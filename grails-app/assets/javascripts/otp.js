@@ -380,14 +380,31 @@ $.otp.tableButtons = [
     }
 ];
 
+
+/**
+ * Applies the default OTP-wide select2 to the jquery selection.
+ *
+ * This is needed as a separate function, to make it available for the "destroy>clone>add-back" dance when cloning selects (e.g. for multi-input-fields).
+ * Select2 is very picky about its cloning-procedures, see:
+ *   - https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding
+ *   - https://github.com/select2/select2/issues/2522
+ *
+ * @param jqSelection JQ selector, e.g. "$('.use-select-2').not('.dont-use-select-2')"
+ *        Careful: This method assumes that the selection only contains `select` tags.
+ *        If other tags are in there, strange things will happen.
+ */
+$.otp.applySelect2 = function (jqSelection) {
+    jqSelection.select2({
+        minimumResultsForSearch: 10
+    });
+};
+
 $(document).ready(function() {
     // apply select2 fancy search-box to all select-boxes that want it.
     // Currently opt-in, by setting css-class on the g:select
     // Since there are some cases where select2 doesn't integrate nicely we also provide
     // an opt-out class. If you use the opt-out, please leave a comment explaining why!
-    $('.use-select-2').not('.dont-use-select-2').select2({
-        minimumResultsForSearch: 10
-    });
+    $.otp.applySelect2($('.use-select-2').not('.dont-use-select-2'));
 
     var t = $('[title]');
     t.tooltip();

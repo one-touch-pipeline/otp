@@ -74,7 +74,14 @@ $.otp.dataTableFilter = {
                     $("td.add", lastTr).show();
                 }
             } else {
-                $("td.attribute select", tr).val("none");
+                /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
+                 * 'raw' select-tag and the select2 visuals.
+                 * We can't use a normal 'trigger(change)' because this function is an event handler, so
+                 * would trigger a recursive stack overflow. (Ask me how I know this ;-) )
+                 *
+                 * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event
+                 *     and:  https://github.com/select2/select2/issues/3620 */
+                $("td.attribute select", tr).val("none").trigger('change.select2');
                 $("td.add", tr).hide();
                 $("td.remove", tr).hide();
             }
@@ -99,12 +106,31 @@ $.otp.dataTableFilter = {
 
             tr = $(event.target).parents(".dtf_row");
             $("td.add", tr).hide();
+
+            // select2 doesn't take well to cloning, do the required voodoo dance.
+            $("select.select2-hidden-accessible", tr).select2("destroy");
             cloned = tr.clone();
+            $.otp.applySelect2($("select.use-select-2", tr));
+
             $("td.value span.dtf_value_span", cloned).hide();
             $("td.add", cloned).hide();
             $("td.remove", cloned).hide();
-            $("td.attribute select", cloned).val("none");
+
+            /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
+             * 'raw' select-tag and the select2 visuals.
+             * We can't use a normal 'trigger(change)' because this function is an event handler, so
+             * would trigger a recursive stack overflow. (Ask me how I know this ;-) )
+             *
+             * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event
+             *     and:  https://github.com/select2/select2/issues/3620 */
+            $("td.attribute select", cloned).val("none").trigger("change.select2");
             cloned.appendTo(searchCriteriaTable);
+
+            /*
+             * Add select2 to new element only _after_ all other DOM-objects have reached their final state.
+             * Doing it earlier results in unstable width-estimations, and jumping elements on reflow/adding new lines.
+             */
+            $.otp.applySelect2($("select.use-select-2", cloned));
         };
 
         var searchCriteriaRemoveRow = function (event) {

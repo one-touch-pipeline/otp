@@ -22,17 +22,36 @@
 
 $(function () {
     "use strict";
+
     var wrapper = $(".multi-input-field");
     wrapper.on("click", ".add-field", function (e) {
         e.preventDefault();
 
-        var parent = $(e.target).parents(".multi-input-field");
-        parent.append("<div class=\"field\">");
+        // basic context
+        var parent = $(e.target).parents(".multi-input-field").first();
+        var baseField = $(".field", parent).first();
 
-        var div = parent.children("div.field:last");
-        div.append($(e.target).siblings("input:first, select:first, textarea:first").clone().val(""));
+        // select2, with all its custom event handlers, doesn't take well to cloning.
+        // Remove any that might be in there, to be recreated afterwards.
+        var orig_select2 = $("select.use-select-2", baseField).select2("destroy");
+
+        // use base field as template for new one, but empty any selections.
+        var clonedField = baseField.clone();
+        $("input, textarea, select", clonedField).val("");
+
+        // update buttons on our new field; only the first field can be cloned, user-added fields can only be removed.
+        $("button.add-field", clonedField).remove();
         // the whitespace at the start prevents the button from sticking to the input element
-        div.append(" <button class=\"remove-field\">-</button>");
+        clonedField.append(" <button class=\"remove-field\">-</button>");
+
+        // add our shiny new field to the DOM
+        // must be done before applying any potential select2; styling rules don't apply yet to elements outside the DOM,
+        // so select2 can't copy them to its generated elements.
+        parent.append(clonedField);
+
+        // if there are any select2-wannabe's in there, (re-)apply now that we're done.
+        $.otp.applySelect2(orig_select2);
+        $.otp.applySelect2($("select.use-select-2", clonedField));
     });
 
     wrapper.on("click", ".remove-field", function (e) {

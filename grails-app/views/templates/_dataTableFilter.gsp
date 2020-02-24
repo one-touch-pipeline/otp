@@ -28,24 +28,31 @@ To be used in conjunction with: common/DataTableFilter.js
     <h3 style="display: table-cell; vertical-align: middle"><g:message code="search.extended.header"/>:</h3>
     <table style="display: table-cell" id="searchCriteriaTable">
         <tr class="dtf_row">
-            <td class="attribute">
-                <select class="dtf_criterium" autocomplete="off">
+            <td class="attribute" style="width: 22ch">
+                %{-- Explicitly unset ID-attr: duplicate IDs (when cloning the filter-row) break select2 (and the DOM specification..)
+                     Funnily enough, no ID works.. --}%
+                <select id="" class="dtf_criterium use-select-2" autocomplete="off" style="width: 100%">
                     <option value="none"><g:message code="search.extended.noCriteria"/></option>
                     <g:each in="${filterTree}" var="column">
                         <option value="${column.name}"><g:message code="${column.msgcode}"/></option>
                     </g:each>
                 </select>
             </td>
-            <td class="value">
+            <td class="value" style="">
+                <g:set var="valueWidth" value='42ch'/>
                 <g:each in="${filterTree}" var="column">
-                    <span id="dtf_${column.name}" class="dtf_value_span" style="display: none">
+                    <span id="dtf_${column.name}" class="dtf_value_span" style="display: none;">
                     <g:if test="${column.type == "LIST"}">
                         <g:if test="${column.value && column.key}">
-                            <g:select name="${column.name}" from="${column.from}"
-                                      optionValue="${column.value}" optionKey="${column.key}" autocomplete="off" />
+                            %{-- Explicitly unset ID-attr: duplicate IDs (when cloning the filter-row) break select2 (and the DOM specification..)
+                                 Funnily enough, no ID works.. --}%
+                            <g:select id="" name="${column.name}" from="${column.from}" class="use-select-2" style="width: ${valueWidth};"
+                                      optionValue="${column.value}" optionKey="${column.key}"
+                                      autocomplete="off" />
                         </g:if>
                         <g:else>
-                            <g:select name="${column.name}" from="${column.from}" autocomplete="off" />
+                            <g:select id="" name="${column.name}" from="${column.from}" class="use-select-2" style="width: ${valueWidth};"
+                                      autocomplete="off" />
                         </g:else>
 
                     </g:if>
@@ -60,10 +67,10 @@ To be used in conjunction with: common/DataTableFilter.js
                         </span>
                     </g:elseif>
                     <g:elseif test="${column.type == "NUMBER"}">
-                        <input type="number" name="${column.name}" autocomplete="off" />
+                        <input type="number" name="${column.name}" style="width: ${valueWidth};" autocomplete="off" />
                     </g:elseif>
                     <g:else>
-                        <input type="text" name="${column.name}" autocomplete="off"/>
+                        <input type="text" name="${column.name}" style="width: ${valueWidth};" autocomplete="off"/>
                     </g:else>
                     </span>
                 </g:each>
