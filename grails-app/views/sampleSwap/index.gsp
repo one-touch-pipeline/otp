@@ -104,28 +104,36 @@
                                 <td></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'project'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${availableProjects.name}" value="${value.value}" /></td>
+                                <td><g:select name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)} use-select-2"
+                                              from="${availableProjects.name}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'sampleType'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${sampleTypes}" value="${value.value}" /></td>
+                                <td><g:select name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)} use-select-2"
+                                              from="${sampleTypes}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'seqType'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${seqTypes}" value="${value.value}" /></td>
+                                <td><g:select name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)} use-select-2"
+                                              from="${seqTypes}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'libPrepKit'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${libPrepKits}" value="${value.value}" /></td>
+                                <td><g:select name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)} use-select-2"
+                                              from="${libPrepKits}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'libraryLayout'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${libraryLayouts}" value="${value.value}" /></td>
+                                <td><g:select name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)} use-select-2"
+                                              from="${libraryLayouts}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'antibodyTarget'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${antibodyTargets}" value="${value.value}" /></td>
+                                <td><g:select name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)} use-select-2"
+                                              from="${antibodyTargets}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'run' || value.key == 'lane' || value.key == 'ilse'}">
-                                <td><input class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" value="${value.value}"  readonly/></td>
+                                <td><input name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)}"
+                                           value="${value.value}"  readonly/></td>
                             </g:elseif>
                             <g:else>
-                                <td><input class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" value="${value.value}" /></td>
+                                <td><input name="${body.seqTrackId}!${value.key}" class="${body.getNormalizedLevel(value.key)}"
+                                           value="${value.value}" /></td>
                             </g:else>
                         </g:each>
                     </tr>
