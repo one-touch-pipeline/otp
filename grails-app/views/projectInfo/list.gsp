@@ -109,7 +109,7 @@
                                 <g:select name="legalBasis"
                                           from="${legalBases}"
                                           value="${docCmd?.legalBasis ?: defaultLegalBasis}"
-                                          class="dropDown"
+                                          class="use-select-2"
                                           required="true"/>
                             </td>
                         </tr>
@@ -220,20 +220,20 @@
                                             <tr>
                                                 <td><g:message code="projectInfo.dta.transfer.new.direction"/></td>
                                                 <td>
-                                                    <g:select name="direction"
+                                                    <g:select id="" name="direction"
                                                               from="${directions}"
                                                               value="${cachedXfer ? xferCmd.direction : defaultDirection}"
-                                                              class="dropDown"
+                                                              class="use-select-2"
                                                               required="true"/>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td><g:message code="projectInfo.dta.transfer.transferMode"/></td>
                                                 <td>
-                                                    <g:select name="transferMode"
+                                                    <g:select id="" name="transferMode"
                                                               from="${transferModes}"
                                                               value="${cachedXfer ? xferCmd.transferMode : defaultTransferMode}"
-                                                              class="dropDown"
+                                                              class="use-select-2"
                                                               required="true"/>
                                                 </td>
                                             </tr>
