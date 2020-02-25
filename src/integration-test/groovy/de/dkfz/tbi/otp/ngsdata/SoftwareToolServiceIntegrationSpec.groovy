@@ -162,7 +162,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         then:
         ValidationException e = thrown()
-        e.message.contains("must be unique")
+        e.message.contains("softwareTool.programName.unique")
     }
 
     void "test createSoftwareTool, creates a software tool for the given properties"() {
