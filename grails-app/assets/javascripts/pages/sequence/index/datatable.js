@@ -38,6 +38,7 @@ $.otp.sequence = {
             dom: '<i> B rt<"clear">S',
             buttons: [ {
                 extend: 'csv',
+                text: 'Download CSV',
                 titleAttr: 'Attention: Download can take a while',
                 action: function ( e, dt, node, config ) {
                     var iframe = document.createElement('iframe');
