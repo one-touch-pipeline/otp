@@ -57,7 +57,7 @@
                             <td>
                                 <span class="edit-fields" style="display: none;">
                                     <g:if test="${option.allowedValues}">
-                                        <g:select name="value" from="${option.allowedValues}" value="${option.value.value}"/>
+                                        <g:select id="" name="value" class="use-select-2" from="${option.allowedValues}" value="${option.value.value}"/>
                                     </g:if>
                                     <g:else>
                                         <input class="" name="value" value="${option.value.tooltip}"/>
