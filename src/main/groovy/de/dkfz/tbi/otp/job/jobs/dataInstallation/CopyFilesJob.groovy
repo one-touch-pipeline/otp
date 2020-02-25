@@ -145,7 +145,6 @@ chmod 440 ${targetFile} ${md5SumFileName}
         }
     }
 
-
     protected void checkInitialSequenceFiles(SeqTrack seqTrack) {
         List<DataFile> dataFiles = seqTrack.dataFiles
         if (!dataFiles) {
@@ -154,7 +153,8 @@ chmod 440 ${targetFile} ${md5SumFileName}
         final Collection<String> missingPaths = []
         for (DataFile file in dataFiles) {
             String path = lsdfFilesService.getFileInitialPath(file)
-            if (!lsdfFilesService.isFileReadableAndNotEmpty(new File(path))) {
+            FileSystem fs = fileSystemService.filesystemForFastqImport
+            if (!FileService.isFileReadableAndNotEmpty(fs.getPath(path))) {
                 missingPaths.add(path)
             }
         }

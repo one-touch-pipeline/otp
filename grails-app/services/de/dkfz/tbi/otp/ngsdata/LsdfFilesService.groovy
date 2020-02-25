@@ -180,11 +180,6 @@ class LsdfFilesService {
     }
 
     @Deprecated
-    static boolean isFileReadableAndNotEmpty(final File file) {
-        FileService.isFileReadableAndNotEmpty(file.toPath())
-    }
-
-    @Deprecated
     static void ensureFileIsReadableAndNotEmpty(final File file) {
         FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
     }

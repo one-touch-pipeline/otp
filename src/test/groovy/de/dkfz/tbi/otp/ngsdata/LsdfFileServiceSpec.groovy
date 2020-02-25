@@ -56,15 +56,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
 
-    void "test isFileReadableAndNotEmpty"() {
-        given:
-        File file = tempFolder.newFile()
-        file << "content"
-
-        expect:
-        LsdfFilesService.isFileReadableAndNotEmpty(file)
-    }
-
     void "test ensureFileIsReadableAndNotEmpty"() {
         given:
         File file = tempFolder.newFile()
@@ -77,18 +68,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         notThrown()
     }
 
-    void "test isFileReadableAndNotEmpty, when path is not absolute, should fail"() {
-        given:
-        File file = new File("testFile.txt")
-
-        when:
-        LsdfFilesService.isFileReadableAndNotEmpty(file)
-
-        then:
-        def e = thrown(AssertionError)
-        e.message =~ /(?i)absolute/
-    }
-
     void "test ensureFileIsReadableAndNotEmpty, when path is not absolute, should fail"() {
         given:
         File file = new File("testFile.txt")
@@ -99,15 +78,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         then:
         def e = thrown(AssertionError)
         e.message =~ /(?i)absolute/
-    }
-
-    void "test isFileReadableAndNotEmpty, when does not exist"() {
-        given:
-        //file must be absolute to make sure that the test fails the 'exists?' assertion
-        File file = new File(tempFolder.newFolder(), "testFile.txt")
-
-        expect:
-        !LsdfFilesService.isFileReadableAndNotEmpty(file)
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when does not exist, should fail"() {
@@ -123,14 +93,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         e.message =~ /(?i)on local filesystem is not accessible or does not exist\./
     }
 
-    void "test isFileReadableAndNotEmpty, when file is not a regular file"() {
-        given:
-        File file = tempFolder.newFolder()
-
-        expect:
-        !LsdfFilesService.isFileReadableAndNotEmpty(file)
-    }
-
     void "test ensureFileIsReadableAndNotEmpty, when file is not a regular file, should fail"() {
         given:
         File file = tempFolder.newFolder()
@@ -141,19 +103,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         then:
         def e = thrown(AssertionError)
         e.message =~ /(?i)isRegularFile/
-    }
-
-    void "test isFileReadableAndNotEmpty, when file isn't readable"() {
-        given:
-        File file = tempFolder.newFile()
-        file << "content"
-        file.setReadable(false)
-
-        expect:
-        !LsdfFilesService.isFileReadableAndNotEmpty(file)
-
-        cleanup:
-        file.setReadable(true)
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when file isn't readable, should fail"() {
@@ -171,14 +120,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
         cleanup:
         file.setReadable(true)
-    }
-
-    void "test isFileReadableAndNotEmpty, when file is empty"() {
-        given:
-        File file = tempFolder.newFile()
-
-        expect:
-        !LsdfFilesService.isFileReadableAndNotEmpty(file)
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when file is empty, should fail"() {
