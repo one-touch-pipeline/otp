@@ -65,7 +65,8 @@
                 <tr>
                     <td><span class="table-column-header"><g:message code="bulk.sample.creation.delimiter"/></span></td>
                     <td>
-                        <g:select name="delimiter" from="${delimiters}" id="delimiter" value="${delimiter}" optionValue="displayName"
+                        <g:select name="delimiter" class="use-select-2" style="width: 24ch;"
+                                  from="${delimiters}" value="${delimiter}" optionValue="displayName"
                                   noSelection="['': 'Choose a Delimiter']"/>
                     </td>
                     <td></td>
@@ -90,7 +91,7 @@
                             <g:checkBox checked="${createMissingSampleTypes}" name="createMissingSampleTypes" value="${createMissingSampleTypes}" style="vertical-align: middle"/>
                             <g:message code="bulk.sample.creation.referenceGenomeSource.createSamples"/>
                         </label><br>
-                        <g:select name="referenceGenomeSource" id="referenceGenomeSource"
+                        <g:select name="referenceGenomeSource" class="use-select-2"
                                   from="${referenceGenomeSources}" value="${referenceGenomeSource}"
                                   disabled="${!createMissingSampleTypes}"/>
                     </td>
