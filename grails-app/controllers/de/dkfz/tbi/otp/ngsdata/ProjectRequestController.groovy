@@ -179,11 +179,7 @@ class ProjectRequestCreationCommand {
         speciesWithStrain nullable: true
         sequencingCenter nullable: true, blank: false
         approxNoOfSamples nullable: true
-        seqType validator: { val, obj ->
-            if (!val) {
-                return "empty"
-            }
-        }
+        seqType nullable: true
         comments nullable: true, blank: false
         pi validator: { val, obj ->
             List<String> pi = [val]

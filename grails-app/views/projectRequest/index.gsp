@@ -201,7 +201,7 @@
             <td class="multi-input-field">
                 <g:each in="${cmd?.seqType ?: [null]}" var="seqType" status="i">
                     <div class="field">
-                        <g:select name="seqType.id" id="seqType" from="${seqTypes}" value="${seqType?.id ?: ""}" noSelection="${["": "None"]}" optionKey="id" optionValue="displayNameWithLibraryLayout" required="true" />
+                        <g:select name="seqType.id" id="seqType" from="${seqTypes}" value="${seqType?.id ?: ""}" noSelection="${["": "None"]}" optionKey="id" optionValue="displayNameWithLibraryLayout" />
                         <g:if test="${i == 0}">
                             <button class="add-field">+</button>
                         </g:if>
