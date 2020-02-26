@@ -49,7 +49,7 @@ trait CellRangerFactory implements IsAlignment {
                 pipeline            : pipeline,
                 seqType             : seqType,
                 sample              : sample,
-                expectedCells       : 5000,
+                expectedCells       : null,
                 enforcedCells       : null,
                 referenceGenome     : referenceGenomeIndex.referenceGenome,
                 referenceGenomeIndex: referenceGenomeIndex,

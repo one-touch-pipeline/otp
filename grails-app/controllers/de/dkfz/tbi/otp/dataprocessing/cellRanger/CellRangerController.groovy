@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import grails.databinding.BindUsing
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
@@ -39,7 +38,7 @@ class CellRangerController {
             create: "POST",
     ]
 
-    static final List<String> ALLOWED_CELL_TYPE = ["expected", "enforced"]
+    static final List<String> ALLOWED_CELL_TYPE = ["neither", "expected", "enforced"]
 
     def index(CellRangerSelectionCommand cmd) {
         List<Project> projects = projectService.getAllProjects()
@@ -109,10 +108,12 @@ class CellRangerController {
         Integer expectedCells, enforcedCells
         switch (cmd.expectedOrEnforcedCells) {
             case "expected":
-                expectedCells = cmd.expectedOrEnforcedCellsValue
+                expectedCells = cmd.expectedOrEnforcedCellsValue as Integer
                 break
             case "enforced":
-                enforcedCells = cmd.expectedOrEnforcedCellsValue
+                enforcedCells = cmd.expectedOrEnforcedCellsValue as Integer
+                break
+            case "neither":
                 break
             default:
                 throw new UnsupportedOperationException("expectedOrEnforcedCells must be one of ${ALLOWED_CELL_TYPE}")
@@ -148,14 +149,16 @@ class CellRangerSelectionCommand {
 
 class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
     String expectedOrEnforcedCells
-
-    @BindUsing({ obj, source ->
-        String value = source['expectedOrEnforcedCellsValue']
-        value?.isInteger() ? value.toInteger() : null
-    })
-    Integer expectedOrEnforcedCellsValue
-
+    String expectedOrEnforcedCellsValue
     ReferenceGenomeIndex referenceGenomeIndex
     Project project
     SeqType seqType
+
+    static constraints = {
+        expectedOrEnforcedCellsValue nullable: true, validator: { val, obj ->
+            if (val != null && !(val ==~ /^[0-9]+$/)) {
+                return "validator.not.a.number"
+            }
+        }
+    }
 }

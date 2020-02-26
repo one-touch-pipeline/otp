@@ -103,6 +103,7 @@ class ProjectConfigController implements CheckAndCall {
 
         ProjectSelection selection = projectSelectionService.selectedProject
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]

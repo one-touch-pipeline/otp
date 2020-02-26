@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.alignment.cellRanger
 
 import groovy.json.JsonOutput
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -75,7 +76,6 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
                     needsProcessing     : true,
                     sample              : sample,
                     config              : conf,
-                    expectedCells       : 0, // modified in individual tests
                     referenceGenome     : referenceGenomeIndex.referenceGenome,
                     referenceGenomeIndex: referenceGenomeIndex,
             )
@@ -119,14 +119,15 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
         }
     }
 
-    void "test CellRanger with one lane"() {
+    @Unroll
+    void "test CellRanger with one lane, with expectedCells #expected and enforcedCells #enforced"() {
         given:
         SessionUtils.withNewSession {
             SeqTrack seqTrack = createSeqTrack(fastqFiles[0], fastqFiles[1])
             mwp.refresh()
             mwp.seqTracks = [seqTrack]
-            mwp.expectedCells = null
-            mwp.enforcedCells = 1000
+            mwp.expectedCells = expected
+            mwp.enforcedCells = enforced
             mwp.save(flush: true)
         }
 
@@ -135,17 +136,24 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
         then:
         checkResults()
+
+        where:
+        expected | enforced
+        null     | null
+        1000     | null
+        null     | 1000
     }
 
-    void "test CellRanger with two lanes"() {
+    @Unroll
+    void "test CellRanger with two lanes, with expectedCells #expected and enforcedCells #enforced"() {
         given:
         SessionUtils.withNewSession {
             SeqTrack seqTrack1 = createSeqTrack(fastqFiles[0], fastqFiles[1])
             SeqTrack seqTrack2 = createSeqTrack(fastqFiles[2], fastqFiles[3])
             CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)
             crmwp.seqTracks = [seqTrack1, seqTrack2]
-            mwp.expectedCells = 1000 //according to 10x
-            mwp.enforcedCells = null
+            mwp.expectedCells = expected
+            mwp.enforcedCells = enforced
             crmwp.save(flush: true)
         }
 
@@ -154,6 +162,12 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
         then:
         checkResults()
+
+        where:
+        expected | enforced
+        null     | null
+        1000     | null
+        null     | 1000
     }
 
     @Override

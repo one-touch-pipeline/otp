@@ -26,6 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title>${g.message(code: "cellRanger.title", args: [project?.name])}</title>
+    <asset:javascript src="pages/cellRanger/index/cellRanger.js"/>
 </head>
 
 <body>
@@ -89,7 +90,12 @@
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
                                 <label>
-                                    <g:radio name="expectedOrEnforcedCells" value="expected" checked="${cmd == null || cmd.expectedOrEnforcedCells == "expected"}"/>
+                                    <g:radio name="expectedOrEnforcedCells" value="neither" checked="${cmd == null || cmd.expectedOrEnforcedCells == "neither"}"/>
+                                    ${g.message(code: "cellRanger.neither")}
+                                </label>
+                                <br>
+                                <label>
+                                    <g:radio name="expectedOrEnforcedCells" value="expected" checked="${cmd?.expectedOrEnforcedCells == "expected"}"/>
                                     ${g.message(code: "cellRanger.expectedCells")}
                                 </label>
                                 <br>
@@ -98,7 +104,7 @@
                                     ${g.message(code: "cellRanger.enforcedCells")}
                                 </label>
                                 <br><br>
-                                <label>
+                                <label id="expectedOrEnforcedCellsValue">
                                     ${g.message(code: "cellRanger.value")}:<br>
                                     <input name="expectedOrEnforcedCellsValue" value="${cmd?.expectedOrEnforcedCellsValue}"/>
                                 </label>

@@ -59,13 +59,13 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
             }
         })
         expectedCells(nullable: true, validator: { val, obj ->
-            if (!(val == null ^ obj.enforcedCells == null)) {
-                return "exclusive"
+            if (val != null && obj.enforcedCells != null) {
+                return "nand"
             }
         })
         enforcedCells(nullable: true, validator: { val, obj ->
-            if (!(val == null ^ obj.expectedCells == null)) {
-                return "exclusive"
+            if (val != null && obj.expectedCells != null) {
+                return "nand"
             }
         })
         referenceGenomeIndex(validator: { val, obj ->

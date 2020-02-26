@@ -66,16 +66,15 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
         then:
         ValidationException e = thrown()
-        e.message =~ "exclusive"
+        e.message =~ "nand"
 
         where:
         expectedCells | enforcedCells
-        null          | null
         5000          | 5000
     }
 
     @Unroll
-    void "test mutually exclusive validator, succeeds validation (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
+    void "test nand validator, succeeds validation (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
         when:
         createMergingWorkPackage(expectedCells: expectedCells, enforcedCells: enforcedCells)
 
@@ -84,13 +83,24 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
         where:
         expectedCells | enforcedCells
+        null          | null
         5000          | null
         null          | 5000
     }
 
     void "expectedCells and enforcedCells are editable"() {
         given:
-        CellRangerMergingWorkPackage mwp = createMergingWorkPackage(expectedCells: 5000, enforcedCells: null)
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage(expectedCells: null, enforcedCells: null)
+
+        when:
+        mwp.expectedCells = 5000
+        mwp.enforcedCells = null
+        mwp.save(flush: true)
+
+        then:
+        CellRangerMergingWorkPackage refreshedMwp = CellRangerMergingWorkPackage.get(mwp.id)
+        refreshedMwp.expectedCells == 5000
+        refreshedMwp.enforcedCells == null
 
         when:
         mwp.expectedCells = null
@@ -98,9 +108,9 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
         mwp.save(flush: true)
 
         then:
-        CellRangerMergingWorkPackage refreshedMwp = CellRangerMergingWorkPackage.get(mwp.id)
-        refreshedMwp.expectedCells == null
-        refreshedMwp.enforcedCells == 5000
+        CellRangerMergingWorkPackage refreshedRefreshedMwp = CellRangerMergingWorkPackage.get(mwp.id)
+        refreshedRefreshedMwp.expectedCells == null
+        refreshedRefreshedMwp.enforcedCells == 5000
 
         when:
         mwp.expectedCells = 5000
@@ -109,7 +119,7 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
         then:
         ValidationException e = thrown()
-        e.message =~ "exclusive"
+        e.message =~ "nand"
     }
 
     void "test status constraint, only one mwp with status FINAL and same sample, seqType, config and referenceGenomeIndex"() {
