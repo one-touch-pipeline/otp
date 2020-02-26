@@ -70,7 +70,7 @@
                     <g:message code="configureAnalysis.note.submit"/>
                 </otp:annotation>
 
-                <g:submitButton class="blue_label" name="submit" value="submit" onclick="return submitCheck();" ondblclick="return false;"/>
+                <g:submitButton class="blue_label" name="submit" value="Submit" onclick="return submitCheck();" ondblclick="return false;"/>
             </g:form>
 
             <script>

@@ -54,7 +54,7 @@ $.otp.userAdministration.loadUserList = function () {
         if (enabled) {
             html += 'checked="checked"';
         }
-        html += '/><input type="button" value="update" onclick="$.otp.userAdministration.changeUser(' + id + ', \'' + checkboxId + '\', \'' + target + '\')"/>';
+        html += '/><input type="button" value="Update" onclick="$.otp.userAdministration.changeUser(' + id + ', \'' + checkboxId + '\', \'' + target + '\')"/>';
         return html;
     };
     $('#userTable').dataTable({

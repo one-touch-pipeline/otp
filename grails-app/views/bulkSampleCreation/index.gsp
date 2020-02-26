@@ -101,7 +101,7 @@
                 <tr>
                     <td colspan="3">
                         <input type="hidden" value="${project.id}" name="project"/>
-                        <g:submitButton name="submit"/>
+                        <g:submitButton name="Submit"/>
                     </td>
                 </tr>
             </g:uploadForm>
