@@ -154,7 +154,7 @@ class DeletionService {
         }
     }
 
-    void deleteArtefact(Artefact artefact) {
+    private void deleteArtefact(Artefact artefact) {
         if (artefact) {
             Process process = artefact.process
             if (artefact.workflowArtefact) {
@@ -165,7 +165,7 @@ class DeletionService {
         }
     }
 
-    void deleteProcess(Process process) {
+    private void deleteProcess(Process process) {
         assert process.finished : "process with id ${process.id} not finished"
         Process.findAllByRestarted(process).each {
             deleteProcess(it)
@@ -174,7 +174,7 @@ class DeletionService {
         process.delete(flush: true)
     }
 
-    void deleteProcessingSteps(List<ProcessingStep> processingSteps) {
+    private void deleteProcessingSteps(List<ProcessingStep> processingSteps) {
         processingSteps*.next = null
         processingSteps.sort { -it.id }
         processingSteps.each {
@@ -182,31 +182,31 @@ class DeletionService {
         }
     }
 
-    void deleteProcessingStep(ProcessingStep processingStep) {
+    private void deleteProcessingStep(ProcessingStep processingStep) {
         deleteClusterJobs(ClusterJob.findAllByProcessingStep(processingStep))
         deleteProcessingStepUpdates(ProcessingStepUpdate.findAllByProcessingStep(processingStep))
         processingStep.delete(flush: true)
     }
 
-    void deleteClusterJobs(List<ClusterJob> clusterJobs) {
+    private void deleteClusterJobs(List<ClusterJob> clusterJobs) {
         clusterJobs*.dependencies = [] as Set
         clusterJobs.each {
             deleteClusterJob(it)
         }
     }
 
-    void deleteClusterJob(ClusterJob clusterJob) {
+    private void deleteClusterJob(ClusterJob clusterJob) {
         clusterJob.delete(flush: true)
     }
 
-    void deleteProcessingStepUpdates(List<ProcessingStepUpdate> processingStepUpdates) {
+    private void deleteProcessingStepUpdates(List<ProcessingStepUpdate> processingStepUpdates) {
         processingStepUpdates*.previous = null
         processingStepUpdates.each {
             deleteProcessingStepUpdate(it)
         }
     }
 
-    void deleteProcessingStepUpdate(ProcessingStepUpdate processingStepUpdate) {
+    private void deleteProcessingStepUpdate(ProcessingStepUpdate processingStepUpdate) {
         ProcessingError error = processingStepUpdate.error
         if (error) {
             processingStepUpdate.error = null
@@ -215,7 +215,7 @@ class DeletionService {
         processingStepUpdate.delete(flush: true)
     }
 
-    void deleteProcessingError(ProcessingError processingError) {
+    private void deleteProcessingError(ProcessingError processingError) {
         processingError.delete(flush: true)
     }
 
