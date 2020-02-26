@@ -368,12 +368,20 @@ label {
     margin: 0 0.25em 0 0;
 }
 input, select, textarea, button {
-    color: #444;
+    color: #333;
     background-color: #fcfcfc;
     border: 1px solid #aaa;
     .border-radius(4px);
     font-size: 1em;
     padding: 0.2em 0.4em;
+    &:disabled {
+        color: #aaa;
+        background-color: #f6f5f4;
+    }
+    &:focus {
+        .box-shadowed(0, 0, 0.5em, #ffffff);
+        outline: 0;
+    }
 }
 select {
     padding: 0.2em 0.2em 0.2em 0;
@@ -391,10 +399,7 @@ input[type=text] {
     height: 28px;
     box-sizing: border-box;
 }
-input:focus, select:focus, textarea:focus {
-    .box-shadowed(0, 0, 0.5em, #ffffff);
-    outline: 0;
-}
+
 .required-indicator {
     color: #48802C;
     display: inline-block;
