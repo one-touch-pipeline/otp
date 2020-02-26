@@ -33,8 +33,9 @@
     <form class="rounded-page-header-box">
         <span><g:message code="search.from.date"/>:<input type="text" class="datePicker" id="startDate" value="${startDate}"></span>
         <br>
-        <span><g:message code="search.to.date"/>:<input type="text" class="datePicker" id="endDate" value="${endDate}"></span>
-        <g:select name="projects" class="projectSelectMultiple"
+        <span><g:message code="search.to.date"  />:<input type="text" class="datePicker" id="endDate"   value="${endDate}"  ></span>
+        %{-- Don't use select2 (yet): We haven't yet tried wiring up a multiple-select to a controller, but we could... --}%
+        <g:select name="projects" class="projectSelectMultiple dont-use-select-2"
                   value="${availableProjects}" from="${availableProjects}"
                   optionKey="name" multiple="true"/>
 
