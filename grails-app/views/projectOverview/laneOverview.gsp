@@ -35,17 +35,19 @@
             <div class="grid-element">
                 <g:render template="/templates/projectSelection"/>
             </div>
+
             <div class="grid-element rounded-page-header-box" style="display: table;">
                 <span style="display:table-cell; vertical-align: middle"><g:message code="projectOverview.filter.sampleType"/>:</span>
                 <table id="searchCriteriaTableSampleType" style="display:table-cell;">
                     <tr>
                         <td class="value">
-                            <g:select name="sampleTypeSelection"
+                            <g:select id="" name="sampleTypeSelection" class="use-select-2" style="min-width: 18ch;"
                                       from='${sampleTypes}' noSelection="${["none": message(code: "otp.filter.sampleType")]}"
                                       autocomplete="off"/>
                         </td>
                     </tr>
                 </table>
+
                 <div style="display:table-cell; vertical-align: middle"><g:message code="projectOverview.filter.seqType"/>:</div>
                 <table id="searchCriteriaTableSeqType" style="display:table-cell;">
                     <tr class="dtf_row">
@@ -54,7 +56,8 @@
                              since "attribute"-handling also triggers the value-updates, all is good. --}%
                         <td class="attribute">
                             <span class="dtf_value_span">
-                                <g:select class="dtf_criterium" name="seqTypeSelection" from="${seqTypes}" optionKey="id"
+                                <g:select id="" name="seqTypeSelection" class="dtf_criterium use-select-2" style="min-width: 24ch;"
+                                          from="${seqTypes}" optionKey="id"
                                           noSelection="${["none": message(code: "otp.filter.seqType")]}"
                                           autocomplete="off"/>
                             </span>
@@ -69,9 +72,11 @@
                 </table>
             </div>
         </div>
+
         <otp:annotation type="info" id="withdrawn_description">
             ${g.message(code: "projectOverview.index.information.withdrawn")}
         </otp:annotation>
+
         <div class="otpDataTables">
             <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
                 <thead>
