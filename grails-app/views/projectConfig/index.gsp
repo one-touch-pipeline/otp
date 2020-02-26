@@ -71,19 +71,22 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.keywords"/></td>
+                    <td><g:message code="project.keywords"/></td>
                     <td></td>
-                    <td title="<g:message code="project.keywords.addKeywords"/>">
-                        <g:link controller="keyword" action="index">
+                    <td>
                         ${project.keywords*.name.join(", ") ?: g.message(code: "project.keywords.empty")}
-                        </g:link>
+                        <sec:access expression="hasRole('ROLE_OPERATOR')">
+                            <g:link controller="keyword" action="index">
+                                <button class="edit-button" title="${g.message(code: "project.keywords.addKeywords")}">&nbsp;&nbsp;&nbsp;</button>
+                            </g:link>
+                        </sec:access>
                     </td>
                 </tr>
                 <tr>
                     <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.description"/></td>
                     <td></td>
                     <td>
-                        <div style="overflow: auto; max-height: 20em;">
+                        <div class="scrollable" style="max-height: 20em;">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="textArea"

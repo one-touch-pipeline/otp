@@ -22,14 +22,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 
 class KeywordService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void addKeywords(String value, Project project) {
+    void createOrAddKeyword(String value, Project project) {
         Keyword keyword = Keyword.findOrSaveByName(StringUtils.trimAndShortenWhitespace(value))
+        addKeywordToProject(keyword, project)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addKeywordToProject(Keyword keyword, Project project) {
         project.addToKeywords(keyword)
         project.save(flush: true)
     }

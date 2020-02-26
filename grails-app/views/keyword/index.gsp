@@ -34,50 +34,55 @@
     <g:render template="/templates/messages"/>
     <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
 
-    <h1><g:message code="keyword.index.header" args="[project.name]"/></h1>
-
-    <h2><g:message code="keyword.index.addKeywords" args="[project.name]"/></h2>
-    <g:form controller="keyword" action="save">
-        <input type="hidden" value="${project.id}" name="project">
-        <g:textField list="keywordList" name="value" size="50" autofocus="true" required="true" autocomplete="off"/>
-        <datalist id="keywordList">
-            <g:each in="${keywords}" var="keyword">
-                <option value="${keyword.name}">${keyword.name}</option>
-            </g:each>
-        </datalist>
-        <g:submitButton name="Add"/>
-    </g:form>
-
-    <h2><g:message code="keyword.index.keywordsOfProject" args="[project.name]"/></h2>
-    <div class="scrollable-keyword-list">
-        <ul>
-            <g:if test="${projectKeywords}">
-                <g:each var="keyword" in="${projectKeywords}">
-                    <li>
-                        <div class="no-wrap-list-item">
-                            <g:form controller="keyword" action="remove">
-                                <span class="keyword-in-list">${keyword.name}</span>
-                                <g:submitButton name="Remove"/>
-                                <input type="hidden" value="${project.id}" name="project.id">
-                                <input type="hidden" value="${keyword.id}" name="keyword.id">
-                            </g:form>
-                        </div>
-                    </li>
-                </g:each>
-            </g:if>
-            <g:else>
-                <li><g:message code="keyword.index.keywordsOfProject.none"/></li>
-            </g:else>
-        </ul>
+    <div class="keyword-header">
+        <div class="item">
+            <h1><g:message code="keyword.index.header" args="[project.name]"/></h1>
+        </div>
+        <div class="item">
+            <g:form controller="projectConfig" view="index">
+                <g:submitButton name="back" value="Back to Overview"/>
+            </g:form>
+        </div>
     </div>
-    <hr>
-    <h2><g:message code="keyword.index.overviewKeywords" args="[keywords.size()]"/></h2>
-    <div class="scrollable-keyword-list">
-        <ul>
-            <g:each in="${keywords}" var="keyword">
-                <li><span class="keyword-in-list">${keyword.name}</span></li>
-            </g:each>
-        </ul>
+
+    <div class="keyword-container">
+        <div class="item">
+            <h2><g:message code="keyword.index.keywordsOfProject" args="[project.name, projectKeywords.size()]"/></h2>
+            <div class="scrollable-keyword-list">
+                <ul>
+                    <li>
+                        <g:form controller="keyword" action="createOrAdd">
+                            <input type="hidden" value="${project.id}" name="project">
+                            <g:textField list="keywordList" name="value" size="30" autofocus="true" required="true" autocomplete="off"/>
+                            <datalist id="keywordList">
+                                <g:each in="${availableKeywords}" var="keyword">
+                                    <option value="${keyword.name}">${keyword.name}</option>
+                                </g:each>
+                            </datalist>
+                            <g:submitButton name="Add"/>
+                        </g:form>
+                    </li>
+                    <g:if test="${projectKeywords}">
+                        <g:each var="keyword" in="${projectKeywords}">
+                            <li><g:render template="keywordListItem" model="[keyword: keyword, project: project, action: 'remove']"/></li>
+                        </g:each>
+                    </g:if>
+                    <g:else>
+                        <li><g:message code="keyword.index.keywordsOfProject.none"/></li>
+                    </g:else>
+                </ul>
+            </div>
+        </div>
+        <div class="item">
+            <h2><g:message code="keyword.index.otherAvailableKeywords" args="[availableKeywords.size()]"/></h2>
+            <div class="scrollable-keyword-list">
+                <ul>
+                    <g:each in="${availableKeywords}" var="keyword">
+                        <li><g:render template="keywordListItem" model="[keyword: keyword, project: project, action: 'add']"/></li>
+                    </g:each>
+                </ul>
+            </div>
+        </div>
     </div>
     <br>
     <br>

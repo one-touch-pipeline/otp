@@ -22,11 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.validation.Validateable
-import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
+
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.searchability.Keyword
+import de.dkfz.tbi.otp.utils.StringUtils
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class KeywordController implements CheckAndCall {
@@ -47,30 +47,44 @@ class KeywordController implements CheckAndCall {
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
-         return [
-                 keywords       : Keyword.listOrderByName() ?: [],
-                 projectKeywords: project.keywords.sort(),
-                 projects       : projects,
-                 project        : project,
-            ]
+
+        Closure keywordSorting = { Keyword keyword ->
+            keyword.name.toLowerCase()
         }
 
-    def save(AddKeywordCommand cmd) {
+        List<Keyword> otherAvailableKeywords = Keyword.list() - project.keywords
+        return [
+                availableKeywords: otherAvailableKeywords.sort(keywordSorting) ?: [],
+                projectKeywords  : project.keywords.sort(keywordSorting),
+                projects         : projects,
+                project          : project,
+        ]
+    }
+
+    def createOrAdd(AddKeywordByNameCommand cmd) {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "keyword.index.failure") as String, cmd.getErrors())
-        }
-        else {
-            keywordService.addKeywords(cmd.value, cmd.project)
+        } else {
+            keywordService.createOrAddKeyword(cmd.value, cmd.project)
             flash.message = new FlashMessage(g.message(code: "keyword.index.success") as String)
         }
         redirect(action: "index")
     }
 
-    def remove(RemoveKeywordCommand cmd) {
+    def add(AddKeywordCommand cmd) {
+        if (cmd.hasErrors()) {
+            flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordFailure") as String, cmd.getErrors())
+        } else {
+            keywordService.addKeywordToProject(cmd.keyword, cmd.project)
+            flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordSuccess") as String)
+        }
+        redirect(action: "index")
+    }
+
+    def remove(KeywordCommand cmd) {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordFailure") as String, cmd.getErrors())
-        }
-        else {
+        } else {
             keywordService.removeKeywordFromProject(cmd.keyword, cmd.project)
             flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordSuccess") as String)
         }
@@ -78,12 +92,31 @@ class KeywordController implements CheckAndCall {
     }
 }
 
-class AddKeywordCommand implements Validateable {
+class AddKeywordByNameCommand implements Validateable {
     String value
+    Project project
+
+    static constraints = {
+        value blank: false, size: 1..255
+    }
+
+    void setValue(String value) {
+        this.value = StringUtils.trimAndShortenWhitespace(value)
+    }
+}
+
+class KeywordCommand implements Validateable {
+    Keyword keyword
     Project project
 }
 
-class RemoveKeywordCommand implements Validateable {
-    Keyword keyword
-    Project project
+class AddKeywordCommand extends KeywordCommand {
+
+    static constraints = {
+        keyword validator: { val, obj ->
+            if (val in obj.project.keywords) {
+                return "already.contained"
+            }
+        }
+    }
 }

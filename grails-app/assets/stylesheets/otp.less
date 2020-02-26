@@ -2083,16 +2083,37 @@ div.log {
     overflow: auto;
 }
 
-.scrollable-keyword-list {
-    .scrollable;
-    max-width: 400px;
-    max-height: 30em;
-    .no-wrap-list-item {
-        white-space: nowrap;
+.keyword-header {
+    display: flex;
+    align-items: center;
+    .item {
+        margin-right: 20px;
     }
 }
-.keyword-in-list {
-    padding-right: 5px;
+
+.keyword-container {
+    display: flex;
+
+    .item {
+        margin-right: 50px;
+        flex-basis: auto;
+        max-width: 800px;
+    }
+
+    .scrollable-keyword-list {
+        .scrollable;
+        max-height: 50em;
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding-bottom: 5px;
+            .no-wrap {
+                white-space: nowrap;
+            }
+        }
+    }
 }
 
 .cell-ranger-creation-grid-wrapper {

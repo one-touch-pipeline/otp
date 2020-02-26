@@ -34,7 +34,7 @@ class Keyword implements Entity {
     ]
 
     static constraints = {
-        name(blank: false, unique: true)
+        name(blank: false, unique: true, size: 1..255)
     }
 
     static Keyword findOrSaveByName(String name) {
