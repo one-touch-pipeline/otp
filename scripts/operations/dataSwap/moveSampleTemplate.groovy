@@ -49,6 +49,8 @@ DataSwapService dataSwapService = ctx.dataSwapService
 StringBuilder outputStringBuilder = new StringBuilder()
 
 final Path scriptOutputDirectory = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
+ctx.fileService.createDirectoryRecursively(scriptOutputDirectory)
+ctx.fileService.setPermission(scriptOutputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 boolean linkedFilesVerified = false
 
