@@ -25,12 +25,28 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="qcThreshold.title2" args="${[selectedProject.name]}"/></title>
+    <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
+    <div class="project-selection-header-container">
+        <div class="grid-element">
+            <g:render template="/templates/projectSelection"/>
+        </div>
+        <div class="grid-element comment-box">
+            <g:render template="/templates/commentBox" model="[
+                    commentable     : selectedProject,
+                    targetController: 'projectConfig',
+                    targetAction    : 'saveProjectComment',
+            ]"/>
+        </div>
+    </div>
+    <div>
+        <g:render template="/projectConfig/tabMenu"/>
+    </div>
 
     <div>
         <h1>${g.message(code: "qcThreshold.title2", args: [selectedProject.name])}</h1>

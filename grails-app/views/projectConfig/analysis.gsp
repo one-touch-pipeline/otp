@@ -47,17 +47,10 @@
         <div>
             <g:render template="tabMenu" model="[project: selectedProject]"/>
         </div>
-        <br>
 
         <h1>${g.message(code: 'projectOverview.analysis.title')}</h1>
 
         <div>
-            <h2>${g.message(code: 'projectOverview.qc.thresholds')}</h2>
-
-            <div>
-                <g:link controller="qcThreshold" action="projectConfiguration">${g.message(code: 'projectOverview.qc.link')}</g:link>
-            </div>
-
             <h2>${g.message(code: 'projectOverview.analysis.thresholds')}</h2>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <ul>
