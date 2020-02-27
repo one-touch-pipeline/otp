@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2020 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,26 @@
   - SOFTWARE.
   --}%
 
-<sec:ifNotGranted roles="ROLE_ADMIN">
-    <h1><g:message code="default.no.project"/></h1>
-    <p>${g.message(code: "default.no.project.explain")}</p>
-    <ul>
-        <li>${g.message(code: "default.no.project.pi")}</li>
-        <li><g:link controller="projectRequest">${g.message(code: "default.no.project.request")}</g:link></li>
-    </ul>
-</sec:ifNotGranted>
+<html>
+<head>
+    <meta name="layout" content="main" />
+    <title><g:message code="default.no.project"/></title>
+</head>
 
-<sec:ifAnyGranted roles="ROLE_ADMIN">
-    <p><g:link controller="projectCreation">${g.message(code: "default.no.project.admin")}</g:link></p>
-</sec:ifAnyGranted>
+<body>
+    <div class="body">
+        <sec:ifNotGranted roles="ROLE_ADMIN">
+            <h1><g:message code="default.no.project"/></h1>
+            <p>${g.message(code: "default.no.project.explain")}</p>
+            <ul>
+                <li>${g.message(code: "default.no.project.pi")}</li>
+                <li><g:link controller="projectRequest">${g.message(code: "default.no.project.request")}</g:link></li>
+            </ul>
+        </sec:ifNotGranted>
+
+        <sec:ifAnyGranted roles="ROLE_ADMIN">
+            <p><g:link controller="projectCreation">${g.message(code: "default.no.project.admin")}</g:link></p>
+        </sec:ifAnyGranted>
+    </div>
+</body>
+</html>

@@ -72,4 +72,6 @@ class ErrorsController {
             ]
         }
     }
+
+    def noProject() { }
 }

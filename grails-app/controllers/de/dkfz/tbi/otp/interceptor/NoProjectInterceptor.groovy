@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,37 +21,46 @@
  */
 package de.dkfz.tbi.otp.interceptor
 
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.ngsdata.ProjectService
 
 @CompileStatic
-class PrivacyPolicyInterceptor {
-    UserService userService
+class NoProjectInterceptor {
+    ProjectService projectService
+    SpringSecurityService springSecurityService
 
-    int order = 0
+    int order = 1
 
-    static final String FILTER_APPLIED = "__otp_privacy_policy_filter_applied"
-
-    PrivacyPolicyInterceptor() {
+    NoProjectInterceptor() {
         matchAll()
-                .except(controller: "privacyPolicy", action: "accept")
-                .except(controller: "logout", action: "index")
+                .except(controller: 'errors')
+                .except(controller: 'projectRequest')
+                .except(controller: 'projectCreation')
+                .except(controller: 'privacyPolicy')
+                .except(controller: 'logout', action: 'index')
+                .except(controller: 'info')
+                .except(controller: 'document')
+                // admin pages
+                .except(controller: 'userAdministration')
+                .except(controller: 'roles')
+                .except(controller: 'crashRecovery')
+                .except(controller: 'processingOption')
+                .except(controller: 'jobErrorDefinition')
+                .except(controller: 'dicom')
+                .except(controller: 'shutdown')
     }
 
     @Override
     boolean before() {
-        // ensure that filter is only applied once per request
-        if (request.getAttribute(FILTER_APPLIED)) {
-            return true
+        if (springSecurityService.loggedIn) {
+            if (!projectService.allProjects) {
+                forward(controller: "errors", action: "noProject")
+                return false
+            }
         }
-        request.setAttribute(FILTER_APPLIED, true)
-
-        if (!userService.privacyPolicyAccepted) {
-            forward(controller: "privacyPolicy", action: "index")
-            return false
-        }
-        return true
+        true
     }
 
     @Override

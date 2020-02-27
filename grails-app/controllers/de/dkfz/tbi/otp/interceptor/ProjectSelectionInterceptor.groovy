@@ -37,6 +37,8 @@ class ProjectSelectionInterceptor {
     ProjectSelectionService projectSelectionService
     SpringSecurityService springSecurityService
 
+    int order = 2
+
     ProjectSelectionInterceptor() {
         matchAll().except(controller: 'errors')
     }
