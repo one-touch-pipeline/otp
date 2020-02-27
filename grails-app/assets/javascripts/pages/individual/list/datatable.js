@@ -26,11 +26,6 @@
 /**
  * Generates the list of individuals
  */
-$.otp.individualList = function () {
-    "use strict";
-    $.otp.individual.register();
-};
-
 $.otp.individual = {
     register: function () {
         "use strict";
@@ -111,3 +106,7 @@ $.otp.individual = {
         });
     }
 };
+
+$(function() {
+    $.otp.individual.register();
+});

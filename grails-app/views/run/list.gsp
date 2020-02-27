@@ -43,11 +43,6 @@
         <div class="otpDataTables">
             <otp:dataTable codes="${tableHeader}" id="runTable"/>
         </div>
-    <asset:script>
-        $(function() {
-            $.otp.runList();
-        });
-    </asset:script>
     </div>
 </body>
 </html>

@@ -42,10 +42,5 @@
     <div class="otpDataTables">
         <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
     </div>
-    <asset:script type="text/javascript">
-        $(function() {
-            $.otp.sequence.register();
-        });
-    </asset:script>
 </body>
 </html>

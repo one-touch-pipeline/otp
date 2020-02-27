@@ -198,3 +198,7 @@ $.otp.sequence = {
         });
     }
 };
+
+$(function() {
+    $.otp.sequence.register();
+});

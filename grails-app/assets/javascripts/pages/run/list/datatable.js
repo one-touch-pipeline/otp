@@ -26,12 +26,6 @@
 /**
  * Generates the list of Runs
  */
-$.otp.runList = function () {
-    "use strict";
-    $.otp.run.register();
-    $.otp.resizeBodyInit('#runTable', 180);
-};
-
 $.otp.run = {
     register: function () {
         "use strict";
@@ -95,3 +89,7 @@ $.otp.run = {
         });
     }
 };
+
+$(function() {
+    $.otp.run.register();
+});

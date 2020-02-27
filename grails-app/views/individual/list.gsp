@@ -29,6 +29,7 @@
     <asset:javascript src="common/DataTableFilter.js"/>
     <asset:javascript src="pages/individual/list/datatable.js"/>
 </head>
+
 <body>
     <div class="body">
         <div class="dataTable_searchContainer">
@@ -43,11 +44,6 @@
         <div class="otpDataTables">
             <otp:dataTable codes="${tableHeader}" id="individualTable"/>
         </div>
-    <asset:script type="text/javascript">
-        $(function() {
-            $.otp.individualList();
-        });
-    </asset:script>
     </div>
 </body>
 </html>
