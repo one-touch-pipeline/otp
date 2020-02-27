@@ -237,6 +237,7 @@ class CellRangerSelectionCommand {
     static constraints = {
         individual nullable: true
         sampleType nullable: true
+        reference nullable: true
     }
 }
 
