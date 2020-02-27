@@ -304,6 +304,9 @@ SELECT id, date_created, 'project_info' as source FROM project_info
  It iterates the entire union table and executes updates on all objects, setting the timestamp.
  The timestamp used is always the last non-1970 timestamp, in descending order. Meaning entities
  without a timestamp get the timestamp of the next (based on ID) entity with a valid timestamp.
+
+ Be careful with comparing the timestamps. The format may not be the same for production and your
+ local database.
  */
 CREATE OR REPLACE FUNCTION fill_timestamps()
     RETURNS void AS
@@ -315,13 +318,13 @@ DECLARE
         ORDER BY id DESC;
     last_timestamp TIMESTAMP WITH TIME ZONE;
 BEGIN
-    last_timestamp := '1970-01-01 00:00:00.000000';
+    last_timestamp := '1970-01-01 01:00:00+01s';
     FOR r IN union_table_cursor LOOP
-            IF r.date_created = '1970-01-01 00:00:00.000000' THEN
-                --raise notice 'UPDATE union_helper_table SET date_created = ''%s'' WHERE id = %s', last_timestamp, r.id;
-                --EXECUTE format('UPDATE union_helper_table SET date_created = ''%s'' WHERE id = %s', last_timestamp, r.id);
+            IF r.date_created = '1970-01-01 01:00:00+01s' THEN
+                --raise notice 'UPDATE %s SET date_created = ''%s'' WHERE id = %s', r.source, last_timestamp, r.id;
                 EXECUTE format('UPDATE %s SET date_created = ''%s'' WHERE id = %s', r.source, last_timestamp, r.id);
             ELSE
+                --raise notice 'change timestamp: %s', r.date_created;
                 last_timestamp := r.date_created;
             END IF;
         END LOOP;
@@ -332,8 +335,8 @@ $BODY$
 -- Execute the function
 SELECT fill_timestamps();
 
--- Remove the helper table
-DROP TABLE union_helper_table;
+-- Remove the function again, as we are not going to need it again
+DROP FUNCTION fill_timestamps();
 
 
 -- Special timestamp update for related entities
@@ -347,6 +350,10 @@ DROP TABLE union_helper_table;
  It follows one script for each of these entities, where the earliest date found in
  related DataFiles is used to set the timestamp.
 
+ We restrict the entity selection by a given ID, which has to be determined with the helper
+ script below and then added to the WHERE of the three update scripts.
+ Look for `0/*[ID]*/` and replace it.
+
  We execute these after the general timestamp-cleanup to avoid large gaps in the timestamps.
  There are two causes for this:
    - sample swaps, where old data could have been swapped into newer samples, causing the
@@ -355,6 +362,16 @@ DROP TABLE union_helper_table;
      range of "possible data" to be received. In this case the timestamp would be later than
      it likely would have been.
  */
+
+-- Helper script to determine the cut-off ID for updating SeqTrack, Sample and Individual
+/*
+ This retrieves the highest entity ID with an unset/1970 dateCreated. This is the value to use
+ instead of `0/*[ID]*/`.
+ Also consider the timestamp format again, if it should not work.
+ */
+SELECT MAX(id) FROM union_helper_table
+WHERE date_created = timestamp '1970-01-01 00:00:00';
+
 
 -- Update Timestamps of SeqTracks based on DataFiles
 WITH query (st_id, df_date) AS (
@@ -369,7 +386,7 @@ SET date_created = query.df_date
 FROM query
 WHERE
         query.st_id = seq_track.id AND
-        date_created = '1970-01-01 00:00:00.000000';
+        id < 0/*[ID]*/;
 
 -- Update Timestamps of Samples based on DataFiles
 WITH query (s_id, df_date) AS (
@@ -385,7 +402,7 @@ SET date_created = query.df_date
 FROM query
 WHERE
         query.s_id = sample.id AND
-        date_created = '1970-01-01 00:00:00.000000';
+        id < 0/*[ID]*/;
 
 -- Update Timestamps of Individuals based on DataFiles
 WITH query (i_id, df_date) AS (
@@ -402,4 +419,8 @@ SET date_created = query.df_date
 FROM query
 WHERE
         query.i_id = individual.id AND
-        date_created = '1970-01-01 00:00:00.000000';
+        id < 0/*[ID]*/;
+
+
+-- Remove the helper table
+DROP TABLE union_helper_table;
