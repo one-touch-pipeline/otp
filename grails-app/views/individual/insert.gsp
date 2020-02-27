@@ -32,10 +32,9 @@
 </head>
 
 <body>
-<div class="body">
-    <g:render template="/templates/messages"/>
+    <div class="body">
+        <g:render template="/templates/messages"/>
 
-    <g:if test="${projects}">
         <h1><g:message code="individual.insert.title"/></h1>
         <g:form controller="individual" action="save">
             <div>
@@ -170,10 +169,6 @@
                 <g:message code="individual.insert.redirect"/><input type="checkbox" name="checkRedirect">
             </div>
         </g:form>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
-</div>
+    </div>
 </body>
 </html>

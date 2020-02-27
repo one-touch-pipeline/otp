@@ -30,7 +30,6 @@
 </head>
 <body>
     <div class="body">
-    <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
 
         <div class="table">
@@ -54,10 +53,6 @@
             $.otp.resultsTable.registerSnv();
         });
     </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
     </div>
 </body>
 </html>

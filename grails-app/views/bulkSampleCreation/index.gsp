@@ -32,8 +32,6 @@
 <body>
 <div class="body" id="bulk-sample-creation">
     <g:render template="/templates/messages"/>
-
-    <g:if test="${projects}">
     <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
 
     <h1><g:message code="bulk.sample.creation.title"/></h1>
@@ -108,10 +106,6 @@
             </tbody>
         </table>
     </div>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
 </div>
 </body>
 </html>

@@ -31,7 +31,6 @@
 </head>
 <body>
     <div class="body">
-    <g:if test="${projects}">
         <div class="dataTable_searchContainer">
             <div id="searchbox" class="rounded-page-header-box">
                 <span class="blue_label"><g:message code="simple.quick.search"/> :</span>
@@ -84,10 +83,6 @@
             $.otp.individualList();
         });
     </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
     </div>
 </body>
 </html>

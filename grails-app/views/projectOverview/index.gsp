@@ -31,7 +31,6 @@
 </head>
 <body>
     <div class="body">
-    <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <h1 class="statisticTitle">
             <g:message code="projectOverview.pageTitle" args="[project.name]"/>
@@ -122,10 +121,6 @@
             $.otp.graph.project.init();
         });
     </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
     </div>
 </body>
 </html>

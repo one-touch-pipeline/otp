@@ -32,7 +32,6 @@
 </head>
 <body>
     <div class="body">
-    <g:if test="${projects}">
         <g:set var="sharesUnixGroup" value="${projectsOfUnixGroup.size() > 1}"/>
         <g:set var="projectsWithSharedUnixGroupListing" value="${projectsOfUnixGroup.sort { it.name }.collect { "\n  - "+it }.join("")}"/>
         <g:set var="confirmationText" value="${sharesUnixGroup ? g.message(code: "projectUser.sharedUnixGroupConfirmation", args: [projectsWithSharedUnixGroupListing]) : ''}"/>
@@ -333,10 +332,6 @@
             </table>
         </div>
         </sec:access>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
     </div>
 </body>
 </html>

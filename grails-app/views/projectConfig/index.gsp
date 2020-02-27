@@ -30,9 +30,8 @@
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
-<div class="body">
-    <g:render template="/templates/messages"/>
-    <g:if test="${projects}">
+    <div class="body">
+        <g:render template="/templates/messages"/>
         <div class="project-selection-header-container">
             <div class="grid-element">
                 <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
@@ -393,10 +392,6 @@
                 </sec:ifAllGranted>
             </table>
         </div>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
-</div>
+    </div>
 </body>
 </html>

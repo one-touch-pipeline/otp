@@ -31,9 +31,8 @@
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
-<div class="body">
+    <div class="body">
     <g:render template="/templates/messages"/>
-    <g:if test="${projects}">
         <div class="project-selection-header-container">
             <div class="grid-element">
                 <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
@@ -174,10 +173,6 @@
                 $.otp.projectConfig.asynchronousCallAlignmentInfo();
             });
         </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
-</div>
+    </div>
 </body>
 </html>

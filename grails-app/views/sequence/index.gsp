@@ -30,10 +30,9 @@
     <asset:javascript src="pages/sequence/index/datatable.js"/>
 </head>
 <body>
-    <div class="body">
-    <g:if test="${projects}">
-         <div class="searchCriteriaTableSequences">
-         <table id="searchCriteriaTable2">
+<div class="body">
+    <div class="searchCriteriaTableSequences">
+        <table id="searchCriteriaTable2">
             <tr>
             <td>
                 <span class="blue_label"><g:message code="extended.search"/> :</span>
@@ -81,22 +80,18 @@
             </td>
             </tr>
         </table>
-        </div>
         <otp:annotation type="info" id="withdrawn_description">
             <g:message code="sequence.information.withdrawn"/>
         </otp:annotation>
-        <div class="otpDataTables">
+    </div>
+    <div class="otpDataTables">
         <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
-        </div>
+    </div>
     <asset:script type="text/javascript">
         $(function() {
             $.otp.sequence.register();
         });
     </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
-    </div>
+</div>
 </body>
 </html>

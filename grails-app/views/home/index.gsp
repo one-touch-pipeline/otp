@@ -30,8 +30,7 @@
 </head>
 <body>
     <div class="body">
-    <g:if test="${projectQuery}">
-    <h2><g:message code="home.pageTitle"/></h2>
+        <h2><g:message code="home.pageTitle"/></h2>
         <div class="homeTable">
             <table>
                  <thead>
@@ -80,10 +79,6 @@
                 $.otp.graph.overview.init();
              });
         </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
     </div>
 </body>
 </html>

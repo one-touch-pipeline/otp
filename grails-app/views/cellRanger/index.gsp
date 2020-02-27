@@ -30,9 +30,8 @@
 </head>
 
 <body>
-<div class="body">
-    <g:render template="/templates/messages"/>
-    <g:if test="${projects}">
+    <div class="body">
+        <g:render template="/templates/messages"/>
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
 
         <g:if test="${configExists}">
@@ -149,10 +148,6 @@
         <g:else>
             <otp:annotation type="info">${g.message(code: "cellRanger.noConfig")}</otp:annotation>
         </g:else>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
-</div>
+    </div>
 </body>
 </html>

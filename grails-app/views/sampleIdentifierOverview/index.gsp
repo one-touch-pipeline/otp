@@ -30,7 +30,6 @@
 </head>
 <body>
     <div class="body">
-    <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <h1>${g.message(code: "sampleIdentifierOverview.index.title")}</h1>
         <div class="otpDataTables">
@@ -45,10 +44,6 @@
             $.otp.sampleIdentifierOverviewTable.register();
         });
     </asset:script>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
     </div>
 </body>
 </html>

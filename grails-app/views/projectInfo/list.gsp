@@ -32,9 +32,8 @@
 </head>
 <body>
     <div class="body">
-        <g:render template="/templates/messages"/>
+            <g:render template="/templates/messages"/>
 
-        <g:if test="${projects}">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
 
             <h1><g:message code="projectInfo.title" args="[project?.name]"/></h1>
@@ -262,10 +261,6 @@
                 </g:each>
                 </ul>
             </div>
-        </g:if>
-        <g:else>
-            <g:render template="/templates/noProject"/>
-        </g:else>
     </div>
 </body>
 </html>

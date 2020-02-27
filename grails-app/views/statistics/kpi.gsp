@@ -27,8 +27,7 @@
     <meta name="layout" content="mainV2"/>
 </head>
 <body>
-<div class="body container">
-    <g:if test="${projectSelection}">
+    <div class="body container">
         <div class="col-xs-12">
             <h2>${projectSelection.getDisplayName()}</h2>
             <hr>
@@ -88,11 +87,7 @@
                 directories.csv
             </g:link>
         </div>
-    </g:if>
-    <g:else>
-        <g:render template="/templates/noProject"/>
-    </g:else>
-</div>
+    </div>
 <script>
     var startDate = '${startDate}';
     var endDate = '${endDate}';
