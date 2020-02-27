@@ -22,6 +22,7 @@
 include:
   - local: '.gitlab-ci-core.yml'
   - template: Dependency-Scanning.gitlab-ci.yml
+  - template: License-Scanning.gitlab-ci.yml
 
 variables:
   #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, retire.js, gemnasium-python, gemnasium-maven, bundler-audit"`
