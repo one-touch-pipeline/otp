@@ -29,20 +29,43 @@ $.otp.graph = {};
 $.otp.graph.overview = {
     init: function() {
         "use strict";
-        var url = $.otp.contextPath,
-            projectGroup = $('#projectGroup_select').val();
-        RGraph.AJAX(url + '/statistic/projectCountPerDate?projectGroupName=' + projectGroup, function () {
+        var projectGroup = $('#projectGroup_select').val();
+        RGraph.AJAX($.otp.createLink({
+            controller: 'statistic',
+            action: 'projectCountPerDate',
+            parameters: {projectGroupName: projectGroup}
+        }), function () {
             $.otp.graph.overview.projectCountPerDate(this, projectGroup);
         });
-        RGraph.AJAX(url + '/statistic/laneCountPerDate?projectGroupName=' + projectGroup, function () {
+        RGraph.AJAX($.otp.createLink({
+            controller: 'statistic',
+            action: 'laneCountPerDate',
+            parameters: {projectGroupName: projectGroup}
+        }), function () {
             $.otp.graph.overview.laneCountPerDate(this, projectGroup);
         });
-        RGraph.AJAX(url + '/statistic/gigaBasesPerDay?projectGroupName=' + projectGroup, function () {
+        RGraph.AJAX($.otp.createLink({
+            controller: 'statistic',
+            action: 'gigaBasesPerDay',
+            parameters: {projectGroupName: projectGroup}
+        }), function () {
             $.otp.graph.overview.gigaBasesPerDay(this, projectGroup);
         });
-        RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType?projectGroupName=' + projectGroup, $.otp.graph.overview.sampleCountPerSequenceType);
-        RGraph.AJAX(url + '/statistic/patientsCountPerSequenceType?projectGroupName=' + projectGroup, $.otp.graph.overview.patientsCountPerSequenceType);
-        RGraph.AJAX(url + '/statistic/projectCountPerSequenceType?projectGroupName=' + projectGroup, $.otp.graph.overview.projectCountPerSequenceType);
+        RGraph.AJAX($.otp.createLink({
+            controller: 'statistic',
+            action: 'sampleCountPerSequenceType',
+            parameters: {projectGroupName: projectGroup}
+        }), $.otp.graph.overview.sampleCountPerSequenceType);
+        RGraph.AJAX($.otp.createLink({
+            controller: 'statistic',
+            action: 'patientsCountPerSequenceType',
+            parameters: {projectGroupName: projectGroup}
+        }), $.otp.graph.overview.patientsCountPerSequenceType);
+        RGraph.AJAX($.otp.createLink({
+            controller: 'statistic',
+            action: 'projectCountPerSequenceType',
+            parameters: {projectGroupName: projectGroup}
+        }), $.otp.graph.overview.projectCountPerSequenceType);
     },
 
     projectCountPerDate: function(data, project) {
@@ -416,11 +439,16 @@ $.otp.graph.project = {
 $.otp.graph.info = {
     init: function () {
         "use strict";
-        var url = $.otp.contextPath;
-        RGraph.AJAX(url + '/info/projectCountPerDate', function () {
+        RGraph.AJAX($.otp.createLink({
+            controller: 'info',
+            action: 'projectCountPerDate',
+        }), function () {
             $.otp.graph.overview.projectCountPerDate(this, "All projects");
         });
-        RGraph.AJAX(url + '/info/laneCountPerDate', function () {
+        RGraph.AJAX($.otp.createLink({
+            controller: 'info',
+            action: 'laneCountPerDate',
+        }), function () {
             $.otp.graph.overview.laneCountPerDate(this, "All projects");
         });
     }
