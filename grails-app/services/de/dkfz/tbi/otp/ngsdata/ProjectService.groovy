@@ -198,6 +198,10 @@ class ProjectService {
             }
         }
 
+        if (projectParams.baseProject) {
+            addProjectToRelatedProjects(projectParams.baseProject, project)
+        }
+
         userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, projectParams.unixGroup)
 
         createProjectDirectoryIfNeeded(project)
@@ -889,6 +893,12 @@ echo 'OK'
         }.findAll { String unixGroup, List<Project> projects ->
             projects.size() > 1
         }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addProjectToRelatedProjects(Project baseProject, Project newProject) {
+        baseProject.relatedProjects = ("${baseProject.relatedProjects ?: ""},${newProject.name}").split(",").findAll().unique().sort().join(",")
+        baseProject.save(flush: true)
     }
 }
 

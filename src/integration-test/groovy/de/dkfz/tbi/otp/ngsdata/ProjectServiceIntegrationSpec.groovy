@@ -1690,6 +1690,30 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ]
     }
 
+    void "test addProjectToRelatedProjects extends related projects with new project and cleans string"() {
+        given:
+        setupData()
+        Project baseProject = createProject(relatedProjects: value)
+        Project newProject = createProject(name: newName)
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.addProjectToRelatedProjects(baseProject, newProject)
+        }
+
+        then:
+        baseProject.relatedProjects == expected
+
+        where:
+        value           | newName || expected
+        null            | "P1"    || "P1"
+        ""              | "P1"    || "P1"
+        "P1,P2"         | "P3"    || "P1,P2,P3"
+        "P1,P3"         | "P2"    || "P1,P2,P3"
+        "P2,P1,P2"      | "P2"    || "P1,P2"
+        ",P1,,P3,P2,P1" | "P4"    || "P1,P2,P3,P4"
+    }
+
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {
         File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
         assert statDirectory.exists() || statDirectory.mkdirs()
