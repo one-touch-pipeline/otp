@@ -37,6 +37,7 @@
     <div class="species-with-strain-grid-wrapper">
 
         <div class="grid-element" style="grid-row: 1; grid-column: 1 / span 2;">
+            <g:set var="fieldWidth" value="40ch"/>
             <div class="form-and-listing-grid">
                 <div class="form">
                     <h2><g:message code="speciesWithStrain.header.createSpeciesWithStrain"/></h2>
@@ -49,7 +50,8 @@
                                         <g:message code="speciesWithStrain.label.noSpeciesAvailable"/>
                                     </g:if>
                                     <g:else>
-                                        <g:select name="speciesId" id="species" optionKey="id" from="${allSpecies}" />
+                                        <g:select id="species" name="speciesId" class="use-select-2" style="width: ${fieldWidth};"
+                                                  from="${allSpecies}" optionKey="id"/>
                                     </g:else>
                                 </td>
                             </tr>
@@ -60,7 +62,8 @@
                                         <g:message code="speciesWithStrain.label.noStrainsAvailable"/>
                                     </g:if>
                                     <g:else>
-                                        <g:select name="strainId" id="strain" optionKey="id" from="${strains}" />
+                                        <g:select id="strain" name="strainId" class="use-select-2" style="width: ${fieldWidth};"
+                                                  from="${strains}" optionKey="id" />
                                     </g:else>
                                 </td>
                             </tr>
@@ -103,7 +106,8 @@
                             <tr>
                                 <td><g:message code="speciesWithStrain.label.commonName"/></td>
                                 <td>
-                                    <input list="commonNameList" name="commonNameName" value="${cachedCommonName}" autocomplete="off" />
+                                    <input type="text" list="commonNameList" name="commonNameName" value="${cachedCommonName}"
+                                           autocomplete="off" style="width: ${fieldWidth};"/>
                                     <datalist id="commonNameList">
                                         <g:each var="commonName" in="${commonNames}">
                                             <option>${commonName}</option>
@@ -114,7 +118,8 @@
                             <tr>
                                 <td><g:message code="speciesWithStrain.label.scientificName"/></td>
                                 <td>
-                                    <input type="text" id="scientificName" name="scientificName" value="${cachedScientificName}" autocomplete="off" />
+                                    <input type="text" id="scientificName" name="scientificName" value="${cachedScientificName}"
+                                           autocomplete="off" style="width: ${fieldWidth};"/>
                                 </td>
                             </tr>
                             <tr>
@@ -155,7 +160,7 @@
                         <table>
                             <tr>
                                 <td><g:message code="speciesWithStrain.label.strainName"/></td>
-                                <td><input type="text" name="newStrainName" value="${cachedStrainName}" autocomplete="off" /></td>
+                                <td><input type="text" name="newStrainName" value="${cachedStrainName}" autocomplete="off" style="width: ${fieldWidth};"/></td>
                             </tr>
                             <tr>
                                 <td></td>
