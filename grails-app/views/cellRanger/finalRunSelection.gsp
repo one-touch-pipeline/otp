@@ -30,7 +30,7 @@
 
 <body>
 <div class="body">
-    <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
+    <g:render template="/templates/projectSelection"/>
     <g:render template="/templates/messages"/>
     <h1>${g.message(code: "cellRanger.selection.title", args: [project?.name])}</h1>
 

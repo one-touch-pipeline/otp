@@ -34,7 +34,7 @@
     <div class="body">
             <g:render template="/templates/messages"/>
 
-            <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
+            <g:render template="/templates/projectSelection"/>
 
             <h1><g:message code="projectInfo.title" args="[project?.name]"/></h1>
 

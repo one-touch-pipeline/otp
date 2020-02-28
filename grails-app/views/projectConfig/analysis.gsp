@@ -34,7 +34,7 @@
         <g:render template="/templates/messages"/>
         <div class="project-selection-header-container">
             <div class="grid-element">
-                <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
+                <g:render template="/templates/projectSelection"/>
             </div>
             <div class="grid-element comment-box">
                 <g:render template="/templates/commentBox" model="[

@@ -30,7 +30,7 @@
 </head>
 <body>
     <div class="body">
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <g:render template="/templates/projectSelection"/>
         <h1>${g.message(code: "sampleIdentifierOverview.index.title")}</h1>
         <div class="otpDataTables">
             <otp:dataTable codes="${[

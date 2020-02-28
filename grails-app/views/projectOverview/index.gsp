@@ -31,7 +31,7 @@
 </head>
 <body>
     <div class="body">
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <g:render template="/templates/projectSelection"/>
         <h1 class="statisticTitle">
             <g:message code="projectOverview.pageTitle" args="[project.name]"/>
         </h1>

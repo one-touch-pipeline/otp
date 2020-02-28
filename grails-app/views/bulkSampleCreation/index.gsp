@@ -32,7 +32,7 @@
 <body>
 <div class="body" id="bulk-sample-creation">
     <g:render template="/templates/messages"/>
-    <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+    <g:render template="/templates/projectSelection"/>
 
     <h1><g:message code="bulk.sample.creation.title"/></h1>
     <otp:annotation type="info">

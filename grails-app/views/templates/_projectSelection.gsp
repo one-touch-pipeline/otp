@@ -28,13 +28,14 @@
         <strong><g:message code="home.projectFilter.project"/>:</strong>
     </div>
     <div class="selected-project-value">
-        <strong>${project?.name}</strong>
+        <strong>${projectSelection?.projects?.first()?.name}</strong>
     </div>
     <div class="select-label">
         <g:message code="home.projectFilter.select"/>:
     </div>
     <div class="project-dropdown">
-        <g:select id="project" name='id' from='${projects}' value='${project?.id}'
+        %{-- variables are form ProjectSelectionInterceptor --}%
+        <g:select id="project" name='id' from='${availableProjects}' value='${projectSelection?.projects?.first()?.id}'
                   optionKey='id' optionValue='displayName'
                   autocomplete="off" onChange='submit();'/>
     </div>

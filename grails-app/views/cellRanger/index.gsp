@@ -32,7 +32,7 @@
 <body>
     <div class="body">
         <g:render template="/templates/messages"/>
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
+        <g:render template="/templates/projectSelection"/>
 
         <g:if test="${configExists}">
             <h3>${g.message(code: "cellRanger.select")}</h3>

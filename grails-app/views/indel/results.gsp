@@ -30,7 +30,7 @@
 </head>
 <body>
     <div class="body">
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <g:render template="/templates/projectSelection"/>
 
         <div class="table">
             <div class="otpDataTables">

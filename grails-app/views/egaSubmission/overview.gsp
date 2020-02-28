@@ -32,7 +32,7 @@
 <body>
     <div class="body">
         <g:if test="${projects}">
-            <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+            <g:render template="/templates/projectSelection"/>
         </g:if>
         <g:link style="float: right" action="helpPage" fragment="overview" target="_blank">
             <g:img file="info.png"/>

@@ -38,7 +38,7 @@
     </g:each>
     </ul>
     <div class="searchCriteriaTableSequences">
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <g:render template="/templates/projectSelection"/>
 
         <form class="rounded-page-header-box" action="${g.createLink(controller: 'sampleSwap', action: 'index')}">
             <div style="color: black"><strong>&nbsp;Individual : ${individual?.pid}</strong></div>
