@@ -50,6 +50,11 @@
                                   name="sampleType.id" from="${allSampleTypes}" optionKey="id" value="${sampleType?.id}"
                                   noSelection="${[(""): "All Sample Types"]}" onChange="submit()"/>
                     </div>
+                    <div>
+                        <strong>${g.message(code: "cellRanger.seqType")}:</strong><br>
+                        ${seqTypes.first()}
+                        <input type="hidden" name="seqType.id" value="${seqType.id}"/>
+                    </div>
                 </div>
             </g:form>
             <br>
@@ -58,6 +63,7 @@
                 <g:form action="create">
                     <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
                     <input type="hidden" name="individual.id" value="${individual?.id}"/>
+                    <input type="hidden" name="seqType.id" value="${seqType?.id}"/>
 
                     <div class="cell-ranger-creation-grid-wrapper">
                         <div class="row one">
@@ -67,11 +73,6 @@
                                           from="${referenceGenomeIndexes}"
                                           optionKey="id" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
                                           noSelection="${[(""): "Select a reference"]}" />
-                            </div>
-                            <div>
-                                <strong>${g.message(code: "cellRanger.create.seqType")}:</strong>
-                                <g:select name="seqType.id" class="use-select-2"
-                                          from="${seqTypes}" optionKey="id" value="${cmd?.seqType?.id}"/>
                             </div>
                         </div>
                         <div class="row two">

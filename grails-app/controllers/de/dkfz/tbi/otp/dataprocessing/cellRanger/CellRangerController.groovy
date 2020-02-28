@@ -213,11 +213,13 @@ class GroupedMwp implements Comparable {
 class CellRangerSelectionCommand {
     Individual individual
     SampleType sampleType
+    SeqType seqType
     ReferenceGenomeIndex reference
 
     static constraints = {
         individual nullable: true
         sampleType nullable: true
+        seqType nullable: true
         reference nullable: true
     }
 }
@@ -226,7 +228,6 @@ class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
     String expectedOrEnforcedCells
     String expectedOrEnforcedCellsValue
     ReferenceGenomeIndex referenceGenomeIndex
-    SeqType seqType
 
     static constraints = {
         expectedOrEnforcedCellsValue nullable: true, validator: { val, obj ->

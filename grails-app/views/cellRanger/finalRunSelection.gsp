@@ -93,7 +93,7 @@
                 </g:form>
                 </td>
                 <td>
-                    <g:link action="index" params="${["individual.id": mwps.sample.individual.id, "sampleType.id": mwps.sample.sampleType.id, "reference.id": mwps.reference.id]}">
+                    <g:link action="index" params="${["individual.id": mwps.sample.individual.id, "sampleType.id": mwps.sample.sampleType.id, "seqType.id": mwps.seqType.id, "reference.id": mwps.reference.id]}">
                         ${g.message(code: "cellRanger.selection.rerun")}
                     </g:link>
                 </td>
