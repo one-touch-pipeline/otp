@@ -40,7 +40,7 @@
                         'analysis.sampleTypes',
                         'analysis.seqType',
                         'analysis.libPrepKits',
-                        'analysis.pluginVersion',
+                        'analysis.programVersion',
                         'analysis.processingDate',
                         'analysis.progress',
                     ] }"

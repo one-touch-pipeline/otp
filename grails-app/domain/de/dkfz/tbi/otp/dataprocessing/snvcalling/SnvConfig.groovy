@@ -33,14 +33,8 @@ class SnvConfig extends ConfigPerProjectAndSeqType {
      */
     String configuration
 
-    /**
-     * Defines which version of the external scripts has to be used for this project.
-     */
-    String externalScriptVersion
-
     static constraints = {
         configuration blank: false
-        externalScriptVersion blank: false
         seqType unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
         pipeline validator: { pipeline ->
             pipeline?.name == Pipeline.Name.OTP_SNV

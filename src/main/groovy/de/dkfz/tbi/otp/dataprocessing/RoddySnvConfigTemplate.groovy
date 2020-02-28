@@ -29,7 +29,7 @@ class RoddySnvConfigTemplate {
     static String createConfig(RoddyConfiguration snvPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType="project"
-               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, snvPipelineConfiguration.seqType, snvPipelineConfiguration.pluginName, snvPipelineConfiguration.pluginVersion, snvPipelineConfiguration.configVersion)}"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, snvPipelineConfiguration.seqType, snvPipelineConfiguration.pluginName, snvPipelineConfiguration.programVersion, snvPipelineConfiguration.configVersion)}"
                description="SNV project configuration for ${snvPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${snvPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>

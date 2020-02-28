@@ -26,11 +26,6 @@ import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance> {
 
     @Override
-    String getVersionAttributeName() {
-        "pluginVersion"
-    }
-
-    @Override
     Class<SophiaInstance> getInstanceClass() {
         SophiaInstance
     }

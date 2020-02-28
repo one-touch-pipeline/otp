@@ -22,14 +22,12 @@
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
-import de.dkfz.tbi.otp.dataprocessing.WithProgramVersion
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class RunYapsaConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion {
+class RunYapsaConfig extends ConfigPerProjectAndSeqType {
 
     static constraints = {
-        programVersion(blank: false)
         obsoleteDate validator: { val, obj ->
             if (!val) {
                 RunYapsaConfig runYapsaConfig = atMostOneElement(RunYapsaConfig.findAllWhere(

@@ -59,7 +59,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
     @Unroll
     void "getRoddyAlignmentInformation, when useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
         given:
-        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["pluginVersion": "pluginVersion:1.1.0"])
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["programVersion": "programVersion:1.1.0"])
         ProjectOverviewService service = new ProjectOverviewService([
                 processingOptionService   : new ProcessingOptionService(),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -104,17 +104,17 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         mergeCommand == alignmentInfo.mergeCommand
         mergeOpt == alignmentInfo.mergeOptions
         'Version 6.0' == alignmentInfo.samToolsCommand
-        roddyPipelineVersion == alignmentInfo.pluginVersion
+        roddyPipelineVersion == alignmentInfo.programVersion
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
 
         where:
         useConvey | mergeTool                           || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
-        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_PICARD    || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'pluginVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'pluginVersion:1.1.0'
-        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_PICARD    || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'programVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'programVersion:1.1.0'
+        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
     }
 
     void "getRoddyAlignmentInformation, when rna, return alignment info with the correct data"() {

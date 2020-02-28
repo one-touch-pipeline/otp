@@ -32,7 +32,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
                     project          : cmd.project,
                     seqType          : cmd.seqType,
                     pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
+                    programVersion   : cmd.programVersion,
                     baseProjectConfig: cmd.baseProjectConfig,
                     configVersion    : cmd.config,
             ])
@@ -46,14 +46,14 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         result << getValues(cmd.project, cmd.seqType, getPipeline())
 
         String pluginName = getDefaultPluginName(cmd.seqType.roddyName)
-        String pluginVersion = getDefaultPluginVersion(cmd.seqType.roddyName)
+        String programVersion = getDefaultProgramVersion(cmd.seqType.roddyName)
         String baseProjectConfig = getDefaultBaseProjectConfig(cmd.seqType.roddyName)
         result << [
                 pluginName              : pluginName,
                 defaultPluginName       : pluginName,
 
-                pluginVersion           : pluginVersion,
-                defaultPluginVersion    : pluginVersion,
+                programVersion          : programVersion,
+                defaultProgramVersion   : programVersion,
 
                 baseProjectConfig       : baseProjectConfig,
                 defaultBaseProjectConfig: baseProjectConfig,
@@ -62,7 +62,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
     }
 
     abstract String getDefaultPluginName(String roddyName)
-    abstract String getDefaultPluginVersion(String roddyName)
+    abstract String getDefaultProgramVersion(String roddyName)
     abstract String getDefaultBaseProjectConfig(String roddyName)
     abstract void configure(RoddyConfiguration configuration)
 }

@@ -24,12 +24,12 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.dataprocessing.WithProgramVersion
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 
 abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfigurePipelineController {
 
     Map index(BaseConfigurePipelineSubmitCommand cmd) {
-        WithProgramVersion config = getLatestConfig(cmd.project, cmd.seqType)
+        ConfigPerProjectAndSeqType config = getLatestConfig(cmd.project, cmd.seqType)
         String currentVersion = config?.programVersion
 
         String defaultVersion = getDefaultVersion()
@@ -61,7 +61,7 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
         return [:]
     }
 
-    abstract WithProgramVersion getLatestConfig(Project project, SeqType seqType)
+    abstract ConfigPerProjectAndSeqType getLatestConfig(Project project, SeqType seqType)
 
     abstract String getDefaultVersion()
 

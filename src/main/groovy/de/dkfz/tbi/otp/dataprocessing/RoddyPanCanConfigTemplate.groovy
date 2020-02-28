@@ -89,7 +89,7 @@ class RoddyPanCanConfigTemplate {
 <configuration
         configurationType="project"
         name="${RoddyWorkflowConfig.getNameUsedInConfig(Pipeline.Name.PANCAN_ALIGNMENT, panCanAlignmentConfiguration.seqType,
-                "${panCanAlignmentConfiguration.pluginName}:${panCanAlignmentConfiguration.pluginVersion}", panCanAlignmentConfiguration.configVersion)}"
+                "${panCanAlignmentConfiguration.pluginName}:${panCanAlignmentConfiguration.programVersion}", panCanAlignmentConfiguration.configVersion)}"
         description="Alignment configuration for project ${panCanAlignmentConfiguration.project.name}."
         imports="${panCanAlignmentConfiguration.baseProjectConfig}">
 

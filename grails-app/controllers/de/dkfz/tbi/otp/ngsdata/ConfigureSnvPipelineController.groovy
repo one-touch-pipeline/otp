@@ -37,7 +37,7 @@ class ConfigureSnvPipelineController extends AbstractConfigureRoddyPipelineContr
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    String getDefaultPluginVersion(String roddyName) {
+    String getDefaultProgramVersion(String roddyName) {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, roddyName)
     }
 

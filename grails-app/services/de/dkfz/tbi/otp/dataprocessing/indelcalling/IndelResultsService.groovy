@@ -28,11 +28,6 @@ import de.dkfz.tbi.otp.utils.FormatHelper
 class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingInstance> {
 
     @Override
-    String getVersionAttributeName() {
-        "pluginVersion"
-    }
-
-    @Override
     Class<IndelCallingInstance> getInstanceClass() {
         IndelCallingInstance
     }

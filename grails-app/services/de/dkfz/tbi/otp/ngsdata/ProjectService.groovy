@@ -352,8 +352,8 @@ class ProjectService {
 
         assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginName):
                 "pluginName '${panCanAlignmentConfiguration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginVersion):
-                "pluginVersion '${panCanAlignmentConfiguration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.programVersion):
+                "programVersion '${panCanAlignmentConfiguration.programVersion}' is an invalid path component"
         assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig):
                 "baseProjectConfig '${panCanAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
         assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN:
@@ -401,7 +401,7 @@ class ProjectService {
     void configureRnaAlignmentConfig(RoddyConfiguration rnaAlignmentConfiguration) {
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' " +
                 "is an invalid path component"
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginVersion): "pluginVersion '${rnaAlignmentConfiguration.pluginVersion}' " +
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.programVersion): "programVersion '${rnaAlignmentConfiguration.programVersion}' " +
                 "is an invalid path component"
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig " +
                 "'${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
@@ -574,7 +574,7 @@ class ProjectService {
                 configuration.project,
                 pipeline.name,
                 configuration.seqType,
-                configuration.pluginVersion,
+                configuration.programVersion,
                 configuration.configVersion,
         )
         File configDirectory = configFilePath.parentFile
@@ -584,7 +584,7 @@ class ProjectService {
         roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
                 configuration.seqType,
-                roddyWorkflowConfigService.formatPluginVersion(configuration.pluginName, configuration.pluginVersion),
+                roddyWorkflowConfigService.formatPluginVersion(configuration.pluginName, configuration.programVersion),
                 pipeline,
                 configFilePath.path,
                 configuration.configVersion,
@@ -615,8 +615,8 @@ class ProjectService {
      * It assumes a single ':' as the separator, the version being the
      * second field of the split. This complies with the Roddy convention.
      */
-    private static String parseVersionFromPluginVersionString(String pluginVersion) {
-        return pluginVersion.split(":")[1]
+    private static String parseVersionFromPluginVersionString(String programVersion) {
+        return programVersion.split(":")[1]
     }
 
     private static void adaptConfigurationNameInRoddyConfigFile(Path file, String oldName, String newName) {
@@ -639,8 +639,8 @@ class ProjectService {
         fileService.createDirectoryRecursively(targetConfigDirectory)
 
         String nextConfigVersion = workflowConfigService.getNextConfigVersion(targetProjectConfig?.configVersion)
-        String pluginVersion = parseVersionFromPluginVersionString(baseProjectRoddyConfig.pluginVersion)
-        String configFileName = RoddyWorkflowConfig.getConfigFileName(pipeline.name, seqType, pluginVersion, nextConfigVersion)
+        String programVersion = parseVersionFromPluginVersionString(baseProjectRoddyConfig.programVersion)
+        String configFileName = RoddyWorkflowConfig.getConfigFileName(pipeline.name, seqType, programVersion, nextConfigVersion)
 
         Path baseProjectConfigFile = remoteFileSystem.getPath(baseProjectRoddyConfig.configFilePath)
         Path targetProjectConfigFile = remoteFileSystem.getPath(targetConfigDirectory.toString(), configFileName)
@@ -650,7 +650,7 @@ class ProjectService {
 
         fileService.setPermission(targetProjectConfigFile, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
-        String nameUsedInConfig = RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, baseProjectRoddyConfig.pluginVersion, nextConfigVersion)
+        String nameUsedInConfig = RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, baseProjectRoddyConfig.programVersion, nextConfigVersion)
         adaptConfigurationNameInRoddyConfigFile(targetProjectConfigFile, baseProjectRoddyConfig.nameUsedInConfig, nameUsedInConfig)
 
         fileService.setPermission(targetProjectConfigFile, FileService.DEFAULT_FILE_PERMISSION)
@@ -658,7 +658,7 @@ class ProjectService {
         roddyWorkflowConfigService.importProjectConfigFile(
                 targetProject,
                 baseProjectRoddyConfig.seqType,
-                baseProjectRoddyConfig.pluginVersion,
+                baseProjectRoddyConfig.programVersion,
                 baseProjectRoddyConfig.pipeline,
                 targetProjectConfigFile.toString(),
                 nextConfigVersion,
@@ -704,7 +704,7 @@ class ProjectService {
 
     private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {
         assert OtpPath.isValidPathComponent(configuration.pluginName): "pluginName '${configuration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(configuration.pluginVersion): "pluginVersion '${configuration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(configuration.programVersion): "programVersion '${configuration.programVersion}' is an invalid path component"
         assert OtpPath.isValidPathComponent(configuration.baseProjectConfig): "baseProjectConfig '${configuration.baseProjectConfig}' " +
                 "is an invalid path component"
         assert configuration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${configuration.configVersion}' " +
@@ -733,7 +733,7 @@ class ProjectService {
                 configuration.project,
                 pipeline.name,
                 configuration.seqType,
-                configuration.pluginVersion,
+                configuration.programVersion,
                 configuration.configVersion,
         )
         File configDirectory = configFilePath.parentFile
@@ -743,7 +743,7 @@ class ProjectService {
         return roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
                 configuration.seqType,
-                roddyWorkflowConfigService.formatPluginVersion(configuration.pluginName, configuration.pluginVersion),
+                roddyWorkflowConfigService.formatPluginVersion(configuration.pluginName, configuration.programVersion),
                 pipeline,
                 configFilePath.path,
                 configuration.configVersion,
@@ -903,7 +903,7 @@ trait ProjectSeqTypeReferenceGenomeConfiguration extends ProjectSeqTypeConfigura
 
 class RoddyConfiguration implements ProjectSeqTypeConfiguration {
     String pluginName
-    String pluginVersion
+    String programVersion
     String baseProjectConfig
     String configVersion
     String resources = "xl"

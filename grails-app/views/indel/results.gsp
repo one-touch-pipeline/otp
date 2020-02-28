@@ -67,7 +67,7 @@
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescue"/></th>
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescueMedianAlleleFreqInControl"/></th>
                         <th><g:message code="analysis.indel.tinda.plot"/></th>
-                        <th><g:message code="analysis.pluginVersion"/></th>
+                        <th><g:message code="analysis.programVersion"/></th>
                         <th><g:message code="analysis.processingDate"/></th>
                         <th><g:message code="analysis.progress"/></th>
                     </tr>

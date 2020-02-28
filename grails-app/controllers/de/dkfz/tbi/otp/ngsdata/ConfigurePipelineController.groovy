@@ -57,7 +57,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                     statSizeFileName     : cmd.statSizeFileName,
                     mergeTool            : cmd.mergeTool,
                     pluginName           : cmd.pluginName,
-                    pluginVersion        : cmd.pluginVersion,
+                    programVersion       : cmd.programVersion,
                     baseProjectConfig    : cmd.baseProjectConfig,
                     configVersion        : cmd.config,
                     bwaMemVersion        : cmd.bwaMemVersion,
@@ -78,7 +78,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }
 
         String defaultPluginName = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
+        String defaultProgramVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
         String defaultBaseProjectConfig = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
         String defaultReferenceGenome = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
         String defaultMergeTool = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, cmd.seqType.roddyName)
@@ -130,8 +130,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 pluginName              : defaultPluginName,
                 defaultPluginName       : defaultPluginName,
 
-                pluginVersion           : defaultPluginVersion,
-                defaultPluginVersion    : defaultPluginVersion,
+                programVersion          : defaultProgramVersion,
+                defaultProgramVersion   : defaultProgramVersion,
 
                 baseProjectConfig       : defaultBaseProjectConfig,
                 defaultBaseProjectConfig: defaultBaseProjectConfig,
@@ -155,7 +155,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         Map result = [:]
 
         String defaultPluginName = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
+        String defaultProgramVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
         String defaultBaseProjectConfig = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
         String defaultReferenceGenome = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
         String defaultGenomeStarIndex = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)
@@ -207,8 +207,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 pluginName              : defaultPluginName,
                 defaultPluginName       : defaultPluginName,
 
-                pluginVersion           : defaultPluginVersion,
-                defaultPluginVersion    : defaultPluginVersion,
+                programVersion          : defaultProgramVersion,
+                defaultProgramVersion   : defaultProgramVersion,
 
                 baseProjectConfig       : defaultBaseProjectConfig,
                 defaultBaseProjectConfig: defaultBaseProjectConfig,
@@ -245,7 +245,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                     baseProjectConfig: cmd.baseProjectConfig,
                     seqType          : cmd.seqType,
                     pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
+                    programVersion   : cmd.programVersion,
                     configVersion    : cmd.config,
             ])
             projectService.configureRnaAlignmentConfig(rnaAlignmentConfiguration)
@@ -404,14 +404,14 @@ class ConfigureCellRangerSubmitCommand extends BaseConfigurePipelineSubmitComman
 @ToString(includeNames = true, includeSuper = true)
 class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     String pluginName
-    String pluginVersion
+    String programVersion
     String baseProjectConfig
     String config
     String submit
 
     static constraints = {
         pluginName nullable: true, blank: false, shared: 'pathComponent'
-        pluginVersion nullable: true, blank: false, shared: 'pathComponent'
+        programVersion nullable: true, blank: false, shared: 'pathComponent'
         baseProjectConfig nullable: false, blank: false, shared: 'pathComponent'
         config nullable: true, blank: false, validator: { val, obj ->
             if (val && !(val ==~ /^v\d+_\d+$/)) {

@@ -117,7 +117,7 @@ class ExecuteRoddyCommandService {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
 
 
-        String pluginVersion = config.pluginVersion
+        String programVersion = config.programVersion
         File configFile = new File(config.configFilePath)
         String jobSchSpecificConfig = ""
         if (jobScheduler) {
@@ -127,7 +127,7 @@ class ExecuteRoddyCommandService {
         return [
                 "--useconfig=${applicationIniPath}",
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath()}",
-                "--usePluginVersion=${pluginVersion}",
+                "--usePluginVersion=${programVersion}",
                 "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath}${jobSchSpecificConfig}",
         ].join(" ")
     }

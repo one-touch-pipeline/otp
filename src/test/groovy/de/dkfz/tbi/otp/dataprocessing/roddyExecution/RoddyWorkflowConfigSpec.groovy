@@ -46,7 +46,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
     }
 
     final static String RODDY_NAME = 'roddyName'
-    final static String PLUGIN_VERSION = 'pluginVersion:1.1.1'
+    final static String PROGRAM_VERSION = 'programVersion:1.1.1'
     final static String CONFIG_VERSION = 'v1_0'
 
     void setup() {
@@ -66,8 +66,8 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         property         | constraint                | value
         'configFilePath' | 'validator.absolute.path' | 'invalidPath'
         'pipeline'       | 'nullable'                | null
-        'pluginVersion'  | 'nullable'                | null
-        'pluginVersion'  | 'blank'                   | ''
+        'programVersion' | 'nullable'                | null
+        'programVersion' | 'blank'                   | ''
         'configVersion'  | 'blank'                   | ''
         'configVersion'  | 'matches.invalid'         | 'invalidValue'
     }
@@ -101,14 +101,14 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         TestCase.assertValidateError(config2, 'configFilePath', 'unique', config2.configFilePath)
     }
 
-    void "test constraint, when project, seqType, pipeline, pluginVersion and configVersion combination is not unique, then validate should return false"() {
+    void "test constraint, when project, seqType, pipeline, programVersion and configVersion combination is not unique, then validate should return false"() {
         given:
         RoddyWorkflowConfig config1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date())
         RoddyWorkflowConfig config2 = DomainFactory.createRoddyWorkflowConfig()
         config2.project = config1.project
         config2.seqType = config1.seqType
         config2.pipeline = config1.pipeline
-        config2.pluginVersion = config1.pluginVersion
+        config2.programVersion = config1.programVersion
         config2.configVersion = config1.configVersion
 
         expect:
@@ -208,27 +208,27 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         SeqType seqType = DomainFactory.createSeqType(roddyName: RODDY_NAME)
 
         when:
-        String fileName = RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PLUGIN_VERSION, CONFIG_VERSION)
+        String fileName = RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PROGRAM_VERSION, CONFIG_VERSION)
 
         then:
-        fileName ==~ /${workflowName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${PLUGIN_VERSION}_${CONFIG_VERSION}.xml/
+        fileName ==~ /${workflowName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${PROGRAM_VERSION}_${CONFIG_VERSION}.xml/
     }
 
     @Unroll
     void "test getConfigFileName #nullProperty not set should fail"() {
         when:
-        RoddyWorkflowConfig.getConfigFileName(pipeline, seqType, pluginVersion, configVersion)
+        RoddyWorkflowConfig.getConfigFileName(pipeline, seqType, programVersion, configVersion)
 
         then:
         AssertionError error = thrown()
         error.message.contains(nullProperty)
 
         where:
-        pipeline                       | seqType                                            | pluginVersion  | configVersion  || nullProperty
-        null                           | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | CONFIG_VERSION || 'pipeline'
-        Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PLUGIN_VERSION | CONFIG_VERSION || 'seqType'
-        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginNameAndVersion'
-        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | null           || 'configVersion'
+        pipeline                       | seqType                                            | programVersion  | configVersion  || nullProperty
+        null                           | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PROGRAM_VERSION | CONFIG_VERSION || 'pipeline'
+        Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PROGRAM_VERSION | CONFIG_VERSION || 'seqType'
+        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null            | CONFIG_VERSION || 'pluginNameAndVersion'
+        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PROGRAM_VERSION | null           || 'configVersion'
     }
 
     void "test getConfigFileName seqType has no roddy name should fail"() {
@@ -237,7 +237,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         SeqType seqType = DomainFactory.createSeqType()
 
         when:
-        RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PLUGIN_VERSION, CONFIG_VERSION)
+        RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PROGRAM_VERSION, CONFIG_VERSION)
 
         then:
         AssertionError error = thrown()
@@ -250,7 +250,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         SeqType seqType = DomainFactory.createSeqType(roddyName: RODDY_NAME)
 
         when:
-        RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PLUGIN_VERSION, 'invalid')
+        RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PROGRAM_VERSION, 'invalid')
 
         then:
         AssertionError error = thrown()
@@ -264,11 +264,11 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         SeqType seqType = DomainFactory.createSeqType(roddyName: RODDY_NAME)
 
         File path = RoddyWorkflowConfig.getStandardConfigDirectory(project, pipelineName)
-        String name = RoddyWorkflowConfig.getConfigFileName(pipelineName, seqType, PLUGIN_VERSION, CONFIG_VERSION)
+        String name = RoddyWorkflowConfig.getConfigFileName(pipelineName, seqType, PROGRAM_VERSION, CONFIG_VERSION)
         String expected = "${path.path}/${name}"
 
         when:
-        File file = RoddyWorkflowConfig.getStandardConfigFile(project, pipelineName, seqType, PLUGIN_VERSION, CONFIG_VERSION)
+        File file = RoddyWorkflowConfig.getStandardConfigFile(project, pipelineName, seqType, PROGRAM_VERSION, CONFIG_VERSION)
 
         then:
         file.path == expected
@@ -278,10 +278,10 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         given:
         Pipeline.Name pipelineName = Pipeline.Name.PANCAN_ALIGNMENT
         SeqType seqType = DomainFactory.createSeqType(roddyName: RODDY_NAME)
-        String expected = "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${PLUGIN_VERSION}_${CONFIG_VERSION}"
+        String expected = "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${PROGRAM_VERSION}_${CONFIG_VERSION}"
 
         when:
-        String name = RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, seqType, PLUGIN_VERSION, CONFIG_VERSION)
+        String name = RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, seqType, PROGRAM_VERSION, CONFIG_VERSION)
 
         then:
         name == expected
@@ -290,18 +290,18 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
     @Unroll
     void "test getNameUsedInConfig #nullProperty not set should fail"() {
         when:
-        RoddyWorkflowConfig.getNameUsedInConfig(pipeline, seqType, pluginVersion, configVersion)
+        RoddyWorkflowConfig.getNameUsedInConfig(pipeline, seqType, programVersion, configVersion)
 
         then:
         AssertionError error = thrown()
         error.message.contains(nullProperty)
 
         where:
-        pipeline                       | seqType                                            | pluginVersion  | configVersion  || nullProperty
-        null                           | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | CONFIG_VERSION || 'pipeline'
-        Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PLUGIN_VERSION | CONFIG_VERSION || 'seqType'
-        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginNameAndVersion'
-        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | null           || 'configVersion'
+        pipeline                       | seqType                                            | programVersion  | configVersion  || nullProperty
+        null                           | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PROGRAM_VERSION | CONFIG_VERSION || 'pipeline'
+        Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PROGRAM_VERSION | CONFIG_VERSION || 'seqType'
+        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null            | CONFIG_VERSION || 'pluginNameAndVersion'
+        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PROGRAM_VERSION | null           || 'configVersion'
     }
 
 

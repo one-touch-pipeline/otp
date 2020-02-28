@@ -263,7 +263,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 "${roddyBamFile.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-                "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
+                "--usePluginVersion=${roddyBamFile.config.programVersion} " +
                 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},${roddyBaseConfigsPath}/resource/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} " +
                 "--useiodir=${viewByPid},${roddyBamFile.workDirectory}"
 
@@ -322,7 +322,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 "${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-                "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
+                "--usePluginVersion=${roddyBamFile.config.programVersion} " +
                 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}"
 
         LogThreadLocal.withThreadLog(System.out) {

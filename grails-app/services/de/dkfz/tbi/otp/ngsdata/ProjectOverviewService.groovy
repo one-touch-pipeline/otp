@@ -67,7 +67,7 @@ class ProjectOverviewService {
     protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig config) {
         assert config
         ProcessOutput output = getRoddyProcessOutput(config)
-        return generateRoddyAlignmentInfo(output, config.seqType, config.pluginVersion)
+        return generateRoddyAlignmentInfo(output, config.seqType, config.programVersion)
     }
 
     /**
@@ -101,7 +101,7 @@ class ProjectOverviewService {
      * @param seqType
      * @return new Alignment info
      */
-    private RoddyAlignmentInfo generateRoddyAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
+    private RoddyAlignmentInfo generateRoddyAlignmentInfo(ProcessOutput output, SeqType seqType, String programVersion) {
         Map<String, String> res = extractConfigRoddyOutput(output)
 
         Map bwa = createAlignmentCommandOptionsMap(res, output, seqType)
@@ -114,7 +114,7 @@ class ProjectOverviewService {
                 samToolsCommand   : res.get("SAMTOOLS_VERSION") ? "Version ${res.get("SAMTOOLS_VERSION")}" : "",
                 mergeCommand      : merge.command,
                 mergeOptions      : merge.options,
-                pluginVersion     : pluginVersion,
+                programVersion    : programVersion,
         )
     }
 

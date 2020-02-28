@@ -86,7 +86,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                     }
                 }
                 config {
-                    property(getVersionAttributeName(), 'version')
+                    property("programVersion", 'version')
                 }
                 property('processingState', "processingState")
                 property('id', "instanceId")
@@ -120,8 +120,6 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             return properties
         }
     }
-
-    abstract String getVersionAttributeName()
 
     abstract Class<T> getInstanceClass()
 

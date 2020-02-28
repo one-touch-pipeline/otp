@@ -32,7 +32,7 @@ class RoddyAlignmentInfo extends AlignmentInfo {
     String samToolsCommand
     String mergeCommand
     String mergeOptions
-    String pluginVersion
+    String programVersion
 
     @Override
     Map<String, Object> getAlignmentSpecificMessageAttributes() {

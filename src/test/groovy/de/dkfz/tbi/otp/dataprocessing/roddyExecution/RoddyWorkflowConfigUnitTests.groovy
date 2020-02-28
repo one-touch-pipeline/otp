@@ -128,12 +128,12 @@ class RoddyWorkflowConfigUnitTests {
         )
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
-                configVersion: roddyWorkflowConfig1.configVersion,
-                pluginVersion: roddyWorkflowConfig1.pluginVersion,
-                ], false)
+                project       : roddyWorkflowConfig1.project,
+                seqType       : roddyWorkflowConfig1.seqType,
+                pipeline      : roddyWorkflowConfig1.pipeline,
+                configVersion : roddyWorkflowConfig1.configVersion,
+                programVersion: roddyWorkflowConfig1.programVersion,
+        ], false)
 
         TestCase.assertValidateError(roddyWorkflowConfig2, "configVersion", "validator.invalid", roddyWorkflowConfig2.configVersion)
     }
@@ -146,11 +146,11 @@ class RoddyWorkflowConfigUnitTests {
         )
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
-                configVersion: roddyWorkflowConfig1.configVersion,
-                pluginVersion: roddyWorkflowConfig1.pluginVersion,
+                project       : roddyWorkflowConfig1.project,
+                seqType       : roddyWorkflowConfig1.seqType,
+                pipeline      : roddyWorkflowConfig1.pipeline,
+                configVersion : roddyWorkflowConfig1.configVersion,
+                programVersion: roddyWorkflowConfig1.programVersion,
         ], false)
 
         assert roddyWorkflowConfig2.validate()
@@ -164,12 +164,12 @@ class RoddyWorkflowConfigUnitTests {
         )
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
-                pluginVersion: roddyWorkflowConfig1.pluginVersion,
-                configVersion: roddyWorkflowConfig1.configVersion,
-                individual: roddyWorkflowConfig1.individual,
+                project       : roddyWorkflowConfig1.project,
+                seqType       : roddyWorkflowConfig1.seqType,
+                pipeline      : roddyWorkflowConfig1.pipeline,
+                programVersion: roddyWorkflowConfig1.programVersion,
+                configVersion : roddyWorkflowConfig1.configVersion,
+                individual    : roddyWorkflowConfig1.individual,
         ], false)
 
         TestCase.assertValidateError(roddyWorkflowConfig2, "configVersion", "validator.invalid", roddyWorkflowConfig2.configVersion)
@@ -180,12 +180,12 @@ class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
-                project: roddyWorkflowConfig1.project,
-                seqType: roddyWorkflowConfig1.seqType,
-                pipeline: roddyWorkflowConfig1.pipeline,
-                pluginVersion: roddyWorkflowConfig1.pluginVersion,
-                configVersion: roddyWorkflowConfig1.configVersion,
-                individual: DomainFactory.createIndividual(project: roddyWorkflowConfig1.project),
+                project       : roddyWorkflowConfig1.project,
+                seqType       : roddyWorkflowConfig1.seqType,
+                pipeline      : roddyWorkflowConfig1.pipeline,
+                programVersion: roddyWorkflowConfig1.programVersion,
+                configVersion : roddyWorkflowConfig1.configVersion,
+                individual    : DomainFactory.createIndividual(project: roddyWorkflowConfig1.project),
         ], false)
 
         assert roddyWorkflowConfig2.validate()
@@ -275,7 +275,7 @@ class RoddyWorkflowConfigUnitTests {
     @Test
     void testGetNameUsedInConfig_withConfigVersion_shouldBeCorrect() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.seqType.roddyName}_${roddyWorkflowConfig.seqType.libraryLayout}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
+        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.seqType.roddyName}_${roddyWorkflowConfig.seqType.libraryLayout}_${roddyWorkflowConfig.programVersion}_${roddyWorkflowConfig.configVersion}"
 
         assert expected == roddyWorkflowConfig.nameUsedInConfig
     }
@@ -316,7 +316,7 @@ class RoddyWorkflowConfigUnitTests {
     void testValidateConfig_shouldFailForPluginVersionInName() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
-        roddyWorkflowConfig.pluginVersion = "plugin:invalid"
+        roddyWorkflowConfig.programVersion = "plugin:invalid"
         RoddyWorkflowConfigService service = createService()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, 'plugin:invalid') {

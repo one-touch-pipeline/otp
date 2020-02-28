@@ -109,8 +109,8 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.plugin.version"/></td>
-                    <td><g:textField name="pluginVersion" value="${pluginVersion}"/></td>
-                    <td>${defaultPluginVersion}</td>
+                    <td><g:textField name="programVersion" value="${programVersion}"/></td>
+                    <td>${defaultProgramVersion}</td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>

@@ -29,13 +29,14 @@ It also displays the total available amount of processable objects.
 The overview lists alignment and analysis pipelines in one table. The numbers reflect MergingWorkPackages and SamplePairs respectively.
 */
 
-import java.util.regex.Matcher
 import groovy.transform.TupleConstructor
-import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
+import java.util.regex.Matcher
 
 // Input Area
 
@@ -389,21 +390,7 @@ String parseVersionFromString(String versionString) {
 }
 
 String getVersion(ConfigPerProjectAndSeqType config, String identifier) {
-    if (config == null) {
-        return "${Globals.UNVERSIONED_PREFIX} ${identifier}"
-    }
-    switch (Hibernate.getClass(config)) {
-        case RoddyWorkflowConfig:
-            return config.pluginVersion
-        case RunYapsaConfig:
-            return config.programVersion
-        case CellRangerConfig:
-            return config.programVersion
-        case SnvConfig:
-            return config.externalScriptVersion
-        default:
-            throw new UnsupportedOperationException("Unhandled CPPAS subclass '${config.class.simpleName}', add it to the switch!")
-    }
+    return config?.programVersion ?: "${Globals.UNVERSIONED_PREFIX} ${identifier}"
 }
 
 @TupleConstructor

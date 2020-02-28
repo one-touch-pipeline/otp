@@ -45,10 +45,10 @@ trait ConfigurePipelineHelper {
             hasErrors = cmd.hasErrors()
             boolean duplicateConfigVersion = false
             RoddyWorkflowConfig.findAllWhere([
-                    project      : cmd.project,
-                    seqType      : cmd.seqType,
-                    pipeline     : pipeline,
-                    pluginVersion: "${cmd.pluginName}:${cmd.pluginVersion}",
+                    project       : cmd.project,
+                    seqType       : cmd.seqType,
+                    pipeline      : pipeline,
+                    programVersion: "${cmd.pluginName}:${cmd.programVersion}",
             ]).each {
                 if (it.configVersion == cmd.config) {
                     duplicateConfigVersion = true
@@ -68,7 +68,7 @@ trait ConfigurePipelineHelper {
                     message          : message,
                     hasErrors        : hasErrors,
                     pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
+                    programVersion   : cmd.programVersion,
                     baseProjectConfig: cmd.baseProjectConfig,
                     config           : cmd.config,
             ]

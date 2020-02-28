@@ -40,12 +40,12 @@ class RoddyWorkflowConfigService {
     WorkflowConfigService workflowConfigService
 
     @SuppressWarnings('Println') //The method is written for scripts, so it needs the output in stdout
-    void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath,
+    void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
                                              String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
         assert individual : "The individual is not allowed to be null"
 
         RoddyBamFile.withTransaction {
-            importProjectConfigFile(project, seqType, pluginVersionToUse, pipeline, configFilePath, configVersion, adapterTrimmingNeeded, individual)
+            importProjectConfigFile(project, seqType, programVersionToUse, pipeline, configFilePath, configVersion, adapterTrimmingNeeded, individual)
 
             List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
                 eq('seqType', seqType)
@@ -66,12 +66,12 @@ class RoddyWorkflowConfigService {
         }
     }
 
-    RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath,
+    RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
                                                 String configVersion, boolean adapterTrimmingNeeded = false, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
-        assert pluginVersionToUse: "The pluginVersionToUse is not allowed to be null"
+        assert programVersionToUse: "The programVersionToUse is not allowed to be null"
         assert configFilePath : "The configFilePath is not allowed to be null"
         assert configVersion : "The configVersion is not allowed to be null"
 
@@ -82,12 +82,12 @@ class RoddyWorkflowConfigService {
                 seqType: seqType,
                 pipeline: pipeline,
                 configFilePath: configFilePath,
-                pluginVersion: pluginVersionToUse,
+                programVersion: programVersionToUse,
                 previousConfig: roddyWorkflowConfig,
                 configVersion: configVersion,
                 individual: individual,
                 adapterTrimmingNeeded: adapterTrimmingNeeded,
-                nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, pluginVersionToUse, configVersion)
+                nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersionToUse, configVersion)
         )
         validateConfig(config)
         workflowConfigService.createConfigPerProjectAndSeqType(config)
@@ -109,8 +109,8 @@ class RoddyWorkflowConfigService {
         assert configPerProjectAndSeqType.save(flush: true)
     }
 
-    String formatPluginVersion(String pluginName, String pluginVersion) {
-        return (String) "${pluginName}:${pluginVersion}"
+    String formatPluginVersion(String pluginName, String programVersion) {
+        return (String) "${pluginName}:${programVersion}"
     }
 
     void validateConfig(RoddyWorkflowConfig config) {
@@ -128,7 +128,7 @@ class RoddyWorkflowConfigService {
         String pattern = /^${patternHelper.join("_")}\.xml$/
         Matcher matcher = configFile.fileName.toString() =~ pattern
         assert matcher.matches(): "The file name '${configFile.toString()}' does not match the pattern '${pattern}'"
-        assert config.pluginVersion.endsWith(":${matcher.group(1)}")
+        assert config.programVersion.endsWith(":${matcher.group(1)}")
         def configuration = new XmlParser().parseText(configFile.text)
         assert configuration.@name == config.getNameUsedInConfig()
         if (config.individual) {

@@ -35,7 +35,7 @@ class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipel
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    WithProgramVersion getLatestConfig(Project project, SeqType seqType) {
+    ConfigPerProjectAndSeqType getLatestConfig(Project project, SeqType seqType) {
         return projectService.getLatestRunYapsaConfig(project, seqType)
     }
 

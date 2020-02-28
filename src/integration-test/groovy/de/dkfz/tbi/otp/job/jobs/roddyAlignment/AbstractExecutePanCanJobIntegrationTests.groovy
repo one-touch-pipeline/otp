@@ -163,7 +163,7 @@ class AbstractExecutePanCanJobIntegrationTests {
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_NormalPriority_AllFine() {
         setupData()
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
     }
 
     @Test
@@ -171,7 +171,7 @@ class AbstractExecutePanCanJobIntegrationTests {
         setupData()
         roddyBamFile.project.processingPriority = ProcessingPriority.MINIMUM.priority
         roddyBamFile.project.save(flush: true)
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
     }
 
     @Test
@@ -179,7 +179,7 @@ class AbstractExecutePanCanJobIntegrationTests {
         setupData()
         roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         roddyBamFile.project.save(flush: true)
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
     }
 
     @Test
@@ -187,7 +187,7 @@ class AbstractExecutePanCanJobIntegrationTests {
         setupData()
         roddyBamFile.project.processingPriority = (ProcessingPriority.FAST_TRACK.priority + 10) as short
         roddyBamFile.project.save(flush: true)
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
     }
 
     void testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(String additionalImports) {
@@ -197,11 +197,11 @@ class AbstractExecutePanCanJobIntegrationTests {
         String expectedCmd = """
 ${roddyCommand} rerun \
 ${roddyBamFile.pipeline.name}_${roddyBamFile.seqType.roddyName}_${roddyBamFile.seqType.libraryLayout}_\
-${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
+${roddyBamFile.config.programVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --usefeaturetoggleconfig=${featureTogglesConfigPath} \
---usePluginVersion=${roddyBamFile.config.pluginVersion} \
+--usePluginVersion=${roddyBamFile.config.programVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},${roddyBaseConfigsPath}/resource/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
 --additionalImports=${additionalImports} \

@@ -47,6 +47,15 @@ abstract class ConfigPerProjectAndSeqType implements Entity {
      * When changes appear in the configuration, a new ConfigPerProjectAndSeqType entry is created and the old entry is set to obsolete.
      */
     Date obsoleteDate
+
+    /**
+     * The version of the external program.
+     *
+     * For Roddy configurations this contains the plugin version in the Roddy expected naming
+     * format, e.g.: IndelCallingWorkflow:1.0.176-8 and is used for the parameter --usePluginVersion
+     */
+    String programVersion
+
     /**
      * When a previous config files exists, it should be referred here.
      * This is needed for tracking.
@@ -54,14 +63,15 @@ abstract class ConfigPerProjectAndSeqType implements Entity {
     ConfigPerProjectAndSeqType previousConfig
 
     static constraints = {
-        previousConfig nullable: true, validator: { val, obj ->
-            return (val == null || val != null && val.obsoleteDate != null)
-        }
-        obsoleteDate nullable: true
         seqType nullable: true, //needs to be nullable because of old data, should never be null for new data
                 validator: { val, obj ->
                     obj.obsoleteDate ? true : val != null
                 }
+        obsoleteDate nullable: true
+        programVersion blank: false
+        previousConfig nullable: true, validator: { val, obj ->
+            return (val == null || val != null && val.obsoleteDate != null)
+        }
     }
 
     static mapping = {

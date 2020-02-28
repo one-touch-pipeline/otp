@@ -297,13 +297,13 @@ class ProjectConfigController implements CheckAndCall {
                     RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
             if (pipeline.type == Pipeline.Type.SNV && snvConfig) {
                 row.add("Yes")
-                row.add(snvConfig.externalScriptVersion)
+                row.add(snvConfig.programVersion)
             } else if (pipeline.name == Pipeline.Name.RUN_YAPSA && runYapsaConfig) {
                 row.add("Yes")
                 row.add(runYapsaConfig.programVersion)
             } else if (pipeline.usesRoddy() && roddyWorkflowConfig) {
                 row.add("Yes")
-                row.add(roddyWorkflowConfig.pluginVersion)
+                row.add(roddyWorkflowConfig.programVersion)
             } else {
                 row.add("No")
                 row.add("-")

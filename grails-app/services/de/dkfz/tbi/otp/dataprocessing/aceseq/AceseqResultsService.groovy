@@ -29,11 +29,6 @@ import de.dkfz.tbi.otp.utils.FormatHelper
 class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance> {
 
     @Override
-    String getVersionAttributeName() {
-        "pluginVersion"
-    }
-
-    @Override
     Class<AceseqInstance> getInstanceClass() {
         AceseqInstance
     }

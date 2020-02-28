@@ -47,11 +47,14 @@ class ConfigPerProjectAndSeqTypeSpec extends Specification implements DataTest {
         ]
     }
 
+    static final String PROGRAM_VERSION = "programVersion"
+
     void testSaveWithoutProject_shouldFail() {
         given:
         ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeMock(
-                pipeline: DomainFactory.createIndelPipelineLazy(),
-                seqType: DomainFactory.createSeqType(),
+                pipeline      : DomainFactory.createIndelPipelineLazy(),
+                seqType       : DomainFactory.createSeqType(),
+                programVersion: PROGRAM_VERSION,
         )
 
         expect:
@@ -68,10 +71,11 @@ class ConfigPerProjectAndSeqTypeSpec extends Specification implements DataTest {
     void testSaveWithObsoleteDate() {
         given:
         ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeMock(
-                project: DomainFactory.createProject(),
-                obsoleteDate: new Date(),
-                pipeline: DomainFactory.createIndelPipelineLazy(),
-                seqType: DomainFactory.createSeqType(),
+                project       : DomainFactory.createProject(),
+                obsoleteDate  : new Date(),
+                pipeline      : DomainFactory.createIndelPipelineLazy(),
+                seqType       : DomainFactory.createSeqType(),
+                programVersion: PROGRAM_VERSION,
         )
 
         when:
@@ -84,9 +88,10 @@ class ConfigPerProjectAndSeqTypeSpec extends Specification implements DataTest {
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
         given:
         ConfigPerProjectAndSeqType validConfigPerProject = new ConfigPerProjectAndSeqTypeMock(
-                project: DomainFactory.createProject(),
-                seqType: DomainFactory.createSeqType(),
-                pipeline: DomainFactory.createIndelPipelineLazy(),
+                project       : DomainFactory.createProject(),
+                seqType       : DomainFactory.createSeqType(),
+                pipeline      : DomainFactory.createIndelPipelineLazy(),
+                programVersion: PROGRAM_VERSION,
         )
 
         expect:
@@ -94,10 +99,11 @@ class ConfigPerProjectAndSeqTypeSpec extends Specification implements DataTest {
 
         when:
         ConfigPerProjectAndSeqType newConfigPerProject = new ConfigPerProjectAndSeqTypeMock(
-                project: DomainFactory.createProject(),
-                seqType: DomainFactory.createSeqType(),
-                pipeline: DomainFactory.createIndelPipelineLazy(),
+                project       : DomainFactory.createProject(),
+                seqType       : DomainFactory.createSeqType(),
+                pipeline      : DomainFactory.createIndelPipelineLazy(),
                 previousConfig: validConfigPerProject,
+                programVersion: PROGRAM_VERSION,
         )
 
         then:

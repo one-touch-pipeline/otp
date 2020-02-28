@@ -46,13 +46,11 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
      * the full path to the config file which is used in this project and pipeline. The name of the config file contains the version number.
      *
      * The file should be located in: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/configFiles/${Pipeline}/
-     * The file should be named as: ${Pipeline}_${seqType.roddyName}_${seqType.libraryLayout}_${PluginVersion}_${configVersion}.xml
+     * The file should be named as: ${Pipeline}_${seqType.roddyName}_${seqType.libraryLayout}_${programVersion}_${configVersion}.xml
      *
      * for example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.0.177_v1_0.xml
      */
     String configFilePath
-
-    String pluginVersion
 
     String configVersion
 
@@ -67,7 +65,6 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
 
     static constraints = {
         configFilePath unique: true, blank: false, shared: "absolutePath"
-        pluginVersion blank: false
         obsoleteDate validator: { val, obj ->
             if (!val) {
                 // This validator asserts that the config is unique for the given properties.
@@ -88,12 +85,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
                 // This validator asserts that the config is unique for the given properties.
                 // Unique constraint can't be used since individual is optional and can be null.
                 Long id = atMostOneElement(RoddyWorkflowConfig.findAllWhere(
-                        project: config.project,
-                        seqType: config.seqType,
-                        pipeline: config.pipeline,
-                        individual: config.individual,
-                        pluginVersion: config.pluginVersion,
-                        configVersion: config.configVersion,
+                        project       : config.project,
+                        seqType       : config.seqType,
+                        pipeline      : config.pipeline,
+                        individual    : config.individual,
+                        programVersion: config.programVersion,
+                        configVersion : config.configVersion,
                 ))?.id
                 !id || id == config.id
             }
@@ -161,8 +158,8 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         ].join("_")
     }
 
-    static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String pluginVersion, String configVersion) {
-        return getNameUsedInConfig(pipelineName, seqType, "${pluginName}:${pluginVersion}", configVersion)
+    static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String programVersion, String configVersion) {
+        return getNameUsedInConfig(pipelineName, seqType, "${pluginName}:${programVersion}", configVersion)
     }
 
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
@@ -186,7 +183,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         return "${getNameUsedInConfig(pipelineName, seqType, pluginNameAndVersion, configVersion)}.xml"
     }
 
-    static File getStandardConfigFile(Project project, Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
-        return new File(getStandardConfigDirectory(project, pipelineName), getConfigFileName(pipelineName, seqType, pluginVersion, configVersion))
+    static File getStandardConfigFile(Project project, Pipeline.Name pipelineName, SeqType seqType, String programVersion, String configVersion) {
+        return new File(getStandardConfigDirectory(project, pipelineName), getConfigFileName(pipelineName, seqType, programVersion, configVersion))
     }
 }

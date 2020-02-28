@@ -772,11 +772,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
+        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndProgramVersionAndObsoleteDateIsNull(
                 configuration.project,
                 configuration.seqType,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
-                "${configuration.pluginName}:${configuration.pluginVersion}"
+                "${configuration.pluginName}:${configuration.programVersion}"
         )
         roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
@@ -803,10 +803,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndProgramVersion(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
-                "${configuration2.pluginName}:${configuration2.pluginVersion}"
+                "${configuration2.pluginName}:${configuration2.programVersion}"
         )
         roddyWorkflowConfigs.size() == 2
         roddyWorkflowConfigs.findAll { it.obsoleteDate == null }.size() == 1
@@ -868,11 +868,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         exception.message ==~ /pluginName '.*' is an invalid path component\..*/
     }
 
-    void "test configurePanCanAlignmentDeciderProject invalid pluginVersion input"() {
+    void "test configurePanCanAlignmentDeciderProject invalid programVersion input"() {
         given:
         setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
-                pluginVersion: 'invalid/version'
+                programVersion: 'invalid/version'
         )
 
         when:
@@ -882,7 +882,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         AssertionError exception = thrown()
-        exception.message ==~ /pluginVersion '.*' is an invalid path component\..*/
+        exception.message ==~ /programVersion '.*' is an invalid path component\..*/
     }
 
     @Unroll
@@ -1058,7 +1058,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 project: Project.findByName("testProjectAlignment"),
                 seqType: SeqTypeService.wholeGenomePairedSeqType,
                 pluginName: 'plugin',
-                pluginVersion: '1.2.3',
+                programVersion: '1.2.3',
                 baseProjectConfig: 'baseConfig',
                 configVersion: 'v1_0',
         )
@@ -1074,11 +1074,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndPluginVersionAndObsoleteDateIsNull(
+        RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndProgramVersionAndObsoleteDateIsNull(
                 configuration.project,
                 configuration.seqType,
                 Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline,
-                "${configuration.pluginName}:${configuration.pluginVersion}"
+                "${configuration.pluginName}:${configuration.programVersion}"
         ))
         File roddyWorkflowConfigFile = new File(roddyWorkflowConfig.configFilePath)
         roddyWorkflowConfigFile.exists()
@@ -1180,10 +1180,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
+        RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndProgramVersionAndObsoleteDateIsNull(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
-                "${configuration.pluginName}:${configuration.pluginVersion}"
+                "${configuration.pluginName}:${configuration.programVersion}"
         ).size() == 1
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
     }
@@ -1308,23 +1308,23 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Project baseProject = createProject(realm: realm)
         Project targetProject = createProject(realm: realm)
 
-        String pluginName = "pluginVersion"
-        String pluginVersion = "1.1.51"
+        String pluginName = "programVersion"
+        String programVersion = "1.1.51"
         String configVersion = "v1_2"
 
-        File baseXmlConfigFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_${pluginVersion}_${configVersion}.xml")
-        CreateFileHelper.createRoddyWorkflowConfig(baseXmlConfigFile, "PANCAN_ALIGNMENT_WES_PAIRED_${pluginName}:${pluginVersion}_${configVersion}")
+        File baseXmlConfigFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_${programVersion}_${configVersion}.xml")
+        CreateFileHelper.createRoddyWorkflowConfig(baseXmlConfigFile, "PANCAN_ALIGNMENT_WES_PAIRED_${pluginName}:${programVersion}_${configVersion}")
 
         Pipeline pipeline = Pipeline.findByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT)
         assert pipeline: "Pipeline could not be found"
 
         DomainFactory.createRoddyWorkflowConfig(
-                project: baseProject,
-                seqType: seqType,
-                pipeline: pipeline,
+                project       : baseProject,
+                seqType       : seqType,
+                pipeline      : pipeline,
                 configFilePath: baseXmlConfigFile,
-                pluginVersion: "${pluginName}:${pluginVersion}",
-                configVersion: configVersion,
+                programVersion: "${pluginName}:${programVersion}",
+                configVersion : configVersion,
         )
 
         DomainFactory.createReferenceGenomeProjectSeqType(
@@ -1389,11 +1389,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
+        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndProgramVersionAndObsoleteDateIsNull(
                 configuration.project,
                 configuration.seqType,
                 Pipeline.findAllByTypeAndName(Pipeline.Type."${analysisName.toUpperCase()}", Pipeline.Name."RODDY_${analysisName.toUpperCase()}"),
-                "${configuration.pluginName}:${configuration.pluginVersion}"
+                "${configuration.pluginName}:${configuration.programVersion}"
         )
         roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
@@ -1439,10 +1439,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndProgramVersion(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type."${analysisName.toUpperCase()}", Pipeline.Name."RODDY_${analysisName.toUpperCase()}"),
-                "${configuration2.pluginName}:${configuration2.pluginVersion}"
+                "${configuration2.pluginName}:${configuration2.programVersion}"
         )
         roddyWorkflowConfigs.size() == 2
         roddyWorkflowConfigs.findAll { it.obsoleteDate == null }.size() == 1
@@ -1478,10 +1478,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndProgramVersion(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.SNV, Pipeline.Name.RODDY_SNV),
-                "${configuration2.pluginName}:${configuration2.pluginVersion}"
+                "${configuration2.pluginName}:${configuration2.programVersion}"
         )
         roddyWorkflowConfigs.size() == 1
         roddyWorkflowConfigs[0].obsoleteDate == null
@@ -1545,11 +1545,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @Unroll
-    void "test configure #analysisName pipelineProject invalid pluginVersion input"() {
+    void "test configure #analysisName pipelineProject invalid programVersion input"() {
         given:
         setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
-                pluginVersion: 'invalid/version'
+                programVersion: 'invalid/version'
         )
 
         when:
@@ -1559,7 +1559,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         AssertionError exception = thrown()
-        exception.message ==~ /pluginVersion '.*' is an invalid path component\..*/
+        exception.message ==~ /programVersion '.*' is an invalid path component\..*/
 
         where:
         analysisName << [
@@ -1698,7 +1698,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 sambambaVersion      : "sambamba",
                 mergeTool            : MergeConstants.MERGE_TOOL_PICARD,
                 pluginName           : 'plugin',
-                pluginVersion        : '1.2.3',
+                programVersion       : '1.2.3',
                 baseProjectConfig    : 'baseConfig',
                 configVersion        : 'v1_0',
                 adapterTrimmingNeeded: true,
@@ -1742,7 +1742,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'SNVCallingWorkflow',
-                pluginVersion    : '1.0.166-1',
+                programVersion   : '1.0.166-1',
                 baseProjectConfig: 'otpSNVCallingWorkflowWES-1.0',
                 configVersion    : 'v1_0',
         ] + properties)
@@ -1757,7 +1757,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'IndelCallingWorkflow',
-                pluginVersion    : '1.0.166-1',
+                programVersion   : '1.0.166-1',
                 baseProjectConfig: 'otpIndelCallingWorkflowWES-1.0',
                 configVersion    : 'v1_0',
         ] + properties)
@@ -1772,7 +1772,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'SophiaWorkflow',
-                pluginVersion    : '1.0.14',
+                programVersion   : '1.0.14',
                 baseProjectConfig: 'otpSophia-1.0',
                 configVersion    : 'v1_0',
         ] + properties)
@@ -1787,7 +1787,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'ACEseqWorkflow',
-                pluginVersion    : '1.2.6',
+                programVersion   : '1.2.6',
                 baseProjectConfig: 'otpACEseq-1.0',
                 configVersion    : 'v1_0',
         ] + properties)

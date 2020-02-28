@@ -1228,11 +1228,11 @@ class DomainFactory {
     @Deprecated
     static SnvConfig createSnvConfig(Map properties = [:]) {
         return createDomainObject(SnvConfig, [
-                configuration        : "configuration_${counter++}",
-                externalScriptVersion: "1.0",
-                seqType              : { createSeqType() },
-                project              : { createProject() },
-                pipeline             : { createOtpSnvPipelineLazy() },
+                configuration : "configuration_${counter++}",
+                programVersion: "1.0",
+                seqType       : { createSeqType() },
+                project       : { createProject() },
+                pipeline      : { createOtpSnvPipelineLazy() },
         ], properties)
     }
 
@@ -1804,21 +1804,21 @@ class DomainFactory {
     static private Map createRoddyWorkflowConfigMapHelper(Map properties = [:]) {
         Pipeline pipeline = properties.containsKey('pipeline') ? properties.pipeline : createPanCanPipeline()
         SeqType seqType = properties.containsKey('seqType') ? properties.seqType : createWholeGenomeSeqType()
-        String pluginVersion = properties.containsKey('pluginVersion') ? properties.pluginVersion : "pluginVersion:1.1.${counter++}"
+        String programVersion = properties.containsKey('programVersion') ? properties.programVersion : "programVersion:1.1.${counter++}"
         String configVersion = properties.containsKey('configVersion') ? properties.configVersion : "v1_${counter++}"
         return [
                 pipeline             : pipeline,
                 seqType              : seqType,
                 configFilePath       : {
-                    "${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"
+                    "${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${programVersion.substring(programVersion.indexOf(':') + 1)}_${configVersion}.xml"
                 },
-                pluginVersion        : pluginVersion,
+                programVersion       : programVersion,
                 configVersion        : configVersion,
                 project              : { properties.individual?.project ?: createProject() },
                 dateCreated          : { new Date() },
                 lastUpdated          : { new Date() },
                 adapterTrimmingNeeded: { seqType.isWgbs() || seqType.isRna() || seqType.isChipSeq() },
-                nameUsedInConfig     : RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, pluginVersion, configVersion)
+                nameUsedInConfig     : RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersion, configVersion)
         ]
     }
 

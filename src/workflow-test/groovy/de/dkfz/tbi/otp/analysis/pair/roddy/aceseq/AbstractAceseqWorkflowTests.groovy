@@ -74,7 +74,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                             project          : project,
                             seqType          : seqType,
                             pluginName       : processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME),
-                            pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
+                            programVersion   : processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
                             baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
                             configVersion    : 'v1_0',
                             resources        : 't',

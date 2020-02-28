@@ -175,7 +175,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The pipeline is not allowed to be null')
     }
 
-    void "test importProjectConfigFile fails when pluginVersionToUse is null"() {
+    void "test importProjectConfigFile fails when programVersionToUse is null"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -187,7 +187,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
 
         then:
         AssertionError e = thrown()
-        e.message.contains('The pluginVersionToUse is not allowed to be null')
+        e.message.contains('The programVersionToUse is not allowed to be null')
     }
 
     void "test importProjectConfigFile fails when configFilePath is null"() {
@@ -237,7 +237,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyWorkflowConfig.seqType == seqType
         roddyWorkflowConfig.pipeline == pipeline
         roddyWorkflowConfig.configFilePath == configFile.path
-        roddyWorkflowConfig.pluginVersion == TEST_RODDY_PLUGIN_VERSION
+        roddyWorkflowConfig.programVersion == TEST_RODDY_PLUGIN_VERSION
         roddyWorkflowConfig.previousConfig == null
         roddyWorkflowConfig.configVersion == DomainFactory.TEST_CONFIG_VERSION
         roddyWorkflowConfig.individual == null
@@ -270,7 +270,13 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
-        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(project: project, seqType: seqType, pipeline: pipeline, pluginVersion: TEST_RODDY_PLUGIN_VERSION_2, configVersion: DomainFactory.TEST_CONFIG_VERSION)
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
+                project: project,
+                seqType: seqType,
+                pipeline: pipeline,
+                programVersion: TEST_RODDY_PLUGIN_VERSION_2,
+                configVersion: DomainFactory.TEST_CONFIG_VERSION
+        )
         assert RoddyWorkflowConfig.list().size() == 1
 
         when:
@@ -278,7 +284,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
 
         then:
         RoddyWorkflowConfig.list().size() == 2
-        RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByPluginVersion(TEST_RODDY_PLUGIN_VERSION))
+        RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByProgramVersion(TEST_RODDY_PLUGIN_VERSION))
         roddyWorkflowConfig2.previousConfig == roddyWorkflowConfig1
         roddyWorkflowConfig1.obsoleteDate
     }

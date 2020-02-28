@@ -39,7 +39,7 @@ String individualPid = ''
 
 //The roddy plugin version. It needs to be a valid value for Roddy.
 //For example: AlignmentAndQCWorkflows:1.1.39
-String pluginVersionToUse = ''
+String programVersionToUse = ''
 
 
 //The config version used. Has to be match the expression: '^v\d+_\d+$'
@@ -75,7 +75,7 @@ RoddyWorkflowConfigService roddyWorkflowConfigService = ctx.roddyWorkflowConfigS
 
 LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     assert projectName
-    assert pluginVersionToUse
+    assert programVersionToUse
     assert configFilePath
     assert seqTypeRoddyName
     assert libraryLayout
@@ -96,7 +96,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
         roddyWorkflowConfigService.importProjectConfigFile(
                 project,
                 seqType,
-                pluginVersionToUse,
+                programVersionToUse,
                 pipeline,
                 configFilePath,
                 configVersion,
@@ -107,7 +107,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
         roddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(
                 project,
                 seqType,
-                pluginVersionToUse,
+                programVersionToUse,
                 pipeline,
                 configFilePath,
                 configVersion,

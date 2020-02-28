@@ -142,18 +142,13 @@ $.otp.projectConfig = {
      * @param data holds the data that have been loaded
      */
     createAlignmentTable: function (data) {
-        var aligning = "Aligning";
-        var merging = "Merging";
-        var samtools = "Samtools";
-        var roddyPipelineVersion = "Roddy Pipeline Version";
-
         $.each(data.alignmentInfo, function (key, value) {
             $('#alignment_info_table tr:last').after(
                 '<tr><td colspan="3"><strong>' + key + '</strong></td></tr>' +
-                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + aligning + '<td>' + value.alignmentProgram + '</td><td>' + value.alignmentParameter + '</td></tr>' +
-                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + merging + '</td><td>' + value.mergeCommand + '</td><td>' + value.mergeOptions + '</td></tr>' +
-                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
-                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + roddyPipelineVersion + '</td><td>' + value.pluginVersion + '</td><td></td></tr>');
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>Aligning<td>' + value.alignmentProgram + '</td><td>' + value.alignmentParameter + '</td></tr>' +
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>Merging</td><td>' + value.mergeCommand + '</td><td>' + value.mergeOptions + '</td></tr>' +
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>Samtools</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>Roddy Pipeline Version</td><td>' + value.programVersion + '</td><td></td></tr>');
         });
     }
 };

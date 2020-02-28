@@ -62,7 +62,7 @@ println IndelCallingInstance.executeQuery(sql.toString()).groupBy(
                     analysis.seqType
                 },
                 { BamFilePairAnalysis analysis ->
-                    analysis.config.pluginVersion
+                    analysis.config.programVersion
                 }
 
         ]
@@ -71,9 +71,9 @@ println IndelCallingInstance.executeQuery(sql.toString()).groupBy(
             map1.collect { Project project, Map map2 ->
                 "    ${project}\n" +
                         map2.collect { SeqType seqType, Map map3 ->
-                            "        ${seqType.displayNameWithLibraryLayout} (${RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)?.pluginVersion})\n" +
-                                    map3.collect { String pluginVersion, List list ->
-                                        "            ${pluginVersion}: ${list.size()}".toString()
+                            "        ${seqType.displayNameWithLibraryLayout} (${RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)?.programVersion})\n" +
+                                    map3.collect { String programVersion, List list ->
+                                        "            ${programVersion}: ${list.size()}".toString()
                                     }.sort().join('\n')
                         }.sort().join('\n')
             }.sort().join('\n\n')

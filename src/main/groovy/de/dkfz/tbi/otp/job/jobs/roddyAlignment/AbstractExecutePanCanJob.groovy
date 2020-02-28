@@ -106,9 +106,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
         String fasttrack = (roddyResult.processingPriority >= ProcessingPriority.FAST_TRACK.priority) ?
                 "-fasttrack"
                 : ""
-        String pluginVersion = roddyResult.config.pluginVersion
+        String programVersion = roddyResult.config.programVersion
         String seqType = roddyResult.seqType.roddyName.toLowerCase()
-        return "--additionalImports=${pluginVersion}-${seqType}${fasttrack}"
+        return "--additionalImports=${programVersion}-${seqType}${fasttrack}"
     }
 
     String prepareAndReturnCValues(R roddyResult) {

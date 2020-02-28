@@ -40,16 +40,16 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
     void "execute roddy, roddy call succeeds, no cluster jobs sent, roddy job failed and successfully restarted"() {
         given:
         RoddyWorkflowConfig config
-        String pluginVersion
+        String programVersion
         SessionUtils.withNewSession {
             createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
             config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
-            pluginVersion = config.pluginVersion
+            programVersion = config.programVersion
 
             // setting not existing plugin must make roddy exit without sending any cluster jobs
-            config.pluginVersion = HelperUtils.getUniqueString()
+            config.programVersion = HelperUtils.getUniqueString()
             config.save(flush: true)
         }
 
@@ -63,7 +63,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         when:
         SessionUtils.withNewSession {
             config.refresh()
-            config.pluginVersion = pluginVersion
+            config.programVersion = programVersion
             config.save(flush: true)
             restartWorkflowFromFailedStep()
         }

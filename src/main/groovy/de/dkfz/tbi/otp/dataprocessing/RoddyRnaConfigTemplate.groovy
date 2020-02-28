@@ -30,7 +30,7 @@ class RoddyRnaConfigTemplate {
     static String createConfig(RoddyConfiguration rnaAlignmentConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType="project"
-               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.pluginName, rnaAlignmentConfiguration.pluginVersion, rnaAlignmentConfiguration.configVersion)}"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.pluginName, rnaAlignmentConfiguration.programVersion, rnaAlignmentConfiguration.configVersion)}"
                description="Project configuration for ${rnaAlignmentConfiguration.seqType.roddyName} in OTP."
                imports="${rnaAlignmentConfiguration.baseProjectConfig}">
     <subconfigurations>

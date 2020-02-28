@@ -44,7 +44,7 @@
                             'aceseq.goodnessOfFit',
                             'aceseq.gender',
                             'aceseq.solutionPossible',
-                            'analysis.pluginVersion',
+                            'analysis.programVersion',
                             'analysis.processingDate',
                             'analysis.progress',
                             'analysis.plots',

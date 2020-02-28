@@ -33,7 +33,7 @@ select
     pipeline.name,
     project.name,
     realm.jobScheduler,
-    config.pluginVersion,
+    config.programVersion,
     count(analysis.id) as count
 from
     BamFilePairAnalysis analysis
@@ -62,7 +62,7 @@ group by
     pipeline.name,
     project.name,
     realm.jobScheduler,
-    config.pluginVersion
+    config.programVersion
 
 """
 

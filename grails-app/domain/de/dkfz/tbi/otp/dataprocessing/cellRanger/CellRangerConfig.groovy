@@ -25,10 +25,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class CellRangerConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion, AlignmentConfig {
+class CellRangerConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
     static constraints = {
-        programVersion(blank: false)
         obsoleteDate validator: { val, obj ->
             if (!val) {
                 CellRangerConfig cellRangerConfig = atMostOneElement(CellRangerConfig.findAllWhere(
