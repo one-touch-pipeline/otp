@@ -23,11 +23,11 @@
 <html>
 <head>
     <meta name="layout" content="info"/>
-    <title><g:message code="info.about.title" /></title>
+    <title><g:message code="otp.title.short"/></title>
 </head>
 
 <body>
-    <h1><g:message code="info.about.title" /></h1>
+    <h1><g:message code="info.about.header"/></h1>
     <p class="keep-whitespace">${raw(aboutOtp)}</p>
 </body>
 </html>
