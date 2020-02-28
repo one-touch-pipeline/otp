@@ -409,6 +409,32 @@ input[type=text] {
     position: relative;
     top: 0.1em;
 }
+/* **HACK**
+ * Normally one shouldn't tie one-self so closely to dependency-internal CSS classes, but...
+ * The select2 library ships a theme that has an incredibly-specific CSS selector, that makes the selection-test gray,
+ * and looks *exactly* like OTP's "disabled" style, for the active element.
+ * This default style cannot be disabled except by re-implementing the select2 theme file.
+ *
+ * Workaround: ship an even-more-selective selector, that overrides the color-property from the theme-file.
+ * We make it more selective by repeating our own 'select-2-otp-theme' class. In CSS priority-math, a single level with two class-specifications on it
+ * (which happen to be identical, but CSS doesn't care about that), is more specific than an entire hierarchy of select2 nested styles.
+ * Unfortunately, we MUST then specify the class of the exact element we want to override ("__rendered"), because Select2 does so too.
+ */
+.select2-container {
+    // active
+    .select-2-otp-theme.select-2-otp-theme .select2-selection__rendered {
+        color: #333;
+    }
+
+    // disabled
+    &.select2-container--disabled .select-2-otp-theme.select-2-otp-theme {
+        background-color: #f6f5f4;
+        .select2-selection__rendered {
+            color: #aaa;
+        }
+    }
+}
+
 /* EMBEDDED PROPERTIES */
 fieldset.embedded {
     .no-box-shadow;
@@ -488,15 +514,20 @@ tr {
     }
 }
 
-input.threshold {
-    width: 40px;
-}
-select.threshold {
-    width: 100%;
-}
-
-span.defaultThreshold {
-    color: #888;
+.threshold-table {
+    input.threshold {
+        width: 8ch;
+    }
+    select.threshold {
+        width: 100%;
+    }
+    // 'other property' column
+    th:nth-child(8) {
+        width: 50ch;
+    }
+    span.defaultThreshold {
+        color: #888;
+    }
 }
 
 tr>td:first-child, tr>th:first-child {

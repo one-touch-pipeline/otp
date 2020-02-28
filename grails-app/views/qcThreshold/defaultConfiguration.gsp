@@ -34,7 +34,7 @@
 
     <div>
         <h1>${g.message(code: "qcThreshold.title")}</h1>
-        <table>
+        <table class="threshold-table">
 
             <g:each in="${classesWithProperties}" var="cl">
                 <thead>

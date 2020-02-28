@@ -35,8 +35,8 @@
     <div>
         <h1>${g.message(code: "qcThreshold.title2", args: [selectedProject.name])}</h1>
         <otp:annotation type="info">${g.message(code: "qcThreshold.noticeProject")}</otp:annotation>
-        <table>
 
+        <table class="threshold-table">
             <g:each in="${classesWithProperties}" var="cl">
                 <thead>
                 <tr class="intermediateHeader"><td colspan="9"><h2>${cl.clasz.simpleName}</h2></td></tr>
@@ -54,9 +54,9 @@
                     <th></th>
                 </tr>
                 </thead>
+
                 <tbody>
                 <g:each in="${cl.existingThresholds}" var="v">
-
                     <otp:editTable>
                         <td>${v.property}</td>
                         <td>${v.seqType?.displayNameWithLibraryLayout ?: "All sequencing types"}</td>
@@ -205,6 +205,7 @@
                         </td>
                     </otp:editTable>
                 </g:each>
+
                 <g:form action="create">
                     <input type="hidden" name="className" value="${cl.clasz.simpleName}"/>
                     <input type="hidden" name="project.id" value="${selectedProject.id}"/>

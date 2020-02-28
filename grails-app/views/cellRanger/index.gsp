@@ -40,13 +40,13 @@
                 <div class="cell-ranger-selection-grid-wrapper">
                     <div>
                         <strong>${g.message(code: "cellRanger.individual")}:</strong><br>
-                        <g:select class="use-select-2"
+                        <g:select class="use-select-2" style="min-width: 35ch;"
                                   name="individual.id" from="${allIndividuals}" optionKey="id" value="${individual?.id}"
                                   noSelection="${[(""): "All Individuals"]}" onChange="submit()"/>
                     </div>
                     <div>
                         <strong>${g.message(code: "cellRanger.sampleType")}:</strong><br>
-                        <g:select class="use-select-2"
+                        <g:select class="use-select-2" style="min-width: 35ch;"
                                   name="sampleType.id" from="${allSampleTypes}" optionKey="id" value="${sampleType?.id}"
                                   noSelection="${[(""): "All Sample Types"]}" onChange="submit()"/>
                     </div>

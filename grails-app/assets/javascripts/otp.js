@@ -395,7 +395,24 @@ $.otp.tableButtons = [
  */
 $.otp.applySelect2 = function (jqSelection) {
     jqSelection.select2({
-        minimumResultsForSearch: 10
+        minimumResultsForSearch: 10,
+
+        /*
+         * Select2 doesn't fully resolve width-properties through complicated style-sheets,
+         * especially when the target element is hidden during document load.
+         * The official fix is to use "width: 'computedstyle'", but this calculates each width
+         * per-item, which makes for sloppy alignment in table-like settings, such as DataTableFilter.
+         * To work around this, items using select2 will often need an explicit `min-width` or `width` attribute
+         * To further enforce certain OTP-styling, we also add the custom 'select-2-otp-theme' to Select2's
+         * generated elements, so we have something to "grab on to" for our own CSS.
+         *
+         * official fix: https://github.com/select2/select2/pull/5559
+         * background: https://github.com/select2/select2/issues/3733
+         *   > "Select2 doesn't inherit styling from the parent elements because the effort involved is pretty intense,
+         *   >  and it's not something we're really interested in implementing."
+         */
+        width: 'computedstyle',
+        containerCssClass: 'select-2-otp-theme'
     });
 };
 

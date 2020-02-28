@@ -23,5 +23,5 @@
 //= require /webjars/jquery/1.11.1/jquery.js
 //= require /webjars/jquery-ui/1.10.4/ui/jquery-ui.js
 //= require jqueryDatatables
-//= require /webjars/select2/4.0.12/js/select2.js
+//= require /webjars/select2/4.0.12/js/select2.full.js
 //= require ../otp
