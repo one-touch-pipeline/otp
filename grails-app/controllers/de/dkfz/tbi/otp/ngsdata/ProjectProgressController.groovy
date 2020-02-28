@@ -40,7 +40,7 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
         if (projects) {
             return projects.split(",") as List
         } else {
-            Project.list()*.name
+            null
         }
     }
 }
@@ -48,19 +48,20 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
 @Secured(['ROLE_OPERATOR'])
 class ProjectProgressController {
 
+    ProjectService projectService
     ProjectProgressService projectProgressService
 
     def progress() {
         [
             startDate: new Date().minus(8).format('yyyy-MM-dd'),
             endDate: new Date().format('yyyy-MM-dd'),
-            projects: Project.list()*.name,
+            projects: projectService.allProjects*.name,
         ]
     }
 
     JSON dataTableSource(ProjectProgressDataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List<Project> projects = projectProgressService.getProjectsFromNameList(cmd.projectNames)
+        List<Project> projects = projectProgressService.getProjectsFromNameList(cmd.projectNames ?: projectService.allProjects*.name)
 
         //the end date is increased by one day, since the check consider also the time
         List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, cmd.endDate.plus(1))

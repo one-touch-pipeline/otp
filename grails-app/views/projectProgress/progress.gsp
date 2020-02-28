@@ -41,8 +41,7 @@
         <g:select class="projectSelectMultiple blue_label"
             name="projects"
             value="${projects}"
-            from="${de.dkfz.tbi.otp.ngsdata.Project.list(sort: "name", order: "asc")}"
-            optionKey="name"
+            from="${projects}"
             multiple="true"
         />
 
