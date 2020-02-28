@@ -61,8 +61,10 @@ class ProjectSelectionInterceptor {
     boolean after() {
         if (model != null && springSecurityService.loggedIn) {
             model.projectSelection = projectSelectionService.selectedProject
+            model.selectedProject = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
             List<Project> allProjects = projectService.allProjects
+            model.availableProjects = allProjects
 
             // projects in groups
             Map<String, List<ProjectSelectionCommand>> availableProjectsInGroups = [:]
