@@ -81,35 +81,76 @@ class ProjectRequestService {
 
     void create(ProjectRequestCreationCommand cmd) {
         ProjectRequest req = new ProjectRequest(
-                name: cmd.name,
-                description: cmd.description,
-                keywords: cmd.keywords as Set,
-                organizationalUnit: cmd.organizationalUnit,
-                costCenter: cmd.costCenter,
-                grantId: cmd.grantId,
-                fundingBody: cmd.fundingBody,
-                endDate: cmd.endDate,
-                storageUntil: cmd.storagePeriod == StoragePeriod.USER_DEFINED ? cmd.storageUntil :
-                        cmd.storagePeriod == StoragePeriod.TEN_YEARS ? LocalDate.now().plusYears(10) :
-                                null,
-                relatedProjects: cmd.relatedProjects,
-                tumorEntity: cmd.tumorEntity,
-                speciesWithStrain: cmd.speciesWithStrain,
-                projectType: cmd.projectType,
-                sequencingCenter: cmd.sequencingCenter,
-                approxNoOfSamples: cmd.approxNoOfSamples,
-                seqTypes: cmd.seqType,
-                comments: cmd.comments,
+                name                        : cmd.name,
+                description                 : cmd.description,
+                keywords                    : cmd.keywords as Set,
+                organizationalUnit          : cmd.organizationalUnit,
+                costCenter                  : cmd.costCenter,
+                grantId                     : cmd.grantId,
+                fundingBody                 : cmd.fundingBody,
+                endDate                     : cmd.endDate,
+                storageUntil                : resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
+                relatedProjects             : cmd.relatedProjects,
+                tumorEntity                 : cmd.tumorEntity,
+                speciesWithStrain           : cmd.speciesWithStrain,
+                projectType                 : cmd.projectType,
+                sequencingCenter            : cmd.sequencingCenter,
+                approxNoOfSamples           : cmd.approxNoOfSamples,
+                seqTypes                    : cmd.seqTypes,
+                comments                    : cmd.comments,
 
-                pi: findOrCreateUsers([cmd.pi]).first(),
-                requester: springSecurityService.currentUser as User,
-                deputyPis: findOrCreateUsers(cmd.deputyPis),
+                pi                          : findOrCreateUsers([cmd.pi]).first(),
+                requester                   : springSecurityService.currentUser as User,
+                deputyPis                   : findOrCreateUsers(cmd.deputyPis),
                 responsibleBioinformaticians: findOrCreateUsers(cmd.responsibleBioinformaticians),
-                bioinformaticians: findOrCreateUsers(cmd.bioinformaticians),
-                submitters: findOrCreateUsers(cmd.submitters),
+                bioinformaticians           : findOrCreateUsers(cmd.bioinformaticians),
+                submitters                  : findOrCreateUsers(cmd.submitters),
         )
         req.save(flush: true)
         sendEmailOnCreation(req)
+    }
+
+    void edit(EditProjectRequestCommand cmd) {
+        ProjectRequest projectRequest = cmd.request
+        projectRequest.with {
+            name                         = cmd.name
+            description                  = cmd.description
+            keywords                     = cmd.keywords as Set
+            organizationalUnit           = cmd.organizationalUnit
+            costCenter                   = cmd.costCenter
+            grantId                      = cmd.grantId
+            fundingBody                  = cmd.fundingBody
+            endDate                      = cmd.endDate
+            storageUntil                 = resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil)
+            relatedProjects              = cmd.relatedProjects
+            tumorEntity                  = cmd.tumorEntity
+            speciesWithStrain            = cmd.speciesWithStrain
+            projectType                  = cmd.projectType
+            sequencingCenter             = cmd.sequencingCenter
+            approxNoOfSamples            = cmd.approxNoOfSamples
+            seqTypes                     = cmd.seqTypes
+            comments                     = cmd.comments
+
+            pi                           = findOrCreateUsers([cmd.pi]).first()
+            deputyPis                    = findOrCreateUsers(cmd.deputyPis)
+            responsibleBioinformaticians = findOrCreateUsers(cmd.responsibleBioinformaticians)
+            bioinformaticians            = findOrCreateUsers(cmd.bioinformaticians)
+            submitters                   = findOrCreateUsers(cmd.submitters)
+        }
+        projectRequest.save(flush: true)
+    }
+
+    private static LocalDate resolveStoragePeriodToLocalDate(StoragePeriod storagePeriod, LocalDate given) {
+        switch (storagePeriod) {
+            case StoragePeriod.USER_DEFINED:
+                return given
+            case StoragePeriod.TEN_YEARS:
+                return LocalDate.now().plusYears(10)
+            case StoragePeriod.INFINITELY:
+                return null
+            default:
+                return null
+        }
     }
 
     ProjectRequest get(Long l) {

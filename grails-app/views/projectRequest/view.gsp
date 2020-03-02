@@ -141,12 +141,12 @@
             <td>
                 <g:submitButton name="approve" value="${g.message(code: "projectRequest.view.approve")}" />
                 <g:submitButton name="deny" value="${g.message(code: "projectRequest.view.deny")}" />
+                <g:link class="btn" action="index" params="[id: projectRequest.id]">${g.message(code: "projectRequest.view.edit")}</g:link>
             </td>
         </tr>
         <g:hiddenField name="request.id" value="${projectRequest.id}"/>
     </table>
     </g:form>
-
 </div>
 </body>
 </html>

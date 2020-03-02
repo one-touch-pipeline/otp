@@ -31,24 +31,49 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.util.MultiObjectValueSource
 
 import java.time.LocalDate
 
 class ProjectRequestController {
 
     static allowedMethods = [
-            index: "GET",
-            save : "POST",
-            view: "GET",
+            index : "GET",
+            save  : "POST",
+            edit  : "POST",
+            view  : "GET",
             update: "POST",
     ]
 
     ProjectRequestService projectRequestService
 
+    def index(Long id) {
+        ProjectRequest projectRequest = projectRequestService.get(id)
+        Map<String, ?> defaults = [
+                keywords                    : [""],
+                seqTypes                    : [null],
+                deputyPis                   : [""],
+                responsibleBioinformaticians: [""],
+                bioinformaticians           : [""],
+                submitters                  : [""],
+                speciesWithStrain           : [id: null],
+        ]
+        Map<String, ?> projectRequestHelper = [:]
+        if (projectRequest) {
+            projectRequestHelper << [
+                pi                          : projectRequest.pi.username,
+                deputyPis                   : projectRequest.deputyPis*.username ?: null,
+                responsibleBioinformaticians: projectRequest.responsibleBioinformaticians*.username ?: null,
+                bioinformaticians           : projectRequest.bioinformaticians*.username ?: null,
+                submitters                  : projectRequest.submitters*.username ?: null,
+                storagePeriod               : projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
+            ]
+        }
 
-    def index() {
+        MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(flash.cmd, projectRequestHelper, projectRequest, defaults)
         return [
                 cmd                       : flash.cmd as ProjectRequestCreationCommand,
+                projectRequestToEdit      : projectRequest,
                 projectTypes              : Project.ProjectType.values(),
                 storagePeriods            : StoragePeriod.values(),
                 tumorEntities             : TumorEntity.listOrderByName(),
@@ -57,6 +82,7 @@ class ProjectRequestController {
                 seqTypes                  : SeqType.all.sort { it.displayNameWithLibraryLayout },
                 awaitingRequests          : projectRequestService.getWaiting(),
                 createdAndApprovedRequests: projectRequestService.getCreatedAndApproved(),
+                source                    : multiObjectValueSource,
         ]
     }
 
@@ -78,6 +104,28 @@ class ProjectRequestController {
             flash.cmd = cmd
         }
         redirect(action: "index")
+    }
+
+    def edit(EditProjectRequestCommand cmd) {
+        String redirectAction = "index"
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, cmd.errors)
+            flash.cmd = cmd
+            redirect(action: redirectAction, id: cmd.request.id)
+            return
+        }
+        try {
+            projectRequestService.edit(cmd)
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.success") as String)
+            redirectAction = "view"
+        } catch (ValidationException e) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, e.errors)
+            flash.cmd = cmd
+        } catch (LdapUserCreationException e) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, [e.message])
+            flash.cmd = cmd
+        }
+        redirect(action: redirectAction, id: cmd.request.id)
     }
 
     def view(Long id) {
@@ -120,6 +168,7 @@ enum StoragePeriod {
         name()
     }
 }
+
 class ProjectRequestCreationCommand {
     String name
     String description
@@ -139,15 +188,15 @@ class ProjectRequestCreationCommand {
     String relatedProjects
     TumorEntity tumorEntity
     SpeciesWithStrain speciesWithStrain
-    String projectType
+    Project.ProjectType projectType
     String sequencingCenter
     Integer approxNoOfSamples
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
-        Object id = source['seqType']?.id
+        Object id = source['seqTypes']?.id
         List<String> ids = id instanceof String[] ? id : [id]
         return ids.collect { it?.isLong() ? SeqType.get(it as Long) : null }.findAll()
     })
-    List<SeqType> seqType = []
+    List<SeqType> seqTypes = []
     String comments
 
     String pi
@@ -179,7 +228,7 @@ class ProjectRequestCreationCommand {
         speciesWithStrain nullable: true
         sequencingCenter nullable: true, blank: false
         approxNoOfSamples nullable: true
-        seqType nullable: true
+        seqTypes nullable: true
         comments nullable: true, blank: false
         pi validator: { val, obj ->
             List<String> pi = [val]
@@ -224,6 +273,10 @@ class ProjectRequestCreationCommand {
     void setComments(String s) {
         comments = StringUtils.blankToNull(s)
     }
+}
+
+class EditProjectRequestCommand extends ProjectRequestCreationCommand {
+    ProjectRequest request
 }
 
 class ProjectRequestUpdateCommand {

@@ -19,6 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+<%@ page import="de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -95,23 +96,31 @@
 
     <h2>${g.message(code: "projectRequest.header.new")}</h2>
     <otp:annotation type="info">${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</otp:annotation>
-    <g:form action="save">
+
+    <g:if test="${projectRequestToEdit}">
+        <otp:annotation type="warning">
+            ${g.message(code: "projectRequest.edit.warning", args: [projectRequestToEdit.name, projectRequestToEdit.requester])}
+        </otp:annotation>
+    </g:if>
+    <br>
+    <g:form action="${projectRequestToEdit ? "edit" : "save"}">
     <table class="key-value-table key-help-input">
+        <g:hiddenField name="request.id" value="${projectRequestToEdit?.id}"/>
         <tr>
             <td><label for="name">${g.message(code: "project.name")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.name.detail")}"></td>
-            <td><input name="name" id="name" value="${cmd?.name}" required/></td>
+            <td><input name="name" id="name" value="${source.getByFieldName("name")}" required/></td>
         </tr>
         <tr>
             <td><label for="description">${g.message(code: "project.description")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.description.detail")}"></td>
-            <td><textarea class="resize-vertical" name="description" id="description" required>${cmd?.description}</textarea></td>
+            <td><textarea class="resize-vertical" name="description" id="description" required>${source.getByFieldName("description")}</textarea></td>
         </tr>
         <tr>
             <td><label for="keyword">${g.message(code: "project.keywords")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.keywords.detail")}"></td>
             <td class="multi-input-field">
-                <g:each in="${cmd?.keywords ?: [""]}" var="keyword" status="i">
+                <g:each in="${source.getByFieldName("keywords")?.sort()}" var="keyword" status="i">
                     <div class="field">
                         <input list="keywordList" name="keywords" id="keyword" type="text" value="${keyword}" required>
                         <g:if test="${i == 0}">
@@ -132,41 +141,44 @@
         <tr>
             <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.organizationalUnit.detail")}"></td>
-            <td><input name="organizationalUnit" id="organizationalUnit" value="${cmd?.organizationalUnit}" required/></td>
+            <td><input name="organizationalUnit" id="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}" required/></td>
         </tr>
         <tr>
             <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
-            <td><input name="costCenter" id="costCenter" value="${cmd?.costCenter}"/></td>
+            <td><input name="costCenter" id="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
         </tr>
         <tr>
             <td><label for="fundingBody">${g.message(code: "project.fundingBody")}</label></td>
             <td></td>
-            <td><input name="fundingBody" id="fundingBody" value="${cmd?.fundingBody}"/></td>
+            <td><input name="fundingBody" id="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
         </tr>
         <tr>
             <td><label for="grantId">${g.message(code: "project.grantId")}</label></td>
             <td></td>
-            <td><input name="grantId" id="grantId" value="${cmd?.grantId}"/></td>
+            <td><input name="grantId" id="grantId" value="${source.getByFieldName("grantId")}"/></td>
         </tr>
         <tr>
             <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
             <td></td>
-            <td><input name="endDate" id="endDate" value="${cmd?.endDate}" type="date"/></td>
+            <td><input name="endDate" id="endDate" value="${source.getByFieldName("endDate")}" type="date"/></td>
         </tr>
         <tr>
             <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
             <td>
-                <g:select name="storagePeriod" id="storagePeriod" value="${cmd?.storagePeriod}" from="${storagePeriods}" optionKey="name" optionValue="description" noSelection="${["": ""]}" required="true" />
+                <g:select name="storagePeriod" id="storagePeriod"
+                          value="${source.getByFieldName("storagePeriod")}" from="${storagePeriods}"
+                          optionKey="name" optionValue="description"
+                          noSelection="${["": ""]}" required="true" />
                 <br>
-                <input name="storageUntil" id="storageUntil" value="${cmd?.storageUntil}" type="date" style="display: none"/>
+                <input name="storageUntil" id="storageUntil" value="${source.getByFieldName("storageUntil")}" type="date" style="display: none"/>
             </td>
         </tr>
         <tr>
             <td><label for="relatedProjects">${g.message(code: "project.relatedProjects")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.relatedProjects.detail")}"></td>
-            <td><input name="relatedProjects" id="relatedProjects" value="${cmd?.relatedProjects}"/></td>
+            <td><input name="relatedProjects" id="relatedProjects" value="${source.getByFieldName("relatedProjects")}"/></td>
         </tr>
 %{--
         <tr>
@@ -178,30 +190,37 @@
         <tr>
             <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}</label></td>
             <td></td>
-            <td><g:select name="speciesWithStrain.id" id="speciesWithStrain" value="${cmd?.speciesWithStrain?.id}" from="${species}" optionKey="id" noSelection="${[null: ""]}" /></td>
+            <td>
+                <g:select name="speciesWithStrain.id" id="speciesWithStrain"
+                          from="${species}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}"
+                          optionKey="id" noSelection="${['': 'None']}" />
+            </td>
         </tr>
         <tr>
             <td><label for="projectType">${g.message(code: "project.projectType")}</label></td>
             <td></td>
-            <td><g:select name="projectType" id="projectType" value="${cmd?.projectType}" from="${projectTypes}"/></td>
+            <td><g:select name="projectType" id="projectType" value="${source.getByFieldName("projectType")}" from="${projectTypes}"/></td>
         </tr>
         <tr>
             <td><label for="sequencingCenter">${g.message(code: "projectRequest.sequencingCenter")}</label></td>
             <td></td>
-            <td><input name="sequencingCenter" id="sequencingCenter" value="${cmd?.sequencingCenter}"/></td>
+            <td><input name="sequencingCenter" id="sequencingCenter" value="${source.getByFieldName("sequencingCenter")}"/></td>
         </tr>
         <tr>
             <td><label for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}</label></td>
             <td></td>
-            <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" value="${cmd?.approxNoOfSamples}"/></td>
+            <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" value="${source.getByFieldName("approxNoOfSamples")}"/></td>
         </tr>
         <tr>
-            <td><label for="seqType">${g.message(code: "projectRequest.seqTypes")}</label></td>
+            <td><label for="seqTypes">${g.message(code: "projectRequest.seqTypes")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.seqTypes.detail")}"></td>
             <td class="multi-input-field">
-                <g:each in="${cmd?.seqType ?: [null]}" var="seqType" status="i">
+                <g:each in="${source.getByFieldName("seqTypes")}" var="seqType" status="i">
                     <div class="field">
-                        <g:select name="seqType.id" id="seqType" from="${seqTypes}" value="${seqType?.id ?: ""}" noSelection="${["": "None"]}" optionKey="id" optionValue="displayNameWithLibraryLayout" />
+                        <g:select name="seqTypes.id" id="seqTypes"
+                                  from="${seqTypes}" value="${seqType?.id ?: ""}"
+                                  optionKey="id" optionValue="displayNameWithLibraryLayout"
+                                  noSelection="${["": "None"]}"/>
                         <g:if test="${i == 0}">
                             <button class="add-field">+</button>
                         </g:if>
@@ -215,19 +234,28 @@
         <tr>
             <td><label for="comments">${g.message(code: "projectRequest.comments")}</label></td>
             <td></td>
-            <td><textarea class="resize-vertical" name="comments" id="comments">${cmd?.comments}</textarea></td>
+            <td><textarea class="resize-vertical" name="comments" id="comments">${source.getByFieldName("comments")}</textarea></td>
         </tr>
 
         <tr class="user-auto-complete">
             <td><label for="pi">${g.message(code: "projectRequest.pi")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.pi.detail")}"></td>
-            <td><input name="pi" id="pi" type="text" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${cmd?.pi}" required></td>
+            <td>
+                <g:if test="${projectRequestToEdit}">
+                    <g:hiddenField name="pi" value="${source.getByFieldName("pi")}"/>
+                    ${source.getByFieldName("pi")}
+                </g:if>
+                <g:else>
+                    <input name="pi" id="pi" type="text" autocomplete="off"
+                           placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${source.getByFieldName("pi")}" required>
+                </g:else>
+            </td>
         </tr>
         <tr>
             <td><label for="deputyPi">${g.message(code: "projectRequest.deputyPi")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.deputyPi.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
-                <g:each in="${cmd?.deputyPis ?: [""]}" var="deputyPi" status="i">
+                <g:each in="${source.getByFieldName("deputyPis") ?: [""]}" var="deputyPi" status="i">
                     <div class="field">
                         <input name="deputyPis" id="deputyPi" type="text" autocomplete="off"
                                placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${deputyPi}">
@@ -245,7 +273,7 @@
             <td><label for="responsibleBioinformatician">${g.message(code: "projectRequest.responsibleBioinformatician")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.responsibleBioinformatician.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
-                <g:each in="${cmd?.responsibleBioinformaticians ?: [""]}" var="responsibleBioinformatician" status="i">
+                <g:each in="${source.getByFieldName("responsibleBioinformaticians") ?: [""]}" var="responsibleBioinformatician" status="i">
                     <div class="field">
                         <input name="responsibleBioinformaticians" id="responsibleBioinformatician" type="text" autocomplete="off"
                                placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${responsibleBioinformatician}">
@@ -263,7 +291,7 @@
             <td><label for="bioinformatician">${g.message(code: "projectRequest.bioinformatician")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.bioinformatician.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
-                <g:each in="${cmd?.bioinformaticians ?: [""]}" var="bioinformatician" status="i">
+                <g:each in="${source.getByFieldName("bioinformaticians") ?: [""]}" var="bioinformatician" status="i">
                     <div class="field">
                         <input name="bioinformaticians" id="bioinformatician" type="text" autocomplete="off"
                                placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${bioinformatician}">
@@ -281,7 +309,7 @@
             <td><label for="submitter">${g.message(code: "projectRequest.submitter")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.submitter.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
-                <g:each in="${cmd?.submitters ?: [""]}" var="submitter" status="i">
+                <g:each in="${source.getByFieldName("submitters") ?: [""]}" var="submitter" status="i">
                     <div class="field">
                         <input name="submitters" id="submitter" type="text" autocomplete="off"
                                placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${submitter}">
@@ -304,11 +332,24 @@
         <tr>
             <td></td>
             <td></td>
-            <td><g:submitButton name="${g.message(code: "projectRequest.submit")}"/></td>
+            <td>
+                <g:if test="${projectRequestToEdit}">
+                    <div class="element-with-annotation-flex-container">
+                        <div>
+                            <g:submitButton name="${g.message(code: "projectRequest.submit.edit")}"/>
+                        </div>
+                        <otp:annotation type="warning">
+                            ${g.message(code: "projectRequest.edit.warning.submit")}
+                        </otp:annotation>
+                    </div>
+                </g:if>
+                <g:else>
+                    <g:submitButton name="${g.message(code: "projectRequest.submit")}"/>
+                </g:else>
+            </td>
         </tr>
     </table>
     </g:form>
-
 </div>
 </body>
 </html>

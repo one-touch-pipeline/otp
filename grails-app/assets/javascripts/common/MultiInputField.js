@@ -31,7 +31,8 @@ $(function () {
 
         var div = parent.children("div.field:last");
         div.append($(e.target).siblings("input:first, select:first, textarea:first").clone().val(""));
-        div.append("<button class=\"remove-field\">-</button>");
+        // the whitespace at the start prevents the button from sticking to the input element
+        div.append(" <button class=\"remove-field\">-</button>");
     });
 
     wrapper.on("click", ".remove-field", function (e) {
