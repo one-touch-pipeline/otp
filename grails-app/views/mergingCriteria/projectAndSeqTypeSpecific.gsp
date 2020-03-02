@@ -25,13 +25,13 @@
 <head>
     <meta name="layout" content="main"/>
     <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</title>
+    <asset:javascript src="common/CommentBox.js"/>
 </head>
 
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <g:link controller="projectConfig"> Back to project configuration</g:link>
     <h1>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</h1>
 
     <g:form action="update">
@@ -78,6 +78,7 @@
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
                         <g:hiddenField name="seqType.id" value="${seqType.id}"/>
                         <g:submitButton name="Submit"/>
+                        <g:link controller="alignmentConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
                     </sec:ifAllGranted>
                 </td>
             </tr>

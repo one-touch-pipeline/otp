@@ -26,15 +26,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="configurePipeline.sophia.title" args="[selectedProject.name, seqType.displayName]"/></title>
+    <asset:javascript src="common/CommentBox.js"/>
 </head>
 <body>
     <div class="body">
         <g:render template="/templates/messages"/>
 
-        <h1 style="display: inline"><g:message code="configurePipeline.sophia.title" args="[selectedProject.name, seqType.displayName]"/></h1>
-        <g:form controller="projectConfig" style="display: inline; float: right">
-            <g:submitButton name="back" value="Back to Overview"/>
-        </g:form>
+        <h1><g:message code="configurePipeline.sophia.title" args="[selectedProject.name, seqType.displayName]"/></h1>
 
         <otp:annotation type="info">
             <g:message code="configurePipeline.info.defaultValues"/>
@@ -80,7 +78,10 @@
                 </tr>
                 <tr>
                     <td class="myKey"></td>
-                    <td><g:submitButton name="submit" value="Submit"/></td>
+                    <td>
+                        <g:submitButton name="submit" value="Submit"/>
+                        <g:link controller="analysisConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
+                    </td>
                 </tr>
             </table>
         </g:form>
