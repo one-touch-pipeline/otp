@@ -63,7 +63,6 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
                 break
             case { it instanceof AuthenticationSwitchUserEvent } :
                 // User switch
-                projectSelectionService.setSelectedProject([], 'none') //clear cache if user switched
                 DicomAuditLogger.logUserSwitched(
                         EventIdentification.EventOutcomeIndicator.SUCCESS,
                         DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
