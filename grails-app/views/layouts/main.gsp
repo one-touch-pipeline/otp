@@ -28,7 +28,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title><g:layoutTitle default="Grails"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="contextPath" content="${request.contextPath}">
+    <meta name="contextPath" content="${request.contextPath}">
+    <meta name="projectName" content="${selectedProject?.name}">
+    <meta name="projectParameter" content="${projectParameter}">
     <g:if test="${otp.environmentName() == 'production'}">
         <link rel="shortcut icon" href="${assetPath(src: 'favicon.ico')}" type="image/x-icon">
     </g:if>

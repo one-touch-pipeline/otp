@@ -24,9 +24,11 @@
 /*global $ */
 
 OTP = {
-    contextPath:    $("head meta[name=contextPath]").attr("content"),
-    controllerName: $("head meta[name=controllerName]").attr("content"),
-    actionName:     $("head meta[name=actionName]").attr("content"),
+    contextPath:      $("head meta[name=contextPath]").attr("content"),
+    projectName:      $("head meta[name=projectName]").attr("content"),
+    projectParameter: $("head meta[name=projectParameter]").attr("content"),
+    controllerName:   $("head meta[name=controllerName]").attr("content"),
+    actionName:       $("head meta[name=actionName]").attr("content"),
 
     /**
      * Helper method to extend the given link by a further component.
@@ -83,15 +85,22 @@ OTP = {
         link = OTP.addLinkComponent(link, options.controller);
         link = OTP.addLinkComponent(link, options.action);
         link = OTP.addLinkComponent(link, options.id);
-        if (options.parameters !== undefined && options.parameters && Object.keys(options.parameters).length > 0) {
+
+        var parameters;
+        if ($.otp.projectName) {
+            parameters = $.extend({ [$.otp.projectParameter]: $.otp.projectName }, options.parameters);
+        } else {
+            parameters = options.parameters;
+        }
+        if (parameters !== undefined && parameters && Object.keys(parameters).length > 0) {
             link += "?";
             counter = 0;
-            for (parameter in options.parameters) {
-                if (options.parameters.hasOwnProperty(parameter)) {
+            for (parameter in parameters) {
+                if (parameters.hasOwnProperty(parameter)) {
                     if (counter > 0) {
                         link += "&";
                     }
-                    link += parameter + "=" + options.parameters[parameter];
+                    link += parameter + "=" + encodeURIComponent(parameters[parameter]);
                     counter += 1;
                 }
             }

@@ -26,6 +26,7 @@ import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
 
+import de.dkfz.tbi.otp.ProjectLinkGenerator
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.NumberConverter
 
@@ -95,5 +96,9 @@ beans = {
         "defaultGrails${numberType.simpleName}Converter"(NumberConverter) {
             targetType = numberType
         }
+    }
+
+    grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.grails.serverURL) { bean ->
+        bean.autowire = true
     }
 }

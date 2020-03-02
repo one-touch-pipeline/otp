@@ -249,4 +249,7 @@ environments {
     production {
         grails.plugin.console.baseUrl="/otp/console"
     }
+    development {
+        grails.plugin.console.baseUrl="/console"
+    }
 }

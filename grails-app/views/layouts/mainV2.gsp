@@ -30,6 +30,8 @@
     <link rel="shortcut icon" href="${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
     <title><g:layoutTitle default="OTP"/></title>
     <meta name="contextPath" content="${request.contextPath}">
+    <meta name="projectName" content="${selectedProject?.name}">
+    <meta name="projectParameter" content="${projectParameter}">
     <meta name="controllerName" content="${controllerName}">
     <meta name="actionName" content="${actionName}">
     <asset:javascript src="v2/application.js"/>
