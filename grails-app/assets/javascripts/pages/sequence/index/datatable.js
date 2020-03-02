@@ -28,6 +28,8 @@ $.otp.sequence = {
     register: function () {
         "use strict";
         var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true);
+        var showRunLinks = document.getElementById("showRunLinks").value;
+
 
         var link = $.otp.createLink({
             controller: 'sequence',
@@ -100,6 +102,17 @@ $.otp.sequence = {
                             } else {
                                 fastQC = row.fastqcState;
                             }
+                            var runLink = row.name ?
+                                "<span title='" + row.name + "'>" + row.name + "</span>" : "";
+                            if (showRunLinks === "true") {
+                                runLink = $.otp.createLinkMarkup({
+                                    controller: 'run',
+                                    action: 'show',
+                                    id: row.runId,
+                                    title: row.name,
+                                    text: row.name
+                                })
+                            }
                             //changes here may require changes in fnRowCallback, where for some column additional values are set
                             rowData = [
                                 $.otp.createLinkMarkup({
@@ -126,13 +139,7 @@ $.otp.sequence = {
                                 row.libraryPreparationKit ?
                                     "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + "</span>" : "",
                                 row.antibodyTarget,
-                                $.otp.createLinkMarkup({
-                                    controller: 'run',
-                                    action: 'show',
-                                    id: row.runId,
-                                    title: row.name,
-                                    text: row.name
-                                }),
+                                runLink,
                                 row.laneId ?
                                     "<span title='" + row.laneId + "'>" + row.laneId + "</span>" : "",
                                 row.libraryName,

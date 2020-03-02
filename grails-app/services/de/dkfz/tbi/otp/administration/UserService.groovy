@@ -223,4 +223,18 @@ No user exists yet, create user ${currentUser} with admin rights.
             }
         }
     }
+
+    List<Role> getRolesOfCurrentUser() {
+        return getRolesOfUser(springSecurityService.getCurrentUser() as User)
+    }
+
+    boolean checkRolesContainsAdministrativeRole(List <Role> roles) {
+        return roles.any {
+            it.authority in Role.ADMINISTRATIVE_ROLES
+        }
+    }
+
+    boolean isCurrentUserAllowedToSeeRuns() {
+        return checkRolesContainsAdministrativeRole(getRolesOfCurrentUser())
+    }
 }

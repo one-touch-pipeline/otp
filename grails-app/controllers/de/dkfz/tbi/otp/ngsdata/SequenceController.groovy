@@ -25,12 +25,14 @@ import grails.converters.JSON
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SequenceController {
     SeqTrackService seqTrackService
     FastqcResultsService fastqcResultsService
+    UserService userService
 
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
@@ -42,6 +44,7 @@ class SequenceController {
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
             libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
             antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
+            showRunLinks: userService.isCurrentUserAllowedToSeeRuns(),
         ]
     }
 

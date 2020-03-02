@@ -30,8 +30,8 @@
     <asset:javascript src="pages/sequence/index/datatable.js"/>
 </head>
 <body>
-<div class="body">
     <div class="searchCriteriaTableSequences">
+        <input type="hidden" id="showRunLinks" value="${showRunLinks}"/>
         <table id="searchCriteriaTable2">
             <tr>
             <td>
