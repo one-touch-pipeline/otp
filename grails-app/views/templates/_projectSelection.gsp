@@ -20,24 +20,25 @@
   - SOFTWARE.
   --}%
 
-<g:form style="width: min-content" class="project-selection-container" controller="projectSelection" action="select">
-    <g:hiddenField name="displayName" value=""/>
-    <g:hiddenField name="type" value="PROJECT"/>
-    <g:hiddenField name="redirect" value="${request.forwardURI - request.contextPath}"/>
+<div style="width: min-content" class="project-selection-container">
     <div class="selected-project-label">
         <strong><g:message code="home.projectFilter.project"/>:</strong>
     </div>
     <div class="selected-project-value">
-        <strong>${projectSelection?.projects?.first()?.name}</strong>
+        <strong>${selectedProject.displayName}</strong>
     </div>
     <div class="select-label">
         <g:message code="home.projectFilter.select"/>:
     </div>
     <div class="project-dropdown">
         %{-- variables are form ProjectSelectionInterceptor --}%
-        <g:select id="project" name='id' class="use-select-2"
-                  from='${availableProjects}' value='${projectSelection?.projects?.first()?.id}'
-                  optionKey='id' optionValue='displayName'
-                  autocomplete="off" onChange='submit();'/>
+        <select id="project" class="use-select-2" autocomplete="off" onChange='window.location = this.value;'>
+            <g:each in="${availableProjects}" var="project">
+                <option value="${g.createLink(controller: controllerName, action: actionName, params: [(projectParameter): project.name])}"
+                    ${selectedProject == project ? "selected" : ""}>
+                    ${project.displayName}
+                </option>
+            </g:each>
+        </select>
     </div>
-</g:form>
+</div>
