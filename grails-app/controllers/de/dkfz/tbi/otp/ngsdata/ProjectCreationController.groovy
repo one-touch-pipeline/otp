@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
@@ -33,12 +34,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
-import de.dkfz.tbi.util.MultiObjectValueSource
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.util.MultiObjectValueSource
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@Secured(['ROLE_OPERATOR'])
 class ProjectCreationController {
     static allowedMethods = [
             index: "GET",
