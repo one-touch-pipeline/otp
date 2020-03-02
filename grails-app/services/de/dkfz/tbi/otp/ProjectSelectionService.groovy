@@ -22,76 +22,53 @@
 package de.dkfz.tbi.otp
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.web.servlet.mvc.GrailsHttpSession
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.grails.web.util.WebUtils
-import org.springframework.context.ApplicationContext
-import org.springframework.context.i18n.LocaleContextHolder
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreFilter
+import org.springframework.security.access.AccessDeniedException
 
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import javax.servlet.http.HttpServletRequest
 
 @Transactional
 class ProjectSelectionService {
-    ApplicationContext applicationContext
-    PluginAwareResourceBundleMessageSource messageSource
     ProjectService projectService
-    SpringSecurityService springSecurityService
 
-    private static final String PROJECT_SELECTION_KEY = "PROJECT_SELECTION"
+    static final String PROJECT_SELECTION_PARAMETER = "project"
+    private static final String PROJECT_SELECTION_KEY = "de.dkfz.tbi.otp.projectselection"
+    private static final String PROJECT_REQUEST_KEY = "de.dkfz.tbi.otp.projectrequest"
 
+    /**
+     * This method is used the set the selected project for the current request.
+     * It must only be used in ProjectSelectionInterceptor.
+     */
+    void setSelectedProject(String projectName) {
+        Project project = projectService.getProjectByNameAsList(projectName).find()
+        currentRequest.setAttribute(PROJECT_REQUEST_KEY, project)
+        currentRequest.setAttribute(PROJECT_SELECTION_KEY, project ?: projectService.getAllProjects().find())
+    }
 
-    ProjectSelection getSelectedProject() {
-        if (springSecurityService.isLoggedIn()) {
-            GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()
-            if (!(ProjectSelection) session.getAttribute(PROJECT_SELECTION_KEY)) {
-                setSelectedProject(
-                        // projectService.allProjects (instead of Project.all) is used here because spring security annotations
-                        // don't work when calling a method in the same class
-                        projectService.allProjects,
-                        messageSource.getMessage("header.projectSelection.allProjects", [].toArray(), LocaleContextHolder.getLocale())
-                )
-            }
-            return (ProjectSelection) session.getAttribute(PROJECT_SELECTION_KEY)
-        } else {
-            return null
+    /**
+     * Returns either the project that the user selected if they have access to it; or the first available project that the user can access; or null.
+     * It should be used in actions that render regular GSP pages.
+     */
+    Project getSelectedProject() {
+        return currentRequest.getAttribute(PROJECT_SELECTION_KEY) as Project
+    }
+
+    /**
+     * Returns the exact {@link Project} selected by the user, if they have access to it; and throws an exception otherwise.
+     * It should be used in actions that alter data (after form submissions), and actions used by AJAX requests.
+     */
+    Project getRequestedProject() {
+        Project project = currentRequest.getAttribute(PROJECT_REQUEST_KEY) as Project
+        if (!project) {
+            throw new AccessDeniedException("Access denied for the requested project.")
         }
+        return project
     }
 
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
-    Project getProjectFromProjectSelectionOrAllProjects(ProjectSelection projectSelection) {
-        if (projectSelection.projects.size() == 1) {
-            return atMostOneElement(Project.findAllByName(projectSelection.projects.first().name, [fetch: [projectGroup: 'join']]))
-        } else if (projectService.allProjects.size() > 0) {
-            return projectService.allProjects.first()
-        } else {
-            return null
-        }
-    }
-
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
-    Project getProjectFromProjectSelectionOrAllProjects() {
-        getProjectFromProjectSelectionOrAllProjects(getSelectedProject())
-    }
-
-    @PreFilter(value = "hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')", filterTarget = "projects")
-    void setSelectedProject(List<Project> projects, String displayName) {
-        GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()
-        ProjectSelection projectSelection = new ProjectSelection(projects: projects, displayName: displayName)
-        session.setAttribute(PROJECT_SELECTION_KEY, projectSelection)
-    }
-}
-
-class ProjectSelection {
-    List<Project> projects
-    String displayName
-
-    boolean asBoolean() {
-        projects.asBoolean()
+    private HttpServletRequest getCurrentRequest() {
+        WebUtils.retrieveGrailsWebRequest().currentRequest
     }
 }

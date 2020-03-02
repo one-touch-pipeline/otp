@@ -139,6 +139,11 @@ class ProjectService {
         return Project.findByName(name)
     }
 
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
+    List<Project> getProjectByNameAsList(String name) {
+        return Project.findAllByName(name)
+    }
+
     List<Project> projectByProjectGroup(ProjectGroup projectGroup) {
         return Project.findAllByProjectGroup(projectGroup, [sort: "name", order: "asc"])
     }
