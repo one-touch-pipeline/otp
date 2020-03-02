@@ -20,26 +20,22 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.Project" %>
 <html>
 <head>
-    <title>OTP - ${projectSelection.getDisplayName()}</title>
+    <title>KPIs</title>
     <meta name="layout" content="mainV2"/>
 </head>
 <body>
     <div class="body container">
         <div class="col-xs-12">
-            <h2>${projectSelection.getDisplayName()}</h2>
+            <h2>KPIs</h2>
             <hr>
-            <p>
-                <g:if test="${projectSelection instanceof Project}">
-                    ${projectSelection.description}
-                </g:if>
-            </p>
         </div>
         <div class="col-xs-12 col-sm-12 statistics-container">
             <div class="optionsContainer">
                 <g:form action="kpi" class="form-inline" method="get">
+                    <input type="hidden" name="${projectParameter}" value="${selectedProject.name}"/>
+                    <input type="hidden" name="projectGroup" value="${projectGroup}"/>
                     <div class="input-group">
                         <div class="input-group-addon">
                             <b>${g.message(code: "start.numbers.startDate")}</b>
@@ -67,6 +63,8 @@
                     ${g.message(code: "start.numbers.info.users")}</div>
             </g:if>
             <div class="statistics-box">
+                <h2>${projectGroup ?: "All"}</h2>
+                <hr>
                 <p class="projects"><span
                         class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.users")}
                     <span class="highlight">${numberOfUsers} <g:if test="${numberOfCreatedUsers}">(${numberOfCreatedUsers})</g:if></span></p>
@@ -83,9 +81,28 @@
                         class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.clusterJobs")}
                     <span class="highlight">${numberOfClusterJobs}</span></p>
             </div>
-            Download <g:link action="downloadDirectoriesCSV">
-                directories.csv
-            </g:link>
+
+            <div class="statistics-box">
+                <h2>${selectedProject.displayName}</h2>
+                <hr>
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.users")}
+                    <span class="highlight">${numberOfUsersProject} <g:if test="${numberOfCreatedUsersProject}">(${numberOfCreatedUsersProject})</g:if></span></p>
+
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.samples")}
+                    <span class="highlight">${numberOfSamplesProject}</span></p>
+
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.clusterJobs")}
+                    <span class="highlight">${numberOfClusterJobsProject}</span></p>
+            </div>
+
+            <div class="statistics-box">
+                Download <g:link action="downloadDirectoriesCSV">
+                    directories.csv
+                </g:link>
+            </div>
         </div>
     </div>
 <script>

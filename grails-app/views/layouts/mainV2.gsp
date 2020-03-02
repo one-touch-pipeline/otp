@@ -20,6 +20,7 @@
   - SOFTWARE.
   --}%
 
+<%@ page import="de.dkfz.tbi.otp.ProjectSelectionService" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,19 +117,23 @@
                                 <form class="navbar-form navbar-left">
                                     <div class="input-group">
                                         <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            ${projectSelection.getDisplayName()} <span class="caret"></span>
+                                            ${selectedProject.getDisplayName()} <span class="caret"></span>
                                         </button>
                                         <ul id="js-project-list" class="dropdown-menu dropdown-menu-right scrollable-menu">
                                             <div class="project-search-field">
                                                 <input type="text" class="form-control" id="js-project-input" autocomplete="off" role="textbox" aria-label="${g.message(code:"header.projectSelection.search")}" title="${g.message(code:"header.projectSelection.search")}" placeholder="${g.message(code:"header.projectSelection.search")}">
                                             </div>
-                                            <li><g:link controller="projectSelection" action="select" params="${[type: "ALL", redirect: request.forwardURI - request.contextPath]}">${g.message(code: "header.projectSelection.allProjects")}</g:link>
+                                            <li><g:link controller="${controllerName}" action="${actionName}" params="${[projectGroup: "ALL"]}">${g.message(code: "header.projectSelection.allProjects")}</g:link>
                                             <g:each in="${availableProjectsInGroups.entrySet()}" var="subGroup">
                                                 <li class="dropdown-submenu"><a href="#">${subGroup.key}</a>
                                                     <ul class="dropdown-menu">
-                                                        <g:each in="${subGroup.value}" var="item">
-                                                        <g:set var="i" value="${0}"/>
-                                                            <li><g:link controller="projectSelection" action="select" params="${[id: item.id, type: item.type, redirect: request.forwardURI - request.contextPath]}">${item.displayName}</g:link></li>
+                                                        <g:each in="${subGroup.value}" var="item" status="i">
+                                                            <g:if test="${i==0}">
+                                                                <li><g:link controller="${controllerName}" action="${actionName}" params="${[(projectParameter): selectedProject.name, projectGroup: subGroup.key]}">${item.displayName}</g:link></li>
+                                                            </g:if>
+                                                            <g:else>
+                                                                <li><g:link controller="${controllerName}" action="${actionName}" params="${[(projectParameter): item.displayName, projectGroup: subGroup.key]}">${item.displayName}</g:link></li>
+                                                            </g:else>
                                                         </g:each>
                                                     </ul>
                                                 </li>
@@ -137,7 +142,7 @@
                                                 <li class="dropdown-submenu"><a href="#">${g.message(code: "header.projectSelection.other")}</a>
                                                     <ul class="dropdown-menu">
                                                         <g:each in="${availableProjectsWithoutGroup}" var="item">
-                                                            <li><g:link controller="projectSelection" action="select" params="${[id: item.id, type: item.type, redirect: request.forwardURI - request.contextPath]}">${item.displayName}</g:link></li>
+                                                            <li><g:link controller="${controllerName}" action="${actionName}" params="${[(projectParameter): item.displayName]}">${item.displayName}</g:link></li>
                                                         </g:each>
                                                     </ul>
                                                 </li>

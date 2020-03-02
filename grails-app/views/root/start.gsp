@@ -20,22 +20,19 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.Project" %>
 <html>
 <head>
-    <title>OTP - ${projectSelection.getDisplayName()}</title>
+    <title>OTP - ${selectedProject.getDisplayName()}</title>
     <meta name="layout" content="mainV2"/>
 </head>
 <body>
 <div class="body container">
     <div class="row">
         <div class="col-xs-12">
-            <h2>${projectSelection.getDisplayName()}s</h2>
+            <h2>${selectedProject.getDisplayName()}s</h2>
             <hr>
             <p>
-                <g:if test="${projectSelection instanceof Project}">
-                    ${projectSelection.description}
-                </g:if>
+                ${selectedProject.description}
             </p>
         </div>
     </div>
@@ -89,7 +86,7 @@
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <h2>${g.message(code: "start.numbers.title", args: [projectSelection.getDisplayName()])}</h2>
+            <h2>${g.message(code: "start.numbers.title", args: [selectedProject.getDisplayName()])}</h2>
             <hr>
         </div>
         <div class="col-xs-12 col-sm-6 statistics-container">

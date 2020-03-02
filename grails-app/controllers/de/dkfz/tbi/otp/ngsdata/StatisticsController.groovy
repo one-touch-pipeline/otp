@@ -21,17 +21,18 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ProjectSelection
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+
 import java.text.SimpleDateFormat
 
 class StatisticsController {
     ProjectService projectService
-    ProjectSelectionService projectSelectionService
     UserProjectRoleService userProjectRoleService
     ClusterJobService clusterJobService
     SampleService sampleService
+    ProjectSelectionService projectSelectionService
+    ProjectGroupService projectGroupService
 
     static allowedMethods = [
             downloadDirectoriesCSV: "GET",
@@ -39,10 +40,9 @@ class StatisticsController {
     ]
 
     def downloadDirectoriesCSV() {
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
         StringBuilder output = new StringBuilder()
 
-        selection.projects.each { Project project ->
+        projectService.allProjects.each { Project project ->
             output << project.projectDirectory << ","
             output << project.dirAnalysis ?: ''
             output << "\n"
@@ -52,33 +52,53 @@ class StatisticsController {
     }
 
     def kpi() {
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
+        List<Project> projects
+        if (!params.projectGroup || params.projectGroup == "ALL") {
+            projects = projectService.allProjects
+        } else {
+            projects = projectService.allProjects.intersect(Project.findAllByProjectGroup(projectGroupService.projectGroupByName(params.projectGroup)))
+        }
+        Project project = projectSelectionService.selectedProject
+
         Date startDate = params.start ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(params.start) : null
         Date endDate = params.end ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(params.end) : null
 
-        if (!selection.projects) {
+        if (!projects) {
             return [
                     numberOfProject: 0,
             ]
         }
-        int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, selection.projects)
+        int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, projects)
 
-        int projects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, selection.projects)
+        int numberOfProjects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, projects)
 
-        int clusterJobs = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, selection.projects)
+        int clusterJobs = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, projects)
 
-        int usersCreated = (startDate && endDate) ? userProjectRoleService.getNumberOfValidUsersForProjects(selection.projects, startDate, endDate) : 0
+        int usersCreated = (startDate && endDate) ? userProjectRoleService.getNumberOfValidUsersForProjects(projects, startDate, endDate) : 0
 
-        int users = userProjectRoleService.getNumberOfValidUsersForProjects(selection.projects)
+        int users = userProjectRoleService.getNumberOfValidUsersForProjects(projects)
+
+        int samplesProject = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, [project])
+
+        int clusterJobsProject = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, [project])
+
+        int usersCreatedProject = (startDate && endDate) ? userProjectRoleService.getNumberOfValidUsersForProjects([project], startDate, endDate) : 0
+
+        int usersProject = userProjectRoleService.getNumberOfValidUsersForProjects([project])
 
         return [
-                numberOfProject     : projects,
-                numberOfSamples     : samples,
-                numberOfUsers       : users,
-                numberOfCreatedUsers: usersCreated,
-                numberOfClusterJobs : clusterJobs,
-                startDate           : params.start,
-                endDate             : params.end,
+                projectGroup               : params.projectGroup,
+                numberOfProject            : numberOfProjects,
+                numberOfSamples            : samples,
+                numberOfUsers              : users,
+                numberOfCreatedUsers       : usersCreated,
+                numberOfClusterJobs        : clusterJobs,
+                numberOfSamplesProject     : samplesProject,
+                numberOfUsersProject       : usersProject,
+                numberOfCreatedUsersProject: usersCreatedProject,
+                numberOfClusterJobsProject : clusterJobsProject,
+                startDate                  : params.start,
+                endDate                    : params.end,
         ]
     }
 }

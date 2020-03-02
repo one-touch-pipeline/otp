@@ -128,23 +128,23 @@ class RootController {
             return
         }
 
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
+        List<Project> projects = [projectSelectionService.selectedProject]
 
         HibernateCriteriaBuilder c
         Date fourWeeksAgo = new Date(System.currentTimeMillis() - FOUR_WEEKS_IN_MS)
 
-        int individualsFinder = selection.projects ? Individual.countByProjectInList(selection.projects) : []
+        int individualsFinder = projects ? Individual.countByProjectInList(projects) : []
         c = Sample.createCriteria()
         int samples = c.count {
             individual {
-                'in'('project', selection.projects)
+                'in'('project', projects)
             }
         }
         c = SeqTrack.createCriteria()
         int seqTracks = c.count {
             sample {
                 individual {
-                    'in'('project', selection.projects)
+                    'in'('project', projects)
                 }
             }
         }
@@ -157,7 +157,7 @@ class RootController {
                         countDistinct("individual")
                     }
                     individual {
-                        'in'('project', selection.projects)
+                        'in'('project', projects)
                     }
                 }
             }
@@ -171,7 +171,7 @@ class RootController {
                 }
                 sample {
                     individual {
-                        'in'('project', selection.projects)
+                        'in'('project', projects)
                     }
                 }
             }
@@ -185,7 +185,7 @@ class RootController {
             seqTrack {
                 sample {
                     individual {
-                        'in'('project', selection.projects)
+                        'in'('project', projects)
                     }
                 }
             }

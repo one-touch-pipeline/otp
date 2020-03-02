@@ -22,9 +22,9 @@
 
 <%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName; de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 <g:applyLayout name="main">
-    <head>
-        <title><g:layoutTitle default="OTP"/></title>
-        <g:layoutHead/>
+<head>
+    <title><g:layoutTitle default="OTP"/></title>
+    <g:layoutHead/>
     <asset:javascript src="modules/info.js"/>
     <asset:stylesheet src="modules/info.css"/>
 </head>
