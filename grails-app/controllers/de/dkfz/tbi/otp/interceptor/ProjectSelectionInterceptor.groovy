@@ -46,13 +46,7 @@ class ProjectSelectionInterceptor {
     @Override
     boolean before() {
         if (springSecurityService.loggedIn) {
-            String projectName = params.project
-            if (projectName) {
-                Project project = projectService.getProjectByName(projectName)
-                if (project) {
-                    projectSelectionService.setSelectedProject([project], project.name)
-                }
-            }
+            projectSelectionService.setSelectedProject(params.remove(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) as String)
         }
         true
     }
@@ -60,12 +54,12 @@ class ProjectSelectionInterceptor {
     @Override
     boolean after() {
         if (model != null && springSecurityService.loggedIn) {
-            model.projectSelection = projectSelectionService.selectedProject
-            model.selectedProject = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+            model.selectedProject = projectSelectionService.selectedProject
 
             List<Project> allProjects = projectService.allProjects
             model.availableProjects = allProjects
 
+            model.projectParameter = ProjectSelectionService.PROJECT_SELECTION_PARAMETER
             // projects in groups
             Map<String, List<ProjectSelectionCommand>> availableProjectsInGroups = [:]
             Map<ProjectGroup, List<Project>> projectsMap = allProjects.groupBy { it.projectGroup }
