@@ -37,7 +37,7 @@ class SampleSwapController {
             redirect(controller: "projectOverview", action: "index")
         }
 
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<Individual> individuals = Individual.findAllByProject(project, [sort: "pid", order: "asc"])
 

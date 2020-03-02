@@ -74,7 +74,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
             getEmailsForNotification(_) >> "emails"
         }
         controller.projectSelectionService = Mock(ProjectSelectionService) {
-            getProjectFromProjectSelectionOrAllProjects() >> project
+            getSelectedProject() >> project
         }
         controller.ldapService = Mock(LdapService) {
             getDistinguishedNameOfGroupByGroupName(_) >> project.unixGroup

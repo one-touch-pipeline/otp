@@ -25,7 +25,8 @@ import grails.validation.ValidationException
 import groovy.transform.Canonical
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -44,7 +45,7 @@ class CellRangerController {
     static final List<String> ALLOWED_CELL_TYPE = ["neither", "expected", "enforced"]
 
     def index(CellRangerSelectionCommand cmd) {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         assert cmd.validate()
 
@@ -132,7 +133,7 @@ class CellRangerController {
     }
 
     def finalRunSelection() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<CellRangerMergingWorkPackage> mwps = CellRangerMergingWorkPackage.createCriteria().list {
             sample {

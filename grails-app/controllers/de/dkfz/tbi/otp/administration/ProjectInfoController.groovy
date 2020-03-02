@@ -53,7 +53,7 @@ class ProjectInfoController implements CheckAndCall {
     ProjectInfoService projectInfoService
 
     def list() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectInfos: 'join']]))
 
         return [

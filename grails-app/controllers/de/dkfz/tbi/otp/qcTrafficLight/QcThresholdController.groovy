@@ -53,7 +53,7 @@ class QcThresholdController {
     }
 
     def projectConfiguration() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 

@@ -46,7 +46,7 @@ class ProjectUserController implements CheckAndCall {
     ProcessingOptionService processingOptionService
 
     def index() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<UserProjectRole> userProjectRolesOfProject = UserProjectRole.findAllByProject(project)
         List<User> projectUsers = userProjectRolesOfProject*.user

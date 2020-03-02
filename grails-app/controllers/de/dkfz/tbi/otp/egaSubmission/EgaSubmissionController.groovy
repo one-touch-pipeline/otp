@@ -64,7 +64,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     final private static String ERROR_TITLE = "Some errors occurred"
 
     Map overview() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
         List<EgaSubmission> submissions = EgaSubmission.findAllByProject(project).sort { it.submissionName.toLowerCase() }
 
         return [

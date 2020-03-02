@@ -48,7 +48,7 @@ class ProjectOverviewController {
      * The table content are retrieved asynchronously from {@link #dataTableSourceLaneOverview} via JavaScript.
      */
     Map laneOverview() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
         List<String> sampleTypes = projectOverviewService.sampleTypeByProject(project)

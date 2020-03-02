@@ -35,7 +35,7 @@ class KeywordController implements CheckAndCall {
     ProjectSelectionService projectSelectionService
 
     Map index() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
 
         Closure keywordSorting = { Keyword keyword ->

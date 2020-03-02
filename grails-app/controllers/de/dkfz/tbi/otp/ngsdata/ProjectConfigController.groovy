@@ -54,7 +54,7 @@ class ProjectConfigController implements CheckAndCall {
     ConfigService configService
 
     Map index() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         Map<String, String> dates = getDates(project)
 
@@ -76,7 +76,7 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     Map alignment() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
@@ -108,7 +108,7 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     Map analysis() {
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
+        Project project = projectSelectionService.selectedProject
 
         List<List> thresholdsTable = createThresholdTable(project)
 
