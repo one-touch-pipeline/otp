@@ -59,7 +59,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         when:
         controller.request.method = 'POST'
         controller.params.identifier = "Identifier"
-        controller.params['project.id'] = project.id
+        controller.params['individualProject.id'] = project.id
         controller.params.alias = "Alias"
         controller.params.displayedIdentifier = "Displayed Identifier"
         controller.params.internIdentifier = "Intern Identifier"
@@ -165,7 +165,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         when:
         controller.request.method = 'POST'
         controller.params.identifier = "Identifier"
-        controller.params['project.id'] = project.id
+        controller.params['individualProject.id'] = project.id
         controller.params.alias = "Alias"
         controller.params.displayedIdentifier = "Displayed Identifier"
         controller.params.internIdentifier = "Intern Identifier"

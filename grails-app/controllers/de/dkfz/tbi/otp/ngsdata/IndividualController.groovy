@@ -221,7 +221,7 @@ class IndividualCommand implements Validateable {
     IndividualService individualService
 
     String identifier
-    Project project
+    Project individualProject
     String alias
     String displayedIdentifier
     String internIdentifier

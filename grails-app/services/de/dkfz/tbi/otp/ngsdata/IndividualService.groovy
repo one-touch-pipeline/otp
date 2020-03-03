@@ -223,7 +223,7 @@ class IndividualService {
                 mockFullName: cmd.displayedIdentifier,
                 internIdentifier: cmd.internIdentifier,
                 type: cmd.type,
-                project: cmd.project,
+                project: cmd.individualProject,
         )
         individual.save(flush: true)
         createSamples(individual, cmd.samples)
