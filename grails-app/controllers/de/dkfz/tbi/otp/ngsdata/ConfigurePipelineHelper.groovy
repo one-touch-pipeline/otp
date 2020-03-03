@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.validation.FieldError
-
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
@@ -38,45 +36,14 @@ trait ConfigurePipelineHelper {
     FileSystemService fileSystemService
     WorkflowConfigService workflowConfigService
 
-    Map checkErrorsIfSubmitted(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline) {
-        boolean hasErrors = false
-        String message = ""
-        if (cmd.submit) {
-            hasErrors = cmd.hasErrors()
-            boolean duplicateConfigVersion = false
-            RoddyWorkflowConfig.findAllWhere([
-                    project       : projectSelectionService.requestedProject,
-                    seqType       : cmd.seqType,
-                    pipeline      : pipeline,
-                    programVersion: "${cmd.pluginName}:${cmd.programVersion}",
-            ]).each {
-                if (it.configVersion == cmd.config) {
-                    duplicateConfigVersion = true
-                }
-            }
-            if (hasErrors) {
-                FieldError errors = cmd.errors.getFieldError()
-                message = "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'." +
-                        "Error code: '${errors.code}"
-            } else if (duplicateConfigVersion) {
-                hasErrors = true
-                message = "'${cmd.config}' is not a valid value for 'Config Version'. Error code: 'duplicate'"
-            } else {
-                return [:]
-            }
-            return [
-                    message          : message,
-                    hasErrors        : hasErrors,
-                    pluginName       : cmd.pluginName,
-                    programVersion   : cmd.programVersion,
-                    baseProjectConfig: cmd.baseProjectConfig,
-                    config           : cmd.config,
-            ]
-        }
-        return [
-                message  : message,
-                hasErrors: hasErrors,
-        ]
+    boolean validateUniqueness(ConfigurePipelineSubmitCommand cmd, Project project, Pipeline pipeline) {
+        return RoddyWorkflowConfig.findAllWhere([
+                project       : project,
+                seqType       : cmd.seqType,
+                pipeline      : pipeline,
+                programVersion: "${cmd.pluginName}:${cmd.programVersion}",
+                configVersion : cmd.config,
+        ]).empty
     }
 
     Map getValues(Project project, SeqType seqType, Pipeline pipeline) {

@@ -32,8 +32,9 @@
     <g:render template="/templates/messages"/>
     <br><g:link controller="projectConfig">Back to Overview</g:link><br><br>
 
-    <h1 style="display: inline"><g:message code="configurePipeline.runyapsa.title" args="[selectedProject.name, seqType.displayName]"/></h1>
-    <g:form action="update" params='["seqType.id": seqType.id]'>
+    <h1><g:message code="configurePipeline.runyapsa.title" args="[selectedProject.name, seqType.displayName]"/></h1>
+
+    <g:form action="update" params='["seqType.id": seqType.id]' method="POST">
         <table class="pipelineTable">
             <tr>
                 <th></th>
@@ -59,7 +60,7 @@
         </table>
     </g:form>
     <g:if test="${currentVersion}">
-        <g:form controller="configurePipeline" action="invalidateConfig"
+        <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                 params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
             <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
         </g:form>

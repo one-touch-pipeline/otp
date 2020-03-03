@@ -35,22 +35,15 @@
         <g:form controller="projectConfig" style="display: inline; float: right">
             <g:submitButton name="back" value="Back to Overview"/>
         </g:form>
-        <g:if test="${hasErrors == true}">
-            <div class="errors"> <li>${message}</li></div>
-        </g:if>
-        <g:elseif test="${message}">
-            <div class="message">${message}</div>
-        </g:elseif>
-        <g:else>
-            <div class="empty"><br></div>
-        </g:else>
+
         <otp:annotation type="info">
             <g:message code="configurePipeline.info.defaultValues"/>
         </otp:annotation>
         <otp:annotation type="warning">
             <g:message code="configurePipeline.info.humanOnly"/>
         </otp:annotation>
-        <g:form action="index" params='["seqType.id": seqType.id]'>
+
+        <g:form action="save" params='["seqType.id": seqType.id]' method="POST">
             <table class="pipelineTable">
                 <tr>
                     <th></th>
@@ -93,7 +86,7 @@
         </g:form>
         <g:if test="${lastRoddyConfig}">
             <h2><g:message code="configurePipeline.last.config"/></h2>
-            <g:form controller="configurePipeline" action="invalidateConfig"
+            <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                     params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
                 <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
             </g:form>

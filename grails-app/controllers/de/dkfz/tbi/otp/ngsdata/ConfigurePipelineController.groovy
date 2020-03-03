@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import groovy.transform.ToString
-import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -37,46 +36,23 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     ProjectService projectService
 
     static allowedMethods = [
-            runYapsa        : "GET",
-            updateRunYapsa  : "POST",
-            invalidateConfig: "POST",
+            alignment                  : "GET",
+            saveAlignment              : "POST",
+            copyAlignment              : "POST",
+            rnaAlignment               : "GET",
+            rnaAlignmentConfig         : "POST",
+            rnaAlignmentReferenceGenome: "POST",
+            getStatSizeFileNames       : "GET",
+            getGeneModels              : "GET",
+            getToolVersions            : "GET",
+            invalidateConfig           : "POST",
     ]
 
-
-    def alignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
+    def alignment(BaseConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.PANCAN_ALIGNMENT.pipeline
 
-        Project project = projectSelectionService.requestedProject
+        Project project = projectSelectionService.selectedProject
         List<Project> projects = projectService.getAllProjectsWithConfigFile(cmd.seqType, pipeline)
-
-        Map result = checkErrorsIfSubmitted(cmd, pipeline)
-        if (!result) {
-            PanCanAlignmentConfiguration panCanAlignmentConfiguration = new PanCanAlignmentConfiguration([
-                    project              : project,
-                    seqType              : cmd.seqType,
-                    referenceGenome      : cmd.referenceGenome,
-                    statSizeFileName     : cmd.statSizeFileName,
-                    mergeTool            : cmd.mergeTool,
-                    pluginName           : cmd.pluginName,
-                    programVersion       : cmd.programVersion,
-                    baseProjectConfig    : cmd.baseProjectConfig,
-                    configVersion        : cmd.config,
-                    bwaMemVersion        : cmd.bwaMemVersion,
-                    sambambaVersion      : cmd.sambambaVersion,
-                    adapterTrimmingNeeded: cmd.adapterTrimmingNeeded,
-            ])
-            projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
-
-            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
-            redirect(controller: "projectConfig")
-            return
-        }
-
-        if (cmd.copy) {
-            projectService.copyPanCanAlignmentXml(cmd.basedProject, project, cmd.seqType)
-            flash.message = new FlashMessage(g.message(code: "configurePipeline.copy.success") as String)
-            redirect(controller: "projectConfig")
-        }
 
         String defaultPluginName = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
         String defaultProgramVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
@@ -96,7 +72,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         assert MergeConstants.ALL_MERGE_TOOLS.containsAll(allMergeTools)
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
-        result << params
+        Map result = [:]
         result << getValues(project, cmd.seqType, pipeline)
 
         String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
@@ -108,12 +84,12 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         result << [
                 projects                : projects,
 
-                referenceGenome         : referenceGenome,
+                referenceGenome         : flash?.cmd?.referenceGenome ?: referenceGenome,
                 referenceGenomes        : referenceGenomes,
                 defaultReferenceGenome  : defaultReferenceGenome,
-                statSizeFileName        : null,
+                statSizeFileName        : flash?.cmd?.statSizeFileName,
 
-                mergeTool               : defaultMergeTool,
+                mergeTool               : flash?.cmd?.mergeTool ?: defaultMergeTool,
                 mergeTools              : allMergeTools,
                 defaultMergeTool        : defaultMergeTool,
 
@@ -137,21 +113,64 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 baseProjectConfig       : defaultBaseProjectConfig,
                 defaultBaseProjectConfig: defaultBaseProjectConfig,
         ]
-
-        if (cmd.submit || cmd.copy) {
-            result << [
-                    referenceGenome : cmd.referenceGenome,
-                    statSizeFileName: cmd.statSizeFileName,
-                    mergeTool       : cmd.mergeTool,
-            ]
-        }
         return result
     }
+
+    def saveAlignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
+        Project project = projectSelectionService.requestedProject
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
+            flash.cmd = cmd
+            redirect(action: "alignment", params: ["seqType.id": cmd.seqType.id])
+            return
+        }
+
+        if (!validateUniqueness(cmd, project, Pipeline.Name.PANCAN_ALIGNMENT.pipeline)) {
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, [g.message(code: "configurePipeline.store.failure.duplicate") as String])
+            flash.cmd = cmd
+            redirect(action: "alignment", params: ["seqType.id": cmd.seqType.id])
+            return
+        }
+
+        PanCanAlignmentConfiguration panCanAlignmentConfiguration = new PanCanAlignmentConfiguration([
+                project              : project,
+                seqType              : cmd.seqType,
+                referenceGenome      : cmd.referenceGenome,
+                statSizeFileName     : cmd.statSizeFileName,
+                mergeTool            : cmd.mergeTool,
+                pluginName           : cmd.pluginName,
+                programVersion       : cmd.programVersion,
+                baseProjectConfig    : cmd.baseProjectConfig,
+                configVersion        : cmd.config,
+                bwaMemVersion        : cmd.bwaMemVersion,
+                sambambaVersion      : cmd.sambambaVersion,
+                adapterTrimmingNeeded: cmd.adapterTrimmingNeeded,
+        ])
+        projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
+
+        flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
+        redirect(controller: "projectConfig", action: "alignment")
+    }
+
+    def copyAlignment(CopyAlignmentPipelineSubmitCommand cmd) {
+        Project project = projectSelectionService.requestedProject
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
+            flash.cmd = cmd
+            redirect(action: "alignment", params: ["seqType.id": cmd.seqType.id])
+            return
+        }
+
+        projectService.copyPanCanAlignmentXml(cmd.basedProject, project, cmd.seqType)
+        flash.message = new FlashMessage(g.message(code: "configurePipeline.copy.success") as String)
+        redirect(controller: "projectConfig", action: "alignment")
+    }
+
 
     def rnaAlignment(BaseConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline
 
-        Project project = projectSelectionService.requestedProject
+        Project project = projectSelectionService.selectedProject
         List<Project> projects = projectService.getAllProjectsWithConfigFile(cmd.seqType, pipeline)
 
         Map result = [:]
@@ -233,54 +252,65 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                         ],
                 ],
         ]
-        result << params
         result << getValues(project, cmd.seqType, pipeline)
 
         return result
     }
 
     def rnaAlignmentConfig(ConfigurePipelineSubmitCommand cmd) {
-        Map result = checkErrorsIfSubmitted(cmd, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)
-        if (!result) {
-            RoddyConfiguration rnaAlignmentConfiguration = new RoddyConfiguration([
-                    project          : projectSelectionService.requestedProject,
-                    baseProjectConfig: cmd.baseProjectConfig,
-                    seqType          : cmd.seqType,
-                    pluginName       : cmd.pluginName,
-                    programVersion   : cmd.programVersion,
-                    configVersion    : cmd.config,
-            ])
-            projectService.configureRnaAlignmentConfig(rnaAlignmentConfiguration)
-            result << [message: 'The config settings were saved successfully']
+        Project project = projectSelectionService.requestedProject
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
+            flash.cmd = cmd
+            redirect(action: "rnaAlignment")
+            return
         }
-        forward(action: "rnaAlignment", params: result)
+
+        if (!validateUniqueness(cmd, project, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)) {
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,  [g.message(code: "configurePipeline.store.failure.duplicate") as String])
+            flash.cmd = cmd
+            redirect(action: "rnaAlignment")
+            return
+        }
+
+        RoddyConfiguration rnaAlignmentConfiguration = new RoddyConfiguration([
+                project          : project,
+                baseProjectConfig: cmd.baseProjectConfig,
+                seqType          : cmd.seqType,
+                pluginName       : cmd.pluginName,
+                programVersion   : cmd.programVersion,
+                configVersion    : cmd.config,
+        ])
+        projectService.configureRnaAlignmentConfig(rnaAlignmentConfiguration)
+        flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
+        redirect(controller: "projectConfig", action: "alignment")
     }
 
     def rnaAlignmentReferenceGenome(ConfigureRnaAlignmentSubmitCommand cmd) {
-        boolean hasErrors = cmd.hasErrors()
-        Map result = [hasErrors: hasErrors]
-
-        if (hasErrors) {
-            FieldError errors = cmd.errors.getFieldError()
+        Project project = projectSelectionService.requestedProject
+        if (!cmd.validate()) {
             log.error(errors)
-            result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
-        } else {
-            RnaAlignmentReferenceGenomeConfiguration rnaConfiguration = new RnaAlignmentReferenceGenomeConfiguration([
-                    project                : projectSelectionService.requestedProject,
-                    seqType                : cmd.seqType,
-                    referenceGenome        : cmd.referenceGenome,
-                    geneModel              : cmd.geneModel,
-                    referenceGenomeIndex   : cmd.referenceGenomeIndex,
-                    mouseData              : cmd.mouseData,
-                    deprecateConfigurations: cmd.deprecateConfigurations,
-                    sampleTypes            : cmd.sampleTypeIds.collect {
-                        return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
-                    },
-            ])
-            projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
-            result << [message: 'The reference genome settings were saved successfully']
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
+            flash.cmd = cmd
+            redirect(action: "rnaAlignment")
+            return
         }
-        forward(action: "rnaAlignment", params: result)
+
+        RnaAlignmentReferenceGenomeConfiguration rnaConfiguration = new RnaAlignmentReferenceGenomeConfiguration([
+                project                : project,
+                seqType                : cmd.seqType,
+                referenceGenome        : cmd.referenceGenome,
+                geneModel              : cmd.geneModel,
+                referenceGenomeIndex   : cmd.referenceGenomeIndex,
+                mouseData              : cmd.mouseData,
+                deprecateConfigurations: cmd.deprecateConfigurations,
+                sampleTypes            : cmd.sampleTypeIds.collect {
+                    return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
+                },
+        ])
+        projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
+        flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
+        redirect(controller: "projectConfig", action: "alignment")
     }
 
     JSON getStatSizeFileNames(String referenceGenome) {
@@ -339,19 +369,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
 @ToString(includeNames = true, includeSuper = true)
 class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
-    Project basedProject
-
     String referenceGenome
     String statSizeFileName
     String mergeTool
     String bwaMemVersion
     String sambambaVersion
-    String copy
     boolean adapterTrimmingNeeded
 
     static constraints = {
-        basedProject(nullable: true)
-        copy(nullable: true)
         statSizeFileName(nullable: true, blank: false, matches:  ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN)
         bwaMemVersion(nullable: true, validator: { val, obj ->
             obj.seqType.isWgbs() ? true : val != null
@@ -360,6 +385,11 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
             obj.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA ? val != null : true
         })
     }
+}
+
+@ToString(includeNames = true, includeSuper = true)
+class CopyAlignmentPipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand implements Serializable {
+    Project basedProject
 }
 
 @ToString(includeNames = true, includeSuper = true)
