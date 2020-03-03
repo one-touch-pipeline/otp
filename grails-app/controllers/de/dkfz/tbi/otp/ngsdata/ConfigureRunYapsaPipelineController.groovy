@@ -26,7 +26,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipelineController {
 
     def update(ConfigureRunYapsaSubmitCommand cmd) {
-        updatePipeline(projectService.createOrUpdateRunYapsaConfig(cmd.project, cmd.seqType, cmd.programVersion), cmd.project, cmd.seqType)
+        updatePipeline(
+                projectService.createOrUpdateRunYapsaConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.programVersion),
+                cmd.seqType,
+        )
     }
 
     @Override

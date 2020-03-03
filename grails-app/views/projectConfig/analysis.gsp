@@ -96,7 +96,7 @@
                 <ul>
                     <g:each in="${snvSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='ConfigureSnvPipeline' params='["project.id": selectedProject.id, "seqType.id": seqType.id]' class="configure">
+                            <g:link controller='ConfigureSnvPipeline' params='["seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
@@ -128,7 +128,7 @@
                 <ul>
                     <g:each in="${indelSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='ConfigureIndelPipeline' params='["project.id": selectedProject.id, "seqType.id": seqType.id]' class="configure">
+                            <g:link controller='ConfigureIndelPipeline' params='["seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
@@ -160,7 +160,7 @@
                     <g:each in="${sophiaSeqTypes}" var="seqType">
                         <li>
                             <g:if test="${!checkSophiaReferenceGenome[seqType]}">
-                                <g:link controller='ConfigureSophiaPipeline' params='["project.id": selectedProject.id, "seqType.id": seqType.id]' class="configure">
+                                <g:link controller='ConfigureSophiaPipeline' params='["seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </g:if>
@@ -196,7 +196,7 @@
                     <g:each in="${aceseqSeqTypes}" var="seqType">
                         <li>
                             <g:if test="${!checkAceseqReferenceGenome[seqType]}">
-                                <g:link controller='ConfigureAceseqPipeline' params='["project.id": selectedProject.id, "seqType.id": seqType.id]' class="configure">
+                                <g:link controller='ConfigureAceseqPipeline' params='["seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </g:if>
@@ -231,7 +231,7 @@
                 <ul>
                     <g:each in="${runYapsaSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='configureRunYapsaPipeline' action='index' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
+                            <g:link controller='configureRunYapsaPipeline' action='index' params='["seqType.id": seqType.id]'
                                     class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>

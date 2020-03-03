@@ -28,8 +28,10 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 class ConfigureCellRangerPipelineController extends AbstractConfigureNonRoddyPipelineController {
 
     def update(ConfigureCellRangerSubmitCommand cmd) {
-        updatePipeline(projectService.createOrUpdateCellRangerConfig(cmd.project, cmd.seqType, cmd.programVersion, cmd.referenceGenomeIndex),
-                cmd.project, cmd.seqType)
+        updatePipeline(
+                projectService.createOrUpdateCellRangerConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.programVersion, cmd.referenceGenomeIndex),
+                cmd.seqType,
+        )
     }
 
     @Override

@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="configurePipeline.rnaAlignment.title" args="[project.name, seqType.displayName]"/></title>
+    <title><g:message code="configurePipeline.rnaAlignment.title" args="[selectedProject.name, seqType.displayName]"/></title>
     <asset:javascript src="pages/configurePipeline/alignment/configureAlignment.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
@@ -33,7 +33,7 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <h1 style="display: inline"><g:message code="configurePipeline.rnaAlignment.title" args="[project.name, seqType.displayName]"/></h1>
+    <h1 style="display: inline"><g:message code="configurePipeline.rnaAlignment.title" args="[selectedProject.name, seqType.displayName]"/></h1>
     <g:form controller="projectConfig" style="display: inline; float: right">
         <g:submitButton name="back" value="Back to Overview"/>
     </g:form>
@@ -49,7 +49,7 @@
     <h2><g:message code="configurePipeline.alignment.configFile"/></h2>
     <otp:annotation type="info"><g:message code="configurePipeline.info.defaultValues"/></otp:annotation>
     <g:form controller="configurePipeline" action="rnaAlignmentConfig"
-            params='["project.id": project.id, "seqType.id": seqType.id]'>
+            params='["seqType.id": seqType.id]'>
         <table class="alignmentTable">
             <tr>
                 <th></th>
@@ -94,7 +94,7 @@
     <h2><g:message code="configurePipeline.alignment.referenceGenome"/></h2>
     <otp:annotation type="info"><g:message code="configurePipeline.info.defaultValues.exceptIndexes"/></otp:annotation>
     <g:form controller="configurePipeline" action="rnaAlignmentReferenceGenome"
-            params='["project.id": project.id, "seqType.id": seqType.id]'>
+            params='["seqType.id": seqType.id]'>
         <table class="alignmentTable">
             <tr>
                 <th></th>
@@ -187,7 +187,7 @@
     <g:if test="${lastRoddyConfig}">
         <h2><g:message code="configurePipeline.last.config"/></h2>
         <g:form controller="configurePipeline" action="invalidateConfig"
-                params='["project.id": project.id, "seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
+                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
             <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
         <code style="white-space: pre-wrap">

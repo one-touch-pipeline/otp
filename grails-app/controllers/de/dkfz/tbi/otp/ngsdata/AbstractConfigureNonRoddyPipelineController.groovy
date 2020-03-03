@@ -24,32 +24,36 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 
 abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfigurePipelineController {
 
+    ProjectSelectionService projectSelectionService
+
     Map index(BaseConfigurePipelineSubmitCommand cmd) {
-        ConfigPerProjectAndSeqType config = getLatestConfig(cmd.project, cmd.seqType)
+        Project project = projectSelectionService.selectedProject
+        ConfigPerProjectAndSeqType config = getLatestConfig(project, cmd.seqType)
         String currentVersion = config?.programVersion
 
         String defaultVersion = getDefaultVersion()
         List<String> availableVersions = getAvailableVersions()
 
         return [
-                project: cmd.project,
+                project: project,
                 seqType: cmd.seqType,
                 pipeline: getPipeline(),
 
                 defaultVersion: defaultVersion,
                 currentVersion: currentVersion,
                 availableVersions: availableVersions,
-        ] + getAdditionalProperties(cmd.project, cmd.seqType)
+        ] + getAdditionalProperties(project, cmd.seqType)
     }
 
-    void updatePipeline(Errors errors, Project project, SeqType seqType) {
+    void updatePipeline(Errors errors, SeqType seqType) {
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, errors)
-            redirect action: "index", params: ['project.id': project.id, 'seqType.id': seqType.id]
+            redirect action: "index", params: ['seqType.id': seqType.id]
         } else {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
             redirect controller: "projectConfig"

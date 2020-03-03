@@ -61,13 +61,13 @@
                         <g:each in="${roddySeqTypes}" var="seqType">
                             <li>
                                 <g:if test="${seqType.isRna()}">
-                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
+                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["seqType.id": seqType.id]'
                                             class="configure">
                                         ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
                                 </g:if>
                                 <g:else>
-                                    <g:link controller='configurePipeline' action='alignment' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
+                                    <g:link controller='configurePipeline' action='alignment' params='["seqType.id": seqType.id]'
                                             class="configure">
                                         ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
@@ -124,7 +124,7 @@
                     <ul>
                         <g:each in="${cellRangerSeqTypes}" var="seqType">
                             <li>
-                                <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
+                                <g:link controller='configureCellRangerPipeline' action='index' params='["seqType.id": seqType.id]'
                                         class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
