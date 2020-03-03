@@ -29,21 +29,18 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 class ConfigureAnalysisController {
 
     ProcessingThresholdsService processingThresholdsService
-    ProjectService projectService
     ProjectSelectionService projectSelectionService
     SamplePairDeciderService samplePairDeciderService
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
 
-    Map index(AnalysisCommand cmd) {
+    Map index() {
+        Project project = projectSelectionService.selectedProject
         if (params.submit) {
-            handleSubmit(params, cmd.project)
+            handleSubmit(params, projectSelectionService.requestedProject)
         }
 
-        Map map = [
-                project: cmd.project,
-        ] + fetchData(cmd.project)
-        return map
+        return fetchData(project)
     }
 
     private handleSubmit(Map params, Project project) {
@@ -64,8 +61,6 @@ class ConfigureAnalysisController {
                 }
             }
         }
-        projectSelectionService.setSelectedProject([project], project.name)
-
         samplePairDeciderService.findOrCreateSamplePairsForProject(project)
 
         redirect(controller: "projectConfig")
@@ -89,12 +84,5 @@ class ConfigureAnalysisController {
                 groupedDiseaseTypes: groupedDiseaseTypes,
                 groupedThresholds  : groupedThresholds,
         ]
-    }
-}
-
-class AnalysisCommand implements Serializable {
-    Project project
-    static constraints = {
-        project(nullable: false)
     }
 }

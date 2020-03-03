@@ -62,7 +62,7 @@
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <ul>
                     <li>
-                        <g:link controller='configureAnalysis' params='["project.id": selectedProject.id]' class="configure">
+                        <g:link controller='configureAnalysis' class="configure">
                             ${g.message(code: 'projectOverview.analysis.link')}
                         </g:link>
                     </li>

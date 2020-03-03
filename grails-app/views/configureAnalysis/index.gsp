@@ -25,15 +25,14 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="configureAnalysis.title" args="${[project.name]}"/></title>
+    <title><g:message code="configureAnalysis.title" args="${[selectedProject.name]}"/></title>
     <asset:javascript src="configureThresholds.js"/>
 </head>
 <body>
     <div class="body">
         <div  style="clear: both">
             <g:form >
-                <input name="project.id" type="hidden" value="${project.id}"/>
-                <h1><g:message code="configureAnalysis.title" args="${[project.name]}"/></h1>
+                <h1><g:message code="configureAnalysis.title" args="${[selectedProject.name]}"/></h1>
                 <table>
                     <thead>
                         <tr>
@@ -57,16 +56,16 @@
                             <tr>
                                 <td>${sampleType.name}</td>
                                 <td width="3em">
-                                    <g:select id="" name="${project}!${sampleType.name}" class="use-select-2"
-                                              from='${categories}'
-                                              value='${groupedDiseaseTypes[sampleType.id] ?
-                                                      groupedDiseaseTypes[sampleType.id][0].category :
-                                                      de.dkfz.tbi.otp.ngsdata.SampleType.Category.UNDEFINED }'
+                                    <g:select id="" name="${selectedProject}!${sampleType.name}" class="use-select-2"
+                                               from='${categories}'
+                                               value='${groupedDiseaseTypes[sampleType.id] ?
+                                                       groupedDiseaseTypes[sampleType.id][0].category :
+                                                       de.dkfz.tbi.otp.ngsdata.SampleType.Category.UNDEFINED }'
                                     />
                                 </td>
                                 <g:each var="seqType" in="${seqTypes}">
-                                    <td width="1em"><g:textField onkeypress="return numberCheck(event);" name="${project}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!numberOfLanes" value="${groupedThresholds.get(sampleType.id)?.get(seqType.id)?.get(0)?.numberOfLanes}"/></td>
-                                    <td width="1em"><g:textField onkeypress="return numberCheck(event);" name="${project}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!coverage" value="${groupedThresholds.get(sampleType.id)?.get(seqType.id)?.get(0)?.coverage}"/></td>
+                                    <td width="1em"><g:textField onkeypress="return numberCheck(event);" name="${selectedProject}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!numberOfLanes" value="${groupedThresholds.get(sampleType.id)?.get(seqType.id)?.get(0)?.numberOfLanes}"/></td>
+                                    <td width="1em"><g:textField onkeypress="return numberCheck(event);" name="${selectedProject}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!coverage" value="${groupedThresholds.get(sampleType.id)?.get(seqType.id)?.get(0)?.coverage}"/></td>
                                 </g:each>
                             </tr>
                         </g:each>
