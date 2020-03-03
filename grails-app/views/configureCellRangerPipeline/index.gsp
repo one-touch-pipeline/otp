@@ -43,7 +43,8 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="configurePipeline.version"/></td>
-                <td><g:select name="programVersion" value="${defaultVersion}" from="${availableVersions}" noSelection="${["": "Select version"]}"/></td>
+                <td><g:select name="programVersion" class="use-select-2" style="width: 25ch"
+                              from="${availableVersions}" value="${defaultVersion}" noSelection="${["": "Select version"]}"/></td>
                 <td>${defaultVersion}</td>
                 <td><g:message code="configurePipeline.cellRanger.info"/></td>
             </tr>

@@ -43,7 +43,9 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="configurePipeline.version"/></td>
-                <td><g:select name="programVersion" value="${currentVersion}" from="${availableVersions}" noSelection="${["": "Select version"]}"/></td>
+                <td><g:select name="programVersion" class="use-select-2" style="width: 25ch"
+                              from="${availableVersions}" value="${currentVersion}"
+                              noSelection="${["": "Select version"]}"/></td>
                 <td>${defaultVersion}</td>
                 <td>&nbsp;</td>
             </tr>
