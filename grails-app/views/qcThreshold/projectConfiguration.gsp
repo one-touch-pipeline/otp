@@ -63,7 +63,7 @@
                         <td>${v.seqType?.displayNameWithLibraryLayout ?: "All sequencing types"}</td>
                         <g:form action="update">
                             <input type="hidden" name="qcThreshold.id" value="${v.projectExistingThresholds?.id}"/>
-                            <input type="hidden" name="project" value="true"/>
+                            <input type="hidden" name="forProject" value="true"/>
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
@@ -199,7 +199,7 @@
                             <g:if test="${v.projectExistingThresholds}">
                                 <g:form action="delete">
                                     <input type="hidden" name="qcThreshold.id" value="${v.projectExistingThresholds?.id}"/>
-                                    <input type="hidden" name="project" value="true"/>
+                                    <input type="hidden" name="forProject" value="true"/>
                                     <g:submitButton name="Delete"/>
                                 </g:form>
                             </g:if>
@@ -209,7 +209,7 @@
 
                 <g:form action="create">
                     <input type="hidden" name="className" value="${cl.clasz.simpleName}"/>
-                    <input type="hidden" name="project.id" value="${selectedProject.id}"/>
+                    <input type="hidden" name="forProject" value="true"/>
                     <otp:tableAdd>
                         <td>
                             <g:select id="" name="property" class="threshold use-select-2" style="min-width: ${propFieldWidth};"

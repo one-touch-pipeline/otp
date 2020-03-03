@@ -69,7 +69,9 @@ class QcThresholdController {
 
     def create(CreateCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            qcThresholdService.createThreshold(cmd.project ?: null, cmd.className, cmd.property, cmd.seqType, cmd.condition,
+            qcThresholdService.createThreshold(
+                    cmd.forProject ? projectSelectionService.requestedProject : null,
+                    cmd.className, cmd.property, cmd.seqType, cmd.condition,
                     cmd.actualErrorThresholdLower, cmd.actualWarningThresholdLower,
                     cmd.actualWarningThresholdUpper, cmd.actualErrorThresholdUpper,
                     cmd.property2 ?: null,
@@ -103,7 +105,7 @@ class QcThresholdController {
                 flash.message = new FlashMessage(g.message(code: "qcThreshold.store.succ") as String)
             }
         }
-        if (cmd.project) {
+        if (cmd.forProject) {
             redirect(action: "projectConfiguration")
         } else {
             redirect(action: "defaultConfiguration")
@@ -150,29 +152,29 @@ class AbstractCommand {
 }
 
 class CreateCommand extends AbstractCommand {
-    Project project
+    Boolean forProject
     String className
     String property
     SeqType seqType
 
     static constraints = {
-        project nullable: true
+        forProject nullable: true
         property blank: false
     }
 }
 
 class UpdateCommand extends AbstractCommand {
     QcThreshold qcThreshold
-    Boolean project
+    Boolean forProject
     static constraints = {
-        project nullable: true
+        forProject nullable: true
     }
 }
 
 class DeleteCommand {
     QcThreshold qcThreshold
-    Boolean project
+    Boolean forProject
     static constraints = {
-        project nullable: true
+        forProject nullable: true
     }
 }
