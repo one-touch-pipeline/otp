@@ -91,6 +91,7 @@ class ProjectUserController implements CheckAndCall {
     def addUserToProject(AddUserToProjectCommand cmd) {
         String message
         String errorMessage = null
+        Project project = projectSelectionService.requestedProject
         if (cmd.hasErrors()) {
             FieldError cmdErrors = cmd.errors.getFieldError()
             errorMessage = "'${cmdErrors.rejectedValue}' is not a valid value for '${cmdErrors.field}'. Error code: '${cmdErrors.code}'"
@@ -99,7 +100,7 @@ class ProjectUserController implements CheckAndCall {
             try {
                 if (cmd.addViaLdap) {
                     userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
-                            cmd.project,
+                            project,
                             ProjectRole.findByName(cmd.projectRoleName),
                             cmd.searchString,
                             [
@@ -112,7 +113,7 @@ class ProjectUserController implements CheckAndCall {
                     )
                 } else {
                     userProjectRoleService.addExternalUserToProject(
-                            cmd.project,
+                            project,
                             cmd.realName,
                             cmd.email,
                             ProjectRole.findByName(cmd.projectRoleName)
@@ -338,7 +339,6 @@ class UpdateProjectRoleCommand implements Validateable {
 }
 
 class AddUserToProjectCommand implements Serializable {
-    Project project
     boolean addViaLdap = true
 
     String searchString

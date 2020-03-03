@@ -107,10 +107,12 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
             addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _) >> null
             addExternalUserToProject(_, _, _, _) >> null
         }
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getRequestedProject() >> DomainFactory.createProject()
+        }
 
         when:
         controller.request.method = 'POST'
-        controller.params.project = DomainFactory.createProject()
         controller.params.addViaLdap = addViaLdap
         controller.params.searchString = "searchString"
         controller.params.projectRoleName = "projectRole"
@@ -142,10 +144,12 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
             addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _) >> { throw new AssertionError("internal") }
             addExternalUserToProject(_, _, _, _) >> { throw new AssertionError("external") }
         }
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getRequestedProject() >> DomainFactory.createProject()
+        }
 
         when:
         controller.request.method = 'POST'
-        controller.params.project = DomainFactory.createProject()
         controller.params.addViaLdap = addViaLdap
         controller.params.searchString = "searchString"
         controller.params.projectRoleName = "projectRole"

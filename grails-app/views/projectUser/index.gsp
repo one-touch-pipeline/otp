@@ -53,7 +53,7 @@
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
             <h2><g:message code="projectUser.addMember.action" args="[selectedProject?.name]"/></h2>
             <otp:annotation type="info"><g:message code="projectUser.annotation.delayedFileAccessChanges"/></otp:annotation>
-            <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject" params='["project": selectedProject.id]'>
+            <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject">
                 <sec:access expression="hasRole('ROLE_OPERATOR')">
                     <label class="select internal">
                         <g:radio name="addViaLdap" value="true" checked="true"/>
@@ -129,7 +129,6 @@
                         </table>
                     </div>
                 </sec:access>
-                <input type="hidden" name="projectName" value="${selectedProject}">
                 <div class="submit-container">
                     <div>
                         <input id="add-button" type="submit" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"
