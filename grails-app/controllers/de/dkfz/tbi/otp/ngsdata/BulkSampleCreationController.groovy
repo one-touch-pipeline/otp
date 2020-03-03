@@ -21,8 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 class BulkSampleCreationController {
@@ -34,6 +33,7 @@ class BulkSampleCreationController {
     ]
 
     CommentService commentService
+    ProjectSelectionService projectSelectionService
     SampleIdentifierService sampleIdentifierService
 
     Map index() {
@@ -66,7 +66,7 @@ class BulkSampleCreationController {
                 List<String> errors = sampleIdentifierService.createBulkSamples(
                         sampleIdentifierService.removeExcessWhitespaceFromCharacterDelimitedText(cmd.sampleText, cmd.delimiter),
                         cmd.delimiter,
-                        cmd.project,
+                        projectSelectionService.requestedProject,
                         cmd.referenceGenomeSource,
                 )
 
@@ -84,7 +84,6 @@ class BulkSampleCreationController {
 
 class CreateBulkSampleCreationCommand {
     Spreadsheet.Delimiter delimiter
-    Project project
     String sampleText
     Boolean createMissingSampleTypes
     SampleType.SpecificReferenceGenome referenceGenomeSource

@@ -99,7 +99,6 @@
                 </tr>
                 <tr>
                     <td colspan="3">
-                        <input type="hidden" value="${selectedProject.id}" name="project"/>
                         <g:submitButton name="Submit"/>
                     </td>
                 </tr>
