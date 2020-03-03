@@ -65,7 +65,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'dirAnalysis'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'dirAnalysis'])}"
                                 value="${selectedProject.dirAnalysis}"/>
                     </td>
                 </tr>
@@ -89,7 +89,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="textArea"
-                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'description'])}"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'description'])}"
                                     value="${selectedProject.description}"/>
                         </div>
                     </td>
@@ -100,7 +100,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'relatedProjects'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'relatedProjects'])}"
                                 value="${selectedProject.relatedProjects}"/>
                     </td>
                 </tr>
@@ -111,7 +111,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectConfig", action: 'updateTumorEntity', params: ['project.id': selectedProject.id, 'fieldName': 'tumorEntity'])}"
+                                link="${g.createLink(controller: "projectConfig", action: 'updateTumorEntity', params: ['fieldName': 'tumorEntity'])}"
                                 noSelection="${['': 'None']}"
                                 values="${tumorEntities}"
                                 value="${selectedProject.tumorEntity}"/>
@@ -124,7 +124,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectConfig", action: 'updateSpeciesWithStrain', params: ['project.id': selectedProject.id, 'fieldName': 'speciesWithStrain'])}"
+                                link="${g.createLink(controller: "projectConfig", action: 'updateSpeciesWithStrain', params: ['fieldName': 'speciesWithStrain'])}"
                                 optionKey="id"
                                 noSelection="${['': 'None']}"
                                 values="${allSpeciesWithStrain}"
@@ -137,7 +137,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'unixGroup'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'unixGroup'])}"
                                 value="${selectedProject.unixGroup}"/>
                     </td>
                 </tr>
@@ -147,7 +147,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'costCenter'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'costCenter'])}"
                                 value="${selectedProject.costCenter}"/>
                     </td>
                 </tr>
@@ -157,7 +157,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'organizationalUnit'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'organizationalUnit'])}"
                                 value="${selectedProject.organizationalUnit}"/>
                     </td>
                 </tr>
@@ -167,7 +167,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'fundingBody'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'fundingBody'])}"
                                 value="${selectedProject.fundingBody}"/>
                     </td>
                 </tr>
@@ -177,7 +177,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'grantId'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'grantId'])}"
                                 value="${selectedProject.grantId}"/>
                     </td>
                 </tr>
@@ -188,7 +188,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectConfig", action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'projectType'])}"
+                                link="${g.createLink(controller: "projectConfig", action: 'updateProjectField', params: ['fieldName': 'projectType'])}"
                                 values="${projectTypes}"
                                 value="${selectedProject.projectType}"/>
                     </td>
@@ -200,7 +200,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateCopyFiles', params: ['project.id': selectedProject.id, 'fieldName': 'forceCopyFiles'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateCopyFiles', params: ['fieldName': 'forceCopyFiles'])}"
                                 values="${["true", "false"]}"
                                 value="${selectedProject.forceCopyFiles}"/>
                     </td>
@@ -223,7 +223,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="date"
-                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': selectedProject.id, 'fieldName': 'endDate'])}"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['fieldName': 'endDate'])}"
                                     value="${selectedProject.endDate}"/>
                         </sec:ifAllGranted>
                         <sec:ifNotGranted roles="ROLE_OPERATOR">
@@ -239,7 +239,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="date"
-                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': selectedProject.id, 'fieldName': 'storageUntil'])}"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['fieldName': 'storageUntil'])}"
                                     value="${selectedProject.storageUntil}"/>
                         </sec:ifAllGranted>
                         <sec:ifNotGranted roles="ROLE_OPERATOR">
@@ -253,7 +253,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'nameInMetadataFiles'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'nameInMetadataFiles'])}"
                                 value="${selectedProject.nameInMetadataFiles}"/>
                     </td>
                 </tr>
@@ -264,7 +264,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingPriority', params: ['project.id': selectedProject.id, 'fieldName': 'processingPriority'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingPriority', params: ['fieldName': 'processingPriority'])}"
                                 values="${processingPriorities}"
                                 value="${processingPriority ?: ""}"/>
                     </td>
@@ -275,7 +275,7 @@
                     <td><otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="dropDown"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectGroup', params: ['project.id': selectedProject.id, 'fieldName': 'projectGroup'])}"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectGroup', params: ['fieldName': 'projectGroup'])}"
                             noSelection="['':'None']"
                             values="${allProjectGroups}"
                             value="${selectedProject.projectGroup}"/>
@@ -288,7 +288,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateSampleIdentifierParserBeanName', params: ['project.id': selectedProject.id, 'fieldName': 'sampleIdentifierParserBeanName'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateSampleIdentifierParserBeanName', params: ['fieldName': 'sampleIdentifierParserBeanName'])}"
                                 values="${sampleIdentifierParserBeanNames}"
                                 value="${selectedProject.sampleIdentifierParserBeanName}"/>
                     </td>
@@ -300,7 +300,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateQcThresholdHandling', params: ['project.id': selectedProject.id, 'fieldName': 'qcThresholdHandling'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateQcThresholdHandling', params: ['fieldName': 'qcThresholdHandling'])}"
                                 values="${qcThresholdHandlingDropdown}"
                                 value="${selectedProject.qcThresholdHandling}"/>
                     </td>
@@ -312,7 +312,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateFingerPrinting', id: selectedProject.id)}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateFingerPrinting')}"
                                 values="${["true", "false"]}"
                                 value="${selectedProject.fingerPrinting}"/>
                     </td>
@@ -324,7 +324,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingNotification', id: selectedProject.id)}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingNotification')}"
                                 values="${["true", "false"]}"
                                 value="${selectedProject.processingNotification}"/>
                     </td>
@@ -336,7 +336,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateQcTrafficLightNotification', id: selectedProject.id)}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateQcTrafficLightNotification')}"
                                 values="${["true", "false"]}"
                                 value="${selectedProject.qcTrafficLightNotification}"/>
                     </td>
@@ -348,7 +348,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateCustomFinalNotification', id: selectedProject.id)}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateCustomFinalNotification')}"
                                 values="${["true", "false"]}"
                                 value="${selectedProject.customFinalNotification}"/>
                     </td>
@@ -360,7 +360,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: "updateClosed", params: ['project.id': selectedProject.id, 'fieldName': 'closed'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateClosed", params: ['fieldName': 'closed'])}"
                                 values="${["true", "false"]}"
                                 value="${closed}"/>
                     </td>
@@ -374,7 +374,7 @@
                                 <otp:editorSwitch
                                         roles="ROLE_OPERATOR"
                                         template="textArea"
-                                        link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': selectedProject.id, 'fieldName': 'internalNotes'])}"
+                                        link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'internalNotes'])}"
                                         value="${selectedProject.internalNotes}"/>
                             </div>
                         </td>

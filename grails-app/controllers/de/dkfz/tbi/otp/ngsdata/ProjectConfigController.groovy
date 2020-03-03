@@ -166,61 +166,61 @@ class ProjectConfigController implements CheckAndCall {
 
     JSON updateProjectField(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project)
+            projectService.updateProjectField(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateProjectFieldDate(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, cmd.project)
+            projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateProcessingPriority(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(ProcessingPriority.valueOf(cmd.value).priority, cmd.fieldName, cmd.project)
+            projectService.updateProjectField(ProcessingPriority.valueOf(cmd.value).priority, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateSpeciesWithStrain(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateProjectGroup(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateQcThresholdHandling(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(QcThresholdHandling.valueOf(cmd.value), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(QcThresholdHandling.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateCopyFiles(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     JSON updateClosed(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
+            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
@@ -231,34 +231,26 @@ class ProjectConfigController implements CheckAndCall {
         render dataToRender as JSON
     }
 
-    JSON updateFingerPrinting(Long id, String value) {
-        assert id
-        Project project = Project.get(id)
-        projectService.updateFingerPrinting(project, value.toBoolean())
+    JSON updateFingerPrinting(String value) {
+        projectService.updateFingerPrinting(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateProcessingNotification(Long id, String value) {
-        assert id
-        Project project = Project.get(id)
-        projectService.updateProcessingNotification(project, value.toBoolean())
+    JSON updateProcessingNotification(String value) {
+        projectService.updateProcessingNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateQcTrafficLightNotification(Long id, String value) {
-        assert id
-        Project project = Project.get(id)
-        projectService.updateQcTrafficLightNotification(project, value.toBoolean())
+    JSON updateQcTrafficLightNotification(String value) {
+        projectService.updateQcTrafficLightNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateCustomFinalNotification(Long id, String value) {
-        assert id
-        Project project = Project.get(id)
-        projectService.updateCustomFinalNotification(project, value.toBoolean())
+    JSON updateCustomFinalNotification(String value) {
+        projectService.updateCustomFinalNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
@@ -375,7 +367,6 @@ class ProjectConfigController implements CheckAndCall {
 }
 
 class UpdateProjectCommand implements Validateable {
-    Project project
     String value
     String fieldName
 
