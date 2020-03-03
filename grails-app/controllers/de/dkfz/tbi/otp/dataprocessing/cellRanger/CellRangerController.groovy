@@ -118,7 +118,7 @@ class CellRangerController {
                 expectedCells,
                 enforcedCells,
                 cmd.referenceGenomeIndex,
-                cmd.project,
+                projectSelectionService.requestedProject,
                 cmd.individual,
                 cmd.sampleType,
                 cmd.seqType,
@@ -226,7 +226,6 @@ class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
     String expectedOrEnforcedCells
     String expectedOrEnforcedCellsValue
     ReferenceGenomeIndex referenceGenomeIndex
-    Project project
     SeqType seqType
 
     static constraints = {

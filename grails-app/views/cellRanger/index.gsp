@@ -56,7 +56,6 @@
             <g:if test="${samples}">
                 <h3>${g.message(code: "cellRanger.header.create")}:</h3>
                 <g:form action="create">
-                    <input type="hidden" name="project.id" value="${selectedProject?.id}"/>
                     <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
                     <input type="hidden" name="individual.id" value="${individual?.id}"/>
 
