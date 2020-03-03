@@ -77,10 +77,12 @@
             <td>${g.message(code: "project.relatedProjects")}</td>
             <td>${projectRequest.relatedProjects}</td>
         </tr>
+        %{--
         <tr>
             <td>${g.message(code: "project.tumorEntity")}</td>
             <td>${projectRequest.tumorEntity}</td>
         </tr>
+        --}%
         <tr>
             <td>${g.message(code: "project.speciesWithStrain")}</td>
             <td>${projectRequest.speciesWithStrain}</td>
@@ -104,6 +106,10 @@
         <tr>
             <td>${g.message(code: "projectRequest.comments")}</td>
             <td>${projectRequest.comments}</td>
+        </tr>
+        <tr>
+            <td>${g.message(code: "projectRequest.pi")}</td>
+            <td>${projectRequest.pi}</td>
         </tr>
         <tr>
             <td>${g.message(code: "projectRequest.deputyPi")}</td>
