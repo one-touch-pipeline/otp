@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.IlseSubmission
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
@@ -86,7 +87,7 @@ class QcTrafficLightNotificationService {
                         bamFile              : bamFile,
                         link                 : createNotificationTextService.createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index'),
                         emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
-                        thresholdPage        : linkGenerator.link(controller: 'qcThreshold', action: 'projectConfiguration', absolute: true, params: ['project': bamFile.project,]),
+                        thresholdPage        : linkGenerator.link(controller: 'qcThreshold', action: 'projectConfiguration', absolute: true, params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): bamFile.project,]),
                         faq                  : faq,
                 ]
         )

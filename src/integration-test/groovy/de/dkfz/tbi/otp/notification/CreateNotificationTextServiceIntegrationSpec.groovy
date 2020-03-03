@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -88,9 +89,9 @@ faq:${faq}
         ]
 
         String expected = [
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?project=project2",
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?project=project3",
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?project=project5",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project2",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project3",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project5",
         ].join('\n')
 
         expect:

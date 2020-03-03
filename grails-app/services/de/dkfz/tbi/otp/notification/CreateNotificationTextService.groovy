@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -334,7 +335,7 @@ class CreateNotificationTextService {
                     action    : action,
                     absolute  : true,
                     params    : [
-                            'project': it,
+                            (ProjectSelectionService.PROJECT_SELECTION_PARAMETER): it,
                     ]
             ])
         }.join('\n')
