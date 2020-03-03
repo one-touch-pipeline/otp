@@ -54,9 +54,10 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ProjectInfo createProjectInfoAndUploadFile(AddProjectInfoCommand cmd) {
+    ProjectInfo createProjectInfoAndUploadFile(Project project, AddProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()
+        assert project : "project must not be null"
         ProjectInfo projectInfo = new ProjectInfo(
                 fileName: cmd.projectInfoFile.originalFilename,
                 comment : cmd.comment,
@@ -69,8 +70,8 @@ class ProjectInfoService {
             projectInfo.validityDate = cmd.validityDate
         }
 
-        cmd.project.addToProjectInfos(projectInfo)
-        cmd.project.save(flush: true)
+        project.addToProjectInfos(projectInfo)
+        project.save(flush: true)
         projectInfo.save(flush: true)
 
         uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)

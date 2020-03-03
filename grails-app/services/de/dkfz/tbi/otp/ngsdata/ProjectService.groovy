@@ -216,7 +216,7 @@ class ProjectService {
         }
 
         if (projectParams.projectInfoFile) {
-            projectInfoService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
+            projectInfoService.createProjectInfoAndUploadFile(project, new AddProjectInfoCommand(projectInfoFile: projectParams.projectInfoFile))
         }
         if (projectParams.projectInfoToCopy) {
             Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(projectParams.projectInfoToCopy.getPath())

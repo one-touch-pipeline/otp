@@ -32,6 +32,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
@@ -102,12 +103,12 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         setupData()
         Project project = createProject()
 
-        AddProjectInfoCommand cmd = createAddProjectInfoCommand(project: project)
+        AddProjectInfoCommand cmd = createAddProjectInfoCommand()
         ProjectInfo projectInfo
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfo = projectInfoService.createProjectInfoAndUploadFile(cmd)
+            projectInfo = projectInfoService.createProjectInfoAndUploadFile(project, cmd)
         }
 
         then:
@@ -126,8 +127,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfo1 = projectInfoService.createProjectInfoAndUploadFile(cmd1)
-            projectInfo2 = projectInfoService.createProjectInfoAndUploadFile(cmd2)
+            projectInfo1 = projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd1)
+            projectInfo2 = projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd2)
         }
 
         then:
@@ -141,13 +142,14 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         Project project = createProject()
         MockMultipartFile file = createMultipartFile()
-        AddProjectInfoCommand cmd1 = createAddProjectInfoCommand(project: project, projectInfoFile: file)
-        AddProjectInfoCommand cmd2 = createAddProjectInfoCommand(project: project, projectInfoFile: file)
+        ProjectSelectionService projectSelectionService = [getRequestedProject: { -> project }] as ProjectSelectionService
+        AddProjectInfoCommand cmd1 = createAddProjectInfoCommand(projectSelectionService: projectSelectionService, projectInfoFile: file)
+        AddProjectInfoCommand cmd2 = createAddProjectInfoCommand(projectSelectionService: projectSelectionService, projectInfoFile: file)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfoService.createProjectInfoAndUploadFile(cmd1)
-            projectInfoService.createProjectInfoAndUploadFile(cmd2)
+            projectInfoService.createProjectInfoAndUploadFile(project, cmd1)
+            projectInfoService.createProjectInfoAndUploadFile(project, cmd2)
         }
 
         then:
@@ -163,7 +165,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectInfoService.createProjectInfoAndUploadFile(createAddProjectInfoCommand(project: project, projectInfoFile: file))
+            projectInfoService.createProjectInfoAndUploadFile(project, createAddProjectInfoCommand(projectInfoFile: file))
         }
 
         then:
@@ -178,25 +180,26 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         given:
         setupData()
         AddProjectInfoCommand cmd = createAddProjectInfoCommand()
+        Project project = createProject()
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectInfoService.createProjectInfoAndUploadFile(cmd)
+            projectInfoService.createProjectInfoAndUploadFile(project, cmd)
         }
 
         then:
-        Path projectInfoFile = Paths.get(cmd.project.projectDirectory.absolutePath, ProjectService.PROJECT_INFO, cmd.projectInfoFile.name)
+        Path projectInfoFile = Paths.get(project.projectDirectory.absolutePath, ProjectService.PROJECT_INFO, cmd.projectInfoFile.name)
         PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
 
         projectInfoFile.bytes == cmd.projectInfoFile.bytes
         TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
 
-        cmd.project.refresh()
-        cmd.project.projectInfos.size() == 1
+        project.refresh()
+        project.projectInfos.size() == 1
 
-        ProjectInfo projectInfo = cmd.project.projectInfos.first()
+        ProjectInfo projectInfo = project.projectInfos.first()
         projectInfo.refresh()
-        projectInfo.project == cmd.project
+        projectInfo.project == project
         projectInfo.fileName == cmd.projectInfoFile.originalFilename
         projectInfo.dtaId == cmd.dtaId
         projectInfo.peerInstitution == cmd.peerInstitution
@@ -215,7 +218,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectInfoService.createProjectInfoAndUploadFile(cmd)
+            projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd)
         }
 
         then:
@@ -242,7 +245,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectInfoService.createProjectInfoAndUploadFile(cmd)
+            projectInfoService.createProjectInfoAndUploadFile(createProject(), cmd)
         }
 
         then:
@@ -251,8 +254,22 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         where:
         property          | value || constraint
-        'project'         | null  || 'nullable'
         'projectInfoFile' | null  || 'nullable'
+    }
+
+    void "createProjectInfoAndUploadFile, when project is null, then fail"() {
+        given:
+        setupData()
+        AddProjectInfoCommand cmd = createAddProjectInfoCommand()
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectInfoService.createProjectInfoAndUploadFile(null, cmd)
+        }
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ /.*project must not be null.*/
     }
 
     void "add and remove a project info with createProjectInfoAndUploadFile and deleteProjectInfo"() {
@@ -264,7 +281,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectInfoService.createProjectInfoAndUploadFile(createAddProjectInfoCommand(project: project, projectInfoFile: file))
+            projectInfoService.createProjectInfoAndUploadFile(project, createAddProjectInfoCommand(projectInfoFile: file))
             projectInfoContent = projectInfoService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
         }
 
@@ -430,13 +447,13 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
     AddProjectInfoCommand createAddProjectInfoCommand(Map properties = [:]) {
         return new AddProjectInfoCommand([
-                project        : createProject(),
-                projectInfoFile: createMultipartFile(),
-                comment        : "comment_${nextId}",
-                dtaId          : "dtaId_${nextId}",
-                legalBasis     : ProjectInfo.LegalBasis.DTA,
-                peerInstitution: "peerInstitution_${nextId}",
-                validityDate   : new Date(),
+                projectSelectionService: [getRequestedProject: { -> }] as ProjectSelectionService,
+                projectInfoFile        : createMultipartFile(),
+                comment                : "comment_${nextId}",
+                dtaId                  : "dtaId_${nextId}",
+                legalBasis             : ProjectInfo.LegalBasis.DTA,
+                peerInstitution        : "peerInstitution_${nextId}",
+                validityDate           : new Date(),
         ] + properties)
     }
 

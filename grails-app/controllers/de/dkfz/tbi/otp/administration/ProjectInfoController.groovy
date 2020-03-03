@@ -82,7 +82,7 @@ class ProjectInfoController implements CheckAndCall {
                 flash.docCmd = cmd
             } else {
                 try {
-                    projectInfo = projectInfoService.createProjectInfoAndUploadFile(cmd)
+                    projectInfo = projectInfoService.createProjectInfoAndUploadFile(projectSelectionService.requestedProject, cmd)
                     redirectParams["fragment"] = "doc${projectInfo.id}"
                 } catch (Exception e) {
                     log.error(e.message, e)
@@ -221,7 +221,8 @@ class UpdateDataTransferCommentCommand extends DataTransferCommand {
 }
 
 class AddProjectInfoCommand implements Validateable {
-    Project project
+    ProjectSelectionService projectSelectionService
+
     MultipartFile projectInfoFile
     String comment
 
@@ -246,7 +247,7 @@ class AddProjectInfoCommand implements Validateable {
             if (!OtpPath.isValidPathComponent(val.originalFilename)) {
                 return "invalid.name"
             }
-            if (ProjectInfo.findAllByProjectAndFileName(obj.project, val.originalFilename).size() != 0) {
+            if (ProjectInfo.findAllByProjectAndFileName(obj.projectSelectionService.requestedProject, val.originalFilename).size() != 0) {
                 return "duplicate"
             }
             if (val.size > ProjectService.PROJECT_INFO_MAX_SIZE) {

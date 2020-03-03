@@ -455,7 +455,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             }
         }
         projectService.projectInfoService = Mock(ProjectInfoService) {
-            1 * createProjectInfoAndUploadFile(_)
+            1 * createProjectInfoAndUploadFile(_, _)
         }
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME

@@ -51,7 +51,6 @@
                             <td><g:textArea name="comment" rows="3" value="${docCmd?.comment}"/></td>
                         </tr>
                     </table>
-                    <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <g:submitButton name="${g.message(code: "projectInfo.upload.add")}"/>
                 </g:uploadForm>
             </div>
@@ -93,7 +92,6 @@
             <h2><g:message code="projectInfo.dta.header.upload"/></h2>
             <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
-                    <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <table class="key-value-table key-input">
                         <tr>
                             <td><g:message code="projectInfo.upload.path"/></td>
