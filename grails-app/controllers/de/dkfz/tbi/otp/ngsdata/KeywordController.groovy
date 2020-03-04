@@ -53,7 +53,7 @@ class KeywordController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "keyword.index.failure") as String, cmd.getErrors())
         } else {
-            keywordService.createOrAddKeyword(cmd.value, cmd.project)
+            keywordService.createOrAddKeyword(cmd.value, projectSelectionService.requestedProject)
             flash.message = new FlashMessage(g.message(code: "keyword.index.success") as String)
         }
         redirect(action: "index")
@@ -63,7 +63,7 @@ class KeywordController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordFailure") as String, cmd.getErrors())
         } else {
-            keywordService.addKeywordToProject(cmd.keyword, cmd.project)
+            keywordService.addKeywordToProject(cmd.keyword, projectSelectionService.requestedProject)
             flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordSuccess") as String)
         }
         redirect(action: "index")
@@ -73,7 +73,7 @@ class KeywordController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordFailure") as String, cmd.getErrors())
         } else {
-            keywordService.removeKeywordFromProject(cmd.keyword, cmd.project)
+            keywordService.removeKeywordFromProject(cmd.keyword, projectSelectionService.requestedProject)
             flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordSuccess") as String)
         }
         redirect(action: "index")
@@ -82,7 +82,6 @@ class KeywordController implements CheckAndCall {
 
 class AddKeywordByNameCommand implements Validateable {
     String value
-    Project project
 
     static constraints = {
         value blank: false, size: 1..255
@@ -95,14 +94,14 @@ class AddKeywordByNameCommand implements Validateable {
 
 class KeywordCommand implements Validateable {
     Keyword keyword
-    Project project
 }
 
 class AddKeywordCommand extends KeywordCommand {
+    ProjectSelectionService projectSelectionService
 
     static constraints = {
         keyword validator: { val, obj ->
-            if (val in obj.project.keywords) {
+            if (val in obj.projectSelectionService.requestedProject?.keywords) {
                 return "already.contained"
             }
         }

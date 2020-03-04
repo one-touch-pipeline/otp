@@ -52,7 +52,6 @@
                 <ul>
                     <li>
                         <g:form controller="keyword" action="createOrAdd">
-                            <input type="hidden" value="${selectedProject.id}" name="project">
                             <g:textField list="keywordList" name="value" size="30" autofocus="true" required="true" autocomplete="off"/>
                             <datalist id="keywordList">
                                 <g:each in="${availableKeywords}" var="keyword">
@@ -64,7 +63,7 @@
                     </li>
                     <g:if test="${projectKeywords}">
                         <g:each var="keyword" in="${projectKeywords}">
-                            <li><g:render template="keywordListItem" model="[keyword: keyword, project: selectedProject, action: 'remove']"/></li>
+                            <li><g:render template="keywordListItem" model="[keyword: keyword, selectedProject: selectedProject, action: 'remove']"/></li>
                         </g:each>
                     </g:if>
                     <g:else>
@@ -78,7 +77,7 @@
             <div class="scrollable-keyword-list">
                 <ul>
                     <g:each in="${availableKeywords}" var="keyword">
-                        <li><g:render template="keywordListItem" model="[keyword: keyword, project: selectedProject, action: 'add']"/></li>
+                        <li><g:render template="keywordListItem" model="[keyword: keyword, selectedProject: selectedProject, action: 'add']"/></li>
                     </g:each>
                 </ul>
             </div>
