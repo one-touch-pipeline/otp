@@ -24,7 +24,7 @@
 <html>
 <head>
     <meta name="layout" content="main"/>
-    <title>${g.message(code: "mergingCriteria.title", args: [project.name])}</title>
+    <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</title>
 </head>
 
 <body>
@@ -32,7 +32,7 @@
     <g:render template="/templates/messages"/>
 
     <g:link controller="projectConfig"> Back to project configuration</g:link>
-    <h1>${g.message(code: "mergingCriteria.title", args: [project.name])}</h1>
+    <h1>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</h1>
 
     <g:form action="update">
         <table>
@@ -76,7 +76,6 @@
                 </td>
                 <td>
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
-                        <g:hiddenField name="project.id" value="${project.id}"/>
                         <g:hiddenField name="seqType.id" value="${seqType.id}"/>
                         <g:submitButton name="Submit"/>
                     </sec:ifAllGranted>

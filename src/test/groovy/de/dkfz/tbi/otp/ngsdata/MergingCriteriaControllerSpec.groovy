@@ -27,6 +27,7 @@ import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.security.*
@@ -62,17 +63,18 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         setupData()
 
         Project project = DomainFactory.createProject()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getSelectedProject() >> project
+        }
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
-        controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         def model
         model = controller.projectAndSeqTypeSpecific()
 
         then:
         controller.response.status == 200
-        model.project == project
         model.seqType == seqType
         model.mergingCriteria instanceof MergingCriteria
         model.mergingCriteria.project == null
@@ -84,18 +86,19 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         setupData()
 
         Project project = DomainFactory.createProject()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getSelectedProject() >> project
+        }
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
 
         when:
-        controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         def model
         model = controller.projectAndSeqTypeSpecific()
 
         then:
         controller.response.status == 200
-        model.project == project
         model.seqType == seqType
         model.mergingCriteria == mergingCriteria
     }
@@ -104,11 +107,12 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getSelectedProject() >> DomainFactory.createProject()
+        }
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
-        controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         controller.projectAndSeqTypeSpecific()
 
@@ -132,10 +136,12 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         setupData()
 
         Project project = DomainFactory.createProject()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getRequestedProject() >> project
+        }
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
-        controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         controller.params.useLibPrepKit = "on"
         controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
@@ -143,7 +149,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${project.id}&seqType.id=${seqType.id}"
+        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${seqType.id}"
         MergingCriteria mergingCriteria = MergingCriteria.findByProjectAndSeqType(project, seqType)
         mergingCriteria
         mergingCriteria.useLibPrepKit
@@ -155,18 +161,20 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         setupData()
 
         Project project = DomainFactory.createProject()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            getRequestedProject() >> project
+        }
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
 
         when:
-        controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         controller.update()
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${project.id}&seqType.id=${seqType.id}"
+        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${seqType.id}"
         mergingCriteria
         !mergingCriteria.useLibPrepKit
         mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
@@ -191,7 +199,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         then:
         controller.response.status == 302
         controller.response.redirectedUrl ==
-                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${group.mergingCriteria.project.id}&seqType.id=${group.mergingCriteria.seqType.id}"
+                "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${group.mergingCriteria.seqType.id}"
         !group.seqPlatforms.contains(seqPlatform1)
         group.seqPlatforms.contains(seqPlatform2)
     }
@@ -211,7 +219,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         then:
         controller.response.status == 302
         controller.response.redirectedUrl ==
-                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${group.mergingCriteria.project.id}&seqType.id=${group.mergingCriteria.seqType.id}"
+                "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${group.mergingCriteria.seqType.id}"
         group.seqPlatforms.contains(seqPlatform)
     }
 
@@ -232,7 +240,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         then:
         controller.response.status == 302
         controller.response.redirectedUrl ==
-                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
+                "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${mergingCriteria.seqType.id}"
         SeqPlatformGroup.list().size() == 1
         SeqPlatformGroup.list().first().seqPlatforms.contains(seqPlatform)
         SeqPlatformGroup.list().first().mergingCriteria == mergingCriteria
@@ -267,7 +275,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${seqPlatformGroup.mergingCriteria.project.id}&" +
+        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?" +
                 "seqType.id=${seqPlatformGroup.mergingCriteria.seqType.id}"
         SeqPlatformGroup.list().size() == 1
         !SeqPlatformGroup.list().first().seqPlatforms
@@ -292,7 +300,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         then:
         controller.response.status == 302
         controller.response.redirectedUrl ==
-                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
+                "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${mergingCriteria.seqType.id}"
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 1
         SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
     }
@@ -317,7 +325,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         then:
         controller.response.status == 302
         controller.response.redirectedUrl ==
-                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
+                "/mergingCriteria/projectAndSeqTypeSpecific?seqType.id=${mergingCriteria.seqType.id}"
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 2
         CollectionUtils.containSame(SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)*.seqPlatforms, [[seqPlatform] as Set, [seqPlatform1] as Set])
     }

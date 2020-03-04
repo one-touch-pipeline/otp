@@ -101,7 +101,7 @@
                     <tr>
                         <td>
                             <g:link controller="mergingCriteria" action="projectAndSeqTypeSpecific"
-                                    params='["project.id": selectedProject.id, "seqType.id": m.key.id]'>
+                                    params='["seqType.id": m.key.id]'>
                                 ${m.key}
                             </g:link>
                         </td>
