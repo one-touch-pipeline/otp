@@ -91,7 +91,7 @@ $.otp.individual = {
                                     controller: 'projectOverview',
                                     action: 'index',
                                     parameters: {
-                                                project: row.project
+                                                [$.otp.projectParameter]: row.project
                                     },
                                     text: row.project
                                 }),

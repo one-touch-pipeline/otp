@@ -90,7 +90,7 @@
                         <td class="myValue">
                             <g:link controller="projectOverview"
                                     action="index"
-                                    params="[project: individual.project]">${individual.project.displayName}</g:link>
+                                    params="[(projectParameter): individual.project.name]">${individual.project.displayName}</g:link>
                         </td>
                     </tr>
                 </table>

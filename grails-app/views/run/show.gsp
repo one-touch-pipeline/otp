@@ -109,7 +109,7 @@
                     <td>-</td>
                     <td>s</td>
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                    <td><b><g:link controller="projectOverview" action="index" params="[project: file.project]">${file.project}</g:link></b></td>
+                    <td><b><g:link controller="projectOverview" action="index" params="[(projectParameter): file.project.name]">${file.project}</g:link></b></td>
                     <td class="true">metadata</td>
                     <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">view-by-pid</td>

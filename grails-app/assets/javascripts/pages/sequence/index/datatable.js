@@ -119,7 +119,7 @@ $.otp.sequence = {
                                     controller: 'projectOverview',
                                     action: 'index',
                                     parameters: {
-                                        project: row.projectName
+                                        [$.otp.projectParameter]: row.projectName
                                     },
                                     text: row.projectName,
                                     title: row.projectName

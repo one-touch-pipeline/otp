@@ -44,7 +44,7 @@
                 <table>
                     <g:each var="entry" in="${projectQuery}">
                         <tr>
-                            <td><b><g:link controller="projectOverview" action="index" params="[project: entry.key]">${entry.value['displayName']}</g:link></b></td>
+                            <td><b><g:link controller="projectOverview" action="index" params="[(projectParameter): entry.key]">${entry.value['displayName']}</g:link></b></td>
                             <td><b>${entry.value['seqTypes']}</b><td>
                         </tr>
                     </g:each>

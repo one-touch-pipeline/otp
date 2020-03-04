@@ -77,7 +77,7 @@ on the general cluster job page
                         <td><g:message code="jobstats.jobSpecific.detail.table.attribute.project"/></td>
                         <td>
                             <g:if test="${individual != null}">
-                                <g:link controller="projectOverview" action="index" params="[project: individual.project]">${individual.project}</g:link>
+                                <g:link controller="projectOverview" action="index" params="[(projectParameter): individual.project.name]">${individual.project}</g:link>
                             </g:if>
                         </td>
                     </tr>

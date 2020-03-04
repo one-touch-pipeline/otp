@@ -84,7 +84,7 @@
                 <g:each var="userProjectRole" in="${userProjectRoles}">
                     <tr>
                         <td>
-                            <g:link controller="projectUser" action="index" params="['project': userProjectRole.project.name]">
+                            <g:link controller="projectUser" action="index" params="[(projectParameter): userProjectRole.project.name]">
                                 ${userProjectRole.project.name}
                             </g:link>
                         </td>

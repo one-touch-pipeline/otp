@@ -28,6 +28,7 @@ import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
@@ -122,7 +123,7 @@ class ProjectCreationController {
         } else {
             Project project = projectService.createProject(cmd)
             flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
-            redirect(controller: "projectConfig", params: [project: project.name])
+            redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
         }
     }
 }
