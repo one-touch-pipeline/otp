@@ -24,7 +24,7 @@
 <html>
 <head>
     <meta name="layout" content="main"/>
-    <title><g:message code="qcThreshold.title2" args="${[project.name]}"/></title>
+    <title><g:message code="qcThreshold.title2" args="${[selectedProject.name]}"/></title>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 
@@ -33,7 +33,7 @@
     <g:render template="/templates/messages"/>
 
     <div>
-        <h1>${g.message(code: "qcThreshold.title2", args: [project.name])}</h1>
+        <h1>${g.message(code: "qcThreshold.title2", args: [selectedProject.name])}</h1>
         <otp:annotation type="info">${g.message(code: "qcThreshold.noticeProject")}</otp:annotation>
         <table>
 
@@ -199,7 +199,7 @@
                 </g:each>
                 <g:form action="create">
                     <input type="hidden" name="className" value="${cl.clasz.simpleName}"/>
-                    <input type="hidden" name="project.id" value="${project.id}"/>
+                    <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <otp:tableAdd>
                         <td>
                             <g:select class="threshold" name="property" from="${cl.availableThresholdProperties}"

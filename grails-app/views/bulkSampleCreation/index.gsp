@@ -44,7 +44,7 @@
             <tbody>
             <tr>
                 <td><span class="table-column-header"><g:message code="individual.insert.project"/></span></td>
-                <td>${project}</td>
+                <td>${selectedProject}</td>
                 <td><b><g:message code="bulk.sample.creation.multipleProjects"/></b></td>
             </tr>
             <tr>
@@ -98,7 +98,7 @@
                 </tr>
                 <tr>
                     <td colspan="3">
-                        <input type="hidden" value="${project.id}" name="project"/>
+                        <input type="hidden" value="${selectedProject.id}" name="project"/>
                         <g:submitButton name="Submit"/>
                     </td>
                 </tr>

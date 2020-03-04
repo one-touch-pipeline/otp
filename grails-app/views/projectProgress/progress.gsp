@@ -40,8 +40,9 @@
         </span>
         <g:select class="projectSelectMultiple blue_label"
             name="projects"
-            value="${projects}"
-            from="${projects}"
+            value="${availableProjects}"
+            from="${availableProjects}"
+            optionKey="name"
             multiple="true"
         />
 

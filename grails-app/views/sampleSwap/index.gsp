@@ -104,7 +104,7 @@
                                 <td></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'project'}">
-                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${projects.name}" value="${value.value}" /></td>
+                                <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${availableProjects.name}" value="${value.value}" /></td>
                             </g:elseif>
                             <g:elseif test="${value.key == 'sampleType'}">
                                 <td><g:select class="${body.getNormalizedLevel(value.key)}" name="${body.seqTrackId}!${value.key}" from="${sampleTypes}" value="${value.value}" /></td>

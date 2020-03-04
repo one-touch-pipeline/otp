@@ -53,7 +53,7 @@
                             <label for="project"><g:message code="individual.insert.project"/></label>
                         </td>
                         <td>
-                            <g:select name="project.id" from="${projects}" optionKey="id" id="project" noSelection="[null: '']" value="${cmd?.project?.id}"/>
+                            <g:select name="project.id" from="${availableProjects}" optionKey="id" id="project" noSelection="[null: '']" value="${cmd?.project?.id}"/>
                         </td>
                     </tr>
                     <tr>

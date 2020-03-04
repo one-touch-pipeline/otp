@@ -57,7 +57,7 @@
                         </select>
                     </td>
                     <td class="value">
-                        <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="displayName" optionKey="id" style="display: none"/>
+                        <g:select class="criteria" name="projectSelection" from="${availableProjects}" optionValue="displayName" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
                         <g:select class="criteria" name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
                         <g:select class="criteria" name="seqTypeSelection" from="${seqTypes}" style="display: none"/>

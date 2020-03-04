@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="projectOverview.title" args="[project?.name]"/></title>
+    <title><g:message code="projectOverview.title" args="[selectedProject?.name]"/></title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
@@ -39,14 +39,14 @@
             </div>
             <div class="grid-element comment-box">
                 <g:render template="/templates/commentBox" model="[
-                        commentable     : project,
+                        commentable     : selectedProject,
                         targetController: 'projectConfig',
                         targetAction    : 'saveProjectComment',
                 ]"/>
             </div>
         </div>
         <div>
-            <g:render template="linkBanner" model="[project: project, active: 'alignment' ]"/>
+            <g:render template="linkBanner" model="[ project: selectedProject, active: 'alignment' ]"/>
         </div>
         <br>
 
@@ -61,13 +61,13 @@
                         <g:each in="${roddySeqTypes}" var="seqType">
                             <li>
                                 <g:if test="${seqType.isRna()}">
-                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
                                             class="configure">
                                         ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
                                 </g:if>
                                 <g:else>
-                                    <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                    <g:link controller='configurePipeline' action='alignment' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
                                             class="configure">
                                         ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
@@ -101,7 +101,7 @@
                     <tr>
                         <td>
                             <g:link controller="mergingCriteria" action="projectAndSeqTypeSpecific"
-                                    params='["project.id": project.id, "seqType.id": m.key.id]'>
+                                    params='["project.id": selectedProject.id, "seqType.id": m.key.id]'>
                                 ${m.key}
                             </g:link>
                         </td>
@@ -124,7 +124,7 @@
                     <ul>
                         <g:each in="${cellRangerSeqTypes}" var="seqType">
                             <li>
-                                <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": selectedProject.id, "seqType.id": seqType.id]'
                                         class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>

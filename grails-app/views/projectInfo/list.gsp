@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="projectInfo.title" args="[project?.name]"/></title>
+    <title><g:message code="projectInfo.title" args="[selectedProject?.name]"/></title>
     <asset:javascript src="pages/projectInfo/list/functions.js"/>
     <asset:javascript src="modules/editorSwitch.js"/>
     <asset:javascript src="taglib/Expandable.js"/>
@@ -36,7 +36,7 @@
 
             <g:render template="/templates/projectSelection"/>
 
-            <h1><g:message code="projectInfo.title" args="[project?.name]"/></h1>
+            <h1><g:message code="projectInfo.title" args="[selectedProject?.name]"/></h1>
 
             <h2><g:message code="projectInfo.header.document.upload"/></h2>
             <div class="project-info-form-container">
@@ -51,7 +51,7 @@
                             <td><g:textArea name="comment" rows="3" value="${docCmd?.comment}"/></td>
                         </tr>
                     </table>
-                    <input type="hidden" name="project.id" value="${project.id}"/>
+                    <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <g:submitButton name="${g.message(code: "projectInfo.upload.add")}"/>
                 </g:uploadForm>
             </div>
@@ -93,7 +93,7 @@
             <h2><g:message code="projectInfo.dta.header.upload"/></h2>
             <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
-                    <input type="hidden" name="project.id" value="${project.id}"/>
+                    <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <table class="key-value-table key-input">
                         <tr>
                             <td><g:message code="projectInfo.upload.path"/></td>

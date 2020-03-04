@@ -33,7 +33,7 @@
     <div class="body">
         <g:render template="/templates/projectSelection"/>
         <h1 class="statisticTitle">
-            <g:message code="projectOverview.pageTitle" args="[project.name]"/>
+            <g:message code="projectOverview.pageTitle" args="[selectedProject.name]"/>
         </h1>
         <div class="statisticTitle">
             <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>

@@ -22,7 +22,7 @@
 
 <div class="no-wrap">
     <g:form controller="keyword" action="${action}">
-        <input type="hidden" value="${project.id}" name="project">
+        <input type="hidden" value="${selectedProject.id}" name="project">
         <input type="hidden" value="${keyword.id}" name="keyword">
         ${action == "remove" ? keyword.name : ""}
         <g:submitButton name="${[

@@ -36,7 +36,7 @@
 
     <div class="keyword-header">
         <div class="item">
-            <h1><g:message code="keyword.index.header" args="[project.name]"/></h1>
+            <h1><g:message code="keyword.index.header" args="[selectedProject.name]"/></h1>
         </div>
         <div class="item">
             <g:form controller="projectConfig" view="index">
@@ -47,12 +47,12 @@
 
     <div class="keyword-container">
         <div class="item">
-            <h2><g:message code="keyword.index.keywordsOfProject" args="[project.name, projectKeywords.size()]"/></h2>
+            <h2><g:message code="keyword.index.keywordsOfProject" args="[selectedProject.name, projectKeywords.size()]"/></h2>
             <div class="scrollable-keyword-list">
                 <ul>
                     <li>
                         <g:form controller="keyword" action="createOrAdd">
-                            <input type="hidden" value="${project.id}" name="project">
+                            <input type="hidden" value="${selectedProject.id}" name="project">
                             <g:textField list="keywordList" name="value" size="30" autofocus="true" required="true" autocomplete="off"/>
                             <datalist id="keywordList">
                                 <g:each in="${availableKeywords}" var="keyword">
@@ -64,7 +64,7 @@
                     </li>
                     <g:if test="${projectKeywords}">
                         <g:each var="keyword" in="${projectKeywords}">
-                            <li><g:render template="keywordListItem" model="[keyword: keyword, project: project, action: 'remove']"/></li>
+                            <li><g:render template="keywordListItem" model="[keyword: keyword, project: selectedProject, action: 'remove']"/></li>
                         </g:each>
                     </g:if>
                     <g:else>
@@ -78,7 +78,7 @@
             <div class="scrollable-keyword-list">
                 <ul>
                     <g:each in="${availableKeywords}" var="keyword">
-                        <li><g:render template="keywordListItem" model="[keyword: keyword, project: project, action: 'add']"/></li>
+                        <li><g:render template="keywordListItem" model="[keyword: keyword, project: selectedProject, action: 'add']"/></li>
                     </g:each>
                 </ul>
             </div>

@@ -31,14 +31,12 @@
 </head>
 <body>
     <div class="body">
-        <g:if test="${projects}">
-            <g:render template="/templates/projectSelection"/>
-        </g:if>
+        <g:render template="/templates/projectSelection"/>
         <g:link style="float: right" action="helpPage" fragment="overview" target="_blank">
             <g:img file="info.png"/>
         </g:link>
         <div class="buttons">
-            <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
+            <g:link action="newSubmission" params="[id: selectedProject.id]"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
         </div>
         <h1><g:message code="egaSubmission.overview.header"/></h1>
         <table>

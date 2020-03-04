@@ -60,7 +60,7 @@
                 <td><g:message code="projectCreation.basis.project"/></td>
                 <td>
                     <g:select id="baseProject" name="baseProject.id" class="use-select-2"
-                              value="${baseProject?.id}" from="${projects}" noSelection="${[null:"No project selected"]}"
+                              value="${baseProject?.id}" from="${availableProjects}" noSelection="${[null:"No project selected"]}"
                               optionKey="id" optionValue="name"/>
                 </td>
             </tr>

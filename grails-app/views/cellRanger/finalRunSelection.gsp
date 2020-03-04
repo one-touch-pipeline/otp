@@ -24,7 +24,7 @@
 <html>
 <head>
     <meta name="layout" content="main"/>
-    <title>${g.message(code: "cellRanger.selection.title", args: [project?.name])}</title>
+    <title>${g.message(code: "cellRanger.selection.title", args: [selectedProject?.name])}</title>
     <asset:javascript src="pages/cellRanger/finalRunSelection/finalRunSelection.js"/>
 </head>
 
@@ -32,7 +32,7 @@
 <div class="body">
     <g:render template="/templates/projectSelection"/>
     <g:render template="/templates/messages"/>
-    <h1>${g.message(code: "cellRanger.selection.title", args: [project?.name])}</h1>
+    <h1>${g.message(code: "cellRanger.selection.title", args: [selectedProject?.name])}</h1>
 
     <otp:annotation type="info">${g.message(code: "cellRanger.selection.info")}</otp:annotation>
 
