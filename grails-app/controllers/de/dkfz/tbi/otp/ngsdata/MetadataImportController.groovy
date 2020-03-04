@@ -52,12 +52,11 @@ import java.util.regex.Pattern
 class MetadataImportController {
 
     static allowedMethods = [
-            // TODO: incomplete (OTP-2887)
-            index: "GET",
+            index           : "GET",
             validateOrImport: "POST",
-            details: "GET",
-            multiDetails: "GET",
-            autoImport: "GET",
+            details         : "GET",
+            multiDetails    : "GET",
+            autoImport      : "GET",
     ]
 
     MetadataImportService metadataImportService

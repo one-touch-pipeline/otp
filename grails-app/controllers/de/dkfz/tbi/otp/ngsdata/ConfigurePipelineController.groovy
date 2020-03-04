@@ -37,7 +37,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     ProcessingOptionService processingOptionService
 
     static allowedMethods = [
-            // TODO: incomplete (OTP-2887)
             runYapsa        : "GET",
             updateRunYapsa  : "POST",
             invalidateConfig: "POST",

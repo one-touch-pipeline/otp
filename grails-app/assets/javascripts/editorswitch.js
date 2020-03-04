@@ -82,7 +82,8 @@ $(function() {
         outerContainer = container.parent();
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
+            dataType: "json",
+            type: "POST",
             data: {value: $("input:text[name=value]", container).val()},
             success: function (data) {
                 if (data.success) {
@@ -110,7 +111,8 @@ $(function() {
         outerContainer = container.parent();
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
+            dataType: "json",
+            type: "POST",
             data: {value: $("textarea", container).val()},
             success: function (data) {
                 if (data.success) {
@@ -138,8 +140,9 @@ $(function() {
         outerContainer = container.parent();
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
-            data: {value: $("input:text[name=value]", container).val()},
+            dataType: "json",
+            type: "POST",
+            data: { value: $("input:text[name=value]", container).val() },
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
@@ -170,7 +173,8 @@ $(function() {
 
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
+            dataType: "json",
+            type: "POST",
             data: { value: $("select option:selected", container).attr("value") },
             success: function (data) {
                 if (data.success) {
@@ -195,7 +199,8 @@ $(function() {
         outerContainer = container.parent();
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
+            dataType: "json",
+            type: "POST",
             data: { value: $('input[type="date"]', container).val() },
             success: function (data) {
                 if (data.success) {
@@ -225,7 +230,8 @@ $(function() {
         });
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
+            dataType: "json",
+            type: "POST",
             data: value,
             success: function (data) {
                 if (data.success) {
@@ -268,8 +274,9 @@ $(function() {
         outerContainer = container.parent();
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
-            data: {value: $("select option:selected", container).text()},
+            dataType: "json",
+            type: "POST",
+            data: { value: $("select option:selected", container).text() },
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
@@ -297,8 +304,9 @@ $(function() {
         outerContainer = container.parent();
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
-            data: {value: $("input:text[name=value]", container).val()},
+            dataType: "json",
+            type: "POST",
+            data: { value: $("input:text[name=value]", container).val() },
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
@@ -335,7 +343,8 @@ $(function() {
         });
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
+            dataType: "json",
+            type: "POST",
             data: data,
             success: function (data) {
                 if (data.success) {
@@ -371,13 +380,14 @@ $(function() {
         invVal = (orgVal === "true" ? "false" : "true");
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
-            dataType: 'json',
-            data: {"value": invVal},
+            dataType: "json",
+            type: "POST",
+            data: { "value": invVal },
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
                     $.each(["label", "editor"], function () {
-                        $("p.edit-switch-"+this+" span", outerContainer).removeClass("icon-"+orgVal).addClass("icon-"+invVal);
+                        $("p.edit-switch-" + this + " span", outerContainer).removeClass("icon-" + orgVal).addClass("icon-" + invVal);
                     });
                     if (data.tooltip) {
                         $("p.edit-switch-label", outerContainer)[0].title = data.tooltip;

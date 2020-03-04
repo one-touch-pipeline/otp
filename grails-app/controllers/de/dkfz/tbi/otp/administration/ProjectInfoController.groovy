@@ -38,6 +38,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class ProjectInfoController implements CheckAndCall {
 
+    static allowedMethods = [
+            list                     : 'GET',
+            addProjectInfo           : 'POST',
+            addTransfer              : 'POST',
+            deleteProjectInfo        : 'POST',
+            markTransferAsCompleted  : 'POST',
+            download                 : 'GET',
+            updateProjectInfoComment : 'POST',
+            updateDataTransferComment: 'POST',
+    ]
+
     ProjectSelectionService projectSelectionService
     ProjectService projectService
     ProjectInfoService projectInfoService
@@ -186,17 +197,6 @@ class ProjectInfoController implements CheckAndCall {
             projectInfoService.updateDataTransferComment(cmd.dataTransfer, cmd.value)
         }
     }
-
-    static allowedMethods = [
-            list: 'GET',
-            addProjectInfo: 'POST',
-            addTransfer: 'POST',
-            deleteProjectInfo: 'POST',
-            markTransferAsCompleted: 'POST',
-            download: 'GET',
-            updateProjectInfoComment: 'POST',
-            updateDataTransferComment: 'POST',
-    ]
 }
 
 class ProjectInfoCommand implements Validateable {
