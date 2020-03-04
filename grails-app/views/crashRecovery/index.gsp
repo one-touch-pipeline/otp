@@ -43,7 +43,7 @@
         </div>
         <h1><g:message code="crashRecovery.title"/></h1>
             <g:if test="${!processingOptionsValid}">
-                <otp:annotation type="error">
+                <otp:annotation type="danger">
                     There are invalid processing options: <g:link controller="processingOption">view and correct them here</g:link>
                 </otp:annotation>
             </g:if>

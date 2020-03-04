@@ -2597,20 +2597,25 @@ table.key-value-table {
     padding: 10px;
     margin: 5px;
 
-    border: 2px solid;
+    border: 1px solid;
     border-radius: 5px;
 
+    // colors taken from Bootstrap
+    // https://getbootstrap.com/docs/4.0/components/alerts/
     &.type-info {
-        border-color: #006dba;
-        background: #b2d1ff;
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
     }
     &.type-warning {
-        border-color: #fff04d;
-        background: #feffc1;
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeeba;
     }
-    &.type-error {
-        border-color: #cc0000;
-        background: #ffaaaa;
+    &.type-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
     }
 }
 
