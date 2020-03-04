@@ -53,16 +53,7 @@ class ProjectConfigController implements CheckAndCall {
     ConfigService configService
 
     Map index() {
-        List<Project> projects = projectService.allProjects
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
-
-        ProjectSelection selection = projectSelectionService.selectedProject
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         Map<String, String> dates = getDates(project)
 
@@ -76,8 +67,6 @@ class ProjectConfigController implements CheckAndCall {
         }
 
         return [
-                projects                       : projects,
-                project                        : project,
                 creationDate                   : dates.creationDate,
                 lastReceivedDate               : dates.lastReceivedDate,
                 directory                      : projectDirectory ?: '',
@@ -94,15 +83,7 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     Map alignment() {
-        List<Project> projects = projectService.allProjects
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
-
-        ProjectSelection selection = projectSelectionService.selectedProject
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
@@ -121,8 +102,6 @@ class ProjectConfigController implements CheckAndCall {
         }
 
         return [
-                projects                       : projects,
-                project                        : project,
                 seqTypeMergingCriteria         : seqTypeMergingCriteria,
                 roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
                     it.displayNameWithLibraryLayout
@@ -136,15 +115,8 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     Map analysis() {
-        List<Project> projects = projectService.allProjects
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
-        ProjectSelection selection = projectSelectionService.selectedProject
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         List<List> thresholdsTable = createThresholdTable(project)
 
         Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
@@ -167,8 +139,6 @@ class ProjectConfigController implements CheckAndCall {
         }
 
         return [
-                projects                       : projects,
-                project                        : project,
                 snvSeqTypes                    : snv.seqTypes,
                 indelSeqTypes                  : indel.seqTypes,
                 sophiaSeqTypes                 : sophia.seqTypes,

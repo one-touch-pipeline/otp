@@ -30,14 +30,12 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SequenceController {
     SeqTrackService seqTrackService
-    ProjectService projectService
     FastqcResultsService fastqcResultsService
 
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [
             tableHeader: SequenceColumn.values()*.message,
-            projects: projectService.getAllProjects(),
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
             seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),

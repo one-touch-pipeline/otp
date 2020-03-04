@@ -21,13 +21,12 @@
  */
 package de.dkfz.tbi.otp.sampleswap
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class SampleSwapController {
 
-    ProjectService projectService
-    SeqTrackService seqTrackService
     CommentService commentService
     ProjectSelectionService projectSelectionService
     IndividualService individualService
@@ -38,15 +37,7 @@ class SampleSwapController {
             redirect(controller: "projectOverview", action: "index")
         }
 
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects?.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         List<Individual> individuals = Individual.findAllByProject(project, [sort: "pid", order: "asc"])
 
@@ -59,8 +50,6 @@ class SampleSwapController {
         }
 
         return [
-                project        : project,
-                projects       : projects,
                 individuals    : individuals,
                 sampleTypes    : SampleType.list(sort: "name", order: "asc").collect { it.name },
                 seqTypes       : SeqType.list(sort: "displayName", order: "asc").collect { it.displayName }.unique(),

@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 class ProjectUserController implements CheckAndCall {
 
-    ProjectService projectService
     ProjectSelectionService projectSelectionService
     UserService userService
     UserProjectRoleService userProjectRoleService
@@ -47,15 +46,7 @@ class ProjectUserController implements CheckAndCall {
     ProcessingOptionService processingOptionService
 
     def index() {
-        List<Project> projects = projectService.getAllProjects()
-        if (!projects) {
-            return [
-                    projects: projects
-            ]
-        }
-
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         List<UserProjectRole> userProjectRolesOfProject = UserProjectRole.findAllByProject(project)
         List<User> projectUsers = userProjectRolesOfProject*.user
@@ -84,8 +75,6 @@ class ProjectUserController implements CheckAndCall {
         Map<Boolean, UserEntry> userEntriesByEnabledStatus = userEntries.groupBy { it.userProjectRole.enabled }
 
         return [
-                projects                   : projects,
-                project                    : project,
                 projectsOfUnixGroup        : Project.findAllByUnixGroup(project.unixGroup),
                 enabledProjectUsers        : userEntriesByEnabledStatus[true],
                 disabledProjectUsers       : userEntriesByEnabledStatus[false],

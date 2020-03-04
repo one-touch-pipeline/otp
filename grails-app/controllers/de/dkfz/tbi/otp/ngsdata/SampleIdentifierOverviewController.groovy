@@ -23,27 +23,15 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.utils.DataTableCommand
-
 
 class SampleIdentifierOverviewController {
 
     ProjectService projectService
     ProjectOverviewService projectOverviewService
-    ProjectSelectionService projectSelectionService
 
     Map index() {
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project: project,
-        ]
+        return [:]
     }
 
     JSON dataTableSourceListSampleIdentifierByProject(DataTableCommand cmd) {

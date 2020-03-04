@@ -36,7 +36,6 @@ class IndividualController {
 
     IndividualService individualService
     SeqTrackService seqTrackService
-    ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
 
@@ -66,12 +65,10 @@ class IndividualController {
     }
 
     def list() {
-        Map retValue = [
+        return [
                 tableHeader    : IndividualColumn.values()*.message,
-                projects       : projectService.getAllProjects(),
                 individualTypes: Individual.Type.values(),
         ]
-        return retValue
     }
 
     def dataTableSource(DataTableCommand cmd) {
@@ -96,11 +93,9 @@ class IndividualController {
     }
 
     def insert() {
-        List<Project> projects = projectService.getAllProjects()
         List<Individual.Type> individualTypes = Individual.Type.values()
         List<String> sampleTypes = individualService.getSampleTypeNames()
         return [
-                projects       : projects,
                 individualTypes: individualTypes,
                 sampleTypes    : sampleTypes,
                 cmd            : flash.cmd as IndividualCommand,

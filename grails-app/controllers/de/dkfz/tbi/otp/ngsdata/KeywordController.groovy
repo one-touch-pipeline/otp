@@ -32,20 +32,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class KeywordController implements CheckAndCall {
 
     KeywordService keywordService
-    ProjectService projectService
     ProjectSelectionService projectSelectionService
 
     Map index() {
-        List<Project> projects = projectService.allProjects
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
-
-        ProjectSelection selection = projectSelectionService.selectedProject
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
 
         Closure keywordSorting = { Keyword keyword ->
@@ -56,8 +46,6 @@ class KeywordController implements CheckAndCall {
         return [
                 availableKeywords: otherAvailableKeywords.sort(keywordSorting) ?: [],
                 projectKeywords  : project.keywords.sort(keywordSorting),
-                projects         : projects,
-                project          : project,
         ]
     }
 

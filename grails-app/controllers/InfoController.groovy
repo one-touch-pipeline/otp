@@ -26,7 +26,6 @@ import grails.converters.JSON
 import de.dkfz.tbi.otp.administration.DocumentService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.ngsdata.StatisticService
 
 /*
@@ -35,7 +34,6 @@ import de.dkfz.tbi.otp.ngsdata.StatisticService
 class InfoController {
     DocumentService documentService
     StatisticService statisticService
-    ProjectService projectService
     ProcessingOptionService processingOptionService
 
     @GrailsCompileStatic
@@ -55,11 +53,7 @@ class InfoController {
     }
 
     @GrailsCompileStatic
-    def numbers() {
-        return [
-                projects: projectService.getProjectCount()
-        ]
-    }
+    def numbers() { }
 
     @GrailsCompileStatic
     def faq() { }

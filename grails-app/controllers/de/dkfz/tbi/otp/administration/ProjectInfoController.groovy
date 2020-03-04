@@ -50,24 +50,13 @@ class ProjectInfoController implements CheckAndCall {
     ]
 
     ProjectSelectionService projectSelectionService
-    ProjectService projectService
     ProjectInfoService projectInfoService
 
     def list() {
-        List<Project> projects = projectService.allProjects
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
-
-        ProjectSelection selection = projectSelectionService.selectedProject
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectInfos: 'join']]))
 
         return [
-                projects           : projects,
                 project            : project,
                 projectInfos       : projectInfoService.getAllProjectInfosSortedByDateDescAndGroupedByDta(project),
 

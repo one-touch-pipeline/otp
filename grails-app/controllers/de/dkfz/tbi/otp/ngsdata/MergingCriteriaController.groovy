@@ -24,15 +24,11 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 
-
 class MergingCriteriaController {
 
-    ProjectService projectService
-    ProjectSelectionService projectSelectionService
     MergingCriteriaService mergingCriteriaService
 
     def projectAndSeqTypeSpecific(ProjectAndSeqTypeCommand cmd) {

@@ -162,13 +162,7 @@ class AlignmentQualityOverviewController {
     QcTrafficLightService qcTrafficLightService
 
     def index(AlignmentQcCommand cmd) {
-        List<Project> projects = projectService.allProjects
-        ProjectSelection selection = projectSelectionService.selectedProject
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-        if (!project) {
-            return [:]
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         if (cmd.sample && cmd.sample.project != project) {
             response.sendError(404)
@@ -211,8 +205,6 @@ class AlignmentQualityOverviewController {
         }
 
         return [
-                projects: projects,
-                project : project,
                 seqTypes: seqTypes,
                 seqType : seqType,
                 header  : header,

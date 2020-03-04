@@ -23,7 +23,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -34,21 +35,12 @@ class ProjectOverviewController {
 
     ProjectService projectService
     ProjectOverviewService projectOverviewService
-    SeqTrackService seqTrackService
     CommentService commentService
     ProjectSelectionService projectSelectionService
 
 
     Map index() {
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project : project,
-        ]
+        return [:]
     }
 
     /**
@@ -56,19 +48,14 @@ class ProjectOverviewController {
      * The table content are retrieved asynchronously from {@link #dataTableSourceLaneOverview} via JavaScript.
      */
     Map laneOverview() {
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
         List<String> sampleTypes = projectOverviewService.sampleTypeByProject(project)
         String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
 
         return [
-                projects            : projects,
                 hideSampleIdentifier: ProjectOverviewService.hideSampleIdentifier(project),
-                project             : project,
                 seqTypes            : seqTypes,
                 sampleTypes         : sampleTypes,
                 sampleType          : sampleTypeName,

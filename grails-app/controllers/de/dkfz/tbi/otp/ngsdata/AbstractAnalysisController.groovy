@@ -23,26 +23,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 abstract class AbstractAnalysisController {
 
-    ProjectService projectService
-    ProjectSelectionService projectSelectionService
-
     Map results() {
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project : project,
-        ]
+        return [:]
     }
 }
 

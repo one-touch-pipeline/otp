@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 class BulkSampleCreationController {
@@ -33,19 +33,11 @@ class BulkSampleCreationController {
             submit: "POST",
     ]
 
-    ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
-    ProjectSelectionService projectSelectionService
 
     Map index() {
-        List<Project> projects = projectService.allProjects
-        ProjectSelection selection = projectSelectionService.selectedProject
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
         return [
-                projects                : projects,
-                project                 : project,
                 delimiters              : Spreadsheet.Delimiter.values(),
                 delimiter               : flash.delimiter,
                 header                  : SampleIdentifierService.BulkSampleCreationHeader.values(),

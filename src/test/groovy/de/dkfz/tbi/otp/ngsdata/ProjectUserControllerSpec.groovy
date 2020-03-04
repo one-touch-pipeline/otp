@@ -28,7 +28,6 @@ import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ProjectSelection
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
@@ -74,12 +73,8 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.userProjectRoleService = Mock(UserProjectRoleService) {
             getEmailsForNotification(_) >> "emails"
         }
-        controller.projectService = Mock(ProjectService) {
-            getAllProjects() >> [project]
-        }
         controller.projectSelectionService = Mock(ProjectSelectionService) {
-            getSelectedProject() >> new ProjectSelection(projects: [project])
-            getProjectFromProjectSelectionOrAllProjects(_) >> project
+            getProjectFromProjectSelectionOrAllProjects() >> project
         }
         controller.ldapService = Mock(LdapService) {
             getDistinguishedNameOfGroupByGroupName(_) >> project.unixGroup

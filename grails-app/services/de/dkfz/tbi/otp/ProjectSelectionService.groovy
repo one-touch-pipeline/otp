@@ -74,6 +74,11 @@ class ProjectSelectionService {
         }
     }
 
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
+    Project getProjectFromProjectSelectionOrAllProjects() {
+        getProjectFromProjectSelectionOrAllProjects(getSelectedProject())
+    }
+
     @PreFilter(value = "hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')", filterTarget = "projects")
     void setSelectedProject(List<Project> projects, String displayName) {
         GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()

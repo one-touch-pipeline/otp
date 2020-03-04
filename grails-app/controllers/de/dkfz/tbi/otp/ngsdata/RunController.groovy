@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunController {
 
-    ProjectService projectService
     LsdfFilesService lsdfFilesService
     RunService runService
     FastqcResultsService fastqcResultsService
@@ -64,12 +63,10 @@ class RunController {
     }
 
     def list = {
-        Map retValue = [
+        return [
                 seqCenters: seqCenterService.allSeqCenters(),
                 tableHeader: RunColumn.values()*.message,
-                projects  : projectService.getAllProjects().size(),
         ]
-        return retValue
     }
 
     def dataTableSource(DataTableCommand cmd) {

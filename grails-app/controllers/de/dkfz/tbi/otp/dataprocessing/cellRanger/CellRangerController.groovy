@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 class CellRangerController {
     CellRangerConfigurationService cellRangerConfigurationService
     ProjectSelectionService projectSelectionService
-    ProjectService projectService
     SeqTypeService seqTypeService
 
     static allowedMethods = [
@@ -45,14 +44,7 @@ class CellRangerController {
     static final List<String> ALLOWED_CELL_TYPE = ["neither", "expected", "enforced"]
 
     def index(CellRangerSelectionCommand cmd) {
-        List<Project> projects = projectService.getAllProjects()
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         assert cmd.validate()
 
@@ -82,8 +74,6 @@ class CellRangerController {
         return [
                 cmd                   : flash.cmd as CellRangerConfigurationCommand,
                 configExists          : configExists,
-                projects              : projects,
-                project               : project,
                 allIndividuals        : allIndividuals,
                 individual            : cmd.individual,
                 allSampleTypes        : allSampleTypes,
@@ -142,15 +132,7 @@ class CellRangerController {
     }
 
     def finalRunSelection() {
-        List<Project> projects = projectService.getAllProjects()
-        if (!projects) {
-            return [
-                    projects: projects,
-            ]
-        }
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         List<CellRangerMergingWorkPackage> mwps = CellRangerMergingWorkPackage.createCriteria().list {
             sample {
@@ -173,8 +155,6 @@ class CellRangerController {
         groupedMwps.each { it.mwps.sort() }
 
         return [
-                project    : project,
-                projects   : projects,
                 groupedMwps: groupedMwps,
         ]
     }

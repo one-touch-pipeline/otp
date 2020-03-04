@@ -23,13 +23,13 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class QcThresholdController {
     QcThresholdService qcThresholdService
     ProjectSelectionService projectSelectionService
-    ProjectService projectService
 
     static allowedMethods = [
             defaultConfiguration: "GET",
@@ -53,8 +53,7 @@ class QcThresholdController {
     }
 
     def projectConfiguration() {
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects()
 
         List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 
@@ -64,7 +63,6 @@ class QcThresholdController {
                 classesWithProperties: classesWithProperties,
                 seqTypes             : seqTypes,
                 compare              : QcThreshold.ThresholdStrategy,
-                project              : project,
         ]
     }
 
