@@ -34,7 +34,7 @@
 
     <h1><g:message code="configurePipeline.runyapsa.title" args="[selectedProject.name, seqType.displayName]"/></h1>
 
-    <g:form action="update" params='["seqType.id": seqType.id]' method="POST">
+    <g:form action="update" params='["seqType.id": seqType.id, overviewController: "analysisConfigurationOverview"]' method="POST">
         <table class="pipelineTable">
             <tr>
                 <th></th>
@@ -61,7 +61,7 @@
     </g:form>
     <g:if test="${currentVersion}">
         <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
-                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
+                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "analysisConfigurationOverview"]'>
             <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
     </g:if>

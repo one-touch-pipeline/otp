@@ -56,14 +56,14 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
             flash.cmd = cmd
-            redirect(action: "index")
+            redirect(action: "index", params: ["seqType.id": cmd.seqType.id])
             return
         }
 
         if (!validateUniqueness(cmd, project, pipeline)) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,  [g.message(code: "configurePipeline.store.failure.duplicate") as String])
             flash.cmd = cmd
-            redirect(action: "index")
+            redirect(action: "index", params: ["seqType.id": cmd.seqType.id])
             return
         }
 
@@ -78,7 +78,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         configure(configuration)
 
         flash.message = new FlashMessage(flash.message = g.message(code: "configurePipeline.store.success") as String)
-        redirect(controller: "projectConfig")
+        redirect(controller: "analysisConfigurationOverview")
     }
 
     abstract String getDefaultPluginName(String roddyName)

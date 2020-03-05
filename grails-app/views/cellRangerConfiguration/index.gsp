@@ -50,7 +50,7 @@
 
     <h1><g:message code="cellRanger.title" args="[selectedProject.name, seqType.displayName]"/></h1>
     <h2>Configure version</h2>
-    <g:form action="updateVersion" params='["seqType.id": seqType.id]' method="POST">
+    <g:form action="updateVersion" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
         <table class="pipelineTable">
             <tr>
                 <th></th>
@@ -76,7 +76,7 @@
     <g:if test="${currentVersion}">
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
-                    params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
+                    params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "cellRangerConfiguration"]'>
                 <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
             </g:form>
         </sec:ifAllGranted>

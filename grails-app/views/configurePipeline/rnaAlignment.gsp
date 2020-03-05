@@ -183,7 +183,7 @@
     <g:if test="${lastRoddyConfig}">
         <h2><g:message code="configurePipeline.last.config"/></h2>
         <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
-                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
+                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "alignmentConfigurationOverview"]'>
             <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
         <code style="white-space: pre-wrap">

@@ -50,13 +50,13 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
         ]
     }
 
-    protected void updatePipeline(Errors errors, SeqType seqType) {
+    protected void updatePipeline(Errors errors, SeqType seqType, String controller) {
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, errors)
             redirect action: "index", params: ['seqType.id': seqType.id]
         } else {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
-            redirect controller: "projectConfig"
+            redirect controller: controller
         }
     }
 

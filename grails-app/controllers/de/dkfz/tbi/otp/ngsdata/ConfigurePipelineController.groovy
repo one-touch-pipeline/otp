@@ -149,7 +149,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
 
         flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
-        redirect(controller: "projectConfig", action: "alignment")
+        redirect(controller: "alignmentConfigurationOverview")
     }
 
     def copyAlignment(CopyAlignmentPipelineSubmitCommand cmd) {
@@ -163,7 +163,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         projectService.copyPanCanAlignmentXml(cmd.basedProject, project, cmd.seqType)
         flash.message = new FlashMessage(g.message(code: "configurePipeline.copy.success") as String)
-        redirect(controller: "projectConfig", action: "alignment")
+        redirect(controller: "alignmentConfigurationOverview")
     }
 
 
@@ -262,14 +262,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
             flash.cmd = cmd
-            redirect(action: "rnaAlignment")
+            redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
             return
         }
 
         if (!validateUniqueness(cmd, project, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,  [g.message(code: "configurePipeline.store.failure.duplicate") as String])
             flash.cmd = cmd
-            redirect(action: "rnaAlignment")
+            redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
             return
         }
 
@@ -283,7 +283,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         ])
         projectService.configureRnaAlignmentConfig(rnaAlignmentConfiguration)
         flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
-        redirect(controller: "projectConfig", action: "alignment")
+        redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
     }
 
     def rnaAlignmentReferenceGenome(ConfigureRnaAlignmentSubmitCommand cmd) {
@@ -292,7 +292,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
             log.error(errors)
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, cmd.errors)
             flash.cmd = cmd
-            redirect(action: "rnaAlignment")
+            redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
             return
         }
 
@@ -310,7 +310,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         ])
         projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
         flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
-        redirect(controller: "projectConfig", action: "alignment")
+        redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
     }
 
     JSON getStatSizeFileNames(String referenceGenome) {
@@ -347,11 +347,11 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         if (hasErrors) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.invalidate.failure") as String, errors)
-            redirect(action: cmd.originAction)
+            redirect(action: cmd.originAction, params: ["seqType.id": cmd.seqType.id])
         } else {
             projectService.invalidateProjectConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.pipeline)
             flash.message = new FlashMessage(g.message(code: "configurePipeline.invalidate.success") as String)
-            redirect(controller: "projectConfig")
+            redirect(controller: cmd.overviewController)
         }
     }
 
@@ -425,12 +425,14 @@ class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitComm
 @ToString(includeNames = true, includeSuper = true)
 class ConfigureRunYapsaSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     String programVersion
+    String overviewController
 }
 
 @ToString(includeNames = true, includeSuper = true)
 class ConfigureCellRangerSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     ReferenceGenomeIndex referenceGenomeIndex
     String programVersion
+    String overviewController
 }
 
 @ToString(includeNames = true, includeSuper = true)
@@ -462,10 +464,12 @@ class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand 
 class InvalidateConfigurationCommand extends BaseConfigurePipelineSubmitCommand {
     Pipeline pipeline
     String originAction
+    String overviewController
 
     static constraints = {
         pipeline(nullable: false)
         originAction(nullable: false)
+        overviewController(nullable: false)
     }
 }
 

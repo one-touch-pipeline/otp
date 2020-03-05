@@ -38,6 +38,7 @@ class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipel
         updatePipeline(
                 projectService.createOrUpdateRunYapsaConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.programVersion),
                 cmd.seqType,
+                cmd.overviewController,
         )
     }
 
