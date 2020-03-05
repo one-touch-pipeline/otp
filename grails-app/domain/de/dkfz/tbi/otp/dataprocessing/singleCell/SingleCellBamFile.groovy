@@ -46,6 +46,8 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     static final String WEB_SUMMARY_HTML_FILE_NAME = "web_summary.html"
 
+    static final String CELL_RANGER_COMMAND_FILE_NAME = "cell_ranger_command.txt"
+
     static final List<String> CREATED_RESULT_FILES = [
             WEB_SUMMARY_HTML_FILE_NAME,
             METRICS_SUMMARY_CSV_FILE_NAME,

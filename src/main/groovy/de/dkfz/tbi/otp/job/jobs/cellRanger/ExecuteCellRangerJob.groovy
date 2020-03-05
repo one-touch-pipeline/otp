@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
+import java.nio.file.Paths
 
 @Component
 @Scope("prototype")
@@ -97,13 +98,15 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
     private String createScript(SingleCellBamFile singleCellBamFile) {
         String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
         String moduleLoadPrefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE)
+        String command = createCommand(singleCellBamFile)
 
         String script = """\
             ${moduleLoader}
             ${moduleLoadPrefix} ${singleCellBamFile.mergingWorkPackage.config.programVersion}
 
             cd ${singleCellBamFile.workDirectory}
-            ${createCommand(singleCellBamFile)}
+            echo \"${command}\" > ${Paths.get(singleCellBamFile.resultDirectory.toString(), "${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}").toAbsolutePath()}
+            ${command}
 
             ${createMd5SumCommand(singleCellBamFile)}
             """
