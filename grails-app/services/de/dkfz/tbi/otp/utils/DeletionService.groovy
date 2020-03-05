@@ -171,6 +171,7 @@ class DeletionService {
             deleteProcess(it)
         }
         deleteProcessingSteps(ProcessingStep.findAllByProcess(process))
+        process.comment?.delete(flush: true)
         process.delete(flush: true)
     }
 
