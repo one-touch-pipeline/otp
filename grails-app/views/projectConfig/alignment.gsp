@@ -116,45 +116,6 @@
             </table>
         </div>
 
-        <div>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <h2><g:message code="projectOverview.alignmentInformation.configureCellRanger"/></h2>
-
-                <div class="show_button">
-                    <ul>
-                        <g:each in="${cellRangerSeqTypes}" var="seqType">
-                            <li>
-                                <g:link controller='configureCellRangerPipeline' action='index' params='["seqType.id": seqType.id]'
-                                        class="configure">
-                                    ${seqType.displayNameWithLibraryLayout}
-                                </g:link>
-                            </li>
-                        </g:each>
-                    </ul>
-                </div>
-            </sec:ifAllGranted>
-            <table>
-                <tr>
-                    <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.seqType')}</th>
-                    <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.version')}</th>
-                </tr>
-                <g:each in="${cellRangerOverview}" var="m">
-                    <tr>
-                        <td>
-                            ${m.seqType?.getDisplayNameWithLibraryLayout()}
-                        </td>
-                        <td>
-                            ${m.config?.programVersion ?: "Not configured"}
-                        </td>
-                    </tr>
-                </g:each>
-            </table>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <g:link controller="cellRanger">${g.message(code: 'projectOverview.alignmentInformation.cellRanger.link')}</g:link>
-            </sec:ifAllGranted>
-        </div>
-        <br>
-
         <div class="otpDataTables">
             <h2>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h2>
             <otp:dataTable

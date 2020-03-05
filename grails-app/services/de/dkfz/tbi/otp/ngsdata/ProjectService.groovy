@@ -470,7 +470,7 @@ class ProjectService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     Errors createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
         Pipeline pipeline = Pipeline.findByName(Pipeline.Name.CELL_RANGER)
         ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
