@@ -29,5 +29,5 @@ abstract class AbstractConfigurePipelineController {
     ProjectService projectService
     ProcessingOptionService processingOptionService
 
-    abstract Pipeline getPipeline()
+    protected abstract Pipeline getPipeline()
 }

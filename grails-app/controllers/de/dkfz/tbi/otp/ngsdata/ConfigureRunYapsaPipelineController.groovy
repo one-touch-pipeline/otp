@@ -25,6 +25,15 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipelineController {
 
+    static allowedMethods = [
+            index: "GET",
+            update: "POST",
+    ]
+
+    def index(BaseConfigurePipelineSubmitCommand cmd) {
+        return getModelValues(cmd.seqType)
+    }
+
     def update(ConfigureRunYapsaSubmitCommand cmd) {
         updatePipeline(
                 projectService.createOrUpdateRunYapsaConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.programVersion),
@@ -33,22 +42,22 @@ class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipel
     }
 
     @Override
-    Pipeline getPipeline() {
+    protected Pipeline getPipeline() {
         Pipeline.Name.RUN_YAPSA.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') //for an unknown reason the groovy compiler doesnt work with @Override in this case
-    ConfigPerProjectAndSeqType getLatestConfig(Project project, SeqType seqType) {
+    protected ConfigPerProjectAndSeqType getLatestConfig(Project project, SeqType seqType) {
         return projectService.getLatestRunYapsaConfig(project, seqType)
     }
 
     @Override
-    String getDefaultVersion() {
+    protected String getDefaultVersion() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION)
     }
 
     @Override
-    List<String> getAvailableVersions() {
+    protected List<String> getAvailableVersions() {
         return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_AVAILABLE_VERSIONS)
     }
 }

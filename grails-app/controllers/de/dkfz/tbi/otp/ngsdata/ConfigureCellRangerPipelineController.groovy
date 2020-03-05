@@ -27,6 +27,10 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 
 class ConfigureCellRangerPipelineController extends AbstractConfigureNonRoddyPipelineController {
 
+    Map index(BaseConfigurePipelineSubmitCommand cmd) {
+        return getModelValues(cmd.seqType)
+    }
+
     def update(ConfigureCellRangerSubmitCommand cmd) {
         updatePipeline(
                 projectService.createOrUpdateCellRangerConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.programVersion, cmd.referenceGenomeIndex),
@@ -52,10 +56,5 @@ class ConfigureCellRangerPipelineController extends AbstractConfigureNonRoddyPip
     @Override
     List<String> getAvailableVersions() {
         return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_CELLRANGER_AVAILABLE_VERSIONS)
-    }
-
-    @Override
-    Map getAdditionalProperties(Project project, SeqType seqType) {
-        return [:]
     }
 }

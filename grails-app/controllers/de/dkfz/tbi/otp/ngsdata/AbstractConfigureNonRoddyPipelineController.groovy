@@ -31,9 +31,9 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
 
     ProjectSelectionService projectSelectionService
 
-    Map index(BaseConfigurePipelineSubmitCommand cmd) {
+    protected Map getModelValues(SeqType seqType) {
         Project project = projectSelectionService.selectedProject
-        ConfigPerProjectAndSeqType config = getLatestConfig(project, cmd.seqType)
+        ConfigPerProjectAndSeqType config = getLatestConfig(project, seqType)
         String currentVersion = config?.programVersion
 
         String defaultVersion = getDefaultVersion()
@@ -41,16 +41,16 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
 
         return [
                 project: project,
-                seqType: cmd.seqType,
+                seqType: seqType,
                 pipeline: getPipeline(),
 
                 defaultVersion: defaultVersion,
                 currentVersion: currentVersion,
                 availableVersions: availableVersions,
-        ] + getAdditionalProperties(project, cmd.seqType)
+        ]
     }
 
-    void updatePipeline(Errors errors, SeqType seqType) {
+    protected void updatePipeline(Errors errors, SeqType seqType) {
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, errors)
             redirect action: "index", params: ['seqType.id': seqType.id]
@@ -60,14 +60,9 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
         }
     }
 
-    @SuppressWarnings("UnusedMethodParameter")
-    Map getAdditionalProperties(Project project, SeqType seqType) {
-        return [:]
-    }
+    protected abstract ConfigPerProjectAndSeqType getLatestConfig(Project project, SeqType seqType)
 
-    abstract ConfigPerProjectAndSeqType getLatestConfig(Project project, SeqType seqType)
+    protected abstract String getDefaultVersion()
 
-    abstract String getDefaultVersion()
-
-    abstract List<String> getAvailableVersions()
+    protected abstract List<String> getAvailableVersions()
 }
