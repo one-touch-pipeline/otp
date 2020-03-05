@@ -92,6 +92,7 @@
                 </div>
                 <div class="lane-and-datafile-grid-wrapper color-left-border non">
                     <div class="grid-element cHeader identifier"><g:message code="seqTrack.seqTrackSet.lanesPerRun.lanesAndFile"/></div>
+                    <div class="grid-element cHeader wellIdentifier"><g:message code="seqTrack.seqTrackSet.lanesPerRun.singleCellWellLabel"/></div>
                     <div class="grid-element cHeader bases" title="${g.message(code: "seqTrack.seqTrackSet.lanesPerRun.numberOfBases.tooltip")}">
                         <g:message code="seqTrack.seqTrackSet.lanesPerRun.numberOfBases"/>
                     </div>
@@ -99,7 +100,6 @@
                     <div class="grid-element cHeader reads" title="${g.message(code: "seqTrack.seqTrackSet.lanesPerRun.numberOfReadsAndSeqLength.tooltip")}">
                         <g:message code="seqTrack.seqTrackSet.lanesPerRun.numberOfReadsAndSeqLength"/>
                     </div>
-                    <div class="grid-element cHeader insertSize"><g:message code="seqTrack.seqTrackSet.lanesPerRun.insertSize"/></div>
                 </div>
                 <g:each var="seqTrack" in="${lanesPerRun[run]}">
                     <g:set var="dataFiles" value="${seqTrack.dataFiles.sort { it.readName }}" />
@@ -110,6 +110,9 @@
                             <strong><g:message code="seqTrack.seqTrackSet.lanesPerRun.laneId"/>:</strong>
                             <g:link controller="seqTrack" action="show" id="${seqTrack.id}">${seqTrack.laneId}</g:link>
                         </div>
+                        <div class="grid-element lane wellIdentifier">
+                            ${seqTrack.singleCellWellLabel}
+                        </div>
                         <div class="grid-element lane bases" title="${UnitHelper.asNucleobases(seqTrack.nBasePairs)}">
                             <strong>${UnitHelper.asNucleobases(seqTrack.nBasePairs, true)}</strong>
                         </div>
@@ -118,9 +121,6 @@
                         </div>
                         <div class="grid-element lane reads" title="${UnitHelper.asReads(totalNReads)}">
                             <strong>${UnitHelper.asReads(totalNReads, true)}</strong>
-                        </div>
-                        <div class="grid-element lane insertSize">
-                            <strong>${seqTrack.insertSize}</strong>
                         </div>
 
                         <g:each var="dataFile" status="i" in="${dataFiles}">
