@@ -110,8 +110,6 @@ class ProjectConfigController implements CheckAndCall {
     Map analysis() {
         Project project = projectSelectionService.selectedProject
 
-        List<List> thresholdsTable = createThresholdTable(project)
-
         Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
         Pipeline indel = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
         Pipeline sophia = Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA)
@@ -137,7 +135,6 @@ class ProjectConfigController implements CheckAndCall {
                 sophiaSeqTypes                 : sophia.seqTypes,
                 aceseqSeqTypes                 : aceseq.seqTypes,
                 runYapsaSeqTypes               : runYapsa.seqTypes,
-                thresholdsTable                : thresholdsTable,
                 snvConfigTable                 : snvConfigTable,
                 indelConfigTable               : indelConfigTable,
                 sophiaConfigTable              : sophiaConfigTable,
@@ -297,45 +294,6 @@ class ProjectConfigController implements CheckAndCall {
             table.add(row)
         }
         return table.transpose()
-    }
-
-    private List<List<String>> createThresholdTable(Project project) {
-        List<List<String>> thresholdsTable = []
-        List<SeqType> seqTypes = SeqTypeService.allAlignableSeqTypes
-
-        List row = []
-        row.add(message(code: "projectOverview.analysis.sampleType"))
-        row.add(message(code: "projectOverview.analysis.category"))
-        seqTypes.each {
-            row.add(message(code: "projectOverview.analysis.minLanes", args: [it.displayNameWithLibraryLayout]))
-            row.add(message(code: "projectOverview.analysis.coverage", args: [it.displayNameWithLibraryLayout]))
-        }
-        thresholdsTable.add(row)
-
-        sampleTypeService.findUsedSampleTypesForProject(project).each { SampleType sampleType ->
-            row = []
-            row.add(sampleType.name)
-            row.add(sampleType.getCategory(project) ?: SampleType.Category.UNDEFINED)
-            seqTypes.each {
-                ProcessingThresholds processingThresholds = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(project, sampleType, it)
-                row.add(processingThresholds?.numberOfLanes)
-                row.add(processingThresholds?.coverage)
-            }
-            thresholdsTable.add(row)
-        }
-        if (thresholdsTable.size() == 1) {
-            return []
-        }
-        thresholdsTable = removeEmptyColumns(thresholdsTable)
-        return thresholdsTable
-    }
-
-    private static List removeEmptyColumns(List orgList) {
-        List list = orgList.transpose()
-        list.removeAll {
-            it.findAll { it == null }.size() == (it.size() - 1)
-        }
-        return list.transpose()
     }
 
     JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {

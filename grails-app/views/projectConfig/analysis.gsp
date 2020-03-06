@@ -51,38 +51,6 @@
         <h1>${g.message(code: 'projectOverview.analysis.title')}</h1>
 
         <div>
-            <h2>${g.message(code: 'projectOverview.analysis.thresholds')}</h2>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <ul>
-                    <li>
-                        <g:link controller='configureAnalysis' class="configure">
-                            ${g.message(code: 'projectOverview.analysis.link')}
-                        </g:link>
-                    </li>
-                </ul>
-            </sec:ifAllGranted>
-            <g:if test="${thresholdsTable}">
-                <table>
-                    <g:each var="row" in="${thresholdsTable}" status="i">
-                        <tr>
-                            <g:each var="cell" in="${row}">
-                                <g:if test="${i == 0}">
-                                    <th>${cell}</th>
-                                </g:if>
-                                <g:else>
-                                    <td class="tableEntry">${cell}</td>
-                                </g:else>
-                            </g:each>
-                        </tr>
-                    </g:each>
-                </table>
-            </g:if>
-            <g:else>
-                ${g.message(code: 'projectOverview.analysis.noThresholds')}
-            </g:else>
-        </div>
-
-        <div>
             <h2>${g.message(code: 'projectOverview.snv.title')}</h2>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <g:message code="projectOverview.snv.configure"/>

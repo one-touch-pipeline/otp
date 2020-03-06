@@ -23,5 +23,6 @@
 <div class="tab-menu">
     <g:link action="alignment" class="${actionName=="alignment" ? "active" : ""}"><g:message code="projectOverview.alignmentInformation.title"/></g:link>
     <g:link action="analysis" class="${actionName=="analysis" ? "active" : ""}"><g:message code="projectOverview.analysis.title"/></g:link>
+    <g:link controller="processingThreshold" action="index" class="${controllerName == "processingThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.procThresholds"/></g:link>
     <g:link controller="qcThreshold" action="projectConfiguration" class="${controllerName == "qcThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.qcThresholds"/></g:link>
 </div>
