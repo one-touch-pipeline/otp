@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2020 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="projectOverview.title" args="[selectedProject?.name]"/></title>
+    <title>${g.message(code: 'projectOverview.alignmentInformation.title', args: [selectedProject?.name])}</title>
     <asset:javascript src="common/CommentBox.js"/>
-    <asset:javascript src="pages/projectConfig/index/functions.js"/>
+    <asset:javascript src="pages/alignmentConfigurationOverview/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
     <div class="body">
-    <g:render template="/templates/messages"/>
+        <g:render template="/templates/messages"/>
         <div class="project-selection-header-container">
             <div class="grid-element">
                 <g:render template="/templates/projectSelection"/>
@@ -46,11 +46,10 @@
             </div>
         </div>
         <div>
-            <g:render template="tabMenu" model="[project: selectedProject]"/>
+            <g:render template="/projectConfig/tabMenu"/>
         </div>
-        <br>
 
-        <h1>${g.message(code: 'projectOverview.alignmentInformation.title')}</h1>
+        <h1>${g.message(code: 'projectOverview.alignmentInformation.title', args: [selectedProject?.name])}</h1>
 
         <div>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -128,12 +127,6 @@
                     ]}"
                     id="listReferenceGenome"/>
         </div>
-        <asset:script type="text/javascript">
-            $(function() {
-                $.otp.projectConfig.referenceGenome();
-                $.otp.projectConfig.asynchronousCallAlignmentInfo();
-            });
-        </asset:script>
     </div>
 </body>
 </html>

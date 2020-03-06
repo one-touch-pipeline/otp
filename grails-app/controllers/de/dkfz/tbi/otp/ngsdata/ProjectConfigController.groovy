@@ -26,21 +26,15 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
-import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class ProjectConfigController implements CheckAndCall {
 
@@ -73,92 +67,6 @@ class ProjectConfigController implements CheckAndCall {
                 allProjectGroups               : ProjectGroup.list(),
                 closed                         : project?.closed,
         ]
-    }
-
-    Map alignment() {
-        Project project = projectSelectionService.selectedProject
-
-        List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
-        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
-            [(seqType): mergingCriteria.find { it.seqType == seqType }]
-        }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
-
-        List<Map> cellRangerOverview = SeqTypeService.cellRangerAlignableSeqTypes.sort {
-            it.name
-        }.collect { SeqType seqType ->
-            CellRangerConfig config = projectService.getLatestCellRangerConfig(project, seqType)
-            ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
-            return [
-                    seqType: seqType,
-                    config : config,
-            ]
-        }
-
-        return [
-                seqTypeMergingCriteria         : seqTypeMergingCriteria,
-                roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
-                    it.displayNameWithLibraryLayout
-                },
-                cellRangerSeqTypes             : SeqTypeService.cellRangerAlignableSeqTypes.sort {
-                    it.displayNameWithLibraryLayout
-                },
-                cellRangerOverview             : cellRangerOverview,
-
-        ]
-    }
-
-    Map analysis() {
-        Project project = projectSelectionService.selectedProject
-
-        Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
-        Pipeline indel = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
-        Pipeline sophia = Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA)
-        Pipeline aceseq = Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ)
-        Pipeline runYapsa = Pipeline.findByName(Pipeline.Name.RUN_YAPSA)
-
-        List snvConfigTable = createAnalysisConfigTable(project, snv)
-        List indelConfigTable = createAnalysisConfigTable(project, indel)
-        List sophiaConfigTable = createAnalysisConfigTable(project, sophia)
-        List aceseqConfigTable = createAnalysisConfigTable(project, aceseq)
-        List runYapsaConfigTable = createAnalysisConfigTable(project, runYapsa)
-
-        Map<SeqType, String> checkSophiaReferenceGenome = sophia.seqTypes.collectEntries {
-            [(it): projectService.checkReferenceGenomeForSophia(project, it).error]
-        }
-        Map<SeqType, String> checkAceseqReferenceGenome = aceseq.seqTypes.collectEntries {
-            [(it): projectService.checkReferenceGenomeForAceseq(project, it).error]
-        }
-
-        return [
-                snvSeqTypes                    : snv.seqTypes,
-                indelSeqTypes                  : indel.seqTypes,
-                sophiaSeqTypes                 : sophia.seqTypes,
-                aceseqSeqTypes                 : aceseq.seqTypes,
-                runYapsaSeqTypes               : runYapsa.seqTypes,
-                snvConfigTable                 : snvConfigTable,
-                indelConfigTable               : indelConfigTable,
-                sophiaConfigTable              : sophiaConfigTable,
-                aceseqConfigTable              : aceseqConfigTable,
-                runYapsaConfigTable            : runYapsaConfigTable,
-                checkSophiaReferenceGenome     : checkSophiaReferenceGenome,
-                checkAceseqReferenceGenome     : checkAceseqReferenceGenome,
-        ]
-    }
-
-    @SuppressWarnings('CatchThrowable')
-    JSON getAlignmentInfo() {
-        Project project = projectSelectionService.requestedProject
-        Map<String, AlignmentInfo> alignmentInfo = null
-        String alignmentError = null
-        try {
-            alignmentInfo = projectOverviewService.getAlignmentInformation(project)
-        } catch (Throwable e) {
-            alignmentError = e.message
-            log.error(e.message, e)
-        }
-
-        Map map = [alignmentInfo: alignmentInfo, alignmentError: alignmentError]
-        render map as JSON
     }
 
     JSON updateProjectField(UpdateProjectCommand cmd) {
@@ -265,62 +173,6 @@ class ProjectConfigController implements CheckAndCall {
                 creationDate    : timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null,
                 lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null,
         ]
-    }
-
-    private
-    static List<List<String>> createAnalysisConfigTable(Project project, Pipeline pipeline) {
-        List<List<String>> table = []
-        table.add(["", "Config created", "Version"])
-        pipeline.seqTypes.each { SeqType seqType ->
-            List<String> row = []
-            row.add(seqType.displayNameWithLibraryLayout)
-            SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
-            RunYapsaConfig runYapsaConfig = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
-            RoddyWorkflowConfig roddyWorkflowConfig = atMostOneElement(
-                    RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
-            if (pipeline.type == Pipeline.Type.SNV && snvConfig) {
-                row.add("Yes")
-                row.add(snvConfig.programVersion)
-            } else if (pipeline.name == Pipeline.Name.RUN_YAPSA && runYapsaConfig) {
-                row.add("Yes")
-                row.add(runYapsaConfig.programVersion)
-            } else if (pipeline.usesRoddy() && roddyWorkflowConfig) {
-                row.add("Yes")
-                row.add(roddyWorkflowConfig.programVersion)
-            } else {
-                row.add("No")
-                row.add("-")
-            }
-            table.add(row)
-        }
-        return table.transpose()
-    }
-
-    JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
-        Project project = projectSelectionService.requestedProject
-        Map dataToRender = cmd.dataToRender()
-        List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
-            String adapterTrimming = ""
-            if (!it.sampleType) {
-                adapterTrimming = it.seqType.wgbs ?:
-                        RoddyWorkflowConfig.getLatestForProject(
-                                project,
-                                it.seqType,
-                                Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
-                        )?.adapterTrimmingNeeded
-            }
-            return [
-                    it.seqType.displayNameWithLibraryLayout,
-                    it.sampleType?.name,
-                    it.referenceGenome.name,
-                    it.statSizeFileName ?: "",
-                    adapterTrimming,
-            ]
-        }
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-        render dataToRender as JSON
     }
 }
 

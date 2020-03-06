@@ -48,7 +48,6 @@ $.otp.projectConfig = {
             fnServerData: function (sSource, aoData, fnCallback) {
                 $.ajax({
                     "dataType": 'json',
-                    "type": "POST",
                     "url": sSource,
                     "data": aoData,
                     "error": function () {
@@ -72,7 +71,7 @@ $.otp.projectConfig = {
         var oTable = $.otp.projectConfig.registerDataTable(
             "#listReferenceGenome",
             $.otp.createLink({
-                controller: 'projectConfig',
+                controller: 'alignmentConfigurationOverview',
                 action: 'dataTableSourceReferenceGenome'
             }),
             $.otp.projectConfig.returnParameterUnchanged
@@ -87,7 +86,7 @@ $.otp.projectConfig = {
         "use strict";
         $.ajax({
             url: $.otp.createLink({
-                controller: 'projectConfig',
+                controller: 'alignmentConfigurationOverview',
                 action: 'getAlignmentInfo',
             }),
             dataType: 'json',
@@ -142,3 +141,8 @@ $.otp.projectConfig = {
         });
     }
 };
+
+$(function() {
+    $.otp.projectConfig.referenceGenome();
+    $.otp.projectConfig.asynchronousCallAlignmentInfo();
+});

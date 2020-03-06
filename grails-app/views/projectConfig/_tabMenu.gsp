@@ -21,8 +21,8 @@
   --}%
 
 <div class="tab-menu">
-    <g:link action="alignment" class="${actionName=="alignment" ? "active" : ""}"><g:message code="projectOverview.alignmentInformation.title"/></g:link>
-    <g:link action="analysis" class="${actionName=="analysis" ? "active" : ""}"><g:message code="projectOverview.analysis.title"/></g:link>
+    <g:link controller="alignmentConfigurationOverview" action="index" class="${controllerName == "alignmentConfigurationOverview" || header == "alignment" ? 'active' : ''}"><g:message code="config.tabMenu.alignment"/></g:link>
+    <g:link controller="analysisConfigurationOverview" action="index" class="${controllerName == "analysisConfigurationOverview" || header == "analysis" ? 'active' : ''}"><g:message code="config.tabMenu.analysis"/></g:link>
     <g:link controller="processingThreshold" action="index" class="${controllerName == "processingThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.procThresholds"/></g:link>
     <g:link controller="qcThreshold" action="projectConfiguration" class="${controllerName == "qcThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.qcThresholds"/></g:link>
     <g:link controller="cellRangerConfiguration" action="index" class="${controllerName == "cellRangerConfiguration" ? 'active' : ''}"><g:message code="config.tabMenu.cellRanger"/></g:link>
