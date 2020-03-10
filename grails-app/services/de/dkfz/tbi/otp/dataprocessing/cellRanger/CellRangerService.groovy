@@ -181,7 +181,6 @@ class CellRangerService {
 
     void finishCellRangerWorkflow(SingleCellBamFile singleCellBamFile) {
         cellRangerWorkflowService.cleanupOutputDirectory(singleCellBamFile)
-        cellRangerWorkflowService.correctFilePermissions(singleCellBamFile)
 
         completeBamFile(singleCellBamFile)
 

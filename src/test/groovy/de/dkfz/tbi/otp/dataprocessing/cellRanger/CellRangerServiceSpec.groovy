@@ -264,7 +264,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         CellRangerService cellRangerService = new CellRangerService([
                 cellRangerWorkflowService   : Mock(CellRangerWorkflowService) {
                     1 * cleanupOutputDirectory(singleCellBamFile)
-                    1 * correctFilePermissions(singleCellBamFile)
                     1 * linkResultFiles(singleCellBamFile)
                 },
                 abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
@@ -319,7 +318,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         CellRangerService cellRangerService = new CellRangerService([
                 cellRangerWorkflowService   : Mock(CellRangerWorkflowService) {
                     _ * cleanupOutputDirectory(singleCellBamFile)
-                    _ * correctFilePermissions(singleCellBamFile)
                     _ * linkResultFiles(singleCellBamFile)
                 },
                 abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
