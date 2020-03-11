@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.MetadataField
  * available), no matter if the library layout is included in the displayed value or not. (Decided together with the OTP
  * Product Owner on 2016-07-19.)
  */
+/** This table is used externally. Please discuss a change in the team */
 class SeqType implements Entity, MetadataField {
 
     final static SINGLE_CELL_DNA = "Single-cell DNA"
@@ -50,14 +51,17 @@ class SeqType implements Entity, MetadataField {
             SeqTypeNames.CHIP_SEQ,
     ].asImmutable()
 
+    /** This attribute is used externally. Please discuss a change in the team */
     LibraryLayout libraryLayout
     String dirName
 
+    /** This attribute is used externally. Please discuss a change in the team */
     boolean singleCell
 
     /**
      * Display name used in the GUI.
      */
+    /** This attribute is used externally. Please discuss a change in the team */
     String displayName
 
     /** name used in roddy config files */
@@ -66,6 +70,7 @@ class SeqType implements Entity, MetadataField {
     /**
      * Indicates, if the SeqType require antibodyTarget
      */
+    /** This attribute is used externally. Please discuss a change in the team */
     boolean hasAntibodyTarget = false
 
     static hasMany = [importAlias: String]

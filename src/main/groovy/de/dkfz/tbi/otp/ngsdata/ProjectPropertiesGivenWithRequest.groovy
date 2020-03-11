@@ -27,10 +27,13 @@ import java.time.LocalDate
 
 // doesn't work as abstract class
 trait ProjectPropertiesGivenWithRequest {
+    /** This attribute is used externally. Please discuss a change in the team */
     String name
     String description
 
+    /** This attribute is used externally. Please discuss a change in the team */
     String organizationalUnit
+    /** This attribute is used externally. Please discuss a change in the team */
     String costCenter
 
     LocalDate endDate

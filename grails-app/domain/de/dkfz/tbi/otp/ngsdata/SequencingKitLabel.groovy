@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.utils.MetadataField
  * Furthermore a list of possible aliases is referenced.
  * Should be called "Chemical Version" in the user interface.
  */
+/** This table is used externally. Please discuss a change in the team */
 class SequencingKitLabel implements Entity, MetadataField { // to set legacy refer to SeqPlatform
 
     static hasMany = [importAlias: String]

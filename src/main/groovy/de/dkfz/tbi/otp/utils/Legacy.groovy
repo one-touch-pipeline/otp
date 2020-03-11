@@ -23,5 +23,6 @@ package de.dkfz.tbi.otp.utils
 
 trait Legacy {
 
+    /** This attribute is used externally. Please discuss a change in the team */
     boolean legacy = false
 }

@@ -47,6 +47,7 @@ trait Entity {
     /**
      * dateCreated and lastUpdated are maintained automatically by Grails
      */
+    /** This attribute is used externally. Please discuss a change in the team */
     Date dateCreated
     Date lastUpdated
 }

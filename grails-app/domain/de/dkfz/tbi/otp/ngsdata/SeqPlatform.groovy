@@ -27,8 +27,10 @@ import de.dkfz.tbi.otp.utils.Legacy
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+/** This table is used externally. Please discuss a change in the team */
 class SeqPlatform implements Entity, Legacy {
 
+    /** This attribute is used externally. Please discuss a change in the team */
     String name   // eg. solid, illumina
     SeqPlatformModelLabel seqPlatformModelLabel
     SequencingKitLabel sequencingKitLabel

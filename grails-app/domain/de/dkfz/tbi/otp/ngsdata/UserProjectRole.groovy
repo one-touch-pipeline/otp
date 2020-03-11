@@ -24,16 +24,22 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
+/** This table is used externally. Please discuss a change in the team */
 class UserProjectRole implements Serializable, Entity {
 
+    /** This attribute is used externally. Please discuss a change in the team */
     Project project
+    /** This attribute is used externally. Please discuss a change in the team */
     User user
+    /** This attribute is used externally. Please discuss a change in the team */
     ProjectRole projectRole
+    /** This attribute is used externally. Please discuss a change in the team */
     boolean enabled = true
     boolean accessToOtp = false
     boolean accessToFiles = false
     boolean manageUsers = false
     boolean manageUsersAndDelegate = false
+    /** This attribute is used externally. Please discuss a change in the team */
     boolean receivesNotifications = true
 
     /**

@@ -25,19 +25,20 @@ package de.dkfz.tbi.otp.security
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.util.TimestampHelper
 
-/**
- * Auto generated class by spring security plugin.
- */
+/** This table is used externally. Please discuss a change in the team */
 class User implements Entity {
 
     // the AD account
     String username
     String password
+    /** This attribute is used externally. Please discuss a change in the team */
     boolean enabled
     boolean accountExpired
     boolean accountLocked
     boolean passwordExpired
+    /** This attribute is used externally. Please discuss a change in the team */
     String email
+    /** This attribute is used externally. Please discuss a change in the team */
     String realName // with format '<first_name> <last_name>'
 
     boolean acceptedPrivacyPolicy

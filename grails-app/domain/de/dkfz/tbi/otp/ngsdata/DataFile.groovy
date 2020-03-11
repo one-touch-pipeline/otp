@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.utils.Entity
 
+/** This table is used externally. Please discuss a change in the team */
 class DataFile implements CommentableWithProject, Entity {
 
     String fileName                // file name
@@ -37,6 +38,7 @@ class DataFile implements CommentableWithProject, Entity {
 
     /** @deprecated OTP-2311: Redundant with seqTrack.project  */
     @Deprecated
+    /** This attribute is used externally. Please discuss a change in the team */
     Project project = null
 
     /** @deprecated OTP-2311: Redundant with run.dateExecuted  */

@@ -29,12 +29,14 @@ import de.dkfz.tbi.otp.utils.Entity
  * In the GUI and e-mails sent by OTP this shall be called "PID".
  * (Decided together with the OTP Product Owner on 2016-07-19.)
  */
+/** This table is used externally. Please discuss a change in the team */
 class Individual implements CommentableWithProject, Entity {
 
     /**
      * Identifier used in the file system. It should never change.
      * Usually its the same as {@link #mockPid}
      */
+    /** This attribute is used externally. Please discuss a change in the team */
     String pid
 
     // TODO OTP-1225: Field names pid, mockPid and mockFullName are confusing and used inconsistently.
@@ -61,6 +63,7 @@ class Individual implements CommentableWithProject, Entity {
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
 
+    /** This attribute is used externally. Please discuss a change in the team */
     Project project
 
     static belongsTo = [

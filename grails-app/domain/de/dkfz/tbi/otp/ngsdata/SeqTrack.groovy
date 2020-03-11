@@ -37,7 +37,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical
  * lane. An explaining tooltip should be provided. (Decided together with the OTP Product Owner on 2016-07-19.)
  */
-
+/** This table is used externally. Please discuss a change in the team */
 class SeqTrack implements ProcessParameterObject, Entity {
 
     static final String RUN_PREFIX = "run"
@@ -132,6 +132,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
      * empty for SeqTracks where the metadata import found the column to be missing or empty.
      */
     String libraryName
+    /** This attribute is used externally. Please discuss a change in the team */
     String normalizedLibraryName
 
     /**
@@ -143,10 +144,13 @@ class SeqTrack implements ProcessParameterObject, Entity {
     List<LogMessage> logMessages = []
 
     static belongsTo = [
+            /** This attribute is used externally. Please discuss a change in the team */
             antibodyTarget: AntibodyTarget,
             libraryPreparationKit: LibraryPreparationKit,
             run: Run,
+            /** This attribute is used externally. Please discuss a change in the team */
             sample: Sample,
+            /** This attribute is used externally. Please discuss a change in the team */
             seqType: SeqType,
     ]
 

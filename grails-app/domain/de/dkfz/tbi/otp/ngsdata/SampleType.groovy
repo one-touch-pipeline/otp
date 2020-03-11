@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.utils.Legacy
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+/** This table is used externally. Please discuss a change in the team */
 class SampleType implements Entity, Legacy {
 
     /**
@@ -90,6 +91,7 @@ class SampleType implements Entity, Legacy {
         UNKNOWN
     }
 
+    /** This attribute is used externally. Please discuss a change in the team */
     String name
 
     SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN

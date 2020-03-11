@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
 
+/** This table is used externally. Please discuss a change in the team */
 class ProjectRole implements Entity {
 
     /**
@@ -64,6 +65,7 @@ class ProjectRole implements Entity {
             Basic.PI,
     ])
 
+    /** This attribute is used externally. Please discuss a change in the team */
     String name
 
     static constraints = {

@@ -53,6 +53,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         ).save(flush: true)
     }
 
+    /** This method is used externally. Please discuss a change in the team */
     @Override
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
         if (!SeqTrackService.mayAlign(seqTrack)) {

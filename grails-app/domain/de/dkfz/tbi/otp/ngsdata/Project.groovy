@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+/** This table is used externally. Please discuss a change in the team */
 class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProject, Entity {
 
     enum ProjectType {
@@ -37,6 +38,7 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
         USER_MANAGEMENT,
     }
 
+    /** This attribute is used externally. Please discuss a change in the team */
     String individualPrefix
     String internalNotes
     String dirName
@@ -89,6 +91,7 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
 
     AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
 
+    /** This attribute is used externally. Please discuss a change in the team */
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
 
     QcThresholdHandling qcThresholdHandling

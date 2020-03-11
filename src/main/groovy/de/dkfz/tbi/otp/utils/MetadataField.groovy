@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.utils
 
 trait MetadataField implements Legacy {
+
+    /** This attribute is used externally. Please discuss a change in the team */
     String name
     Set<String> importAlias
 }

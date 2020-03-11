@@ -23,9 +23,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
 
+/** This table is used externally. Please discuss a change in the team */
 class Sample implements Entity {
 
+    /** This attribute is used externally. Please discuss a change in the team */
     Individual individual
+    /** This attribute is used externally. Please discuss a change in the team */
     SampleType sampleType
 
     static hasMany = [
