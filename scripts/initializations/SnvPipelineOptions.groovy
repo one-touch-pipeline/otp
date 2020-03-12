@@ -39,7 +39,7 @@ assert snvSeqTypes.size() == 2
 snvSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION,
-            '1.2.166-1',
+            '1.2.166-3',
             seqType.roddyName,
     )
 }
