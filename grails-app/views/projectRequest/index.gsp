@@ -33,68 +33,9 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <h1>${g.message(code: "projectRequest.title")}</h1>
-    <h2>${g.message(code: "projectRequest.header.waiting")}</h2>
-    <g:if test="${awaitingRequests}">
-        <table>
-            <tr>
-                <th>${g.message(code: "project.name")}</th>
-                <th>${g.message(code: "projectRequest.dateCreated")}</th>
-                <th>${g.message(code: "projectRequest.lastUpdated")}</th>
-                <th>${g.message(code: "projectRequest.status")}</th>
-                <th>${g.message(code: "projectRequest.requester")}</th>
-                <th>${g.message(code: "projectRequest.viewApprove")}</th>
-            </tr>
-            <g:each var="req" in="${awaitingRequests}">
-                <tr>
-                    <td>${req.name}</td>
-                    <td>${req.dateCreated.format("yyyy-MM-dd HH:mm")}</td>
-                    <td>${req.lastUpdated.format("yyyy-MM-dd HH:mm")}</td>
-                    <td>${req.status}</td>
-                    <td>${req.requester}</td>
-                    <td><g:link action="view" id="${req.id}">${g.message(code: "projectRequest.viewApprove")}</g:link></td>
-                </tr>
-            </g:each>
-        </table>
-    </g:if>
-    <g:else>
-        <ul>
-            <li>${g.message(code: "projectRequest.none")}</li>
-        </ul>
-    </g:else>
-    <br>
+    <g:render template="tabMenu"/>
 
-    <h2>${g.message(code: "projectRequest.header.createdApproved")}</h2>
-    <g:if test="${createdAndApprovedRequests}">
-        <table>
-            <tr>
-                <th>${g.message(code: "project.name")}</th>
-                <th>${g.message(code: "projectRequest.dateCreated")}</th>
-                <th>${g.message(code: "projectRequest.lastUpdated")}</th>
-                <th>${g.message(code: "projectRequest.status")}</th>
-                <th>${g.message(code: "projectRequest.requester")}</th>
-                <th>${g.message(code: "projectRequest.pi")}</th>
-            </tr>
-            <g:each var="req" in="${createdAndApprovedRequests}">
-                <tr>
-                    <td>${req.name}</td>
-                    <td>${req.dateCreated.format("yyyy-MM-dd HH:mm")}</td>
-                    <td>${req.lastUpdated.format("yyyy-MM-dd HH:mm")}</td>
-                    <td>${req.status}</td>
-                    <td>${req.requester}</td>
-                    <td>${req.pi}</td>
-                </tr>
-            </g:each>
-        </table>
-    </g:if>
-    <g:else>
-        <ul>
-            <li>${g.message(code: "projectRequest.none")}</li>
-        </ul>
-    </g:else>
-    <br>
-
-    <h2>${g.message(code: "projectRequest.header.new")}</h2>
+    <h2>${g.message(code: "projectRequest.title")}</h2>
     <otp:annotation type="info">${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</otp:annotation>
 
     <g:if test="${projectRequestToEdit}">

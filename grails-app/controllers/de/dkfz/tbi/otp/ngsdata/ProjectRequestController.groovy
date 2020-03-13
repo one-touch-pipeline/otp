@@ -38,14 +38,33 @@ import java.time.LocalDate
 class ProjectRequestController {
 
     static allowedMethods = [
-            index : "GET",
-            save  : "POST",
-            edit  : "POST",
-            view  : "GET",
-            update: "POST",
+            index   : "GET",
+            open    : "GET",
+            resolved: "GET",
+            save    : "POST",
+            edit    : "POST",
+            view    : "GET",
+            update  : "POST",
     ]
 
     ProjectRequestService projectRequestService
+
+    private Map getSharedModel() {
+        List<ProjectRequest> waitingForUser = projectRequestService.waitingForCurrentUser
+        List<ProjectRequest> waitingForPi = projectRequestService.unresolvedRequestsOfUser
+        List<ProjectRequest> approvedByUser = projectRequestService.createdByUserAndResolved
+        List<ProjectRequest> finishedByUser = projectRequestService.resolvedWithUserAsPi
+
+        return [
+                actionHighlight      : waitingForUser ? "work-and-todo" : (waitingForPi ? "work-but-nothing-todo" : "no-work-and-nothing-todo"),
+                waitingForUser       : waitingForUser,
+                waitingForPi         : waitingForPi,
+                approvedByUser       : approvedByUser,
+                finishedByUser       : finishedByUser,
+                openRequestsCount    : (waitingForUser + waitingForPi).unique().size(),
+                resolvedRequestsCount: (approvedByUser + finishedByUser).unique().size(),
+        ]
+    }
 
     def index(Long id) {
         ProjectRequest projectRequest = projectRequestService.get(id)
@@ -71,19 +90,25 @@ class ProjectRequestController {
         }
 
         MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(flash.cmd, projectRequestHelper, projectRequest, defaults)
-        return [
-                cmd                       : flash.cmd as ProjectRequestCreationCommand,
-                projectRequestToEdit      : projectRequest,
-                projectTypes              : Project.ProjectType.values(),
-                storagePeriods            : StoragePeriod.values(),
-                tumorEntities             : TumorEntity.listOrderByName(),
-                species                   : SpeciesWithStrain.all.sort { it.toString() },
-                keywords                  : Keyword.listOrderByName(),
-                seqTypes                  : SeqType.all.sort { it.displayNameWithLibraryLayout },
-                awaitingRequests          : projectRequestService.getWaiting(),
-                createdAndApprovedRequests: projectRequestService.getCreatedAndApproved(),
-                source                    : multiObjectValueSource,
+        return sharedModel + [
+                cmd                 : flash.cmd as ProjectRequestCreationCommand,
+                projectRequestToEdit: projectRequest,
+                projectTypes        : Project.ProjectType.values(),
+                storagePeriods      : StoragePeriod.values(),
+                tumorEntities       : TumorEntity.listOrderByName(),
+                species             : SpeciesWithStrain.all.sort { it.toString() },
+                keywords            : Keyword.listOrderByName(),
+                seqTypes            : SeqType.all.sort { it.displayNameWithLibraryLayout },
+                source              : multiObjectValueSource,
         ]
+    }
+
+    def open() {
+        return sharedModel
+    }
+
+    def resolved() {
+        return sharedModel
     }
 
     def save(ProjectRequestCreationCommand cmd) {
@@ -134,7 +159,7 @@ class ProjectRequestController {
             render status: 404
             return
         }
-        return [
+        return sharedModel + [
                 projectRequest: projectRequest,
         ]
     }

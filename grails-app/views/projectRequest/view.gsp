@@ -29,6 +29,8 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
+    <g:render template="tabMenu"/>
+
     <h1>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</h1>
     <g:form action="update">
     <table class="key-value-table key-input">

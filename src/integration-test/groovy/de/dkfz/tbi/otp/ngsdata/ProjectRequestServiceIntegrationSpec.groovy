@@ -42,17 +42,21 @@ import static de.dkfz.tbi.otp.ngsdata.ProjectRequest.Status.*
 
 @Rollback
 @Integration
-class ProjectRequestServiceSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class ProjectRequestServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+
+    ProjectRequestService getServiceWithMockedCurrentUser(User user = DomainFactory.createUser()) {
+        return new ProjectRequestService(
+                springSecurityService: Mock(SpringSecurityService) {
+                    getCurrentUser() >> user
+                }
+        )
+    }
 
     void "test get, when current user is #value, return project request"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
-        ProjectRequestService service = new ProjectRequestService()
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >>  {
-                return (user == "pi") ? request.pi : request.requester
-            }
-        }
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser((user == "pi") ? request.pi : request.requester)
 
         expect:
         request == service.get(request.id)
@@ -64,60 +68,69 @@ class ProjectRequestServiceSpec extends Specification implements UserAndRoles, D
     void "test get, when current user is neither PI nor requester, return null"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
-        ProjectRequestService service = new ProjectRequestService()
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> DomainFactory.createUser()
-        }
+        ProjectRequestService service = serviceWithMockedCurrentUser
 
         expect:
         !service.get(request.id)
     }
 
-    void "test getCreatedAndApproved"() {
-        given:
-        User user = DomainFactory.createUser()
-        List<ProjectRequest> requests = []
-        DomainFactory.createProjectRequest(pi: user, status: WAITING_FOR_PI)
-        requests << DomainFactory.createProjectRequest(pi: user, status: APPROVED_BY_PI_WAITING_FOR_OPERATOR)
-        requests << DomainFactory.createProjectRequest(pi: user, status: DENIED_BY_PI)
-        requests << DomainFactory.createProjectRequest(pi: user, status: DENIED_BY_OPERATOR)
-        requests << DomainFactory.createProjectRequest(pi: user, status: PROJECT_CREATED, project: DomainFactory.createProject())
-        requests << DomainFactory.createProjectRequest(requester: user, status: WAITING_FOR_PI)
-        requests << DomainFactory.createProjectRequest(requester: user, status: APPROVED_BY_PI_WAITING_FOR_OPERATOR)
-        requests << DomainFactory.createProjectRequest(requester: user, status: DENIED_BY_PI)
-        requests << DomainFactory.createProjectRequest(requester: user, status: DENIED_BY_OPERATOR)
-        requests << DomainFactory.createProjectRequest(requester: user, status: PROJECT_CREATED, project: DomainFactory.createProject())
-
-        ProjectRequestService service = new ProjectRequestService()
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> user
+    private static List<ProjectRequest> getProjectRequestsForStatus(List<ProjectRequest.Status> status, Map properties = [:]) {
+        return status.collect { ProjectRequest.Status stat ->
+            Map situational = (stat == PROJECT_CREATED) ? [project: DomainFactory.createProject()] : [:]
+            return DomainFactory.createProjectRequest([status: stat] + situational + properties)
         }
-
-        expect:
-        TestCase.assertContainSame( service.getCreatedAndApproved(), requests )
     }
 
-    void "test getWaiting"() {
-        User user = DomainFactory.createUser()
-        List<ProjectRequest> requests = []
-        requests << DomainFactory.createProjectRequest(pi: user, status: WAITING_FOR_PI)
-        DomainFactory.createProjectRequest(pi: user, status: APPROVED_BY_PI_WAITING_FOR_OPERATOR)
-        DomainFactory.createProjectRequest(pi: user, status: DENIED_BY_PI)
-        DomainFactory.createProjectRequest(pi: user, status: DENIED_BY_OPERATOR)
-        DomainFactory.createProjectRequest(pi: user, status: PROJECT_CREATED, project: DomainFactory.createProject())
-        DomainFactory.createProjectRequest(requester: user, status: WAITING_FOR_PI)
-        DomainFactory.createProjectRequest(requester: user, status: APPROVED_BY_PI_WAITING_FOR_OPERATOR)
-        DomainFactory.createProjectRequest(requester: user, status: DENIED_BY_PI)
-        DomainFactory.createProjectRequest(requester: user, status: DENIED_BY_OPERATOR)
-        DomainFactory.createProjectRequest(requester: user, status: PROJECT_CREATED, project: DomainFactory.createProject())
+    private static Map<String, List<ProjectRequest>> setupRequestsOfEachType(User user) {
+        List<ProjectRequest.Status> open = [WAITING_FOR_PI]
+        List<ProjectRequest.Status> resolved = [APPROVED_BY_PI_WAITING_FOR_OPERATOR, DENIED_BY_PI, DENIED_BY_OPERATOR, PROJECT_CREATED]
+        getProjectRequestsForStatus(open + resolved)
+        return [
+                waitingForCurrentUser   : getProjectRequestsForStatus(open, [pi: user]),
+                unresolvedRequestsOfUser: getProjectRequestsForStatus(open, [requester: user]),
+                createdByUserAndResolved: getProjectRequestsForStatus(resolved, [requester: user]),
+                resolvedWithUserAsPi    : getProjectRequestsForStatus(resolved, [pi: user]),
+        ]
+    }
 
-        ProjectRequestService service = new ProjectRequestService()
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> user
-        }
+    void "test getWaitingForCurrentUser"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+        List<ProjectRequest> expected = setupRequestsOfEachType(user)["waitingForCurrentUser"]
 
         expect:
-        TestCase.assertContainSame( service.getWaiting(), requests )
+        TestCase.assertContainSame(service.waitingForCurrentUser, expected)
+    }
+
+    void "test getUnresolvedRequestsOfUser"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+        List<ProjectRequest> expected = setupRequestsOfEachType(user)["unresolvedRequestsOfUser"]
+
+        expect:
+        TestCase.assertContainSame(service.unresolvedRequestsOfUser, expected)
+    }
+
+    void "test getCreatedByUserAndResolved"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+        List<ProjectRequest> expected = setupRequestsOfEachType(user)["createdByUserAndResolved"]
+
+        expect:
+        TestCase.assertContainSame(service.createdByUserAndResolved, expected)
+    }
+
+    void "test getResolvedWithUserAsPi"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+        List<ProjectRequest> expected = setupRequestsOfEachType(user)["resolvedWithUserAsPi"]
+
+        expect:
+        TestCase.assertContainSame(service.resolvedWithUserAsPi, expected)
     }
 
     void "test create"() {
@@ -132,10 +145,7 @@ class ProjectRequestServiceSpec extends Specification implements UserAndRoles, D
                 pi: pi.username,
                 deputyPis: [deputyPi.username],
         )
-        ProjectRequestService service = new ProjectRequestService()
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> DomainFactory.createUser()
-        }
+        ProjectRequestService service = serviceWithMockedCurrentUser
         service.linkGenerator = Mock(LinkGenerator) {
             1 * link(_) >> 'link'
         }
@@ -170,10 +180,7 @@ class ProjectRequestServiceSpec extends Specification implements UserAndRoles, D
                 pi: DomainFactory.createUser().username,
                 deputyPis: ["non-existent"],
         )
-        ProjectRequestService service = new ProjectRequestService()
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> DomainFactory.createUser()
-        }
+        ProjectRequestService service = serviceWithMockedCurrentUser
         service.linkGenerator = Mock(LinkGenerator) {
             0 * link(_) >> 'link'
         }

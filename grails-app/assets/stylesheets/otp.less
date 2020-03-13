@@ -2365,6 +2365,29 @@ div.tab-menu {
             border-bottom: none;
         }
 
+        span.counter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+
+            height: 18px;
+            width: 18px;
+
+            font-size: 10px;
+            font-weight: bold;
+
+            background-color: #ffcb89;
+            &.work-and-todo {
+                background-color: lightcoral;
+            }
+            &.work-but-nothing-todo {
+                background-color: lightblue;
+            }
+            &.no-work-and-nothing-todo {
+                background-color: lightgrey;
+            }
+        }
     }
 }
 

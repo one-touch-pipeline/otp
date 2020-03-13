@@ -58,21 +58,26 @@ class ProjectRequestService {
     UserProjectRoleService userProjectRoleService
     UserService userService
 
-
-    List<ProjectRequest> getCreatedAndApproved() {
+    List<ProjectRequest> getCreatedByUserAndResolved() {
         ProjectRequest.createCriteria().list {
-            or {
-                and {
-                    eq("pi", springSecurityService.currentUser)
-                    ne("status", ProjectRequest.Status.WAITING_FOR_PI)
-                }
-                eq("requester", springSecurityService.currentUser)
-            }
+            eq("requester", springSecurityService.currentUser)
+            ne("status", ProjectRequest.Status.WAITING_FOR_PI)
         } as List<ProjectRequest>
     }
 
-    List<ProjectRequest> getWaiting() {
+    List<ProjectRequest> getResolvedWithUserAsPi() {
+        ProjectRequest.createCriteria().list {
+            eq("pi", springSecurityService.currentUser)
+            ne("status", ProjectRequest.Status.WAITING_FOR_PI)
+        } as List<ProjectRequest>
+    }
+
+    List<ProjectRequest> getWaitingForCurrentUser() {
         ProjectRequest.findAllByPiAndStatus(springSecurityService.currentUser as User, ProjectRequest.Status.WAITING_FOR_PI)
+    }
+
+    List<ProjectRequest> getUnresolvedRequestsOfUser() {
+        ProjectRequest.findAllByRequesterAndStatus(springSecurityService.currentUser as User, ProjectRequest.Status.WAITING_FOR_PI)
     }
 
     private List<User> findOrCreateUsers(List<String> usernames) {
