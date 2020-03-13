@@ -46,7 +46,7 @@
             </div>
         </div>
         <div>
-            <g:render template="linkBanner" model="[ project: selectedProject, active: 'alignment' ]"/>
+            <g:render template="tabMenu" model="[project: selectedProject]"/>
         </div>
         <br>
 

@@ -45,7 +45,7 @@
             </div>
         </div>
         <div>
-            <g:render template="linkBanner" model="[ project: selectedProject, active: 'analysis' ]"/>
+            <g:render template="tabMenu" model="[project: selectedProject]"/>
         </div>
         <br>
 

@@ -34,7 +34,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner" model="[active: 'seqPlatforms']"/>
+    <g:render template="tabMenu"/>
 
     <h1><g:message code="dataFields.seqPlatform.header"/></h1>
     <otp:annotation type="info"><g:message code="dataFields.title.caseInsensitive"/></otp:annotation>

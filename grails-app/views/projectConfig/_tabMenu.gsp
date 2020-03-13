@@ -20,8 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.Project" %>
-<ul class="LinkBanner">
-        <li><g:link controller="projectConfig" action="alignment" class="${active=='alignment' ? 'active' : ''}"><g:message code="projectOverview.alignmentInformation.title"/></g:link></li>
-        <li><g:link controller="projectConfig" action="analysis" class="${active=='analysis' ? 'active' : ''}"><g:message code="projectOverview.analysis.title"/></g:link></li>
-</ul>
+<div class="tab-menu">
+    <g:link action="alignment" class="${actionName=="alignment" ? "active" : ""}"><g:message code="projectOverview.alignmentInformation.title"/></g:link>
+    <g:link action="analysis" class="${actionName=="analysis" ? "active" : ""}"><g:message code="projectOverview.analysis.title"/></g:link>
+</div>
