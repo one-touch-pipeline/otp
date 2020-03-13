@@ -26,6 +26,7 @@ import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
@@ -66,6 +67,7 @@ class AlignmentQualityOverviewController {
             'alignment.quality.individual',
             'alignment.quality.sampleType',
             'alignment.quality.qcStatus',
+            'alignment.quality.arribaPlots',
             'alignment.quality.totalReadCounter',
             'alignment.quality.duplicates',
             'alignment.quality.3pnorm',
@@ -364,6 +366,15 @@ class AlignmentQualityOverviewController {
                     break
 
                 case SeqTypeNames.RNA.seqTypeName:
+                    map << [
+                            arribaPlots               : new TableCellValue(
+                                    value: "PDF",
+                                    linkTarget        : "_blank",
+                                    link : g.createLink(
+                                            action: "renderPDF",
+                                            params: ["abstractMergedBamFile.id": abstractMergedBamFile.id])
+                            ),
+                    ]
                     qcKeys += [
                             "totalReadCounter",
                             "threePNorm",
@@ -453,6 +464,27 @@ class AlignmentQualityOverviewController {
             List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
     }
+
+    def renderPDF(AbstractMergedBamFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
+
+        // This page is semi-generic over AbstractMergedBamFile, with lots of SeqType-specific handling sprinkled all over.
+        // This link is only generated for seqType RNA, so this cast is probably safe.
+        if (cmd.abstractMergedBamFile instanceof RnaRoddyBamFile) {
+            RnaRoddyBamFile rrbf = cmd.abstractMergedBamFile as RnaRoddyBamFile
+            File file = rrbf.getWorkArribaFusionPlotPdf()
+            if (file.exists()) {
+                render file: file, contentType: "application/pdf"
+            } else {
+                render text: "no plot available", contentType: "text/plain"
+            }
+        } else {
+            render status: 404
+        }
+    }
 }
 
 class AlignmentQcCommand {
@@ -506,4 +538,8 @@ class QcStatusCommand implements Serializable {
     void setComment(String comment) {
         this.comment = StringUtils.trimAndShortenWhitespace(comment)
     }
+}
+
+class AbstractMergedBamFileCommand {
+    AbstractMergedBamFile abstractMergedBamFile
 }

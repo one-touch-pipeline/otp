@@ -23,9 +23,13 @@ package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 
+import java.nio.file.Paths
+
 class RnaRoddyBamFile extends RoddyBamFile {
 
-    static final CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"
+    static final String CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"
+    static final String ARRIBA_FOLDER = "fusions_arriba"
+    static final String ARRIBA_PLOT_SUFFIX = ".fusions.pdf"
 
     @Override
     File getWorkMergedQADirectory() {
@@ -39,5 +43,11 @@ class RnaRoddyBamFile extends RoddyBamFile {
 
     File getCorrespondingWorkChimericBamFile() {
         return new File(workDirectory, "${sampleType.dirName}_${individual.pid}_${CHIMERIC_BAM_SUFFIX}")
+    }
+
+    File getWorkArribaFusionPlotPdf() {
+       File file =  Paths.get(workDirectory as String, ARRIBA_FOLDER,
+                "${sampleType.dirName}_${individual.pid}${ARRIBA_PLOT_SUFFIX}").toFile()
+        return file
     }
 }

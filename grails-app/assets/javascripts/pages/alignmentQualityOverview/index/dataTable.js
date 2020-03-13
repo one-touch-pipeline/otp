@@ -150,6 +150,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 ]);
                             } else if (seqType === 'RNA') {
                                 columnNames = columnNames.concat([
+                                    "arribaPlots",
                                     "totalReadCounter",
                                     "percentDuplicates",
                                     "threePNorm",
