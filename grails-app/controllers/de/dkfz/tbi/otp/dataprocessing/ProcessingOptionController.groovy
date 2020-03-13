@@ -25,8 +25,7 @@ import grails.validation.ValidationException
 import groovy.transform.Canonical
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.config.OptionProblem
-import de.dkfz.tbi.otp.config.PropertiesValidationService
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
@@ -83,6 +82,7 @@ class ProcessingOptionController {
                         name.validatorForValue.allowedValues?.sort(),
                         existingOption?.project?.name,
                         existingOption?.dateCreated?.format("yyyy-MM-dd HH:mm:ss"),
+                        name.validatorForValue == TypeValidators.MULTI_LINE_TEXT,
                 )
             }
         }
@@ -121,4 +121,5 @@ class OptionRow {
     List<String> allowedValues
     String project
     String dateCreated
+    boolean multiline
 }

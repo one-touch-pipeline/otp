@@ -202,7 +202,7 @@ class OtpTagLib {
     def tableCell = { attrs ->
         TableCellValue cell = attrs.cell
 
-        String result = cell.value
+        String result = cell.value.encodeAsHTML()
         if (cell.icon) {
             result = "<span class='icon-${cell.icon}'>${result}</span>"
         }

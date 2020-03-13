@@ -59,6 +59,9 @@
                                     <g:if test="${option.allowedValues}">
                                         <g:select id="" name="value" class="use-select-2" from="${option.allowedValues}" value="${option.value.value}"/>
                                     </g:if>
+                                    <g:elseif test="${option.multiline}">
+                                        <g:textArea name="value" rows="25" cols="60">${option.value.tooltip}</g:textArea>
+                                    </g:elseif>
                                     <g:else>
                                         <input class="" name="value" value="${option.value.tooltip}"/>
                                     </g:else>
