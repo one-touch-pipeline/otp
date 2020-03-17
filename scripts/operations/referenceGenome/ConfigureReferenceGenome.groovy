@@ -117,7 +117,6 @@ String refGenName = ''
 String statSizeFileName = ''
 
 
-
 //RNA should not be configured over this script. Use the GUI instead!
 List<SeqType> blackListedSeqTypes = [
         SeqTypeService.getRnaPairedSeqType(),
@@ -126,31 +125,40 @@ List<SeqType> blackListedSeqTypes = [
 
 assert !(seqTypes.any { it in blackListedSeqTypes }): "Blacklisted seqTypes selected, cant continue!"
 
+String rgpstToStringHelper(ReferenceGenomeProjectSeqType rgpst) {
+    return "${rgpst.referenceGenome.name} | ${rgpst.statSizeFileName}"
+}
+
 ReferenceGenome.withTransaction {
     assert refGenName
     assert statSizeFileName == null || !statSizeFileName.empty
     ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(refGenName))
+
+    println "Changes for '${project.name}'"
     seqTypes.each { seqType ->
         sampleTypes.each { sampleType ->
+            println String.format("${seqType.toString()},  ${sampleType?.name}")
             Map keyProperties = [
                     project: project,
                     seqType: seqType,
                     sampleType: sampleType,
             ]
-            ReferenceGenomeProjectSeqType oldReferenceGenomeProjectSeqType = atMostOneElement(
-                    ReferenceGenomeProjectSeqType.findAllWhere(keyProperties + [deprecatedDate: null]))
-            if (oldReferenceGenomeProjectSeqType) {
-                oldReferenceGenomeProjectSeqType.deprecatedDate = new Date()
-                assert oldReferenceGenomeProjectSeqType.save(flush: true)
-                println "Deprecated ${oldReferenceGenomeProjectSeqType}"
+
+            ReferenceGenomeProjectSeqType oldRGPST = atMostOneElement(ReferenceGenomeProjectSeqType.findAllWhere(keyProperties + [deprecatedDate: null]))
+            if (oldRGPST) {
+                oldRGPST.deprecatedDate = new Date()
+                assert oldRGPST.save(flush: true)
+                println "  - deprecate: ${rgpstToStringHelper(oldRGPST)} -> on: ${oldRGPST.deprecatedDate}"
             }
-            ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(keyProperties + [
+            ReferenceGenomeProjectSeqType newRGPST = new ReferenceGenomeProjectSeqType(keyProperties + [
                     referenceGenome: referenceGenome,
                     statSizeFileName: statSizeFileName,
             ])
-            assert referenceGenomeProjectSeqType.save(flush: true)
-            println "Created ${referenceGenomeProjectSeqType}"
+            assert newRGPST.save(flush: true)
+            println "  - create   : ${rgpstToStringHelper(newRGPST)}"
         }
     }
+    assert false: "rollback for debug"
 }
-println ''
+
+''
