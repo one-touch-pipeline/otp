@@ -51,7 +51,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE, PROJECT, LIBRARY_LAYOUT]*.name()
+        return [SEQUENCING_TYPE, PROJECT, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
@@ -71,7 +71,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (seqTypeName.isEmpty()) {
                 return
             }
-            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
             if (!libraryLayout) {
                 return
             }

@@ -28,8 +28,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LIBRARY_LAYOUT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.MATE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.READ
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
 
 @Component
 class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
@@ -41,12 +41,12 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [MATE, LIBRARY_LAYOUT]*.name()
+        return [READ, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
     void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == LIBRARY_LAYOUT.name()) {
+        if (columnTitle == SEQUENCING_READ_TYPE.name()) {
             addErrorForMissingRequiredColumn(context, columnTitle)
         }
     }
@@ -54,8 +54,8 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
-            String libraryLayoutName = it.getValue(LIBRARY_LAYOUT.name())
-            String mateNumber = it.getValue(MATE.name())
+            String libraryLayoutName = it.getValue(SEQUENCING_READ_TYPE.name())
+            String mateNumber = it.getValue(READ.name())
             if (libraryLayoutName && mateNumber && mateNumber.isInteger()) {
                 LibraryLayout libraryLayout = LibraryLayout.values().find {
                     it.toString() == libraryLayoutName

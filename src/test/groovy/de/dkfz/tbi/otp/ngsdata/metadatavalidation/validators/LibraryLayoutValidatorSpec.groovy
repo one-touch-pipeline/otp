@@ -50,13 +50,13 @@ class LibraryLayoutValidatorSpec extends Specification implements DomainFactoryC
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Required column 'LIBRARY_LAYOUT' is missing.")
+        problem.message.contains("Required column 'SEQUENCING_READ_TYPE' is missing.")
     }
 
     void 'validate adds expected error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.LIBRARY_LAYOUT}\n" +
+                "${MetaDataColumn.SEQUENCING_READ_TYPE}\n" +
                 "invalidLayout\n" +
                 "${LibraryLayout.PAIRED}\n" +
                 "invalidLayout\n" +

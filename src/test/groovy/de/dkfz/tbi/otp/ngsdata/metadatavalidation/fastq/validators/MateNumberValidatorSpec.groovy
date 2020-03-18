@@ -51,7 +51,7 @@ SomeValue
     void 'validate, when value is "#value", then validation should not return an error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.MATE}
+${MetaDataColumn.READ}
 ${value}
 """)
 
@@ -79,7 +79,7 @@ ${value}
     void 'validate, when value is "#value", then adds expected errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.MATE}
+${MetaDataColumn.READ}
 ${value}
 """)
 

@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 /**
- * Defines the columns of the metadata file
+ * Defines the columns of the FASTQ metadata file
  */
 enum MetaDataColumn {
     FASTQ_FILE,
@@ -39,17 +39,17 @@ enum MetaDataColumn {
     INSTRUMENT_MODEL,
     PIPELINE_VERSION,
     ALIGN_TOOL,
-    INSERT_SIZE,
-    LIBRARY_LAYOUT,
+    FRAGMENT_SIZE,
+    SEQUENCING_READ_TYPE,
     WITHDRAWN,
     WITHDRAWN_DATE,
     COMMENT,
-    BARCODE,
+    INDEX,
     LIB_PREP_KIT,
     SEQUENCING_KIT,
     ILSE_NO,
     PROJECT,
-    MATE,
+    READ,
     CUSTOMER_LIBRARY,
     SAMPLE_SUBMISSION_TYPE,
     TAGMENTATION_BASED_LIBRARY,

@@ -50,7 +50,7 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
 
     @Override
     String getColumnTitle(MetadataValidationContext context) {
-        return MetaDataColumn.MATE.name()
+        return MetaDataColumn.READ.name()
     }
 
     @Override

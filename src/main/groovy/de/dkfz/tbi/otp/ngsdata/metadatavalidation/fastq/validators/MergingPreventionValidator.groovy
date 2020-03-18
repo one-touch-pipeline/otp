@@ -62,7 +62,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
         /** This content is used externally. Please discuss a change in the team */
-        return [SAMPLE_ID, SEQUENCING_TYPE, LIBRARY_LAYOUT, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
+        return [SAMPLE_ID, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override

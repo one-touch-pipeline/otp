@@ -30,7 +30,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BARCODE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 class BarcodeFilenameValidatorSpec extends Specification {
 
@@ -65,7 +65,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode 'AGGCAGAA' parsed from filename 'testFileName_AGGCAGAA_1.fastq.gz'. (For multiplexed lanes the ${BARCODE} column should be filled.)", "The BARCODE column is missing")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ${INDEX} column is missing. OTP will use the barcode 'AGGCAGAA' parsed from filename 'testFileName_AGGCAGAA_1.fastq.gz'. (For multiplexed lanes the ${INDEX} column should be filled.)", "The INDEX column is missing")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -74,7 +74,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${BARCODE}\n" +
+                "${MetaDataColumn.FASTQ_FILE}\t${INDEX}\n" +
                         "testFileName.fastq.gz\t\n"
         )
 
@@ -89,7 +89,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${BARCODE}\n" +
+                "${MetaDataColumn.FASTQ_FILE}\t${INDEX}\n" +
                         "testFileName_AGGCAGAA_1.fastq.gz\t\n"
         )
 
@@ -99,7 +99,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "A barcode can be parsed from the filename 'testFileName_AGGCAGAA_1.fastq.gz', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the BARCODE cell is empty. OTP will ignore the barcode parsed from the filename.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "A barcode can be parsed from the filename 'testFileName_AGGCAGAA_1.fastq.gz', but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the INDEX cell is empty. OTP will ignore the barcode parsed from the filename.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -108,7 +108,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${BARCODE}\n" +
+                "${MetaDataColumn.FASTQ_FILE}\t${INDEX}\n" +
                         "testFileName.fastq.gz\tAGGCAGAA\n"
         )
 
@@ -123,7 +123,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${BARCODE}\n" +
+                "${MetaDataColumn.FASTQ_FILE}\t${INDEX}\n" +
                         "testFileName.fastq.gz\t\n" +
                         "testFileName_AGGCAGAA.fastq.gz\tAGGCAGAA\n"
         )
@@ -139,7 +139,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${BARCODE}\n" +
+                "${MetaDataColumn.FASTQ_FILE}\t${INDEX}\n" +
                         "testFileName_AGGCAGGG_1.fastq.gz\tAGGCAGAA\n"
         )
 
@@ -149,7 +149,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The barcode parsed from the filename 'testFileName_AGGCAGGG_1.fastq.gz' ('AGGCAGGG') is different from the value in the ${BARCODE} cell ('AGGCAGAA'). OTP will ignore the barcode parsed from the filename and use the barcode 'AGGCAGAA'.", "At least one barcode parsed from the filename is different from the value in the BARCODE cell. OTP will ignore the barcode parsed from the filename.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The barcode parsed from the filename 'testFileName_AGGCAGGG_1.fastq.gz' ('AGGCAGGG') is different from the value in the ${INDEX} cell ('AGGCAGAA'). OTP will ignore the barcode parsed from the filename and use the barcode 'AGGCAGAA'.", "At least one barcode parsed from the filename is different from the value in the INDEX cell. OTP will ignore the barcode parsed from the filename.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

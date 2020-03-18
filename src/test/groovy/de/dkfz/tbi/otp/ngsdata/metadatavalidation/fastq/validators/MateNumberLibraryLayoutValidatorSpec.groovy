@@ -53,15 +53,15 @@ value1\tvalue2
 
         where:
         header || messages
-        "${MetaDataColumn.MATE.name()}\tlayout" || ["Required column 'LIBRARY_LAYOUT' is missing."]
-        "nomate\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || []
-        "nomate\tlayout" || ["Required column 'LIBRARY_LAYOUT' is missing."]
+        "${MetaDataColumn.READ.name()}\tlayout" || ["Required column 'SEQUENCING_READ_TYPE' is missing."]
+        "nomate\t${MetaDataColumn.SEQUENCING_READ_TYPE.name()}" || []
+        "nomate\tlayout" || ["Required column 'SEQUENCING_READ_TYPE' is missing."]
     }
 
     void 'validate, all are fine'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.MATE}\t${MetaDataColumn.LIBRARY_LAYOUT}
+${MetaDataColumn.READ}\t${MetaDataColumn.SEQUENCING_READ_TYPE}
 1\t${LibraryLayout.PAIRED}
 2\t${LibraryLayout.PAIRED}
 1\t${LibraryLayout.MATE_PAIR}
@@ -88,7 +88,7 @@ i3\\t${LibraryLayout.SINGLE}
     void 'validate, adds expected errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.MATE}\t${MetaDataColumn.LIBRARY_LAYOUT}
+${MetaDataColumn.READ}\t${MetaDataColumn.SEQUENCING_READ_TYPE}
 1\tUnknownLibrary
 3\t${LibraryLayout.PAIRED}
 3\t${LibraryLayout.MATE_PAIR}

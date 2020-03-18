@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
@@ -44,7 +45,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     }
 
     static final String VALID_METADATA =
-            "${MetaDataColumn.LIB_PREP_KIT}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
+            "${LIB_PREP_KIT}\t${SEQUENCING_READ_TYPE}\t${SEQUENCING_TYPE}\t${TAGMENTATION_BASED_LIBRARY}\n" +
                     "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
                     "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
                     "lib_prep_kit\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
@@ -156,7 +157,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     void 'validate, when sequencing type is not exome and no libPrepKit column exist, succeeds without problems'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}
+${SEQUENCING_TYPE}
 WGS
 WGBS
 CHIPSEQ
@@ -172,7 +173,7 @@ CHIPSEQ
     void 'validate, when sequencing type is exome, RNA, WGS, WGBS or ChipSeq and no libPrepKit column exist, adds one error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}
+${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}
 ${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${LibraryLayout.PAIRED}
 ${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${LibraryLayout.PAIRED}
 ${SeqTypeNames.EXOME.seqTypeName}\t${LibraryLayout.PAIRED}

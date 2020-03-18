@@ -54,7 +54,7 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [LIBRARY_LAYOUT, SEQUENCING_TYPE]*.name()
+        return [SEQUENCING_READ_TYPE, SEQUENCING_TYPE]*.name()
     }
 
     @Override

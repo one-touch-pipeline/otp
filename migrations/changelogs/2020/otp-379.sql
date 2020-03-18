@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,22 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
 
-/**
- * Defines the columns of the BAM metadata file
- */
-enum BamMetadataColumn {
-    BAM_FILE_PATH,
-    COVERAGE,
-    INDIVIDUAL,
-    SEQUENCING_READ_TYPE,
-    MD5,
-    PROJECT,
-    REFERENCE_GENOME,
-    SAMPLE_TYPE,
-    SEQUENCING_TYPE,
-    LIBRARY_PREPARATION_KIT,
-    INSERT_SIZE_FILE,
-    QUALITY_CONTROL_FILE,
-}
+UPDATE meta_data_key SET name = 'READ' WHERE name = 'MATE';
+UPDATE meta_data_key SET name = 'INDEX' WHERE name = 'BARCODE';
+UPDATE meta_data_key SET name = 'SEQUENCING_READ_TYPE' WHERE name = 'LIBRARY_LAYOUT';
+UPDATE meta_data_key SET name = 'FRAGMENT_SIZE' WHERE name = 'INSERT_SIZE';

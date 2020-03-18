@@ -48,7 +48,7 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification implement
         ])
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${LIBRARY_LAYOUT},${ANTIBODY_TARGET},${ANTIBODY}
+${SEQUENCING_TYPE},${SEQUENCING_READ_TYPE},${ANTIBODY_TARGET},${ANTIBODY}
 ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
 """.replaceAll(',', '\t')
         )
@@ -82,7 +82,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         ])
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${LIBRARY_LAYOUT},${ANTIBODY_TARGET},${ANTIBODY}
+${SEQUENCING_TYPE},${SEQUENCING_READ_TYPE},${ANTIBODY_TARGET},${ANTIBODY}
 ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
 """.replaceAll(',', '\t')
         )
@@ -113,7 +113,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
     void 'validate, when no ANTIBODY_TARGET and ANTIBODY column exist and seqType do not require antibody Target, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\n" +
+                "${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\n" +
                         "some seqType\tPAIRED"
         )
 
@@ -133,7 +133,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
     void 'validate, when no ANTIBODY column exists and seqType require AntibodyTarget and AntibodyTarget is given, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${ANTIBODY_TARGET}\n" +
+                "${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${ANTIBODY_TARGET}\n" +
                         "ChIP Seq\tPAIRED\tsome_antibody_target"
         )
 
@@ -152,7 +152,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
     void 'validate, when no ANTIBODY_TARGET column exists and seqType require AntibodyTarget, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${ANTIBODY}\n" +
+                "${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${ANTIBODY}\n" +
                         "ChIP Seq\tPAIRED\tsome_antibody"
         )
 

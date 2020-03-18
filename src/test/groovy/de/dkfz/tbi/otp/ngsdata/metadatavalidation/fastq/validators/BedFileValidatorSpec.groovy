@@ -61,7 +61,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
 
     static final List<String> HEADER = [
             MetaDataColumn.SEQUENCING_TYPE,
-            MetaDataColumn.LIBRARY_LAYOUT,
+            MetaDataColumn.SEQUENCING_READ_TYPE,
             MetaDataColumn.LIB_PREP_KIT,
             MetaDataColumn.SAMPLE_ID,
             MetaDataColumn.TAGMENTATION_BASED_LIBRARY,
@@ -111,7 +111,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
         }
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext([
-                [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.LIB_PREP_KIT.name(), MetaDataColumn.SAMPLE_ID.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name(), MetaDataColumn.PROJECT.name()],
+                [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.SEQUENCING_READ_TYPE.name(), MetaDataColumn.LIB_PREP_KIT.name(), MetaDataColumn.SAMPLE_ID.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name(), MetaDataColumn.PROJECT.name()],
                 [seqTypeName, libraryLayout, libPrepKitName, sampleId, tagmentationBasedLibrary, sampleId == PARSE_SAMPLE_ID_NEW_PROJECT ? 'noProject' : project.name],
         ].collect { row ->
             row.join('\t')

@@ -37,7 +37,7 @@ class BarcodeValidatorSpec extends Specification {
     void 'validate, when barcode is valid, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.BARCODE}\n" +
+                "${MetaDataColumn.INDEX}\n" +
                 "\n" +
                  "AGGCAGAA\n" +
                  "AGGCAGAA-AGGCAGAA\n" +
@@ -55,7 +55,7 @@ class BarcodeValidatorSpec extends Specification {
     void 'validate, when barcode use valid chars but does not pass the regular expression, adds warnings'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.BARCODE}\n" +
+                "${MetaDataColumn.INDEX}\n" +
                 "invalidBarcode\n"
         )
 
@@ -72,7 +72,7 @@ class BarcodeValidatorSpec extends Specification {
     void 'validate, when barcode contains invalid chars, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.BARCODE}\n" +
+                "${MetaDataColumn.INDEX}\n" +
                 "${barcode}\n"
         )
 
@@ -90,7 +90,7 @@ class BarcodeValidatorSpec extends Specification {
     }
 
 
-    void 'validate, when no BARCODE column exists in metadata file, adds warnings'() {
+    void 'validate, when no INDEX column exists in metadata file, adds warnings'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
@@ -99,7 +99,7 @@ class BarcodeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem([] as Set, Level.WARNING, "Optional column 'BARCODE' is missing. OTP will try to parse the barcodes from the filenames.")
+                new Problem([] as Set, Level.WARNING, "Optional column 'INDEX' is missing. OTP will try to parse the barcodes from the filenames.")
                 ]
         containSame(context.problems, expectedProblems)
     }

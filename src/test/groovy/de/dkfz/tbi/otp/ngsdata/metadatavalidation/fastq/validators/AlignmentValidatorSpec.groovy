@@ -58,7 +58,7 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""""".replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR, "Required column '${LIBRARY_LAYOUT}' is missing."),
+                new Problem(Collections.emptySet(), Level.ERROR, "Required column '${SEQUENCING_READ_TYPE}' is missing."),
                 new Problem(Collections.emptySet(), Level.ERROR, "Required column '${SEQUENCING_TYPE}' is missing."),
         ]
 
@@ -76,7 +76,7 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${LIBRARY_LAYOUT}
+${SEQUENCING_TYPE},${SEQUENCING_READ_TYPE}
 ${seqType.seqTypeName},${seqType.libraryLayout}
 """.replaceAll(',', '\t'))
 
@@ -101,7 +101,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout}
         SeqType seqType = createSeqType()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${LIBRARY_LAYOUT}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
 ${seqType.name},${createProject().name},,,DNA,${LibraryLayout.SINGLE}
 """.replaceAll(',', '\t'))
 
@@ -126,7 +126,7 @@ ${seqType.name},${createProject().name},,,DNA,${LibraryLayout.SINGLE}
         Project project = createProject()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${LIBRARY_LAYOUT}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
 ${seqType1.name},${project.name},,1,DNA,${LibraryLayout.PAIRED}
 ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
 """.replaceAll(',', '\t'))
@@ -158,7 +158,7 @@ ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PA
         DomainFactory.proxyCellRanger.createConfig(project: project)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${LIBRARY_LAYOUT}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
 ${seqType1.name},${project.name},,1,DNA,${LibraryLayout.PAIRED}
 ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
 """.replaceAll(',', '\t'))

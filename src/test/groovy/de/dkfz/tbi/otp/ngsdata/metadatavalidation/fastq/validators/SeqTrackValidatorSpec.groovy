@@ -62,9 +62,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     SeqTrackValidator validator = new SeqTrackValidator()
 
-    private static final Collection<MetaDataColumn> SEQ_TRACK_COLUMNS = [RUN_ID, LANE_NO, BARCODE].asImmutable()
+    private static final Collection<MetaDataColumn> SEQ_TRACK_COLUMNS = [RUN_ID, LANE_NO, INDEX].asImmutable()
 
-    private static final Collection<MetaDataColumn> MATE_COLUMNS = (SEQ_TRACK_COLUMNS + MATE).asImmutable()
+    private static final Collection<MetaDataColumn> MATE_COLUMNS = (SEQ_TRACK_COLUMNS + READ).asImmutable()
 
     private
     static Set<Cell> cells(MetadataValidationContext context, Collection<MetaDataColumn> columns, int ... rowIndices) {
@@ -82,7 +82,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     private static MetadataValidationContext createContextWithoutBarcode() {
         return createContext((
-                "${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "runA L1\n" +
                         "runA L1\n" +
                         "runA L2\n" +  // unrelated lane
@@ -92,7 +92,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     private static MetadataValidationContext createContextWithBarcode() {
         return createContext((
-                "${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "runA L1 ABC\n" +
                         "runA L1 ABC\n" +
                         "runA L2 ABC\n" +  // unrelated lane
@@ -102,7 +102,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     private static MetadataValidationContext createContextWithAndWithoutBarcode() {
         return createContext((
-                "${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "runA L1\n" +
                         "runA L1 ABC"
         ).replace(' ', '\t'))
@@ -438,7 +438,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when columns which must have equal values for a SeqTrack have different values, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SAMPLE_ID} ${SEQUENCING_TYPE} ${PIPELINE_VERSION} ${RUN_ID} ${LANE_NO} ${CUSTOMER_LIBRARY} ${BARCODE}\n" +
+                "${SAMPLE_ID} ${SEQUENCING_TYPE} ${PIPELINE_VERSION} ${RUN_ID} ${LANE_NO} ${CUSTOMER_LIBRARY} ${INDEX}\n" +
                         "A F K runA L1 1\n" +
                         "A F K runA L1 2\n" +
                         "B F L runA L1 1\n" +
@@ -471,7 +471,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when mate extraction fails, does not complain'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${RUN_ID} ${LANE_NO} ${LIBRARY_LAYOUT}\n" +
+                "${FASTQ_FILE} ${RUN_ID} ${LANE_NO} ${SEQUENCING_READ_TYPE}\n" +
                         "a.fastq.gz runA L1 ${PAIRED}\n" +
                         "b.fastq.gz runA L2 ${SINGLE}\n" +
                         "c.fastq.gz runA L3 ${SINGLE}\n"
@@ -487,7 +487,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when no mate is missing, succeeds'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO} ${LIBRARY_LAYOUT}\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${SEQUENCING_READ_TYPE}\n" +
                         "s_101202_7_r1.fastq.gz 1 runA L1 ${PAIRED}\n" +
                         "s_101202_7_r2.fastq.gz 2 runA L1 ${PAIRED}\n" +
                         "s_101202_7_i1.fastq.gz I1 runA L1 ${PAIRED}\n" +
@@ -506,7 +506,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given duplicate mates for a SeqTrack, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
                         "s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
                         "s_101202_7_1.fastq.gz 1 runB L1 ABC\n" +
@@ -530,7 +530,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when one mate is missing, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${LIBRARY_LAYOUT} ${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "${PAIRED} s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
                         "${PAIRED} s_101202_5_1.fastq.gz 1 runB L1 ABC\n" +
                         "${PAIRED} s_101202_5_2.fastq.gz 2 runB L1 ABC\n" +
@@ -540,7 +540,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
                         "${PAIRED} s_101202_7_2.fastq.gz 2 runA L1 DEF\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
-                new Problem(cells(context, MATE_COLUMNS + LIBRARY_LAYOUT, 0),
+                new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
                         Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with library layout '${LibraryLayout.PAIRED}'.", "A mate is missing for at least one seqTrack."),
         ]
 
@@ -554,7 +554,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when two mates are missing, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${LIBRARY_LAYOUT} ${MATE} ${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${SEQUENCING_READ_TYPE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "${PAIRED} 3 runA L1 ABC\n" +
                         "${PAIRED} 1 runB L1 ABC\n" +
                         "${PAIRED} 2 runB L1 ABC\n" +
@@ -564,7 +564,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
                         "${PAIRED} 2 runA L1 DEF\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
-                new Problem(cells(context, MATE_COLUMNS + LIBRARY_LAYOUT, 0),
+                new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
                         Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with library layout '${LibraryLayout.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
         ]
 
@@ -578,7 +578,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when library layout column is missing, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO}\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
                         "s_101202_1_1.fastq.gz 1 runA L1\n"
         ).replace(' ', '\t'))
 
@@ -592,13 +592,13 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when library layout is not unique for a SeqTrack, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
-                "${LIBRARY_LAYOUT} ${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "${PAIRED} s_101202_7_1.fastq.gz 1 runA L1 ABC\n" +
                         "FOOBARFOO s_101202_7_2.fastq.gz 2 runA L1 ABC\n"
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
-                new Problem(cells(context, SEQ_TRACK_COLUMNS + LIBRARY_LAYOUT, 0, 1),
-                        Level.ERROR, "All rows for run 'runA', lane 'L1', barcode 'ABC' must have the same value in column 'LIBRARY_LAYOUT'.", "All rows of the same seqTrack must have the same value in column 'LIBRARY_LAYOUT'."),
+                new Problem(cells(context, SEQ_TRACK_COLUMNS + SEQUENCING_READ_TYPE, 0, 1),
+                        Level.ERROR, "All rows for run 'runA', lane 'L1', barcode 'ABC' must have the same value in column 'SEQUENCING_READ_TYPE'.", "All rows of the same seqTrack must have the same value in column 'SEQUENCING_READ_TYPE'."),
         ]
 
         when:
@@ -611,7 +611,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when library layout is not known to OTP, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
-                "${LIBRARY_LAYOUT} ${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO}\n" +
+                "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
                         "FOOBARFOO s_101202_7_1.fastq.gz 1 runA L1\n"
         ).replace(' ', '\t'))
 
@@ -627,7 +627,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when mate column exists, but filename column does not, does not crash'() {
         given:
         MetadataValidationContext context = createContext((
-                "${MATE} ${RUN_ID} ${LANE_NO}\n" +
+                "${READ} ${RUN_ID} ${LANE_NO}\n" +
                         "1 runA L1\n" +
                         "2 runA L1\n" +
                         "i1 runA L1\n" +
@@ -644,7 +644,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, given only one row for a SeqTrack, does not complain about inconsistencies between mate number and filename'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO}\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
                         "s_101202_4_1.fastq.gz 2 runA L1\n" +
                         "not_parseable_4.gz 2 runB L1\n"
         ).replace(' ', '\t'))
@@ -659,7 +659,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when filenames of a SeqTrack do not differ in exactly one character, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
                         "s_101202_4_1.fastq.gz 1 runA L1 ABC\n" +
                         "s_101202_6_1.fastq.gz 1 runA L1 DEF\n" +
@@ -694,7 +694,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when distinguishing character in filenames of a SeqTrack is not the mate number, adds error'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO} ${BARCODE} UNRELATED_COLUMN\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
                         "s_101202_3_1.fastq.gz 1 runA L1 ABC\n" +
                         "s_101202_4_1.fastq.gz 2 runA L1 ABC\n" +
                         "s_101202_1_1.fastq.gz 1 runA L2 ABC\n" +
@@ -725,7 +725,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when filenames of a SeqTrack differ in exactly one character which is the mate number, succeeds'() {
         given:
         MetadataValidationContext context = createContext((
-                "${FASTQ_FILE} ${MATE} ${RUN_ID} ${LANE_NO}\n" +
+                "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
                         "s_101202_7_r1.fastq.gz 1 runA L1\n" +
                         "s_101202_7_r2.fastq.gz 2 runA L1\n" +
                         "s_101202_7_r1.fastq.gz 1 runA L2\n" +
@@ -751,7 +751,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void "rowsWithoutIndex, when some rows contains index columns, then the returned list do not contain them."() {
         given:
         MetadataValidationContext context = createContext("""\
-${MATE}
+${READ}
 1
 2
 I1

@@ -227,7 +227,7 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
     private Path metaDataFileForTestValidateAndImport(File bamFilesDir, File qualityControl, LibraryPreparationKit libPrepKit) {
         Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
         metadataFile.bytes = ("""\
-${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${
+${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${SEQUENCING_READ_TYPE}\t${
             PROJECT
         }\t${COVERAGE}\t${INSERT_SIZE_FILE}\t${QUALITY_CONTROL_FILE}\t${LIBRARY_PREPARATION_KIT}
 refGen1\tseqType1\t${bamFilesDir}/bamfile1_merged.mdup.bam\tsampleType1\tindividual1\t${LibraryLayout.SINGLE}\tproject_01\t\tinsertSize.txt\t\t${libPrepKit.name}

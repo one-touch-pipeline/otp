@@ -276,7 +276,7 @@ class MetaDataExport {
 
         put(FASTQ_FILE, lsdfFilesService.getFileViewByPidPath(dataFile).replaceAll('//+', '/'))
         put(MD5, dataFile.md5sum)
-        put(MATE, dataFile.mateNumber?.toString())
+        put(READ, dataFile.mateNumber?.toString())
         put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
         put(WITHDRAWN_DATE, dataFile.withdrawnDate?.format("yyyy-MM-dd"))
 
@@ -291,7 +291,7 @@ class MetaDataExport {
         SeqTrack seqTrack = dataFile.seqTrack
         String[] laneId = seqTrack.laneId.split('_', 2)
         put(LANE_NO, laneId[0])
-        put(BARCODE, laneId.length > 1 ? laneId[1] : null)
+        put(INDEX, laneId.length > 1 ? laneId[1] : null)
         String seqType = seqTrack.seqType.name
         if (seqType.endsWith(SeqType.TAGMENTATION_SUFFIX)) {
             put(SEQUENCING_TYPE, seqType.substring(0, seqType.length() - SeqType.TAGMENTATION_SUFFIX.length()))
@@ -299,7 +299,7 @@ class MetaDataExport {
         } else {
             put(SEQUENCING_TYPE, seqType)
         }
-        put(LIBRARY_LAYOUT, seqTrack.seqType.libraryLayout.toString())
+        put(SEQUENCING_READ_TYPE, seqTrack.seqType.libraryLayout.toString())
         properties.put('OTP_PID', seqTrack.individual.pid)
         properties.put('OTP_PID_ALIAS', seqTrack.individual.mockPid)
         properties.put('OTP_PID_DISPLAYED_IDENTIFIER', seqTrack.individual.mockFullName)
@@ -308,7 +308,7 @@ class MetaDataExport {
                 properties.get(SAMPLE_ID.toString()), SampleIdentifier.findAllBySample(seqTrack.sample)*.name))
         put(PIPELINE_VERSION, preferredOrLongest(
                 properties.get(PIPELINE_VERSION.toString()), SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name))
-        put(INSERT_SIZE, String.valueOf(seqTrack.insertSize))
+        put(FRAGMENT_SIZE, String.valueOf(seqTrack.insertSize))
         put(LIB_PREP_KIT, seqTrack.libraryPreparationKit?.name)
         put(ILSE_NO, seqTrack.ilseSubmission?.ilseNumber?.toString())
         put(PROJECT, seqTrack.project.name)

@@ -28,15 +28,15 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BARCODE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 @Component
 class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If a barcode can be parsed from the filename, it is consistent with the entry in the '${BARCODE}' column."]
+        return ["If a barcode can be parsed from the filename, it is consistent with the entry in the '${INDEX}' column."]
     }
 
     @Override
@@ -46,7 +46,7 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [BARCODE]*.name()
+        return [INDEX]*.name()
     }
 
     @Override
@@ -55,16 +55,16 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            String barcode = valueTuple.getValue(BARCODE.name())
+            String barcode = valueTuple.getValue(INDEX.name())
             String fileName = valueTuple.getValue(FASTQ_FILE.name())
             String fileNameBarcode = MultiplexingService.barcode(fileName)
 
             if (barcode == null && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${BARCODE} column should be filled.)", "The ${BARCODE} column is missing")
+                context.addProblem(valueTuple.cells, Level.WARNING, "The ${INDEX} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${INDEX} column should be filled.)", "The ${INDEX} column is missing")
             } else if (barcode == '' && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.")
             } else if (barcode && fileNameBarcode && barcode != fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${BARCODE} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.", "At least one barcode parsed from the filename is different from the value in the ${BARCODE} cell. OTP will ignore the barcode parsed from the filename.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${INDEX} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.", "At least one barcode parsed from the filename is different from the value in the ${INDEX} cell. OTP will ignore the barcode parsed from the filename.")
             }
         }
     }

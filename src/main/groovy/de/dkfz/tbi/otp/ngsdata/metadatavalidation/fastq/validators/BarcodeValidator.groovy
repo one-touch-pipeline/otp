@@ -29,7 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BARCODE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 @Component
 class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
@@ -44,12 +44,12 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
 
     @Override
     String getColumnTitle(MetadataValidationContext context) {
-        return BARCODE.name()
+        return INDEX.name()
     }
 
     @Override
     void checkColumn(MetadataValidationContext context) {
-        addWarningForMissingOptionalColumn(context, BARCODE.name(), "OTP will try to parse the barcodes from the filenames.")
+        addWarningForMissingOptionalColumn(context, INDEX.name(), "OTP will try to parse the barcodes from the filenames.")
     }
 
     @Override

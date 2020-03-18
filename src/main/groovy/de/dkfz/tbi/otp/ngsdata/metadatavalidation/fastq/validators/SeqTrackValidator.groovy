@@ -45,9 +45,9 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             ANTIBODY_TARGET,
             ANTIBODY,
             SEQUENCING_TYPE,
-            LIBRARY_LAYOUT,
+            SEQUENCING_READ_TYPE,
             LIB_PREP_KIT,
-            INSERT_SIZE,
+            FRAGMENT_SIZE,
             PIPELINE_VERSION,
             ILSE_NO,
             CUSTOMER_LIBRARY,
@@ -192,7 +192,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             }
         }
 
-        Column libraryLayoutColumn = context.spreadsheet.getColumn(LIBRARY_LAYOUT.name())
+        Column libraryLayoutColumn = context.spreadsheet.getColumn(SEQUENCING_READ_TYPE.name())
         Collection<Cell> libraryLayoutCells = seqTrackRows*.row*.getCell(libraryLayoutColumn)
         Collection<String> libraryLayoutNames = libraryLayoutCells*.text.unique()
         String libraryLayoutName = libraryLayoutNames.size() == 1 ? libraryLayoutNames.first() : null
@@ -218,7 +218,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     }
 
     static List<RowWithExtractedValues> rowsWithoutIndex(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
-        Column mateColumn = context.spreadsheet.getColumn(MATE.name())
+        Column mateColumn = context.spreadsheet.getColumn(READ.name())
         return seqTrackRows.findAll {
             !it.row.getCell(mateColumn)?.text?.toUpperCase(Locale.ENGLISH)?.startsWith('I')
         }

@@ -57,7 +57,7 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
     void 'createFromFile, when file contains undetermined entries, ignores them'() {
         given:
         Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
-        file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_ID} ${BARCODE}\n" +
+        file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_ID} ${INDEX}\n" +
                 "0 Undetermined_1.fastq.gz x x\n" +
                 "1 Undetermined_1.fastq.gz x Undetermined\n" +
                 "2 Undetermined_1.fastq.gz Undetermined_1 x\n" +
@@ -84,7 +84,7 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE}\t${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\t${LIBRARY_LAYOUT}
+${SEQUENCING_TYPE}\t${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\t${SEQUENCING_READ_TYPE}
 ${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttestSampleLib\tlib\t${LibraryLayout.PAIRED}
 ${SeqTypeNames.EXOME.seqTypeName}\ttestSample1Lib\tlib\t${LibraryLayout.PAIRED}
 ${SeqTypeNames.RNA.seqTypeName}\ttest2SampleLib\t\t${LibraryLayout.SINGLE}

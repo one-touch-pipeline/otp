@@ -44,7 +44,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE, LIBRARY_LAYOUT]*.name()
+        return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
@@ -63,7 +63,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
         List<SeqType> seqTypes = SeqTypeService.getSeqTypesRequiredLibPrepKit()
         valueTuples.each { ValueTuple valueTuple ->
             String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
             if (!libraryLayout) {
                 return
             }

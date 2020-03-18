@@ -42,7 +42,7 @@ class LibraryLayoutValidator extends SingleValueValidator<AbstractMetadataValida
 
     @Override
     String getColumnTitle(AbstractMetadataValidationContext context) {
-        return MetaDataColumn.LIBRARY_LAYOUT.name()
+        return MetaDataColumn.SEQUENCING_READ_TYPE.name()
     }
 
     @Override

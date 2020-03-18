@@ -111,7 +111,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
         ])
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE.name()}\t${LIB_PREP_KIT.name()}\t${PROJECT.name()}\t${LIBRARY_LAYOUT.name()}\n" +
+                "${SEQUENCING_TYPE.name()}\t${LIB_PREP_KIT.name()}\t${PROJECT.name()}\t${SEQUENCING_READ_TYPE.name()}\n" +
                         "${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project1.name}\t${LibraryLayout.PAIRED}\n" +
                         "${SeqTypeNames.EXOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project1.name}\t${LibraryLayout.PAIRED}\n" +
                         // project config -> adapter file missing

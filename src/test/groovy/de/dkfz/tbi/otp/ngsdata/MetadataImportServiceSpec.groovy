@@ -44,7 +44,8 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -562,17 +563,17 @@ ${INSTRUMENT_PLATFORM}          ${platform1}  ${platform1}  ${platform1}  ${plat
 ${INSTRUMENT_MODEL}             ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model2}     ${model1}
 ${RUN_DATE}                     ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date2}      ${date1}
 ${LANE_NO}                      4             1             1             2             2             2             3             5             1
-${BARCODE}                      -             barcode8      barcode8      barcode7      barcode7      barcode6      -             -             -
+${INDEX}                        -             barcode8      barcode8      barcode7      barcode7      barcode6      -             -             -
 ${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}     ${SC_EXON}
-${LIBRARY_LAYOUT}               ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
-${MATE}                         1             1             2             1             2             1             1             1             1
+${SEQUENCING_READ_TYPE}         ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
+${READ}                         1             1             2             1             2             1             1             1             1
 ${SAMPLE_ID}                    ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
 ${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true          -
 ${BASE_MATERIAL}                -             -             -             -             -             -             -             -             ${scMaterial}
 """
         if (includeOptional) {
             metadata += """
-${INSERT_SIZE}                  -             -             -             234           234           -             456           -             -
+${FRAGMENT_SIZE}                -             -             -             234           234           -             456           -             -
 ${PIPELINE_VERSION}             -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
 ${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -             ${kit2}
 ${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -             -
@@ -924,8 +925,8 @@ ${INSTRUMENT_MODEL}             ${seqPlatform.seqPlatformModelLabel.name}   ${se
 ${RUN_DATE}                     ${dateString}                               ${dateString}
 ${LANE_NO}                      1                                           1
 ${SEQUENCING_TYPE}              ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}
-${LIBRARY_LAYOUT}               ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
-${MATE}                         1                                           2
+${SEQUENCING_READ_TYPE}         ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
+${READ}                         1                                           2
 ${SAMPLE_ID}                    ${sampleIdentifier.name}                    ${sampleIdentifier.name}
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
@@ -1086,40 +1087,40 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         }
 
         Map baseData = [
-                (RUN_ID)             : runName,
-                (CENTER_NAME)        : seqCenter,
-                (INSTRUMENT_PLATFORM): seqPlatform.name,
-                (INSTRUMENT_MODEL)   : seqPlatform.seqPlatformModelLabel.name,
-                (RUN_DATE)           : dateString,
-                (LANE_NO)            : '1',
-                (SEQUENCING_TYPE)    : seqType.name,
-                (LIBRARY_LAYOUT)     : seqType.libraryLayout,
-                (SAMPLE_ID)          : sampleIdentifier.name,
-                (PIPELINE_VERSION)   : softwareToolIdentifier.name,
+                (RUN_ID)              : runName,
+                (CENTER_NAME)         : seqCenter,
+                (INSTRUMENT_PLATFORM) : seqPlatform.name,
+                (INSTRUMENT_MODEL)    : seqPlatform.seqPlatformModelLabel.name,
+                (RUN_DATE)            : dateString,
+                (LANE_NO)             : '1',
+                (SEQUENCING_TYPE)     : seqType.name,
+                (SEQUENCING_READ_TYPE): seqType.libraryLayout,
+                (SAMPLE_ID)           : sampleIdentifier.name,
+                (PIPELINE_VERSION)    : softwareToolIdentifier.name,
         ].asImmutable()
 
         Map fastqData1 = [
                 (FASTQ_FILE): fastq1,
                 (MD5)       : md5sum1,
-                (MATE)      : '1',
+                (READ)      : '1',
         ] + baseData
 
         Map fastqData2 = [
                 (FASTQ_FILE): fastq2,
                 (MD5)       : md5sum2,
-                (MATE)      : '2',
+                (READ)      : '2',
         ] + baseData
 
         Map fastqIndexData1 = [
                 (FASTQ_FILE): fastqIndex1,
                 (MD5)       : md5sumIndex1,
-                (MATE)      : 'i1',
+                (READ)      : 'i1',
         ] + baseData
 
         Map fastqIndexData2 = [
                 (FASTQ_FILE): fastqIndex2,
                 (MD5)       : md5sumIndex2,
-                (MATE)      : 'i2',
+                (READ)      : 'i2',
         ] + baseData
 
         List<String> keys = fastqData1.keySet().toList()
@@ -1243,7 +1244,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         dataFileIndex2 != null
     }
 
-    void "extractBarcode, when both BARCODE and FASTQ_FILE columns are missing, returns null"() {
+    void "extractBarcode, when both INDEX and FASTQ_FILE columns are missing, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext().spreadsheet.dataRows[0]
 
@@ -1254,7 +1255,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         result == null
     }
 
-    void "extractBarcode, when BARCODE column is missing and filename contains no barcode, returns null extracted from FASTQ_FILE cell"() {
+    void "extractBarcode, when INDEX column is missing and filename contains no barcode, returns null extracted from FASTQ_FILE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\nfile.fastq.gz").spreadsheet.dataRows[0]
 
@@ -1266,7 +1267,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         result.cells == [row.getCellByColumnTitle(FASTQ_FILE.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column is missing and filename contains barcode, returns barcode extracted from FASTQ_FILE cell"() {
+    void "extractBarcode, when INDEX column is missing and filename contains barcode, returns barcode extracted from FASTQ_FILE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE.name()}\nfile_ACGTACGT_.fastq.gz").spreadsheet.dataRows[0]
 
@@ -1278,116 +1279,116 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         result.cells == [row.getCellByColumnTitle(FASTQ_FILE.name())] as Set
     }
 
-    void "extractBarcode, when no entry in BARCODE column and FASTQ_FILE column is missing, returns null extracted from BARCODE cell"() {
+    void "extractBarcode, when no entry in INDEX column and FASTQ_FILE column is missing, returns null extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("SOME_COLUMN\t${BARCODE}\nsome_value").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("SOME_COLUMN\t${INDEX}\nsome_value").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == null
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when no entry in BARCODE column and filename contains no barcode, returns null extracted from BARCODE cell"() {
+    void "extractBarcode, when no entry in INDEX column and filename contains no barcode, returns null extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile.fastq.gz").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${INDEX}\nfile.fastq.gz").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == null
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when no entry in BARCODE column and filename contains barcode, returns null extracted from BARCODE cell"() {
+    void "extractBarcode, when no entry in INDEX column and filename contains barcode, returns null extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_ACGTACGT_.fastq.gz").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${INDEX}\nfile_ACGTACGT_.fastq.gz").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == null
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column contains entry and FASTQ_FILE column is missing, returns barcode extracted from BARCODE cell"() {
+    void "extractBarcode, when INDEX column contains entry and FASTQ_FILE column is missing, returns barcode extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${BARCODE}\nACGTACGT").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${INDEX}\nACGTACGT").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == 'ACGTACGT'
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column contains entry with a comma and FASTQ_FILE column is missing, returns barcode extracted from BARCODE cell"() {
+    void "extractBarcode, when INDEX column contains entry with a comma and FASTQ_FILE column is missing, returns barcode extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${BARCODE}\nACGTACGT,ACGTACGT,ACGTACGT,ACGTACGT").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${INDEX}\nACGTACGT,ACGTACGT,ACGTACGT,ACGTACGT").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == 'ACGTACGT-ACGTACGT-ACGTACGT-ACGTACGT'
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column contains entry and filename contains no barcode, returns barcode extracted from BARCODE cell"() {
+    void "extractBarcode, when INDEX column contains entry and filename contains no barcode, returns barcode extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${INDEX}\nfile.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == 'ACGTACGT'
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column contains entry and filename contains same barcode, returns barcode extracted from BARCODE cell"() {
+    void "extractBarcode, when INDEX column contains entry and filename contains same barcode, returns barcode extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_ACGTACGT_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${INDEX}\nfile_ACGTACGT_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == 'ACGTACGT'
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column contains entry and filename contains barcode which is substring, returns barcode extracted from BARCODE cell"() {
+    void "extractBarcode, when INDEX column contains entry and filename contains barcode which is substring, returns barcode extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_CGTACG_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${INDEX}\nfile_CGTACG_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == 'ACGTACGT'
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
-    void "extractBarcode, when BARCODE column contains entry and filename contains different barcode, returns barcode extracted from BARCODE cell"() {
+    void "extractBarcode, when INDEX column contains entry and filename contains different barcode, returns barcode extracted from INDEX cell"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_TGCATGCA_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${INDEX}\nfile_TGCATGCA_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractBarcode(row)
 
         then:
         result.value == 'ACGTACGT'
-        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+        result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
 
 
-    void "extractMateNumber, when MATE columns is missing, returns null"() {
+    void "extractMateNumber, when READ columns is missing, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("something\nsomething").spreadsheet.dataRows[0]
 
@@ -1399,9 +1400,9 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
     }
 
     @Unroll
-    void "extractMateNumber, when MATE value is '#value', then return ExtractedValue with that value"() {
+    void "extractMateNumber, when READ value is '#value', then return ExtractedValue with that value"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${MATE}\tsomething\n${value}\tsomething").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${READ}\tsomething\n${value}\tsomething").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractMateNumber(row)

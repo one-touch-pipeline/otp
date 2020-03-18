@@ -46,7 +46,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
 
     @Override
     List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
-        return [SEQUENCING_TYPE, LIBRARY_LAYOUT]*.name()
+        return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
@@ -76,7 +76,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             String baseMaterial = it.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
 
-            LibraryLayout libraryLayout = LibraryLayout.findByName(it.getValue(LIBRARY_LAYOUT.name()))
+            LibraryLayout libraryLayout = LibraryLayout.findByName(it.getValue(SEQUENCING_READ_TYPE.name()))
 
             if (seqTypeName &&
                     libraryLayout &&

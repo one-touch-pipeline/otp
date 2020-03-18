@@ -98,7 +98,7 @@ class BamMetadataImportService {
                 String bamFilePath = uniqueColumnValue(row, BamMetadataColumn.BAM_FILE_PATH)
                 String _sampleType = uniqueColumnValue(row, BamMetadataColumn.SAMPLE_TYPE)
                 String _individual = uniqueColumnValue(row, BamMetadataColumn.INDIVIDUAL)
-                String libraryLayout = uniqueColumnValue(row, BamMetadataColumn.LIBRARY_LAYOUT)
+                String libraryLayout = uniqueColumnValue(row, BamMetadataColumn.SEQUENCING_READ_TYPE)
                 String _project = uniqueColumnValue(row, BamMetadataColumn.PROJECT)
                 String coverage = uniqueColumnValue(row, BamMetadataColumn.COVERAGE)
                 String md5sum = uniqueColumnValue(row, BamMetadataColumn.MD5)

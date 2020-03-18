@@ -54,7 +54,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE, LIBRARY_LAYOUT]*.name()
+        return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
@@ -76,7 +76,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
             String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
 
-            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])
 

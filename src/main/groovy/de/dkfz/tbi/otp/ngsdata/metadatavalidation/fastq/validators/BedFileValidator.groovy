@@ -52,7 +52,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE, LIBRARY_LAYOUT, LIB_PREP_KIT, SAMPLE_ID, PROJECT]*.name()
+        return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE, LIB_PREP_KIT, SAMPLE_ID, PROJECT]*.name()
     }
 
     @Override
@@ -78,7 +78,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
         boolean singleCell = SeqTypeService.isSingleCell(valueTuple.getValue(BASE_MATERIAL.name()))
 
-        LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+        LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
 
         if (seqType != SeqTypeNames.EXOME.seqTypeName || libraryLayout != LibraryLayout.PAIRED || singleCell) {
             return

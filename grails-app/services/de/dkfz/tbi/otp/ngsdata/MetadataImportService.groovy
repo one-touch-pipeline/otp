@@ -424,7 +424,7 @@ class MetadataImportService {
             String tagmentationRaw = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
-            LibraryLayout libLayout = LibraryLayout.findByName(uniqueColumnValue(rows, LIBRARY_LAYOUT))
+            LibraryLayout libLayout = LibraryLayout.findByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(
                     seqTypeMaybeTagmentationName(seqTypeRaw, tagmentationRaw),
@@ -462,7 +462,7 @@ class MetadataImportService {
                     laneId               : laneId,
                     ilseSubmission       : ilseSubmission,
                     // TODO OTP-2050: Use a different fallback value?
-                    insertSize           : tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
+                    insertSize           : tryParseInt(uniqueColumnValue(rows, FRAGMENT_SIZE), 0),
                     run                  : run,
                     sample               : (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
                             sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString, project)).sample,
@@ -578,7 +578,7 @@ class MetadataImportService {
         String barcode = null
         Set<Cell> cells = [] as Set
 
-        Cell barcodeCell = row.getCellByColumnTitle(BARCODE.name())
+        Cell barcodeCell = row.getCellByColumnTitle(INDEX.name())
         if (barcodeCell) {
             cells.add(barcodeCell)
             barcode = barcodeCell.text ? barcodeCell.text.replace(',', '-') : null
@@ -601,7 +601,7 @@ class MetadataImportService {
     }
 
     static ExtractedValue extractMateNumber(Row row) {
-        Cell mateNumberCell = row.getCellByColumnTitle(MATE.name())
+        Cell mateNumberCell = row.getCellByColumnTitle(READ.name())
         if (mateNumberCell) {
             return new ExtractedValue(mateNumberCell.text, [mateNumberCell] as Set)
         }
@@ -631,7 +631,7 @@ class MetadataImportService {
 
     SeqType getSeqTypeFromMetadata(ValueTuple tuple) {
         boolean isSingleCell = seqTypeService.isSingleCell(tuple.getValue(BASE_MATERIAL.name()))
-        LibraryLayout libLayout = LibraryLayout.findByName(tuple.getValue(LIBRARY_LAYOUT.name()))
+        LibraryLayout libLayout = LibraryLayout.findByName(tuple.getValue(SEQUENCING_READ_TYPE.name()))
         if (!libLayout) {
             return null
         }
