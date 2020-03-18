@@ -37,7 +37,7 @@ class EgaSubmissionService {
 
     SeqTrackService seqTrackService
 
-    private final String RAW_PREFIX = "RAW:"
+    private final String RAW_PREFIX = "UNMAPPED:"
 
     enum FileType {
         BAM,
