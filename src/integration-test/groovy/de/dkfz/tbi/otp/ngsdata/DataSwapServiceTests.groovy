@@ -114,7 +114,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
         File alignmentScript = scriptFolder.resolve("restartAli_${script}.groovy").toFile()
         assert alignmentScript.exists()
-        assert alignmentScript.text.contains("ctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${bamFile.seqTracks.iterator().next().id}))")
+        assert alignmentScript.text.contains("${bamFile.seqTracks.iterator().next().id},")
 
         File copyScriptOtherUser = scriptFolder.resolve("${script}-otherUser.sh").toFile()
         assert copyScriptOtherUser.exists()

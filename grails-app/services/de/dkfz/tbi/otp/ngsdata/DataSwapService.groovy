@@ -71,17 +71,7 @@ class DataSwapService {
 
             """.stripIndent()
 
-    static final String alignmentScriptHeader = """\
-            // PLEASE CHECK THE COMMANDS CAREFULLY BEFORE RUNNING THE SCRIPT
-
-            // !!Before retriggering the alignments the bashScriptToMoveFiles has to be executed!!
-
-            import de.dkfz.tbi.otp.ngsdata.*
-            import de.dkfz.tbi.otp.dataprocessing.*
-            import de.dkfz.tbi.otp.ngsqc.*
-
-            """.stripIndent()
-
+    static final String alignmentScriptHeader = "// ids of seqtracks which should be triggered with 'TriggerAlignment.groovy' for alignment\n\n"
 
     /**
      * Adapts the MetaDataFile copy in the database, when the corresponding values, which are stored in other objects, are changed
@@ -406,11 +396,7 @@ ln -s '${newDirectFileName}' \\
      * The input SeqTrack is passed to the AlignmentDecider
      */
     String startAlignmentForSeqTrack(SeqTrack seqTrack) {
-        if (SeqTypeService.getAllAlignableSeqTypes().contains(seqTrack.seqType)) {
-            return "// lane: ${seqTrack}\nctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${seqTrack.id}))\n"
-        } else {
-            return "// The SeqTrack ${seqTrack} has the seqType ${seqTrack.seqType.name} and will not be aligned\n"
-        }
+        "    ${seqTrack.id},  //${seqTrack}\n"
     }
 
     /**

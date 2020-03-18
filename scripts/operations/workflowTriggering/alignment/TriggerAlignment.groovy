@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,15 +27,25 @@
 
 import org.hibernate.sql.JoinType
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+OtrsTicketService otrsTicketService = ctx.otrsTicketService
+SeqTrackService seqTrackService = ctx.seqTrackService
+SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
 
 LogThreadLocal.withThreadLog(System.out, {
     SeqTrack.withTransaction {
         Collection<SeqTrack> seqTracks = SeqTrack.withCriteria {
             or {
+                'in'('id', [
+                        -1,
+                ])
                 sample {
                     individual {
                         or {
@@ -100,17 +110,26 @@ LogThreadLocal.withThreadLog(System.out, {
         }
         println "--> ${seqTracks.size()} seqtracks in ${seqTracks*.sample.unique().size()} samples"
 
-        /*
+        assert false: "DEBUG: transaction intentionally failed to rollback changes"
+
         //trigger alignment
-        List<AbstractMergingWorkPackage> mergingWorkPackages = seqTracks.collectMany {
-            ctx.seqTrackService.decideAndPrepareForAlignment(it)
+        List<MergingWorkPackage> mergingWorkPackages = seqTracks.collectMany {
+            seqTrackService.decideAndPrepareForAlignment(it)
         }.unique()
 
         println "\n----------------------\n"
         println mergingWorkPackages.join('\n')
         println "\n----------------------\n"
-        println ctx.samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages).join('\n')
-        //*/
+        println samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages).join('\n')
+        println "\n----------------------\n"
+
+        //reset ticket only for seqTracks which gets aligned.
+        List<OtrsTicket> otrsTickets = mergingWorkPackages ? otrsTicketService.findAllOtrsTickets(mergingWorkPackages*.seqTracks.flatten()) : []
+        println "found ${otrsTickets.size()} coresponding tickets: ${otrsTickets*.ticketNumber.sort().join(',')}"
+        otrsTickets.each {
+            otrsTicketService.resetAlignmentAndAnalysisNotification(it)
+        }
+        println "reset notification state of tickets"
     }
 })
 null // suppress output spam

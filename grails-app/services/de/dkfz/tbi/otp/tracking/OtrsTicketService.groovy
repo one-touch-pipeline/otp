@@ -112,6 +112,11 @@ class OtrsTicketService {
         return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
     }
 
+    void resetAlignmentAndAnalysisNotification(OtrsTicket otrsTicket) {
+        otrsTicket.alignmentFinished = null
+        resetAnalysisNotification(otrsTicket)
+    }
+
     void resetAnalysisNotification(OtrsTicket otrsTicket) {
         otrsTicket.snvFinished = null
         otrsTicket.indelFinished = null
