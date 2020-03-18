@@ -28,12 +28,15 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.BAM_FILE_PATH
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_READ_TYPE
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class BamMetadataValidationContextSpec extends Specification {
@@ -47,6 +50,22 @@ class BamMetadataValidationContextSpec extends Specification {
     def setup() {
         context = BamMetadataValidationContextFactory.createContext()
         problems = new Problems()
+    }
+
+    void 'createFromFile, when file header contains alias, replace it'() {
+        given:
+        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        file.bytes = ("UNKNOWN ${BAM_FILE_PATH} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
+                "1 2 3"
+        ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
+
+        when:
+        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(file, [], FileSystems.default)
+
+        then:
+        context.spreadsheet.header.cells[0].text == "UNKNOWN"
+        context.spreadsheet.header.cells[1].text == BAM_FILE_PATH.name()
+        context.spreadsheet.header.cells[2].text == SEQUENCING_READ_TYPE.name()
     }
 
     void "checkFilesInDirectory, when a folder is empty, add a warning"() {

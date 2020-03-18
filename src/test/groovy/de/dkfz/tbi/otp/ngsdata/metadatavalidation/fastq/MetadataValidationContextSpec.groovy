@@ -79,6 +79,22 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
         context.spreadsheet.dataRows[3].cells[0].text == '7'
     }
 
+    void 'createFromFile, when file header contains alias, replace it'() {
+        given:
+        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        file.bytes = ("UNKNOWN ${ALIGN_TOOL} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
+                "1 2 3"
+        ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
+
+        when:
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure, "")
+
+        then:
+        context.spreadsheet.header.cells[0].text == "UNKNOWN"
+        context.spreadsheet.header.cells[1].text == ALIGN_TOOL.name()
+        context.spreadsheet.header.cells[2].text == SEQUENCING_READ_TYPE.name()
+    }
+
 
     void 'test getSummary when problems occurred'()  {
         given:

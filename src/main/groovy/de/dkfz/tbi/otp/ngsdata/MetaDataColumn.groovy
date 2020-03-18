@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.TupleConstructor
+
 /**
  * Defines the columns of the FASTQ metadata file
  */
+@TupleConstructor
 enum MetaDataColumn {
     FASTQ_FILE,
     MD5,
@@ -39,17 +42,17 @@ enum MetaDataColumn {
     INSTRUMENT_MODEL,
     PIPELINE_VERSION,
     ALIGN_TOOL,
-    FRAGMENT_SIZE,
-    SEQUENCING_READ_TYPE,
+    FRAGMENT_SIZE(["INSERT_SIZE"]),
+    SEQUENCING_READ_TYPE(["LIBRARY_LAYOUT"]),
     WITHDRAWN,
     WITHDRAWN_DATE,
     COMMENT,
-    INDEX,
+    INDEX(["BARCODE"]),
     LIB_PREP_KIT,
     SEQUENCING_KIT,
     ILSE_NO,
     PROJECT,
-    READ,
+    READ(["MATE"]),
     CUSTOMER_LIBRARY,
     SAMPLE_SUBMISSION_TYPE,
     TAGMENTATION_BASED_LIBRARY,
@@ -57,4 +60,21 @@ enum MetaDataColumn {
     PATIENT_ID,
     BIOMATERIAL_ID,
     SINGLE_CELL_WELL_LABEL,
+
+    final List<String> importAliases = []
+
+    private static Map<String, MetaDataColumn> mapping
+    static {
+        mapping = values().collectEntries { column ->
+            Map<String, MetaDataColumn> map = [(column.name()): column]
+            column.importAliases.each { alias ->
+                map.put(alias, column)
+            }
+            return map
+        }
+    }
+
+    static MetaDataColumn getColumnForName(String name) {
+        return mapping.get(name)
+    }
 }

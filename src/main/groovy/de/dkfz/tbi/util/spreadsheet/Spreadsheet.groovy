@@ -23,6 +23,8 @@ package de.dkfz.tbi.util.spreadsheet
 
 import com.opencsv.*
 import groovy.transform.TupleConstructor
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 import de.dkfz.tbi.otp.utils.StringUtils
 
@@ -52,7 +54,9 @@ class Spreadsheet {
     private final Map<String, Column> columnsByTitle
     private final List<Row> dataRows
 
-    Spreadsheet(String document, Delimiter delimiter = Delimiter.TAB) {
+    Spreadsheet(String document,
+                Delimiter delimiter = Delimiter.TAB,
+                @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY) {
         this.delimiter = delimiter
         Map<String, Column> columnsByTitle = [:]
         List<Row> dataRows = []
@@ -62,9 +66,8 @@ class Spreadsheet {
         reader.setErrorLocale(Locale.ENGLISH)
         String [] line
         while ((line = reader.readNext()) != null) {
-            Row row = new Row(this, rowIndex++, line)
             if (!header) {
-                header = row
+                header = new Row(this, rowIndex++, line.collect(renameHeader))
                 for (Cell cell : header.cells) {
                     if (columnsByTitle.containsKey(cell.text)) {
                         throw new IllegalArgumentException("Duplicate column '${cell.text}'")
@@ -72,7 +75,7 @@ class Spreadsheet {
                     columnsByTitle.put(cell.text, new Column(cell))
                 }
             } else {
-                dataRows.add(row)
+                dataRows.add(new Row(this, rowIndex++, line as List<String>))
             }
         }
         this.columnsByTitle = columnsByTitle.asImmutable()
@@ -101,7 +104,7 @@ class Row {
     final int rowIndex
     final List<Cell> cells
 
-    protected Row(Spreadsheet spreadsheet, int rowIndex, String[] line) {
+    protected Row(Spreadsheet spreadsheet, int rowIndex, List<String> line) {
         this.spreadsheet = spreadsheet
         this.rowIndex = rowIndex
         int columnIndex = 0

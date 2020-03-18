@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -43,7 +44,9 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription) {
-        Map parametersForFile = readAndCheckFile(metadataFile, { Row row ->
+        Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
+            MetaDataColumn.getColumnForName(s)?.name() ?: s
+        }, { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined')
         })
 

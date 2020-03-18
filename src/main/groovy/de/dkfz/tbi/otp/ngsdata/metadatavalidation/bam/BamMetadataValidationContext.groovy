@@ -43,7 +43,9 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     static BamMetadataValidationContext createFromFile(Path metadataFile, List<String> furtherFiles, FileSystem fileSystem) {
-        Map parametersForFile = readAndCheckFile(metadataFile)
+        Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
+            BamMetadataColumn.getColumnForName(s)?.name() ?: s
+        })
 
         Problems allBamProblems = validateFurtherFiles(furtherFiles, parametersForFile.problems, parametersForFile.spreadsheet, fileSystem)
 

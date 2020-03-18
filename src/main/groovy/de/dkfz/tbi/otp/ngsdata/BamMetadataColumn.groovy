@@ -21,14 +21,17 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.TupleConstructor
+
 /**
  * Defines the columns of the BAM metadata file
  */
+@TupleConstructor
 enum BamMetadataColumn {
     BAM_FILE_PATH,
     COVERAGE,
     INDIVIDUAL,
-    SEQUENCING_READ_TYPE,
+    SEQUENCING_READ_TYPE(["LIBRARY_LAYOUT"]),
     MD5,
     PROJECT,
     REFERENCE_GENOME,
@@ -37,4 +40,21 @@ enum BamMetadataColumn {
     LIBRARY_PREPARATION_KIT,
     INSERT_SIZE_FILE,
     QUALITY_CONTROL_FILE,
+
+    final List<String> importAliases = []
+
+    private static Map<String, BamMetadataColumn> mapping
+    static {
+        mapping = values().collectEntries { column ->
+            Map<String, BamMetadataColumn> map = [(column.name()): column]
+            column.importAliases.each { alias ->
+                map.put(alias, column)
+            }
+            return map
+        }
+    }
+
+    static BamMetadataColumn getColumnForName(String name) {
+        return mapping.get(name)
+    }
 }

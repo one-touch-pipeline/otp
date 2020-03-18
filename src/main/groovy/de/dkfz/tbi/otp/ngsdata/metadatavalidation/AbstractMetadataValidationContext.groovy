@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.util.spreadsheet.FilteredSpreadsheet
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
@@ -50,7 +53,9 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         this.metadataFileMd5sum = metadataFileMd5sum
     }
 
-    static Map readAndCheckFile(Path metadataFile, Closure<Boolean> dataRowFilter = { true }) {
+    static Map readAndCheckFile(Path metadataFile,
+                                @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
+                                @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
         Problems problems = new Problems()
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null
@@ -79,7 +84,8 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
                 if (document.getBytes(CHARSET) != bytes) {
                     problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly encoded with ${CHARSET.name()}. Characters might be corrupted.")
                 }
-                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), dataRowFilter)
+                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Spreadsheet.Delimiter.TAB,
+                        renameHeader, dataRowFilter)
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null
                     problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} contains less than two lines.")

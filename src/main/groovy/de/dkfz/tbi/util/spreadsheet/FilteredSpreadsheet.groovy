@@ -21,12 +21,18 @@
  */
 package de.dkfz.tbi.util.spreadsheet
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 class FilteredSpreadsheet extends Spreadsheet {
 
     private final List<Row> dataRows
 
-    FilteredSpreadsheet(String document, Closure<Boolean> dataRowFilter) {
-        super(document)
+    FilteredSpreadsheet(String document,
+                        Delimiter delimiter = Delimiter.TAB,
+                        @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
+                        @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
+        super(document, delimiter, renameHeader)
         dataRows = super.dataRows.findAll(dataRowFilter).asImmutable()
     }
 
