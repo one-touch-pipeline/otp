@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,25 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser
+package de.dkfz.tbi.otp.parser.covid19
 
-import groovy.transform.TupleConstructor
+enum Covid19TissueType {
+    NASAL_SWAB('NS'),
+    THROAT_SWAB('TS'),
+    BRONCHIAL_LAVAGE('BL'),
+    BLOOD('B'),
+    PROTECTED_SPECIMEN_BRUSH('PSB'),
 
-@TupleConstructor
-enum SampleIdentifierParserBeanName {
-    NO_PARSER('', 'No Parser'),
-    DEEP('deepSampleIdentifierParser', 'DEEP'),
-    HIPO('hipoSampleIdentifierParser', 'HIPO'),
-    HIPO2('hipo2SampleIdentifierParser', 'HIPO2'),
-    HIPO2_SPL('hipo2SamplePreparationLabSampleIdentifierParser', 'HIPO2_SPL'),
-    INFORM('informSampleIdentifierParser', 'INFORM'),
-    OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
-    SIMPLE('simpleProjectIndividualSampleTypeParser', 'Simple'),
-    ITCC_4P('iTCC_4P_Parser', 'ITCC-4P'),
-    PEDION('pedionParser', 'PeDiOn'),
-    COVID19('covid19SampleIdentifierParser', 'Covid-19'),
+    final String key
 
+    private Covid19TissueType(String key) {
+        this.key = key
+    }
 
-    final String beanName
-    final String displayName
+    static Covid19TissueType fromKey(String key) {
+        Covid19TissueType covid19TissueType = values().find { it.key == key }
+        if (covid19TissueType == null) {
+            throw new IllegalArgumentException()
+        }
+        return covid19TissueType
+    }
 }
