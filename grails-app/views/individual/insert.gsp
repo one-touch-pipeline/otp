@@ -166,7 +166,8 @@
                 </table>
                 <button type="button" class="add-button"><g:message code="individual.insert.newSampleButton"/></button>
                 <input type="submit" value="${g.message(code: 'individual.insert.save')}"/>
-                <g:message code="individual.insert.redirect"/><input type="checkbox" name="checkRedirect">
+                <br>
+                <input type="checkbox" id="checkRedirect" name="checkRedirect"><label for="checkRedirect"><g:message code="individual.insert.redirect"/></label>
             </div>
         </g:form>
     </div>
