@@ -109,8 +109,8 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                 loadModul,
                 "${enableModul} ${singleCellBamFile.mergingWorkPackage.config.programVersion}",
                 "cd ${singleCellBamFile.workDirectory}",
-                "echo \"cellranger count ${parameterKey}=${parameterValue} --disable-ui\" > ${resultDirectory.resolve("${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}")}",
                 "cellranger count ${parameterKey}=${parameterValue} --disable-ui",
+                "echo \"cellranger count ${parameterKey}=${parameterValue} --disable-ui\" > ${resultDirectory.resolve("${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}")}",
                 "md5sum ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)} | " +
                         "sed -e 's#  ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)}##' > " +
                         "${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)}",

@@ -105,8 +105,9 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
             ${moduleLoadPrefix} ${singleCellBamFile.mergingWorkPackage.config.programVersion}
 
             cd ${singleCellBamFile.workDirectory}
-            echo \"${command}\" > ${Paths.get(singleCellBamFile.resultDirectory.toString(), "${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}").toAbsolutePath()}
             ${command}
+
+            echo \"${command}\" > ${Paths.get(singleCellBamFile.resultDirectory.toString(), "${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}").toAbsolutePath()}
 
             ${createMd5SumCommand(singleCellBamFile)}
             """
