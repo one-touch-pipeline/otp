@@ -98,24 +98,26 @@
                 <h3><g:message code="individual.insert.addSample"/></h3>
                 <table class="key-value-table key-input">
                     <thead>
-                    <tr class="hidden">
+                    <tr class="hidden template">
                         <th colspan="2">
                             <g:message code="individual.insert.newSample"/>
                         </th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="sample hidden">
+                    <tr class="sample hidden template">
                         <td>
                             <label for="sampleType"><g:message code="individual.insert.sampleType"/></label>
                         </td>
                         <td>
-                            %{-- Don't use select2: This field is cloned (when adding multiple samples), and we don't yet know
-                                 how to deal with that, without breaking event-handlers attached to this tag. --}%
-                            <g:select name="sampleType" class="dont-use-select-2" from="${sampleTypes}" noSelection="[null: '']"/>
+                            %{-- Voodoo for select2: These table rows serve as a template, cloned by the "+ sample" button.
+                                 Mark this select for the javascript-handler to add select2 dropdowns after clone.
+                                 NOTE: a nicer way would be to rewrite this to use MultiInputField. --}%
+                            <g:select id="" name="sampleType" class="use-select-2-after-clone"
+                                      from="${sampleTypes}" noSelection="[null: '']"/>
                         </td>
                     </tr>
-                    <tr class="sampleIdentifier hidden">
+                    <tr class="sampleIdentifier hidden template">
                         <td>
                             <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
                         </td>
@@ -141,9 +143,9 @@
                                     <label for="samples[${sampleCounter}].sampleType"><g:message code="individual.insert.sampleType"/></label>
                                 </td>
                                 <td>
-                                    %{-- Don't use select2: This field occurs multiple times (when adding multiple samples), and we don't yet know
-                                         how to deal with that, without breaking event-handlers attached to this tag. --}%
-                                    <g:select name="samples[${sampleCounter}].sampleType" class="dont-use-select-2"
+                                    %{-- Select2: these dropdowns are present on page-load, so they get their select2 from OTP-wide JS,
+                                         not from the "+ sample"-button handler. --}%
+                                    <g:select name="samples[${sampleCounter}].sampleType" class="use-select-2"
                                               from="${sampleTypes}" noSelection="[null: '']" value="${sample.sampleType}"/>
                                 </td>
                             </tr>
