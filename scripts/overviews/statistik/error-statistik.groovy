@@ -78,7 +78,7 @@ List<Closure> grouping = [
 //---------------------
 //work
 
-SimpleDateFormat simpleDateFormat = new SimpleDateFormat('yyyy-MM-dd')
+SimpleDateFormat simpleDateFormat = new SimpleDateFormat('yyyy-MM-dd', Locale.ENGLISH)
 
 Date startDate = simpleDateFormat.parse(startDateString)
 Date endDate = simpleDateFormat.parse(endDateString) + 1

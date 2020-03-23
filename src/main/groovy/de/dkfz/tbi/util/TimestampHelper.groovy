@@ -46,12 +46,12 @@ class TimestampHelper {
         Date now = new Date()
         boolean same24hours = ((now.getTime() - date.getTime()) <= 86400000) // 86.400.000 = 24h * 60m * 60s * 1000ms
         if (same24hours) {
-            return new SimpleDateFormat(TIME_PATTERN).format(date)
+            return new SimpleDateFormat(TIME_PATTERN, Locale.ENGLISH).format(date)
         } else {
             if (now.getYear() == date.getYear()) {
-                new SimpleDateFormat(TIME_SHORT_DATE).format(date)
+                new SimpleDateFormat(TIME_SHORT_DATE, Locale.ENGLISH).format(date)
             } else {
-                new SimpleDateFormat(TIME_DATE).format(date)
+                new SimpleDateFormat(TIME_DATE, Locale.ENGLISH).format(date)
             }
         }
     }
@@ -67,7 +67,7 @@ class TimestampHelper {
         }
         return [
                 shortest: getInShortestTimeFormat(date),
-                full    : new SimpleDateFormat(TIME_WEEKDAY_DATE).format(date),
+                full    : new SimpleDateFormat(TIME_WEEKDAY_DATE, Locale.ENGLISH).format(date),
                 value   : date.getTime(),
         ]
     }

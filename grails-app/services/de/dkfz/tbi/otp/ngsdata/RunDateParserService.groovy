@@ -40,7 +40,7 @@ class RunDateParserService {
    static Date parseDate(String format, String text) {
        Date date = null
        try {
-           SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format)
+           SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.ENGLISH)
            date = simpleDateFormat.parse(text)
        } catch (Exception e) {
        // no exception

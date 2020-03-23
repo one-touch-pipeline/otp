@@ -451,7 +451,7 @@ All the Rules that will be used for OTP
         priority = HIGH
     }
     SimpleDateFormatMissingLocale {
-        priority = HIGH
+        priority = CRITICAL
     }
     StatelessSingleton {
         priority = DEFAULT

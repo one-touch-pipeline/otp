@@ -93,7 +93,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 property('dateCreated', "dateCreated")
             }
         }
-        SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat('yyyy-MM-dd HH:mm')
+        SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat('yyyy-MM-dd HH:mm', Locale.ENGLISH)
 
         return results.collect { Map properties ->
             T instance = instanceClass.get(properties.instanceId)

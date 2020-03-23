@@ -168,7 +168,7 @@ ${search ? """
         if (dateString == "") {
             ticket."${property}" = null
         } else {
-            DateFormat format = new SimpleDateFormat(DATE_FORMAT)
+            DateFormat format = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
             Date date = format.parse(dateString)
 
             ticket."${property}" = date

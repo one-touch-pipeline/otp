@@ -53,8 +53,8 @@ class StatisticsController {
 
     def kpi() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Date startDate = params.start ? new SimpleDateFormat("yyyy-MM-dd").parse(params.start) : null
-        Date endDate = params.end ? new SimpleDateFormat("yyyy-MM-dd").parse(params.end) : null
+        Date startDate = params.start ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(params.start) : null
+        Date endDate = params.end ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(params.end) : null
 
         if (!selection.projects) {
             return [

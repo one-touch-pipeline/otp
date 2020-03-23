@@ -99,7 +99,6 @@ class RunController {
     }
 }
 
-
 @TupleConstructor
 enum RunColumn {
     RUN('run.list.name', "name"),
@@ -151,7 +150,7 @@ class RunFiltering {
                     break
                 case "dateCreatedSelection":
                     if (it.value) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                         Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
                         Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
 
@@ -161,7 +160,7 @@ class RunFiltering {
                     break
                 case "dateExecutedSelection":
                     if (it.value) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                         Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
                         Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
 
