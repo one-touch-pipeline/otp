@@ -28,7 +28,6 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 @SuppressWarnings('JavaIoPackageAccess')
 class TestConfigService extends ConfigService {
@@ -38,6 +37,11 @@ class TestConfigService extends ConfigService {
     @SuppressWarnings('UnsafeImplementationAsMap')
     TestConfigService(Map<OtpProperty, String> properties = [:]) {
         super()
+
+        /*
+         * As an extra protection against accidentally using production-settings in test-environments,
+         * filter our properties. We wouldn't want to accidentally use the production DB or something.
+         */
         if (Environment.current.name == "WORKFLOW_TEST") {
             otpProperties = otpProperties.findAll {
                 it.key in [
@@ -62,6 +66,7 @@ class TestConfigService extends ConfigService {
             otpProperties = otpProperties.findAll {
                 it.key in [
                         OtpProperty.TEST_TESTING_GROUP,
+                        OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP,
                 ]
             }
         }
@@ -102,12 +107,28 @@ class TestConfigService extends ConfigService {
         this.otpProperties = new HashMap<>(cleanProperties)
     }
 
-
     String getTestingGroup() {
+        assertTestGroupsDiffer()
+        return getAndAssertValue(OtpProperty.TEST_TESTING_GROUP)
+    }
+
+    String getWorkflowProjectUnixGroup() {
+        assertTestGroupsDiffer()
+        return getAndAssertValue(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP)
+    }
+
+    /**
+     * OTP runtime assumes that lots of data is generated with the 'default' group, and then chgrp-ed to the project group.
+     * This functionality can only be tested if both groups differ.
+     */
+    private void assertTestGroupsDiffer() {
         String testingGroup = getAndAssertValue(OtpProperty.TEST_TESTING_GROUP)
-        assert testingGroup != getWorkflowProjectUnixGroup():"'${OtpProperty.TEST_TESTING_GROUP.key}' with value '${testingGroup}' does not differ from " +
-                "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP ? OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key : 'your primary group'}' with value '${getWorkflowProjectUnixGroup()}'"
-        return testingGroup
+        String projectGroup = getAndAssertValue(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP)
+
+        assert testingGroup != projectGroup:
+                "'${OtpProperty.TEST_TESTING_GROUP.key             }' with value '${testingGroup}' does not differ from " +
+                "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key}' with value '${projectGroup}.'" +
+                "OTP needs the primary/'default' group and the 'project' group to differ, in order to test if data re-owning works."
     }
 
     String getWorkflowTestAccountName() {
@@ -130,9 +151,6 @@ class TestConfigService extends ConfigService {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RESULT_DIR))
     }
 
-    String getWorkflowProjectUnixGroup() {
-        return otpProperties.get(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP) ?: LocalShellHelper.executeAndWait("id -g -n").assertExitCodeZeroAndStderrEmpty().stdout.trim()
-    }
 
     File getWorkflowTestRoddySharedFilesBaseDir() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
@@ -140,7 +158,7 @@ class TestConfigService extends ConfigService {
 
     private String getAndAssertValue(OtpProperty property) {
         String value = otpProperties.get(property)
-        assert value: "'${property}' is not set in otp.properties"
+        assert value: "'${property}' (${property.key}) is not set in otp.properties"
         return value
     }
 }

@@ -32,6 +32,7 @@ mkdir -p logs/jobs
 
 #add required otp properties
 echo 'otp.testing.group=othergroup' >> $HOME/.otp.properties
+echo 'otp.testing.project.unix.group=otp' >> $HOME/.otp.properties
 
 #set proxy if given
 `dirname $0`/use-proxy.sh
