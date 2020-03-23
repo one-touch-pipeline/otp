@@ -375,10 +375,10 @@ class ExecuteRoddyCommandServiceIntegrationTests {
             stat -c %a ${tmpOutputDir}
             stat -c %G ${tmpOutputDir}
             """.stripIndent())
-        //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
+        //make the 2 optional, since it does not work for all developers.
         String expected = """\
             2?770
-            (${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
+            ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}
             """.stripIndent()
 
         assert permissionAndGroup ==~ expected
@@ -401,10 +401,10 @@ class ExecuteRoddyCommandServiceIntegrationTests {
             stat -c %a ${tmpOutputDir}
             stat -c %G ${tmpOutputDir}
             """.stripIndent())
-        //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
+        //make the 2 optional, since it does not work for all developers.
         String expected = """\
             2?770
-            (${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
+            ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}
             """.stripIndent()
 
         assert permissionAndGroup ==~ expected
