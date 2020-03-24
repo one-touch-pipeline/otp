@@ -27,6 +27,12 @@
 @darkblue: #81BEF7;
 @otpBlack: #222;
 @danger: #c82333;
+
+// re-usable colours for errors, see also: .input-error
+@errorText: #cc0000;
+@errorAccent: #ffaaaa;
+@errorBackground: #fff3f3;
+
 @width: 1250px; //if you change this you also have to change the width of "header.png" and "header_operator.png"
 
 .box-shadowed (@x, @y, @radius, @color) {
@@ -43,9 +49,6 @@
        -moz-box-shadow: none;
     -webkit-box-shadow: none;
             box-shadow: none;
-}
-.input-error {
-    .box-shadowed(0, 0, 0.5em, #ffaaaa);
 }
 .border-radius (@radius) {
        -moz-border-radius: @radius;
@@ -131,7 +134,6 @@ input, select, textarea, option, button {
     }
 }
 
-/* my styles start here */
 /**
 * tableBlock is used for a div with a header and a table underneath
 * having the same width and belonging together.
@@ -216,7 +218,6 @@ div.tableBlock {
   -ms-transition: @obj @time @easing;
   -o-transition: @obj @time @easing;
   -webkit-transition: @obj @time @easing;}
-/* end of my styles */
 a {
     &:hover, &:active {
         outline: none; /* prevents outline in webkit on active links but retains it for tab focus */
@@ -433,6 +434,14 @@ input[type=text] {
             color: #aaa;
         }
     }
+
+    // error state, this needs to be even more specific, in order to override the color-values.
+    .select-2-otp-theme.select-2-otp-theme.select-2-otp-error {
+        .input-error;
+        .select2-selection__rendered {
+            color: @errorText;
+        }
+    }
 }
 
 /* EMBEDDED PROPERTIES */
@@ -453,26 +462,25 @@ fieldset.embedded {
     border: 1px solid white;
 }
 /* form fields with errors */
-.error input, .error select, .error textarea, input.error {
-    background: #fff3f3;
-    border-color: #ffaaaa;
-    color: #cc0000;
-}
-.error input:focus, .error select:focus, .error textarea:focus {
-    .input-error;
+.input-error { // intended as generic template for consistent OTP-wide error styling.
+    background: @errorBackground;
+    border-color: @errorAccent;
+    color: @errorText;
+    .box-shadowed(0, 0, 0.5em,  @errorAccent);
 }
 .error-checkbox {
-    background: #ffaaaa;
+    // checkboxes can't really be styled, try anyway.
+    .input-error;
+    background: @errorAccent; // checkboxes are tiny, so give background a bit more "kick".
+}
+.error input, .error select, .error textarea, input.error {
+    .input-error;
 }
 /* same effects for browsers that support HTML5 client-side validation (these have to be specified separately or IE will ignore the entire rule) */
 input:invalid, select:invalid, textarea:invalid {
-    background: #fff3f3;
-    border-color: #ffaaaa;
-    color: #cc0000;
-}
-input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
     .input-error;
 }
+
 /* TABLES */
 table {
     border-bottom: 1px solid #DFDFDF;

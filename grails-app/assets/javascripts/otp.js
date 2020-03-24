@@ -394,6 +394,16 @@ $.otp.tableButtons = [
  *        If other tags are in there, strange things will happen.
  */
 $.otp.applySelect2 = function (jqSelection) {
+    /** Syncs the HTML5 validity styling between the 'real' select, and its Select2 imitation */
+    function syncValidity(realSelect) {
+        const s2 = $(realSelect).data('select2').$selection; // voodoo to go from the 'real' select to its select2 imitation input-field.
+        if (realSelect.checkValidity()) {
+            s2.removeClass('select-2-otp-error');
+        } else {
+            s2.addClass('select-2-otp-error');
+        }
+    }
+
     jqSelection.select2({
         minimumResultsForSearch: 10,
 
@@ -413,6 +423,10 @@ $.otp.applySelect2 = function (jqSelection) {
          */
         width: 'computedstyle',
         containerCssClass: 'select-2-otp-theme'
+    }).change(function (ev) { // handler to keep html5 validity-state and -visuals synced between 'real' select and select2 elements.
+        syncValidity(ev.target);
+    }).each(function (i, e) { // initial sync when first applying, to match other fields (:invalid style is shown immediately on page load.)
+        syncValidity(e);
     });
 };
 
