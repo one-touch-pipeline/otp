@@ -52,12 +52,55 @@ $.otp.userAdministration.loadUserList = function () {
         checkboxId = "user-change-" + id + "-" + target;
         html = '<input type="checkbox" id="' + checkboxId + '" ';
         if (enabled) {
-            html += 'checked="checked"';
+            html += 'checked';
         }
         html += '/><input type="button" value="Update" onclick="$.otp.userAdministration.changeUser(' + id + ', \'' + checkboxId + '\', \'' + target + '\')"/>';
         return html;
     };
     $('#userTable').dataTable({
+        aoColumns: [
+            {
+                'mData': function (source, type, data) {
+                    return $.otp.createLinkMarkup({
+                        controller: 'userAdministration',
+                        action: 'show',
+                        text: source.username || "[no username]",
+                        title: source.id,
+                        parameters: {
+                            "user.id": source.id
+                        }
+                    });
+                }
+            },
+            {'mData': 'realname'},
+            {'mData': 'email'},
+            {'mData': 'deactivationDate'},
+            {
+                'mData': function (source, type, data) {
+                    if (type === "sort") {
+                        return source.enabled
+                    }
+                    return createUserChangeMarkup(source.id, 'enable', source.enabled);
+                }
+            },
+            {
+                'mData': function (source, type, data) {
+                    if (type === "sort") {
+                        return source.acceptedPrivacyPolicy;
+                    }
+                    return createUserChangeMarkup(source.id, 'enable', source.acceptedPrivacyPolicy);
+                }
+            },
+            {
+                'mData': function (source, type, data) {
+                    var result = "";
+                    if (source.username) {
+                        result = '<input type="hidden" value="' + source.username + '"/><button class="changeUserButton">Switch to ' + source.username + '</button>';
+                    }
+                    return result
+                }
+            }
+        ],
         bFilter: false,
         bProcessing: true,
         bServerSide: false,
@@ -82,27 +125,6 @@ $.otp.userAdministration.loadUserList = function () {
                     fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
                 },
                 "success": function (json) {
-                    var rowData, userId, username, i;
-                    for (i = 0; i < json.aaData.length; i += 1) {
-                        rowData = json.aaData[i];
-                        userId = rowData[0].id;
-                        username = rowData[0].username;
-                        rowData[0] = $.otp.createLinkMarkup({
-                            controller: 'userAdministration',
-                            action: 'show',
-                            text: username || "[no username]",
-                            title: userId,
-                            parameters: {
-                                "user.id": userId
-                            }
-                        });
-                        rowData[4] = createUserChangeMarkup(userId, 'enable', rowData[4]);
-                        rowData[5] = createUserChangeMarkup(userId, 'acceptedPrivacyPolicy', rowData[5]);
-                        rowData[6] = "";
-                        if (username) {
-                            rowData[6] = '<input type="hidden" value="' + username + '"/><button class="changeUserButton">Switch to ' + username + '</button>';
-                        }
-                    }
                     fnCallback(json);
                 }
             });
@@ -116,7 +138,7 @@ $.otp.userAdministration.loadUserList = function () {
                 form.submit();
             });
             return nRow;
-        }
+        },
     });
     $.otp.resizeBodyInit('#userTable', 180);
 };

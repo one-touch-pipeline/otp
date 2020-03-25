@@ -31,7 +31,8 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimestampHelper
+
+import java.text.SimpleDateFormat
 
 /**
  * @short Controller for user management.
@@ -57,7 +58,8 @@ class UserAdministrationController implements CheckAndCall {
     /**
      * Default action showing the DataTable markup
      */
-    def index() { }
+    def index() {
+    }
 
     /**
      * Action returning the DataTable content as JSON
@@ -68,16 +70,24 @@ class UserAdministrationController implements CheckAndCall {
         dataToRender.iTotalRecords = userService.getUserCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
+
         List users = userService.getAllUsers()
 
         users.each { User user ->
+            String dateString
+            if (user.plannedDeactivationDate) {
+                dateString = new SimpleDateFormat('yyyy-MM-dd HH:mm:ss', Locale.ENGLISH).format(user.plannedDeactivationDate)
+            } else {
+                dateString = ""
+            }
             dataToRender.aaData << [
-                    [id: user.id, username: user.username],
-                    user.realName,
-                    user.email,
-                    TimestampHelper.asTimestamp(user.plannedDeactivationDate)["full"],
-                    user.enabled,
-                    user.acceptedPrivacyPolicy,
+                    id                   : user.id,
+                    username             : user.username,
+                    realname             : user.realName,
+                    email                : user.email,
+                    deactivationDate     : dateString,
+                    enabled              : user.enabled,
+                    acceptedPrivacyPolicy: user.acceptedPrivacyPolicy,
             ]
         }
         render dataToRender as JSON
