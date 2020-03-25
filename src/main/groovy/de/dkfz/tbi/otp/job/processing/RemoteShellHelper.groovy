@@ -83,7 +83,9 @@ class RemoteShellHelper {
      * @param realm The realm which identifies the host
      * @param command The command to be executed
      * @return standard output of the command executed
+     * @deprecated use executeCommandReturnProcessOutput instead
      */
+    @Deprecated
     String executeCommand(Realm realm, String command) {
         return executeCommandReturnProcessOutput(realm, command).stdout
     }

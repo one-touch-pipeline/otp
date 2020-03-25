@@ -105,10 +105,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         int counter = 0
         projectService.remoteShellHelper = Stub(RemoteShellHelper) {
-            executeCommand(_, _) >> { Realm realm2, String command ->
+            executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script' + counter++ + '.sh')
                 script.text = command
-                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
+                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
             }
         }
         projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
@@ -277,12 +277,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             }
         }
         projectService.remoteShellHelper = Stub(RemoteShellHelper) {
-            executeCommand(_, _) >> { Realm realm2, String command ->
+            executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script.sh')
                 script.text = command
-                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
+                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
             } >> { Realm realm2, String command ->
-                "mkdir: cannot create directory ‘${projectParams.dirAnalysis}’: Permission denied".toString()
+                return new ProcessOutput(stderr: "mkdir: cannot create directory ‘${projectParams.dirAnalysis}’: Permission denied".toString(), exitCode: 1)
             }
         }
 
@@ -446,12 +446,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
         String analysisDir = "${temporaryFolder.newFolder()}/dirA"
         projectService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
+            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
                 assert command.contains("mkdir -p -m 2775 ${analysisDir}")
 
                 File script = temporaryFolder.newFile('script.sh')
                 script.text = command
-                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
+                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
             }
         }
         projectService.projectInfoService = Mock(ProjectInfoService) {

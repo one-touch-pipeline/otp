@@ -68,8 +68,8 @@ class LogThreadLocal {
 
     static void withThreadLog(Appendable out, Closure code) {
         assert out != null
-        assert code != null
-        assert threadLog == null
+        assert code
+        assert !threadLog
 
         setThreadLog(new SimpleLogger() {
             @Override
@@ -78,6 +78,19 @@ class LogThreadLocal {
                 out.append('\n')
             }
         })
+        try {
+            code()
+        } finally {
+            removeThreadLog()
+        }
+    }
+
+    static void withThreadLog(Logger logger, Closure code) {
+        assert logger
+        assert code
+        assert !threadLog
+
+        setThreadLog(logger)
         try {
             code()
         } finally {

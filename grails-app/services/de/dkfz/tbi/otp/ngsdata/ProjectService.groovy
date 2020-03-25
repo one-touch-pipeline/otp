@@ -827,8 +827,8 @@ ${input}
 
 echo 'OK'
 """
-        LogThreadLocal.withThreadLog(System.out) {
-            assert remoteShellHelper.executeCommand(realm, script).trim() == "OK"
+        LogThreadLocal.withThreadLog(log) {
+            assert remoteShellHelper.executeCommandReturnProcessOutput(realm, script).stdout?.trim() == "OK"
         }
     }
 
