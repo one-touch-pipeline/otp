@@ -46,10 +46,6 @@ $.otp.projectConfig = {
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "project",
-                    value: $('#project').find('option:selected').val()
-                });
                 $.ajax({
                     "dataType": 'json',
                     "type": "POST",
@@ -81,11 +77,6 @@ $.otp.projectConfig = {
             }),
             $.otp.projectConfig.returnParameterUnchanged
         );
-        $('#project').change(function () {
-            var oSettings = oTable.fnSettings();
-            oSettings.oFeatures.bServerSide = true;
-            oTable.fnDraw();
-        });
     },
 
     /**
@@ -98,7 +89,6 @@ $.otp.projectConfig = {
             url: $.otp.createLink({
                 controller: 'projectConfig',
                 action: 'getAlignmentInfo',
-                parameters: { "project.id": $('#project').find('option:selected').val() }
             }),
             dataType: 'json',
             success: function (data) {

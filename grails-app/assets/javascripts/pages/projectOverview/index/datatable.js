@@ -50,10 +50,6 @@ $.otp.projectOverviewTable = {
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "project",
-                    value: $('#project').find('option:selected').text()
-                });
                 $.ajax({
                     "dataType": 'json',
                     "type": "POST",
@@ -80,9 +76,7 @@ $.otp.projectOverviewTable = {
         $.getJSON($.otp.createLink({
             controller: 'projectOverview',
             action: 'individualCountByProject'
-        }), {
-            projectName : $('#project').find('option:selected').text()
-        }, function (data) {
+        }), function (data) {
             var message, i;
             if (data.individualCount >= 0) {
                 $('#patient-count').html(data.individualCount);

@@ -257,8 +257,8 @@ class ProjectOverviewService {
         }
     }
 
-    List overviewProjectQuery(String projectName) {
-        Project project = Project.findByName(projectName)
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    List overviewProjectQuery(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             property("individualId")

@@ -33,7 +33,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
 
 class ProjectOverviewController {
 
-    ProjectService projectService
     ProjectOverviewService projectOverviewService
     CommentService commentService
     ProjectSelectionService projectSelectionService
@@ -88,7 +87,7 @@ class ProjectOverviewController {
      */
     JSON dataTableSourceLaneOverview(DataTableCommand cmd) {
         boolean anythingWithdrawn = false
-        Project project = projectService.getProject(Long.valueOf(params.projectId as String))
+        Project project = projectSelectionService.requestedProject
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
         boolean hideSampleIdentifier = ProjectOverviewService.hideSampleIdentifier(project)
@@ -185,15 +184,16 @@ class ProjectOverviewController {
         Pipeline.findAllByType(Pipeline.Type.ALIGNMENT, [sort: "id"])
     }
 
-    JSON individualCountByProject(String projectName) {
-        Project project = projectService.getProjectByName(projectName)
+    JSON individualCountByProject() {
+        Project project = projectSelectionService.requestedProject
         Map dataToRender = [individualCount: projectOverviewService.individualCountByProject(project)]
         render dataToRender as JSON
     }
 
     JSON dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List data = projectOverviewService.overviewProjectQuery(params.project)
+        Project project = projectSelectionService.requestedProject
+        List data = projectOverviewService.overviewProjectQuery(project)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
@@ -201,7 +201,7 @@ class ProjectOverviewController {
     }
 
     JSON dataTableSourcePatientsAndSamplesGBCountPerProject(DataTableCommand cmd) {
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectSelectionService.requestedProject
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.patientsAndSamplesGBCountPerProject(project)
         dataToRender.iTotalRecords = data.size()
@@ -211,7 +211,7 @@ class ProjectOverviewController {
     }
 
     JSON dataTableSourceSampleTypeNameCountBySample(DataTableCommand cmd) {
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectSelectionService.requestedProject
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.sampleTypeNameCountBySample(project)
         dataToRender.iTotalRecords = data.size()
@@ -221,7 +221,7 @@ class ProjectOverviewController {
     }
 
     JSON dataTableSourceCenterNameRunId(DataTableCommand cmd) {
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectSelectionService.requestedProject
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.centerNameRunId(project)
         List dataLast = projectOverviewService.centerNameRunIdLastMonth(project)

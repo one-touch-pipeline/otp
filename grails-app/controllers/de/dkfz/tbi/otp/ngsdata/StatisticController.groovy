@@ -24,15 +24,16 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import grails.validation.Validateable
 
+import de.dkfz.tbi.otp.ProjectSelectionService
+
 class StatisticController {
 
     static final String ALL_PROJECTS = "All projects"
 
-    StatisticService statisticService
-
     ProjectGroupService projectGroupService
-
+    ProjectSelectionService projectSelectionService
     ProjectService projectService
+    StatisticService statisticService
 
     private static long getRoundedPercentage(long numerator, long denominator) {
         return Math.round(numerator * 100 / denominator)
@@ -206,8 +207,8 @@ class StatisticController {
         render dataToRender as JSON
     }
 
-    JSON sampleTypeCountBySeqType(ProjectCommand command) {
-        Project project = projectService.getProjectByName(command.projectName)
+    JSON sampleTypeCountBySeqType() {
+        Project project = projectSelectionService.requestedProject
 
         List<String> labels = []
         List<String> labelsPercentage = []
@@ -233,8 +234,8 @@ class StatisticController {
         render dataToRender as JSON
     }
 
-    JSON sampleTypeCountByPatient(ProjectCommand command) {
-        Project project = projectService.getProjectByName(command.projectName)
+    JSON sampleTypeCountByPatient() {
+        Project project = projectSelectionService.requestedProject
 
         List<String> labels = []
         List<Integer> values = []
@@ -254,23 +255,10 @@ class StatisticController {
         render dataToRender as JSON
     }
 
-    JSON laneCountPerDateByProject(ProjectCommand command) {
-        Project project = projectService.getProjectByName(command.projectName)
+    JSON laneCountPerDateByProject() {
+        Project project = projectSelectionService.requestedProject
         List data = statisticService.laneCountPerDay([project])
         render statisticService.dataPerDate(data) as JSON
-    }
-}
-
-class ProjectCommand implements Validateable {
-
-    ProjectService projectService
-
-    String projectName
-
-    static constraints = {
-        projectName(nullable: false, validator: { val, ProjectCommand obj ->
-            return val && (obj.projectService.getProjectByName(val) != null)
-        })
     }
 }
 

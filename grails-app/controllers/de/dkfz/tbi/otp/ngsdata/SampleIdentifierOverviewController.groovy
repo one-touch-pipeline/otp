@@ -23,12 +23,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SampleIdentifierOverviewController {
 
-    ProjectService projectService
     ProjectOverviewService projectOverviewService
+    ProjectSelectionService projectSelectionService
 
     Map index() {
         return [:]
@@ -36,7 +37,7 @@ class SampleIdentifierOverviewController {
 
     JSON dataTableSourceListSampleIdentifierByProject(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectSelectionService.requestedProject
         Map data = projectOverviewService.listSampleIdentifierByProject(project)
 
         dataToRender.iTotalRecords = data.size()

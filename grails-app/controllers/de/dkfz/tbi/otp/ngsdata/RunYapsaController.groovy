@@ -23,15 +23,19 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunYapsaController extends AbstractAnalysisController {
 
     RunYapsaResultsService runYapsaResultsService
+    ProjectSelectionService projectSelectionService
 
-    JSON dataTableResults(ResultTableCommand cmd) {
+    JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List data = runYapsaResultsService.getCallingInstancesForProject(cmd.project?.name)
+        Project project = projectSelectionService.requestedProject
+        List data = runYapsaResultsService.getCallingInstancesForProject(project?.name)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data

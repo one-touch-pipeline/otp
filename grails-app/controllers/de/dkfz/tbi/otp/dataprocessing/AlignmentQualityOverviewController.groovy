@@ -24,15 +24,14 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.converters.JSON
 import org.springframework.validation.FieldError
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.otp.utils.FormatHelper
-import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.AccessDeniedException
 
@@ -158,7 +157,6 @@ class AlignmentQualityOverviewController {
 
     CellRangerService cellRangerService
 
-    ProjectService projectService
     ProjectSelectionService projectSelectionService
     QcThresholdService qcThresholdService
     QcTrafficLightService qcTrafficLightService
@@ -237,15 +235,14 @@ class AlignmentQualityOverviewController {
     JSON dataTableSource(AlignmentQcDataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        if (!cmd.project || !cmd.seqType) {
+        Project project = projectSelectionService.requestedProject
+        if (!cmd.seqType) {
             dataToRender.iTotalRecords = 0
             dataToRender.iTotalDisplayRecords = 0
             dataToRender.aaData = []
             render dataToRender as JSON
             return
         }
-
-        Project project = projectService.getProject(cmd.project.id)
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, cmd.seqType, cmd.sample)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(CHROMOSOMES,
@@ -497,7 +494,6 @@ class AlignmentQcCommand {
 }
 
 class AlignmentQcDataTableCommand extends DataTableCommand {
-    Project project
     SeqType seqType
     Sample sample
 

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.utils.DataTableCommand
 
 abstract class AbstractAnalysisController {
 
@@ -43,8 +42,4 @@ class BamFilePairAnalysisCommand {
         bamFilePairAnalysis nullable: false
         plotType nullable: false
     }
-}
-
-class ResultTableCommand extends DataTableCommand {
-    Project project
 }

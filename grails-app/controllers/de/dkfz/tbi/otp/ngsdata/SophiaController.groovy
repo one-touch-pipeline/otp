@@ -23,15 +23,19 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SophiaController extends AbstractAnalysisController {
 
     SophiaResultsService sophiaResultsService
+    ProjectSelectionService projectSelectionService
 
-    JSON dataTableResults(ResultTableCommand cmd) {
+    JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List data = sophiaResultsService.getCallingInstancesForProject(cmd.project?.name)
+        Project project = projectSelectionService.requestedProject
+        List data = sophiaResultsService.getCallingInstancesForProject(project?.name)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data

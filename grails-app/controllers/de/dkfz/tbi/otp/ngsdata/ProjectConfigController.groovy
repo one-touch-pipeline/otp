@@ -149,7 +149,8 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     @SuppressWarnings('CatchThrowable')
-    JSON getAlignmentInfo(Project project) {
+    JSON getAlignmentInfo() {
+        Project project = projectSelectionService.requestedProject
         Map<String, AlignmentInfo> alignmentInfo = null
         String alignmentError = null
         try {
@@ -346,7 +347,7 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
-        Project project = projectService.getProject(params.project as Long)
+        Project project = projectSelectionService.requestedProject
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
             String adapterTrimming = ""

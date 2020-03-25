@@ -107,10 +107,6 @@ $.otp.alignmentQualityOverviewTable = {
                 bDeferRender: true,
                 fnServerData: function (sSource, aoData, fnCallback) {
                     aoData.push({
-                        name: "project",
-                        value: $('#project').val()
-                    });
-                    aoData.push({
                         name: "seqType",
                         value: $('#seqType').val()
                     });

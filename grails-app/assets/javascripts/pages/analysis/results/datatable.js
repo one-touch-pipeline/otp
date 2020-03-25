@@ -43,10 +43,6 @@ $.otp.resultsTable = {
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "project.id",
-                    value : $('#project').val()
-                });
                 $.ajax({
                     "dataType": 'json',
                     "type": "POST",

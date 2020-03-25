@@ -23,11 +23,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SnvController extends AbstractAnalysisController {
 
     SnvResultsService snvResultsService
+    ProjectSelectionService projectSelectionService
 
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
@@ -61,9 +64,10 @@ class SnvController extends AbstractAnalysisController {
         }
     }
 
-    JSON dataTableResults(ResultTableCommand cmd) {
+    JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List data = snvResultsService.getCallingInstancesForProject(cmd.project?.name)
+        Project project = projectSelectionService.requestedProject
+        List data = snvResultsService.getCallingInstancesForProject(project?.name)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data

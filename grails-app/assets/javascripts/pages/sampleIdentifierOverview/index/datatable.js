@@ -39,10 +39,6 @@ $.otp.sampleIdentifierOverviewTable = {
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "project",
-                    value: $('#project').find('option:selected').text()
-                });
                 $.ajax({
                     "dataType": 'json',
                     "type": "POST",
@@ -72,10 +68,5 @@ $.otp.sampleIdentifierOverviewTable = {
                 action: 'dataTableSourceListSampleIdentifierByProject'
             })
         );
-        $('#project_select').change(function () {
-            var oSettings1 = oTable.fnSettings();
-            oSettings1.oFeatures.bServerSide = true;
-            oTable.fnDraw();
-        });
     },
 };

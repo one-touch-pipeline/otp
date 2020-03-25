@@ -45,10 +45,6 @@ $.otp.projectOverviewTable = {
             bPaginate: false,
             bDeferRender : true,
             fnServerData : function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name : "projectId",
-                    value : $('#project').find('option:selected').val()
-                });
                 $.ajax({
                     "dataType" : 'json',
                     "type" : "POST",
@@ -74,7 +70,7 @@ $.otp.projectOverviewTable = {
                                     mockPid: mockPid
                                 }
                             });
-                            var projectName = $('#project').find('option:selected').text();
+                            var projectName = $.otp.projectName;
                             if (projectName !== "ICGC_MMML" &&
                                 projectName !== "ICGC_MMML_XP" &&
                                 projectName !== "ICGC_MMML_RARE_LYMPHOMA_XP" &&

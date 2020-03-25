@@ -23,15 +23,19 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class AceseqController extends AbstractAnalysisController {
 
     AceseqResultsService aceseqResultsService
+    ProjectSelectionService projectSelectionService
 
-    JSON dataTableResults(ResultTableCommand cmd) {
+    JSON dataTableResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List data = aceseqResultsService.getCallingInstancesForProject(cmd.project?.name)
+        Project project = projectSelectionService.requestedProject
+        List data = aceseqResultsService.getCallingInstancesForProject(project?.name)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
