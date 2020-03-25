@@ -72,9 +72,9 @@ class TestConfigService extends ConfigService {
         }
         otpProperties += [
                 (OtpProperty.SSH_USER)             : "user",
-                (OtpProperty.PATH_PROJECT_ROOT)    : TestCase.getUniqueNonExistentPath().path + '/root_path',
-                (OtpProperty.PATH_PROCESSING_ROOT) : TestCase.getUniqueNonExistentPath().path + '/processing_root_path',
-                (OtpProperty.PATH_CLUSTER_LOGS_OTP): TestCase.getUniqueNonExistentPath().path + '/logging_root_path',
+                (OtpProperty.PATH_PROJECT_ROOT)    : TestCase.uniqueNonExistentPath.path + '/root_path',
+                (OtpProperty.PATH_PROCESSING_ROOT) : TestCase.uniqueNonExistentPath.path + '/processing_root_path',
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): TestCase.uniqueNonExistentPath.path + '/logging_root_path',
 
         ]
         cleanProperties = new HashMap<>(otpProperties)
@@ -85,9 +85,8 @@ class TestConfigService extends ConfigService {
                 getBean: { String beanName ->
                     if (beanName == "configService") {
                         return this
-                    } else {
-                        assert false
                     }
+                    throw new IllegalArgumentException("Test tried to get a bean from application context that was not the ConfigService: \"${beanName}\"")
                 },
         ] as ApplicationContext
     }
@@ -150,7 +149,6 @@ class TestConfigService extends ConfigService {
     File getWorkflowTestResultRootDir() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RESULT_DIR))
     }
-
 
     File getWorkflowTestRoddySharedFilesBaseDir() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
