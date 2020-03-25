@@ -889,7 +889,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
-            2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
+            1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             0 * _
         }
         service.seqTypeService = Mock(SeqTypeService) {
@@ -1063,7 +1063,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
-            2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
+            1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             0 * _
         }
         service.seqTypeService = Mock(SeqTypeService) {
@@ -1602,5 +1602,152 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
 
         expect:
         [seqTrackWithWorkflowConfig] == service.getSeqTracksWithConfiguredAlignment([seqTrackWithWorkflowConfig, seqTrackWithoutWorkflowConfig])
+    }
+
+    class DataForGetOrCreateRun implements DomainFactoryCore {
+        Run run = createRun()
+        SeqCenter seqCenter = run.seqCenter
+        SeqPlatform seqPlatform = run.seqPlatform
+        Date dateExecuted = run.dateExecuted
+        String dateExecutedString = dateExecuted ? dateExecuted.format('yyyy-MM-dd') : ''
+
+        MetadataImportService service = new MetadataImportService([
+                seqPlatformService: new SeqPlatformService([
+                        seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
+                        sequencingKitLabelService   : new SequencingKitLabelService(),
+                ]),
+        ])
+
+        String fileContent
+
+        List<Row> rows
+
+        DataForGetOrCreateRun(Map parameterMap = [:]) {
+            Map map = [
+                    (RUN_ID)             : run.name,
+                    (RUN_DATE)           : dateExecutedString,
+                    (CENTER_NAME)        : seqCenter.name,
+                    (INSTRUMENT_PLATFORM): seqPlatform.name,
+                    (INSTRUMENT_MODEL)   : seqPlatform.seqPlatformModelLabel,
+                    (SEQUENCING_KIT)     : seqPlatform.sequencingKitLabel ?: '',
+            ] + parameterMap
+
+            fileContent = map.collect { key, value ->
+                [
+                        key,
+                        value,
+                ]
+            }.transpose()*.join('\t').join('\n')
+
+            rows = MetadataValidationContextFactory.createContext(fileContent).spreadsheet.dataRows
+        }
+    }
+
+    void "getOrCreateRun, when not exist, create it"() {
+        given:
+        String runName = 'newRun'
+
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun([
+                (RUN_ID): runName
+        ])
+
+        when:
+        Run run = data.service.getOrCreateRun(runName, data.rows)
+
+        then:
+        run
+        run.name == runName
+        run.seqCenter == data.seqCenter
+        run.seqPlatform == data.seqPlatform
+        run.dateExecuted == data.dateExecuted
+    }
+
+    void "getOrCreateRun, when run already exist and is correct,  then return it"() {
+        given:
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun()
+
+        when:
+        Run run = data.service.getOrCreateRun(data.run.name, data.rows)
+
+        then:
+        run
+        run.id == data.run.id
+    }
+
+    void "getOrCreateRun, when run already exist but is connected to another center,  then throw exception"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter()
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun([
+                (CENTER_NAME)        : seqCenter.name,
+        ])
+
+        when:
+        data.service.getOrCreateRun(data.run.name, data.rows)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains(seqCenter.name)
+        e.message.contains(data.seqCenter.name)
+    }
+
+    void "getOrCreateRun, when run already exist but is connected to another seqPlatform,  then throw exception"() {
+        given:
+        SeqPlatform seqPlatform = createSeqPlatform()
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun([
+                (INSTRUMENT_PLATFORM): seqPlatform.name,
+                (INSTRUMENT_MODEL)   : seqPlatform.seqPlatformModelLabel,
+                (SEQUENCING_KIT)     : seqPlatform.sequencingKitLabel ?: '',
+        ])
+
+        when:
+        data.service.getOrCreateRun(data.run.name, data.rows)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains(seqPlatform.name)
+        e.message.contains(data.seqPlatform.name)
+    }
+
+    void "getOrCreateRun, when run already exist but has an date and the sheet has none,  then throw exception"() {
+        given:
+        String dateExecutedString = ''
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun([
+                (RUN_DATE)    :    dateExecutedString,
+        ])
+
+        when:
+        data.service.getOrCreateRun(data.run.name, data.rows)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('(null)')
+        e.message.contains(data.dateExecuted.toString())
+    }
+
+    void "getOrCreateRun, when run already exist but has no date and the sheet has one,  then throw exception"() {
+        given:
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun()
+        data.run.dateExecuted = null
+        data.run.save(flush: true)
+
+        when:
+        data.service.getOrCreateRun(data.run.name, data.rows)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('(null)')
+        e.message.contains(data.dateExecuted.toString())
+    }
+
+    void "getOrCreateRun, when run already exist without date and is correct,  then return it"() {
+        given:
+        DataForGetOrCreateRun data = new DataForGetOrCreateRun()
+
+        when:
+        Run run = data.service.getOrCreateRun(data.run.name, data.rows)
+
+        then:
+        run
+        run.id == data.run.id
     }
 }

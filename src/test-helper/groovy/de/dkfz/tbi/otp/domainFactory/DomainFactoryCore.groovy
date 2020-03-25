@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.time.LocalDate
+import java.time.ZoneId
 
 @SuppressWarnings('MethodCount')
 trait DomainFactoryCore implements DomainFactoryHelper {
@@ -135,9 +136,10 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     Run createRun(Map properties = [:]) {
         return createDomainObject(Run, [
-                name       : "runName_${nextId}",
-                seqCenter  : { createSeqCenter() },
-                seqPlatform: { createSeqPlatformWithSeqPlatformGroup() },
+                name        : "runName_${nextId}",
+                seqCenter   : { createSeqCenter() },
+                seqPlatform : { createSeqPlatformWithSeqPlatformGroup() },
+                dateExecuted: { Date.from(LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()) },
         ], properties)
     }
 

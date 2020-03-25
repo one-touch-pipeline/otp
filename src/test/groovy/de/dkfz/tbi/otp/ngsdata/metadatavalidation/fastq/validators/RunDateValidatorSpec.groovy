@@ -23,13 +23,13 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class RunDateValidatorSpec extends Specification {
@@ -41,7 +41,9 @@ class RunDateValidatorSpec extends Specification {
                         "2016-01-01\n" +
                         "2016-01-32\n" +
                         "2016-0s1-22\n" +
-                        "9999-01-01\n")
+                        "9999-01-01\n" +
+                        "\n"
+        )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
                         "The format of the run date '2016-01-32' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd."),
@@ -49,14 +51,15 @@ class RunDateValidatorSpec extends Specification {
                         "The format of the run date '2016-0s1-22' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
                         "The run date '9999-01-01' must not be from the future.", "No run date may be from the future."),
+                new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
+                        "The format of the run date '' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd."),
                 ]
 
         when:
         new RunDateValidator().validate(context)
 
-
         then:
-        containSame(expectedProblems, context.problems)
+        TestCase.assertContainSame(expectedProblems, context.problems)
     }
 
     void 'validate context without RUN_DATE column'() {

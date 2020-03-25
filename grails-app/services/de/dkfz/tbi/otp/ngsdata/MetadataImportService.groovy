@@ -380,35 +380,40 @@ class MetadataImportService {
 
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows, boolean align) {
         metadataFileRows.groupBy { it.getCellByColumnTitle(RUN_ID.name()).text }.each { String runName, List<Row> rows ->
-            Run run = Run.findWhere(
-                    name: runName,
-                    seqCenter: exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME))),
-                    seqPlatform: seqPlatformService.findSeqPlatform(
-                            uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
-                            uniqueColumnValue(rows, INSTRUMENT_MODEL),
-                            uniqueColumnValue(rows, SEQUENCING_KIT) ?: null),
-                    dateExecuted: Objects.requireNonNull(
-                            RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
-            )
-            if (!run) {
-                run = new Run(
-                        name: runName,
-                        seqCenter: exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME))),
-                        seqPlatform: seqPlatformService.findSeqPlatform(
-                                uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
-                                uniqueColumnValue(rows, INSTRUMENT_MODEL),
-                                uniqueColumnValue(rows, SEQUENCING_KIT) ?: null),
-                        dateExecuted: Objects.requireNonNull(
-                                RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
-                )
-                run.save(flush: true)
-            }
+            Run run = getOrCreateRun(runName, rows)
 
             Long timeStarted = System.currentTimeMillis()
             log.debug('seqTracks started')
             importSeqTracks(context, fastqImportInstance, run, rows, align)
             log.debug("seqTracks stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
+    }
+
+    protected Run getOrCreateRun(String runName, List<Row> rows) {
+        SeqCenter seqCenter =  exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME)))
+        SeqPlatform seqPlatform = seqPlatformService.findSeqPlatform(
+                uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
+                uniqueColumnValue(rows, INSTRUMENT_MODEL),
+                uniqueColumnValue(rows, SEQUENCING_KIT) ?: null)
+        String dateString = uniqueColumnValue(rows, RUN_DATE)
+        Date dateExecuted = dateString ? RunDateParserService.parseDate('yyyy-MM-dd', dateString) : null
+
+        Run run = atMostOneElement(Run.findAllByName(runName))
+        if (run) {
+            assert run.seqCenter == seqCenter : "The center of run (${run.seqCenter}) differ from center in sheet (${seqCenter})"
+            assert run.seqPlatform == seqPlatform : "The seqPlatform of run (${run.seqPlatform}) differ from seqPlatform in sheet (${seqPlatform})"
+            assert run.dateExecuted == dateExecuted : "The dateExecuted of run (${run.dateExecuted}) differ from dateExecuted in sheet (${dateExecuted})"
+            return run
+        }
+
+        Run newRun = new Run(
+                name: runName,
+                seqCenter: seqCenter,
+                seqPlatform: seqPlatform,
+                dateExecuted: dateExecuted,
+        )
+        newRun.save(flush: true)
+        return newRun
     }
 
     private void importSeqTracks(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Run run, Collection<Row> runRows, boolean align) {
