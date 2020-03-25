@@ -37,7 +37,7 @@
             <table>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.SubmissionProject"/></td>
-                    <td><g:hiddenField name="project" value="${selectedProject.id}"/>${selectedProject.name}</td>
+                    <td>${selectedProject.displayName}</td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.egaBox.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.egaBox"/></td>

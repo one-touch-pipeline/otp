@@ -58,8 +58,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     EgaSubmissionService egaSubmissionService
     EgaSubmissionValidationService egaSubmissionValidationService
     EgaSubmissionFileService egaSubmissionFileService
-    ProjectService projectService
     ProjectSelectionService projectSelectionService
+    ProjectService projectService
 
     final private static String ERROR_TITLE = "Some errors occurred"
 
@@ -98,10 +98,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     def newSubmission() {
-        Project project = Project.get(params.id)
-
         return [
-                selectedProject : project,
                 studyTypes      : EgaSubmission.StudyType,
                 defaultStudyType: EgaSubmission.StudyType.CANCER_GENOMICS,
                 cmd             : flash.cmd,
@@ -220,11 +217,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             if (cmd.hasErrors()) {
                 flash.message = new FlashMessage(ERROR_TITLE, cmd.errors)
                 flash.cmd = cmd
-                redirect(action: "newSubmission", params: ['id': cmd.project.id])
+                redirect(action: "newSubmission")
                 return
             }
             EgaSubmission submission = egaSubmissionService.createSubmission([
-                    project       : cmd.project,
+                    project       : projectSelectionService.requestedProject,
                     egaBox        : cmd.egaBox,
                     submissionName: cmd.submissionName,
                     studyName     : cmd.studyName,
@@ -520,7 +517,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     JSON dataTableSelectSamples(DataTableCommand cmd) {
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectService.getProjectByName(params.egaProject)
         Map dataToRender = cmd.dataToRender()
 
         List<Map<String, String>> data = []

@@ -24,13 +24,10 @@ package de.dkfz.tbi.otp.egaSubmission
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
-import de.dkfz.tbi.otp.ngsdata.Project
-
 trait SubmitCommands {
 }
 
 class NewSubmissionControllerSubmitCommand implements Validateable {
-    Project project
     String egaBox
     String submissionName
     String studyName

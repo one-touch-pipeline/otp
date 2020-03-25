@@ -36,7 +36,7 @@
             <g:img file="info.png"/>
         </g:link>
         <div class="buttons">
-            <g:link action="newSubmission" params="[id: selectedProject.id]"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
+            <g:link action="newSubmission"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
         </div>
         <h1><g:message code="egaSubmission.overview.header"/></h1>
         <table>
