@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+REPORT="build/reports/codenarc/all.txt"
+METRICS="metrics.txt"
 
-if [ ! -f build/reports/codenarc/all.txt ]
+if [ ! -f "$REPORT" ]
 then
     echo ''
     echo "file build/reports/codenarc/all.txt does not exist"
@@ -31,30 +33,36 @@ fi
 
 LEVEL="1 2 3"
 
+# Keep all codenarc metrics sorted together in the metrics report.
+PREFIX="CodeNarc_"
+
 echo ''
 echo "Defined thresholds:"
-cat  build.gradle  | grep -e "maxPriority.Violations" | sed -e "s/ *maxPriority/\tmax priority /g" -e "s/Violations = / violations: /g"
+grep -e "maxPriority.Violations" build.gradle | sed -re "s/^ *maxPriority([1-3])Violations = ([0-9]+)/\tMax. priority \1 violations: \2/" | tee \
+            >( sed -re "s/\tMax. priority ([1-3]) violations: /${PREFIX}P\1_MaxViolations /" >> "$METRICS" )
 
 echo ''
 echo "Found violations:"
-head build/reports/codenarc/all.txt | grep -e "^Summary: TotalFiles=" | sed -e "s/ P/\n\tfound priority /g" -e "s/=/ violations: /g" |  grep -v Summary
+grep --max-count=1 -e "^Summary: TotalFiles=" "$REPORT" | sed -re "s/ P([1-3]+)=([0-9]+)/\n\tFound priority \1 violations: \2/g" |  grep -v Summary | tee \
+            >( sed -re "s/\tFound priority ([1-3]) violations: /${PREFIX}P\1_FoundViolations /" >> "$METRICS" )
 
 echo ''
 echo "Count of rules with violations:"
-for p in $LEVEL
-do
-    cat build/reports/codenarc/all.txt | grep Violation | grep -v Summary | grep " P=$p " | awk '{print $2}' | sort -u | wc -l | sed -e "s/^/\trule count of priority $p violations: /"
+for p in $LEVEL; do
+    grep -oEe "Violation: Rule=[^ ]+ P=$p " "$REPORT" | sort -u | wc -l | tee \
+            >( sed -e "s/^/${PREFIX}P${p}_DistinctRulesViolated /" >> "$METRICS" ) \
+            |  sed -e "s/^/\tDistinct P$p rules violated: /"
 done
 
-for p in $LEVEL
-do
+for p in $LEVEL; do
     echo ''
     echo "Rules of priority $p with violations count:"
-    cat build/reports/codenarc/all.txt | grep Violation | grep -v Summary | grep " P=$p " | awk '{print $2}' | sed -e "s/Rule=//" -e "s/P=//g" | sort | uniq -c | sort -k1,1hr
+    grep -oEe "Violation: Rule=[^ ]+ P=$p " "$REPORT" | sed -e "s/Violation: Rule=//" -e "s/ P=[1-3]//" | sort | uniq -c | sort -k1,1hr | \
+            tee >( sed -re "s/ +([0-9]+) ([a-zA-Z]+)/${PREFIX}P${p}_Violations_\2 \1/" >> "$METRICS" )
 done
 
 echo ''
 echo "Show level 1 violations"
-cat build/reports/codenarc/all.txt  | grep -e "^File: " -e " P=1 " | grep -B 1 "Violation:" | sed -e "s/--//"
+cat "$REPORT"  | grep -e "^File: " -e " P=1 " | grep -B 1 "Violation:" | sed -e "s/--//"
 
 echo ''

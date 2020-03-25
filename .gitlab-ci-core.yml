@@ -126,6 +126,8 @@ codenarc:
     paths:
       - build/reports/codenarc
     when: always
+    reports:
+      metrics: metrics.txt
 
 
 war:
