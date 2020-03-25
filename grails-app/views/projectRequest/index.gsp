@@ -342,7 +342,7 @@
                         <div>
                             <g:submitButton name="${g.message(code: "projectRequest.submit.edit")}"/>
                         </div>
-                        <otp:annotation type="warning">
+                        <otp:annotation type="warning" variant="inline">
                             ${g.message(code: "projectRequest.edit.warning.submit")}
                         </otp:annotation>
                     </div>

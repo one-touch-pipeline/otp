@@ -2551,8 +2551,15 @@ table.key-value-table {
 }
 
 .annotation-box {
-    padding: 10px;
-    margin: 5px;
+    &.variant-standalone {
+        display: block;
+        padding: 10px;
+        margin: 5px;
+    }
+    &.variant-inline {
+        display: inline-block;
+        padding: 1px 3px 1px 3px;
+    }
 
     border: 1px solid;
     border-radius: 5px;

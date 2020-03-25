@@ -248,12 +248,14 @@ class OtpTagLib {
     /**
      * A simple colored wrapper to highlight information.
      * @attr type REQUIRED one of info, warning, or error
+     * @attr variant OPTIONAL switches the look of the element to match different contexts. Options: 'standalone' (the default), 'inline'.
      */
     def annotation = { attrs, body ->
         String type = attrs.remove("type")
-        assert type : "attribute `type` must be given"
+        assert type: "attribute `type` must be given"
+        String variant = attrs.remove("variant") ?: "standalone"
 
-        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box type-${type}\">"
+        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box type-${type} variant-${variant}\">"
         out << body()
         out << "</div>"
     }

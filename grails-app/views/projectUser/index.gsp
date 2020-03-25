@@ -124,7 +124,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2"><otp:annotation type="info"><g:message code="projectUser.addMember.externalUserRestrictions"/></otp:annotation></td>
+                                <td colspan="2"><otp:annotation type="info" variant="inline"><g:message code="projectUser.addMember.externalUserRestrictions"/></otp:annotation></td>
                             </tr>
                         </table>
                     </div>
@@ -136,7 +136,7 @@
                                data-text="${confirmationText}"/>
                     </div>
                     <div>
-                        <otp:annotation type="info"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
+                        <otp:annotation type="info" variant="inline"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
                     </div>
                 </div>
             </g:form>
