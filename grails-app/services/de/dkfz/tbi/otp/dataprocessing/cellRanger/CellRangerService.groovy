@@ -97,15 +97,18 @@ class CellRangerService {
         fileService.deleteDirectoryRecursively(sampleDirectory) //delete dir if exist from previous run
         fileService.createDirectoryRecursively(sampleDirectory)
 
-        singleCellBamFile.containedSeqTracks.sort {
-            it.id
-        }.withIndex(1).collect { SeqTrack seqTrack, int laneCounter ->
-            String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
-            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${dataFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
-                Path link = sampleDirectory.resolve(fileName)
-                Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(dataFile))
-                fileService.createLink(link, target, realm)
+        singleCellBamFile.containedSeqTracks.groupBy { it.sampleIdentifier }.each { String sampleIdentifier, List<SeqTrack> seqTracks ->
+            String sampleIdentifierDirName = sampleIdentifier.replaceAll(/[^A-Za-z0-9_-]/, "_")
+            Path sampleIdentifierDirectory = sampleDirectory.resolve(sampleIdentifierDirName)
+            fileService.createDirectoryRecursively(sampleIdentifierDirectory)
+            seqTracks.sort { it.id }.withIndex(1).each { SeqTrack seqTrack, int laneCounter ->
+                seqTrack.dataFilesWhereIndexFileIsFalse.sort { it.id }.each { DataFile dataFile ->
+                    String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
+                    String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${dataFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
+                    Path link = sampleIdentifierDirectory.resolve(fileName)
+                    Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(dataFile))
+                    fileService.createLink(link, target, realm)
+                }
             }
         }
     }
@@ -143,9 +146,13 @@ class CellRangerService {
         String localCores = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT)
         String localMem = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM)
 
+        String fastqDirectories = singleCellBamFile.containedSeqTracks*.sampleIdentifier.unique().collect {
+            new File(singleCellBamFile.sampleDirectory, it).absolutePath
+        }.join(",")
+
         Map<String, String> parameters = [
                 (CellRangerParameters.ID.parameterName)           : singleCellBamFile.singleCellSampleName,
-                (CellRangerParameters.FASTQ.parameterName)        : singleCellBamFile.sampleDirectory.absolutePath,
+                (CellRangerParameters.FASTQ.parameterName)        : fastqDirectories,
                 (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.absolutePath,
                 (CellRangerParameters.SAMPLE.parameterName)       : singleCellBamFile.singleCellSampleName,
                 (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,

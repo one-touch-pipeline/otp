@@ -53,6 +53,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 LibraryPreparationKit,
                 FileType,
                 MergingCriteria,
+                MetaDataEntry,
+                MetaDataKey,
                 Pipeline,
                 Project,
                 Realm,
@@ -84,15 +86,39 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         Path sampleDirectory = singleCellBamFile.sampleDirectory.toPath()
+        String sampleIdentifier = "qwert"
 
-        Path mate1 = sampleDirectory.resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R1_001.fastq.gz")
-        Path mate2 = sampleDirectory.resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R2_001.fastq.gz")
+        Path mate1 = sampleDirectory.resolve(sampleIdentifier).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R1_001.fastq.gz")
+        Path mate2 = sampleDirectory.resolve(sampleIdentifier).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R2_001.fastq.gz")
 
         String file1 = 'file1'
         String file2 = 'file2'
 
         Path filePath1 = Paths.get(file1)
         Path filePath2 = Paths.get(file2)
+        singleCellBamFile.seqTracks.each { SeqTrack seqTrack ->
+            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
+                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), sampleIdentifier)
+            }
+        }
+
+        String sampleIdentifier2 = "as*ÄÜ?°!§%&/()=?`dfg"
+        String sampleIdentifier2DirName = "as_______________dfg"
+        Path mate3 = sampleDirectory.resolve(sampleIdentifier2DirName).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R1_001.fastq.gz")
+        Path mate4 = sampleDirectory.resolve(sampleIdentifier2DirName).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R2_001.fastq.gz")
+
+        String file3 = 'file1'
+        String file4 = 'file2'
+
+        Path filePath3 = Paths.get(file3)
+        Path filePath4 = Paths.get(file4)
+
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(CellRangerMergingWorkPackage.all.find())
+        seqTrack2.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
+            DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), sampleIdentifier2)
+        }
+        singleCellBamFile.seqTracks.add(seqTrack2)
+        singleCellBamFile.save(flush: true)
 
         CellRangerService cellRangerService = new CellRangerService([
                 fileSystemService: Mock(FileSystemService) {
@@ -113,13 +139,24 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.createDirectoryRecursively(sampleDirectory)
 
         then:
+        1 * cellRangerService.fileService.createDirectoryRecursively(sampleDirectory.resolve(singleCellBamFile.seqTracks.first().sampleIdentifier))
+
         2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
                 file1,
                 file2,
         ]
         1 * cellRangerService.fileService.createLink(mate1, filePath1, singleCellBamFile.realm)
         1 * cellRangerService.fileService.createLink(mate2, filePath2, singleCellBamFile.realm)
-        0 * cellRangerService.fileService._
+
+        then:
+        1 * cellRangerService.fileService.createDirectoryRecursively(sampleDirectory.resolve(sampleIdentifier2DirName))
+
+        2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
+                file3,
+                file4,
+        ]
+        1 * cellRangerService.fileService.createLink(mate3, filePath3, singleCellBamFile.realm)
+        1 * cellRangerService.fileService.createLink(mate4, filePath4, singleCellBamFile.realm)
     }
 
     void "deleteOutputDirectoryStructureIfExists, if singleCellBamFile given, then delete the output directory"() {
@@ -212,11 +249,18 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     @Unroll
     void "createCellRangerParameters, adds EXPECT_CELLS and FORCE_CELLS parameters depending on respective fields in singleCellBamFile (expect=#expectedKey)"() {
         given:
+        new TestConfigService()
+
         final File indexFile = new File(TestCase.uniqueNonExistentPath, 'someIndex')
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         singleCellBamFile.mergingWorkPackage.expectedCells = expectedCells
         singleCellBamFile.mergingWorkPackage.enforcedCells = enforcedCells
+        singleCellBamFile.seqTracks.each { SeqTrack seqTrack ->
+            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
+                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), "asdfg")
+            }
+        }
 
         CellRangerService cellRangerService = new CellRangerService([
                 referenceGenomeIndexService: Mock(ReferenceGenomeIndexService) {
@@ -233,7 +277,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         then:
         map[CellRangerParameters.ID.parameterName] == singleCellBamFile.singleCellSampleName
-        map[CellRangerParameters.FASTQ.parameterName] == singleCellBamFile.sampleDirectory.absolutePath
+        map[CellRangerParameters.FASTQ.parameterName] == new File(singleCellBamFile.sampleDirectory, "asdfg").absolutePath
         map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.absolutePath
         map[CellRangerParameters.SAMPLE.parameterName] == singleCellBamFile.singleCellSampleName
         map[CellRangerParameters.LOCAL_CORES.parameterName] ==~ /\d+/

@@ -387,6 +387,12 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return getDataFiles().sum { it.fileSize } as Long ?: 0
     }
 
+    String getSampleIdentifier() {
+        return exactlyOneElement(MetaDataEntry.findAllByKeyAndDataFileInList(
+                exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_ID.name())), dataFilesWhereIndexFileIsFalse
+        )*.getValue().unique())
+    }
+
     static mapping = {
         antibodyTarget index: "seq_track_antibody_target_idx"
         libraryPreparationKit index: "seq_track_library_preparation_kit_idx"

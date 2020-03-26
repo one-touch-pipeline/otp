@@ -129,6 +129,10 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             mwp.expectedCells = expected
             mwp.enforcedCells = enforced
             mwp.save(flush: true)
+
+            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
+                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), "asdfg")
+            }
         }
 
         when:
@@ -155,6 +159,12 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             mwp.expectedCells = expected
             mwp.enforcedCells = enforced
             crmwp.save(flush: true)
+
+            crmwp.seqTracks.each { SeqTrack seqTrack ->
+                seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
+                    DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), "asdfg")
+                }
+            }
         }
 
         when:
