@@ -202,13 +202,11 @@
             <a href="https://www.klinikum.uni-heidelberg.de/" target="_blank">Heidelberg University Hospital</a> |
             <g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link> |
             <g:link controller="privacyPolicy"><g:message code="info.privacyPolicy.link"/></g:link> |
-            <g:set var="faqLink" value="${ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)}" />
             <g:if test="${faqLink}">
-                <a href="${faqLink.value}" target="_blank">FAQ</a> |
+                <a href="${faqLink}" target="_blank">FAQ</a> |
             </g:if>
             ${version}
         </div>
-        <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
     </div>
     <asset:deferredScripts/>
 </body>

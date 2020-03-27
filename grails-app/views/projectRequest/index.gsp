@@ -20,6 +20,7 @@
   - SOFTWARE.
   --}%
 <%@ page import="de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain" %>
+<%@ page import="de.dkfz.tbi.otp.config.GuiAnnotation" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -36,8 +37,15 @@
     <g:render template="tabMenu"/>
 
     <h2>${g.message(code: "projectRequest.title")}</h2>
-    <otp:annotation type="info">${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</otp:annotation>
-
+    <otp:annotation type="info">
+        <g:if test="${faqLink}">
+            ${g.message(code: "projectRequest.new.support.faq", args: [contactDataSupportEmail, faqLink])}
+        </g:if>
+        <g:else>
+            ${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}
+        </g:else>
+    </otp:annotation>
+    <otp:annotationPO option-type="${GuiAnnotation.PROJECT_REQUEST}" type="info"/>
     <g:if test="${projectRequestToEdit}">
         <otp:annotation type="warning">
             ${g.message(code: "projectRequest.edit.warning", args: [projectRequestToEdit.name, projectRequestToEdit.requester])}

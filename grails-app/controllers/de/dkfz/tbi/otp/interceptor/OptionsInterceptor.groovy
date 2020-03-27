@@ -56,6 +56,12 @@ class OptionsInterceptor {
             } catch (IllegalArgumentException e) { }
             model.logo = logo.fileName
 
+            String faqLink
+            try {
+                faqLink = processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)
+            } catch (IllegalArgumentException e) { }
+            model.faqLink = faqLink
+
             // this file is provided by the gradle-git-properties gradle plugin
             String resourceName = "git.properties"
             ClassLoader loader = Thread.currentThread().getContextClassLoader()
