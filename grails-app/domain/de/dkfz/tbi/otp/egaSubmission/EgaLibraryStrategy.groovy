@@ -36,4 +36,9 @@ class EgaLibraryStrategy implements Entity {
     static constraints = {
         libraryStrategyEgaName unique: true
     }
+
+    @Override
+    String toString() {
+        "EgaLibraryStrategy ${this.libraryStrategyEgaName} (${seqTypes*.toString().join(", ")})"
+    }
 }

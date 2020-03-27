@@ -41,4 +41,9 @@ class EgaLibrarySource implements Entity {
         GENOMIC,
         TRANSCRIPTOMIC,
     }
+
+    @Override
+    String toString() {
+        "EgaLibrarySource ${this.librarySourceEgaName} (${seqTypes*.toString().join(", ")})"
+    }
 }

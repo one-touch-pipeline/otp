@@ -36,4 +36,10 @@ class EgaLibrarySelection implements Entity {
     static constraints = {
         librarySelectionEgaName unique: true
     }
+
+    @Override
+    String toString() {
+        // Don't include the (potentially dozens of) libPrepKits in the string representation.
+        librarySelectionEgaName
+    }
 }

@@ -431,12 +431,13 @@ class EgaSubmissionService {
                     seqTracks {
                         run {
                             seqPlatform {
-                                 property('seqPlatformModelLabel', 'seqPlatformModelLabel')
+                                property('seqPlatformModelLabel', 'seqPlatformModelLabel')
                             }
                         }
                     }
                 }
                 seqType {
+                    property('id', 'seqTypeId')
                     property('libraryLayout', 'libraryLayout')
                     property('displayName', 'displayName')
                 }
@@ -446,9 +447,9 @@ class EgaSubmissionService {
 
         metadata.each { Map it ->
             it.put("mappedEgaPlatformModel", mapEgaPlatformModel(it.seqPlatformModelLabel))
-            it.put("mappedEgaLibrarySource", mapEgaLibrarySource(SeqType.findByDisplayName(it.displayName)))
+            it.put("mappedEgaLibrarySource", mapEgaLibrarySource(SeqType.get(it.seqTypeId)))
+            it.put("mappedEgaLibraryStrategy", mapEgaLibraryStrategy(SeqType.get(it.seqTypeId)))
             it.put("mappedEgaLibrarySelection", mapEgaLibrarySelection(it.libraryPreparationKit))
-            it.put("mappedEgaLibraryStrategy", mapEgaLibraryStrategy(SeqType.findByDisplayName(it.displayName)))
         }
 
         return metadata

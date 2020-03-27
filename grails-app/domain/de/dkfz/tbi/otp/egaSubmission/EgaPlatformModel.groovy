@@ -36,4 +36,10 @@ class EgaPlatformModel implements Entity {
     static constraints = {
         platformModelEgaName unique: true
     }
+
+    @Override
+    String toString() {
+        // EGA sequencing machine aliases are similar enough to OTP-terms that we don't need both in the string representation.
+        platformModelEgaName
+    }
 }
