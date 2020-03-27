@@ -47,6 +47,10 @@ class ProjectRequestController {
             update  : "POST",
     ]
 
+    private static final String ACTION_INDEX = "index"
+    private static final String ACTION_OPEN = "open"
+    private static final String ACTION_VIEW = "view"
+
     ProjectRequestService projectRequestService
 
     private Map getSharedModel() {
@@ -115,12 +119,20 @@ class ProjectRequestController {
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
             flash.cmd = cmd
-            redirect(action: "index")
+            redirect(action: ACTION_INDEX)
             return
         }
         try {
-            projectRequestService.create(cmd)
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
+            ProjectRequest createdRequest = projectRequestService.create(cmd)
+            String baseMessage = "${g.message(code: "projectRequest.store.success")}. "
+            if (projectRequestService.requesterIsEligibleToAccept(createdRequest)) {
+                flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.work")}")
+                redirect(action: ACTION_VIEW, id: createdRequest.id)
+            } else {
+                flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.waiting")}")
+                redirect(action: ACTION_OPEN)
+            }
+            return
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.errors)
             flash.cmd = cmd
@@ -128,21 +140,21 @@ class ProjectRequestController {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, [e.message])
             flash.cmd = cmd
         }
-        redirect(action: "index")
+        redirect(action: ACTION_INDEX)
     }
 
     def edit(EditProjectRequestCommand cmd) {
-        String redirectAction = "index"
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, cmd.errors)
             flash.cmd = cmd
-            redirect(action: redirectAction, id: cmd.request.id)
+            redirect(action: ACTION_INDEX, id: cmd.request.id)
             return
         }
+        String action = ACTION_INDEX
         try {
             projectRequestService.edit(cmd)
+            action = ACTION_VIEW
             flash.message = new FlashMessage(g.message(code: "projectRequest.edit.success") as String)
-            redirectAction = "view"
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, e.errors)
             flash.cmd = cmd
@@ -150,7 +162,7 @@ class ProjectRequestController {
             flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, [e.message])
             flash.cmd = cmd
         }
-        redirect(action: redirectAction, id: cmd.request.id)
+        redirect(action: action, id: cmd.request.id)
     }
 
     def view(Long id) {
@@ -167,16 +179,16 @@ class ProjectRequestController {
     def update(ProjectRequestUpdateCommand cmd) {
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
-            redirect(action: "view", id: cmd.request.id)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
             return
         }
         Errors errors = projectRequestService.update(cmd.request, cmd.status, cmd.confirmConsent, cmd.confirmRecordOfProcessingActivities)
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
-            redirect(action: "view", id: cmd.request.id)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
         } else {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
-            redirect(action: "index")
+            redirect(action: ACTION_OPEN)
         }
     }
 }

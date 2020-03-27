@@ -84,7 +84,7 @@ class ProjectRequestService {
         return usernames?.findAll()?.collect { userProjectRoleService.createUserWithLdapData(it) }
     }
 
-    void create(ProjectRequestCreationCommand cmd) {
+    ProjectRequest create(ProjectRequestCreationCommand cmd) {
         ProjectRequest req = new ProjectRequest(
                 name                        : cmd.name,
                 description                 : cmd.description,
@@ -114,6 +114,7 @@ class ProjectRequestService {
         )
         req.save(flush: true)
         sendEmailOnCreation(req)
+        return req
     }
 
     void edit(EditProjectRequestCommand cmd) {
@@ -196,6 +197,10 @@ class ProjectRequestService {
         request.status = ProjectRequest.Status.PROJECT_CREATED
         request.project = project
         request.save(flush: true)
+    }
+
+    boolean requesterIsEligibleToAccept(ProjectRequest projectRequest) {
+        return projectRequest.requester == projectRequest.pi
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
