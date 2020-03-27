@@ -172,7 +172,7 @@
             <td>${g.message(code: "projectRequest.seqTypes")}</td>
             <td class="help" title="${g.message(code: "projectRequest.seqTypes.detail")}"></td>
             <td class="multi-input-field">
-                <g:each in="${source.getByFieldName("seqTypes")}" var="seqType" status="i">
+                <g:each in="${source.getByFieldName("seqTypes") ?: [null]}" var="seqType" status="i">
                     <div class="field">
                         <g:select id="" name="seqType.id" class="use-select-2"
                                   from="${seqTypes}" value="${seqType?.id ?: ""}"

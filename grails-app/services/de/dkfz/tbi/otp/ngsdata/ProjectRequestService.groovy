@@ -212,7 +212,7 @@ class ProjectRequestService {
         addUserAndRolesFromProjectRequest(projectRequest.submitters, ProjectRequestRole.SUBMITTER, projectRequest.project)
     }
 
-    private addUserAndRolesFromProjectRequest(Collection<User> users, ProjectRequestRole role, Project project) {
+    private void addUserAndRolesFromProjectRequest(Collection<User> users, ProjectRequestRole role, Project project) {
         users.each { User user ->
             UserProjectRole upr = userProjectRoleService.createUserProjectRole(
                     user,
