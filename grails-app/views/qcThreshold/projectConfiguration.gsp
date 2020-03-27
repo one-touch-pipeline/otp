@@ -37,6 +37,7 @@
         <otp:annotation type="info">${g.message(code: "qcThreshold.noticeProject")}</otp:annotation>
 
         <table class="threshold-table">
+            <g:set var="propFieldWidth" value="40ch"/>
             <g:each in="${classesWithProperties}" var="cl">
                 <thead>
                 <tr class="intermediateHeader"><td colspan="9"><h2>${cl.clasz.simpleName}</h2></td></tr>
@@ -169,7 +170,7 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <g:select id="" name="property2" class="threshold use-select-2"
+                                        <g:select id="" name="property2" class="threshold use-select-2" style="min-width: ${propFieldWidth};"
                                                   from="${cl.availableThresholdProperties}"
                                                   value="${v.projectExistingThresholds?.qcProperty2}" noSelection="['': '']"/>
                                     </span>
@@ -211,7 +212,7 @@
                     <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <otp:tableAdd>
                         <td>
-                            <g:select id="" name="property" class="threshold use-select-2"
+                            <g:select id="" name="property" class="threshold use-select-2" style="min-width: ${propFieldWidth};"
                                       from="${cl.availableThresholdProperties}" noSelection="['': 'Select']"/>
                         </td>
                         <td>
@@ -235,8 +236,8 @@
                             <input id="" name="errorThresholdUpper" class="threshold" title="${g.message(code: "qcThreshold.upperError")}">
                         </td>
                         <td>
-                            <g:select id="" name="property2" class="threshold use-select-2" from="${cl.availableThresholdProperties}"
-                                      noSelection="['': '']"/>
+                            <g:select id="" name="property2" class="threshold use-select-2" style="min-width: ${propFieldWidth};"
+                                      from="${cl.availableThresholdProperties}" noSelection="['': '']"/>
                         </td>
                         <td>
 

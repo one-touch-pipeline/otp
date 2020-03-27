@@ -42,7 +42,7 @@
                 <ul>
                     <li>
                         <g:form action="createNewDefaultGroupAndAddPlatform">
-                            <g:select id="select_seqPlat_newgroup" name="platform.id" class="use-select-2"
+                            <g:select id="select_seqPlat_newgroup" name="platform.id" class="use-select-2" style="min-width: 50ch"
                                       from="${allSeqPlatformsWithoutGroup}" optionKey="id" noSelection="${[null: 'Select to create new group']}"/>
                             <g:submitButton name="Save"/>
                         </g:form>
@@ -65,7 +65,7 @@
                     <g:if test="${!allSeqPlatformsWithoutGroup.empty}">
                         <li>
                             <g:form action="addPlatformToExistingSeqPlatformGroup">
-                                <g:select id="select_seqPlat_${seqPlatformGroup.id}" name="platform.id" class="use-select-2"
+                                <g:select id="select_seqPlat_${seqPlatformGroup.id}" name="platform.id" class="use-select-2" style="min-width: 50ch"
                                           from="${allSeqPlatformsWithoutGroup}" optionKey="id"
                                           noSelection="${[null: 'Select to add to group']}"/>
                                 <g:hiddenField name="group.id" value="${seqPlatformGroup.id}"/>

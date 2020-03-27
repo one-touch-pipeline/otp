@@ -132,6 +132,7 @@
         <div style="float:right; width:50%;">
             <g:if test="${mergingCriteria.useSeqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
                 <h3>${g.message(code: "mergingCriteria.seqPlatformDefinition.specific")}</h3>
+                <g:set var="platformFieldWidth" value="50ch"/>
 
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <g:if test="${!allSeqPlatformsWithoutGroup.empty}">
@@ -140,7 +141,7 @@
                             <ul>
                                 <li>
                                     <g:form action="createNewSpecificGroupAndAddPlatform">
-                                        <g:select id="select_seqPlat_newgroup" name="platform.id" class="use-select-2"
+                                        <g:select id="select_seqPlat_newgroup" name="platform.id" class="use-select-2" style="min-width: ${platformFieldWidth};"
                                                   from="${allSeqPlatformsWithoutGroup}" optionKey="id"
                                                   noSelection="${[null: 'Select to create new group']}"/>
                                         <g:hiddenField name="mergingCriteria.id" value="${mergingCriteria.id}"/>
@@ -170,7 +171,7 @@
                                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                                     <li>
                                         <g:form action="addPlatformToExistingSeqPlatformGroup">
-                                            <g:select id="select_seqPlat_${seqPlatformGroup.id}" name="platform.id"
+                                            <g:select id="select_seqPlat_${seqPlatformGroup.id}" name="platform.id" style="min-width: ${platformFieldWidth};"
                                                       class="use-select-2"
                                                       from="${allSeqPlatformsWithoutGroup}" optionKey="id"
                                                       noSelection="${[null: 'Select to add to group']}"/>

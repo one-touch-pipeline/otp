@@ -35,6 +35,7 @@
     <div>
         <h1>${g.message(code: "qcThreshold.title")}</h1>
         <table class="threshold-table">
+            <g:set var="propFieldWidth" value="40ch"/>
 
             <g:each in="${classesWithProperties}" var="cl">
                 <thead>
@@ -115,7 +116,7 @@
                             <td>
                                 <span class="edit-fields" style="display: none;">
                                     %{-- explicitly unset ID, so it doesn't default to "name", which would lead to duplicate IDs, and thus javascript pain --}%
-                                    <g:select id="" name="property2" class="threshold use-select-2"
+                                    <g:select id="" name="property2" class="threshold use-select-2" style="min-width: ${propFieldWidth}"
                                               from="${cl.availableThresholdProperties}" value="${v.qcProperty2}" noSelection="['': '']"/>
                                 </span>
                                 <span class="show-fields">
@@ -140,7 +141,7 @@
                     <input type="hidden" name="className" value="${cl.clasz.simpleName}"/>
                     <otp:tableAdd>
                         <td>
-                            <g:select id="" name="property" class="threshold use-select-2"
+                            <g:select id="" name="property" class="threshold use-select-2" style="min-width: ${propFieldWidth}"
                                       from="${cl.availableThresholdProperties}" noSelection="['': 'Select']"/>
                         </td>
                         <td>
@@ -164,7 +165,7 @@
                             <input name="errorThresholdUpper" class="threshold" title="${g.message(code: "qcThreshold.upperError")}">
                         </td>
                         <td>
-                            <g:select id="" name="property2" class="threshold use-select-2"
+                            <g:select id="" name="property2" class="threshold use-select-2" style="min-width: ${propFieldWidth}"
                                       from="${cl.availableThresholdProperties}" noSelection="['': '']"/>
                         </td>
                         <td>
