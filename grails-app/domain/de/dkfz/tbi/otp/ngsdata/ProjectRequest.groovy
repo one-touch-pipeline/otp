@@ -26,6 +26,8 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     User requester
     User pi
@@ -53,7 +55,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     Set<User> submitters
 
     static constraints = {
-        project nullable: true, validator: { val, obj ->
+        project nullable: true, validator: { Project val, ProjectRequest obj ->
             if (!val && obj.status == Status.PROJECT_CREATED) {
                 return "required"
             }
@@ -61,7 +63,12 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
                 return "illegal"
             }
         }
-        name blank: false
+        name blank: false, unique: true, validator: { String val, ProjectRequest obj ->
+            Project project = atMostOneElement(Project.findAllByName(val))
+            if (project && project != obj.project) {
+                return 'duplicate.project'
+            }
+        }
         description blank: false
         organizationalUnit blank: false
 

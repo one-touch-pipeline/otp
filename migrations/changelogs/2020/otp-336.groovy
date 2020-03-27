@@ -26,4 +26,7 @@ databaseChangeLog = {
             column(name: "custom_species_with_strain", type: "varchar(255)")
         }
     }
+    changeSet(author: "kosnac", id: "otp-336-2") {
+        addUniqueConstraint(columnNames: "name", constraintName: "UC_PROJECT_REQUESTNAME_COL", tableName: "project_request")
+    }
 }
