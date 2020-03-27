@@ -41,6 +41,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     Project project
 
     Set<String> keywords
+    String customSpeciesWithStrain
     String sequencingCenter
     Integer approxNoOfSamples
     Set<SeqType> seqTypes
@@ -70,6 +71,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         relatedProjects nullable: true
         tumorEntity nullable: true
         speciesWithStrain nullable: true
+        customSpeciesWithStrain nullable: true
         sequencingCenter nullable: true
         approxNoOfSamples nullable: true
         comments nullable: true
@@ -84,7 +86,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
             bioinformaticians: User,
             submitters: User,
     ]
-
 
     static mapping = {
         description type: "text"

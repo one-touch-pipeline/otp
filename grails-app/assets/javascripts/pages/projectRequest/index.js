@@ -21,12 +21,25 @@
  */
 
 $(function () {
-    var input = $("input#storageUntil");
+    // hide and show the date picker for storageUntil when defined by a user
+    var storageUntil = $("input#storageUntil");
     $("select#storagePeriod").on("change", function (e) {
         if ($(e.target).val() === "USER_DEFINED") {
-            input.show()
+            storageUntil.show()
         } else {
-            input.hide()
+            storageUntil.hide()
+        }
+    }).trigger("change");
+
+    // hide and show the textbox to provide a custom SpeciesWithStrain
+    var customSpecies = $("input#customSpeciesWithStrain");
+    $("select#speciesWithStrain").on("change", function (e) {
+        if ($(e.target).val() === "other") {
+            customSpecies.show();
+            customSpecies.prop("disabled", false);
+        } else {
+            customSpecies.hide();
+            customSpecies.prop("disabled", true);
         }
     }).trigger("change");
 });

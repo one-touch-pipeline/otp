@@ -39,18 +39,27 @@ class SpeciesWithStrainController {
             createStrain           : "POST",
     ]
 
+    private Map getRedirectParams() {
+        return [
+                action: "index",
+                params: params.helper ? [helper: params.helper] : [:],
+        ]
+    }
+
     def index() {
         List<Species> species = speciesWithStrainService.getAllSpecies()
         return [
-            cachedCommonName           : flash.commonName ?: '',
-            cachedScientificName       : flash.scientificName ?: '',
-            cachedStrainName           : flash.strainName ?: '',
+                helperParams               : redirectParams.params,
 
-            allSpecies                 : species.sort { it.toString() },
-            speciesByCommonName        : species.groupBy { it.commonName },
-            strains                    : Strain.list().sort { it.toString() },
-            commonNames                : CommonName.list().sort { it.toString() },
-            speciesWithStrainsBySpecies: SpeciesWithStrain.list().groupBy { it.species },
+                cachedCommonName           : flash.commonName ?: "",
+                cachedScientificName       : flash.scientificName ?: "",
+                cachedStrainName           : flash.strainName ?: "",
+
+                allSpecies                 : species.sort { it.toString() },
+                speciesByCommonName        : species.groupBy { it.commonName },
+                strains                    : Strain.list().sort { it.toString() },
+                commonNames                : CommonName.list().sort { it.toString() },
+                speciesWithStrainsBySpecies: SpeciesWithStrain.list().groupBy { it.species },
         ]
     }
 
@@ -64,7 +73,7 @@ class SpeciesWithStrainController {
         } else {
             flash.message = new FlashMessage(g.message(code: "speciesWithStrain.succ") as String)
         }
-        redirect(action: 'index')
+        redirect(redirectParams)
     }
 
     def createSpecies(CreateSpeciesCommand cmd) {
@@ -76,7 +85,7 @@ class SpeciesWithStrainController {
         } else {
             flash.message = new FlashMessage(g.message(code: "speciesWithStrain.succ") as String)
         }
-        redirect(action: 'index')
+        redirect(redirectParams)
     }
 
     def createStrain(CreateStrainCommand cmd) {
@@ -87,7 +96,7 @@ class SpeciesWithStrainController {
         } else {
             flash.message = new FlashMessage(g.message(code: "speciesWithStrain.succ") as String)
         }
-        redirect(action: 'index')
+        redirect(redirectParams)
     }
 }
 

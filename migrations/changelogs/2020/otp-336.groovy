@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,25 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import de.dkfz.tbi.otp.utils.Entity
-
-class SpeciesWithStrain implements Entity {
-    Species species
-    Strain strain
-
-    static constraints = {
-        species(nullable: false)
-        strain(nullable: false, unique: ['species'])
-    }
-
-    String getDisplayString() {
-        return this.toString()
-    }
-
-    @Override
-    String toString() {
-        return "${species} [${strain.name}]"
+databaseChangeLog = {
+    changeSet(author: "kosnac", id: "otp-336-1") {
+        addColumn(tableName: "project_request") {
+            column(name: "custom_species_with_strain", type: "varchar(255)")
+        }
     }
 }

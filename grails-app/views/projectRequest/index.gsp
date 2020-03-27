@@ -132,12 +132,16 @@
         </tr>
 --}%
         <tr>
+            <g:set var="customSpeciesWithStrain" value="${source.getByFieldName("customSpeciesWithStrain")}"/>
             <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></td>
             <td>
                 <g:select id="speciesWithStrain" name="speciesWithStrain.id" class="use-select-2"
-                          from="${species}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}"
-                          optionKey="id" noSelection="${['': 'None']}" />
+                          from="${species}" value="${customSpeciesWithStrain ? "other" : (source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}"
+                          optionKey="id" optionValue="displayString"
+                          noSelection="${['': 'None']}" />
+                <br>
+                <input name="customSpeciesWithStrain" id="customSpeciesWithStrain" value="${customSpeciesWithStrain}" type="text" disabled/>
             </td>
         </tr>
         <tr>

@@ -87,7 +87,7 @@
         --}%
         <tr>
             <td>${g.message(code: "project.speciesWithStrain")}</td>
-            <td>${projectRequest.speciesWithStrain}</td>
+            <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
         </tr>
         <tr>
             <td>${g.message(code: "project.projectType")}</td>

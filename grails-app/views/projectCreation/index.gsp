@@ -119,6 +119,18 @@
                     <td><g:message code="projectRequest.seqTypes"/></td>
                     <td>${projectRequest.seqTypes?.join(", ")}</td>
                 </tr>
+                <g:if test="${projectRequest.customSpeciesWithStrain}">
+                <tr>
+                    <td><g:message code="projectRequest.customSpeciesWithStrain"/></td>
+                    <td>
+                        <span style="margin-right: 20px">${projectRequest.customSpeciesWithStrain}</span>
+                        <otp:annotation type="warning" variant="inline">
+                            <g:message code="projectRequest.customSpeciesWithStrain.link"/>
+                            <g:link controller="speciesWithStrain" action="index" params="[helper: projectRequest.customSpeciesWithStrain]">here</g:link>
+                        </otp:annotation>
+                    </td>
+                </tr>
+                </g:if>
                 <tr>
                     <td><g:message code="projectRequest.comments"/></td>
                     <td>${projectRequest.comments}</td>

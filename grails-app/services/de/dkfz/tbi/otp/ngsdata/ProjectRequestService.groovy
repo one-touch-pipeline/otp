@@ -98,6 +98,7 @@ class ProjectRequestService {
                 relatedProjects             : cmd.relatedProjects,
                 tumorEntity                 : cmd.tumorEntity,
                 speciesWithStrain           : cmd.speciesWithStrain,
+                customSpeciesWithStrain     : cmd.customSpeciesWithStrain,
                 projectType                 : cmd.projectType,
                 sequencingCenter            : cmd.sequencingCenter,
                 approxNoOfSamples           : cmd.approxNoOfSamples,
@@ -130,6 +131,7 @@ class ProjectRequestService {
             relatedProjects              = cmd.relatedProjects
             tumorEntity                  = cmd.tumorEntity
             speciesWithStrain            = cmd.speciesWithStrain
+            customSpeciesWithStrain      = cmd.customSpeciesWithStrain
             projectType                  = cmd.projectType
             sequencingCenter             = cmd.sequencingCenter
             approxNoOfSamples            = cmd.approxNoOfSamples

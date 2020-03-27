@@ -96,7 +96,7 @@ class ProjectRequestController {
                 projectTypes        : Project.ProjectType.values(),
                 storagePeriods      : StoragePeriod.values(),
                 tumorEntities       : TumorEntity.listOrderByName(),
-                species             : SpeciesWithStrain.all.sort { it.toString() },
+                species             : SpeciesWithStrain.all.sort { it.displayString } + [id: "other", displayString: "Other(s)"],
                 keywords            : Keyword.listOrderByName(),
                 seqTypes            : SeqType.all.sort { it.displayNameWithLibraryLayout },
                 source              : multiObjectValueSource,
@@ -212,7 +212,12 @@ class ProjectRequestCreationCommand {
     LocalDate storageUntil
     String relatedProjects
     TumorEntity tumorEntity
+    @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
+        String id = source['speciesWithStrain']?.id
+        return id?.isLong() ? SpeciesWithStrain.get(id as Long) : null
+    })
     SpeciesWithStrain speciesWithStrain
+    String customSpeciesWithStrain
     Project.ProjectType projectType
     String sequencingCenter
     Integer approxNoOfSamples
@@ -251,6 +256,7 @@ class ProjectRequestCreationCommand {
         relatedProjects nullable: true, blank: false
         tumorEntity nullable: true
         speciesWithStrain nullable: true
+        customSpeciesWithStrain nullable: true
         sequencingCenter nullable: true, blank: false
         approxNoOfSamples nullable: true
         seqTypes nullable: true
@@ -281,6 +287,10 @@ class ProjectRequestCreationCommand {
 
     void setRelatedProjects(String s) {
         relatedProjects = StringUtils.blankToNull(s)
+    }
+
+    void setCustomSpeciesWithStrain(String s) {
+        customSpeciesWithStrain = StringUtils.blankToNull(s)
     }
 
     void setSequencingCenter(String s) {

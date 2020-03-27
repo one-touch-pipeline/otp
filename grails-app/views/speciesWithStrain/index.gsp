@@ -34,6 +34,13 @@
     <g:render template="/metaDataFields/tabMenu"/>
 
     <h1><g:message code="speciesWithStrain.header"/></h1>
+
+    <g:if test="${helperParams.helper}">
+        <otp:annotation type="info">
+            <strong><g:message code="speciesWithStrain.helper.prefix"/></strong> ${helperParams.helper}
+        </otp:annotation>
+    </g:if>
+
     <div class="species-with-strain-grid-wrapper">
 
         <div class="grid-element" style="grid-row: 1; grid-column: 1 / span 2;">
@@ -41,7 +48,7 @@
             <div class="form-and-listing-grid">
                 <div class="form">
                     <h2><g:message code="speciesWithStrain.header.createSpeciesWithStrain"/></h2>
-                    <g:form controller="speciesWithStrain" action="createSpeciesWithStrain">
+                    <g:form controller="speciesWithStrain" action="createSpeciesWithStrain" params="${helperParams}">
                         <table>
                             <tr>
                                 <td><g:message code="speciesWithStrain.label.species"/></td>
@@ -101,7 +108,7 @@
             <div class="form-and-listing-grid">
                 <div class="form">
                     <h2><g:message code="speciesWithStrain.header.createSpecies"/></h2>
-                    <g:form controller="speciesWithStrain" action="createSpecies">
+                    <g:form controller="speciesWithStrain" action="createSpecies" params="${helperParams}">
                         <table>
                             <tr>
                                 <td><g:message code="speciesWithStrain.label.commonName"/></td>
@@ -156,7 +163,7 @@
             <div class="form-and-listing-grid">
                 <div class="form">
                     <h2><g:message code="speciesWithStrain.header.createStrain"/></h2>
-                    <g:form controller="speciesWithStrain" action="createStrain">
+                    <g:form controller="speciesWithStrain" action="createStrain" params="${helperParams}">
                         <table>
                             <tr>
                                 <td><g:message code="speciesWithStrain.label.strainName"/></td>
