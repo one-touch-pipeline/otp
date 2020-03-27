@@ -24,12 +24,15 @@ package de.dkfz.tbi.otp
 import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
 class OtpTagLib {
     static namespace = "otp"
 
     ConfigService configService
+    ProcessingOptionService processingOptionService
 
     /**
      * Renders a text field with editor functionality. The editor renders the text with a button next to it.
@@ -253,5 +256,27 @@ class OtpTagLib {
         out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box type-${type}\">"
         out << body()
         out << "</div>"
+    }
+
+    /**
+     * Display an annotation stored in the GUI_OPTIONAL_ANNOTATION ProcessingOption.
+     *
+     * It retrieves the content of the given subtype of the GUI_OPTIONAL_ANNOTATION ProcessingOption and
+     * uses the otp:annotation to display the it.
+     *
+     * The content is rendered as HTML.
+     *
+     * @attr option-type REQUIRED The type of the ProcessingOption, see enum GuiAnnotation
+     * @attr type REQUIRED implicit requirement as it uses otp:annotation
+     */
+    def annotationPO = { attrs, body ->
+        String optionType = attrs.remove("option-type")
+        assert optionType: "attribute `option-type` must be given"
+        assert !body: "the tag contains a body but does not use it"
+
+        String content = raw(processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_ANNOTATION, optionType))
+        if (content) {
+            out << otp.annotation(attrs, content).toString()
+        }
     }
 }

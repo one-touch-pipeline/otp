@@ -85,6 +85,8 @@ enum TypeValidators {
 
     TIME_ZONE({ try { ZoneId.of(it); return true } catch (DateTimeException ignored) { return false } }, { ZoneId.getAvailableZoneIds().sort() }),
 
+    GUI_ANNOTATION({ GuiAnnotation.findByName(it) }, { GuiAnnotation.values()*.name() }),
+
     private Closure validator
     private final Closure<List<String>> allowedValues
 

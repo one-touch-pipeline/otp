@@ -516,6 +516,13 @@ class ProcessingOption implements Entity {
                         " which will not be found under the 'Unregistered OTP user found' section of project members page",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
         ),
+        /** @see GuiAnnotation */
+        GUI_ANNOTATION(
+                "This is the category for site-specific, configurable, GUI annotations. The contents" +
+                        " of specific annotations will be interpreted as HTML, and must handle being unset gracefully",
+                Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT,
+                TypeValidators.GUI_ANNOTATION
+        ),
 
         //naming
         CLUSTER_NAME(
