@@ -189,13 +189,13 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
     @Override
     Duration getTimeout() {
-        return Duration.ofHours(3)
+        return Duration.ofHours(6)
     }
 
     @Override
     String getJobSubmissionOptions() {
         JsonOutput.toJson([
-                (JobSubmissionOption.WALLTIME): Duration.ofHours(3).toString(),
+                (JobSubmissionOption.WALLTIME): Duration.ofHours(5).toString(),
                 (JobSubmissionOption.MEMORY)  : "60g",
                 (JobSubmissionOption.CORES)   : "16",
         ])
