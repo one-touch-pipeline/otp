@@ -71,7 +71,6 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
             CREATED_RESULT_DIRS,
     ].flatten().asImmutable()
 
-
     Set<SeqTrack> seqTracks
 
     String workDirectoryName
@@ -132,7 +131,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     static String buildWorkDirectoryName(CellRangerMergingWorkPackage workPackage, int identifier) {
         return [
                 "RG_${workPackage.referenceGenome.name ?: '-'}",
-                "TV_${workPackage.referenceGenomeIndex.getToolWithVersion().replace(" ", "-")}",
+                "TV_${workPackage.referenceGenomeIndex.toolWithVersion.replace(" ", "-")}",
                 "EC_${workPackage.expectedCells ?: '-'}",
                 "FC_${workPackage.enforcedCells ?: '-'}",
                 "PV_${workPackage.config.programVersion.replace("/", "-")}",
@@ -190,7 +189,6 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
                 return name
         }
     }
-
 
     @Override
     File getFinalInsertSizeFile() {
@@ -252,7 +250,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     @Override
     String toString() {
-        String latest = isMostRecentBamFile() ? ' (latest)' : ''
+        String latest = mostRecentBamFile ? ' (latest)' : ''
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
         return "SCBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus ?: 'ACCEPTED'} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }

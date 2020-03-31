@@ -26,14 +26,33 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class SeqTypeSpec extends Specification implements DataTest {
+class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
                 SeqType,
         ]
+    }
+
+    void "test get SingleCell SeqTypes, no SeqType in DB, returns empty list"() {
+        expect:
+        [] == SeqTypeService.allSingleCellSeqTypes
+    }
+
+    void "test get SingleCell SeqTypes, returns all seqTypes with singleCell true"() {
+        when:
+        List<SeqType> expectedSeqTypes = [
+                createSeqType(singleCell: true),
+                createSeqType(singleCell: true),
+        ]
+        createSeqType(singleCell: false)
+
+        then:
+        CollectionUtils.containSame(expectedSeqTypes, SeqTypeService.allSingleCellSeqTypes)
     }
 
     void "test get WGS Paired SeqType, no SeqType in DB, should fail"() {

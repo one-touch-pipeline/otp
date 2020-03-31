@@ -157,6 +157,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     static hasMany = [
             logMessages: LogMessage,
     ]
+
     static constraints = {
         laneId(blank: false, validator: { String val, SeqTrack obj ->
             // custom unique constraint on laneId, run, cellPosition and project
@@ -204,7 +205,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
             return !obj.seqType?.hasAntibodyTarget == !val
         })
     }
-
 
     static String normalizeLibraryName(String libraryName) {
         if (libraryName != null) {

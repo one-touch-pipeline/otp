@@ -165,6 +165,9 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         return SeqType
     }
 
+    static List<SeqType> getAllSingleCellSeqTypes() {
+        return SeqType.findAllBySingleCell(true)
+    }
 
     static SeqType getWholeGenomePairedSeqType() {
         return getSingleSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, LibraryLayout.PAIRED, 'WGS PAIRED not found')

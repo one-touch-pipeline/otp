@@ -49,7 +49,7 @@ class SingleCellBamFileIntegrationSpec extends Specification implements CellRang
         CellRangerMergingWorkPackage workPackage = createMergingWorkPackage(
                 expectedCells: 5000,
         )
-        String TV = workPackage.referenceGenomeIndex.getToolWithVersion().replace(" ", "-")
+        String TV = workPackage.referenceGenomeIndex.toolWithVersion.replace(" ", "-")
         String PV = workPackage.config.programVersion.replace("/", "-")
         int ID = 123
 

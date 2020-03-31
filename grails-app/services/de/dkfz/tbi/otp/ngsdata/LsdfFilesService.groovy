@@ -156,13 +156,25 @@ class LsdfFilesService {
         return createFinalPathHelper(file, true)
     }
 
+    private OtpPath createViewByPidPath(DataFile dataFile) {
+        return dataFile.individual.getViewByPidPath(dataFile.seqType)
+    }
+
+    String createSingleCellAllWellDirectoryPath(DataFile file) {
+        OtpPath vbpPath = createViewByPidPath(file)
+        String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, true)
+        return new OtpPath(vbpPath, sampleTypeDir).absoluteDataManagementPath.path
+    }
+
+
     private String createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
-        OtpPath pidPath = file.individual.getViewByPidPath(file.seqType)
+        OtpPath vbpPath = createViewByPidPath(file)
         String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, useAllWellDirectory)
 
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
 
-        return new OtpPath(pidPath,
+        return new OtpPath(
+                vbpPath,
                 sampleTypeDir,
                 seqTrack.seqType.libraryLayoutDirName,
                 "run${seqTrack.run.name}",

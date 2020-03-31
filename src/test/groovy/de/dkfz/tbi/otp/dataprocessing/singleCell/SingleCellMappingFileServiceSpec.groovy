@@ -36,7 +36,6 @@ import java.nio.file.*
 class SingleCellMappingFileServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     private static final String ENTRY = "fileNew\twellNew"
-
     private static final String DATA = "file1\twell1\nfile2\twell2\n"
 
     @Override
@@ -53,23 +52,30 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
     class AddMappingFileEntryIfMissing implements DomainFactoryCore {
 
         SingleCellMappingFileService service
+        List<DataFile> dataFiles = []
+        Map<DataFile, Path> mappingFileOfDataFile = [:]
 
-        Path mappingFile = temporaryFolder.newFile().toPath()
-
-        DataFile dataFile = createDataFile()
+        AddMappingFileEntryIfMissing(List<DataFile> dataFiles) {
+            this.dataFiles = dataFiles
+            this.mappingFileOfDataFile = dataFiles.collectEntries { DataFile dataFile ->
+                return [(dataFile): temporaryFolder.newFile().toPath()]
+            }
+        }
     }
 
-    private AddMappingFileEntryIfMissing createDataAddMappingFileEntryIfMissing() {
-        AddMappingFileEntryIfMissing data = new AddMappingFileEntryIfMissing()
+    private AddMappingFileEntryIfMissing createDataAddMappingFileEntryIfMissing(List<DataFile> dataFiles) {
+        AddMappingFileEntryIfMissing data = new AddMappingFileEntryIfMissing(dataFiles)
 
         data.service = new SingleCellMappingFileService([
                 fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+                    _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
                 },
                 fileService      : new FileService(),
                 singleCellService: Mock(SingleCellService) {
-                    1 * singleCellMappingFile(_) >> data.mappingFile
-                    1 * mappingEntry(_) >> ENTRY
+                    _ * singleCellMappingFile(_) >> { DataFile df -> data.mappingFileOfDataFile[df] }
+                    _ * getAllSingleCellMappingFiles() >> { data.mappingFileOfDataFile.values() as List<Path> }
+                    _ * getAllDataFilesWithMappingFile() >> { data.dataFiles }
+                    _ * mappingEntry(_) >> ENTRY
                 },
         ])
         return data
@@ -77,41 +83,142 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
 
     void "addMappingFileEntryIfMissing, when file not exist, then create it with entry"() {
         given:
-        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing()
-        Files.delete(data.mappingFile)
+        List<DataFile> dataFiles = [createDataFile()]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
+        DataFile dataFile = data.dataFiles[0]
+        Path mappingFile = data.mappingFileOfDataFile[(dataFile)]
+
+        Files.delete(mappingFile)
 
         when:
-        data.service.addMappingFileEntryIfMissing(data.dataFile)
+        data.service.addMappingFileEntryIfMissing(dataFile)
 
         then:
-        Files.exists(data.mappingFile)
-        data.mappingFile.text == ENTRY + '\n'
+        Files.exists(mappingFile)
+        mappingFile.text == ENTRY + '\n'
     }
 
     void "addMappingFileEntryIfMissing, when file exist but has not the entry, then add entry"() {
         given:
-        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing()
-        data.mappingFile.text = DATA
+        List<DataFile> dataFiles = [createDataFile()]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
+        DataFile dataFile = data.dataFiles[0]
+        Path mappingFile = data.mappingFileOfDataFile[(dataFile)]
+
+        mappingFile.text = DATA
 
         when:
-        data.service.addMappingFileEntryIfMissing(data.dataFile)
+        data.service.addMappingFileEntryIfMissing(dataFile)
 
         then:
-        Files.exists(data.mappingFile)
-        data.mappingFile.text == DATA + ENTRY + '\n'
+        Files.exists(mappingFile)
+        mappingFile.text == DATA + ENTRY + '\n'
     }
 
     void "addMappingFileEntryIfMissing, when file exist and has the entry, then do not add the entry again"() {
         given:
+        List<DataFile> dataFiles = [createDataFile()]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
+        DataFile dataFile = data.dataFiles[0]
+        Path mappingFile = data.mappingFileOfDataFile[(dataFile)]
+
         String existingData = "${DATA}\n${ENTRY}\n"
-        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing()
-        data.mappingFile.text = existingData
+        mappingFile.text = existingData
 
         when:
-        data.service.addMappingFileEntryIfMissing(data.dataFile)
+        data.service.addMappingFileEntryIfMissing(dataFile)
 
         then:
-        Files.exists(data.mappingFile)
-        data.mappingFile.text == existingData
+        Files.exists(mappingFile)
+        mappingFile.text == existingData
+    }
+
+    void "addMappingFileEntryIfMissingForAllViableDataFiles, creates file and adds the entry if not already contained"() {
+        given:
+        List<DataFile> dataFiles = [
+                createDataFile(),
+                createDataFile(),
+                createDataFile(),
+        ]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
+
+        String expectedContentWithPreexistingData = "${DATA}\n${ENTRY}\n"
+        String expectedContentWithoutPreexistingData = "${ENTRY}\n"
+
+        Path mappingFileA = data.mappingFileOfDataFile[dataFiles[0]]
+
+        Path mappingFileB = data.mappingFileOfDataFile[dataFiles[1]]
+        mappingFileB.text = expectedContentWithPreexistingData
+
+        Path mappingFileC = data.mappingFileOfDataFile[dataFiles[2]]
+        Files.delete(mappingFileC)
+
+        when:
+        data.service.addMappingFileEntryIfMissingForAllViableDataFiles()
+
+        then:
+        mappingFileA
+        mappingFileA.text == expectedContentWithoutPreexistingData
+
+        mappingFileB
+        mappingFileB.text == expectedContentWithPreexistingData
+
+        Files.exists(mappingFileC)
+        mappingFileC.text == expectedContentWithoutPreexistingData
+    }
+
+    void "deleteAllMappingFiles, after the call, no mapping files are left"() {
+        given:
+        List<DataFile> dataFiles = [
+                createDataFile(),
+                createDataFile(),
+        ]
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing(dataFiles)
+
+        expect: "The files exist before the call"
+        data.mappingFileOfDataFile.values().every { Path path ->
+            Files.exists(path)
+        }
+
+        when:
+        data.service.deleteAllMappingFiles()
+
+        then: "The files have been removed"
+        data.mappingFileOfDataFile.values().every { Path path ->
+            !Files.exists(path)
+        }
+    }
+
+    void "recreateAllMappingFiles, is executable in repetition"() {
+        given:
+        DataFile dataFile = createDataFile()
+        AddMappingFileEntryIfMissing data = createDataAddMappingFileEntryIfMissing([dataFile])
+        Path mappingFile = data.mappingFileOfDataFile[dataFile]
+
+        Files.deleteIfExists(mappingFile)
+        assert !Files.exists(mappingFile): "The tests requires that there is no file in the beginning"
+
+        when: "File does not exist"
+        data.service.recreateAllMappingFiles()
+
+        then: "nothing to delete, create file with entry"
+        Files.exists(mappingFile)
+        mappingFile.text == "${ENTRY}\n"
+
+        when: "File does exist, does not contain entry"
+        mappingFile.text = DATA
+        data.service.recreateAllMappingFiles()
+
+        then: "delete file, create file"
+        Files.exists(mappingFile)
+        mappingFile.text == "${ENTRY}\n"
+
+        when: "File does exist, does contain entry"
+        String expected = mappingFile.text
+        data.service.recreateAllMappingFiles()
+
+        then: "delete file, create file"
+        Files.exists(mappingFile)
+        mappingFile.text == expected
     }
 }
