@@ -19,6 +19,8 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+
+<%@ page import="de.dkfz.tbi.otp.ngsdata.StoragePeriod" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -73,7 +75,7 @@
         </tr>
         <tr>
             <td>${g.message(code: "project.storageUntil")}</td>
-            <td>${projectRequest.storageUntil}</td>
+            <td>${projectRequest.storageUntil ?: StoragePeriod.INFINITELY.description}</td>
         </tr>
         <tr>
             <td>${g.message(code: "project.relatedProjects")}</td>
