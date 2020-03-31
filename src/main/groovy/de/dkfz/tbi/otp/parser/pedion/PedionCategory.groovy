@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,23 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser
+package de.dkfz.tbi.otp.parser.pedion
 
-import groovy.transform.TupleConstructor
+enum PedionCategory {
+    CONTROL('C'),
+    TUMOR('T'),
+    METASTASIS('M'),
 
-@TupleConstructor
-enum SampleIdentifierParserBeanName {
-    NO_PARSER('', 'No Parser'),
-    DEEP('deepSampleIdentifierParser', 'DEEP'),
-    HIPO('hipoSampleIdentifierParser', 'HIPO'),
-    HIPO2('hipo2SampleIdentifierParser', 'HIPO2'),
-    HIPO2_SPL('hipo2SamplePreparationLabSampleIdentifierParser', 'HIPO2_SPL'),
-    INFORM('informSampleIdentifierParser', 'INFORM'),
-    OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
-    SIMPLE('simpleProjectIndividualSampleTypeParser', 'Simple'),
-    ITCC_4P('iTCC_4P_Parser', 'ITCC-4P'),
-    PEDION('pedionParser', 'PeDiOn'),
+    final String letter
+    final String usedName
 
-    final String beanName
-    final String displayName
+    PedionCategory(String letter) {
+        this.letter = letter
+        this.usedName = name()
+        assert letter.size() == 1
+    }
+
+    PedionCategory(String letter, String usedName) {
+        this.letter = letter
+        this.usedName = usedName
+        assert letter.size() == 1
+    }
+
+    static final Map<String, String> LETTER_TO_NAME_MAP = values().collectEntries {
+        [it.letter, it.usedName]
+    }.asImmutable()
 }

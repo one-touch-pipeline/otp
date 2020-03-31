@@ -54,7 +54,8 @@ SampleIdentifierParser parser
 //parser = new ITCC_4P_Parser()
 //parser = new OE0290_EORTC_SampleIdentifierParser()
 //parser = new SimpleProjectIndividualSampleTypeParser()
-
+//parser = new PedionParser()
+//parser = new Covid19SampleIdentifierParser()
 
 //----------------------------------------
 //work area
