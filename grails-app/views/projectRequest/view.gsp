@@ -47,7 +47,7 @@
         </tr>
         <tr>
             <td>${g.message(code: "project.description")}</td>
-            <td>${projectRequest.description}</td>
+            <td><div class="project-multiline-wrapper">${projectRequest.description}</div></td>
         </tr>
         <tr>
             <td>${g.message(code: "project.keywords")}</td>
@@ -109,7 +109,7 @@
         </tr>
         <tr>
             <td>${g.message(code: "projectRequest.comments")}</td>
-            <td>${projectRequest.comments}</td>
+            <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
         </tr>
         <tr>
             <td>${g.message(code: "projectRequest.pi")}</td>

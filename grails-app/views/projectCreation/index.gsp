@@ -133,7 +133,7 @@
                 </g:if>
                 <tr>
                     <td><g:message code="projectRequest.comments"/></td>
-                    <td>${projectRequest.comments}</td>
+                    <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
                 </tr>
             </table>
         </g:if>

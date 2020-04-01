@@ -2033,7 +2033,14 @@ div.log {
 }
 
 .scrollable {
-    overflow: auto;
+    overflow-y: auto;
+}
+
+.project-multiline-wrapper {
+    .keep-whitespace;
+    .scrollable;
+    max-height: 12em;
+    max-width: 750px;
 }
 
 .keyword-header {
@@ -2504,8 +2511,8 @@ table.key-value-table {
                 width: 500px;
             }
             .multiline-display {
+                .project-multiline-wrapper;
                 max-height: 20em;
-                overflow: auto;
             }
         }
     }
