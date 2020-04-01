@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import java.time.LocalDate
 import java.time.ZoneId
 
-@SuppressWarnings('MethodCount')
 trait DomainFactoryCore implements DomainFactoryHelper {
 
     Project createProject(Map properties = [:], boolean saveAndValidate = true) {

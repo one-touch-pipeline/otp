@@ -38,7 +38,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
-@SuppressWarnings('MethodCount')
 class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     @Override

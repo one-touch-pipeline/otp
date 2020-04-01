@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.utils.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@SuppressWarnings(['ClassSize', 'MethodCount', 'MethodSize'])
+@SuppressWarnings(['ClassSize', 'MethodSize'])
 class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation implements DomainFactoryCore {
 
     NotificationCreator notificationCreator

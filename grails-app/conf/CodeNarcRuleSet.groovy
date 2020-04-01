@@ -1038,6 +1038,7 @@ All the Rules that will be used for OTP
     }
     MethodCount {
         priority = MIDDLE
+        doNotApplyToFileNames = TEST
     }
     MethodSize {
         priority = MIDDLE

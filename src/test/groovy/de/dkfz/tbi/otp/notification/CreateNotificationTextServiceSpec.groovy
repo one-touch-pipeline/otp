@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 //TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
-@SuppressWarnings(["ClassSize", "MethodCount"])
+@SuppressWarnings(["ClassSize"])
 class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, DataTest {
 
     @Override

@@ -30,7 +30,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-@SuppressWarnings(['MethodCount', 'ClassSize'])
+@SuppressWarnings(['ClassSize'])
 class FileServiceSpec extends Specification implements DataTest {
 
     static final String SOME_CONTENT = 'SomeContent'
