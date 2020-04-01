@@ -853,7 +853,6 @@ ${ILSE_NO}                      -             1234          1234          -     
     }
 
 
-    @SuppressWarnings(["MethodSize"])
     void "importMetadataFile imports correctly data withAntibodyTarget"() {
         given:
         String runName = 'run'
@@ -1031,7 +1030,6 @@ ${FASTQ_GENERATOR}             ${softwareToolIdentifier.name}              ${sof
         dataFile2 != null
     }
 
-    @SuppressWarnings(["MethodSize"])
     void "importMetadataFile imports correctly data index files"() {
         given:
         String runName = 'run'

@@ -217,7 +217,6 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         key == 'seqtype-PAIRED-platform-model-lib2-lib3-lib5-unspecified'
     }
 
-    @SuppressWarnings('MethodSize')
     void "createSingleFastqFileMapping, when ega submission is given, then create expectedMap of file names and file content"() {
         given:
         Sample sample = createSample()
@@ -332,7 +331,6 @@ sampleAlias2,fileAlias-222-1,,
         TestCase.assertContainSame(map, expectedMap)
     }
 
-    @SuppressWarnings('MethodSize')
     void "createPairedFastqFileMapping, when ega submission is given, then create expectedMap of file names and file content"() {
         given:
         Sample sample = createSample()
@@ -457,7 +455,6 @@ sampleAlias2,fileAlias-222-1-r1,,,fileAlias-222-1-r2,,
         TestCase.assertContainSame(map, expectedMap)
     }
 
-    @SuppressWarnings('MethodSize')
     void "createBamFileMapping, when ega submission is given, then create expectedMap of file names and file content"() {
         given:
         SeqType seqTypeSingle1 = createSeqType([

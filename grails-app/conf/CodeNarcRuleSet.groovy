@@ -1042,6 +1042,7 @@ All the Rules that will be used for OTP
     }
     MethodSize {
         priority = MIDDLE
+        doNotApplyToFileNames = TEST
     }
     NestedBlockDepth {
         priority = MIDDLE

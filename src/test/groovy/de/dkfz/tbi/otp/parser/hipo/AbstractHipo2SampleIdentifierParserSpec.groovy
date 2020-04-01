@@ -40,7 +40,6 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         return tissueNumber
     }
 
-    @SuppressWarnings(['MethodSize'])
     @Unroll
     void 'tryParse, when identifier is #identifier, parses correctly'() {
         given:

@@ -29,7 +29,6 @@ class HipoSampleIdentifierParserUnitTest {
 
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
-    @SuppressWarnings(['MethodSize'])
     @Test
     void testTryParse() {
         String sampleName = "H004-ABCD-T1"
