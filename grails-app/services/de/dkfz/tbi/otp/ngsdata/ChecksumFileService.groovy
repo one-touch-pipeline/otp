@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 
+import java.nio.file.FileSystem
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -34,6 +36,7 @@ import static org.springframework.util.Assert.notNull
 class ChecksumFileService {
 
     LsdfFilesService lsdfFilesService
+    FileSystemService fileSystemService
 
     String pathToMd5File(DataFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)
@@ -60,8 +63,11 @@ class ChecksumFileService {
 
     boolean compareMd5(DataFile file) {
         String path = pathToMd5File(file)
-        File md5File = new File(path)
-        FileService.ensureFileIsReadableAndNotEmpty(md5File.toPath())
+
+        FileSystem fs = fileSystemService.filesystemForProcessingForRealm
+        Path md5File = fs.getPath(path)
+
+        FileService.ensureFileIsReadableAndNotEmpty(md5File)
         String md5sum
         try {
             List<String> lines = md5File.readLines()

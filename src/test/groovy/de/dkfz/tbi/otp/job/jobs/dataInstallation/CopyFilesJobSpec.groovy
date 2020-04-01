@@ -82,6 +82,7 @@ class CopyFilesJobSpec extends Specification implements DataTest {
         copyFilesJob.configService = configService
         copyFilesJob.lsdfFilesService = new LsdfFilesService()
         copyFilesJob.checksumFileService = new ChecksumFileService()
+        copyFilesJob.checksumFileService.fileSystemService  = new TestFileSystemService()
         copyFilesJob.checksumFileService.lsdfFilesService = copyFilesJob.lsdfFilesService
         copyFilesJob.fileService = new FileService()
         copyFilesJob.fileSystemService = new TestFileSystemService()
