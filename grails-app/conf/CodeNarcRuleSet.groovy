@@ -28,7 +28,7 @@ final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
 final String VALIDATOR = "*Validator*"
 final String WORKFLOW_TEST = "*/*workflow-test*/*"
-final String JUNIT_TEST_REG_EXPRESSION = "(.*/workflow-test/.*)|(.*Spec.groovy)"
+final String SPOCK_TEST_EXPRESSION = "(.*/workflow-test/.*)|(.*Spec.groovy)"
 final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
 final int CRITICAL = 1
 final int HIGH = 2
@@ -474,9 +474,6 @@ All the Rules that will be used for OTP
     CloneWithoutCloneable {
         priority = DEFAULT
     }
-    JUnitAssertEqualsConstantActualValue {
-        priority = DEFAULT
-    }
     MissingOverrideAnnotation {
         priority = CRITICAL
         doNotApplyToFileNames = INTEGRATION_SPEC
@@ -855,12 +852,15 @@ All the Rules that will be used for OTP
     JUnitAssertAlwaysSucceeds {
         priority = DEFAULT
     }
+    JUnitAssertEqualsConstantActualValue {
+        priority = DEFAULT
+    }
     JUnitFailWithoutMessage {
         priority = DEFAULT
     }
     JUnitLostTest {
         priority = MIDDLE
-        doNotApplyToFilesMatching = JUNIT_TEST_REG_EXPRESSION
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     //JUnitPublicField
     //JUnitPublicNonTestMethod
@@ -872,20 +872,24 @@ All the Rules that will be used for OTP
     //JUnitPublicProperty
     JUnitSetUpCallsSuper {
         priority = HIGH
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     //JUnitStyleAssertions //will be fixed by converting to spock
     JUnitTearDownCallsSuper {
         priority = DEFAULT
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     JUnitTestMethodWithoutAssert {
         priority = MIDDLE
-        doNotApplyToFilesMatching = JUNIT_TEST_REG_EXPRESSION
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     JUnitUnnecessarySetUp {
         priority = DEFAULT
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     JUnitUnnecessaryTearDown {
         priority = DEFAULT
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     //JUnitUnnecessaryThrowsException
     SpockIgnoreRestUsed {

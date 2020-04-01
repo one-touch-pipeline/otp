@@ -197,7 +197,6 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         ]
     }
 
-    @SuppressWarnings('JUnitTestMethodWithoutAssert')
     @Unroll
     void "test parsePid invalid input #pid"() {
         when:
@@ -214,7 +213,6 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         'INVALID_PID' | _
     }
 
-    @SuppressWarnings('JUnitTestMethodWithoutAssert')
     @Unroll
     void "test tryParseCellPosition valid input #identifier"() {
         given:
@@ -238,7 +236,6 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         "123ABC-T3-1234S02" || "1234S02"
     }
 
-    @SuppressWarnings('JUnitTestMethodWithoutAssert')
     @Unroll
     void "test tryParseCellPosition invalid input #identifier"() {
         given:
