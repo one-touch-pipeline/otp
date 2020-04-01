@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
-@SuppressWarnings('JUnitPublicProperty')
 class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory, DataTest {
 
     @Override

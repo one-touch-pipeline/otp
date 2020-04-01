@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class ITCC_4P_ParserSpec extends Specification {
 
-    @SuppressWarnings('JUnitPublicProperty')
     ITCC_4P_Parser itcc4PParser = new ITCC_4P_Parser()
 
     @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity'])

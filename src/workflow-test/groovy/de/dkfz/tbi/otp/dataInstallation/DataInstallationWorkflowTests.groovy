@@ -36,7 +36,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 
-@SuppressWarnings('JUnitPublicProperty')
 class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFactoryCore {
 
     LsdfFilesService lsdfFilesService

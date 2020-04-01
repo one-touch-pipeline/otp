@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.parser.hipo
 
 import spock.lang.Unroll
 
-@SuppressWarnings('JUnitPublicProperty')
 class OE0290_EORTC_SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
 
     OE0290_EORTC_SampleIdentifierParser parser = new OE0290_EORTC_SampleIdentifierParser()

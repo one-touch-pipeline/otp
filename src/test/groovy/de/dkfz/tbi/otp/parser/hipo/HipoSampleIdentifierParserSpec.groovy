@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 
 class HipoSampleIdentifierParserSpec extends Specification {
 
-    @SuppressWarnings('JUnitPublicProperty')
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
     @Unroll

@@ -864,9 +864,12 @@ All the Rules that will be used for OTP
     }
     //JUnitPublicField
     //JUnitPublicNonTestMethod
-    JUnitPublicProperty {
-        priority = LOW
-    }
+    /* Disabled, since following cases require public properties:
+     * - The @Rule annotation of test, used for TemporaryFolder
+     * - Autowireing of services in integration tests
+     * Since that are many cases, twe decided to disable JUnitPublicProperty
+     */
+    //JUnitPublicProperty
     JUnitSetUpCallsSuper {
         priority = HIGH
     }

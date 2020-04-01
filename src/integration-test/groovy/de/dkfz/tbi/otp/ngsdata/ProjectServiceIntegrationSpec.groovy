@@ -54,7 +54,7 @@ import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 import java.time.LocalDate
 
-@SuppressWarnings(['ClassSize', 'MethodCount', 'JUnitPublicProperty'])
+@SuppressWarnings(['ClassSize', 'MethodCount'])
 @Rollback
 @Integration
 class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {

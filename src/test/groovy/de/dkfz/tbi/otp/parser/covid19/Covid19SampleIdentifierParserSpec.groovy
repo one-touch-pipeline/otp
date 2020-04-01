@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class Covid19SampleIdentifierParserSpec extends Specification implements DomainFactoryCore {
 
-    @SuppressWarnings('JUnitPublicProperty')
     Covid19SampleIdentifierParser covid19SampleIdentifierParser = new Covid19SampleIdentifierParser()
 
     @SuppressWarnings(['CyclomaticComplexity'])

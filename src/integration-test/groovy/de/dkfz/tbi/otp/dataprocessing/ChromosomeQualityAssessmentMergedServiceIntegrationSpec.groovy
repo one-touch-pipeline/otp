@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@SuppressWarnings('JUnitPublicProperty')
 @Rollback
 @Integration
 class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specification implements CellRangerFactory {

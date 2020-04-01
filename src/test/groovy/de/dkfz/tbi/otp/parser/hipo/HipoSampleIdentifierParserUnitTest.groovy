@@ -27,7 +27,6 @@ import static junit.framework.TestCase.*
 
 class HipoSampleIdentifierParserUnitTest {
 
-    @SuppressWarnings('JUnitPublicProperty')
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
     @SuppressWarnings(['MethodSize', 'AbcMetric'])

@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class InformSampleIdentifierParserSpec extends Specification {
 
-    @SuppressWarnings('JUnitPublicProperty')
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 
     @SuppressWarnings(['CyclomaticComplexity'])

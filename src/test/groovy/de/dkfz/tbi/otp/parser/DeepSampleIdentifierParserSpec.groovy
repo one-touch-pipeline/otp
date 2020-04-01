@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 
 class DeepSampleIdentifierParserSpec extends Specification {
 
-    @SuppressWarnings('JUnitPublicProperty')
     DeepSampleIdentifierParser deepSampleIdentifierParser = new DeepSampleIdentifierParser()
 
     void "test parsing invalid input"() {

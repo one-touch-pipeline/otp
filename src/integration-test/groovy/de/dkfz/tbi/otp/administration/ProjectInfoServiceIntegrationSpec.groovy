@@ -48,7 +48,6 @@ import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 
-@SuppressWarnings(['JUnitPublicProperty'])
 @Rollback
 @Integration
 class ProjectInfoServiceIntegrationSpec extends Specification implements UserAndRoles, DocumentFactory {

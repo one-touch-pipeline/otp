@@ -26,7 +26,6 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 
-@SuppressWarnings('JUnitPublicProperty')
 class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
 
     Hipo2SamplePreparationLabSampleIdentifierParser parser = new Hipo2SamplePreparationLabSampleIdentifierParser()

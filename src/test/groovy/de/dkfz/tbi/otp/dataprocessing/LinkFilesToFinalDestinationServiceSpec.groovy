@@ -74,7 +74,6 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
         ]
     }
 
-    @SuppressWarnings('JUnitPublicProperty')
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 

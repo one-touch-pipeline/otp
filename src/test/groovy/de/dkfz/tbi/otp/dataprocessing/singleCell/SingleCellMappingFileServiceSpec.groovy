@@ -45,7 +45,6 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         ]
     }
 
-    @SuppressWarnings('JUnitPublicProperty')
     @Rule
     TemporaryFolder temporaryFolder
 

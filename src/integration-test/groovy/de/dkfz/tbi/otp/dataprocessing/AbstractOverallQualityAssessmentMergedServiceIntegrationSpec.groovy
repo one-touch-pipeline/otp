@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 
-@SuppressWarnings('JUnitPublicProperty')
 @Rollback
 @Integration
 abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {

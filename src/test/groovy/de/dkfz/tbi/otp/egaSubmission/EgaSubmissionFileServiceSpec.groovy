@@ -84,7 +84,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     private final EgaSubmissionFileService egaSubmissionFileService = new EgaSubmissionFileService()
 
-    @SuppressWarnings('JUnitPublicProperty')
     @Rule
     TemporaryFolder temporaryFolder
 

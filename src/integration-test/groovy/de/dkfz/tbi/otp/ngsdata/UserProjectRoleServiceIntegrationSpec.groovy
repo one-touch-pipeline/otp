@@ -57,7 +57,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     private final static String EMAIL_LINUX_GROUP_ADMINISTRATION = HelperUtils.randomEmail
     private final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
 
-    @SuppressWarnings('JUnitPublicProperty')
     UserProjectRoleService userProjectRoleService
 
     @Rule
