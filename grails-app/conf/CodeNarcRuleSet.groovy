@@ -1034,6 +1034,7 @@ All the Rules that will be used for OTP
     }
     CyclomaticComplexity {
         priority = HIGH
+        doNotApplyToFileNames = TEST
     }
     MethodCount {
         priority = MIDDLE

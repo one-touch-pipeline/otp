@@ -32,7 +32,6 @@ class Covid19SampleIdentifierParserSpec extends Specification implements DomainF
 
     Covid19SampleIdentifierParser covid19SampleIdentifierParser = new Covid19SampleIdentifierParser()
 
-    @SuppressWarnings(['CyclomaticComplexity'])
     @Unroll('Covid19 identifier #input is parsed to Project #project PID #pid, sample type name #sampleTypeDbName')
     void "test parse valid input"() {
         given:

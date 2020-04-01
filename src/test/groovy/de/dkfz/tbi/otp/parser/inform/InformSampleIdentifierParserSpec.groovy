@@ -31,7 +31,6 @@ class InformSampleIdentifierParserSpec extends Specification {
 
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 
-    @SuppressWarnings(['CyclomaticComplexity'])
     @Unroll('INFORM identifier #input is parsed to PID #pid, sample type name #sampleTypeDbName')
     void "test parse valid input"() {
         given:

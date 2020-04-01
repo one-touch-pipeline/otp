@@ -31,7 +31,6 @@ class ITCC_4P_ParserSpec extends Specification {
 
     ITCC_4P_Parser itcc4PParser = new ITCC_4P_Parser()
 
-    @SuppressWarnings(['CyclomaticComplexity'])
     @Unroll('ITCC_4P identifier #input is parsed to PID #pid, sample type name #sampleTypeDbName')
     void "parse valid input"() {
         given:

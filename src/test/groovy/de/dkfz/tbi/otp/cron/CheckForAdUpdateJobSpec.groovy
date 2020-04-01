@@ -46,7 +46,7 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
     }
 
     @Ignore
-    @SuppressWarnings(['CyclomaticComplexity', 'LineLength'])
+    @SuppressWarnings(['LineLength'])
     @Unroll
     void "fileAccessChangeRequested, when enabled '#enabled', accessToFiles: #accessToFiles, fileAccessChangeRequested: #fileAccessChangeRequested, groups: #groups, then callCount: #callCount and expectedFileAccessChangeRequested: #expectedFileAccessChangeRequested"() {
         given:

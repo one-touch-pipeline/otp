@@ -74,7 +74,6 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
     }
 
-    @SuppressWarnings("CyclomaticComplexity")
     void "test fastqcFileName"() {
         given:
         DataFile dataFile = new DataFile()

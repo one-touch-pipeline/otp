@@ -40,7 +40,7 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         return tissueNumber
     }
 
-    @SuppressWarnings(['CyclomaticComplexity', 'MethodSize'])
+    @SuppressWarnings(['MethodSize'])
     @Unroll
     void 'tryParse, when identifier is #identifier, parses correctly'() {
         given:
