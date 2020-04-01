@@ -367,11 +367,10 @@
                 </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
-                        <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message
-                                code="project.internalNotes"/></td>
+                        <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.internalNotes"/></td>
                         <td></td>
                         <td>
-                            <div style="overflow: auto; max-height: 20em;">
+                            <div class="scrollable" style="max-height: 20em">
                                 <otp:editorSwitch
                                         roles="ROLE_OPERATOR"
                                         template="textArea"
@@ -379,6 +378,11 @@
                                         value="${selectedProject.internalNotes}"/>
                             </div>
                         </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.requestComment"/></td>
+                        <td></td>
+                        <td><div class="project-multiline-wrapper" style="max-height: 20em; max-width: none">${projectRequestComments}</div></td>
                     </tr>
                     <tr>
                         <td><g:message code="projectOverview.projectInfos"/></td>

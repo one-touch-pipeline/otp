@@ -45,6 +45,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class ProjectConfigController implements CheckAndCall {
 
     ProjectService projectService
+    ProjectRequestService projectRequestService
     ProjectOverviewService projectOverviewService
     ProcessingThresholdsService processingThresholdsService
     CommentService commentService
@@ -57,19 +58,11 @@ class ProjectConfigController implements CheckAndCall {
 
         Map<String, String> dates = getDates(project)
 
-        File projectDirectory
-
-        if (project) {
-            projectDirectory = LsdfFilesService.getPath(
-                    configService.rootPath.path,
-                    project.dirName,
-            )
-        }
-
         return [
                 creationDate                   : dates.creationDate,
                 lastReceivedDate               : dates.lastReceivedDate,
-                directory                      : projectDirectory ?: '',
+                projectRequestComments         : projectRequestService.findProjectRequestByProject(project)?.comments,
+                directory                      : project ? LsdfFilesService.getPath(configService.rootPath.path, project.dirName) : "",
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
                 tumorEntities                  : TumorEntity.list().sort(),
                 projectTypes                   : Project.ProjectType.values(),

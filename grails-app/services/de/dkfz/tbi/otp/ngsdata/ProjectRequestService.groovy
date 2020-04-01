@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -225,6 +226,11 @@ class ProjectRequestService {
             userProjectRoleService.setManageUsersAndDelegate(upr, role.manageUsersAndDelegate)
             userProjectRoleService.setReceivesNotifications(upr, role.receivesNotifications)
         }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    ProjectRequest findProjectRequestByProject(Project project) {
+        return CollectionUtils.atMostOneElement(ProjectRequest.findAllByProject(project))
     }
 
     private void sendEmailOnCreation(ProjectRequest request) {
