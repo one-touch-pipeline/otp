@@ -188,18 +188,18 @@ class ProjectService {
         ])
         assert project.save(flush: true)
 
-        if (!projectParams.ignoreUsersFromBaseObjects) {
-            if (projectParams.projectRequest) {
-                projectRequestService.update(projectParams.projectRequest, project)
+        if (projectParams.projectRequest) {
+            projectRequestService.update(projectParams.projectRequest, project)
+            if (!projectParams.ignoreUsersFromBaseObjects) {
                 projectRequestService.addUserRolesAndPermissions(projectParams.projectRequest)
-            }
-            if (projectParams.baseProject) {
-                userProjectRoleService.applyUserProjectRolesOntoProject(projectParams.usersToCopyFromBaseProject as List<UserProjectRole>, project)
             }
         }
 
         if (projectParams.baseProject) {
             addProjectToRelatedProjects(projectParams.baseProject, project)
+            if (!projectParams.ignoreUsersFromBaseObjects) {
+                userProjectRoleService.applyUserProjectRolesOntoProject(projectParams.usersToCopyFromBaseProject as List<UserProjectRole>, project)
+            }
         }
 
         userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, projectParams.unixGroup)
