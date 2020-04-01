@@ -1028,6 +1028,7 @@ All the Rules that will be used for OTP
     }
     ClassSize {
         priority = MIDDLE
+        doNotApplyToFileNames = TEST
     }
     CrapMetric {
         priority = MIDDLE
