@@ -1024,6 +1024,7 @@ All the Rules that will be used for OTP
     // rulesets/size.xml
     AbcMetric {
         priority = HIGH
+        doNotApplyToFileNames = TEST
     }
     ClassSize {
         priority = MIDDLE

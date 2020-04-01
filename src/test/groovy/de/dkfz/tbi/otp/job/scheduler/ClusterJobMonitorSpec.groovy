@@ -100,7 +100,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
      *      - successful
      *      - fail
      */
-    @SuppressWarnings(['AbcMetric', 'MethodSize'])
+    @SuppressWarnings(['MethodSize'])
     void "check multiple cases for checking jobs"() {
         given:
         Realm realm1 = DomainFactory.createRealm()

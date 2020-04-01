@@ -137,7 +137,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         bams*.value == [false, true]
     }
 
-    @SuppressWarnings('AbcMetric')
     void "test generate data files csv file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()

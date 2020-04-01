@@ -31,7 +31,7 @@ class PedionParserSpec extends Specification {
 
     private final PedionParser parser = new PedionParser()
 
-    @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity'])
+    @SuppressWarnings(['CyclomaticComplexity'])
     @Unroll('PeDiOn identifier #input is parsed to PID #pid, sample type name #sampleTypeDbName')
     void "parse valid input"() {
         when:
