@@ -891,7 +891,10 @@ All the Rules that will be used for OTP
         priority = DEFAULT
         doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
-    //JUnitUnnecessaryThrowsException
+    JUnitUnnecessaryThrowsException {
+        priority = DEFAULT
+        doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
+    }
     SpockIgnoreRestUsed {
         priority = DEFAULT
     }

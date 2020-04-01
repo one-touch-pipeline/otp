@@ -315,7 +315,7 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
+    void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createExternallyProcessedMergedBamFile(
@@ -332,7 +332,7 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() throws Exception {
+    void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
 

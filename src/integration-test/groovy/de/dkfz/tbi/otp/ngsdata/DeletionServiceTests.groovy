@@ -69,7 +69,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteFastQCInformationFromDataFile() throws Exception {
+    void testDeleteFastQCInformationFromDataFile() {
         setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
@@ -80,7 +80,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteMetaDataEntryForDataFile() throws Exception {
+    void testDeleteMetaDataEntryForDataFile() {
         setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(dataFile: dataFile)
@@ -91,7 +91,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteConsistencyStatusInformationForDataFile() throws Exception {
+    void testDeleteConsistencyStatusInformationForDataFile() {
         setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         ConsistencyStatus consistencyStatus = DomainFactory.createConsistencyStatus(dataFile: dataFile)
@@ -102,7 +102,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() {
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedBamFile()
 
@@ -118,7 +118,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() {
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
@@ -136,7 +136,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() {
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
@@ -157,7 +157,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_SingleCellBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_SingleCellBamFile() {
         setupData()
         AbstractBamFile abstractBamFile = DomainFactory.proxyCellRanger.createBamFile()
 
@@ -169,7 +169,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteQualityAssessmentInfoForAbstractBamFile_null() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_null() {
         setupData()
         AbstractBamFile abstractBamFile = null
 
@@ -181,7 +181,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
+    void testDeleteMergingRelatedConnectionsOfBamFile() {
         setupData()
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 pipeline: DomainFactory.createDefaultOtpPipeline()
@@ -201,7 +201,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteDataFile() throws Exception {
+    void testDeleteDataFile() {
         setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
@@ -216,7 +216,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
+    void testDeleteConnectionFromSeqTrackRepresentingABamFile() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
@@ -229,7 +229,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
+    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -254,7 +254,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() throws Exception {
+    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() {
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
@@ -267,7 +267,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile() throws Exception {
+    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile() {
         setupData()
         SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile()
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
@@ -280,7 +280,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteSeqScanAndCorrespondingInformation() throws Exception {
+    void testDeleteSeqScanAndCorrespondingInformation() {
         setupData()
         SeqScan seqScan = DomainFactory.createSeqScan()
         MergingLog mergingLog = DomainFactory.createMergingLog(seqScan: seqScan)
@@ -294,7 +294,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteSeqTrack() throws Exception {
+    void testDeleteSeqTrack() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         MergingAssignment mergingAssignment = DomainFactory.createMergingAssignment(seqTrack: seqTrack)
@@ -308,7 +308,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
+    void testDeleteSeqTrack_seqTrackIsOnlyLinked() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
         DomainFactory.createMergingAssignment(seqTrack: seqTrack)
@@ -320,7 +320,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteRun() throws Exception {
+    void testDeleteRun() {
         setupData()
         Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
@@ -332,7 +332,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteRunByName() throws Exception {
+    void testDeleteRunByName() {
         setupData()
         Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
