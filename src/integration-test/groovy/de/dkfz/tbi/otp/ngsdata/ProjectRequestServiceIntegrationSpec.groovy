@@ -174,7 +174,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         service.create(cmd)
 
         then:
-        notThrown()
+        noExceptionThrown()
     }
 
     void "test create, fails if user does not exist"() {
@@ -286,7 +286,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         then:
         e == null
-        notThrown()
+        noExceptionThrown()
         request.status == expectedStatus
 
         where:

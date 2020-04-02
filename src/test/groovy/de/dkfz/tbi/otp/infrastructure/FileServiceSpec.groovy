@@ -173,7 +173,7 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.deleteDirectoryRecursively(file)
 
         then:
-        notThrown()
+        noExceptionThrown()
     }
 
     void "deleteDirectoryRecursively, if path is an empty directory, then delete it"() {

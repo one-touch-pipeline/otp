@@ -65,7 +65,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
 
         then:
-        notThrown()
+        noExceptionThrown()
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when path is not absolute, should fail"() {

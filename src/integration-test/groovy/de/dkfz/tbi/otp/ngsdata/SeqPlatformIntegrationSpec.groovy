@@ -128,7 +128,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         sp4.save(flush: true)
 
         then:
-        notThrown(Throwable)
+        noExceptionThrown()
     }
 
     void "test add a SP which belongs to a default SPG to a project and seqType specific SPG, succeeds"() {
@@ -140,7 +140,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         sp4.save(flush: true)
 
         then:
-        notThrown(Throwable)
+        noExceptionThrown()
     }
 
     void "test add a SPG which belongs to a specific project and seqType to a SP with a default SPG, succeeds"() {
@@ -152,7 +152,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         spg_project2.save(flush: true)
 
         then:
-        notThrown(Throwable)
+        noExceptionThrown()
     }
 
     void "test add a SPG which belongs to a specific project and seqType to a SP which belongs to another SPG, succeeds"() {
@@ -168,7 +168,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         spg_project3.save(flush: true)
 
         then:
-        notThrown(Throwable)
+        noExceptionThrown()
     }
 
     void "test add a SPG which belongs to a specific project and seqType to a SP which already has another SPG with the same project and seqType, fails"() {
