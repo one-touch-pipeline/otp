@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.spreadsheet.Delimiter
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 import java.nio.file.FileSystem
@@ -124,7 +125,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
         String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         when:
         Map egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
@@ -244,7 +245,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
         String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
                 new DataFileAndSampleAlias(
                         dataFile,
@@ -275,7 +276,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
         String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
                 new BamFileAndSampleAlias(
                         roddyBamFile,

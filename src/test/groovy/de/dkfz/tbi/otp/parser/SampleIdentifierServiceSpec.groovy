@@ -32,13 +32,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.Delimiter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class SampleIdentifierServiceSpec extends Specification implements DataTest, ServiceUnitTest<SampleIdentifierService>, DomainFactoryCore {
 
-    private static final Spreadsheet.Delimiter DEFAULT_DELIMITER = Spreadsheet.Delimiter.COMMA
+    private static final Delimiter DEFAULT_DELIMITER = Delimiter.COMMA
     private static final SampleType.SpecificReferenceGenome DEFAULT_SPECIFIC_REF_GEN = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     private static final String HEADER = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(DEFAULT_DELIMITER)
     private static final String SAMPLE_IDENTIFER_NAME = "New name"
@@ -540,7 +540,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         result == expected
 
         where:
-        delimiter << Spreadsheet.Delimiter.values()
+        delimiter << Delimiter.values()
     }
 
     void "checkSampleIdentifier, when identifier and parsed identifier match, succeed"() {

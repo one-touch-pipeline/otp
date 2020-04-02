@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.util.spreadsheet.Delimiter
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 class EgaSubmissionValidationServiceSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
@@ -83,7 +84,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
         egaSubmissionValidationService.validateRows(spreadsheet, submission).valid
@@ -100,7 +101,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
         !egaSubmissionValidationService.validateRows(spreadsheet, submission).valid
@@ -117,7 +118,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
         !egaSubmissionValidationService.validateRows(spreadsheet, submission).valid
@@ -141,7 +142,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes).replace("FASTQ", fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
         egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet) == result

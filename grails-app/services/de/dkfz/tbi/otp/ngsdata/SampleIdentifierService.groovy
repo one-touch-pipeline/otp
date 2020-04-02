@@ -30,8 +30,7 @@ import org.springframework.validation.ObjectError
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.parser.*
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext
 
@@ -48,7 +47,7 @@ class SampleIdentifierService {
         SAMPLE_TYPE,
         SAMPLE_IDENTIFIER,
 
-        static final String getHeaders(Spreadsheet.Delimiter delimiter = Spreadsheet.Delimiter.TAB) {
+        static final String getHeaders(Delimiter delimiter = Delimiter.TAB) {
             return values().join(delimiter.delimiter as String)
         }
     }
@@ -88,7 +87,7 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParseCellPosition(sampleIdentifier)
     }
 
-    List<String> createBulkSamples(String sampleText, Spreadsheet.Delimiter delimiter, Project project, SampleType.SpecificReferenceGenome specificReferenceGenome) {
+    List<String> createBulkSamples(String sampleText, Delimiter delimiter, Project project, SampleType.SpecificReferenceGenome specificReferenceGenome) {
         Spreadsheet spreadsheet = new Spreadsheet(sampleText, delimiter)
         List<String> output = []
         ValidationContext context = new ValidationContext(spreadsheet)
@@ -234,7 +233,7 @@ class SampleIdentifierService {
      * @param delimiter which separates columns
      * @return sanitized text
      */
-    String removeExcessWhitespaceFromCharacterDelimitedText(String text, Spreadsheet.Delimiter delimiter) {
+    String removeExcessWhitespaceFromCharacterDelimitedText(String text, Delimiter delimiter) {
         String columnDelimiter = delimiter.delimiter
         return text
                 .trim()

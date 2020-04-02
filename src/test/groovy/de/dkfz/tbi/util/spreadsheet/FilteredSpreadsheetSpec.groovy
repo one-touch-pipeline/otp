@@ -27,7 +27,7 @@ class FilteredSpreadsheetSpec extends Specification {
 
     void 'dataRows, when document contains rows to be excluded, does not contain the excluded rows'() {
         when:
-        Spreadsheet spreadsheet = new FilteredSpreadsheet("c 0 1 2 3 4".replaceAll(' ', '\n'), Spreadsheet.Delimiter.TAB, Closure.IDENTITY, { Row row ->
+        Spreadsheet spreadsheet = new FilteredSpreadsheet("c 0 1 2 3 4".replaceAll(' ', '\n'), Delimiter.TAB, Closure.IDENTITY, { Row row ->
             Integer.parseInt(row.getCellByColumnTitle('c').text) % 2 == 0
         })
 

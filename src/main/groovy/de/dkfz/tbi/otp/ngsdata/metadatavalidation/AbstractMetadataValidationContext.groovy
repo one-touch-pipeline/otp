@@ -25,8 +25,7 @@ import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.util.spreadsheet.FilteredSpreadsheet
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.charset.Charset
@@ -84,7 +83,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
                 if (document.getBytes(CHARSET) != bytes) {
                     problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly encoded with ${CHARSET.name()}. Characters might be corrupted.")
                 }
-                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Spreadsheet.Delimiter.TAB,
+                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Delimiter.TAB,
                         renameHeader, dataRowFilter)
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null

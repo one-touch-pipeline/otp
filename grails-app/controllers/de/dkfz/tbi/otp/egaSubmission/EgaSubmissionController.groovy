@@ -447,7 +447,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
         String content = new String(cmd.file.bytes)
         content = content.replace("\"", "")
-        return new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
+        return new Spreadsheet(content, Delimiter.COMMA)
     }
 
     def selectFilesBamFilesForm(SelectFilesBamFilesFormSubmitCommand cmd) {

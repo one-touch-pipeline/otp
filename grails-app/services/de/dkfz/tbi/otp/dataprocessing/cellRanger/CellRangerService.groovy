@@ -32,8 +32,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.Md5SumService
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.*
 
 import java.nio.file.*
 
@@ -169,7 +168,7 @@ class CellRangerService {
 
     CellRangerQualityAssessment parseCellRangerQaStatistics(SingleCellBamFile singleCellBamFile) {
         Path path = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm).getPath(singleCellBamFile.qualityAssessmentCsvFile.absolutePath)
-        Spreadsheet spreadsheet = new Spreadsheet(path.text, Spreadsheet.Delimiter.COMMA)
+        Spreadsheet spreadsheet = new Spreadsheet(path.text, Delimiter.COMMA)
         CellRangerQualityAssessment qa = new CellRangerQualityAssessment()
         MetricsSummaryCsvColumn.values().each {
             Cell cell = spreadsheet.dataRows.first().getCellByColumnTitle(it.columnName)

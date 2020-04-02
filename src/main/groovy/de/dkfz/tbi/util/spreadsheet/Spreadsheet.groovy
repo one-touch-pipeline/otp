@@ -36,19 +36,6 @@ import de.dkfz.tbi.otp.utils.StringUtils
  * an empty string as text will be added at the end of the row.
  */
 class Spreadsheet {
-
-    @TupleConstructor
-    enum Delimiter {
-        COMMA(',' as char, ','),
-        SPACE(' ' as char, 'space'),
-        SEMICOLON(';' as char, ';'),
-        TAB('\t' as char, 'tab')
-
-        char delimiter
-        String displayName
-    }
-
-
     final Row header
     final Delimiter delimiter
     private final Map<String, Column> columnsByTitle
@@ -93,6 +80,17 @@ class Spreadsheet {
     List<Row> getDataRows() {
         return dataRows
     }
+}
+
+@TupleConstructor
+enum Delimiter {
+    COMMA(',' as char, ','),
+    SPACE(' ' as char, 'space'),
+    SEMICOLON(';' as char, ';'),
+    TAB('\t' as char, 'tab')
+
+    char delimiter
+    String displayName
 }
 
 class Row {

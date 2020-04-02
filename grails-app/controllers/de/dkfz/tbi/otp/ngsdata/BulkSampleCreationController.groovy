@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.Delimiter
 
 class BulkSampleCreationController {
 
@@ -33,15 +33,14 @@ class BulkSampleCreationController {
     ]
 
     CommentService commentService
-    ProjectSelectionService projectSelectionService
     SampleIdentifierService sampleIdentifierService
 
     Map index() {
         return [
-                delimiters              : Spreadsheet.Delimiter.values(),
+                delimiters              : Delimiter.values(),
                 delimiter               : flash.delimiter,
                 header                  : SampleIdentifierService.BulkSampleCreationHeader.values(),
-                sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Spreadsheet.Delimiter.COMMA),
+                sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Delimiter.COMMA),
                 createMissingSampleTypes: flash.createMissingSampleTypes,
                 referenceGenomeSources  : SampleType.SpecificReferenceGenome.values(),
                 referenceGenomeSource   : flash.referenceGenomeSource,
@@ -83,7 +82,7 @@ class BulkSampleCreationController {
 }
 
 class CreateBulkSampleCreationCommand {
-    Spreadsheet.Delimiter delimiter
+    Delimiter delimiter
     String sampleText
     Boolean createMissingSampleTypes
     SampleType.SpecificReferenceGenome referenceGenomeSource
