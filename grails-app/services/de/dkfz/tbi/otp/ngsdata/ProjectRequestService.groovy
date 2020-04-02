@@ -246,7 +246,8 @@ class ProjectRequestService {
                 link     : link,
         ])
         String title = messageSource.getMessage("notification.template.projectRequest.title", [].toArray(), LocaleContextHolder.locale)
-        mailHelperService.sendEmail(title, message, request.pi.email)
+        List<String> ccs = [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)]
+        mailHelperService.sendEmail(title, message, request.pi.email, ccs)
     }
 
     protected void sendEmailOnApproval(ProjectRequest request) {

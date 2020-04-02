@@ -32,6 +32,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -48,7 +50,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         return new ProjectRequestService(
                 springSecurityService: Mock(SpringSecurityService) {
                     getCurrentUser() >> user
-                }
+                },
+                processingOptionService: new ProcessingOptionService(),
         )
     }
 
@@ -137,6 +140,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         given:
         User pi = DomainFactory.createUser()
         User deputyPi = DomainFactory.createUser()
+        DomainFactory.createProcessingOptionLazy([
+                name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                value: "service@mail.com",
+        ])
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand(
                 name: "name",
                 description: "description",
@@ -156,7 +163,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             getMessageInternal(_, _, _) >> "whatever"
         }
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _) >> null
+            1 * sendEmail(_, _, _, _) >> null
         }
         service.userProjectRoleService = Mock(UserProjectRoleService) {
             1 * createUserWithLdapData(pi.username) >> pi
