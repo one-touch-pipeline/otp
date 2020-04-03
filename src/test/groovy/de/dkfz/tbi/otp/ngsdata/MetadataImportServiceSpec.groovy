@@ -507,7 +507,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             return identifier
         }
 
-        MetadataImportService service = Spy( MetadataImportService) {
+        MetadataImportService service = Spy(MetadataImportService) {
             notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
@@ -544,6 +544,10 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.samplePairDeciderService = Mock(SamplePairDeciderService) {
             seqTrackCount * findOrCreateSamplePairs([]) >> []
             0 * _
+        }
+
+        service.mergingCriteriaService = Mock(MergingCriteriaService) {
+            seqTrackCount * createDefaultMergingCriteria(_, _)
         }
 
         File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
@@ -878,7 +882,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                 signature: '_',
         )
 
-        MetadataImportService service = Spy( MetadataImportService) {
+        MetadataImportService service = Spy(MetadataImportService) {
             notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
@@ -905,6 +909,10 @@ ${ILSE_NO}                      -             1234          1234          -     
         service.samplePairDeciderService = Mock(SamplePairDeciderService) {
             1 * findOrCreateSamplePairs([]) >> []
             0 * _
+        }
+
+        service.mergingCriteriaService = Mock(MergingCriteriaService) {
+            1 * createDefaultMergingCriteria(_, _)
         }
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
@@ -1052,7 +1060,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                 signature: '_',
         )
 
-        MetadataImportService service = Spy( MetadataImportService) {
+        MetadataImportService service = Spy(MetadataImportService) {
             notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
@@ -1076,6 +1084,10 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         service.samplePairDeciderService = Mock(SamplePairDeciderService) {
             1 * findOrCreateSamplePairs([]) >> []
             0 * _
+        }
+
+        service.mergingCriteriaService = Mock(MergingCriteriaService) {
+            1 * createDefaultMergingCriteria(_, _)
         }
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')

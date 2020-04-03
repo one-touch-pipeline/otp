@@ -26,13 +26,14 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class MergingCriteriaServiceIntegrationSpec extends Specification implements UserAndRoles {
+class MergingCriteriaServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
     MergingCriteriaService mergingCriteriaService = new MergingCriteriaService()
 
     void setupData() {
@@ -132,6 +133,47 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !MergingCriteria.findByProjectAndSeqType(project, seqType)
     }
 
+    void "test createDefaultMergingCriteria, creates a MergingCriteria"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        Project project = createProject()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
+
+        then:
+        MergingCriteria.findAllByProjectAndSeqType(project, seqType).size() == 1
+    }
+
+    void "test createDefaultMergingCriteria, MergingCriteria already exists"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        Project project = createProject()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+
+        createMergingCriteria(project: project, seqType: seqType, useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING)
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
+
+        then:
+        MergingCriteria.all.size() == 1
+        MergingCriteria.all.first().useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
+    }
+
+    void "test createDefaultMergingCriteria, sequencing type cannot be aligned"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        Project project = createProject()
+        SeqType seqType = createSeqType()
+
+        when:
+        mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
+
+        then:
+        MergingCriteria.all.empty
+    }
 
     void "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
         given:

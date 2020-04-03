@@ -52,6 +52,17 @@ class MergingCriteriaService {
         return null
     }
 
+    void createDefaultMergingCriteria(Project project, SeqType seqType) {
+        if (seqType in SeqTypeService.allAlignableSeqTypes && !MergingCriteria.findAllByProjectAndSeqType(project, seqType)) {
+            new MergingCriteria(
+                    project: project,
+                    seqType: seqType,
+                    useLibPrepKit: !seqType.isWgbs(),
+                    useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+            ).save(flush: true)
+        }
+    }
+
     List<SeqPlatformGroup> findDefaultSeqPlatformGroups() {
         return SeqPlatformGroup.createCriteria().list {
             isNull("mergingCriteria")

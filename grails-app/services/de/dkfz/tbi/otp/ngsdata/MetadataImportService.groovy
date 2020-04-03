@@ -70,25 +70,26 @@ class MetadataImportService {
 
     @Autowired
     ApplicationContext applicationContext
-
-    SampleIdentifierService sampleIdentifierService
-    SeqTrackService seqTrackService
-    OtrsTicketService otrsTicketService
-    FileSystemService fileSystemService
-    SeqPlatformService seqPlatformService
     @Autowired
     RemoteShellHelper remoteShellHelper
-    LsdfFilesService lsdfFilesService
-    LibraryPreparationKitService libraryPreparationKitService
-    SeqTypeService seqTypeService
-    ConfigService configService
-    MailHelperService mailHelperService
-    ProcessingOptionService processingOptionService
-    FileService fileService
     AntibodyTargetService antibodyTargetService
-    SamplePairDeciderService samplePairDeciderService
+    ConfigService configService
+    FileService fileService
+    FileSystemService fileSystemService
+    LibraryPreparationKitService libraryPreparationKitService
+    LsdfFilesService lsdfFilesService
+    MailHelperService mailHelperService
+    MergingCriteriaService mergingCriteriaService
+    OtrsTicketService otrsTicketService
+    ProcessingOptionService processingOptionService
     ProcessingThresholdsService processingThresholdsService
+    SampleIdentifierService sampleIdentifierService
+    SamplePairDeciderService samplePairDeciderService
     SampleTypeService sampleTypeService
+    SeqPlatformService seqPlatformService
+    SeqTrackService seqTrackService
+    SeqTypeService seqTypeService
+
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -503,6 +504,7 @@ class MetadataImportService {
             }
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+            mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
         }
     }
 
