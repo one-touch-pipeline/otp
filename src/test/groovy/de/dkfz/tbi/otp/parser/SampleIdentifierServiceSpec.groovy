@@ -540,7 +540,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         result == expected
 
         where:
-        delimiter << Delimiter.values()
+        delimiter << Delimiter.simpleValues()
     }
 
     void "checkSampleIdentifier, when identifier and parsed identifier match, succeed"() {

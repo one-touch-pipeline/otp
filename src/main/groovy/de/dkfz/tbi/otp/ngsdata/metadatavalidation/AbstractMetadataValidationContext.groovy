@@ -59,10 +59,13 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null
         byte[] bytes = null
+        List<String> acceptedExtensions = ['.tsv', '.csv', '.txt']
+
         if (!OtpPath.isValidAbsolutePath(metadataFile.toString())) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
-        } else if (!metadataFile.toString().endsWith('.tsv')) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with '.tsv'.")
+        } else if (!(acceptedExtensions.any { metadataFile.toString().endsWith(it) })) {
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with an accepted extension: " +
+                    "${acceptedExtensions}")
         } else if (!Files.isRegularFile(metadataFile)) {
             if (!Files.exists(metadataFile)) {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
@@ -74,16 +77,18 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         } else if (Files.size(metadataFile) == 0L) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is empty.")
         } else if (Files.size(metadataFile) > MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is larger than " +
+                    "${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
         } else {
             try {
                 bytes = Files.readAllBytes(metadataFile)
                 metadataFileMd5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(bytes))
                 String document = new String(bytes, CHARSET)
                 if (document.getBytes(CHARSET) != bytes) {
-                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly encoded with ${CHARSET.name()}. Characters might be corrupted.")
+                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly encoded with " +
+                            "${CHARSET.name()}. Characters might be corrupted.")
                 }
-                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Delimiter.TAB,
+                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Delimiter.AUTO_DETECT,
                         renameHeader, dataRowFilter)
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null

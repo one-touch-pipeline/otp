@@ -37,7 +37,7 @@ class BulkSampleCreationController {
 
     Map index() {
         return [
-                delimiters              : Delimiter.values(),
+                delimiters              : Delimiter.simpleValues(),
                 delimiter               : flash.delimiter,
                 header                  : SampleIdentifierService.BulkSampleCreationHeader.values(),
                 sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Delimiter.COMMA),

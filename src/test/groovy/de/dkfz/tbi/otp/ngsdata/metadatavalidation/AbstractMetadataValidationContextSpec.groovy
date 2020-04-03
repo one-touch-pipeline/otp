@@ -61,7 +61,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Paths.get('metadata.tsv')                                                            || 'not a valid absolute path'
         Paths.get(TestCase.uniqueNonExistentPath.path, 'metadata.tsv')                       || 'does not exist'
         temporaryFolder.newFolder('folder.tsv').toPath()                                     || 'is not a file'
-        temporaryFolder.newFile("${HelperUtils.uniqueString}.xls").toPath()                  || "does not end with '.tsv'."
+        temporaryFolder.newFile("${HelperUtils.uniqueString}.xls").toPath()                  || "does not end with an accepted extension"
         makeNotReadable(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()) || 'is not readable'
         temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()                  || 'is empty'
         createTooLargeMetadataFile()                                                         || 'is larger than'

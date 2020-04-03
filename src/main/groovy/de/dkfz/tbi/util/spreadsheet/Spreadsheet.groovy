@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +22,20 @@
 package de.dkfz.tbi.util.spreadsheet
 
 import com.opencsv.*
-import groovy.transform.TupleConstructor
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
 import de.dkfz.tbi.otp.utils.StringUtils
 
 /**
- * An immutable in-memory representation of a tab-separated spreadsheet file
+ * An immutable in-memory representation of a delimiter-separated spreadsheet file.
  *
  * <p>
  * Each row has at least as many cells as the header. If an input line has less columns than the header line, cells with
  * an empty string as text will be added at the end of the row.
+ *
+ * <p>
+ * This reader internally follows the CSV recommendations of RFC-4180.
  */
 class Spreadsheet {
     final Row header
@@ -41,6 +43,13 @@ class Spreadsheet {
     private final Map<String, Column> columnsByTitle
     private final List<Row> dataRows
 
+    /**
+     * Creates a new Spreadsheet from string contents.
+     *
+     * @param document String representing the unparsed spreadsheet content.
+     * @param delimiter Character used to separate values. Defaults to {@link Delimiter#TAB}.
+     * @param renameHeader Closure that can optionally preprocess the headers after parsing, but before saving. E.g. to rename, or to normalise aliases.
+     */
     Spreadsheet(String document,
                 Delimiter delimiter = Delimiter.TAB,
                 @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY) {
@@ -48,23 +57,41 @@ class Spreadsheet {
         Map<String, Column> columnsByTitle = [:]
         List<Row> dataRows = []
         int rowIndex = 0
-        CSVReader reader = new CSVReaderBuilder(new StringReader(document)).
-                withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter.delimiter).build()).build()
-        reader.setErrorLocale(Locale.ENGLISH)
-        String [] line
-        while ((line = reader.readNext()) != null) {
-            if (!header) {
-                header = new Row(this, rowIndex++, line.collect(renameHeader))
-                for (Cell cell : header.cells) {
-                    if (columnsByTitle.containsKey(cell.text)) {
-                        throw new IllegalArgumentException("Duplicate column '${cell.text}'")
-                    }
-                    columnsByTitle.put(cell.text, new Column(cell))
-                }
-            } else {
-                dataRows.add(new Row(this, rowIndex++, line as List<String>))
+
+        BufferedReader rawReader
+        CSVReader csvReader
+        try {
+            rawReader = new BufferedReader(new StringReader(document))
+
+            if (delimiter == Delimiter.AUTO_DETECT) {
+                delimiter = Delimiter.detectDelimiter(rawReader)
             }
+
+            csvReader = new CSVReaderBuilder(rawReader).
+                    withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter.delimiter).build()).build()
+            csvReader.setErrorLocale(Locale.ENGLISH)
+            String[] line
+            while ((line = csvReader.readNext()) != null) {
+                if (!header) { // intercept first line as header
+                    header = new Row(this, rowIndex++, line.collect(renameHeader))
+                    for (Cell cell : header.cells) {
+                        if (cell.text.empty) {
+                            throw new EmptyHeaderException()
+                        }
+                        if (columnsByTitle.containsKey(cell.text)) {
+                            throw new DuplicateHeaderException(cell.text)
+                        }
+                        columnsByTitle.put(cell.text, new Column(cell))
+                    }
+                } else { // normal lines are kept without processing.
+                    dataRows.add(new Row(this, rowIndex++, line as List<String>))
+                }
+            }
+        } finally {
+            if (rawReader != null) { rawReader.close() }
+            if (csvReader != null) { csvReader.close() }
         }
+
         this.columnsByTitle = columnsByTitle.asImmutable()
         this.dataRows = dataRows.asImmutable()
     }
@@ -80,17 +107,6 @@ class Spreadsheet {
     List<Row> getDataRows() {
         return dataRows
     }
-}
-
-@TupleConstructor
-enum Delimiter {
-    COMMA(',' as char, ','),
-    SPACE(' ' as char, 'space'),
-    SEMICOLON(';' as char, ';'),
-    TAB('\t' as char, 'tab')
-
-    char delimiter
-    String displayName
 }
 
 class Row {
