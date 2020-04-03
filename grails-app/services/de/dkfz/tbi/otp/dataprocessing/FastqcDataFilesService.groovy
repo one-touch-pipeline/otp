@@ -22,8 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
@@ -42,8 +42,6 @@ import java.util.zip.ZipFile
 @Transactional
 class FastqcDataFilesService {
 
-    ConfigService configService
-    DataProcessingFilesService dataProcessingFilesService
     LsdfFilesService lsdfFilesService
     FileSystemService fileSystemService
 
@@ -76,15 +74,17 @@ class FastqcDataFilesService {
         return fastqcFileNameWithoutZipSuffix(inputFileNameAdaption(dataFile.fileName))
     }
 
-    private String inputFileNameAdaption(String fileName) {
-        /**
-         * Also the fastqc tool should work for bz2 files, we get often problems with this file type. Therefore we
-         * extract the files ourselves and call then the fastqc tool. Also we handle .tar.bz2 files using
-         * bzip2 and tar. This adaption of the input file are done here:
-         */
-        return fileName.replaceAll("(\\.tar)?\\.bz2\$", "")
+    /**
+     * Remove suffix for compressed files
+     */
+    String inputFileNameAdaption(String fileName) {
+        Integer suffixLength = CompressionFormat.getUsedFormat(fileName)?.suffix?.length()
+        if (suffixLength) {
+            return fileName[0..<-suffixLength]
+        } else {
+            return fileName
+        }
     }
-
 
     private String fastqcFileNameWithoutZipSuffix(String fileName) {
         /*
@@ -99,6 +99,26 @@ class FastqcDataFilesService {
                 .replaceAll("\\.csfastq\$", "").replaceAll("\\.sam\$", "")
                 .replaceAll("\\.bam\$", "")
         return "${body}${FASTQC_FILE_SUFFIX}"
+    }
+
+    /**
+     * Support for compression formats not supported by FastQC natively.
+     */
+    @TupleConstructor
+    static enum CompressionFormat {
+        // gzip compressed files are supported by FastQC, so they're not listed here
+        /** The FastQC tool should work for bz2 files, we get often problems with this file type. Therefore we extract the files ourselves. */
+        BZIP2(".bz2", "bzip2 --decompress"),
+        TAR_BZIP2(".tar.bz2", "bzip2 --decompress | tar --extract --to-stdout"),
+        TAR_GZIP(".tar.gz", "gzip --decompress | tar --extract --to-stdout"),
+
+        final String suffix
+        final String decompressionCommand
+
+        static CompressionFormat getUsedFormat(String fileName) {
+            // sort by length descending, so eg. ".tar.bz2" is found before ".bz2"
+            return values().sort { -it.name().length() }.find { fileName.endsWith(it.suffix) }
+        }
     }
 
     Realm fastqcRealm(SeqTrack seqTrack) {

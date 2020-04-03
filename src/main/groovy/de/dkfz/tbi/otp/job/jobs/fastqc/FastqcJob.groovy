@@ -78,7 +78,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
         WaitingFileUtils.waitUntilExists(directory)
 
-        // copy fastqc or execute fastqc on cluster
+        // copy fastqc result file or execute fastqc on cluster
         List<DataFile> dataFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
         deleteExistingFastqcResults(realm, dataFiles, directory)
 
@@ -138,25 +138,18 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
     private void createAndExecuteFastQcCommand(Realm realm, List<DataFile> dataFiles, File outDir) {
         dataFiles.each { dataFile ->
-            String preWorkNonGZip = ""
-            String postWorkNonGZip = ""
+            String decompressFileCommand = ""
+            String deleteDecompressedFileCommand = ""
 
             String inputFileName = lsdfFilesService.getFileFinalPath(dataFile)
 
-            boolean isBz2 = inputFileName.endsWith('.bz2')
-            if (isBz2) {
+            FastqcDataFilesService.CompressionFormat usedFormat = FastqcDataFilesService.CompressionFormat.getUsedFormat(inputFileName)
+            if (usedFormat) {
                 String orgFileName = inputFileName
-                inputFileName = inputFileName[0..-5]
+                inputFileName = fastqcDataFilesService.inputFileNameAdaption(inputFileName)
 
-                boolean isTar = inputFileName.endsWith('.tar')
-                String unTarCommand = ""
-                if (isTar) {
-                    unTarCommand = "| tar --extract --to-stdout"
-                    inputFileName = inputFileName[0..-5]
-                }
-                //bzip does not work for links without option '--stdout'
-                preWorkNonGZip = "bzip2 --decompress --keep --stdout ${orgFileName} ${unTarCommand}> ${inputFileName}"
-                postWorkNonGZip = "rm -f ${inputFileName}"
+                decompressFileCommand = "{ ${usedFormat.decompressionCommand} ; } < ${orgFileName} > ${inputFileName}"
+                deleteDecompressedFileCommand = "rm -f ${inputFileName}"
             }
 
             String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
@@ -165,9 +158,9 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
             String command = """\
                     ${moduleLoader}
                     ${fastqcActivation}
-                    ${preWorkNonGZip}
+                    ${decompressFileCommand}
                     ${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
-                    ${postWorkNonGZip}
+                    ${deleteDecompressedFileCommand}
                     chmod -R 440 ${outDir}/*.zip
                     """.stripIndent()
             clusterJobSchedulerService.executeJob(realm, command)

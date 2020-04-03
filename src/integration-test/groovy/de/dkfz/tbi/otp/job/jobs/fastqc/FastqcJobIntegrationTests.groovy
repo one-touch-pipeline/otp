@@ -118,7 +118,7 @@ class FastqcJobIntegrationTests {
         dataFile.vbpFileName = dataFile.fileName = 'file.bz2'
         fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert inputCommand.contains("fastqc-0.10.1")
-            assert inputCommand.contains("bzip2 --decompress --keep")
+            assert inputCommand =~ "\\{ bzip2 --decompress ; } < .*/file.bz2 > .*/file"
             assert inputCommand.contains("rm -f")
             return 'pbsJobId'
         }

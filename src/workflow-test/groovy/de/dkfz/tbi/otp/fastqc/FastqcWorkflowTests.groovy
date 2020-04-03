@@ -92,7 +92,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
 
-    void "test FastQcWorkflow, when FastQc-Data is available"() {
+    void "test FastQcWorkflow, when FastQC result file is available"() {
         given:
         SessionUtils.withNewSession {
             setupWorkflow('gz')
@@ -111,7 +111,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
     @Unroll
-    void "test FastQcWorkflow, when FastQc-Data is not available and extension is #extension"() {
+    void "test FastQcWorkflow, when FastQC result file is not available and extension is #extension"() {
         given:
         SessionUtils.withNewSession {
             setupWorkflow(extension)
@@ -128,6 +128,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         where:
         extension | _
         'gz'      | _
+        'tar.gz'  | _
         'bz2'     | _
         'tar.bz2' | _
     }
