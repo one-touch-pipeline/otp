@@ -48,7 +48,7 @@ class WorkflowRun implements Commentable, Entity {
 
     Map<String, WorkflowArtefact> outputArtefacts
 
-    List<WorkflowConfig> configs
+    List<ExternalWorkflowConfigFragment> configs
 
     String combinedConfig
 
@@ -65,7 +65,7 @@ class WorkflowRun implements Commentable, Entity {
     Workflow workflow
 
     static hasMany = [
-        configs: WorkflowConfig,
+        configs: ExternalWorkflowConfigFragment,
         workflowSteps: WorkflowStep,
     ]
 

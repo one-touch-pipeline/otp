@@ -21,46 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Entity
 
-import java.time.LocalDate
+class WorkflowVersion implements Entity {
 
-class Workflow implements Entity, Commentable {
-
-    String name
-
-    String beanName
-
-    boolean enabled
-
-    LocalDate deprecatedDate
-
-    WesServer wesServer
-
-    int maxParallelRunning
-
-    Set<ReferenceGenome> allowedReferenceGenomes
-
-    Set<SeqType> supportedSeqTypes
-
-    static constraints = {
-        beanName nullable: true
-        deprecatedDate nullable: true
-        wesServer nullable: true
-        maxParallelRunning shared: 'greaterThanZero'
-        comment nullable: true
-    }
-
-    @Override
-    String toString() {
-        "${name}${deprecatedDate ? " (deprecated)" : ""}"
-    }
-
-    static hasMany = [
-            allowedReferenceGenomes: ReferenceGenome,
-            supportedSeqTypes      : SeqType,
-    ]
+    Workflow workflow
+    String version
 }

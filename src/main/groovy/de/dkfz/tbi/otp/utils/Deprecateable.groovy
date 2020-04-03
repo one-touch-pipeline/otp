@@ -19,11 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.utils.Entity
 
-@SuppressWarnings("EmptyClass")
-class WorkflowConfig implements Entity {
+import java.time.LocalDate
 
+trait Deprecateable<D extends Deprecateable<D>> {
+
+    int objectVersion
+    LocalDate deprecationDate
+
+    abstract D getPrevious()
+
+    abstract void setPrevious(D previous)
 }

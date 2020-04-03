@@ -21,46 +21,31 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
+import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.Entity
 
-import java.time.LocalDate
-
-class Workflow implements Entity, Commentable {
+class ExternalWorkflowConfigSelector implements Entity {
 
     String name
-
-    String beanName
-
-    boolean enabled
-
-    LocalDate deprecatedDate
-
-    WesServer wesServer
-
-    int maxParallelRunning
-
-    Set<ReferenceGenome> allowedReferenceGenomes
-
-    Set<SeqType> supportedSeqTypes
-
-    static constraints = {
-        beanName nullable: true
-        deprecatedDate nullable: true
-        wesServer nullable: true
-        maxParallelRunning shared: 'greaterThanZero'
-        comment nullable: true
-    }
-
-    @Override
-    String toString() {
-        "${name}${deprecatedDate ? " (deprecated)" : ""}"
-    }
+    Set<WorkflowVersion> workflowVersions
+    Set<Workflow> workflows
+    Set<ReferenceGenome> referenceGenomes
+    Set<LibraryPreparationKit> libraryPreparationKits
+    Set<SeqType> seqTypes
+    Set<Project> projects
+    ExternalWorkflowConfigFragment externalWorkflowConfigFragment
+    int basePriority
+    int fineTuningPriority
 
     static hasMany = [
-            allowedReferenceGenomes: ReferenceGenome,
-            supportedSeqTypes      : SeqType,
+            workflowVersions      : WorkflowVersion,
+            workflows             : Workflow,
+            referenceGenomes      : ReferenceGenome,
+            libraryPreparationKits: LibraryPreparationKit,
+            seqTypes              : SeqType,
+            projects              : Project,
     ]
 }
