@@ -251,7 +251,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         }.contains(roddyBaseConfigsPath.path)
     }
 
-
     void helperFor_testDefaultRoddyExecutionCommand_AllFine() {
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
@@ -384,7 +383,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         assert permissionAndGroup ==~ expected
     }
 
-
     @Test
     void testCreateWorkOutputDirectory_DirectoryAlreadyExist_AllFine() {
         setupData()
@@ -445,9 +443,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
             chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
             """.stripIndent()).empty
 
-
         executeRoddyCommandService.correctPermissions(roddyBamFile, realm)
-
 
         String expected = """\
             2750
@@ -475,7 +471,10 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     @Test
     void testCorrectGroup_AllFine() {
         setupData()
-        String primaryGroup = configService.getWorkflowProjectUnixGroup()
+
+        // test data in temp-folder will be created with primary group, which is...
+        String primaryGroup = TestConfigService.getPrimaryGroup()
+
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
@@ -496,7 +495,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
 
         executeRoddyCommandService.correctGroups(roddyBamFile, realm)
-
 
         assert "${primaryGroup}\n" as String == LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(
                 "stat -c %G ${roddyBamFile.workDirectory}/file"
@@ -538,7 +536,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
         executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
 
-
         String value = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             stat -c %a ${roddyBamFile.workDirectory.path}
             stat -c %a ${roddyBamFile.workMergedQADirectory.path}
@@ -571,7 +568,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
         assert value ==~ expected
     }
-
 
     private void initRoddyModule() {
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, LOAD_MODULE)

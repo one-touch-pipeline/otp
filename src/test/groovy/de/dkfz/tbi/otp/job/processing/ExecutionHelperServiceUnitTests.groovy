@@ -74,7 +74,8 @@ class ExecutionHelperServiceUnitTests {
 
         LogThreadLocal.withThreadLog(System.out) {
             String output = service.getGroup(realmObject, tmpFile)
-            assert group != output
+            assert group != output : "Cannot test setGroup if OTP property \"otp.testing.group\" is also the user's primary group." +
+                    " Please update your .otp.properties to use a different group that is not your primary group!"
             output = service.setGroup(realmObject, tmpFile, group)
             assert output.empty
             output = service.getGroup(realmObject, tmpFile)

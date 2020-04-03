@@ -410,7 +410,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         projectDirectory.exists()
-        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() != group
+        String mkdirGroup = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group()
+        assert mkdirGroup != group : "Cannot test this if OTP property \"otp.testing.group\" is also the user's primary group." +
+                " Please update your .otp.properties to use a different group that is not your primary group!"
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(

@@ -28,6 +28,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 @SuppressWarnings('JavaIoPackageAccess')
 class TestConfigService extends ConfigService {
@@ -107,13 +108,29 @@ class TestConfigService extends ConfigService {
     }
 
     String getTestingGroup() {
+        String testingGroup = getAndAssertValue(OtpProperty.TEST_TESTING_GROUP)
+        assertTestingGroupIsNotPrimary(testingGroup)
         assertTestGroupsDiffer()
-        return getAndAssertValue(OtpProperty.TEST_TESTING_GROUP)
+        return testingGroup
     }
 
     String getWorkflowProjectUnixGroup() {
         assertTestGroupsDiffer()
         return getAndAssertValue(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP)
+    }
+
+    static String getPrimaryGroup() {
+        return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("id --group --name").trim()
+    }
+
+    /**
+     * Standard testing group shouldn't be the user's primary group.
+     *
+     * When testing file permissions/groups management, the test-data is usually created with the default (primary) group on the /tmp filesystem,
+     * and then changed by the software-under-test to the testing-group. This behaviour cannot be verified if the testing-group is the same as default.
+     */
+    private void assertTestingGroupIsNotPrimary(String testingGroup) {
+        assert testingGroup != getPrimaryGroup() : "Standard testing group shouldn't be the user's primary group, please update your .otp.properties!"
     }
 
     /**
