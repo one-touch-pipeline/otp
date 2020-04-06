@@ -25,7 +25,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.integration.Integration
 import grails.transaction.Rollback
 import grails.web.mapping.LinkGenerator
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.Errors
 import spock.lang.Specification
@@ -157,10 +156,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             1 * link(_) >> 'link'
         }
         service.messageSourceService = Mock(MessageSourceService) {
-            1 * createMessage(_, _) >> "message"
-        }
-        service.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            getMessageInternal(_, _, _) >> "whatever"
+            2 * createMessage(_, _) >> "message"
         }
         service.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(_, _, _, _) >> null
@@ -193,9 +189,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
         service.messageSourceService = Mock(MessageSourceService) {
             0 * createMessage(_, _) >> "message"
-        }
-        service.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            getMessageInternal(_, _, _) >> "whatever"
         }
         service.mailHelperService = Mock(MailHelperService) {
             0 * sendEmail(_, _, _) >> null

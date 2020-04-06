@@ -25,9 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
@@ -37,9 +35,7 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.*
 
 import java.time.LocalDate
 
@@ -53,7 +49,6 @@ class ProjectRequestService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     @Autowired
-    PluginAwareResourceBundleMessageSource messageSource
     ProcessingOptionService processingOptionService
     SpringSecurityService springSecurityService
     UserProjectRoleService userProjectRoleService
@@ -241,11 +236,14 @@ class ProjectRequestService {
                 id: request.id,
         )
         String message = messageSourceService.createMessage("notification.template.projectRequest1", [
-                requester: request.requester.realName,
-                pi       : request.pi.realName,
-                link     : link,
+                requester  : request.requester.realName,
+                projectName: request.name,
+                pi         : request.pi.realName,
+                link       : link,
         ])
-        String title = messageSource.getMessage("notification.template.projectRequest.title", [].toArray(), LocaleContextHolder.locale)
+        String title = messageSourceService.createMessage("notification.template.projectRequest.title", [
+                projectName: request.name,
+        ])
         List<String> ccs = [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)]
         mailHelperService.sendEmail(title, message, request.pi.email, ccs)
     }
@@ -260,11 +258,14 @@ class ProjectRequestService {
                 ]
         )
         String message = messageSourceService.createMessage("notification.template.projectRequest2", [
-                requester: request.requester.realName,
-                pi       : request.pi.realName,
-                link     : link,
+                requester  : request.requester.realName,
+                projectName: request.name,
+                pi         : request.pi.realName,
+                link       : link,
         ])
-        String title = messageSource.getMessage("notification.template.projectRequest.title", [].toArray(), LocaleContextHolder.locale)
+        String title = messageSourceService.createMessage("notification.template.projectRequest.title", [
+                projectName: request.name,
+        ])
         mailHelperService.sendEmail(title, message, processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION))
     }
 }
