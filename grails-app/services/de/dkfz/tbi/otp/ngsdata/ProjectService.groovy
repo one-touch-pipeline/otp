@@ -597,6 +597,7 @@ class ProjectService {
                 pipeline,
                 configFilePath.path,
                 configuration.configVersion,
+                (xmlConfig.encodeAsMD5() as String),
                 adapterTrimmingNeeded,
         )
     }
@@ -671,6 +672,7 @@ class ProjectService {
                 baseProjectRoddyConfig.pipeline,
                 targetProjectConfigFile.toString(),
                 nextConfigVersion,
+                targetProjectConfigFile.text.encodeAsMD5() as String,
                 baseProjectRoddyConfig.adapterTrimmingNeeded,
         )
 
@@ -756,6 +758,7 @@ class ProjectService {
                 pipeline,
                 configFilePath.path,
                 configuration.configVersion,
+                (xmlConfig.encodeAsMD5() as String),
         )
     }
 
@@ -807,8 +810,7 @@ mkdir -p -m 2750 ${configDirectory}
 ${createConfigDirectory}
 
 cat <<${md5} > ${configFilePath}
-${xmlConfig.replaceAll(/\$/, /\\\$/)}
-${md5}
+${xmlConfig.replaceAll(/\$/, /\\\$/)}${md5}
 
 chmod 0440 ${configFilePath}
 

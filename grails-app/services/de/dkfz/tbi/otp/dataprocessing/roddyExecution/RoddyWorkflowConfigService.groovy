@@ -45,7 +45,7 @@ class RoddyWorkflowConfigService {
         assert individual : "The individual is not allowed to be null"
 
         RoddyBamFile.withTransaction {
-            importProjectConfigFile(project, seqType, programVersionToUse, pipeline, configFilePath, configVersion, adapterTrimmingNeeded, individual)
+            importProjectConfigFile(project, seqType, programVersionToUse, pipeline, configFilePath, configVersion, getMd5sum(configFilePath), adapterTrimmingNeeded, individual)
 
             List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
                 eq('seqType', seqType)
@@ -66,8 +66,12 @@ class RoddyWorkflowConfigService {
         }
     }
 
+    protected String getMd5sum(String configFilePath) {
+        new File(configFilePath).text.encodeAsMD5() as String
+    }
+
     RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
-                                                String configVersion, boolean adapterTrimmingNeeded = false, Individual individual = null) {
+                                                String configVersion, String md5sum, boolean adapterTrimmingNeeded = false, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
@@ -87,7 +91,8 @@ class RoddyWorkflowConfigService {
                 configVersion: configVersion,
                 individual: individual,
                 adapterTrimmingNeeded: adapterTrimmingNeeded,
-                nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersionToUse, configVersion)
+                nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersionToUse, configVersion),
+                md5sum: md5sum,
         )
         validateConfig(config)
         workflowConfigService.createConfigPerProjectAndSeqType(config)

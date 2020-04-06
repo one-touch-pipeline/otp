@@ -63,6 +63,8 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
 
     boolean adapterTrimmingNeeded = false
 
+    String md5sum
+
     static constraints = {
         configFilePath unique: true, blank: false, shared: "absolutePath"
         obsoleteDate validator: { val, obj ->
@@ -112,6 +114,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
             }
             return true
         }
+        md5sum nullable: true, matches: /^[0-9a-f]{32}$/
     }
 
     @Override

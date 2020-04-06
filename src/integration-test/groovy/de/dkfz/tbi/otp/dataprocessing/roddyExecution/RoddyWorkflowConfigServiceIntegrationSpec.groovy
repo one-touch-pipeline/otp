@@ -42,7 +42,8 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, Boolean f, Individual g -> }
+                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, String m, Boolean f, Individual g -> },
+                getMd5sum: { String s -> HelperUtils.randomMd5sum },
         ] as RoddyWorkflowConfigService
 
         when:
@@ -73,9 +74,10 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, Boolean f, Individual g ->
+                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, String m, Boolean f, Individual g ->
                     throw new OtpException("importProjectConfigFile failed")
-                }
+                },
+                getMd5sum: { String s -> HelperUtils.randomMd5sum },
         ] as RoddyWorkflowConfigService
 
         when:
@@ -93,7 +95,8 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, Boolean f, Individual g -> }
+                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, String m, Boolean f, Individual g -> },
+                getMd5sum: { String s -> HelperUtils.randomMd5sum },
         ] as RoddyWorkflowConfigService
 
         when:
@@ -140,7 +143,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
-        service.importProjectConfigFile(null, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(null, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         AssertionError e = thrown()
@@ -154,7 +157,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         Project project = DomainFactory.createProject()
 
         when:
-        service.importProjectConfigFile(project, null, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(project, null, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         AssertionError e = thrown()
@@ -168,7 +171,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
 
         when:
-        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, null, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, null, configFile.path, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         AssertionError e = thrown()
@@ -183,7 +186,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
 
         when:
-        service.importProjectConfigFile(project, seqType, null, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(project, seqType, null, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         AssertionError e = thrown()
@@ -198,7 +201,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
 
         when:
-        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, null, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, null, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         AssertionError e = thrown()
@@ -213,7 +216,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
 
         when:
-        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, '')
+        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, '', HelperUtils.randomMd5sum)
 
         then:
         AssertionError e = thrown()
@@ -229,7 +232,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         assert RoddyWorkflowConfig.list().size() == 0
 
         when:
-        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.list())
@@ -256,7 +259,8 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         CreateFileHelper.createRoddyWorkflowConfig(configFile, TEST_RODDY_CONFIG_LABEL_IN_FILE)
 
         when:
-        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, false, individual)
+        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION,
+                HelperUtils.randomMd5sum, false, individual)
 
         then:
         RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.list())
@@ -280,7 +284,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         assert RoddyWorkflowConfig.list().size() == 1
 
         when:
-        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
+        service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, HelperUtils.randomMd5sum)
 
         then:
         RoddyWorkflowConfig.list().size() == 2
