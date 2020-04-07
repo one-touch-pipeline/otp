@@ -103,25 +103,13 @@ class ProjectService {
     /**
      * return the number of projects for specified period if given
      */
-    @SuppressWarnings('NestedBlockDepth')
     int getCountOfProjectsForSpecifiedPeriod(Date startDate = null, Date endDate = null, List<Project> projects) {
-        return DataFile.createCriteria().get {
-            projections {
-                seqTrack {
-                    sample {
-                        individual {
-                            project {
-                                countDistinct('id')
-                            }
-                            'in'('project', projects)
-                        }
-                    }
-                }
-                if (startDate && endDate) {
-                    between('dateCreated', startDate, endDate)
-                }
+        return Project.createCriteria().count {
+            'in'('id', projects*.id)
+            if (startDate && endDate) {
+                between('dateCreated', startDate, endDate)
             }
-        } as int
+        }
     }
 
     /**

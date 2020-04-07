@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
@@ -28,7 +29,7 @@ import spock.lang.Unroll
 
 @Rollback
 @Integration
-class SampleServiceIntegrationSpec extends Specification {
+class SampleServiceIntegrationSpec extends Specification implements DomainFactoryCore {
     SampleService sampleService
 
     @Unroll
@@ -38,12 +39,12 @@ class SampleServiceIntegrationSpec extends Specification {
         Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
         Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
 
-        DataFile dataFile = DomainFactory.createDataFile()
-        dataFile.dateCreated = baseDate.minus(1)
-        dataFile.save(flush: true)
+        Sample sample = createSample()
+        sample.dateCreated = baseDate.minus(1)
+        sample.save(flush: true)
 
         when:
-        int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, [dataFile.project])
+        int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, [sample.project])
 
         then:
         samples == expectedSamples

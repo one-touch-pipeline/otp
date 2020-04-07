@@ -288,7 +288,7 @@ class ClusterJobService {
                 'in'('project', projects)
             }
             if (startDate && endDate) {
-                between('started', new DateTime(startDate), new DateTime(endDate))
+                between('dateCreated', startDate,  endDate)
             }
         }
     }

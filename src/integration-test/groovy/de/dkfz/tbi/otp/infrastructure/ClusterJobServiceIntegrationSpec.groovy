@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -660,9 +659,11 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
         Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
 
-        Project project = createProject()
-        Individual individual = DomainFactory.createIndividual(project: project)
-        ClusterJob clusterJob = DomainFactory.createClusterJob(individual: individual, started: new DateTime(baseDate.minus(1)))
+        Individual individual = createIndividual()
+
+        ClusterJob clusterJob = DomainFactory.createClusterJob('individual': individual)
+        clusterJob.dateCreated = baseDate.minus(1)
+        clusterJob.save(flush: true)
 
         when:
         int clusterJobs = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, [clusterJob.individual.project])

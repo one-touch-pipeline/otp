@@ -1639,12 +1639,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Date startDate = startDateOffset == null ? null : baseDate - startDateOffset
         Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
 
-        DataFile dataFile = DomainFactory.createDataFile()
-        dataFile.dateCreated = baseDate - 1
-        dataFile.save(flush: true)
+        Project project = createProject()
+        project.dateCreated = baseDate - 1
+        project.save(flush: true)
 
         when:
-        int projects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, [dataFile.project])
+        int projects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, [project])
 
         then:
         projects == expectedProjects
