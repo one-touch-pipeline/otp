@@ -36,6 +36,13 @@ class Workflow implements Entity, Commentable {
 
     boolean enabled
 
+    /**
+     * Priority relative to other Workflows.
+     *
+     * This priority is considered during scheduling to determine which type of Workflow to start first.
+     */
+    short priority = 0
+
     LocalDate deprecatedDate
 
     WesServer wesServer

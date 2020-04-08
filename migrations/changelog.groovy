@@ -388,4 +388,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/otp-437.groovy'
+
+    changeSet(author: "kosnac", id: "otp-436-1") {
+        sqlFile(path: 'changelogs/2020/otp-436-1-extend-existing-domains.sql')
+    }
 }

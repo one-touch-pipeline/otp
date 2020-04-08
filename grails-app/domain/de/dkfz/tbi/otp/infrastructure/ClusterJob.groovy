@@ -94,6 +94,13 @@ class ClusterJob implements Entity {
     boolean validated = false
 
     /**
+     * Helper flag for the transition between the old and new workflow system.
+     *
+     * We need to differentiate between jobs belonging to the old or new system.
+     */
+    boolean oldSystem = true
+
+    /**
      * The state of checking
      *
      * @see CheckStatus

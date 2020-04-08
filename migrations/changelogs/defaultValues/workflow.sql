@@ -20,78 +20,78 @@
  * SOFTWARE.
  */
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'FASTQ installation', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'FASTQ installation', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Externally merged BAM files installation', TRUE, 10, now(), now())
-ON CONFLICT DO NOTHING;
-
-
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'FastQC', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'Externally merged BAM files installation', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'PanCancer alignment', TRUE, 10, now(), now())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'RNA alignment', TRUE, 10, now(), now())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'WGBS alignment', TRUE, 10, now(), now())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Cell Ranger', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'FastQC', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Roddy ACEseq (CNV calling)', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'PanCancer alignment', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Roddy Indel calling', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'RNA alignment', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Roddy SNV calling', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'WGBS alignment', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Roddy Sophia (structural variation calling)', TRUE, 10, now(), now())
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'Cell Ranger', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'runYapsa (mutational signature analysis)', TRUE, 10, now(), now())
+
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'Roddy ACEseq (CNV calling)', TRUE, 10, 0, now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'Roddy Indel calling', TRUE, 10, 0, now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'Roddy SNV calling', TRUE, 10, 0, now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'Roddy Sophia (structural variation calling)', TRUE, 10, 0, now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'runYapsa (mutational signature analysis)', TRUE, 10, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
 
 -- deprecated workflows
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'Convey BWA alignment', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'Convey BWA alignment', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'Merging set creation', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'Merging set creation', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'Merging', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'Merging', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'Merged BAM file transfer', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'Merged BAM file transfer', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment merged', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment merged', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, max_parallel_running, date_created, last_updated, deprecated_date)
-VALUES(nextval('hibernate_sequence'), 0, 'SNV calling', FALSE, 0, now(), now(), '2019-01-01'::timestamptz)
+INSERT INTO workflow(id, version, name, enabled, max_parallel_running, priority, date_created, last_updated, deprecated_date)
+VALUES(nextval('hibernate_sequence'), 0, 'SNV calling', FALSE, 0, 0, now(), now(), '2019-01-01'::timestamptz)
 ON CONFLICT DO NOTHING;
