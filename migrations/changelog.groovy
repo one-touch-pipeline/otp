@@ -392,4 +392,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "otp-436-1") {
         sqlFile(path: 'changelogs/2020/otp-436-1-extend-existing-domains.sql')
     }
+
+    changeSet(author: "kosnac", id: "otp-436-2") {
+        sqlFile(path: 'changelogs/2020/otp-436-2-create-log-domains.sql')
+    }
 }
