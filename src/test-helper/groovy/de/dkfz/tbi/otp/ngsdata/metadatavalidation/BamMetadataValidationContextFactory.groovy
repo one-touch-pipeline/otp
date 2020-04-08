@@ -46,6 +46,7 @@ class BamMetadataValidationContextFactory {
                 properties.problems ?: new Problems(),
                 properties.content ?: ''.bytes,
                 properties.fileSystem ?: FileSystems.default,
+                properties.containsKey('linkSourceFiles') ? properties.linkSourceFiles : false,
         )
     }
 }

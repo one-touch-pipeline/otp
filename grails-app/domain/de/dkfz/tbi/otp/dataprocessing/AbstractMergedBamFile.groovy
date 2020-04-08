@@ -69,7 +69,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         // status is set by OTP when project is configured to not check QC thresholds
         UNCHECKED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
 
-
         final JobLinkCase jobLinkCase
 
         final JobNotifyCase jobNotifyCase
@@ -135,12 +134,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
                 val >= 1
             }
         }
-        md5sum nullable: true, validator: { val, obj ->
-            return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
-        }
-        fileOperationStatus validator: { val, obj ->
-            return (val == FileOperationStatus.PROCESSED) == (obj.md5sum != null)
-        }
+        md5sum nullable: true
         qcTrafficLightStatus nullable: true, validator: { status, obj ->
             if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
                 return "comment.missing"
@@ -218,11 +212,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractMergedBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
         if (this.id == processableBamFileInProjectFolder?.id) {
-            return getPathForFurtherProcessingNoCheck()
-        } else {
-            throw new IllegalStateException("This BAM file is not in the project folder or not processable.\n" +
-                    "this: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
+            return pathForFurtherProcessingNoCheck
         }
+        throw new IllegalStateException("This BAM file is not in the project folder or not processable.\n" +
+                "this: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
     }
 
     @Override

@@ -59,7 +59,12 @@ class Problems {
         return allProblems.sort { a, b ->
             b.level.intValue() <=> a.level.intValue() ?: a.message <=> b.message
         }.collect { Problem problem ->
-            "- ${problem.getLogLikeString()}"
+            "- ${problem.logLikeString}"
         }.join("\n")
+    }
+
+    @Override
+    String toString() {
+        return problems.empty ? 'no problems' : "${problems.size()} problems:\n${sortedProblemListString}"
     }
 }

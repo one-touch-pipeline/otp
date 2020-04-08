@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
@@ -58,10 +59,42 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     @Autowired
     ProcessingOptionService processingOptionService
 
+    @Autowired
+    FileService fileService
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
-        final ImportProcess importProcess = getProcessParameterObject()
+        final ImportProcess importProcess = processParameterObject
+        return importProcess.linkOperation.linkSource ? linkSource(importProcess) : copyFiles(importProcess)
+    }
+
+    private NextAction linkSource(ImportProcess importProcess) throws Throwable {
+        FileSystem fileSystem = fileSystemService.filesystemForBamImport
+        importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
+            Realm realm = epmbf.realm
+            Path sourceBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
+            Path targetBaseDir = fileSystem.getPath(epmbf.importFolder.absolutePath)
+
+            linkMissingFiles(sourceBaseDir, targetBaseDir, epmbf.bamFileName, realm)
+            linkMissingFiles(sourceBaseDir, targetBaseDir, epmbf.baiFileName, realm)
+
+            epmbf.furtherFiles.each { String relativePath ->
+                linkMissingFiles(sourceBaseDir, targetBaseDir, relativePath, realm)
+            }
+        }
+        return NextAction.SUCCEED
+    }
+
+    private void linkMissingFiles(Path sourceBaseDir, Path targetBaseDir, String pathToLink, Realm realm) {
+        Path source = sourceBaseDir.resolve(pathToLink)
+        Path target = targetBaseDir.resolve(pathToLink)
+        if (!Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
+            fileService.createLink(target, source, realm, CreateLinkOption.ABSOLUTE)
+        }
+    }
+
+    @SuppressWarnings('JavaIoPackageAccess') //method is about files
+    private NextAction copyFiles(ImportProcess importProcess) throws Throwable {
         NextAction action = NextAction.SUCCEED
 
         String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
@@ -69,7 +102,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         String groovyActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY)
         String samtoolsCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_SAMTOOLS)
         String groovyCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_GROOVY)
-        File otpScriptDir = configService.getToolsPath()
+        File otpScriptDir = configService.toolsPath
 
         importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
             Realm realm = epmbf.project.realm
@@ -79,7 +112,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
             File targetBam = epmbf.bamFile
             File targetBai = epmbf.baiFile
-            File targetBaseDir = epmbf.getImportFolder()
+            File targetBaseDir = epmbf.importFolder
             File checkpoint = new File(targetBaseDir, ".${epmbf.bamFileName}.checkpoint")
 
             String updateBaseDir = "sed -e 's#${sourceBaseDir}#${targetBaseDir}#'"
@@ -156,20 +189,49 @@ touch ${checkpoint}
 
     @Override
     protected void validate() throws Throwable {
-        final ImportProcess importProcess = getProcessParameterObject()
+        final ImportProcess importProcess = processParameterObject
+        importProcess.linkOperation.linkSource ? validateLink(importProcess) : validateCopy(importProcess)
+    }
+
+    private void validateLink(ImportProcess importProcess) throws Throwable {
+        FileSystem fileSystem = fileSystemService.filesystemForBamImport
+        importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile bamFile ->
+            Path sourceBaseDir = fileSystem.getPath(bamFile.importedFrom).parent
+            Path targetBaseDir = fileSystem.getPath(bamFile.importFolder.absolutePath)
+
+            checkLink(sourceBaseDir, targetBaseDir, bamFile.bamFileName)
+            checkLink(sourceBaseDir, targetBaseDir, bamFile.baiFileName)
+
+            bamFile.furtherFiles.each { String relativePath ->
+                checkLink(sourceBaseDir, targetBaseDir, relativePath)
+            }
+
+            fillBamFile(bamFile, targetBaseDir.resolve(bamFile.bamFileName))
+        }
+    }
+
+    private void checkLink(Path sourceBaseDir, Path targetBaseDir, String pathToLink) {
+        Path source = sourceBaseDir.resolve(pathToLink)
+        Path target = targetBaseDir.resolve(pathToLink)
+        assert Files.exists(target, LinkOption.NOFOLLOW_LINKS)
+        assert Files.isSymbolicLink(target)
+        assert target.toRealPath() == source.toRealPath()
+    }
+
+    private void validateCopy(ImportProcess importProcess) throws Throwable {
         FileSystem fs = fileSystemService.filesystemForBamImport
 
         final Collection<String> problems = importProcess.externallyProcessedMergedBamFiles.collect {
-            String path = it.getBamFile().path
+            String path = it.bamFile.path
             Path target = fs.getPath(path)
-            Path targetBai = fs.getPath(it.getBaiFile().path)
+            Path targetBai = fs.getPath(it.baiFile.path)
 
             try {
                 FileService.ensureFileIsReadableAndNotEmpty(target)
                 FileService.ensureFileIsReadableAndNotEmpty(targetBai)
 
                 if (!it.maximumReadLength) {
-                    Path maxReadLengthPath = fs.getPath(it.getBamMaxReadLengthFile().absolutePath)
+                    Path maxReadLengthPath = fs.getPath(it.bamMaxReadLengthFile.absolutePath)
                     FileService.ensureFileIsReadableAndNotEmpty(maxReadLengthPath)
                     it.maximumReadLength = maxReadLengthPath.text as Integer
                 }
@@ -180,13 +242,7 @@ touch ${checkpoint}
                     it.md5sum = checksumFileService.firstMD5ChecksumFromFile(md5Path)
                 }
 
-                it.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-                it.fileSize = Files.size(target)
-                it.fileExists = true
-                assert it.save(flush: true)
-
-                it.workPackage.bamFileInProjectFolder = it
-                assert it.workPackage.save(flush: true)
+                fillBamFile(it, target)
 
                 return null
             } catch (Throwable t) {
@@ -197,5 +253,15 @@ touch ${checkpoint}
         if (problems) {
             throw new ProcessingException(problems.join(","))
         }
+}
+
+    private void fillBamFile(ExternallyProcessedMergedBamFile bamFile, Path bamFilePath) {
+        bamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        bamFile.fileSize = Files.size(bamFilePath)
+        bamFile.fileExists = true
+        assert bamFile.save(flush: true)
+
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        assert bamFile.workPackage.save(flush: true)
     }
 }

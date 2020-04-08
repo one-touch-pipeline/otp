@@ -21,11 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -33,27 +31,40 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
-class SeqTypeBamValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
-
-    @Autowired
-    SeqTypeService seqTypeService
+class MaximalReadLengthValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The sequencing type is registered in OTP"]
+        return [
+                "MaximalReadLength must be an integer number",
+                "If the source files should only link, the MaximalReadLength is required.",
+        ]
     }
 
     @Override
     String getColumnTitle(BamMetadataValidationContext context) {
-        return BamMetadataColumn.SEQUENCING_TYPE.name()
+        return BamMetadataColumn.MAXIMAL_READ_LENGTH.name()
     }
 
     @Override
-    void validateValue(BamMetadataValidationContext context, String seqType, Set<Cell> cells) {
-        if (!seqType) {
-            context.addProblem(cells, Level.ERROR, "No seqType is given.")
-        } else if (!seqTypeService.findByNameOrImportAlias(seqType)) {
-            context.addProblem(cells, Level.ERROR, "The sequencing type '${seqType}' is not registered in OTP.", "At least one sequencing type is not registered in OTP.")
+    void checkColumn(BamMetadataValidationContext context) {
+        if (context.linkSourceFiles) {
+            context.addProblem(Collections.emptySet(), Level.ERROR,
+                    "If source files should only linked, the column '${BamMetadataColumn.MAXIMAL_READ_LENGTH.name()}' is required.")
+        } else {
+            addWarningForMissingOptionalColumn(context, BamMetadataColumn.MAXIMAL_READ_LENGTH.name())
+        }
+    }
+
+    @Override
+    void validateValue(BamMetadataValidationContext context, String maximalReadLength, Set<Cell> cells) {
+        if (maximalReadLength) {
+            if (!maximalReadLength.integer) {
+                context.addProblem(cells, Level.ERROR, "The maximalReadLength '${maximalReadLength}' should be an integer number.",
+                        "At least one maximalReadLength is not an integer number.")
+            }
+        } else if (context.linkSourceFiles) {
+            context.addProblem(cells, Level.ERROR, "The maximalReadLength is required, if the files should only be linked")
         }
     }
 }

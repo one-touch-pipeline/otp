@@ -40,6 +40,7 @@ enum BamMetadataColumn {
     LIBRARY_PREPARATION_KIT,
     INSERT_SIZE_FILE,
     QUALITY_CONTROL_FILE,
+    MAXIMAL_READ_LENGTH,
 
     final List<String> importAliases = []
 

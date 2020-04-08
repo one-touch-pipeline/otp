@@ -49,13 +49,6 @@ class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidat
 
     @Override
     void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
-        if (columnTitle == MetaDataColumn.MD5.name()) {
-            if (context instanceof BamMetadataValidationContext) {
-                addWarningForMissingOptionalColumn(context, columnTitle)
-            } else {
-                addErrorForMissingRequiredColumn(context, columnTitle)
-            }
-        }
     }
 
     @Override
@@ -67,11 +60,11 @@ class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidat
                 context.addProblem(valueTuplesOfMd5sum*.cells.sum(), Level.WARNING, "The MD5 sum '${md5sum}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file.")
             }
             if (context instanceof BamMetadataValidationContext) {
-                if (ExternallyProcessedMergedBamFile.findByMd5sum(md5sum)) {
+                if (ExternallyProcessedMergedBamFile.findAllByMd5sum(md5sum)) {
                     context.addProblem(valueTuplesOfMd5sum*.cells.sum(), Level.WARNING, "A bam file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP.")
                 }
             } else {
-                if (DataFile.findByMd5sum(md5sum)) {
+                if (DataFile.findAllByMd5sum(md5sum)) {
                     context.addProblem(valueTuplesOfMd5sum*.cells.sum(), Level.WARNING, "A fastq file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one fastq file has a MD5 sum which is already registered in OTP.")
                 }
             }

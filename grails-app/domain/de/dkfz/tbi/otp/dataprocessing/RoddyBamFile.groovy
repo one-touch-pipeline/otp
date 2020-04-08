@@ -96,6 +96,12 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
                         it != obj && it.workPackage == obj.workPackage
                     }))
         } //needs to be nullable for objects created before link structure was used
+        md5sum validator: { val, obj ->
+            return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
+        }
+        fileOperationStatus validator: { val, obj ->
+            return (val == FileOperationStatus.PROCESSED) == (obj.md5sum != null)
+        }
     }
 
     static mapping = {

@@ -63,12 +63,13 @@ class BamMetadataImportService {
         return applicationContext.getBeansOfType(BamMetadataValidator).values().sort { it.getClass().name }
     }
 
-    BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles) {
+    BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles, boolean linkSourceFiles) {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
         BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(
                 fileSystem.getPath(metadataFile),
                 furtherFiles,
                 fileSystem,
+                linkSourceFiles
         )
         if (context.spreadsheet) {
             bamMetadataValidators.each {
@@ -85,13 +86,20 @@ class BamMetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
+    Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, ImportProcess.LinkOperation linkOperation,
                           boolean triggerAnalysis, List<String> furtherFiles) {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
         Project outputProject
-        ImportProcess importProcess = new ImportProcess(externallyProcessedMergedBamFiles: [])
-        BamMetadataValidationContext context = validate(metadataFile, furtherFiles)
+        ImportProcess importProcess
+        BamMetadataValidationContext context = validate(metadataFile, furtherFiles, linkOperation.linkSource)
         if (MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
+            importProcess = new ImportProcess([
+                    externallyProcessedMergedBamFiles: [],
+                    state                            : ImportProcess.State.NOT_STARTED,
+                    linkOperation                    : linkOperation,
+                    triggerAnalysis                  : triggerAnalysis,
+            ])
+
             context.spreadsheet.dataRows.each { Row row ->
                 String _referenceGenome = uniqueColumnValue(row, BamMetadataColumn.REFERENCE_GENOME)
                 String _seqType = uniqueColumnValue(row, BamMetadataColumn.SEQUENCING_TYPE)
@@ -105,6 +113,7 @@ class BamMetadataImportService {
                 String insertSizeFile = uniqueColumnValue(row, BamMetadataColumn.INSERT_SIZE_FILE)
                 String qualityControlFile = uniqueColumnValue(row, BamMetadataColumn.QUALITY_CONTROL_FILE)
                 String libraryPreparationKit = uniqueColumnValue(row, BamMetadataColumn.LIBRARY_PREPARATION_KIT)
+                String maximalReadLength = uniqueColumnValue(row, BamMetadataColumn.MAXIMAL_READ_LENGTH)
 
                 Sample sample = Sample.createCriteria().get {
                     individual {
@@ -136,7 +145,7 @@ class BamMetadataImportService {
                         sample: sample,
                         seqType: seqType,
                         pipeline: Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
-                        libraryPreparationKit: libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit),
+                        libraryPreparationKit: libraryPreparationKit ? libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit) : null,
                 )
                 assert emwp.save(flush: true)
 
@@ -146,6 +155,7 @@ class BamMetadataImportService {
                         fileName: getNameFromPath(bamFilePath),
                         coverage: coverage ? Double.parseDouble(coverage) : null,
                         md5sum: md5sum ?: null,
+                        maximalReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
                         furtherFiles: [] as Set,
                         insertSizeFile: insertSizeFile
                 ).save(flush: true)
@@ -196,15 +206,11 @@ class BamMetadataImportService {
                 importProcess.externallyProcessedMergedBamFiles.add(epmbf)
             }
 
-            importProcess.state = ImportProcess.State.NOT_STARTED
-            importProcess.replaceSourceWithLink = replaceWithLink
-            importProcess.triggerAnalysis = triggerAnalysis
             assert importProcess.save(flush: true)
 
             if (importProcess.triggerAnalysis) {
                 samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedMergedBamFiles*.workPackage)
             }
-
 
             outputProject = importProcess.externallyProcessedMergedBamFiles.first().project
         }
@@ -221,6 +227,6 @@ class BamMetadataImportService {
     }
 
     static String uniqueColumnValue(Row row, BamMetadataColumn column) {
-        return row.getCell(row.spreadsheet.getColumn(column.name()))?.text
+        return row.getCell(row.spreadsheet.getColumn(column.name()))?.text ?: null
     }
 }

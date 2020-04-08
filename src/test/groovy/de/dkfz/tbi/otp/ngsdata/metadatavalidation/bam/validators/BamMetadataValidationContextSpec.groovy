@@ -60,7 +60,7 @@ class BamMetadataValidationContextSpec extends Specification {
         ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(file, [], FileSystems.default)
+        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(file, [], FileSystems.default, false)
 
         then:
         context.spreadsheet.header.cells[0].text == "UNKNOWN"

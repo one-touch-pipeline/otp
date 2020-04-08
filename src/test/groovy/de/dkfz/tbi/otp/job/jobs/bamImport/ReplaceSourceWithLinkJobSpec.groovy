@@ -95,7 +95,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
         importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbf],
-                replaceSourceWithLink: true,
+                linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
                 triggerAnalysis: true,
         ).save(flush: true)
     }
@@ -135,7 +135,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
     void "test execute when no linking needs"() {
         given:
-        importProcess.replaceSourceWithLink = false
+        importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_KEEP
         importProcess.save(flush: true)
         createHelperObjects()
 

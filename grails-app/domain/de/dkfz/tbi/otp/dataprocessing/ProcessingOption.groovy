@@ -409,7 +409,7 @@ class ProcessingOption implements Entity {
         ),
         NOTIFICATION_TEMPLATE_FAQ_LINK(
                 "Link to FAQs",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         BLACKLIST_IMPORT_SOURCE_NOTIFICATION(

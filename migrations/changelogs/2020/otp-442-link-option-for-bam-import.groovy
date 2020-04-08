@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.utils
 
-import java.nio.file.Files
-
-@SuppressWarnings('JavaIoPackageAccess') //helper class for FileAccess, so its fine
-class CreateFileHelper {
-
-    static File createFile(File file, String content = "some content") {
-        if (!file.parentFile.exists()) {
-            assert file.parentFile.mkdirs()
+databaseChangeLog = {
+    changeSet(author: "borufka (generated)", id: "otp-442-1") {
+        addColumn(tableName: "import_process") {
+            column(name: "link_operation", type: "varchar(255)")
         }
-        file.text = content
-        return file
     }
 
-    static File createSymbolicLinkFile(File source, File target = new File('/tmp')) {
-        source.parentFile.mkdirs()
-        Files.createSymbolicLink(source.toPath(), target.toPath())
-        return source
+    changeSet(author: "borufka", id: "otp-442-2") {
+        sql("""UPDATE import_process SET link_operation = 'COPY_AND_LINK' WHERE replace_source_with_link = true;
+               UPDATE import_process SET link_operation = 'COPY_AND_KEEP' WHERE replace_source_with_link = false;""")
     }
 
-    static void createRoddyWorkflowConfig(File file, String label) {
-        createFile(file, FileContentHelper.createXmlContentForRoddyWorkflowConfig(label))
+    changeSet(author: "borufka (generated)", id: "otp-442-3") {
+        addNotNullConstraint(columnDataType: "varchar(255)", columnName: "link_operation", tableName: "import_process")
+    }
+
+    changeSet(author: "borufka (generated)", id: "otp-442-4") {
+        dropColumn(columnName: "replace_source_with_link", tableName: "import_process")
     }
 }
+

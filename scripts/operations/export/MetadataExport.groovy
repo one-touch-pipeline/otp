@@ -146,7 +146,7 @@ List<SampleIdentifier> sampleIdentifiers = parseHelper(selectBySampleIdentifier,
 }
 
 List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'SampleTYpe') {
-    SampleType.findAllByName(it)
+    SampleType.findAllByNameIlike(it)
 }
 
 List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {

@@ -132,4 +132,21 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The sequencing type '${SEQ_TYPE_NAME}' is not registered in OTP.")
     }
+
+    void 'validate, when column exist but seqType is not given, adds problems'() {
+        given:
+        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
+                "${SEQUENCING_TYPE}\n" +
+                        "\n"
+        )
+
+        when:
+        service.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        containSame(problem.affectedCells*.cellAddress, ['A2'])
+        problem.message.contains("No seqType is given")
+    }
 }

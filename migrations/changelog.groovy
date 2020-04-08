@@ -408,4 +408,6 @@ databaseChangeLog = {
     changeSet(author: "", id: "otp-168") {
         sqlFile(path: 'changelogs/2020/otp-168.sql')
     }
+
+    include file: 'changelogs/2020/otp-442-link-option-for-bam-import.groovy'
 }

@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
@@ -49,7 +48,14 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
     @Override
     void checkColumn(AbstractMetadataValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
-            addWarningForMissingOptionalColumn(context, BamMetadataColumn.MD5.name())
+            if (context.linkSourceFiles) {
+                context.addProblem(Collections.emptySet(), Level.ERROR,
+                        "If source files should only linked, the column '${MetaDataColumn.MD5.name()}' is required.")
+            } else {
+                addWarningForMissingOptionalColumn(context, MetaDataColumn.MD5.name())
+            }
+        } else {
+            addErrorForMissingRequiredColumn(context, MetaDataColumn.MD5.name())
         }
     }
 
@@ -58,6 +64,9 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
         if (context instanceof BamMetadataValidationContext) {
             if (!value.empty) {
                 checkMd5Sum(context, value, cells)
+            } else if (context.linkSourceFiles) {
+                context.addProblem(cells, Level.ERROR, "The md5sum is required, if the files should only be linked",
+                        "The md5sum is required, if the files should only be linked")
             }
         } else {
             checkMd5Sum(context, value, cells)

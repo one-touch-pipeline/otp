@@ -96,7 +96,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
     }
 
     void cleanup() {
-        configService.clean()
+        configService?.clean()
     }
 
     void "prepareAndReturnWorkflowSpecificCValues, when aceseqInstance is null, throw assert"() {

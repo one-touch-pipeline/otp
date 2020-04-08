@@ -161,9 +161,6 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
             val && val.pipeline?.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
                     ExternalMergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
-        md5sum nullable: true, validator: { val, obj ->
-            return true
-        }
         fileOperationStatus validator: { val, obj ->
             return (val == AbstractMergedBamFile.FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
         }

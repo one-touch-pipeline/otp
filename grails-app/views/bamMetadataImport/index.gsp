@@ -25,7 +25,7 @@
 <%@ page import="de.dkfz.tbi.util.spreadsheet.validation.Level" %>
 <html>
 <head>
-    <meta name="layout" content="metadataLayout" />
+    <meta name="layout" content="metadataLayout"/>
     <title>
         <g:message code="bamMetadataImport.title"/>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -35,17 +35,18 @@
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
 </head>
+
 <body>
 <g:if test="${context}">
-    <div id= "border" class="borderMetadataImport${Level.normalize(context.getMaximumProblemLevel()).name}">
+    <div id="border" class="borderMetadataImport${Level.normalize(context.getMaximumProblemLevel()).name}">
         <g:if test="${context.problems.isEmpty()}">
             No problems found :)
         </g:if>
         <g:else>
             <ul>
-                <g:each var="problem" in="${context.problems}" >
-                    <li class="${Level.normalize(problem.level).name}"><span style="white-space: pre-line "> ${problem.getLevelAndMessage()}</span>
-                        <g:each var="cell" in="${problem.affectedCells}" >
+                <g:each var="problem" in="${context.problems}">
+                    <li class="${Level.normalize(problem.level).name}"><span style="white-space: pre-line ">${problem.getLevelAndMessage()}</span>
+                        <g:each var="cell" in="${problem.affectedCells}">
                             <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                         </g:each>
                     </li>
@@ -58,7 +59,7 @@
                     <thead>
                     <tr>
                         <th></th>
-                        <g:each var="cell" in="${context.spreadsheet.header.cells}" >
+                        <g:each var="cell" in="${context.spreadsheet.header.cells}">
                             <th>
                                 ${cell.columnAddress}
                             </th>
@@ -68,12 +69,11 @@
                         <th>
                             ${context.spreadsheet.header.cells.first().rowAddress}
                         </th>
-                        <g:each var="cell" in="${context.spreadsheet.header.cells}" >
-                            <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
+                        <g:each var="cell" in="${context.spreadsheet.header.cells}">
+                            <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
                             <th
                                     class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                    title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
-                            >
+                                    title="${cellProblems*.getLevelAndMessage().join('\n\n')}">
                                 <span class="anchor" id="${cell.cellAddress}"></span>
                                 ${cell.text}
                             </th>
@@ -81,17 +81,16 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <g:each var="row" in="${context.spreadsheet.dataRows}" >
+                    <g:each var="row" in="${context.spreadsheet.dataRows}">
                         <tr>
                             <th>
                                 ${row.cells.first().rowAddress}
                             </th>
-                            <g:each var="cell" in="${row.cells}" >
-                                <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
+                            <g:each var="cell" in="${row.cells}">
+                                <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
                                 <td
                                         class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                        title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
-                                >
+                                        title="${cellProblems*.getLevelAndMessage().join('\n\n')}">
                                     <span class="anchor" id="${cell.cellAddress}"></span>
                                     ${cell.text}
                                 </td>
@@ -113,8 +112,29 @@
                 <td><g:textField name="path" style="width: 1000px" value="${cmd.path}"/></td>
             </tr>
             <tr>
-                <td><label><g:message code="bamMetadataImport.replaceWithLink"/></label></td>
-                <td><g:checkBox name="replaceWithLink" checked="${cmd.replaceWithLink}" value="true"/></td>
+                <td><label><g:message code="bamMetadataImport.linkOperation"/></label></td>
+                <td>
+                    <label title="${g.message(code: 'bamMetadataImport.linkOperation.copyAndKeep.title')}">
+                        <g:radio name="linkOperation"
+                                 checked="${cmd?.linkOperation == null || cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_KEEP}"
+                                 value="${de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_KEEP}"/>
+                        <g:message code="bamMetadataImport.linkOperation.copyAndKeep"/>
+                    </label>
+                    <br/>
+                    <label title="${g.message(code: 'bamMetadataImport.linkOperation.copyAndLink.title')}">
+                        <g:radio name="linkOperation"
+                                 checked="${cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_LINK}"
+                                 value="${de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_LINK}"/>
+                        <g:message code="bamMetadataImport.linkOperation.copyAndLink"/>
+                    </label>
+                    <br/>
+                    <label title="${g.message(code: 'bamMetadataImport.linkOperation.linkSource.title')}">
+                        <g:radio name="linkOperation"
+                                 checked="${cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.LINK_SOURCE}"
+                                 value="${de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.LINK_SOURCE}"/>
+                        <g:message code="bamMetadataImport.linkOperation.linkSource"/>
+                    </label>
+                </td>
             </tr>
             <tr>
                 <td><label><g:message code="bamMetadataImport.furtherFile"/></label></td>
@@ -134,8 +154,13 @@
                 </td>
             </tr>
             <tr>
-                <td><label><g:message code="bamMetadataImport.triggerAnalysis"/></label></td>
-                <td><g:checkBox name="triggerAnalysis" checked="${cmd.triggerAnalysis}" value="true"/><i><g:message code="bamMetadataImport.triggerAnalysis.info"/></i></td>
+                <td>
+                    <label><g:message code="bamMetadataImport.triggerAnalysis"/></label>
+                </td>
+                <td>
+                    <g:checkBox name="triggerAnalysis" checked="${cmd.triggerAnalysis}" value="true"/>
+                    <i><g:message code="bamMetadataImport.triggerAnalysis.info"/></i>
+                </td>
             </tr>
         </table>
         <br>
@@ -143,17 +168,17 @@
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:submitButton name="submit" value="Import"/>
             <g:if test="${context?.getMaximumProblemLevel() == Level.WARNING}">
-            <label>
-                <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
-                Ignore Warnings
-            </label>
+                <label>
+                    <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
+                    <g:message code="bamMetadataImport.ignore.warning"/>
+                </label>
             </g:if>
         </sec:ifAllGranted>
         <g:hiddenField name="md5" value="${context?.metadataFileMd5sum}"/>
     </g:form>
     <h3><g:message code="metadataImport.implementedValidations"/></h3>
     <ul>
-        <g:each var="implementedValidation" in="${implementedValidations}" >
+        <g:each var="implementedValidation" in="${implementedValidations}">
             <li>${implementedValidation}</li>
         </g:each>
     </ul>

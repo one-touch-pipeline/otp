@@ -47,6 +47,12 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
                     val?.pipeline?.name == Pipeline.Name.DEFAULT_OTP &&
                     MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
+        md5sum validator: { val, obj ->
+            return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
+        }
+        fileOperationStatus validator: { val, obj ->
+            return (val == FileOperationStatus.PROCESSED) == (obj.md5sum != null)
+        }
     }
 
     @Override
@@ -64,7 +70,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
      */
     @Override
     boolean isMostRecentBamFile() {
-        return (mergingPass.isLatestPass() && mergingSet.isLatestSet())
+        return (mergingPass.latestPass && mergingSet.latestSet)
     }
 
     @Override
@@ -135,12 +141,12 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
 
     @Override
     File getFinalInsertSizeFile() {
-        assert false: 'not available for ProcessedMergedBamFile'
+        throw new UnsupportedOperationException('not available for ProcessedMergedBamFile')
     }
 
     @Override
     Integer getMaximalReadLength() {
-        assert false: 'not used for ProcessedMergedBamFile'
+        throw new UnsupportedOperationException('not used for ProcessedMergedBamFile')
     }
 
     @Override

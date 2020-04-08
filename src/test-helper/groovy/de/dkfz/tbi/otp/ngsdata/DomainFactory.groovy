@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -1754,13 +1755,9 @@ class DomainFactory {
         return proxyRoddy.createMergingWorkPackage(properties, saveAndValidate)
     }
 
+    @Deprecated
     static ExternalMergingWorkPackage createExternalMergingWorkPackage(Map properties = [:]) {
-        return createDomainObject(ExternalMergingWorkPackage, [
-                sample         : { createSample() },
-                seqType        : { createSeqType() },
-                pipeline       : { createExternallyProcessedPipelineLazy() },
-                referenceGenome: { createReferenceGenome() },
-        ], properties)
+        return ExternalBamFactoryInstance.INSTANCE.createMergingWorkPackage(properties)
     }
 
     static <E extends AbstractMergingWorkPackage> E createMergingWorkPackage(Class<E> clazz, Map properties = [:]) {
@@ -2341,26 +2338,14 @@ class DomainFactory {
         return secondBamFile
     }
 
+    @Deprecated
     static ExternallyProcessedMergedBamFile createExternallyProcessedMergedBamFile(Map properties = [:]) {
-        return createDomainObject(ExternallyProcessedMergedBamFile, [
-                fileName           : "bamfile_${counter++}.bam",
-                workPackage        : { createExternalMergingWorkPackage() },
-                numberOfMergedLanes: null,
-                importedFrom       : "/importFrom_${counter++}",
-                furtherFiles       : [],
-        ], properties)
+        return ExternalBamFactoryInstance.INSTANCE.createBamFile(properties)
     }
 
+    @Deprecated
     static ExternallyProcessedMergedBamFile createFinishedExternallyProcessedMergedBamFile(Map properties = [:]) {
-        ExternallyProcessedMergedBamFile externallyProcessedMergedBamFile = createExternallyProcessedMergedBamFile([
-                fileOperationStatus: FileOperationStatus.PROCESSED,
-                md5sum             : HelperUtils.randomMd5sum,
-                fileSize           : counter++,
-        ] + properties)
-        ExternalMergingWorkPackage externalMergingWorkPackage = externallyProcessedMergedBamFile.mergingWorkPackage
-        externalMergingWorkPackage.bamFileInProjectFolder = externallyProcessedMergedBamFile
-        assert externalMergingWorkPackage.save(flush: true)
-        return externallyProcessedMergedBamFile
+        return ExternalBamFactoryInstance.INSTANCE.createFinishedBamFile(properties)
     }
 
     static ProcessingThresholds createProcessingThresholds(Map properties = [:]) {

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFa
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
@@ -65,49 +63,15 @@ class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
         ]
     }
 
-    void 'validate concerning metadata, when column is missing, adds error'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-SomeColumn
-SomeValue
-""")
-
-        when:
-        new Md5sumUniqueValidator().validate(context)
-
-        then:
-        Problem problem = CollectionUtils.exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
-        TestCase.assertContainSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Required column 'MD5' is missing.")
-    }
-
-    void 'validate concerning bam metadata, when column is missing, adds warning'() {
-        given:
-        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
-SomeColumn
-SomeValue
-""")
-
-        when:
-        new Md5sumUniqueValidator().validate(context)
-
-        then:
-        Problem problem = CollectionUtils.exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
-        TestCase.assertContainSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Optional column 'MD5' is missing.")
-    }
-
     void 'validate, all are fine'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.MD5}
-${HelperUtils.getRandomMd5sum()}
-${HelperUtils.getRandomMd5sum()}
-${HelperUtils.getRandomMd5sum()}
-${HelperUtils.getRandomMd5sum()}
-${HelperUtils.getRandomMd5sum()}
+${HelperUtils.randomMd5sum}
+${HelperUtils.randomMd5sum}
+${HelperUtils.randomMd5sum}
+${HelperUtils.randomMd5sum}
+${HelperUtils.randomMd5sum}
 """)
 
         when:
@@ -119,10 +83,10 @@ ${HelperUtils.getRandomMd5sum()}
 
     void 'validate concerning metadata, adds expected errors'() {
         given:
-        String md5sum1 = HelperUtils.getRandomMd5sum()
-        String md5sum2 = HelperUtils.getRandomMd5sum()
-        String md5sum3 = HelperUtils.getRandomMd5sum()
-        String md5sum4 = HelperUtils.getRandomMd5sum()
+        String md5sum1 = HelperUtils.randomMd5sum
+        String md5sum2 = HelperUtils.randomMd5sum
+        String md5sum3 = HelperUtils.randomMd5sum
+        String md5sum4 = HelperUtils.randomMd5sum
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.MD5}
@@ -150,10 +114,10 @@ ${md5sum2}
 
     void 'validate concerning bam metadata, adds expected errors'() {
         given:
-        String md5sum1 = HelperUtils.getRandomMd5sum()
-        String md5sum2 = HelperUtils.getRandomMd5sum()
-        String md5sum3 = HelperUtils.getRandomMd5sum()
-        String md5sum4 = HelperUtils.getRandomMd5sum()
+        String md5sum1 = HelperUtils.randomMd5sum
+        String md5sum2 = HelperUtils.randomMd5sum
+        String md5sum3 = HelperUtils.randomMd5sum
+        String md5sum4 = HelperUtils.randomMd5sum
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${BamMetadataColumn.MD5}

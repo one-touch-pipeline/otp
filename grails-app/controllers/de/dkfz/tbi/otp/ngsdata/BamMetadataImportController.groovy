@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 
 class BamMetadataImportController {
@@ -38,14 +39,15 @@ class BamMetadataImportController {
         if (flash.mvc) {
             bamMetadataValidationContext = flash.mvc
         } else if (cmd.path) {
-            bamMetadataValidationContext = bamMetadataImportService.validate(cmd.path, cmd.furtherFilePaths)
+            bamMetadataValidationContext = bamMetadataImportService.validate(cmd.path, cmd.furtherFilePaths,
+                    cmd.linkOperation == ImportProcess.LinkOperation.LINK_SOURCE)
         }
 
         return [
                 cmd                   : cmd,
                 furtherFiles          : cmd.furtherFilePaths ?: [""],
                 context               : bamMetadataValidationContext,
-                implementedValidations: bamMetadataImportService.getImplementedValidations(),
+                implementedValidations: bamMetadataImportService.implementedValidations,
         ]
     }
 
@@ -55,7 +57,7 @@ class BamMetadataImportController {
             flash.message = new FlashMessage("Error", cmd.errors)
         } else if (cmd.submit == "Import") {
             Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
-                    cmd.replaceWithLink, cmd.triggerAnalysis, cmd.furtherFilePaths)
+                    cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths)
             bamMetadataValidationContext = results.context
             if (results.project != null) {
                 redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
@@ -66,7 +68,7 @@ class BamMetadataImportController {
         redirect(action: "index", params: [
                 path            : cmd.path,
                 furtherFilePaths: cmd.furtherFilePaths,
-                replaceWithLink : cmd.replaceWithLink,
+                linkOperation   : cmd.linkOperation,
                 triggerAnalysis : cmd.triggerAnalysis,
         ])
     }
@@ -77,7 +79,7 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     String submit
     String md5
     List<String> furtherFilePaths
-    boolean replaceWithLink
+    ImportProcess.LinkOperation linkOperation
     boolean triggerAnalysis
     boolean ignoreWarnings
 

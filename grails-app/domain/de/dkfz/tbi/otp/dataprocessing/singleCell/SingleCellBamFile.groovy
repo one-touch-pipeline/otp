@@ -87,6 +87,12 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         identifier validator: { int val, SingleCellBamFile obj ->
             uniquePerWorkPackageAndProperties(obj, ["identifier": val])
         }
+        md5sum validator: { val, obj ->
+            return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
+        }
+        fileOperationStatus validator: { val, obj ->
+            return (val == FileOperationStatus.PROCESSED) == (obj.md5sum != null)
+        }
     }
 
     /*

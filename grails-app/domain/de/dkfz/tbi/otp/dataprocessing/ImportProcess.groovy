@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
@@ -38,7 +40,18 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     State state = State.NOT_STARTED
 
-    boolean replaceSourceWithLink
+    @TupleConstructor
+    enum LinkOperation {
+        COPY_AND_KEEP(false, false),
+        COPY_AND_LINK(false, true),
+        LINK_SOURCE(true,false),
+
+        final boolean linkSource
+
+        final boolean replaceSourceWithLink
+    }
+
+    LinkOperation linkOperation = LinkOperation.COPY_AND_KEEP
 
     boolean triggerAnalysis
 
@@ -64,11 +77,13 @@ class ImportProcess implements Entity, ProcessParameterObject {
         }
     }
 
+    @SuppressWarnings("GetterMethodCouldBeProperty") //is no property
     @Override
     SeqType getSeqType() {
         return null
     }
 
+    @SuppressWarnings("GetterMethodCouldBeProperty") //is no property
     @Override
     Individual getIndividual() {
         return null
