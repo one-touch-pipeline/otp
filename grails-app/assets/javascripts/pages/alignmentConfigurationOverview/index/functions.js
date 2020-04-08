@@ -42,7 +42,6 @@ $.otp.projectConfig = {
             bAutoWidth: false,
             sAjaxSource: url,
             bScrollCollapse: true,
-            sScrollY: 200,
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {

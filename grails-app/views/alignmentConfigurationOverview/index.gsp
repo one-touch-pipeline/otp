@@ -76,7 +76,7 @@
                     </ul>
                 </div>
             </sec:ifAllGranted>
-            <div id="alignment_info">
+            <div id="alignment_info" class="fixed-table-header">
                 <table style="visibility: hidden" id="alignment_info_table">
                     <tr>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
@@ -88,7 +88,7 @@
             </div>
         </div>
 
-        <div>
+        <div class="fixed-table-header">
             <h2>${g.message(code: 'projectOverview.mergingCriteria')}</h2>
             <table>
                 <tr>
@@ -115,7 +115,7 @@
             </table>
         </div>
 
-        <div class="otpDataTables">
+        <div class="otpDataTables fixed-table-header">
             <h2>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h2>
             <otp:dataTable
                     codes="${[
@@ -127,6 +127,7 @@
                     ]}"
                     id="listReferenceGenome"/>
         </div>
+        <br>
     </div>
 </body>
 </html>
