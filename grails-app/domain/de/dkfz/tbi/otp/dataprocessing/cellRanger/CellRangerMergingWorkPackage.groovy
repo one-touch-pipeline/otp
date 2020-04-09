@@ -49,13 +49,9 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                 enforcedCells        : obj.enforcedCells,
                 referenceGenomeIndex : obj.referenceGenomeIndex,
             ]
-            String prop = properties.collect { k, v -> "${k}: ${v}" }.join(", ")
             List<CellRangerMergingWorkPackage> workPackages = findAllWhere(properties)
-            if (workPackages.size() > 1) {
-                return ["unique.combinations", prop]
-            }
-            if (workPackages && workPackages.first().id != obj.id) {
-                return ["unique.combination", prop]
+            if (workPackages.size() > 1 || workPackages && workPackages.first().id != obj.id) {
+                return ["unique.combination", properties.collect { k, v -> "${k}: ${v}" }.join(", ")]
             }
         })
         expectedCells(nullable: true, validator: { val, obj ->

@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
@@ -207,6 +209,7 @@ class CreateNotificationTextService {
         String message = messageSourceService.createMessage("notification.template.alignment.base", [
                 samples         : sampleNames,
                 links           : links,
+                cellRangerNote  : cellRangerAlignmentNotificationHelper(allGoodBamFiles.findAll { it instanceof SingleCellBamFile } as Set<SingleCellBamFile>),
                 processingValues: builder.toString().trim(),
                 paths           : directories,
         ])
@@ -222,13 +225,12 @@ class CreateNotificationTextService {
             ])
         }
         if (samplePairs[false]) {
-            message += '\n' + messageSourceService.createMessage("notification.template.alignment.noFurtherProcessing",
-                    [
-                            emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
-                            samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
-                                !it.processingDisabled
-                            }),
-                    ])
+            message += '\n' + messageSourceService.createMessage("notification.template.alignment.noFurtherProcessing", [
+                    emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                    samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
+                        !it.processingDisabled
+                    }),
+            ])
         }
 
         alignmentInfoByConfig.keySet()*.pipeline*.name.sort().unique().each {
@@ -236,8 +238,8 @@ class CreateNotificationTextService {
                 case Pipeline.Name.PANCAN_ALIGNMENT:
                     message += '\n' + messageSourceService.createMessage("notification.template.references.alignment.pancan")
                     break
-                case Pipeline.Name.RODDY_RNA_ALIGNMENT: //no documentation/code available
-                case Pipeline.Name.EXTERNALLY_PROCESSED: //alignment was done externally
+                case Pipeline.Name.RODDY_RNA_ALIGNMENT: // no documentation/code available
+                case Pipeline.Name.EXTERNALLY_PROCESSED: // alignment was done externally
                     break
                 case Pipeline.Name.CELL_RANGER:
                     message += '\n' + messageSourceService.createMessage("notification.template.references.alignment.cellRanger")
@@ -249,6 +251,22 @@ class CreateNotificationTextService {
         }
 
         return message
+    }
+
+    private String cellRangerAlignmentNotificationHelper(Set<SingleCellBamFile> bams) {
+        if (!bams) {
+            return ""
+        }
+        String finalRunSelectionLink = createOtpLinks(bams*.project, "cellRanger", "finalRunSelection")
+
+        List<String> message = []
+        message << messageSourceService.createMessage("notification.template.annotation.cellRanger.selfservice", [finalRunSelectionLink: finalRunSelectionLink])
+        if (bams*.mergingWorkPackage.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }) {
+            message << messageSourceService.createMessage("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [
+                    serviceMail: processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_NOTIFICATION),
+            ])
+        }
+        return message.join('\n\n')
     }
 
     String snvNotification(ProcessingStatus status) {

@@ -29,9 +29,11 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.CellRangerMwpParameter
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
@@ -46,7 +48,24 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
     Sample sampleA
     Sample sampleB
     SeqTrack seqTrackA
+    SeqTrack seqTrackB
     ReferenceGenomeIndex referenceGenomeIndex
+
+    CellRangerMwpParameter createCellRangerMwpParameter(Map properties = [:]) {
+        return new CellRangerMwpParameter([
+                expectedCells       : 1,
+                enforcedCells       : null,
+                referenceGenomeIndex: referenceGenomeIndex,
+                seqType             : seqType,
+        ] + properties)
+    }
+
+    private static boolean mwpUsesParameter(CellRangerMergingWorkPackage mwp, CellRangerMwpParameter parameter) {
+        return mwp.expectedCells == parameter.expectedCells &&
+                mwp.enforcedCells == parameter.enforcedCells &&
+                mwp.referenceGenomeIndex == parameter.referenceGenomeIndex &&
+                mwp.seqType == parameter.seqType
+    }
 
     void setupData() {
         createUserAndRoles()
@@ -68,7 +87,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         Individual individualB = createIndividual(project: project)
         SampleType sampleTypeB = createSampleType()
         sampleB = createSample(individual: individualB, sampleType: sampleTypeB)
-        createSeqTrack(seqType: seqType, sample: sampleB)
+        seqTrackB = createSeqTrack(seqType: seqType, sample: sampleB)
         sampleB.refresh()
     }
 
@@ -153,69 +172,160 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
     }
 
-    @Unroll
-    void "test createMergingWorkPackage (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
+    void "prepareCellRangerExecution creates MWPs and resets Tickets"() {
         given:
         setupData()
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(
+                dataFiles : [
+                        createDataFile(seqTrack: seqTrackA),
+                        createDataFile(seqTrack: seqTrackB),
+                ] as Set<DataFile>,
+                otrsTicket: createOtrsTicketWithEndDatesAndNotificationSent(),
+        )
+        CellRangerMwpParameter expectedParameter = createCellRangerMwpParameter()
 
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(expectedCells, enforcedCells, referenceGenomeIndex, project, individual, sampleType, seqType)
+            cellRangerConfigurationService.prepareCellRangerExecution(
+                    expectedParameter.expectedCells,
+                    expectedParameter.enforcedCells,
+                    expectedParameter.referenceGenomeIndex,
+                    project,
+                    individual,
+                    sampleType,
+                    expectedParameter.seqType
+            )
         }
 
-        then:
+        then: "no errors"
         !errors
+
+        and: "MWPs created"
+        CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
+        mwpUsesParameter(mwp, expectedParameter)
+
+        and: "affected ticket reset"
+        fastqImportInstance.with {
+            !otrsTicket.finalNotificationSent
+            !otrsTicket.alignmentFinished
+        }
+    }
+
+    void "resetTicketForCellRangerExecution properly prepares ticket"() {
+        given:
+        OtrsTicket otrsTicket = createOtrsTicket(
+                finalNotificationSent: finalNotification,
+                alignmentFinished: finished ? new Date() : null,
+        )
+
+        when:
+        cellRangerConfigurationService.resetTicketForCellRangerExecution(otrsTicket)
+
+        then:
+        !otrsTicket.finalNotificationSent
+        !otrsTicket.alignmentFinished
+
+        where:
+        finalNotification | finished
+        false             | true
+        true              | false
+        true              | true
+    }
+
+    void "resetAllTicketsOfSeqTracksForCellRangerExecution, reset only affected Tickets"() {
+        given:
+        setupData()
+
+        Closure<FastqImportInstance> createImportInstanceHelper = {
+            return createFastqImportInstance(
+                    dataFiles: [createDataFile()] as Set<DataFile>,
+                    otrsTicket: createOtrsTicketWithEndDatesAndNotificationSent(),
+            )
+        }
+
+        FastqImportInstance instanceResetA = createImportInstanceHelper()
+        FastqImportInstance instanceResetB = createImportInstanceHelper()
+        FastqImportInstance instanceUntouched = createImportInstanceHelper()
+
+        Set<SeqTrack> seqTracks = [instanceResetA, instanceResetB].collectMany { it.dataFiles }*.seqTrack as Set<SeqTrack>
+
+        when:
+        cellRangerConfigurationService.resetAllTicketsOfSeqTracksForCellRangerExecution(seqTracks)
+
+        then:
+        instanceResetA.with {
+            !otrsTicket.finalNotificationSent
+            !otrsTicket.alignmentFinished
+        }
+        instanceResetB.with {
+            !otrsTicket.finalNotificationSent
+            !otrsTicket.alignmentFinished
+        }
+        instanceUntouched.with {
+            otrsTicket.finalNotificationSent
+            otrsTicket.alignmentFinished
+        }
+    }
+
+    @Unroll
+    void "test createMergingWorkPackagesForSamples creates MWPs for multiple samples"() {
+        given:
+        setupData()
+        CellRangerMwpParameter parameter = createCellRangerMwpParameter()
+        List<Sample> samples = [sampleA, sampleB]
+
+        when:
+        cellRangerConfigurationService.createMergingWorkPackagesForSamples(samples, parameter)
+
+        then:
+        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
+        CollectionUtils.containSame(all*.sample, samples)
+        all.size() == 2
+        all.every { CellRangerMergingWorkPackage mwp ->
+            mwpUsesParameter(mwp, parameter)
+        }
+    }
+
+    @Unroll
+    void "test createMergingWorkPackagesForSample (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
+        given:
+        setupData()
+        CellRangerMwpParameter parameter = createCellRangerMwpParameter(expectedCells: expectedCells, enforcedCells: enforcedCells)
+
+        when:
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter)
+
+        then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
         mwp.sample == sampleA
         mwp.seqTracks == [seqTrackA] as Set
-        mwp.expectedCells == expectedCells
-        mwp.enforcedCells == enforcedCells
-        mwp.referenceGenomeIndex == referenceGenomeIndex
         mwp.project == project
-        mwp.seqType == seqType
         mwp.individual == individual
+        mwpUsesParameter(mwp, parameter)
 
         where:
         expectedCells | enforcedCells
         5000          | null
         null          | 5000
+        null          | null
     }
 
-    void "test createMergingWorkPackage for whole project"() {
+    void "test createMergingWorkPackagesForSample, creates an mwp for each LibPrepKit-SeqPlatformGroup combination of the SeqTracks"() {
         given:
         setupData()
-
-        when:
-        Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(1, null, referenceGenomeIndex, project, null, null, seqType)
-        }
-
-        then:
-        !errors
-        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
-        all.size() == 2
-        all*.sample as Set == [sampleA, sampleB] as Set
-    }
-
-    void "test createMergingWorkPackage, creates an mwp for each LibPrepKit-SeqPlatformGroup combination of the SeqTracks"() {
-        given:
-        setupData()
+        CellRangerMwpParameter parameter = createCellRangerMwpParameter()
         List<SeqTrack> seqTracks = setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits()
 
         when:
-        Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(1, null, referenceGenomeIndex, project, sampleA.individual, sampleA.sampleType, seqType)
-        }
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter)
 
         then:
-        !errors
         seqTracks.size() == 8
         AssertionError e = thrown(AssertionError)
         e.message =~ "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits."
 
         // TODO: when splitting of platforms and kits is implemented, this should be the expected behaviour:
         /*
-        !errors
         List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
         all.size() == 6
         all*.sample.unique() == [sampleA]
@@ -223,23 +333,35 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         */
     }
 
-    void "test createMergingWorkPackage, only considers SeqTracks of the given SeqType"() {
+    void "test createMergingWorkPackagesForSample, only considers SeqTracks of the given SeqType"() {
         given:
         setupData()
+        CellRangerMwpParameter parameter = createCellRangerMwpParameter(seqType: seqType)
 
-        createSeqTrack(sample: sampleA)
-        createSeqTrack(sample: sampleA)
-        createSeqTrack(sample: sampleA)
+        SeqType otherSeqType = createSeqType(name: "otherSeqTypeA", dirName: "otherDir")
+        Closure<SeqTrack> createSeqTrackHelper = { Map properties = [:] ->
+            return createSeqTrack([
+                    sample               : sampleA,
+                    run                  : seqTrackA.run,
+                    libraryPreparationKit: seqTrackA.libraryPreparationKit,
+            ] + properties)
+        }
+        Set<SeqTrack> expected = [
+                seqTrackA,
+                createSeqTrackHelper(seqType: seqTrackA.seqType),
+                createSeqTrackHelper(seqType: seqTrackA.seqType),
+        ] as Set<SeqTrack>
+        createSeqTrackHelper(seqType: otherSeqType)
+        createSeqTrackHelper(seqType: otherSeqType)
+        sampleA.refresh()
 
         when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(1, null, referenceGenomeIndex, project, sampleA.individual, sampleA.sampleType, seqType)
-        }
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter)
 
         then:
-        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
-        all.size() == 1
-        all*.sample as Set == [sampleA] as Set
+        CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
+        mwp.sample == sampleA
+        CollectionUtils.containSame(mwp.seqTracks, expected)
     }
 
     void "test selectNoneAsFinal"() {

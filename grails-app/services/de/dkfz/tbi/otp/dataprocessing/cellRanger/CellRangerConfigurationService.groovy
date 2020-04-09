@@ -31,13 +31,37 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 @Transactional
 class CellRangerConfigurationService {
 
+    @Immutable
+    @ToString
+    static class Samples {
+        List<Sample> allSamples
+        List<Sample> selectedSamples
+    }
+
+    @Canonical
+    static class PlatformGroupAndKit {
+        SeqPlatformGroup seqPlatformGroup
+        LibraryPreparationKit libraryPreparationKit
+    }
+
+    @Canonical
+    static class CellRangerMwpParameter {
+        Integer expectedCells
+        Integer enforcedCells
+        ReferenceGenomeIndex referenceGenomeIndex
+        SeqType seqType
+    }
+
     CellRangerWorkflowService cellRangerWorkflowService
+    OtrsTicketService otrsTicketService
 
     SeqType getSeqType() {
         CollectionUtils.exactlyOneElement(seqTypes)
@@ -92,19 +116,6 @@ class CellRangerConfigurationService {
         )
     }
 
-    @Immutable
-    @ToString
-    static class Samples {
-        List<Sample> allSamples
-        List<Sample> selectedSamples
-    }
-
-    @Canonical
-    static class PlatformGroupAndKit {
-        SeqPlatformGroup seqPlatformGroup
-        LibraryPreparationKit libraryPreparationKit
-    }
-
     Map<PlatformGroupAndKit, List<SeqTrack>> getSeqTracksGroupedByPlatformGroupAndKit(Collection<SeqTrack> seqTracks) {
         return seqTracks.groupBy { SeqTrack seqTrack ->
             [
@@ -129,36 +140,58 @@ class CellRangerConfigurationService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Errors createMergingWorkPackage(Integer expectedCells, Integer enforcedCells, ReferenceGenomeIndex referenceGenomeIndex, Project project, Individual individual, SampleType sampleType, SeqType seqType) {
-        List<Sample> samples = new ArrayList(getSamples(project, individual, sampleType).selectedSamples)
-        CellRangerConfig config = getWorkflowConfig(project)
+    Errors prepareCellRangerExecution(Integer expectedCells, Integer enforcedCells, ReferenceGenomeIndex referenceGenomeIndex, Project project, Individual individual, SampleType sampleType, SeqType seqType) {
+        List<Sample> samples = new ArrayList(getSamples(project, individual, sampleType).selectedSamples).unique()
+        CellRangerMwpParameter parameter = new CellRangerMwpParameter(expectedCells, enforcedCells, referenceGenomeIndex, seqType)
+
         try {
-            samples.unique().each { Sample sample ->
-                Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == seqType })
-                constrainSeqTracksGroupedByPlatformGroupAndKit(map)
-                map.each { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->
-                    new CellRangerMergingWorkPackage(
-                            seqType              : seqType,
-                            pipeline             : pipeline,
-                            sample               : sample,
-                            seqTracks            : seqTracks,
-                            expectedCells        : expectedCells,
-                            enforcedCells        : enforcedCells,
-                            config               : config,
-                            statSizeFileName     : null,
-                            referenceGenomeIndex : referenceGenomeIndex,
-                            referenceGenome      : referenceGenomeIndex.referenceGenome,
-                            antibodyTarget       : null,
-                            seqPlatformGroup     : platformGroupAndKit.seqPlatformGroup,
-                            libraryPreparationKit: platformGroupAndKit.libraryPreparationKit,
-                            needsProcessing      : true,
-                    ).save(flush: true)
-                }
-            }
+            List<CellRangerMergingWorkPackage> mwps = createMergingWorkPackagesForSamples(samples, parameter)
+            resetAllTicketsOfSeqTracksForCellRangerExecution(mwps.collectMany { return it.seqTracks } as Set<SeqTrack>)
         } catch (ValidationException e) {
             return e.errors
         }
         return null
+    }
+
+    void resetAllTicketsOfSeqTracksForCellRangerExecution(Set<SeqTrack> seqTracks) {
+        otrsTicketService.findAllOtrsTickets(seqTracks).each { OtrsTicket ticket ->
+            resetTicketForCellRangerExecution(ticket)
+        }
+    }
+
+    void resetTicketForCellRangerExecution(OtrsTicket ticket) {
+        ticket.finalNotificationSent = false
+        ticket.alignmentFinished = null
+        ticket.save(flush: true)
+    }
+
+    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSamples(List<Sample> samples, CellRangerMwpParameter parameter) {
+        return samples.collectMany { Sample sample ->
+            return createMergingWorkPackagesForSample(sample, parameter)
+        }
+    }
+
+    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSample(Sample sample, CellRangerMwpParameter parameter) {
+        Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == parameter.seqType })
+        constrainSeqTracksGroupedByPlatformGroupAndKit(map)
+        return map.collect { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->
+            return new CellRangerMergingWorkPackage(
+                    seqType              : parameter.seqType,
+                    pipeline             : pipeline,
+                    sample               : sample,
+                    seqTracks            : seqTracks,
+                    expectedCells        : parameter.expectedCells,
+                    enforcedCells        : parameter.enforcedCells,
+                    config               : getWorkflowConfig(sample.project),
+                    statSizeFileName     : null,
+                    referenceGenomeIndex : parameter.referenceGenomeIndex,
+                    referenceGenome      : parameter.referenceGenomeIndex.referenceGenome,
+                    antibodyTarget       : null,
+                    seqPlatformGroup     : platformGroupAndKit.seqPlatformGroup,
+                    libraryPreparationKit: platformGroupAndKit.libraryPreparationKit,
+                    needsProcessing      : true,
+            ).save(flush: true)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#mwpToKeep.project, 'OTP_READ_ACCESS')")

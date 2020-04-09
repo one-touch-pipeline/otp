@@ -711,13 +711,14 @@ pancan alignment infos
                 data1.seqTrackProcessingStatus,
         ])
 
+        int crOffset = (name == "Cell Ranger") ? 1 : 0
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 projectOverviewService: Mock(ProjectOverviewService) {
                     1 * getAlignmentInformationFromConfig(_) >> data1.alignmentInfo
                     0 * _
                 },
                 linkGenerator: Mock(LinkGenerator) {
-                    1 * link(_) >> "link"
+                    (1 + crOffset) * link(_) >> "link"
                 },
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
@@ -726,6 +727,9 @@ pancan alignment infos
                     1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
                     1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
                     1 * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> ""
+                    crOffset * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
+                    0 * getMessageInternal("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [], _) >> ""
+
                     (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
                     (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
@@ -781,7 +785,7 @@ pancan alignment infos
                     0 * _
                 },
                 linkGenerator: Mock(LinkGenerator) {
-                    1 * link(_) >> "link"
+                    (1 + countCellRanger) * link(_) >> "link"
                 },
                 processingOptionService: new ProcessingOptionService(),
         )
@@ -795,6 +799,9 @@ pancan alignment infos
                     countRoddy * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     countPanCan * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
                     countCellRanger * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+
+                    countCellRanger * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
+
                     0 * _
                 }
         )
@@ -841,7 +848,7 @@ pancan alignment infos
                     0 * _
                 },
                 linkGenerator: Mock(LinkGenerator) {
-                    3 * link(_) >> "link"
+                    4 * link(_) >> "link"
                 },
                 processingOptionService: new ProcessingOptionService(),
         )
@@ -854,6 +861,7 @@ pancan alignment infos
                     2 * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     1 * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
                     1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+                    1 * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
                     0 * _
             }
         )
@@ -1201,6 +1209,9 @@ samplePairsFinished: ${samplePairsFinished}
 ${notificationSubject} not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 '''
+
+            _ * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> '''finalRunSelectionLink: ${finalRunSelectionLink}'''
+            _ * getMessageInternal("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [], _) >> '''serviceMail: ${serviceMail}'''
 
             _ * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> '''pancan alignment infos\n'''
             _ * getMessageInternal("notification.template.references.snv", [], _) >> '''snv analysis infos\n'''

@@ -117,7 +117,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
             default:
                 throw new UnsupportedOperationException("expectedOrEnforcedCells must be one of ${ALLOWED_CELL_TYPE}")
         }
-        Errors errors = cellRangerConfigurationService.createMergingWorkPackage(
+        Errors errors = cellRangerConfigurationService.prepareCellRangerExecution(
                 expectedCells,
                 enforcedCells,
                 cmd.referenceGenomeIndex,

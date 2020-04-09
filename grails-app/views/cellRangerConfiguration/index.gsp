@@ -116,7 +116,10 @@
                     <div class="row one">
                         <div>
                             <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                            <g:select name="referenceGenomeIndex.id" class="use-select-2" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference"]}" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"/>
+                            <g:select name="referenceGenomeIndex.id" class="use-select-2"
+                                      from="${referenceGenomeIndexes}" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
+                                      optionKey="id" noSelection="${[(""): "Select a reference"]}"
+                                        required="true"/>
                         </div>
                     </div>
                     <div class="row two">
