@@ -422,7 +422,9 @@ $.otp.graph.project = {
                     location.href =  $.otp.createLink({
                         controller: 'individual',
                         action: 'show',
-                        id: json.labels[idx]
+                        parameters: {
+                            'mockPid': json.labels[idx],
+                        },
                     });
                 },
                 eventsMousemove: function (e, shape) {

@@ -23,6 +23,11 @@
 /*jslint browser: true */
 /*global $ */
 
+$(function() {
+    $.otp.projectOverviewTable.register();
+    $.otp.graph.project.init();
+});
+
 $.otp.projectOverviewTable = {
     /*
      * This function returns the passed value without modifying it.

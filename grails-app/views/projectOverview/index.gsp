@@ -32,95 +32,69 @@
 <body>
     <div class="body">
         <g:render template="/templates/projectSelection"/>
-        <h1 class="statisticTitle">
-            <g:message code="projectOverview.pageTitle" args="[selectedProject.name]"/>
-        </h1>
-        <div class="statisticTitle">
-            <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>
+
+        <h1><g:message code="projectOverview.pageTitle" args="[selectedProject.name]"/></h1>
+        <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>
+
+        <h2 class="data-table-header"><g:message code="projectOverview.table.sampleType.title"/></h2>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'projectOverview.table.sampleTypeName',
+                    'projectOverview.table.sampleCount',
+                ]}"
+                id="sampleTypeNameCountBySample" />
         </div>
-        <div class="table">
-            <div style="width: 20px; height: 20px;"></div>
-            <h2 class="statisticTableTitle">
-                <g:message code="projectOverview.table.sampleType.title" />
-            </h2>
-            <div class="otpDataTables">
-                <otp:dataTable
-                    codes="${[
-                        'projectOverview.table.sampleTypeName',
-                        'projectOverview.table.sampleCount',
-                    ]}"
-                    id="sampleTypeNameCountBySample" />
-            </div>
-            <div style="width: 20px; height: 20px;"></div>
-            <h2 class="statisticTableTitle" >
-                <g:message code="projectOverview.title.centersOverviewTable" />
-            </h2>
-            <div class="otpDataTables">
-                <otp:dataTable
-                    codes="${[
-                        'overview.statistic.center.name',
-                        'overview.statistic.center.totalCount',
-                        'overview.statistic.center.newCount',
-                    ] }"
-                    id="centerNameRunId" />
-            </div>
-            <div style="width: 20px; height: 30px;"></div>
-            <h2 class="statisticTableTitle">
-                <g:message code="projectOverview.table.statistic.title" /></h2>
-            <div class="otpDataTables">
-                <otp:dataTable
-                    codes="${[
-                        'projectOverview.index.PID',
-                        'projectOverview.index.sampleType',
-                        'projectOverview.index.sequenceTypeName',
-                        'projectOverview.index.sequenceTypeLibraryLayout',
-                        'projectOverview.index.singleCell',
-                        'projectOverview.index.centerName',
-                        'projectOverview.index.platformId',
-                        'projectOverview.index.laneCount',
-                        'projectOverview.index.gigaBase'
-                    ] }"
-                    id="projectOverviewTable" />
-            </div>
-            <div style="width: 20px; height: 40px;"></div>
-            <h2 class="statisticTableTitle">
-                <g:message code="projectOverview.table.seqType.title" />
-            </h2>
-            <div class="otpDataTables">
-                <otp:dataTable
-                    codes="${[
-                            'projectOverview.seqType.seqName',
-                            'projectOverview.seqType.libraryLayout',
-                            'projectOverview.seqType.singleCell',
-                            'projectOverview.seqType.individualCount',
-                            'projectOverview.seqType.sampleCount',
-                            'projectOverview.seqType.gb'
-                    ]}"
-                    id="patientsAndSamplesGBCountPerProject" />
-            </div>
-            <div style="width: 20px; height: 20px;"></div>
+
+        <h2 class="data-table-header"><g:message code="projectOverview.title.centersOverviewTable"/></h2>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'overview.statistic.center.name',
+                    'overview.statistic.center.totalCount',
+                    'overview.statistic.center.newCount',
+                ]}"
+                id="centerNameRunId" />
         </div>
-        <div class="homeGraph">
-            <div style="margin-top: 60px"></div>
-            <div style="float: left; border: 25px solid #E1F1FF;">
-                <canvas id="sampleTypeCountBySeqType" width="530"
-                    height="400">[No canvas support]</canvas>
-            </div>
-            <div style="float: right; border: 25px solid #E1F1FF;">
-                <canvas id="laneCountPerDateByProject" width="530"
-                    height="400">[No canvas support]</canvas>
-            </div>
-            <div style="margin-top: 80px"></div>
-            <div style="text-align: center;">
-                <canvas id="sampleTypeCountByPatient" width="550">[No canvas support]</canvas>
-         </div>
+
+        <h2 class="data-table-header"><g:message code="projectOverview.table.statistic.title"/></h2>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'projectOverview.index.PID',
+                    'projectOverview.index.sampleType',
+                    'projectOverview.index.sequenceTypeName',
+                    'projectOverview.index.sequenceTypeLibraryLayout',
+                    'projectOverview.index.singleCell',
+                    'projectOverview.index.centerName',
+                    'projectOverview.index.platformId',
+                    'projectOverview.index.laneCount',
+                    'projectOverview.index.gigaBase'
+                ]}"
+                id="projectOverviewTable" />
         </div>
-    <asset:script type="text/javascript">
-        $(function() {
-            $.otp.projectOverviewTable.register();
-            $.otp.graph.project.init();
-        });
-    </asset:script>
+
+        <h2 class="data-table-header"><g:message code="projectOverview.table.seqType.title"/></h2>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                        'projectOverview.seqType.seqName',
+                        'projectOverview.seqType.libraryLayout',
+                        'projectOverview.seqType.singleCell',
+                        'projectOverview.seqType.individualCount',
+                        'projectOverview.seqType.sampleCount',
+                        'projectOverview.seqType.gb'
+                ]}"
+                id="patientsAndSamplesGBCountPerProject" />
+        </div>
+        <br>
+        <div style="display: flex; justify-content: space-evenly">
+            <canvas id="sampleTypeCountBySeqType" width="550" height="400">[No canvas support]</canvas>
+            <canvas id="laneCountPerDateByProject" width="550" height="400">[No canvas support]</canvas>
+        </div>
+        <div style="display: flex; justify-content: space-evenly">
+            <canvas id="sampleTypeCountByPatient" width="550">[No canvas support]</canvas>
+        </div>
     </div>
 </body>
 </html>
