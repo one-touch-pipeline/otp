@@ -41,15 +41,15 @@
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.egaBox.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.egaBox"/></td>
-                    <td><g:textField name="egaBox" size="130" value="${cmd?.egaBox?: ""}"/></td>
+                    <td><g:textField name="egaBox" size="130" value="${cmd?.egaBox?: ""}" required="required"/></td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.name.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.submissionName"/></td>
-                    <td><g:textField name="submissionName" size="130" value="${cmd?.submissionName?: ""}"/></td>
+                    <td><g:textField name="submissionName" size="130" value="${cmd?.submissionName?: ""}" required="required"/></td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.studyName.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.studyName"/></td>
-                    <td><g:textField name="studyName" size="130" value="${cmd?.studyName?: ""}"/></td>
+                    <td><g:textField name="studyName" size="130" value="${cmd?.studyName?: ""}" required="required"/></td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.studyType.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.studyType"/></td>
@@ -57,7 +57,7 @@
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.studyAbstract.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.studyAbstract"/></td>
-                    <td><g:textArea name="studyAbstract" cols="130" rows="8" value="${cmd?.studyAbstract}"/></td>
+                    <td><g:textArea name="studyAbstract" cols="130" rows="8" value="${cmd?.studyAbstract}" required="required"/></td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.pubMedId.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.pubMedId"/></td>
