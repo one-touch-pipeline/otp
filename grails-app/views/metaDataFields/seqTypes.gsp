@@ -45,7 +45,7 @@
         <tr>
             <th class="export_column"><g:message code="dataFields.seqType.name"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.singleCell"/></th>
-            <th class="export_column"><g:message code="dataFields.seqType.supportsAntibody"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.usesAntibodyTarget"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.directory"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.libraryLayouts"/></th>
             <th></th>
@@ -70,10 +70,10 @@
                 </td>
                 <td>
                     <g:if test="${seqType.hasAntibodyTarget}">
-                        <asset:image src="ok.png" title="${g.message(code: "dataFields.seqType.supportsAntibody.true")}"/>
+                        <asset:image src="ok.png" title="${g.message(code: "dataFields.seqType.usesAntibodyTarget.true")}"/>
                     </g:if>
                     <g:else>
-                        <asset:image src="error.png" title="${g.message(code: "dataFields.seqType.supportsAntibody.false")}"/>
+                        <asset:image src="error.png" title="${g.message(code: "dataFields.seqType.usesAntibodyTarget.false")}"/>
                     </g:else>
                     <span hidden>${seqType.hasAntibodyTarget}</span>
                 </td>

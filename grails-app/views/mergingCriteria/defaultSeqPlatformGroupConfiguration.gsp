@@ -74,9 +74,9 @@
                         </li>
                     </g:if>
                 </ul>
-                <g:form action="deleteSeqPlatformGroup">
+                <g:form action="emptySeqPlatformGroup">
                     <g:hiddenField name="group.id" value="${seqPlatformGroup.id}"/>
-                    <g:submitButton name="Delete group"/>
+                    <g:submitButton name="${g.message(code: "mergingCriteria.seqPlatformDefinition.emptyGroup")}"/>
                 </g:form>
             </div>
         </g:each>

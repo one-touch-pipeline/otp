@@ -277,7 +277,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
     }
 
 
-    void "test deleteSeqPlatformGroup when no seqPlatform is left"() {
+    void "test emptySeqPlatformGroup when no seqPlatform is left"() {
         given:
         setupData()
 
@@ -285,7 +285,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.deleteSeqPlatformGroup(group)
+            mergingCriteriaService.emptySeqPlatformGroup(group)
         }
 
         then:
@@ -296,7 +296,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
     }
 
 
-    void "test deleteSeqPlatformGroup when seqPlatformGroup still contains seqPlatforms"() {
+    void "test emptySeqPlatformGroup when seqPlatformGroup still contains seqPlatforms"() {
         given:
         setupData()
 
@@ -308,7 +308,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.deleteSeqPlatformGroup(seqPlatformGroup)
+            mergingCriteriaService.emptySeqPlatformGroup(seqPlatformGroup)
         }
 
         then:

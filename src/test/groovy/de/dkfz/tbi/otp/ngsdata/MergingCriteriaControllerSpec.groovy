@@ -263,7 +263,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         !SeqPlatformGroup.list().first().mergingCriteria
     }
 
-    void "test deleteSeqPlatformGroup"() {
+    void "test emptySeqPlatformGroup"() {
         given:
         setupData()
 
@@ -271,7 +271,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         when:
         controller.params."group.id" = seqPlatformGroup.id
-        controller.deleteSeqPlatformGroup(seqPlatformGroup)
+        controller.emptySeqPlatformGroup(seqPlatformGroup)
 
         then:
         controller.response.status == 302

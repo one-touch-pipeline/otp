@@ -107,8 +107,8 @@ class MergingCriteriaController {
         redirectHelper(null)
     }
 
-    def deleteSeqPlatformGroup(SeqPlatformGroup group) {
-        mergingCriteriaService.deleteSeqPlatformGroup(group)
+    def emptySeqPlatformGroup(SeqPlatformGroup group) {
+        mergingCriteriaService.emptySeqPlatformGroup(group)
         redirectHelper(group.mergingCriteria)
     }
 

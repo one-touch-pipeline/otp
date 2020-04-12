@@ -112,7 +112,7 @@ class MergingCriteriaService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     // the group will not be deleted internally for reproducibility reasons, but the user will think the group is deleted
-    void deleteSeqPlatformGroup(SeqPlatformGroup group) {
+    void emptySeqPlatformGroup(SeqPlatformGroup group) {
         // code necessary because of grails behaviour with many-to-many relationships
         Set<SeqPlatform> seqPlatforms = new HashSet<SeqPlatform>(group.seqPlatforms ?: [])
         commentService.saveComment(group, seqPlatforms.collect { it.fullName() }.join("\n"))
