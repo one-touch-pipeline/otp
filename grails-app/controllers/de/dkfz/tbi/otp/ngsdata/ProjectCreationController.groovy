@@ -68,6 +68,7 @@ class ProjectCreationController {
                 speciesWithStrain         : [id: null],
                 internalNotes             : "",
                 usersToCopyFromBaseProject: usersToCopyFromBaseProject,
+                nameInMetadataFiles       : "",
             ]
         }
         Map<String, ?> defaults = [
