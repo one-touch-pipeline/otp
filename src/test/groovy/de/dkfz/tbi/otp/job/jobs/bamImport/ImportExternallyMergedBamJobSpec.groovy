@@ -491,7 +491,9 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         importExternallyMergedBamJob.configService = configService
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
-        importExternallyMergedBamJob.executionHelperService = new ExecutionHelperService()
+        importExternallyMergedBamJob.executionHelperService = Mock(ExecutionHelperService) {
+            _ * getGroup(_, _) >> 'someGroup'
+        }
         importExternallyMergedBamJob.fileSystemService = new FileSystemService()
         importExternallyMergedBamJob.fileSystemService.processingOptionService = new ProcessingOptionService()
         importExternallyMergedBamJob.processingOptionService = new ProcessingOptionService()

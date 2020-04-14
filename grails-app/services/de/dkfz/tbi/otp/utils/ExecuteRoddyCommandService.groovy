@@ -180,7 +180,7 @@ class ExecuteRoddyCommandService {
     void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm) {
         executionHelperService.setPermission(realm, roddyResult.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
         correctPermissions(roddyResult, realm)
-        String group = executionHelperService.getGroup(roddyResult.baseDirectory)
+        String group = executionHelperService.getGroup(roddyResult.project.realm, roddyResult.baseDirectory)
         executionHelperService.setGroup(realm, roddyResult.workDirectory, group)
         correctGroups(roddyResult, realm)
     }
