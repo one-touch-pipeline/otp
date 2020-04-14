@@ -551,6 +551,7 @@ class DeletionService {
             dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                     SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
             deleteArtefacts(Artefact.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
+            dirsToDelete << bamFile.baseDirectory
             bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
@@ -637,21 +638,19 @@ class DeletionService {
      */
     List<File> deleteRun(Run run) {
         notNull(run, "The input run of the method deleteRun is null")
-        List<File> dirsToDelete = []
 
         DataFile.findAllByRun(run).each {
             deleteDataFile(it)
         }
 
-        SeqTrack.findAllByRun(run).each {
-            dirsToDelete = deleteSeqTrack(it).get("dirsToDelete")
-        }
+        List<File> dirsToDelete = SeqTrack.findAllByRun(run).collect {
+            return deleteSeqTrack(it).get("dirsToDelete")
+        }.flatten() as List<File>
 
         deleteArtefacts(Artefact.findAllByValueAndClassName(run.id.toString(), run.class.name))
         run.delete(flush: true)
         return dirsToDelete
     }
-
 
     /**
      * Deletes the run given by Name.
@@ -665,8 +664,7 @@ class DeletionService {
         notNull(runName, "The input runName of the method deleteRunByName is null")
         Run run = Run.findByName(runName)
         notNull(run, "No run with name ${runName} could be found in the database")
-        List<File> dirsToDelete = deleteRun(run)
-        return dirsToDelete
+        return deleteRun(run)
     }
 
     /**
