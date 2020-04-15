@@ -29,8 +29,7 @@ import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -45,7 +44,7 @@ LogThreadLocal.withThreadLog(System.out, {
             or {
                 'in'('id', [
                         -1,
-                ])
+                ].collect { it.toLong() })
                 sample {
                     individual {
                         or {
@@ -124,7 +123,7 @@ LogThreadLocal.withThreadLog(System.out, {
         println "\n----------------------\n"
 
         //reset ticket only for seqTracks which gets aligned.
-        List<OtrsTicket> otrsTickets = mergingWorkPackages ? otrsTicketService.findAllOtrsTickets(mergingWorkPackages*.seqTracks.flatten()) : []
+        List<OtrsTicket> otrsTickets = (mergingWorkPackages ? otrsTicketService.findAllOtrsTickets(mergingWorkPackages*.seqTracks.flatten()) : []) as List<OtrsTicket>
         println "found ${otrsTickets.size()} coresponding tickets: ${otrsTickets*.ticketNumber.sort().join(',')}"
         otrsTickets.each {
             otrsTicketService.resetAlignmentAndAnalysisNotification(it)
