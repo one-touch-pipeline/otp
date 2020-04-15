@@ -61,6 +61,15 @@ class Covid19SampleIdentifierParserSpec extends Specification implements DomainF
         'SC2-19999SR-PSB321' || 'covid-19_single-cell' | 'SC2-19999SR' | 'PROTECTED_SPECIMEN_BRUSH321'
         'SC2-10001MD-NS666'  || 'covid-19_methyl-seq'  | 'SC2-10001MD' | 'NASAL_SWAB666'
         'SC2-10001BR-NS999'  || 'covid-19_cite-seq'    | 'SC2-10001BR' | 'NASAL_SWAB999'
+        and: "alternative schema:"
+        'SC2-1-0001SR-NS-01'  || 'covid-19_single-cell' | 'SC2-10001SR' | 'NASAL_SWAB001'
+        'SC2-1-0001SR-NS-001' || 'covid-19_single-cell' | 'SC2-10001SR' | 'NASAL_SWAB001'
+        'SC2-2-0001SR-TS-10'  || 'covid-19_single-cell' | 'SC2-20001SR' | 'THROAT_SWAB010'
+        'SC2-1-5001SR-BL-10'  || 'covid-19_single-cell' | 'SC2-15001SR' | 'BRONCHIAL_LAVAGE010'
+        'SC2-2-5001SR-B-23'   || 'covid-19_single-cell' | 'SC2-25001SR' | 'BLOOD023'
+        'SC2-1-9999SR-PSB-21' || 'covid-19_single-cell' | 'SC2-19999SR' | 'PROTECTED_SPECIMEN_BRUSH021'
+        'SC2-1-0001MD-NS-66'  || 'covid-19_methyl-seq'  | 'SC2-10001MD' | 'NASAL_SWAB066'
+        'SC2-1-0001BR-NS-99'  || 'covid-19_cite-seq'    | 'SC2-10001BR' | 'NASAL_SWAB099'
     }
 
     @Unroll
@@ -75,16 +84,18 @@ class Covid19SampleIdentifierParserSpec extends Specification implements DomainF
         defaultParsedSampleIdentifier == null
 
         where:
-        input                | problem
-        ''                   | 'empty'
-        null                 | 'null'
-        'SC1-10001SR-NS001'  | 'wrong project'
-        'SC2-1001SR-NS001'   | 'pid too short'
-        'SC2-100001SR-NS001' | 'pid too long'
-        'SC2-10001XX-NS001'  | 'invalid seqtype'
-        'SC2-10001SR-XX001'  | 'invlaid sampletype'
-        'SC2-10001SR-NS01'   | 'sampleType order number too short'
-        'SC2-10001SR-NS0001' | 'sampleType order number too long'
+        input                 | problem
+        ''                    | 'empty'
+        null                  | 'null'
+        'SC1-10001SR-NS001'   | 'wrong project'
+        'SC2-1001SR-NS001'    | 'pid too short'
+        'SC2-100001SR-NS001'  | 'pid too long'
+        'SC2-10001XX-NS001'   | 'invalid seqtype'
+        'SC2-10001SR-XX001'   | 'invlaid sampletype'
+        'SC2-10001SR-NS1'     | 'sampleType order number too short'
+        'SC2-10001SR-NS-1'    | 'sampleType order number too short'
+        'SC2-10001SR-NS0001'  | 'sampleType order number too long'
+        'SC2-10001SR-NS-0001' | 'sampleType order number too long'
     }
 
     @Unroll

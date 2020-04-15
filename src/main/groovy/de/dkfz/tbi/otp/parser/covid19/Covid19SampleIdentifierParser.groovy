@@ -40,7 +40,7 @@ class Covid19SampleIdentifierParser implements SampleIdentifierParser {
         if (matcher) {
             return new DefaultParsedSampleIdentifier(
                     Covid19SeqTypeProjectMapper."${matcher.group('seqType')}".projectName,
-                    matcher.group('pid'),
+                    matcher.group('projectAndCenter') + matcher.group('lifeStatus'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
                     SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
@@ -61,7 +61,10 @@ class Covid19SampleIdentifierParser implements SampleIdentifierParser {
 
     private static String buildSampleTypeDbName(Matcher matcher) {
         assert matcher.matches()
-        return "${Covid19TissueType.fromKey(matcher.group('tissueType'))}${matcher.group('orderNumber')}"
+
+        return "${Covid19TissueType.fromKey(matcher.group('tissueType'))}" +
+                "${matcher.group('orderNumber').length() == 2 ? '0' : ''}" +
+                "${matcher.group('orderNumber')}"
     }
 
     private static String getPidRegex() {
@@ -71,12 +74,12 @@ class Covid19SampleIdentifierParser implements SampleIdentifierParser {
         String adult = "([5-9])"
         String id = "[0-9]{3}"
         String seqType = "(?<seqType>((${Covid19SeqTypeProjectMapper.values().join(')|(')})))"
-        return "${project}-${center}(${child}|${adult})${id}${seqType}"
+        return "(?<projectAndCenter>${project}-${center})-{0,1}(?<lifeStatus>(${child}|${adult})${id}${seqType})"
     }
 
     private static String createRegex() {
-        String sampleType = "(?<tissueType>((${Covid19TissueType.values()*.key.join(')|(')})))(?<orderNumber>([0-9]{3}))"
-        return "^(?<pid>${pidRegex})-${sampleType}\$"
+        String sampleType = "(?<tissueType>((${Covid19TissueType.values()*.key.join(')|(')})))-?(?<orderNumber>([0-9]{2,3}))"
+        return "^${pidRegex}-${sampleType}\$"
     }
 
 }
