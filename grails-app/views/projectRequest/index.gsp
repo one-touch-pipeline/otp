@@ -56,17 +56,17 @@
     <table class="key-value-table key-help-input">
         <g:hiddenField name="request.id" value="${projectRequestToEdit?.id}"/>
         <tr>
-            <td><label for="name">${g.message(code: "project.name")}</label></td>
+            <td><label for="name">${g.message(code: "project.name")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.name.detail")}"></td>
             <td><input name="name" id="name" value="${source.getByFieldName("name")}" required/></td>
         </tr>
         <tr>
-            <td><label for="description">${g.message(code: "project.description")}</label></td>
+            <td><label for="description">${g.message(code: "project.description")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.description.detail")}"></td>
             <td><textarea class="resize-vertical" name="description" id="description" required>${source.getByFieldName("description")}</textarea></td>
         </tr>
         <tr>
-            <td><label for="keyword">${g.message(code: "project.keywords")}</label></td>
+            <td><label for="keyword">${g.message(code: "project.keywords")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.keywords.detail")}"></td>
             <td class="multi-input-field">
                 <g:each in="${source.getByFieldName("keywords")?.sort()}" var="keyword" status="i">
@@ -88,7 +88,7 @@
             </td>
         </tr>
         <tr>
-            <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}</label></td>
+            <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.organizationalUnit.detail")}"></td>
             <td><input name="organizationalUnit" id="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}" required/></td>
         </tr>
@@ -113,7 +113,7 @@
             <td><input name="endDate" id="endDate" value="${source.getByFieldName("endDate")}" type="date"/></td>
         </tr>
         <tr>
-            <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}</label></td>
+            <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
             <td>
                 <g:select name="storagePeriod" class="use-select-2"
@@ -195,7 +195,7 @@
         </tr>
 
         <tr class="user-auto-complete">
-            <td><label for="pi">${g.message(code: "projectRequest.pi")}</label></td>
+            <td><label for="pi">${g.message(code: "projectRequest.pi")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.pi.detail")}"></td>
             <td>
                 <g:if test="${projectRequestToEdit}">
@@ -304,6 +304,14 @@
                     <g:submitButton name="${g.message(code: "projectRequest.submit")}"/>
                 </g:else>
             </td>
+        </tr>
+        <tr>
+            <td colspan="3"><br></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td>${g.message(code: "projectRequest.explain.requiredFields")}</td>
         </tr>
     </table>
     </g:form>
