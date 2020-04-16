@@ -125,7 +125,7 @@
                     <td class="myKey">${it}:</td>
                     <td>
                         <g:select id="toolVersionSelect_${it}" name="toolVersionValue" from="${indexToolVersion}"
-                                  class="use-select-2"/>
+                                  class="toolVersionSelect use-select-2"/>
                     </td>
                     <g:if test="${it == "GENOME_STAR_INDEX"}">
                         <td>${defaultGenomeStarIndex}</td>
@@ -141,7 +141,7 @@
                     <g:message code="configurePipeline.rnaAlignment.geneModel"/>
                 </td>
                 <td valign="top" class="geneModel">
-                    <g:select name="geneModel.id" from="${geneModel}" class="dropDown geneModelSelect use-select-2"
+                    <g:select name="geneModel.id" from="${geneModel}" class="geneModelSelect use-select-2"
                               noSelection="[(null): '']"/><br>
                 </td>
                 <td>&nbsp;</td>
@@ -195,10 +195,5 @@
         </code>
     </g:if>
 </div>
-<asset:script>
-    $(function() {
-        $.otp.configureAlignment.register();
-    });
-</asset:script>
 </body>
 </html>

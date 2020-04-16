@@ -147,10 +147,5 @@
             </code>
         </g:if>
     </div>
-    <asset:script>
-        $(function() {
-            $.otp.configureAlignment.register();
-        });
-    </asset:script>
 </body>
 </html>
