@@ -319,7 +319,7 @@
                     <td>${userEntry.projectRoleName}</td>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <td>
-                            <g:form action="setEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id]'>
+                            <g:form action="setEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id, "value": true]'>
                                 <input id="reactivateButton" type="submit" value="${g.message(code: 'projectUser.table.reactivateUser', "value": true)}"
                                        title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Activate"])}"
                                        data-text="${confirmationText}"/>

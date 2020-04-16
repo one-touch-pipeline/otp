@@ -372,7 +372,7 @@ class UserProjectRoleService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
-            upr.enabled = !upr.enabled
+            upr.enabled = value
             if (upr.accessToFiles) {
                 upr.fileAccessChangeRequested = true
             }
