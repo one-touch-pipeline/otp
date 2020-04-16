@@ -20,36 +20,31 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title><g:message code="projectProgress.progress.title" /></title>
+    <meta name="layout" content="main"/>
+    <title><g:message code="projectProgress.progress.title"/></title>
     <asset:javascript src="pages/projectProgress/progress/progress.js"/>
 </head>
 <body>
-  <div class="body">
-    <form class="rounded-page-header-box">
-        <span><g:message code="search.from.date"/>:<input type="text" class="datePicker" id="startDate" value="${startDate}"></span>
-        <br>
-        <span><g:message code="search.to.date"  />:<input type="text" class="datePicker" id="endDate"   value="${endDate}"  ></span>
-        %{-- Don't use select2 (yet): We haven't yet tried wiring up a multiple-select to a controller, but we could... --}%
-        <g:select name="projects" class="projectSelectMultiple dont-use-select-2"
-                  value="${availableProjects}" from="${availableProjects}"
-                  optionKey="name" multiple="true"/>
-
-        <input id="display" type="button" name="progress" value=" Display "/>
-    </form>
-  <div class="otpDataTables" >
-        <otp:dataTable codes="${[
+    <div class="body">
+        <form class="rounded-page-header-box">
+            <span><label for="startDate"><g:message code="search.from.date"/></label><input type="text" class="datePicker" id="startDate" value="${startDate}"></span>
+            <span><label for="endDate"  ><g:message code="search.to.date"  /></label><input type="text" class="datePicker" id="endDate"   value="${endDate}"  ></span>
+            <br>
+            <g:select name="projects" class="projectSelectMultiple use-select-2"
+                      from="${availableProjects}" placeholder="Select projects"
+                      optionKey="name" multiple="true"/>
+            <input id="display" type="button" name="progress" value="Update"/>
+        </form>
+        <div class="otpDataTables">
+            <otp:dataTable codes="${[
                     'projectProgress.progress.runs',
                     'projectProgress.progress.center',
-                    'projectProgress.progress.samples', ]}"
-                    id="progressId"/>
-</div>
-</div>
-
+                    'projectProgress.progress.samples',
+            ]}" id="progressId"/>
+        </div>
+    </div>
 <asset:script type="text/javascript">
         $(function() {
             $.otp.projectProgressTable.registerProjectProgressId();
