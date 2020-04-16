@@ -23,8 +23,7 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.projectProgressTable = {
-    registerProjectProgressId : function () {
+$(function () {
         "use strict";
         $('.datePicker').datepicker({
                 dateFormat: 'yy-mm-dd',
@@ -107,5 +106,4 @@ $.otp.projectProgressTable = {
             oSettings1.oFeatures.bServerSide = true;
             oTableProgress.dataTable().fnDraw();
         });
-    }
-};
+});

@@ -45,10 +45,5 @@
             ]}" id="progressId"/>
         </div>
     </div>
-<asset:script type="text/javascript">
-        $(function() {
-            $.otp.projectProgressTable.registerProjectProgressId();
-    });
-</asset:script>
 </body>
 </html>
