@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.util
 
-import de.dkfz.tbi.otp.administration.LdapKey
 import de.dkfz.tbi.otp.config.ConfigService
 
 import javax.naming.directory.Attributes
@@ -40,8 +39,13 @@ class LdapHelper {
         LocalDateTime.ofInstant(Instant.ofEpochMilli(ms), ConfigService.instance.timeZoneId)
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     static boolean getIsDeactivatedFromAttributes(Attributes a) {
+        // temporary: disabled until it is clear what has to be checked
+        return false
+        /*
         long accountExpires = (a.get(LdapKey.ACCOUNT_EXPIRES)?.get()?.toString()?.toLong()) ?: 0
         return convertAdTimestampToUnixTimestampInMs(accountExpires) < new Date().time
+         */
     }
 }

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.cron
 
 import grails.testing.gorm.DataTest
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -44,6 +45,7 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
         ]
     }
 
+    @Ignore
     @SuppressWarnings(['CyclomaticComplexity', 'LineLength'])
     @Unroll
     void "fileAccessChangeRequested, when enabled '#enabled', accessToFiles: #accessToFiles, fileAccessChangeRequested: #fileAccessChangeRequested, groups: #groups, then callCount: #callCount and expectedFileAccessChangeRequested: #expectedFileAccessChangeRequested"() {

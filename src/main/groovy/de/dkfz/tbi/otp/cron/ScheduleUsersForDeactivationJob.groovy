@@ -197,7 +197,9 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
 
     @Override
     void wrappedExecute() {
-        executeActionPlan(buildActionPlan())
+        log.info("${this.class} has been hardcoded to not run")
+        return
+        //executeActionPlan(buildActionPlan())
     }
 }
 

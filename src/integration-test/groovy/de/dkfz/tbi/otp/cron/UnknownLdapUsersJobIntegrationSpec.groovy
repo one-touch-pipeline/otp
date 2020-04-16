@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.cron
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -83,6 +84,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         result == usersToNotBeFound
     }
 
+    @Ignore
     void "wrappedExecute, sends a mail containing every unresolvable user"() {
         given:
         ["A", "B", "C"].collect { String username ->
@@ -108,6 +110,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         job.wrappedExecute()
     }
 
+    @Ignore
     void "wrappedExecute, only writes out a log message when no unresolved users were found"() {
         given:
         DomainFactory.createUser(username: "username", enabled: true)
