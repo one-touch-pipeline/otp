@@ -41,6 +41,7 @@
                     <div class="rounded-page-header-box">
                         <span><g:message code="alignment.quality.seqType"/>:</span>
                         <form style="display: inline">
+                            <g:hiddenField name="project" value="${selectedProject.name}"/>
                             <g:select id="seqType" name='seqType' class="use-select-2" style="width: 40ch;"
                                       data-columns="${columns}"
                                       from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
