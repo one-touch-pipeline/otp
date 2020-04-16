@@ -105,7 +105,7 @@
         </div>
 
         <h2><g:message code="individual.show.samples"/></h2>
-        <div class="tableBlock">
+        <div id="individualSampleTbl" class="tableBlock">
             <table>
                 <g:each var="sample" in="${individual.samples}">
                     <tr>

@@ -36,7 +36,7 @@
         </g:each>
         <g:each var="dropDown" in="${dropDowns}">
             <label>${labels[i++]}:
-                <g:select name="${dropDown.getKey()}" from="${dropDown.getValue()}"/>
+                <g:select id="" name="${dropDown.getKey()}" from="${dropDown.getValue()}" class="use-select-2"/>
             </label>
         </g:each>
         <button class="buttons save"><g:message code="default.button.save.label"/></button>

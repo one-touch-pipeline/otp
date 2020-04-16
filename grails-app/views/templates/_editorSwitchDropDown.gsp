@@ -23,13 +23,13 @@
 <div class="edit-switch edit-switch-drop-down">
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
-        <g:select name="dropdown"
+        <g:select id="" name="dropdown"
                   optionKey="${optionKey}"
                   optionValue="${optionValue}"
                   noSelection="${noSelection}"
                   from="${values}"
                   value="${value}"
-                  class="dropDown" />
+                  class="use-select-2" />
         <button class="save" data-confirmation="${confirmation}"><g:message code="default.button.update.label"/></button>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
