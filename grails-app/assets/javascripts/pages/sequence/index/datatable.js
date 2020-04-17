@@ -30,12 +30,6 @@ $.otp.sequence = {
         var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true);
         var showRunLinks = document.getElementById("showRunLinks").value;
 
-
-        var link = $.otp.createLink({
-            controller: 'sequence',
-            action: 'exportAll',
-        });
-
         $("#sequenceTable").dataTable({
             dom: '<i> B rt<"clear">S',
             buttons: [ {
@@ -47,7 +41,13 @@ $.otp.sequence = {
                     iframe.style.height = "0px";
                     iframe.style.width = "0px";
                     iframe.style.border = "0px";
-                    iframe.src = link + "?filtering=" + encodeURIComponent(JSON.stringify(searchCriteria()));
+                    iframe.src = $.otp.createLink({
+                        controller: 'sequence',
+                        action: 'exportAll',
+                        parameters: {
+                            filtering: JSON.stringify(searchCriteria()),
+                        }
+                    });
                     document.body.appendChild( iframe );
                 }
             }],
