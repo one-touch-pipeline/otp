@@ -26,21 +26,21 @@ enum PedionTissue {
     LIVER('B'),
     PANCREAS('C'),
     OVAR('D'),
-    ORGANOID_LIVER('N', 'ORGANOID-LIVER'),
-    ORGANOID_PANCREAS('O', 'ORGANOID-PANCREAS'),
+    BRAIN('E'),
+    PROSTATE('F'),
+    INTESTINE('G'),
+    RECTUM('H'),
+    SMALL_INTESTINE('I'),
+    BONE_MARROW('J'),
+    ORGANOID_LIVER('N'),
+    ORGANOID_PANCREAS('O'),
 
     final String letter
     final String usedName
 
     PedionTissue(String letter) {
         this.letter = letter
-        this.usedName = name()
-        assert letter.size() == 1
-    }
-
-    PedionTissue(String letter, String usedName) {
-        this.letter = letter
-        this.usedName = usedName
+        this.usedName = name().replace("_", "-")
         assert letter.size() == 1
     }
 

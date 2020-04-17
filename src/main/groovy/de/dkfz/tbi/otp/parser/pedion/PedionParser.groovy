@@ -73,7 +73,7 @@ class PedionParser implements SampleIdentifierParser {
      * <li> technical replicate of sequencing assay: Different seq reruns from the same analyte sample  </li>
      * </ul>
      */
-    static final String ANALYTE = /[A-Z][0-9][A-Z][0-9]/
+    static final String BIH_GEN_FACILITY = /[A-Z]{4}/
 
     static final String PROJECT = "(?<${PROJECT_KEY}>${PROJECT_FUNDING_PERIOD}${PROJECT_NUMBER}${PROJECT_SUFFIX})"
 
@@ -83,7 +83,7 @@ class PedionParser implements SampleIdentifierParser {
 
     static final String SAMPLE = "${PID}-${SAMPLE_TYPE}"
 
-    static final String SAMPLE_IDENTIFIER = "(?<${SAMPLE_IDENTIFIER_KEY}>${SAMPLE}${ANALYTE})"
+    static final String SAMPLE_IDENTIFIER = "(?<${SAMPLE_IDENTIFIER_KEY}>${SAMPLE}${BIH_GEN_FACILITY})"
 
     @Override
     boolean tryParsePid(String pid) {
