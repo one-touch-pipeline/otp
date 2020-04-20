@@ -78,7 +78,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
                 seqTypes              : seqTypes,
                 samples               : samples.selectedSamples,
                 referenceGenomeIndex  : cmd.reference,
-                referenceGenomeIndexes: toolName.referenceGenomeIndexes,
+                referenceGenomeIndexes: toolName?.referenceGenomeIndexes,
                 selectedIndividuals   : selectedIndividuals,
                 selectedSampleTypes   : selectedSampleTypes,
                 mwps                  : mwps,

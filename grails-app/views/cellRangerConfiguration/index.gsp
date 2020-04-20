@@ -119,7 +119,7 @@
                             <g:select name="referenceGenomeIndex.id" class="use-select-2"
                                       from="${referenceGenomeIndexes}" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
                                       optionKey="id" noSelection="${[(""): "Select a reference"]}"
-                                        required="true"/>
+                                      required="true"/>
                         </div>
                     </div>
                     <div class="row two">
@@ -174,6 +174,7 @@
                     <th>${g.message(code: "cellRanger.individual")}</th>
                     <th>${g.message(code: "cellRanger.sampleType")}</th>
                     <th>${g.message(code: "cellRanger.seqType")}</th>
+                    <th>${g.message(code: "cellRanger.config.programVersion")}</th>
                     <th>${g.message(code: "cellRanger.referenceGenome")}</th>
                     <th>${g.message(code: "cellRanger.referenceGenomeIndex")}</th>
                     <th>${g.message(code: "cellRanger.expectedCells")}</th>
@@ -185,6 +186,7 @@
                         <td>${mwp.individual}</td>
                         <td>${mwp.sampleType}</td>
                         <td>${mwp.seqType}</td>
+                        <td>${mwp.config.programVersion}</td>
                         <td>${mwp.referenceGenome}</td>
                         <td>${mwp.referenceGenomeIndex.toolWithVersion}</td>
                         <td>${mwp.expectedCells}</td>
