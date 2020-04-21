@@ -578,7 +578,7 @@ ${BASE_MATERIAL}                -             -             -             -     
         if (includeOptional) {
             metadata += """
 ${FRAGMENT_SIZE}                -             -             -             234           234           -             456           -             -
-${PIPELINE_VERSION}             -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
+${FASTQ_GENERATOR}             -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
 ${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -             ${kit2}
 ${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -             -
 ${ANTIBODY}                     -             -             -             antibody1     antibody1     -             -             -             -
@@ -938,7 +938,7 @@ ${READ}                         1                                           2
 ${SAMPLE_ID}                    ${sampleIdentifier.name}                    ${sampleIdentifier.name}
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
-${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+${FASTQ_GENERATOR}             ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
 """
 
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -1108,7 +1108,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                 (SEQUENCING_TYPE)     : seqType.name,
                 (SEQUENCING_READ_TYPE): seqType.libraryLayout,
                 (SAMPLE_ID)           : sampleIdentifier.name,
-                (PIPELINE_VERSION)    : softwareToolIdentifier.name,
+                (FASTQ_GENERATOR)    : softwareToolIdentifier.name,
         ].asImmutable()
 
         Map fastqData1 = [

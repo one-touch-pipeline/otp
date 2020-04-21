@@ -30,25 +30,25 @@ import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PIPELINE_VERSION
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_GENERATOR
 
 @Component
-class PipelineVersionValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class FastqGeneratorValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The pipeline version is registered in the OTP database or empty.']
+        return ['The fastq generator is registered in the OTP database or empty.']
     }
 
     @Override
     String getColumnTitle(MetadataValidationContext context) {
-        return PIPELINE_VERSION.name()
+        return FASTQ_GENERATOR.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String pipelineVersion, Set<Cell> cells) {
-        if (pipelineVersion && !SoftwareToolService.getBaseCallingTool(pipelineVersion)) {
-            context.addProblem(cells, Level.ERROR, "Pipeline version '${pipelineVersion}' is not registered in the OTP database.", "At least one pipeline version is not registered in the OTP database.")
+    void validateValue(MetadataValidationContext context, String fastqGenerator, Set<Cell> cells) {
+        if (fastqGenerator && !SoftwareToolService.getBaseCallingTool(fastqGenerator)) {
+            context.addProblem(cells, Level.ERROR, "Fastq generator '${fastqGenerator}' is not registered in the OTP database.", "At least one fastq generator is not registered in the OTP database.")
         }
     }
 }

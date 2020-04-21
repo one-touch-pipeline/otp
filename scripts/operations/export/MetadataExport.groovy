@@ -306,8 +306,8 @@ class MetaDataExport {
         properties.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
         put(SAMPLE_ID, preferredOrLongest(
                 properties.get(SAMPLE_ID.toString()), SampleIdentifier.findAllBySample(seqTrack.sample)*.name))
-        put(PIPELINE_VERSION, preferredOrLongest(
-                properties.get(PIPELINE_VERSION.toString()), SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name))
+        put(FASTQ_GENERATOR, preferredOrLongest(
+                properties.get(FASTQ_GENERATOR.toString()), SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name))
         put(FRAGMENT_SIZE, String.valueOf(seqTrack.insertSize))
         put(LIB_PREP_KIT, seqTrack.libraryPreparationKit?.name)
         put(ILSE_NO, seqTrack.ilseSubmission?.ilseNumber?.toString())

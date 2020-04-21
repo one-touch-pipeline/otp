@@ -436,7 +436,7 @@ class MetadataImportService {
                     seqTypeMaybeTagmentationName(seqTypeRaw, tagmentationRaw),
                     [libraryLayout: libLayout, singleCell: isSingleCell],
             )
-            String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'
+            String pipelineVersionString = uniqueColumnValue(rows, FASTQ_GENERATOR) ?: 'unknown'
             String sampleIdString = uniqueColumnValue(rows, SAMPLE_ID)
             String libPrepKitString = uniqueColumnValue(rows, LIB_PREP_KIT)
             InformationReliability kitInfoReliability

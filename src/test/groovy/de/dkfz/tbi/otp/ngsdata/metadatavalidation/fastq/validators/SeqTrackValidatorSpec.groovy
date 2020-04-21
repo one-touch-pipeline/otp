@@ -438,7 +438,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
     void 'validate, when columns which must have equal values for a SeqTrack have different values, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SAMPLE_ID} ${SEQUENCING_TYPE} ${PIPELINE_VERSION} ${RUN_ID} ${LANE_NO} ${CUSTOMER_LIBRARY} ${INDEX}\n" +
+                "${SAMPLE_ID} ${SEQUENCING_TYPE} ${FASTQ_GENERATOR} ${RUN_ID} ${LANE_NO} ${CUSTOMER_LIBRARY} ${INDEX}\n" +
                         "A F K runA L1 1\n" +
                         "A F K runA L1 2\n" +
                         "B F L runA L1 1\n" +
@@ -451,8 +451,8 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + SAMPLE_ID, 0, 1, 2),
                         Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${SAMPLE_ID}'.", "All rows of the same seqTrack must have the same value in column 'SAMPLE_ID'."),
-                new Problem(cells(context, SEQ_TRACK_COLUMNS + PIPELINE_VERSION, 0, 1, 2),
-                        Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${PIPELINE_VERSION}'.", "All rows of the same seqTrack must have the same value in column 'PIPELINE_VERSION'."),
+                new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_GENERATOR, 0, 1, 2),
+                        Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${FASTQ_GENERATOR}'.", "All rows of the same seqTrack must have the same value in column 'FASTQ_GENERATOR'."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + CUSTOMER_LIBRARY, 0, 1, 2),
                         Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows of the same seqTrack must have the same value in column 'CUSTOMER_LIBRARY'."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + SEQUENCING_TYPE, 3, 4),

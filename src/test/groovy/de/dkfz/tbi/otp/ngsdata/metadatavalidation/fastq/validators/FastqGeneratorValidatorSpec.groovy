@@ -33,7 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class PipelineVersionValidatorSpec extends Specification implements DataTest {
+class FastqGeneratorValidatorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -43,44 +43,44 @@ class PipelineVersionValidatorSpec extends Specification implements DataTest {
         ]
     }
 
-    static final String PIPELINE_VERSION = "pipeline version"
+    static final String FASTQ_GENERATOR = "fastq generator"
 
     static final String METADATA_CONTENT =
-            "${MetaDataColumn.PIPELINE_VERSION}\n" +
+            "${MetaDataColumn.FASTQ_GENERATOR}\n" +
             "\n" +
-            "${PIPELINE_VERSION}\n"
+            "${FASTQ_GENERATOR}\n"
 
-    void 'validate, when metadata file contains valid pipeline version, succeeds'() {
+    void 'validate, when metadata file contains valid fastq generator, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 METADATA_CONTENT
         )
 
         DomainFactory.createSoftwareToolIdentifier(
-                name: PIPELINE_VERSION,
+                name: FASTQ_GENERATOR,
                 softwareTool: DomainFactory.createSoftwareTool( type: SoftwareTool.Type.BASECALLING )
         )
 
         when:
-        new PipelineVersionValidator().validate(context)
+        new FastqGeneratorValidator().validate(context)
 
         then:
         context.problems.empty
     }
 
-    void 'validate, when metadata file contain invalid pipeline version, adds error'() {
+    void 'validate, when metadata file contain invalid fastq generator, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 METADATA_CONTENT
         )
 
         when:
-        new PipelineVersionValidator().validate(context)
+        new FastqGeneratorValidator().validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A3'])
-        problem.message.contains("Pipeline version '${PIPELINE_VERSION}' is not registered in the OTP database.")
+        problem.message.contains("Fastq generator '${FASTQ_GENERATOR}' is not registered in the OTP database.")
     }
 }
