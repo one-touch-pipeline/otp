@@ -43,7 +43,7 @@ class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationCont
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The value in the column '${PROJECT}' should be consistent with the sample identifier."]
+        return ["The value in the column '${PROJECT}' should be consistent with the parsed „project“ value from the sample identifier."]
     }
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {

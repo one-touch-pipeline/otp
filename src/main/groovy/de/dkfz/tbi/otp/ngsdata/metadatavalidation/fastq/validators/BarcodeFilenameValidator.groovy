@@ -36,7 +36,7 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If a barcode can be parsed from the filename, it is consistent with the entry in the '${INDEX}' column."]
+        return ["If a barcode can be parsed from the fastq filename, it is consistent with the entry in the '${INDEX}' column."]
     }
 
     @Override

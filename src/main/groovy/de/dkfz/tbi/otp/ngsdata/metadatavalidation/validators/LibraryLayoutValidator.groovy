@@ -37,7 +37,7 @@ class LibraryLayoutValidator extends SingleValueValidator<AbstractMetadataValida
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The library layout is registered in OTP.']
+        return ['The sequencing layout is registered in OTP.']
     }
 
     @Override

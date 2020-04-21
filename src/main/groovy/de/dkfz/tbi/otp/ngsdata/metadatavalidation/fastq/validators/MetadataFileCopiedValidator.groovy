@@ -56,7 +56,7 @@ class MetadataFileCopiedValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ["There is no incorrect metadata file already copied to the seqcenter inbox."]
+        return ["There was no metadata file already copied to the seqcenter inbox with incorrect content."]
     }
 
     @Override

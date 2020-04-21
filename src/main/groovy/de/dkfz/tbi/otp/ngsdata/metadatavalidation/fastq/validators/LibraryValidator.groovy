@@ -40,7 +40,7 @@ class LibraryValidator extends SingleValueValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The Library contains only valid characters.']
+        return ['The tagmentation library number contains only valid characters.']
     }
 
     @Override

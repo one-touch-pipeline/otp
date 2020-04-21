@@ -47,7 +47,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the library layout is '${LibraryLayout.PAIRED}', a BED file should be configured in OTP to be used for the sample and library preparation kit."]
+        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the sequencing layout is '${LibraryLayout.PAIRED}', the correct BED file for the used library preparation kit should be configured in OTP."]
     }
 
     @Override

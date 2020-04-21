@@ -36,7 +36,7 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The mate number is inside the valid range for the library layout.']
+        return ['The mate number is inside the valid range for the sequencing layout (SINGLE = 1, PAIRED = 1,2).']
     }
 
     @Override

@@ -58,7 +58,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         [
                 "For the same combination of run and lane, either all or none of the rows should have a barcode.",
                 "For the same combination of run, lane and barcode, there must be the same value in each of the columns '${EQUAL_ATTRIBUTES.join("', '")}'.",
-                "For the same combination of run, lane and barcode no data must be registered in OTP yet.",
+                "For the same combination of run, lane and barcode data is already registered in OTP.",
                 "For each combination of run, lane and barcode, there must be exactly one row for each mate (Ignoring lines containing indexes).",
                 "For the same combination of run, lane and barcode, the filenames must differ in exactly one character which is the mate number (Ignoring lines containing indexes).",
         ]

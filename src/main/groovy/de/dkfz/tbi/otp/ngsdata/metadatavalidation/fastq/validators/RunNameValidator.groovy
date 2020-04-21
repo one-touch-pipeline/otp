@@ -37,7 +37,7 @@ class RunNameValidator extends SingleValueValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The run name is a valid directory name."]
+        return ["As the run name is used on the filesystem, only characters valid on the filesystem must be used."]
     }
 
     @Override

@@ -44,7 +44,7 @@ class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataVal
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The tagmentation based library value is registered in the OTP database.']
+        return ["The tagmentation based library value must be from the list: '${ALLOWED_VALUES.join("', '")}'."]
     }
 
     @Override

@@ -37,7 +37,7 @@ class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationCont
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If '${LIB}' is contained in the ${SAMPLE_ID} then the library should be given."]
+        return ["If '${LIB}' is contained in the '${SAMPLE_ID}' then the tagementation library number (CUSTOMER LIBRARY) should be given."]
     }
 
     @Override

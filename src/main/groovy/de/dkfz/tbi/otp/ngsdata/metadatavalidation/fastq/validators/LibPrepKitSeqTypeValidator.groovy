@@ -39,7 +39,8 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is ${SeqTypeService.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, the library preparation kit must not be empty."]
+        return ["If the sequencing type is ${SeqTypeService.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, " +
+                        "the library preparation kit must be given or have the value 'UNKNOWN'."]
     }
 
     @Override

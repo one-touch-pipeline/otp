@@ -42,7 +42,8 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
 
     @Override
     Collection<String> getDescriptions() {
-        return ['There is only one library name for each project, where the normalized library name is the same.']
+        return ['The library names which match the same normalized library should be' +
+                        ' the same within the metadata file and the same as the one already registered in OTP.']
     }
 
     @Override

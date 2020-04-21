@@ -44,7 +44,8 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     Collection<String> getDescriptions() {
         return [
                 'The sample identifier must be registered in OTP or parsable using a pattern known to OTP.',
-                'If the sample identifier can be parsed and is already registered in the OTP database, the parsed values should match those in the database.',
+                'If the sample identifier can be parsed and is already registered in the OTP database,' +
+                        ' the current parsed values should match those already registered in the database.',
                 'All sample identifiers in the metadata file should belong to the same project.',
         ]
     }

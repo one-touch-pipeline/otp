@@ -39,7 +39,7 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The filename must be unique in combination with run and project"]
+        return ["The combination of project, run and filename must be unique."]
     }
 
     @Override
