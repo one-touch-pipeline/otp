@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,33 +21,22 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.gorm.transactions.Transactional
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import java.text.SimpleDateFormat
+class RunDateParserServiceSpec extends Specification implements DataTest, ServiceUnitTest<RunDateParserService> {
 
-@Transactional
-class RunDateParserService {
+    @Unroll
+    void "test parseDateFromRunName, when '#input' expect '#value'"() {
+        expect:
+        value == service.parseDateFromRunName(input)
 
-    Date parseDateFromRunName(String runName) {
-        if (runName.length() < 6) {
-            return null
-        }
-        return parseDate("yyMMdd", runName.substring(0, 6))
+        where:
+        input    | value
+        "12345"  | null
+        "abcdef" | null
+        "910623" | new Date(91, 5, 23) // month seem to count from 0 ?!?
     }
-
-   /**
-    * Best effort to parse a text with a format
-    * @param format
-    * @param text
-    */
-   static Date parseDate(String format, String text) {
-       Date date = null
-       try {
-           SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.ENGLISH)
-           date = simpleDateFormat.parse(text)
-       } catch (Exception e) {
-       // no exception
-       }
-       return date
-   }
 }
