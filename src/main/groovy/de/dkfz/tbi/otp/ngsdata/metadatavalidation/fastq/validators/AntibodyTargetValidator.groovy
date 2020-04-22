@@ -41,7 +41,7 @@ class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationCon
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the antibody target is given. it must be registered in the OTP database (case-insensitive)."]
+        return ["If the antibody target is given, it must be registered in the OTP database (case-insensitive)."]
     }
 
     @Override
