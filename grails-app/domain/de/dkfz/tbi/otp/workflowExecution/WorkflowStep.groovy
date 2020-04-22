@@ -21,9 +21,63 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
-@SuppressWarnings("EmptyClass")
-class WorkflowStep implements Entity {
+class WorkflowStep implements Entity, Commentable {
 
+    enum State {
+        CREATED,
+        RUN,
+        SUCCESS,
+        FAIL,
+    }
+
+    WorkflowRun workflowRun
+
+    String beanName
+
+    String wesIdentifier
+
+    State state
+
+    WorkflowError workflowError
+
+    WorkflowStep previous
+
+    WorkflowStep restartedFrom
+
+    boolean obsolete = false
+
+    Set<ClusterJob> clusterJobs
+
+    List<WorkflowLog> logs
+
+    Comment comment
+
+    static hasMany = [
+            clusterJobs: ClusterJob,
+            logs: WorkflowLog,
+    ]
+
+    static constraints = {
+        wesIdentifier nullable: true
+        workflowError nullable: true
+        previous nullable: true
+        restartedFrom nullable: true
+        comment nullable: true
+    }
+
+    WorkflowStep getNext() {
+        return CollectionUtils.atMostOneElement(findAllByPrevious(this))
+    }
+
+    String getWesData() {
+        return null
+    }
 }

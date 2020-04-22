@@ -396,4 +396,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "otp-436-2") {
         sqlFile(path: 'changelogs/2020/otp-436-2-create-log-domains.sql')
     }
+
+    changeSet(author: "kosnac", id: "otp-436-3") {
+        sqlFile(path: 'changelogs/2020/otp-436-3-base-workflow-step-structure.sql')
+    }
 }

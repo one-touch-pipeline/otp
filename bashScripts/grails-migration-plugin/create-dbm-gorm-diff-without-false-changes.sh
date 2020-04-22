@@ -82,6 +82,7 @@ joinTables="\
 (workflow_run_output_artefacts)|\
 (workflow_run_workflow_config)|\
 (workflow_run_workflow_step)|\
+(workflow_step_workflow_log)|\
 "
 
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath
