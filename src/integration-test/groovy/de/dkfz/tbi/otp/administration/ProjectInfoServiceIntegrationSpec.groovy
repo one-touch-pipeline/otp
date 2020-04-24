@@ -84,6 +84,10 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         project.projectInfos = projectInfos as Set<ProjectInfo>
         project.save(flush: true)
 
+        Map<String, List<ProjectInfo>> expected = [
+                "Dta": [projectInfos[2], projectInfos[1]],
+                "NonDta": [projectInfos[0]],
+        ]
         Map<String, List<ProjectInfo>> result
 
         when:
@@ -92,10 +96,8 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         }
 
         then:
-        result == [
-                "Dta": [projectInfos[2], projectInfos[1]],
-                "NonDta": [projectInfos[0]],
-        ]
+
+        TestCase.assertContainSame(result, expected)
     }
 
     void "createProjectInfoAndUploadFile, succeeds"() {
