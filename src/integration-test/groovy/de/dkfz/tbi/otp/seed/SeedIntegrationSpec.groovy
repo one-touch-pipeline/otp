@@ -87,15 +87,31 @@ class SeedIntegrationSpec extends Specification {
         FileType.Type.SEQUENCE | 'fastq' | '_fastq'
     }
 
+    /**
+     * All created Objects need to be explicitly removed because the seed-plugin creates them in a
+     * different session and thus they would not be rolled back but persisted across all tests.
+     *
+     * We have noticed that Domains with the mapping setting tablePerHierarchy have issues with bulk
+     * operations like delete. The root of this problem seems to be the temporary hibernate tables
+     * (prefixed with HT_*) which hibernate uses for these operations.
+     * Currently only WorkflowLog and its subclasses are affected by this and we typically do not use
+     * updates like this in production or anywhere else. Furthermore we are planning on replacing the
+     * seed-plugin with the migration plugin. (see `migrations/changelogs/defaultValues/*`)
+     * Because of this we decided to not bother with this issue for now.
+     *
+     * As these classes are not seeded anyways, we use a check if the Domain even needs to be cleaned
+     * in the first place and skip otherwise.
+     */
     void cleanupSpec() {
         Realm.withNewSession {
-            grailsApplication.domainClasses*.clazz.sort {
+            List<Class> allDomains = grailsApplication.domainClasses*.clazz
+            allDomains.sort {
                 it.simpleName
             }.each {
-                Realm.executeUpdate("delete ${it.simpleName} ".toString())
-            }
-            grailsApplication.domainClasses*.clazz.each {
-                assert it.count() == 0
+                if (it.count()) {
+                    Realm.executeUpdate("DELETE ${it.simpleName} ".toString())
+                    assert it.count() == 0
+                }
             }
         }
     }
