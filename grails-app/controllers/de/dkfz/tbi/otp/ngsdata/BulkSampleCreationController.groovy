@@ -33,6 +33,7 @@ class BulkSampleCreationController {
     ]
 
     CommentService commentService
+    ProjectSelectionService projectSelectionService
     SampleIdentifierService sampleIdentifierService
 
     Map index() {
