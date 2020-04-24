@@ -43,9 +43,7 @@ class WorkflowRun implements Commentable, Entity {
 
     String workDirectory
 
-    // the key in the input and outputArtefacts represents the 'role' of the artefact for the workflow, e.g. disease and control
-    Map<String, WorkflowArtefact> inputArtefacts
-
+    // the key in the outputArtefacts represents the 'role' of the artefact for the workflow, e.g. disease and control
     Map<String, WorkflowArtefact> outputArtefacts
 
     List<ExternalWorkflowConfigFragment> configs
@@ -79,5 +77,11 @@ class WorkflowRun implements Commentable, Entity {
 
     static mapping = {
         combinedConfig type: "text"
+    }
+
+    Map<String, WorkflowArtefact> getInputArtefacts() {
+        WorkflowRunInputArtefact.findAllByWorkflowRun(this).collectEntries {
+            [it.role, it.workflowArtefact]
+        }
     }
 }

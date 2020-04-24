@@ -19,28 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.utils
+package de.dkfz.tbi.otp.workflowExecution
 
-import grails.gorm.transactions.Transactional
+import de.dkfz.tbi.otp.Withdrawable
 
-import de.dkfz.tbi.otp.workflowExecution.*
-
-@Transactional
-class WorkflowDeletionService {
-    void deleteWorkflowRun(WorkflowRun workflowRun) {
-        WorkflowArtefact.findAllByProducedBy(workflowRun).each {
-            deleteWorkflowArtefact(it)
-        }
-        workflowRun.delete(flush: true)
-    }
-
-    void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {
-        WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact).each {
-            WorkflowRun workflowRun = it.workflowRun
-            it.delete(flush: true)
-            deleteWorkflowRun(workflowRun)
-        }
-        workflowArtefact.artefact.ifPresent { it.delete(flush: true) }
-        workflowArtefact.delete(flush: true)
-    }
+trait Artefact implements Withdrawable {
+    WorkflowArtefact workflowArtefact
 }

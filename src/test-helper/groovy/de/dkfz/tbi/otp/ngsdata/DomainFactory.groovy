@@ -339,6 +339,14 @@ class DomainFactory {
         return createDomainObject(WorkflowArtefact, [:], properties)
     }
 
+    static WorkflowRunInputArtefact createWorkflowRunInputArtefact(Map properties = [:]) {
+        return createDomainObject(WorkflowRunInputArtefact, [
+                workflowRun: { createWorkflowRun() },
+                role: "role_${counter++}",
+                workflowArtefact: { createWorkflowArtefact() },
+        ], properties)
+    }
+
     static WorkflowRun createWorkflowRun(Map properties = [:]) {
         return createDomainObject(WorkflowRun, [
                 workflow: { createWorkflow() },

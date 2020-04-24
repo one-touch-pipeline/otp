@@ -23,14 +23,12 @@ package de.dkfz.tbi.otp.utils
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
 @Integration
@@ -38,13 +36,14 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Do
 
     WorkflowDeletionService workflowDeletionService
 
+    @Ignore
+    //TODO: unignore when domain classes implementing Artefact exist; test that Artefacts belonging to workflowArtefact are also deleted
     void "test deleteWorkflowRun"() {
         given:
+        WorkflowRunInputArtefact wria = createData()
         WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
-        ProcessParameter artefact = DomainFactory.createProcessParameter(className: SeqTrack.class.name)
-        artefact.process.finished = true
-        artefact.process.save(flush: true)
-        DomainFactory.createWorkflowArtefact(artefact: artefact, producedBy: workflowRun)
+        wria.workflowArtefact.producedBy = workflowRun
+        wria.save(flush: true)
 
         when:
         workflowDeletionService.deleteWorkflowRun(workflowRun)
@@ -52,5 +51,28 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Do
         then:
         WorkflowRun.count() == 0
         WorkflowArtefact.count() == 0
+        WorkflowRunInputArtefact.count() == 0
+    }
+
+    @Ignore
+    //TODO: unignore when domain classes implementing Artefact exist; test that Artefacts belonging to workflowArtefact are also deleted
+    void "test deleteWorkflowArtefact"() {
+        given:
+        WorkflowRunInputArtefact wria = createData()
+        DomainFactory.createWorkflowArtefact(producedBy: wria.workflowRun)
+
+        when:
+        workflowDeletionService.deleteWorkflowArtefact(wria.workflowArtefact)
+
+        then:
+        WorkflowRun.count() == 0
+        WorkflowArtefact.count() == 0
+        WorkflowRunInputArtefact.count() == 0
+    }
+
+    private WorkflowRunInputArtefact createData() {
+        WorkflowArtefact wa = DomainFactory.createWorkflowArtefact()
+        WorkflowRun workflowRun2 = DomainFactory.createWorkflowRun()
+        return DomainFactory.createWorkflowRunInputArtefact(workflowRun: workflowRun2, role: "whatever", workflowArtefact: wa)
     }
 }

@@ -22,8 +22,9 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.Withdrawable
-import de.dkfz.tbi.otp.job.processing.Artefact
 import de.dkfz.tbi.otp.utils.Entity
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class WorkflowArtefact implements Withdrawable, Entity {
 
@@ -37,13 +38,7 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     WorkflowRun producedBy
 
-    Artefact artefact
-
     State state = State.LEGACY
-
-    static belongsTo = [
-            artefact: Artefact
-    ]
 
     static constraints = {
         producedBy nullable: true
@@ -57,5 +52,10 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     static mapping = {
         withdrawnComment type: "text"
+    }
+
+    // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
+    Optional<Artefact> getArtefact() {
+        Optional.ofNullable(atMostOneElement(executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])) as Artefact)
     }
 }

@@ -19,28 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.utils
+package de.dkfz.tbi.otp.workflowExecution
 
-import grails.gorm.transactions.Transactional
+import de.dkfz.tbi.otp.utils.Entity
 
-import de.dkfz.tbi.otp.workflowExecution.*
+class WorkflowRunInputArtefact implements Entity {
 
-@Transactional
-class WorkflowDeletionService {
-    void deleteWorkflowRun(WorkflowRun workflowRun) {
-        WorkflowArtefact.findAllByProducedBy(workflowRun).each {
-            deleteWorkflowArtefact(it)
-        }
-        workflowRun.delete(flush: true)
-    }
+    WorkflowRun workflowRun
+    // 'role' of the artefact for the workflow, e.g. "disease" and "control"
+    String role
+    WorkflowArtefact workflowArtefact
 
-    void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {
-        WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact).each {
-            WorkflowRun workflowRun = it.workflowRun
-            it.delete(flush: true)
-            deleteWorkflowRun(workflowRun)
-        }
-        workflowArtefact.artefact.ifPresent { it.delete(flush: true) }
-        workflowArtefact.delete(flush: true)
+    static constraints = {
+        role unique: 'workflowRun'
+        workflowArtefact unique: 'workflowRun'
     }
 }
