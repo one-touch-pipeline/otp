@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2011-2019 The OTP authors
+  ~ Copyright 2011-2020 The OTP authors
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,15 @@
   ~ SOFTWARE.
   -->
 
-
 #Info
+A wes server for cwl.
 
-The tool provide only the wes interface, it use cwltool to run the cwl workflows.
+Please note that python 2.7 is required, python 3 will not work.
 
 # Used documentation:
 https://pypi.org/project/wes-service/
 
-
-##Installation:
+#Installation:
 The tool can be installed on the cluster in your home with:
 ```
 module load python/2.7.9
@@ -43,25 +42,16 @@ pip install wes-service
 pip install Werkzeug==0.16.1
 ```
 
-##Prepare console
-Since it use an environment, every new console needs to be prepared with:
+#start server:
 ```
 module load python/2.7.9
 source ~/venv-wes/bin/activate
 
-export WES_API_HOST=localhost:8080
+export WES_API_HOST=localhost:8081
 export WES_API_AUTH=my_api_token
 export WES_API_PROTO=http
+wes-server --debug --port 8081
 ```
 
-#start server:
-```
-wes-server --debug
-```
-
-#request:
-```
-wes-client --list
-
-wes-client 1st-tool.cwl echo-job.yml
-```
+# Problem
+Unclear, how to provide attachments correctly for run request.
