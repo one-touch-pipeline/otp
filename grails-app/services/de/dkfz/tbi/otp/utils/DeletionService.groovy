@@ -54,8 +54,6 @@ class DeletionService {
     AnalysisDeletionService analysisDeletionService
     FileService fileService
     DataSwapService dataSwapService
-    WorkflowDeletionService workflowDeletionService
-
 
     void deleteProjectContent(Project project) {
         // Delete individuals for a project
@@ -130,7 +128,7 @@ class DeletionService {
                 }
                 seqTypes.add(seqTrack.seqType)
 
-                deleteArtefacts(Artefact.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
             }
 
             SeqScan.findAllBySample(sample)*.delete(flush: true)
@@ -148,19 +146,16 @@ class DeletionService {
         return [deletionScript.toString(), deletionScriptOtherUser.toString()]
     }
 
-    void deleteArtefacts(List<Artefact> artefacts) {
-        artefacts.each {
-            deleteArtefact(it)
+    void deleteProcessParameters(List<ProcessParameter> processParameters) {
+        processParameters.each {
+            deleteProcessParameter(it)
         }
     }
 
-    private void deleteArtefact(Artefact artefact) {
-        if (artefact) {
-            Process process = artefact.process
-            if (artefact.workflowArtefact) {
-                workflowDeletionService.deleteWorkflowArtefact(artefact.workflowArtefact)
-            }
-            artefact.delete(flush: true)
+    private void deleteProcessParameter(ProcessParameter processParameter) {
+        if (processParameter) {
+            Process process = processParameter.process
+            processParameter.delete(flush: true)
             deleteProcess(process)
         }
     }
@@ -359,7 +354,7 @@ class DeletionService {
             }
 
             qualityAssessmentPasses.each {
-                deleteArtefacts(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
                 it.delete(flush: true)
             }
         } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
@@ -370,7 +365,7 @@ class DeletionService {
                 OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
             qualityAssessmentMergedPasses.each {
-                deleteArtefacts(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
                 it.delete(flush: true)
             }
         } else if (abstractBamFile instanceof RoddyBamFile) {
@@ -430,12 +425,12 @@ class DeletionService {
                 dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage)))
 
-                deleteArtefacts(Artefact.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
                 processedMergedBamFile.delete(flush: true)
             }
 
             mergingPasses.each {
-                deleteArtefacts(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
                 it.delete(flush: true)
             }
 
@@ -515,7 +510,7 @@ class DeletionService {
                 Map<String, List<File>> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
                 dirsToDelete.addAll(processingDirsToDelete["dirsToDelete"])
                 dirsToDeleteWithOtherUser.addAll(processingDirsToDelete["dirsToDeleteWithOtherUser"])
-                deleteArtefacts(Artefact.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
                 processedBamFile.delete(flush: true)
             }
             alignmentPass.delete(flush: true)
@@ -539,7 +534,7 @@ class DeletionService {
         if (bamFiles) {
             BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
                 dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
-                deleteArtefacts(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
         }
 
@@ -550,7 +545,7 @@ class DeletionService {
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                     SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
-            deleteArtefacts(Artefact.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
+            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.baseDirectory
             bamFile.baseBamFile = null
             bamFile.delete(flush: true)
@@ -575,7 +570,7 @@ class DeletionService {
             crmwp.bamFileInProjectFolder = null
             crmwp.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            deleteArtefacts(Artefact.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
+            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.workDirectory
             bamFile.delete(flush: true)
             if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
@@ -647,7 +642,7 @@ class DeletionService {
             return deleteSeqTrack(it).get("dirsToDelete")
         }.flatten() as List<File>
 
-        deleteArtefacts(Artefact.findAllByValueAndClassName(run.id.toString(), run.class.name))
+        deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), run.class.name))
         run.delete(flush: true)
         return dirsToDelete
     }

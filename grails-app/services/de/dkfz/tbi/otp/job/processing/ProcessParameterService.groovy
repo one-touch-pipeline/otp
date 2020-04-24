@@ -29,9 +29,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 class ProcessParameterService {
 
     List<JobExecutionPlan> getAllJobExecutionPlansBySeqTrackAndClass(String seqTrackId, String className) {
-        List<Artefact> processParameters = Artefact.findAllByValueAndClassName(seqTrackId, className)
+        List<ProcessParameter> processParameters = ProcessParameter.findAllByValueAndClassName(seqTrackId, className)
         List<JobExecutionPlan> jobExecutionPlans = []
-        processParameters.each { Artefact processParameter ->
+        processParameters.each { ProcessParameter processParameter ->
             jobExecutionPlans << processParameter.process.jobExecutionPlan
         }
         return jobExecutionPlans

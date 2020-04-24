@@ -428,7 +428,7 @@ class ProcessesController {
     }
 
     private Map<String,String> processParameterData(Process process) {
-        Artefact parameter = Artefact.findByProcess(process)
+        ProcessParameter parameter = ProcessParameter.findByProcess(process)
         if (parameter) {
             if (parameter.className) {
                 return [

@@ -76,11 +76,11 @@ class FastqcStartJobIntegrationSpec extends Specification {
         given:
         SeqTrack failedInstance = DomainFactory.createSeqTrack()
         Process failedProcess = DomainFactory.createProcess()
-        DomainFactory.createArtefact(failedProcess, failedInstance)
+        DomainFactory.createProcessParameter(failedProcess, failedInstance)
 
         FastqcStartJob fastqcStartJob = new FastqcStartJob()
         fastqcStartJob.schedulerService = Mock(SchedulerService) {
-            1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, Artefact processParameterSecond ->
+            1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameterSecond ->
                 Process processSecond = DomainFactory.createProcess(
                     jobExecutionPlan: failedProcess.jobExecutionPlan,
                 )

@@ -46,7 +46,7 @@
  *
  */
 
-import de.dkfz.tbi.otp.job.processing.Artefact
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 import java.text.SimpleDateFormat
 
@@ -95,7 +95,7 @@ List<List> result = [
         bamFileBasedErrors,
         analysisBasedErrors,
 ].collectMany {
-    Artefact.executeQuery(it, [
+    ProcessParameter.executeQuery(it, [
             startDate: startDate,
             endDate  : endDate,
     ])
@@ -119,7 +119,7 @@ select
     c.${propertyName}seqType
 from
     ProcessingStepUpdate psu,
-    Artefact pp,
+    ProcessParameter pp,
     ${className} c
 where
     psu.error is not null

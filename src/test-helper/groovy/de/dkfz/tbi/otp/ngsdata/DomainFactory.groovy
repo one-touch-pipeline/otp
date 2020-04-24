@@ -327,8 +327,8 @@ class DomainFactory {
         ], properties)
     }
 
-    static Artefact createArtefact(Map properties = [:]) {
-        return createDomainObject(Artefact, [
+    static ProcessParameter createProcessParameter(Map properties = [:]) {
+        return createDomainObject(ProcessParameter, [
                 process  : { createProcessingStepUpdate().process },
                 value    : "${counter++}",
                 className: "${counter++}",
@@ -336,9 +336,7 @@ class DomainFactory {
     }
 
     static WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
-        return createDomainObject(WorkflowArtefact, [
-                artefact: { createArtefact() },
-        ], properties)
+        return createDomainObject(WorkflowArtefact, [:], properties)
     }
 
     static WorkflowRun createWorkflowRun(Map properties = [:]) {
@@ -1962,7 +1960,7 @@ class DomainFactory {
         final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare")
         assert process.save(flush: true)
         if (processParameterObject != null) {
-            createArtefact(process, processParameterObject)
+            createProcessParameter(process, processParameterObject)
         }
         final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: jobClass)
         assert step.save(flush: true)
@@ -1995,16 +1993,16 @@ class DomainFactory {
         return processingStep
     }
 
-    static Artefact createArtefact(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
-        return createDomainObject(Artefact, [
+    static ProcessParameter createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
+        return createDomainObject(ProcessParameter, [
                 process  : process,
                 className: parameterValue.class.name,
                 value    : parameterValue.id.toString(),
         ], properties)
     }
 
-    static Artefact createArtefact(final Process process, final String className, final String value) {
-        return createDomainObject(Artefact, [
+    static ProcessParameter createProcessParameter(final Process process, final String className, final String value) {
+        return createDomainObject(ProcessParameter, [
                 process  : process,
                 className: className,
                 value    : value,

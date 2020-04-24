@@ -42,7 +42,7 @@ from
     join config.pipeline pipeline,
     ClusterJob job
     join job.realm realm,
-    Artefact processParameter
+    ProcessParameter processParameter
 where
     cast(processParameter.value as long) = analysis.id
     and processParameter.process = job.processingStep.process

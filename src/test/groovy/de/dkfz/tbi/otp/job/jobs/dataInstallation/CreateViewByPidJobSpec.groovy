@@ -45,7 +45,7 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
                 JobExecutionPlan,
                 Process,
                 ProcessingStep,
-                Artefact,
+                ProcessParameter,
                 Project,
                 Realm,
                 Run,
@@ -93,7 +93,7 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
         File source = new File(createViewByPidJob.lsdfFilesService.getFileFinalPath(dataFile))
         File target = new File(createViewByPidJob.lsdfFilesService.getFileViewByPidPath(dataFile))
 
-        DomainFactory.createArtefact([
+        DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : seqTrack.id,
                 className: SeqTrack.class.name,

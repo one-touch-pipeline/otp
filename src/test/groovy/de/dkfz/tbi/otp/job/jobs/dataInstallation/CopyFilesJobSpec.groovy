@@ -47,7 +47,7 @@ class CopyFilesJobSpec extends Specification implements DataTest {
                 JobExecutionPlan,
                 Process,
                 ProcessingStep,
-                Artefact,
+                ProcessParameter,
                 Project,
                 Realm,
                 Run,
@@ -239,7 +239,7 @@ chmod 440 .* .*
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
         CreateFileHelper.createFile(new File("${dataFile.initialDirectory}/${dataFile.fileName}"))
 
-        DomainFactory.createArtefact([
+        DomainFactory.createProcessParameter([
                 process: step.process,
                 value: seqTrack.id,
                 className: SeqTrack.class.name,

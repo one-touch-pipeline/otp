@@ -36,8 +36,6 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 @Rollback
 @Integration
@@ -281,19 +279,17 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         ClusterJob.count() == 0
     }
 
-    void "test deleteArtefacts"() {
+    void "test deleteProcessParameters"() {
         given:
-        WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
-        Artefact artefact = DomainFactory.createArtefact(className: SeqTrack.class.name)
-        artefact.process.finished = true
-        artefact.process.save(flush: true)
-        DomainFactory.createWorkflowArtefact(artefact: artefact, producedBy: workflowRun)
+        ProcessParameter processParameter = DomainFactory.createProcessParameter(className: SeqTrack.class.name)
+        processParameter.process.finished = true
+        processParameter.process.save(flush: true)
 
         when:
-        deletionService.deleteArtefacts([artefact])
+        deletionService.deleteProcessParameters([processParameter])
 
         then:
-        WorkflowRun.count() == 0
-        WorkflowArtefact.count() == 0
+        ProcessParameter.count() == 0
+        Process.count() == 0
     }
 }

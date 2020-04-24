@@ -265,14 +265,14 @@ class SchedulerService {
      * From the JobExecutionPlan the first {@link JobDefinition} describing the first Job
      * is derived and a {@link ProcessingStep} is created. The {@link Parameter}s passed into
      * the method are mapped to the input parameters accepted by the first JobDefinition.
-     * The {@link Artefact} passed into the method is put to the Process.
+     * The {@link ProcessParameter} passed into the method is put to the Process.
      * Last but not least the created ProcessingStep gets scheduled.
      * @param startJob The StartJob which wants to trigger the Process
      * @param input List of Parameters provided by the StartJob for this Process.
-     * @param processParameter Artefact provided by the StartJob for this Process.
+     * @param processParameter ProcessParameter provided by the StartJob for this Process.
      * @return the new created process
      */
-    Process createProcess(StartJob startJob, List<Parameter> input, Artefact processParameter = null) {
+    Process createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
         if (!schedulerActive) {
             throw new RuntimeException("Scheduler is disabled")
         }
@@ -657,7 +657,7 @@ class SchedulerService {
                 }
                 // Limitation: in case the restartedStep is the first step of the Process and the Process had been started with Input Parameters
                 // those will not be available as it is difficult to map them back
-                // this is considered as a theoretical problem as input parameters to the first ProcessingStep are from a time when the Artefact
+                // this is considered as a theoretical problem as input parameters to the first ProcessingStep are from a time when the ProcessParameter
                 // did not yet exist and all existing Workflows do not use this feature
                 mapInputParamatersToStep(restartedStep, step.previous ? step.previous.output : [])
                 // update the previous link

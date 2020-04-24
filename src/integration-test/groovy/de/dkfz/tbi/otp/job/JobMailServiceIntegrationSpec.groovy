@@ -101,7 +101,7 @@ class JobMailServiceIntegrationSpec extends Specification {
             ])
         }
 
-        DomainFactory.createArtefact(step.process, seqTrack)
+        DomainFactory.createProcessParameter(step.process, seqTrack)
         assert step.processParameterObject
 
         AbstractJobImpl job = Mock(AbstractJobImpl) {

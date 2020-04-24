@@ -55,7 +55,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
                 Pipeline,
                 Process,
                 ProcessingStep,
-                Artefact,
+                ProcessParameter,
                 Project,
                 Realm,
                 ReferenceGenome,
@@ -159,7 +159,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path])
 
-        DomainFactory.createArtefact([
+        DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : importProcess.id.toString(),
                 className: ImportProcess.class.name,

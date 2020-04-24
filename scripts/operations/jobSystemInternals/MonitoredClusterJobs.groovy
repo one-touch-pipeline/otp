@@ -36,7 +36,7 @@ ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).groupBy {
     it.processingStep
 }.each { ProcessingStep processingStep, List<ClusterJob> clusterJobs ->
     Process process = processingStep.process
-    println "ProcessingStep ${processingStep.id}: ${processingStep.jobDefinition.name} on ${atMostOneElement(Artefact.findAllByProcess(process))?.toObject()}"
+    println "ProcessingStep ${processingStep.id}: ${processingStep.jobDefinition.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(process))?.toObject()}"
     clusterJobs.each {
         println "  ${it}"
     }

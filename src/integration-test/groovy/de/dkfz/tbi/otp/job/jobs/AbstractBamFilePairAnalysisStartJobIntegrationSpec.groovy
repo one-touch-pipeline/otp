@@ -136,7 +136,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         BamFilePairAnalysis failedInstance = getInstance()
 
         Process failedProcess = DomainFactory.createProcess()
-        DomainFactory.createArtefact(failedProcess, failedInstance)
+        DomainFactory.createProcessParameter(failedProcess, failedInstance)
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->
@@ -145,7 +145,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         }
 
         service.schedulerService = Mock(SchedulerService) {
-            1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, Artefact processParameter2 ->
+            1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
                 Process process2 = DomainFactory.createProcess(
                         jobExecutionPlan: failedProcess.jobExecutionPlan
                 )
@@ -160,7 +160,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         LogThreadLocal.withThreadLog(System.out) {
             process = service.restart(failedProcess)
         }
-        BamFilePairAnalysis restartedInstance = BamFilePairAnalysis.get(Artefact.findByProcess(process).value)
+        BamFilePairAnalysis restartedInstance = BamFilePairAnalysis.get(ProcessParameter.findByProcess(process).value)
 
         then:
         BamFilePairAnalysis.list().size() == 2

@@ -26,7 +26,7 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.job.processing.Artefact
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -41,7 +41,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Do
     void "test deleteWorkflowRun"() {
         given:
         WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
-        Artefact artefact = DomainFactory.createArtefact(className: SeqTrack.class.name)
+        ProcessParameter artefact = DomainFactory.createProcessParameter(className: SeqTrack.class.name)
         artefact.process.finished = true
         artefact.process.save(flush: true)
         DomainFactory.createWorkflowArtefact(artefact: artefact, producedBy: workflowRun)

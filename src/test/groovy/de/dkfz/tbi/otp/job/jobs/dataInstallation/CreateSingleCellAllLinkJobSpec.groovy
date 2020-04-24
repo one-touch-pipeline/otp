@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.job.processing.Artefact
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkFileUtils
@@ -39,7 +39,7 @@ class CreateSingleCellAllLinkJobSpec extends Specification implements DataTest, 
         [
                 DataFile,
                 ProcessingStep,
-                Artefact,
+                ProcessParameter,
         ]
     }
 
@@ -75,7 +75,7 @@ class CreateSingleCellAllLinkJobSpec extends Specification implements DataTest, 
         File source = new File(createSingleCellAllLinkJob.lsdfFilesService.getFileFinalPath(dataFile))
         File target = new File(createSingleCellAllLinkJob.lsdfFilesService.getWellAllFileViewByPidPath(dataFile))
 
-        DomainFactory.createArtefact([
+        DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : seqTrack.id,
                 className: SeqTrack.name,

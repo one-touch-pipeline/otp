@@ -21,13 +21,11 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class Artefact implements Entity {
+class ProcessParameter implements Entity {
     String value
     String className
     Process process
@@ -45,22 +43,18 @@ class Artefact implements Entity {
     }
 
     /**
-     * Retrieves the domain object instance this Artefact points to in case className is not null.
+     * Retrieves the domain object instance this ProcessParameter points to in case className is not null.
      *
      * If the object does not exists, this method returns null.
      * @return The domain object instance or null
      */
     ProcessParameterObject toObject() {
         if (className) {
-            List resultList = Artefact.executeQuery("FROM ${className} WHERE id=${value}".toString())
+            List resultList = executeQuery("FROM ${className} WHERE id=${value}".toString())
             if (resultList) {
                 return exactlyOneElement(resultList)
             }
         }
         return null
-    }
-
-    WorkflowArtefact getWorkflowArtefact() {
-        return CollectionUtils.atMostOneElement(WorkflowArtefact.findAllByArtefact(this))
     }
 }

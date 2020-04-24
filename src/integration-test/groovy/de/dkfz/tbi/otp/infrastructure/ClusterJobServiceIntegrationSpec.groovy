@@ -1698,7 +1698,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ClusterJob job = createClusterJob(clusterJobProps)
         Run run = inputRun ?: DomainFactory.createRun().save([flush: true])
 
-        DomainFactory.createArtefact(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
+        DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
 
         return [job, run]
     }

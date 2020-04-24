@@ -61,7 +61,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
                 Process,
                 ProcessingOption,
                 ProcessingStep,
-                Artefact,
+                ProcessParameter,
                 Project,
                 Realm,
                 ReferenceGenome,
@@ -580,7 +580,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         CreateFileHelper.createFile(bamFile)
         CreateFileHelper.createFile(baiFile)
 
-        DomainFactory.createArtefact([
+        DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : importProcess.id.toString(),
                 className: ImportProcess.class.name,

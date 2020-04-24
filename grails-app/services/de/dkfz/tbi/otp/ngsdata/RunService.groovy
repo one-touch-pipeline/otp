@@ -26,7 +26,7 @@ import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.job.processing.Artefact
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 /**
  * Service to retrieve information about Runs.
@@ -191,15 +191,15 @@ class RunService {
 
     /**
      * Retrieves the ProcessParameters for the given Run.
-     * @param run The Run for which the Artefact should be retrieved.
-     * @return List of Artefact
+     * @param run The Run for which the ProcessParameter should be retrieved.
+     * @return List of ProcessParameter
      * */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Artefact> retrieveProcessParameters(Run run) {
+    List<ProcessParameter> retrieveProcessParameters(Run run) {
         if (!run) {
             return []
         }
-        return Artefact.findAllByValueAndClassName("${run.id}", run.class.name)
+        return ProcessParameter.findAllByValueAndClassName("${run.id}", run.class.name)
     }
 
 

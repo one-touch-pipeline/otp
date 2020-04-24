@@ -95,7 +95,7 @@ class ProcessingStepIntegrationTests {
                 ]),
         ])
 
-        DomainFactory.createArtefact([
+        DomainFactory.createProcessParameter([
                 process: process,
                 value: seqTrack.id.toString(),
                 className: seqTrack.getClass().getName(),

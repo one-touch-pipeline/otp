@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,27 +19,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import de.dkfz.tbi.otp.job.processing.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-println "SCHEDULER ACTIVE"
-println ctx.schedulerService.active
-println ""
-println "SCHEDULER QUEUE"
-ctx.schedulerService.queue.each {
-    println it
-}
-println ""
-println "RUNNING JOBS"
-ctx.schedulerService.getRunning().each {
-    println "${it}\t(ProcessingStep ID ${it.processingStep.id}, ${it.processingStep.process.jobExecutionPlan.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(it.processingStep.process))?.toObject()}"
-}
-println ""
-println "THREADS"
-Thread.getAllStackTraces().each {
-    println "${it.key} (ID ${it.key.id})"
-    it.value.each {
-        println "  ${it}"
-    }
-}
-"EOF"
+ALTER TABLE artefact RENAME TO process_parameter;

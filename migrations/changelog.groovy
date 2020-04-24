@@ -387,6 +387,7 @@ databaseChangeLog = {
     changeSet(author: "albrecjp", id: "otp-480") {
         sqlFile(path: 'changelogs/2020/otp-480.sql')
     }
+<<<<<<< HEAD
     changeSet(author: "m39l", id: "otp-437") {
         sqlFile(path: 'changelogs/2020/otp-437.sql')
     }
@@ -410,4 +411,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/otp-442-link-option-for-bam-import.groovy'
+
+    changeSet(author: "", id: "otp-438") {
+        sqlFile(path: 'changelogs/2020/otp-438.sql')
+    }
 }
