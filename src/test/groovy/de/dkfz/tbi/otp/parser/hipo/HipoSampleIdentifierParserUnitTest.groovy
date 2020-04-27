@@ -162,32 +162,32 @@ class HipoSampleIdentifierParserUnitTest {
     @Test
     void testSampleTypeDbName() {
         String sampleName = "H004-ABCD-T1-D1"
-        String tissueTypeExp = "TUMOR"
+        String tissueTypeExp = "tumor"
         String tissueTypeAct = parser.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
 
         sampleName = "H456-ABCD-T3-D1"
-        tissueTypeExp = "TUMOR03"
+        tissueTypeExp = "tumor03"
         tissueTypeAct = parser.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
 
         sampleName = "H035-BPDM-B3-D1"
-        tissueTypeExp = "BLOOD03"
+        tissueTypeExp = "blood03"
         tissueTypeAct = parser.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
 
         sampleName = "H035-BPDM-B1-D1"
-        tissueTypeExp = "BLOOD01"
+        tissueTypeExp = "blood01"
         tissueTypeAct = parser.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
 
         sampleName = "H035-BPDM-C1-D1"
-        tissueTypeExp = "CELL01"
+        tissueTypeExp = "cell01"
         tissueTypeAct = parser.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
 
         sampleName = "H035-IJKLMM-B1-D1"
-        tissueTypeExp = "BLOOD01"
+        tissueTypeExp = "blood01"
         tissueTypeAct = parser.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
     }
@@ -195,7 +195,7 @@ class HipoSampleIdentifierParserUnitTest {
     @Test
     void testSampleType_checkTissueType_PLASMA() {
         String sampleName = "H001-BPDK-L8-C02"
-        String tissueTypeExp = "PLASMA08"
+        String tissueTypeExp = "plasma08"
 
         HipoSampleIdentifier identifier = parser.tryParse(sampleName)
         assert null != identifier
@@ -205,7 +205,7 @@ class HipoSampleIdentifierParserUnitTest {
     @Test
     void testSampleType_checkTissueType_NORMAL_SORTED_CELLS() {
         String sampleName = "H001-BPDK-Z8-C02"
-        String tissueTypeExp = "NORMAL_SORTED_CELLS08"
+        String tissueTypeExp = "normal_sorted_cells08"
 
         HipoSampleIdentifier identifier = parser.tryParse(sampleName)
         assert null != identifier
@@ -215,7 +215,7 @@ class HipoSampleIdentifierParserUnitTest {
     @Test
     void testSampleType_checkTissueType_TUMOR_INTERVAL_DEBULKING_SURGERY() {
         String sampleName = "H003-BPDK-E8-C02"
-        String tissueTypeExp = "TUMOR_INTERVAL_DEBULKING_SURGERY08"
+        String tissueTypeExp = "tumor_interval_debulking_surgery08".toLowerCase()
 
         HipoSampleIdentifier identifier = parser.tryParse(sampleName)
         assert null != identifier

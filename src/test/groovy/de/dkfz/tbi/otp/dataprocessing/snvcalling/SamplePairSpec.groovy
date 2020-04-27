@@ -63,10 +63,10 @@ class SamplePairSpec extends Specification implements DataTest {
                 libraryLayout: LibraryLayout.PAIRED
         )
         SampleType sampleType1 = DomainFactory.createSampleType(
-                name: "TUMOR",
+                name: "tumor",
         )
         SampleType sampleType2 = DomainFactory.createSampleType(
-                name: "CONTROL",
+                name: "control",
         )
         DomainFactory.createSampleTypePerProject(
                 project: project,

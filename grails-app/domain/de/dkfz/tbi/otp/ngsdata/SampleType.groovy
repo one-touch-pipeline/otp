@@ -101,6 +101,9 @@ class SampleType implements Entity, Legacy {
             if (val == null) {
                 return true // case checked as nullable constraint
             }
+            if (obj.name != obj.name.toLowerCase()) {
+                return 'validator.obj.name.toLowerCase'
+            }
             if (!OtpPath.isValidPathComponent(val)) {
                 return 'validator.path.component'
             }

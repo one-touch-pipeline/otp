@@ -148,7 +148,7 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
         (1..4).each {
             createReferenceGenome(name: "refGen${it}")
             Individual individual = createIndividual(mockPid: "individual${it}", project: project)
-            SampleType sampleType = createSampleType(name: "sampleType${it}")
+            SampleType sampleType = createSampleType(name: "sampletype${it}")
             createSeqType(name: "seqType${it}", libraryLayout: LibraryLayout.SINGLE)
             createSample(individual: individual, sampleType: sampleType)
         }
@@ -193,7 +193,7 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
             assert epmbf.project.name == "project_01"
             assert epmbf.seqType.libraryLayout == LibraryLayout.SINGLE
             assert epmbf.seqType.name == "seqType${it}"
-            assert epmbf.sampleType.name == "sampleType${it}"
+            assert epmbf.sampleType.name == "sampletype${it}"
             assert epmbf.importedFrom == new File(bamFilesDir, "bamfile${it}_merged.mdup.bam").path
             assert epmbf.furtherFiles.contains('qualityDir')
             assert epmbf.furtherFiles.contains('qualityFile')

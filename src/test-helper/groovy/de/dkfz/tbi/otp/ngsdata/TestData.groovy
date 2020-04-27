@@ -172,7 +172,7 @@ class TestData {
     @Deprecated
     private SampleType createSampleType(Map properties = [:]) {
         return DomainFactory.createSampleType([
-            name: "TUMOR",
+            name: "tumor",
             specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ] + properties)
     }

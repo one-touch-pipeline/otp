@@ -43,7 +43,7 @@ class HipoSampleIdentifierParserSpec extends Specification {
         then:
         validPid
         identifier.sampleNumber == sampleNumber
-        identifier.sampleTypeDbName == "TUMOR${sampleNumber}".toString()
+        identifier.sampleTypeDbName == "tumor${sampleNumber}".toString()
         identifier.fullSampleName == fullSampleName
         identifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 

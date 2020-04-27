@@ -32,16 +32,23 @@ enum PedionTissue {
     RECTUM('H'),
     SMALL_INTESTINE('I'),
     BONE_MARROW('J'),
-    ORGANOID_LIVER('N'),
-    ORGANOID_PANCREAS('O'),
+    ORGANOID_LIVER('N', 'organoid-liver'),
+    ORGANOID_PANCREAS('O', 'organoid-pancreas'),
 
     final String letter
     final String usedName
 
     PedionTissue(String letter) {
         this.letter = letter
-        this.usedName = name().replace("_", "-")
+        this.usedName = name().toLowerCase().replace("_", "-")
         assert letter.size() == 1
+    }
+
+    PedionTissue(String letter, String usedName) {
+        this.letter = letter
+        this.usedName = usedName
+        assert letter.size() == 1
+        assert usedName == usedName.toLowerCase()
     }
 
     static final Map<String, String> LETTER_TO_NAME_MAP = values().collectEntries {

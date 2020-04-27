@@ -51,7 +51,7 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
 
         where:
         name << [
-                'sampleType',
+                'sampletype',
                 'sample-type',
                 'sample123',
         ]
@@ -71,6 +71,7 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
         where:
         name          | constraint
         null          | 'nullable'
+        'SampleType'  | 'validator.obj.name.toLowerCase'
         ''            | 'blank'
         'sample_type' | 'underscore'
         'sample type' | 'validator.path.component'
@@ -83,7 +84,7 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
     void "validate, when specificReferenceGenome is null, then validation should fail"() {
         when:
         SampleType sampleType = new SampleType(
-                name: 'sampleType',
+                name: 'sample-type',
                 specificReferenceGenome: null,
         )
 

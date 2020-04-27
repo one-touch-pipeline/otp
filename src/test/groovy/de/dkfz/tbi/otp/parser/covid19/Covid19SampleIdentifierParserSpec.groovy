@@ -54,22 +54,22 @@ class Covid19SampleIdentifierParserSpec extends Specification implements DomainF
 
         where:
         input                || project                | pid           | sampleTypeDbName
-        'SC2-10001SR-NS001'  || 'covid-19_single-cell' | 'SC2-10001SR' | 'NASAL_SWAB001'
-        'SC2-20001SR-TS010'  || 'covid-19_single-cell' | 'SC2-20001SR' | 'THROAT_SWAB010'
-        'SC2-15001SR-BL100'  || 'covid-19_single-cell' | 'SC2-15001SR' | 'BRONCHIAL_LAVAGE100'
-        'SC2-25001SR-B123'   || 'covid-19_single-cell' | 'SC2-25001SR' | 'BLOOD123'
-        'SC2-19999SR-PSB321' || 'covid-19_single-cell' | 'SC2-19999SR' | 'PROTECTED_SPECIMEN_BRUSH321'
-        'SC2-10001MD-NS666'  || 'covid-19_methyl-seq'  | 'SC2-10001MD' | 'NASAL_SWAB666'
-        'SC2-10001BR-NS999'  || 'covid-19_cite-seq'    | 'SC2-10001BR' | 'NASAL_SWAB999'
+        'SC2-10001SR-NS001'  || 'covid-19_single-cell' | 'SC2-10001SR' | 'nasal_swab001'
+        'SC2-20001SR-TS010'  || 'covid-19_single-cell' | 'SC2-20001SR' | 'throat_swab010'
+        'SC2-15001SR-BL100'  || 'covid-19_single-cell' | 'SC2-15001SR' | 'bronchial_lavage100'
+        'SC2-25001SR-B123'   || 'covid-19_single-cell' | 'SC2-25001SR' | 'blood123'
+        'SC2-19999SR-PSB321' || 'covid-19_single-cell' | 'SC2-19999SR' | 'protected_specimen_brush321'
+        'SC2-10001MD-NS666'  || 'covid-19_methyl-seq'  | 'SC2-10001MD' | 'nasal_swab666'
+        'SC2-10001BR-NS999'  || 'covid-19_cite-seq'    | 'SC2-10001BR' | 'nasal_swab999'
         and: "alternative schema:"
-        'SC2-1-0001SR-NS-01'  || 'covid-19_single-cell' | 'SC2-10001SR' | 'NASAL_SWAB001'
-        'SC2-1-0001SR-NS-001' || 'covid-19_single-cell' | 'SC2-10001SR' | 'NASAL_SWAB001'
-        'SC2-2-0001SR-TS-10'  || 'covid-19_single-cell' | 'SC2-20001SR' | 'THROAT_SWAB010'
-        'SC2-1-5001SR-BL-10'  || 'covid-19_single-cell' | 'SC2-15001SR' | 'BRONCHIAL_LAVAGE010'
-        'SC2-2-5001SR-B-23'   || 'covid-19_single-cell' | 'SC2-25001SR' | 'BLOOD023'
-        'SC2-1-9999SR-PSB-21' || 'covid-19_single-cell' | 'SC2-19999SR' | 'PROTECTED_SPECIMEN_BRUSH021'
-        'SC2-1-0001MD-NS-66'  || 'covid-19_methyl-seq'  | 'SC2-10001MD' | 'NASAL_SWAB066'
-        'SC2-1-0001BR-NS-99'  || 'covid-19_cite-seq'    | 'SC2-10001BR' | 'NASAL_SWAB099'
+        'SC2-1-0001SR-NS-01'  || 'covid-19_single-cell' | 'SC2-10001SR' | 'nasal_swab001'
+        'SC2-1-0001SR-NS-001' || 'covid-19_single-cell' | 'SC2-10001SR' | 'nasal_swab001'
+        'SC2-2-0001SR-TS-10'  || 'covid-19_single-cell' | 'SC2-20001SR' | 'throat_swab010'
+        'SC2-1-5001SR-BL-10'  || 'covid-19_single-cell' | 'SC2-15001SR' | 'bronchial_lavage010'
+        'SC2-2-5001SR-B-23'   || 'covid-19_single-cell' | 'SC2-25001SR' | 'blood023'
+        'SC2-1-9999SR-PSB-21' || 'covid-19_single-cell' | 'SC2-19999SR' | 'protected_specimen_brush021'
+        'SC2-1-0001MD-NS-66'  || 'covid-19_methyl-seq'  | 'SC2-10001MD' | 'nasal_swab066'
+        'SC2-1-0001BR-NS-99'  || 'covid-19_cite-seq'    | 'SC2-10001BR' | 'nasal_swab099'
     }
 
     @Unroll

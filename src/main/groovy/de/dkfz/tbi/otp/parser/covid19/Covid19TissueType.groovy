@@ -41,4 +41,9 @@ enum Covid19TissueType {
         }
         return covid19TissueType
     }
+
+    @Override
+    String toString() {
+        return this.name().toLowerCase()
+    }
 }

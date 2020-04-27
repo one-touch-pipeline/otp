@@ -71,7 +71,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
     static final String PARSE_PREFIX = 'PARSE'
     static final String PARSE_PROJECT = 'PROJECT'
     static final String PARSE_INDIVIDUAL = 'INDIVIDUAL'
-    static final String PARSE_SAMPLE_TYPE = 'SAMPLETYPE'
+    static final String PARSE_SAMPLE_TYPE = 'sampletype'
 
     static final String SAMPLE_ID = 'sampleId'
     static final String PARSE_SAMPLE_ID = "${PARSE_PREFIX}_${PARSE_PROJECT}_${PARSE_INDIVIDUAL}_${PARSE_SAMPLE_TYPE}"

@@ -49,44 +49,44 @@ class PedionParserSpec extends Specification {
 
         where:
         input                 || project | pid           | sampleTypeDbName               | useSpecificReferenceGenome
-        'A02P-ABCDEF-CAAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other funding
-        'B02P-ABCDEF-CAAAAAA' || 'B02P'  | 'B02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'C02P-ABCDEF-CAAAAAA' || 'C02P'  | 'C02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'B02P-ABCDEF-CAAAAAA' || 'B02P'  | 'B02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'C02P-ABCDEF-CAAAAAA' || 'C02P'  | 'C02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other project numbersnumbers
-        'A08P-ABCDEF-CAAAAAA' || 'A08P'  | 'A08P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A35P-ABCDEF-CAAAAAA' || 'A35P'  | 'A35P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A08P-ABCDEF-CAAAAAA' || 'A08P'  | 'A08P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A35P-ABCDEF-CAAAAAA' || 'A35P'  | 'A35P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //retrospective project
-        'A02R-ABCDEF-CAAAAAA' || 'A02R'  | 'A02R-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02R-ABCDEF-CAAAAAA' || 'A02R'  | 'A02R-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other pseudonyms
-        'A02P-EFGHIJ-CAAAAAA' || 'A02P'  | 'A02P-EFGHIJ' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-AAAAAA-CAAAAAA' || 'A02P'  | 'A02P-AAAAAA' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ZZZZZZ-CAAAAAA' || 'A02P'  | 'A02P-ZZZZZZ' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-EFGHIJ-CAAAAAA' || 'A02P'  | 'A02P-EFGHIJ' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-AAAAAA-CAAAAAA' || 'A02P'  | 'A02P-AAAAAA' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ZZZZZZ-CAAAAAA' || 'A02P'  | 'A02P-ZZZZZZ' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other categories
-        'A02P-ABCDEF-TAAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'TUMOR-BLOOD-01'               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-MAAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'METASTASIS-BLOOD-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-TAAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'tumor-blood-01'               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-MAAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'metastasis-blood-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other tissues
-        'A02P-ABCDEF-CBAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-LIVER-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CCAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-PANCREAS-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CDAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-OVAR-01'              | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CIAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-SMALL-INTESTINE-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CNAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-ORGANOID-LIVER-01'    | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-COAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-ORGANOID-PANCREAS-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CBAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-liver-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CCAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-pancreas-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CDAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-ovar-01'              | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CIAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-small-intestine-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CNAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-organoid-liver-01'    | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-COAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-organoid-pancreas-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other biol replicate
-        'A02P-ABCDEF-CACAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-03'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAHAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-08'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CANAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-14'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAZAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-26'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CACAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-03'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAHAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-08'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CANAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-14'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAZAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-26'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other analyte
-        'A02P-ABCDEF-CAABAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAAGAAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAAACAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAAAHAA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAABAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAGAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAACAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAAHAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other sequencing assay
-        'A02P-ABCDEF-CAAAABA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAAAAHA' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAAAAAC' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-CAAAAAH' || 'A02P'  | 'A02P-ABCDEF' | 'CONTROL-BLOOD-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAAABA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAAAHA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAAAAC' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-CAAAAAH' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     }
 
     @Unroll

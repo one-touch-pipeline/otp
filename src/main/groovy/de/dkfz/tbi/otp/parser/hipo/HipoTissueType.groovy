@@ -63,4 +63,9 @@ enum HipoTissueType {
             it.key == keyChar
         }
     }
+
+    @Override
+    String toString() {
+        return this.name().toLowerCase()
+    }
 }

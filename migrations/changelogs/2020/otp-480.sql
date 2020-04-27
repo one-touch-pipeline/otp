@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,32 +19,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser.inform
 
-enum InformTissueType {
-    TUMOR                     ('T'),
-    METASTASIS                ('M'),
-    CONTROL                   ('C'),
-    FFPE                      ('F'),
-    PLASMA                    ('L'),
-    OTHER                     ('X'),
-
-    final char key
-
-    private InformTissueType(String key) {
-        this.key = key as char
-    }
-
-    static InformTissueType fromKey(String key) {
-        InformTissueType informTissueType = values().find { it.key == key as char }
-        if (informTissueType == null) {
-            throw new IllegalArgumentException()
-        }
-        return informTissueType
-    }
-
-    @Override
-    String toString() {
-        return this.name().toLowerCase()
-    }
-}
+UPDATE sample_type SET name = LOWER(name);

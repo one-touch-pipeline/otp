@@ -61,7 +61,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     SampleType createSampleType(Map properties = [:]) {
         return createDomainObject(SampleType, [
-                name                   : "sampleTypeName-${nextId}",
+                name                   : "sample-type-name-${nextId}",
                 specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ], properties)
     }

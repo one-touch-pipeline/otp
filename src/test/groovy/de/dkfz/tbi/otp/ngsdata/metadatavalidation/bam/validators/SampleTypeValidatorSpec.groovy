@@ -65,7 +65,7 @@ class SampleTypeValidatorSpec extends Specification implements DataTest {
 
     void 'validate, when column exist and sampleType is registered in OTP, succeeds'() {
         given:
-        String SAMPLE_TYPE_NAME = "sampleTypeName"
+        String SAMPLE_TYPE_NAME = "sample-type-name"
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${SAMPLE_TYPE}\n" +
@@ -83,7 +83,7 @@ class SampleTypeValidatorSpec extends Specification implements DataTest {
 
     void 'validate, when column exist but sampleType is not registered in OTP, adds problems'() {
         given:
-        String SAMPLE_TYPE_NAME = "sampleTypeName"
+        String SAMPLE_TYPE_NAME = "sample-type-name"
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${SAMPLE_TYPE}\n" +

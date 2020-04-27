@@ -2609,7 +2609,7 @@ class DomainFactory {
                 seqTypeDisplayName     : "seqTypeDisplayName${counter}",
                 dirName                : "dirName${counter++}",
                 libraryLayout          : LibraryLayout.PAIRED,
-                sampleTypeName         : "sampleTypeName${counter}",
+                sampleTypeName         : "sample-type-name${counter}",
                 pid                    : "pid${counter++}",
                 mockPid                : "mockPid${counter++}",
                 mockFullName           : "mockFullName${counter++}",

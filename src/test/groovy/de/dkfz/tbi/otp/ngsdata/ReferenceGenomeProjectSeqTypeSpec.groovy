@@ -31,12 +31,12 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
 
     static final String PROJECT_NAME = "project"
     static final String SEQ_TYPE_NAME = "seqType"
-    static final String PROJECT_DEFAULT_SAMPLE_TYPE_NAME = "projectDefaultSampleType"
-    static final String SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME = "sampleTypeSpecificSampleType"
+    static final String PROJECT_DEFAULT_SAMPLE_TYPE_NAME = "project-default-sample-type"
+    static final String SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME = "sample-type-specific-sample-type"
 
     static final String OTHER_PROJECT_NAME = "otherProject"
     static final String OTHER_SEQ_TYPE_NAME = "otherSeqType"
-    static final String OTHER_SAMPLE_TYPE_NAME = "otherSampleType"
+    static final String OTHER_SAMPLE_TYPE_NAME = "other-sample-type"
 
     @Override
     Class[] getDomainClassesToMock() {

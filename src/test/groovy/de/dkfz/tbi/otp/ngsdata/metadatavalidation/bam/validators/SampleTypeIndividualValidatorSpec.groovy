@@ -74,7 +74,7 @@ ${BamMetadataColumn.SAMPLE_TYPE.name()}\t${BamMetadataColumn.INDIVIDUAL.name()}
 SampleType1\tIndividual1\t
 """)
         Individual individual = DomainFactory.createIndividual(pid: 'Individual1')
-        SampleType sampleType = DomainFactory.createSampleType(name: 'SampleType1')
+        SampleType sampleType = DomainFactory.createSampleType(name: 'sampletype1')
         DomainFactory.createSample(sampleType: sampleType, individual: individual)
 
         when:
@@ -91,7 +91,7 @@ ${BamMetadataColumn.SAMPLE_TYPE.name()}\t${BamMetadataColumn.INDIVIDUAL.name()}
 SampleType1\tIndividual1\t
 """)
         Individual individual = DomainFactory.createIndividual(pid: 'anotherIndividual')
-        SampleType sampleType = DomainFactory.createSampleType(name: 'anotherSampleType')
+        SampleType sampleType = DomainFactory.createSampleType(name: 'anothersampletype')
         DomainFactory.createSample(sampleType: sampleType, individual: individual)
 
         when:

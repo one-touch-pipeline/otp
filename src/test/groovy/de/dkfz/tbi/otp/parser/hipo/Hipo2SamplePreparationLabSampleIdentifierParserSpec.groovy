@@ -56,9 +56,9 @@ class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2S
 
         where:
         identifier            || sampleTypeDbName
-        'H123-123ABC-T1-D1'   || 'TUMOR001-01'
-        'H123-123ABC-T12-D1'  || 'TUMOR012-01'
-        'H123-123ABC-T123-D1' || 'TUMOR123-01'
+        'H123-123ABC-T1-D1'   || 'tumor001-01'
+        'H123-123ABC-T12-D1'  || 'tumor012-01'
+        'H123-123ABC-T123-D1' || 'tumor123-01'
     }
 
     @Unroll

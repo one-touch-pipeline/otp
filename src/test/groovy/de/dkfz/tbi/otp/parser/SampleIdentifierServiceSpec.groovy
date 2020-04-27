@@ -58,7 +58,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
     private static DefaultParsedSampleIdentifier makeParsedSampleIdentifier(Map<String, String> properties = [:]) {
         Closure<String> get = { String key ->
-            return properties[key] ?: HelperUtils.uniqueString
+            return properties[key] ?: HelperUtils.uniqueString.toLowerCase()
         }
         return new DefaultParsedSampleIdentifier(get('projectName'), get('pid'), get('sampleTypeDbName'), get('fullSampleName'),
                 properties.containsKey('useSpecificReferenceGenome') ? properties.useSpecificReferenceGenome : DEFAULT_SPECIFIC_REF_GEN)
@@ -220,7 +220,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         given:
         Project project = createProject()
         SampleType sampleType = createSampleType()
-        sampleType.name = 'BLOOD'
+        sampleType.name = 'blood'
         sampleType.save(flush: true)
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
                 projectName: project.name,

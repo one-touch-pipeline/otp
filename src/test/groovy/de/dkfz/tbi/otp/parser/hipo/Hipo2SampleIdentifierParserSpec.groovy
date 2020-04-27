@@ -51,16 +51,16 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
 
         where:
         identifier           || sampleTypeDbName
-        'K12A-123ABC-N0-D1'  || 'CONTROL0-01'
+        'K12A-123ABC-N0-D1'  || 'control0-01'
 
         //different project prefixes
-        'S12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'T12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'A12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'B12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'H12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'P12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'K123-123ABC-T0-D1'  || 'TUMOR0-01'
+        'S12A-123ABC-T0-D1'  || 'tumor0-01'
+        'T12A-123ABC-T0-D1'  || 'tumor0-01'
+        'A12A-123ABC-T0-D1'  || 'tumor0-01'
+        'B12A-123ABC-T0-D1'  || 'tumor0-01'
+        'H12A-123ABC-T0-D1'  || 'tumor0-01'
+        'P12A-123ABC-T0-D1'  || 'tumor0-01'
+        'K123-123ABC-T0-D1'  || 'tumor0-01'
     }
 
     @Unroll

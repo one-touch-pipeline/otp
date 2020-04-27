@@ -31,7 +31,14 @@ enum PedionCategory {
 
     PedionCategory(String letter) {
         this.letter = letter
-        this.usedName = name().replace("_", "-")
+        this.usedName = name().toLowerCase().replace("_", "-")
+        assert letter.size() == 1
+    }
+
+    PedionCategory(String letter, String usedName) {
+        this.letter = letter
+        this.usedName = usedName
+        assert usedName == usedName.toLowerCase()
         assert letter.size() == 1
     }
 

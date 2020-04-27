@@ -56,7 +56,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     static final Pattern PATTERN = Pattern.compile(/^P-([^ ]+)_I-([^ ]+)_S-([^ ]+)$/)
-    static final String SAMPLE_Z = "P-X_I-Y_S-Z"
+    static final String SAMPLE_Z = "P-X_I-Y_S-z"
     static final String SAMPLE_N = "P-B_I-M_S-N"
 
     static final String PARSED_SAMPLETYPE_PID = "The following Samples will be created:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n"
@@ -156,14 +156,14 @@ class SampleValidatorSpec extends Specification implements DataTest {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.INFO
-        problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tZ\tP-X_I-Y_S-Z"
+        problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tz\tP-X_I-Y_S-z"
     }
 
     void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
-        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'Z')
+        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'z')
 
         when:
         validator.validate(context)
@@ -178,7 +178,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
-        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'Z')
+        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'z')
 
         when:
         validator.validate(context)
@@ -193,7 +193,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
-        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'C')
+        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'c')
 
         when:
         validator.validate(context)
@@ -201,7 +201,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
-        problem.message == "Sample identifier '${SAMPLE_Z}' looks like it belongs to sample type 'Z', but it is already registered in OTP with sample type 'C' If you ignore this warning, OTP will keep the assignment of the sample identifier to sample type 'C'."
+        problem.message == "Sample identifier '${SAMPLE_Z}' looks like it belongs to sample type 'z', but it is already registered in OTP with sample type 'c' If you ignore this warning, OTP will keep the assignment of the sample identifier to sample type 'c'."
     }
 
     void 'validate, when identifiers belong to different projects, adds warning'() {
@@ -215,8 +215,8 @@ class SampleValidatorSpec extends Specification implements DataTest {
                         "SampleC3\n" +
                         "${SAMPLE_N}\n" +
                         "P-C_I-M_S-N\n")
-        createSampleIdentifier('SampleB', 'B', 'W', 'X')
-        SampleIdentifier c1 = createSampleIdentifier('SampleC1', 'C', 'Y', 'Z')
+        createSampleIdentifier('SampleB', 'B', 'W', 'x')
+        SampleIdentifier c1 = createSampleIdentifier('SampleC1', 'C', 'Y', 'z')
         DomainFactory.createSampleIdentifier(name: 'SampleC2', sample: c1.sample)
         DomainFactory.createSampleIdentifier(name: 'SampleC3', sample: c1.sample)
         Collection<Problem> expectedProblems = [
@@ -254,7 +254,7 @@ Project 'C':
                         "SampleA\n" +
                         "SampleB\n" +
                         "${SAMPLE_N}\n")
-        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+        createSampleIdentifier('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
@@ -276,7 +276,7 @@ Project 'C':
                 "${SAMPLE_ID}\n" +
                         "SampleB\n" +
                         "${SAMPLE_N}\n")
-        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+        createSampleIdentifier('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.INFO,
                         "All sample identifiers belong to project 'B'."),
@@ -296,7 +296,7 @@ Project 'C':
                 "${SAMPLE_ID}\t${PROJECT}\n" +
                         "SampleB\n" +
                         "${SAMPLE_N}\n")
-        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+        createSampleIdentifier('SampleB', 'B', 'W', 'x')
 
         when:
         validator.validate(context)
