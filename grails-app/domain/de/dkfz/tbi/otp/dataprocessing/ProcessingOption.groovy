@@ -81,29 +81,29 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_ACESEQ_REFERENCE_GENOME(
                 "Name of reference genomes for Aceseq, comma-separated",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         PIPELINE_RUNYAPSA_DEFAULT_VERSION(
                 "Default runYapsa version, used when configuring the pipeline",
-                Necessity.OPTIONAL, "yapsa-devel/80f748e", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "yapsa-devel/80f748e", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_RUNYAPSA_AVAILABLE_VERSIONS(
                 "runYapsa versions, comma-separated",
-                Necessity.OPTIONAL, "yapsa-devel/80f748e", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "yapsa-devel/80f748e", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_RUNYAPSA_REFERENCE_GENOME(
                 "Name of reference genomes for runYapsa, comma-separated",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         PIPELINE_CELLRANGER_DEFAULT_VERSION(
                 "Default Cell Ranger version, used when configuring the pipeline",
-                Necessity.OPTIONAL, "cellranger/3.0.1", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "cellranger/3.0.1", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_CELLRANGER_AVAILABLE_VERSIONS(
                 "Cell Ranger versions, comma-separated",
-                Necessity.OPTIONAL, "cellranger/3.0.1", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "cellranger/3.0.1", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_CELLRANGER_CORE_COUNT(
                 "Count of cores to use by cell ranger, used for parameter '--localcores'",
@@ -130,7 +130,7 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_SOPHIA_REFERENCE_GENOME(
                 "Name of reference genomes for Sophia, comma-separated",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME(
@@ -150,34 +150,34 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME(
                 "Default reference genome, used when configuring the pipeline",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT,
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL,
                 TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL(
                 "Default merge tool, used when configuring the pipeline",
-                Necessity.OPTIONAL, "sambamba", TypeValidators.SINGLE_LINE_TEXT,
+                Necessity.OPTIONAL, "sambamba", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL,
                 TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS(
                 "All merge tools, used when configuring the pipeline",
-                Necessity.OPTIONAL, "picard,biobambam,sambamba", TypeValidators.SINGLE_LINE_TEXT,
+                Necessity.OPTIONAL, "picard,biobambam,sambamba", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL,
                 TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT(
                 "Default version for alignment with bwa_mem, used when configuring the pipeline",
-                Necessity.OPTIONAL, "0.7.15", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "0.7.15", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE(
                 "Available versions for alignment with bwa_mem, used when configuring the pipeline",
-                Necessity.OPTIONAL, "0.7.8, 0.7.15, 0.7.17", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "0.7.8, 0.7.15, 0.7.17", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT(
                 "Default version for merging and duplication marking with sambamba, used when configuring the pipeline",
-                Necessity.OPTIONAL, "0.6.5", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "0.6.5", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE(
                 "Available versions for merging and duplication marking with sambamba, used when configuring the pipeline",
-                Necessity.OPTIONAL, "0.5.9, 0.6.5", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "0.5.9, 0.6.5", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         @Deprecated
         PIPELINE_RODDY_ALIGNMENT_BWA_PATHS(
@@ -191,76 +191,76 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX(
                 "Default genome star index, used when configuring the pipeline",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT,
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL,
         ),
 
         @Deprecated
         PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT(
                 "Quality assessment Command and parameters template",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         @Deprecated
         COMMAND_BWA(
                 "BWA command for pairing and sorting",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         @Deprecated
         COMMAND_CONVEY_BWA(
                 "BWA convey command for alignment",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         // modules and commands for OTP workflows
         COMMAND_LOAD_MODULE_LOADER(
                 "command to load the module system (executed in Bash, may be empty if not required)",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_ENABLE_MODULE(
                 "command to enable a module. The module name will provided somewhere else",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_ACTIVATION_FASTQC(
                 "command to enable the module containing fastqc (executed in Bash, may be empty if not required)",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_FASTQC(
                 "command for fastqc",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_ACTIVATION_SAMTOOLS(
                 "command to enable the module containing samtools (executed in Bash, may be empty if not required)",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_SAMTOOLS(
                 "command for samtools",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_ACTIVATION_GROOVY(
                 "command to enable the module containing groovy (executed in Bash, may be empty if not required)",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_GROOVY(
                 "command for groovy",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_ACTIVATION_JAVA(
                 "command to enable the module containing java (executed in Bash, may be empty if not required)",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         COMMAND_ACTIVATION_R(
                 "command to enable the module containing R (executed in Bash, may be empty if not required)",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         @Deprecated
         COMMAND_R(
                 "command for R",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         @Deprecated
         COMMAND_RUN_YAPSA(
                 "command for runYAPSA",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         //basePath
@@ -277,7 +277,7 @@ class ProcessingOption implements Entity {
         @Deprecated
         RODDY_VERSION(
                 "Roddy version which is used currently to process Roddy-Pipelines",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         RODDY_BASE_CONFIGS_PATH(
                 "Path to the baseConfig-files which are needed to execute Roddy",
@@ -329,11 +329,11 @@ class ProcessingOption implements Entity {
         //ticketSystem
         TICKET_SYSTEM_URL(
                 "Ticket system URL",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         TICKET_SYSTEM_NUMBER_PREFIX(
                 "Prefix for the ticket number",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         TICKET_SYSTEM_AUTO_IMPORT_ENABLED(
                 "Enabled auto import from the ticket system",
@@ -387,7 +387,7 @@ class ProcessingOption implements Entity {
         ),
         EMAIL_SENDER_SALUTATION(
                 "The name and optionally email of the helpdesk team, to be used in the middle of sentences",
-                Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         EMAIL_LINUX_GROUP_ADMINISTRATION(
                 "Email address of the entity responsible for adding users to linux groups",
@@ -414,19 +414,19 @@ class ProcessingOption implements Entity {
 
         BLACKLIST_IMPORT_SOURCE_NOTIFICATION(
                 "Comma separated list of path prefixes which are ignored in the import source notification",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_ADD_USER_SNIPPET(
                 "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
                         " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template.",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_REMOVE_USER_SNIPPET(
                 "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
                         " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         // cluster job scheduler
@@ -443,7 +443,7 @@ class ProcessingOption implements Entity {
         //validator
         VALIDATOR_SAMPLE_IDENTIFIER_REGEX(
                 "regular expression for the sample id",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         //systemConfiguration
@@ -453,7 +453,7 @@ class ProcessingOption implements Entity {
         ),
         OTP_USER_LINUX_GROUP(
                 "linux group of the otp user",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         //ldap
@@ -465,7 +465,7 @@ class ProcessingOption implements Entity {
         //gui
         GUI_TRACKING_PIWIK_URL(
                 "URL for Piwik Tracking",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         GUI_TRACKING_SITE_ID(
                 "Site id for Piwik Tracking",
@@ -481,7 +481,7 @@ class ProcessingOption implements Entity {
         ),
         GUI_CONTACT_DATA_PERSON_IN_CHARGE(
                 "Person in charge, shown on contact page",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         GUI_CONTACT_DATA_POSTAL_ADDRESS(
                 "Postal address, shown on contact page",
@@ -527,7 +527,7 @@ class ProcessingOption implements Entity {
         //naming
         CLUSTER_NAME(
                 "The common name to refer to the cluster OTP uses",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
         private final String description

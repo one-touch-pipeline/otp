@@ -47,7 +47,9 @@ enum TypeValidators {
 
     SINGLE_WORD_TEXT_OPTIONAL({ it ==~ /\S*/ }, null),
 
-    SINGLE_LINE_TEXT({ it ==~ /[^\n]*/ }, null),
+    SINGLE_LINE_TEXT({ it ==~ /[^\n]+/ }, null),
+
+    SINGLE_LINE_TEXT_OPTIONAL({ it ==~ /[^\n]*/ }, null),
 
     MULTI_LINE_TEXT({ it ==~ /[\s\S]*/ }, null),
 

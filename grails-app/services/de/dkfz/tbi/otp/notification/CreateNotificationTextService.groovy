@@ -135,7 +135,19 @@ class CreateNotificationTextService {
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
-            message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
+            if (!(seqTracks.any { it.seqType in SeqTypeService.cellRangerAlignableSeqTypes })) {
+                message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
+            } else {
+                message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing.cellRanger', [
+                        links: createOtpLinks(seqTracks*.project, "cellRangerConfiguration", "index"),
+                ])
+                if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
+                    message += messageSourceService.createMessage('notification.template.installation.furtherProcessing.cellRanger.faq', [
+                            faq: processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
+                    ])
+                }
+            }
+            message += messageSourceService.createMessage('notification.template.installation.furtherProcessing.furtherNotification')
         }
 
         return message

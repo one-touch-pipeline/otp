@@ -438,10 +438,13 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
     void "installationNotification, return message"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createCellRangerAlignableSeqTypes()
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK, "faq")
 
         Map data1 = createData([
                 sampleId1: 'sampleId1',
                 pid      : 'patient_1',
+                seqType  : singleCell ? DomainFactory.createCellRangerAlignableSeqTypes().first() : null,
         ])
         Map data2 = createData([
                 sampleId1                   : 'sampleId2a',
@@ -465,10 +468,11 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 linkGenerator: Mock(LinkGenerator) {
-                    projectCount * link(_) >> 'link'
+                    (projectCount + (singleCell ? 1 : 0)) * link(_) >> 'link'
                 },
                 lsdfFilesService: new LsdfFilesService(),
                 messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
+                processingOptionService: new ProcessingOptionService(),
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
@@ -482,7 +486,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         String expectedRuns = seqTracks*.run*.name.sort().unique().join(', ')
         String expectedLinks = seqTracks*.project.unique().collect { 'link' }.join('\n')
         String expectedSamples = samples.join('\n')
-        String expectedAlign = align ? '\nfurther processing' : ''
+        String expectedAlign = align ? "\nfurther processing${singleCell ? " cell ranger faq" : ""} further notification" : ""
 
         String expected = """
 data installation finished
@@ -499,13 +503,14 @@ ${expectedAlign}"""
         expected == message
 
         where:
-        multipleRuns | multipleSeqTypes | multipleProjects | installationProcessingStatus                                       | align
-        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false
-        true         | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false
-        false        | true             | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false
-        false        | false            | true             | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false
-        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_WONT_DO_MORE | false
-        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | true
+        multipleRuns | multipleSeqTypes | multipleProjects | installationProcessingStatus                                       | align | singleCell
+        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false | false
+        true         | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false | false
+        false        | true             | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false | false
+        false        | false            | true             | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | false | false
+        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_WONT_DO_MORE | false | false
+        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | true  | false
+        false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | true  | true
     }
 
     @Unroll
@@ -1169,6 +1174,9 @@ samples: ${samples}
 links: ${links}
 '''
             _ * getMessageInternal("notification.template.installation.furtherProcessing", [], _) >> '''further processing'''
+            _ * getMessageInternal("notification.template.installation.furtherProcessing.cellRanger", [], _) >> '''further processing cell ranger'''
+            _ * getMessageInternal("notification.template.installation.furtherProcessing.cellRanger.faq", [], _) >> ''' faq'''
+            _ * getMessageInternal("notification.template.installation.furtherProcessing.furtherNotification", [], _) >> ''' further notification'''
             _ * getMessageInternal("notification.template.alignment.base", [], _) >> '''
 alignment finished
 samples: ${samples}

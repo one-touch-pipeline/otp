@@ -124,9 +124,15 @@ class TypeValidatorsSpec extends Specification implements DataTest {
 
         TypeValidators.SINGLE_LINE_TEXT              | 'some text'                       | emptyInit                   || true
         TypeValidators.SINGLE_LINE_TEXT              | 'long text ' * 10                 | emptyInit                   || true
-        TypeValidators.SINGLE_LINE_TEXT              | ''                                | emptyInit                   || true
+        TypeValidators.SINGLE_LINE_TEXT              | ''                                | emptyInit                   || false
         TypeValidators.SINGLE_LINE_TEXT              | null                              | emptyInit                   || false
         TypeValidators.SINGLE_LINE_TEXT              | 'multi\nline\ntext '              | emptyInit                   || false
+
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'some text'                       | emptyInit                   || true
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'long text ' * 10                 | emptyInit                   || true
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | ''                                | emptyInit                   || true
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | null                              | emptyInit                   || false
+        TypeValidators.SINGLE_LINE_TEXT_OPTIONAL     | 'multi\nline\ntext '              | emptyInit                   || false
 
         TypeValidators.MULTI_LINE_TEXT               | ''                                | emptyInit                   || true
         TypeValidators.MULTI_LINE_TEXT               | 'some text'                       | emptyInit                   || true

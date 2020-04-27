@@ -26,11 +26,11 @@ import grails.util.Environment
 enum OtpProperty {
     LDAP_ENABLED('otp.security.ldap.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
     LDAP_SERVER('otp.security.ldap.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
-    LDAP_MANAGER_DN('otp.security.ldap.managerDn', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
+    LDAP_MANAGER_DN('otp.security.ldap.managerDn', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_MANAGER_PASSWORD('otp.security.ldap.managerPw', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
-    LDAP_SEARCH_BASE('otp.security.ldap.search.base', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
+    LDAP_SEARCH_BASE('otp.security.ldap.search.base', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     LDAP_SEARCH_SUBTREE('otp.security.ldap.search.subTree', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
-    LDAP_SEARCH_ATTRIBUTE('otp.security.ldap.search.attribute', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
+    LDAP_SEARCH_ATTRIBUTE('otp.security.ldap.search.attribute', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
 
     SSH_AUTH_METHOD('otp.ssh.authMethod', TypeValidators.SSH_AUTH_METHOD, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST),
             SshAuthMethod.SSH_AGENT.name()),
@@ -69,11 +69,11 @@ enum OtpProperty {
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
-    CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION), Environment.getCurrent().name),
-    CONFIG_AUTO_IMPORT_SECRET('otp.autoimport.secret', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION), ''),
+    CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), Environment.getCurrent().name),
+    CONFIG_AUTO_IMPORT_SECRET('otp.autoimport.secret', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION), ''),
     CONFIG_SECURECHANNEL_HEADERCHECK('otp.securechannel.headercheck.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
 
-    CONFIG_DICOM_INSTANCE_NAME('dicom.instance.name', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
+    CONFIG_DICOM_INSTANCE_NAME('dicom.instance.name', TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, EnumSet.of(UsedIn.PRODUCTION)),
     CONFIG_DICOM_INSTANCE_ID('dicom.instance.id', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION), "1"),
 
     DEVEL_USE_BACKDOOR('otp.security.useBackdoor', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.DEVELOPMENT), "false"),
