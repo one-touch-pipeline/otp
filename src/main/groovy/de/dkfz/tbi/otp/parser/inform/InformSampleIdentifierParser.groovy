@@ -66,7 +66,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         List<String> tissueType = []
         tissueType << InformTissueType.fromKey(matcher.group('tissueTypeKey'))
 
-        if (matcher.group('sampleTypeNumber') == 'X') {
+        if (matcher.group('sampleTypeNumber').toLowerCase() == 'x') {
             tissueType << "0X"
         } else {
             tissueType << "${matcher.group('sampleTypeNumber')}".padLeft(PAD_LEFT, '0')

@@ -143,7 +143,7 @@ class SampleIdentifierService {
     }
 
     static String getSanitizedSampleTypeDbName(String sampleTypeDbName) {
-        return sampleTypeDbName.replaceAll('_', '-')
+        return sampleTypeDbName.replaceAll('_', '-').toLowerCase()
     }
 
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
