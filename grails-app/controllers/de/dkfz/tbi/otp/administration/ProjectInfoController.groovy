@@ -82,6 +82,7 @@ class ProjectInfoController implements CheckAndCall {
                 flash.docCmd = cmd
             } else {
                 try {
+                    flash.message = new FlashMessage(g.message(code: "projectInfo.message.success.storage") as String)
                     projectInfo = projectInfoService.createProjectInfoAndUploadFile(projectSelectionService.requestedProject, cmd)
                     redirectParams["fragment"] = "doc${projectInfo.id}"
                 } catch (Exception e) {
@@ -105,6 +106,7 @@ class ProjectInfoController implements CheckAndCall {
                 flash.xferCmd = cmd
             } else {
                 try {
+                    flash.message = new FlashMessage(g.message(code: "projectInfo.message.success.storage") as String)
                     projectInfoService.addTransferToProjectInfo(cmd)
                     redirectParams["fragment"] = "doc${cmd.parentDocument.id}"
                 } catch (Exception e) {
@@ -222,6 +224,7 @@ class UpdateDataTransferCommentCommand extends DataTransferCommand {
 
 class AddProjectInfoCommand implements Validateable {
     ProjectSelectionService projectSelectionService
+    Project project
 
     MultipartFile projectInfoFile
     String comment
@@ -233,6 +236,9 @@ class AddProjectInfoCommand implements Validateable {
     Date validityDate
 
     static constraints = {
+        project nullable: true
+        projectSelectionService nullable: true
+
         comment nullable: true
 
         dtaId nullable: true
@@ -247,7 +253,7 @@ class AddProjectInfoCommand implements Validateable {
             if (!OtpPath.isValidPathComponent(val.originalFilename)) {
                 return "invalid.name"
             }
-            if (ProjectInfo.findAllByProjectAndFileName(obj.projectSelectionService.requestedProject, val.originalFilename).size() != 0) {
+            if (ProjectInfo.findAllByProjectAndFileName(obj.project ?: obj.projectSelectionService.requestedProject, val.originalFilename).size() != 0) {
                 return "duplicate"
             }
             if (val.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
