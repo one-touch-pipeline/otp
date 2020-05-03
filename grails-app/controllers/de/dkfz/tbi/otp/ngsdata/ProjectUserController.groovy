@@ -282,6 +282,7 @@ class UserEntry {
 class UpdateUserRealNameCommand implements Validateable {
     User user
     String newName
+
     static constraints = {
         newName(blank: false, validator: { val, obj ->
             if (val == obj.user?.realName) {
@@ -298,6 +299,7 @@ class UpdateUserRealNameCommand implements Validateable {
 class UpdateUserEmailCommand implements Validateable {
     User user
     String newEmail
+
     static constraints = {
         newEmail(nullable: false, email: true, blank: false, validator: { val, obj ->
             if (val == obj.user?.email) {
@@ -325,13 +327,6 @@ class SetFlagCommand implements Validateable {
 class UpdateProjectRoleCommand implements Validateable {
     UserProjectRole userProjectRole
     String newRole
-    static constraints = {
-        newRole(validator: { val, obj ->
-            if (val == obj.userProjectRole.projectRole.name) {
-                return 'no.change'
-            }
-        })
-    }
 
     void setValue(String value) {
         this.newRole = value

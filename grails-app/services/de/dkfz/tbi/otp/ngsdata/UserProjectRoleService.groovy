@@ -308,8 +308,18 @@ class UserProjectRoleService {
         }
     }
 
+    /**
+     * Helper function to check if there would be any changes to the flags
+     */
+    boolean nothingToChange(UserProjectRole userProjectRole, Closure consistencyCheck) {
+        return getRelatedUserProjectRoles(userProjectRole).every(consistencyCheck)
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToOtp(UserProjectRole userProjectRole, boolean value) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.accessToOtp == value })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToOtp = value
             assert upr.save(flush: true)
@@ -321,6 +331,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.accessToFiles == value })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = value
             upr.fileAccessChangeRequested = true
@@ -338,6 +351,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
     UserProjectRole setManageUsers(UserProjectRole userProjectRole, boolean value) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.manageUsers == value })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsers = value
             assert upr.save(flush: true)
@@ -349,6 +365,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     UserProjectRole setManageUsersAndDelegate(UserProjectRole userProjectRole, boolean value) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.manageUsersAndDelegate == value })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsersAndDelegate = value
             assert upr.save(flush: true)
@@ -360,6 +379,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #userProjectRole.user.username == principal.username")
     UserProjectRole setReceivesNotifications(UserProjectRole userProjectRole, boolean value) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.receivesNotifications == value })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.receivesNotifications = value
             assert upr.save(flush: true)
@@ -371,6 +393,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.enabled == value })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.enabled = value
             if (upr.accessToFiles) {
@@ -395,6 +420,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole updateProjectRole(UserProjectRole userProjectRole, ProjectRole newProjectRole) {
+        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.projectRole == newProjectRole })) {
+            return userProjectRole
+        }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.projectRole = newProjectRole
             assert upr.save(flush: true)

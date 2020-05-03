@@ -41,7 +41,8 @@ class AuditLog implements Entity {
          * the value is still needed for the data logged that time. But there should no new entry created with that value.
          */
         @Deprecated
-        PROJECT_USER_CHANGED_PROJECT_ROLE,    }
+        PROJECT_USER_CHANGED_PROJECT_ROLE,
+    }
 
     User user
     Date timestamp = Date.valueOf(LocalDate.now())
@@ -54,5 +55,10 @@ class AuditLog implements Entity {
 
     static constraints = {
         description(nullable: true)
+    }
+
+    @Override
+    String toString() {
+        return "[${timestamp}] ${user}: ${description}"
     }
 }
