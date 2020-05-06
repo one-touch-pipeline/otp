@@ -63,6 +63,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
 
     boolean adapterTrimmingNeeded = false
 
+    /** md5sum of the config file */
     String md5sum
 
     static constraints = {

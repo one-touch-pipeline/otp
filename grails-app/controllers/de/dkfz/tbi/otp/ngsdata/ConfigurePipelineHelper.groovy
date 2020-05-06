@@ -25,15 +25,13 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import java.nio.file.FileSystem
 
 trait ConfigurePipelineHelper {
 
     ProjectSelectionService projectSelectionService
-    FileSystemService fileSystemService
+    RoddyWorkflowConfigService roddyWorkflowConfigService
     WorkflowConfigService workflowConfigService
 
     boolean validateUniqueness(ConfigurePipelineSubmitCommand cmd, Project project, Pipeline pipeline) {
@@ -47,23 +45,19 @@ trait ConfigurePipelineHelper {
     }
 
     Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
-        List<RoddyWorkflowConfig> latestConfig = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
+        RoddyWorkflowConfig latestConfig = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
                 project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1,]
-        )
-        String configVersion = workflowConfigService.getNextConfigVersion(CollectionUtils.atMostOneElement(latestConfig)?.configVersion)
+        ))
+        String nextConfigVersion = workflowConfigService.getNextConfigVersion(latestConfig?.configVersion)
 
-        String latestRoddyConfig = ""
-        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
-        if (config) {
-            FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
-            latestRoddyConfig = fs.getPath(config.configFilePath).text
-        }
+        RoddyWorkflowConfigService.ConfigState configState = roddyWorkflowConfigService.getCurrentFilesystemState(project, seqType, pipeline)
+
         return [
-                project          : project,
-                seqType          : seqType,
-                pipeline         : pipeline,
-                nextConfigVersion: configVersion,
-                lastRoddyConfig  : latestRoddyConfig,
+                project             : project,
+                seqType             : seqType,
+                pipeline            : pipeline,
+                nextConfigVersion   : nextConfigVersion,
+                configState         : configState,
         ]
     }
 }

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -139,5 +140,27 @@ class RoddyWorkflowConfigService {
         if (config.individual) {
             assert config.configFilePath.contains(config.individual.pid)
         }
+    }
+
+    ConfigState getCurrentFilesystemState(Project project, SeqType seqType, Pipeline pipeline) {
+        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+        if (config) {
+            FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
+            String currentConfigContent = fs.getPath(config.configFilePath).text
+            return new ConfigState(currentConfigContent, currentConfigContent.encodeAsMD5() != config.md5sum)
+        }
+        return new ConfigState("", false)
+    }
+
+    @TupleConstructor
+    /**
+     * Current filesystem contents of a {@link RoddyWorkflowConfig}, including checksum verification results.
+     *
+     * @see RoddyWorkflowConfig
+     * @see RoddyWorkflowConfigService#getCurrentFilesystemState(Project project, SeqType seqType, Pipeline pipeline)
+     */
+    static class ConfigState {
+        String content
+        boolean changed
     }
 }

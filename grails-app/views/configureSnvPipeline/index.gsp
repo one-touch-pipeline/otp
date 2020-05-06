@@ -85,14 +85,17 @@
                 </tr>
             </table>
         </g:form>
-        <g:if test="${lastRoddyConfig}">
-            <h2><g:message code="configurePipeline.last.config"/></h2>
+        <g:if test="${configState.content}">
+            <h2><g:message code="configurePipeline.current.config"/></h2>
             <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                     params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "analysisConfigurationOverview"]'>
                 <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
             </g:form>
+            <g:if test="${configState.changed}">
+                <otp:annotation type="warning"><g:message code="configurePipeline.current.config.changed"/></otp:annotation>
+            </g:if>
             <code style="white-space: pre-wrap">
-                ${lastRoddyConfig}
+                ${configState.content}
             </code>
         </g:if>
     </div>

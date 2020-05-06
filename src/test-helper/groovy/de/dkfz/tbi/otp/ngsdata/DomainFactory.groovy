@@ -1815,7 +1815,8 @@ class DomainFactory {
                 dateCreated          : { new Date() },
                 lastUpdated          : { new Date() },
                 adapterTrimmingNeeded: { seqType.isWgbs() || seqType.isRna() || seqType.isChipSeq() },
-                nameUsedInConfig     : RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersion, configVersion)
+                nameUsedInConfig     : RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersion, configVersion),
+                md5sum               : HelperUtils.getRandomMd5sum(),
         ]
     }
 
