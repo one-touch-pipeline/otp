@@ -49,12 +49,13 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         defaultParsedSampleIdentifier.useSpecificReferenceGenome == specificReferenceGenome
 
         where:
-        input                                                || pid        | sampleType   | project    | identifier          | specificReferenceGenome
-        '(hipo_021)(some_pid)(tumor01)(DisplayIdentifier)'   || 'some_pid' | 'tumor01'    | 'hipo_021' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '(hipo_021)(some_pid)(tumor01)(with space)'          || 'some_pid' | 'tumor01'    | 'hipo_021' | 'with space'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '(hipo_021)(some_pid)(tumor01)(with_underscore)'     || 'some_pid' | 'tumor01'    | 'hipo_021' | 'with_underscore'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '(hipo_021)(some_pid)(tumor01-x)(DisplayIdentifier)' || 'some_pid' | 'tumor01-x'  | 'hipo_021' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        '(hipo_021)(some_pid)(tumor01-X)(DisplayIdentifier)' || 'some_pid' | 'tumor01-X'  | 'hipo_021' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        input                                                    || pid        | sampleType   | project        | identifier          | specificReferenceGenome
+        '[some_project][some_pid][tumor01][DisplayIdentifier]'   || 'some_pid' | 'tumor01'    | 'some_project' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '[some_project][some_pid][tumor01][with space]'          || 'some_pid' | 'tumor01'    | 'some_project' | 'with space'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '[some_project][some_pid][tumor01][with_underscore]'     || 'some_pid' | 'tumor01'    | 'some_project' | 'with_underscore'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '[some_project][some_pid][tumor01][(with_brackets)]'     || 'some_pid' | 'tumor01'    | 'some_project' | '(with_brackets)'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '[some_project][some_pid][tumor01-x][DisplayIdentifier]' || 'some_pid' | 'tumor01-x'  | 'some_project' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        '[some_project][some_pid][tumor01-X][DisplayIdentifier]' || 'some_pid' | 'tumor01-X'  | 'some_project' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
     }
 
     @Unroll
@@ -69,12 +70,13 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         defaultParsedSampleIdentifier == null
 
         where:
-        input                                               | problem
-        ''                                                  | 'empty'
-        null                                                | 'null'
-        'hipo_021_some_pid_tumor01_DisplayIdentifier'       | 'no brackets found'
-        '(hipo_021)(some_pid)(tumor_01)(DisplayIdentifier)' | 'underscore in sample Type'
-        '(hipo_021)(some_pid)(tumor_01)'                    | 'one group missing'
-        '(hipo_021)(some_pid)(tumor_01)(Display)(toMuch)'   | 'one group to much'
+        input                                                   | problem
+        ''                                                      | 'empty'
+        null                                                    | 'null'
+        'some_project_some_pid_tumor01_DisplayIdentifier'       | 'no brackets found'
+        '[some_project][some_pid][tumor_01][DisplayIdentifier]' | 'underscore in sample Type'
+        '[some_project][some_pid][tumor_01]'                    | 'one group missing'
+        '[some_project][some_pid][tumor_01][Display][toMuch]'   | 'one group to much'
+        '(some_project)(some_pid)(tumor_01)(Display)'           | 'wrong brackets'
     }
 }

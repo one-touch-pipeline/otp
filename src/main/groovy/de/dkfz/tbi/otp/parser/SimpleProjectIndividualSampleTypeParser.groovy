@@ -60,10 +60,10 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
 
     protected static String createRegex() {
         return "^" +
-                "\\((?<project>${projectRegex})\\)" +
-                "\\((?<pid>${pidRegex})\\)" +
-                "\\((?<sampleType>${sampleType})\\)" +
-                "\\((?<displayedSampleIdentifier>${displayedSampleIdentifier})\\)" +
+                "\\[(?<project>${projectRegex})\\]" +
+                "\\[(?<pid>${pidRegex})\\]" +
+                "\\[(?<sampleType>${sampleType})\\]" +
+                "\\[(?<displayedSampleIdentifier>${displayedSampleIdentifier})\\]" +
                 /$/
     }
 
@@ -87,6 +87,6 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
     }
 
     private static String getDisplayedSampleIdentifier() {
-        return "[^\\(\\)]+"
+        return "[^\\[\\]]+"
     }
 }
