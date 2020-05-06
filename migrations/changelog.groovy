@@ -404,4 +404,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "otp-436-3") {
         sqlFile(path: 'changelogs/2020/otp-436-3-base-workflow-step-structure.sql')
     }
+
+    changeSet(author: "", id: "otp-168") {
+        sqlFile(path: 'changelogs/2020/otp-168.sql')
+    }
 }

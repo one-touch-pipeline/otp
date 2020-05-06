@@ -29,36 +29,67 @@
     <asset:javascript src="pages/home/index/projectOverview.js"/>
 </head>
 <body>
-    <div class="body">
-        <h2><g:message code="home.pageTitle"/></h2>
-        <div class="homeTable">
-            <table>
-                 <thead>
-                    <tr>
-                        <th><g:message code="index.project"/></th>
-                        <th class="tableHeaderHome"><g:message code="index.seqType"/></th>
-                    </tr>
-                </thead>
-            </table>
-            <div class="table-body-box" style="margin-top:-10px;">
+    <div class="body home">
+        <h1>${g.message(code: "home.title")}</h1>
+
+        <h2><g:message code="home.yourProjects.title"/></h2>
+        <g:if test="${userProjects}">
+            <div class="table-with-fixed-header">
                 <table>
-                    <g:each var="entry" in="${projectQuery}">
+                     <thead>
                         <tr>
-                            <td><b><g:link controller="projectOverview" action="index" params="[(projectParameter): entry.key]">${entry.value['displayName']}</g:link></b></td>
-                            <td><b>${entry.value['seqTypes']}</b><td>
+                            <th><g:message code="home.project"/></th>
+                            <th><g:message code="home.pis"/></th>
+                            <th><g:message code="home.desc"/></th>
+                            <th><g:message code="home.seqType"/></th>
+                        </tr>
+                    </thead>
+                    <g:each in="${userProjects}" var="project">
+                        <tr>
+                            <td><g:link controller="projectOverview" action="index" params="[(projectParameter): project.name]">${project.displayName}</g:link></td>
+                            <td>${project.pis?.join(", ") ?: "-"}</td>
+                            <td title="${project.description}">${project.shortDescription ?: "-"}</td>
+                            <td>${project.st.collect { "${it.seqType} (${it.numberOfSamples})" }.join(", ")}</td>
                         </tr>
                     </g:each>
                 </table>
             </div>
-        </div>
+        </g:if>
+        <g:else>
+            No projects
+        </g:else>
         <br>
-        <h2><g:message code="home.pageTitle.graph"/></h2>
+        <g:if test="${publicProjects}">
+            <h2><g:message code="home.publicProjects.title"/></h2>
+            <div class="table-with-fixed-header">
+                <table>
+                    <thead>
+                    <tr>
+                        <th><g:message code="home.project"/></th>
+                        <th><g:message code="home.pis"/></th>
+                        <th><g:message code="home.desc"/></th>
+                        <th><g:message code="home.seqType"/></th>
+                    </tr>
+                    </thead>
+                    <g:each in="${publicProjects}" var="project">
+                        <tr>
+                            <td>${project.displayName}</td>
+                            <td>${project.pis?.join(", ") ?: "-"}</td>
+                            <td title="${project.description}">${project.shortDescription ?: "-"}</td>
+                            <td>${project.st.collect { "${it.seqType} (${it.numberOfSamples})" }.join(", ")}</td>
+                        </tr>
+                    </g:each>
+                </table>
+            </div>
+        </g:if>
+
+        <h2><g:message code="home.graph.title"/></h2>
         <form class="rounded-page-header-box" id="projectsGroupbox">
-            <span><g:message code="home.projectGroupFilter"/>:</span>
+            <span><g:message code="home.graph.filter"/>:</span>
             <g:select name='projectGroup_select' class="use-select-2" style="width: 15ch;"
                       from='${projectGroups}' value='projectGroup' />
         </form>
-        <div class="homeGraph" style="clear: both; text-align: center">
+        <div style="clear: both; text-align: center">
             <div>
                 <canvas id="sampleCountPerSequenceTypePie" width="1250" height="400">[No canvas support]</canvas>
             </div>
@@ -74,12 +105,6 @@
                 <canvas id="projectCountPerSequenceTypeBar" width="625" height="400">[No canvas support]</canvas>
             </div>
         </div>
-        <asset:script type="text/javascript">
-            $(function() {
-                $.otp.projectOverviewHome.register();
-                $.otp.graph.overview.init();
-             });
-        </asset:script>
     </div>
 </body>
 </html>

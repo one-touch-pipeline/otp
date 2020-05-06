@@ -65,6 +65,7 @@ class ProjectConfigController implements CheckAndCall {
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
                 allProjectGroups               : ProjectGroup.list(),
+                publiclyAvailable              : project?.publiclyAvailable,
                 closed                         : project?.closed,
         ]
     }
@@ -118,6 +119,12 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON updateCopyFiles(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+        }
+    }
+
+    JSON updatePubliclyAvailable(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }

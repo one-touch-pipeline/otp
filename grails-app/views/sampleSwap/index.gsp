@@ -42,7 +42,7 @@
 
         <form class="rounded-page-header-box" action="${g.createLink(controller: 'sampleSwap', action: 'index')}">
             <div style="color: black"><strong>&nbsp;Individual : ${individual?.pid}</strong></div>
-            <label style="color: black" for="project">&nbsp;${message(code: "home.projectFilter.select")} : </label>
+            <label style="color: black" for="project">&nbsp;${message(code: "projectSelection.select")} : </label>
             <g:select id="individual" name='individual' class="use-select-2"
                     from='${individuals}' value='${individual?.id}' optionKey='id' optionValue='pid' onChange='submit();' />
         </form>

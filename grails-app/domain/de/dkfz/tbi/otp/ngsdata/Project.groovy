@@ -89,6 +89,8 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
 
     String unixGroup
 
+    boolean publiclyAvailable
+
     AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
 
     /** This attribute is used externally. Please discuss a change in the team */

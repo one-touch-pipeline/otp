@@ -21,36 +21,96 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.gorm.transactions.Transactional
+import groovy.transform.TupleConstructor
 
 @Transactional
 class HomeService {
     ProjectService projectService
 
-    Map<String, Map<String, String>> projectQuery() {
-        List<Map<String, String>> projectData = projectService.getAllProjects().collect { Project project ->
-            return [
-                    "name": project.name,
-                    "displayName": project.displayName,
-            ]
+    List<ProjectData> getAllProjects() {
+        getProjectData(projectService.allProjects)
+    }
+
+    List<ProjectData> getAllPublicProjects() {
+        getProjectData(projectService.allPublicProjects)
+    }
+
+    private List<ProjectData> getProjectData(List<Project> projects) {
+        if (!projects) {
+            return []
         }
 
-        projectData.collectEntries { Map<String, String> project ->
-            List<Sequence> seq = Sequence.createCriteria().listDistinct {
-                eq("projectName", project['name'])
-                projections {
-                    groupProperty("seqTypeDisplayName")
-                }
-                order ("seqTypeDisplayName")
-            }
+        Map<Long, SeqType> seqTypeById = SeqType.all.collectEntries { [it.id, it] }
 
-            return [
-                    (project['name']): [
-                            "displayName": project['displayName'],
-                            "seqTypes"   : seq.join(", "),
-                    ]
-            ]
+        List<List> list = SeqTrack.createCriteria().list {
+            createAlias("sample.individual.project", "project")
+            sample {
+                individual {
+                    "in"("project", projects)
+                }
+            }
+            projections {
+                groupProperty("project.id")
+                groupProperty("seqType.id")
+                countDistinct("sample.id", 'samples')
+            }
+        } as List<List>
+
+        Map<Object, List<List>> seqTypeNumberOfSamplesByProject = list.groupBy {
+            it[0]
+        }
+
+        Map<Object, List<List>> pis = UserProjectRole.createCriteria().list {
+            projections {
+                "in"("project", projects)
+                eq("enabled", true)
+                projectRole {
+                    eq("name", ProjectRole.Basic.PI.name())
+                }
+                user {
+                    eq("enabled", true)
+                    eq("accountExpired", false)
+                    eq("accountLocked", false)
+                    eq("passwordExpired", false)
+                    property("realName")
+                }
+                property("project.id")
+            }
+        }.groupBy { it[1] }
+
+        return projects.collect { Project project ->
+            String description = project.description ?: ""
+            String shortDescription = description.length() > 200 ? "${description[0..200]}..." : description
+            new ProjectData(
+                    project.name,
+                    pis[project.id]*.first() as List<String>,
+                    project.displayName,
+                    description,
+                    shortDescription,
+                    seqTypeNumberOfSamplesByProject[project.id].collect { seqTypeNumberOfSamples ->
+                        new ProjectData.SeqTypeNumberOfSamples(
+                                seqTypeById[seqTypeNumberOfSamples[1]].displayName,
+                                seqTypeNumberOfSamples[2] as int
+                        )
+                    }.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.seqType, b.seqType) }
+            )
+        }.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.displayName, b.displayName) }
+    }
+
+    @TupleConstructor
+    static class ProjectData {
+        String name
+        List<String> pis
+        String displayName
+        String description
+        String shortDescription
+        List<SeqTypeNumberOfSamples> st
+
+        @TupleConstructor
+        static class SeqTypeNumberOfSamples {
+            String seqType
+            int numberOfSamples
         }
     }
 }

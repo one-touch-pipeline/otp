@@ -1016,15 +1016,6 @@ body {
     margin-top: 10px;
     length: 70px;
 }
-.homeTable {
-    padding-top: 6px;
-    width: 98%;
-    max-height: 152px;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-
 .dataTable td {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1350,53 +1341,38 @@ td div {
         background: #A5D3FF;
     }
 }
-.table-body-box{
-    max-height: 120px;
-    overflow: auto;
+
+.table-with-fixed-header {
+    overflow-y: auto;
+    max-height: 40ch;
+    thead th {
+        position: sticky;
+        top: 0;
+    }
 }
-.tableHeaderHome {
-    padding-right: 106px;
+.home {
+    table {
+        table-layout: fixed;
+    }
+    th:nth-child(1) {
+        width: 10%;
+    }
+    th:nth-child(2) {
+        width: 10%;
+    }
+    th:nth-child(3) {
+        width: 50%;
+    }
+    th:nth-child(4) {
+        width: 25%;
+    }
+    td:nth-child(1) {
+        line-break: anywhere;
+    }
 }
-.home_graphics_container {
-    margin-top: 25px;
-}
-.home_graphics_container > img {
-    z-index: 1
-}
-.home_graphic_export_overlay {
-    position: relative;
-    width: 550px;
-    float: left;
-    margin-left: 25px;
-}
-.home_graphic_export_overlay:hover .home_graphic_overlay {
-    display: block;
-}
-.home_graphic_overlay {
-    position: absolute;
-    z-index: 10;
-    left: 0px;
-    top: 0px;
-    background-color: rgba(0,0,0,0.5);
-    width: 100%;
-    height: 100%;
-    display: none;
-}
-.home_graphic_overlay .lightBoxLink {
-    display: none;
-}
+
 .show_button {
     margin-bottom: 10px;
-}
-.overview_td {
-    width: 33%;
-}
-.csv{
-    margin-top: 30px;
-}
-.csv_spez {
-    margin-top: 30px;
-    width: 1150px;
 }
 .refreshButton {
     input, a, div {
@@ -2515,6 +2491,7 @@ table.key-value-table {
 
 .ui-tooltip {
     white-space: pre-line;
+    max-width: 50%;
 }
 
 .expandable-container {

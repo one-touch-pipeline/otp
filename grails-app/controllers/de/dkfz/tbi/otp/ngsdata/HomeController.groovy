@@ -27,10 +27,10 @@ class HomeController {
     ProjectGroupService projectGroupService
 
     Map index() {
-        Map queryResult = homeService.projectQuery()
         return [
-                projectQuery : queryResult,
-                projectGroups: [StatisticController.ALL_PROJECTS] + projectGroupService.availableProjectGroups()*.name,
+                userProjects  : homeService.allProjects,
+                publicProjects: homeService.allPublicProjects,
+                projectGroups : [StatisticController.ALL_PROJECTS] + projectGroupService.availableProjectGroups()*.name,
         ]
     }
 }

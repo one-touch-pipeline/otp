@@ -354,6 +354,18 @@
                     </td>
                 </tr>
                 <tr>
+                    <td><g:message code="project.publiclyAvailable"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updatePubliclyAvailable", params: ['fieldName': 'publiclyAvailable'])}"
+                                values="${["true", "false"]}"
+                                value="${publiclyAvailable}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td><g:message code="project.closed"/></td>
                     <td></td>
                     <td>

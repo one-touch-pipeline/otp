@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,6 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
-$(function () {
-    "use strict";
-    $('#projectGroup_select').on("change", function () {
-        $.otp.graph.overview.init();
-    }).trigger("change");
-});
+ALTER TABLE project ADD COLUMN publicly_available BOOLEAN;
+UPDATE project SET publicly_available = FALSE;
+ALTER TABLE project ALTER COLUMN publicly_available SET NOT NULL;

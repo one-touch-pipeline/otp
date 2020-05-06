@@ -96,6 +96,10 @@ class ProjectService {
         return Project.list(sort: "name", order: "asc", fetch: [projectGroup: 'join'])
     }
 
+    List<Project> getAllPublicProjects() {
+        return Project.findAllByPubliclyAvailable(true, [sort: "name", order: "asc"])
+    }
+
     int getProjectCount() {
         return Project.count()
     }
@@ -287,6 +291,7 @@ class ProjectService {
                 "unixGroup",
                 "forceCopyFiles",
                 "speciesWithStrain",
+                "publiclyAvailable",
                 "closed",
                 "individualPrefix",
                 "projectType",

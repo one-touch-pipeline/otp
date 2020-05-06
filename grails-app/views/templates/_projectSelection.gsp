@@ -22,13 +22,13 @@
 
 <div style="width: min-content" class="project-selection-container">
     <div class="selected-project-label">
-        <strong><g:message code="home.projectFilter.project"/>:</strong>
+        <strong><g:message code="projectSelection.project"/>:</strong>
     </div>
     <div class="selected-project-value">
         <strong>${selectedProject.displayName}</strong>
     </div>
     <div class="select-label">
-        <g:message code="home.projectFilter.select"/>:
+        <g:message code="projectSelection.select"/>:
     </div>
     <div class="project-dropdown">
         %{-- variables are form ProjectSelectionInterceptor --}%
