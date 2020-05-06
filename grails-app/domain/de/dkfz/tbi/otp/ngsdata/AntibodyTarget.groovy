@@ -27,8 +27,9 @@ import de.dkfz.tbi.otp.utils.MetadataField
 /**
  * This class represents an Antibody target which is used
  * for the library creation for chip seq sequencing purpose.
+ *
+ * This table is used externally. Please discuss a change in the team
  */
-/** This table is used externally. Please discuss a change in the team */
 class AntibodyTarget implements Entity, MetadataField {
 
     static hasMany = [importAlias: String]

@@ -36,9 +36,12 @@ class DataFile implements CommentableWithProject, Entity {
      */
     String initialDirectory
 
-    /** @deprecated OTP-2311: Redundant with seqTrack.project  */
     @Deprecated
-    /** This attribute is used externally. Please discuss a change in the team */
+    /**
+     * @deprecated OTP-2311: Redundant with seqTrack.project
+     *
+     * This attribute is used externally. Please discuss a change in the team
+     */
     Project project = null
 
     /** @deprecated OTP-2311: Redundant with run.dateExecuted  */

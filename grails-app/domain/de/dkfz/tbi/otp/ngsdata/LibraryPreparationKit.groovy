@@ -27,8 +27,9 @@ import de.dkfz.tbi.otp.utils.MetadataField
 /**
  * This class represents library preparation kits which are used
  * for the library creation for sequencing purpose.
+ *
+ * This table is used externally. Please discuss a change in the team
  */
-/** This table is used externally. Please discuss a change in the team */
 class LibraryPreparationKit implements Entity, MetadataField {
 
     String shortDisplayName

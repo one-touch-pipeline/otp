@@ -27,8 +27,9 @@ import de.dkfz.tbi.otp.utils.MetadataField
 /**
  * This class stores the sequencing platform models which were used for sequencing the data.
  * Furthermore a list of possible importAliases is referenced.
+ *
+ * This table is used externally. Please discuss a change in the team
  */
-/** This table is used externally. Please discuss a change in the team */
 class SeqPlatformModelLabel implements Entity, MetadataField { // to set legacy refer to SeqPlatform
 
     static hasMany = [importAlias: String]

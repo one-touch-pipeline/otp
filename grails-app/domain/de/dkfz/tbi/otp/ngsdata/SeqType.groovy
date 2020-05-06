@@ -60,8 +60,9 @@ class SeqType implements Entity, MetadataField {
 
     /**
      * Display name used in the GUI.
+     *
+     * This attribute is used externally. Please discuss a change in the team
      */
-    /** This attribute is used externally. Please discuss a change in the team */
     String displayName
 
     /** name used in roddy config files */
@@ -69,8 +70,9 @@ class SeqType implements Entity, MetadataField {
 
     /**
      * Indicates, if the SeqType require antibodyTarget
+     *
+     * This attribute is used externally. Please discuss a change in the team
      */
-    /** This attribute is used externally. Please discuss a change in the team */
     boolean hasAntibodyTarget = false
 
     static hasMany = [importAlias: String]

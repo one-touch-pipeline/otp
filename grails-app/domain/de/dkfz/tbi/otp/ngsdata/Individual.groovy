@@ -35,8 +35,9 @@ class Individual implements CommentableWithProject, Entity {
     /**
      * Identifier used in the file system. It should never change.
      * Usually its the same as {@link #mockPid}
+     *
+     * This attribute is used externally. Please discuss a change in the team
      */
-    /** This attribute is used externally. Please discuss a change in the team */
     String pid
 
     // TODO OTP-1225: Field names pid, mockPid and mockFullName are confusing and used inconsistently.
