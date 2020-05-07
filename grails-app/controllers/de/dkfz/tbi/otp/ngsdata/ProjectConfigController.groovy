@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
 
@@ -49,13 +51,15 @@ class ProjectConfigController implements CheckAndCall {
 
     Map index() {
         Project project = projectSelectionService.selectedProject
+        String projectRequestComments = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
+                projectRequestService.findProjectRequestByProject(project)?.comments : '')
 
         Map<String, String> dates = getDates(project)
 
         return [
                 creationDate                   : dates.creationDate,
                 lastReceivedDate               : dates.lastReceivedDate,
-                projectRequestComments         : projectRequestService.findProjectRequestByProject(project)?.comments,
+                projectRequestComments         : projectRequestComments,
                 directory                      : project ? LsdfFilesService.getPath(configService.rootPath.path, project.dirName) : "",
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
                 tumorEntities                  : TumorEntity.list().sort(),
