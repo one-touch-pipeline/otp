@@ -19,12 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
@@ -34,11 +35,12 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
-class ProcessingPrioritySpec extends Specification implements DataTest, DomainFactoryCore {
+class ProcessingPrioritySpec extends Specification implements DataTest, DomainFactoryCore, DomainFactoryProcessingPriority {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -70,18 +72,20 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
         given:
         Entity domainObject = createClousure()
 
-        expect:
-        ProcessingPriority.NORMAL.priority == domainObject.processingPriority
-
         when:
-        domainObject.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        domainObject.project.processingPriority.priority = 5
 
         then:
-        ProcessingPriority.FAST_TRACK.priority == domainObject.processingPriority
+        domainObject.processingPriority.priority == 5
+        when:
+        domainObject.project.processingPriority.priority = 10
+
+        then:
+        domainObject.processingPriority.priority == 10
 
         where:
         clazz                       | createClousure
-        SeqTrack                    | { DomainFactory.createSeqTrack() }
+        SeqTrack                    | { createSeqTrack() }
         // old OTP alignment
         AlignmentPass               | { DomainFactory.createAlignmentPass() }
         MergingPass                 | { DomainFactory.createMergingPass() }
@@ -100,6 +104,6 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
         AceseqInstance              | { DomainFactory.createAceseqInstanceWithRoddyBamFiles() }
         RunYapsaInstance            | { DomainFactory.createRunYapsaInstanceWithRoddyBamFiles() }
 
-        className = clazz.getSimpleName()
+        className = clazz.simpleName
     }
 }
