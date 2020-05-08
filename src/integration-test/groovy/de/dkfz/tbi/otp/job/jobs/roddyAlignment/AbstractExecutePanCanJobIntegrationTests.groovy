@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,13 +32,15 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 
 @Rollback
 @Integration
-class AbstractExecutePanCanJobIntegrationTests {
+class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
     AbstractExecutePanCanJob abstractExecutePanCanJob
 
@@ -163,31 +165,35 @@ class AbstractExecutePanCanJobIntegrationTests {
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_NormalPriority_AllFine() {
         setupData()
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
+                "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${roddyBamFile.processingPriority.roddyConfigSuffix}")
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_MinimalPriority_AllFine() {
         setupData()
-        roddyBamFile.project.processingPriority = ProcessingPriority.MINIMUM.priority
+        roddyBamFile.project.processingPriority = findOrCreateProcessingPriorityMinimum()
         roddyBamFile.project.save(flush: true)
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
+                "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${PRIORITY_NAME_MINIMUM}")
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_FasttrackPriority_AllFine() {
         setupData()
-        roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        roddyBamFile.project.processingPriority = findOrCreateProcessingPriorityFastrack()
         roddyBamFile.project.save(flush: true)
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
+                "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${PRIORITY_NAME_FASTTRACK}")
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_OverFasttrackPriority_AllFine() {
         setupData()
-        roddyBamFile.project.processingPriority = (ProcessingPriority.FAST_TRACK.priority + 10) as short
+        roddyBamFile.project.processingPriority = findOrCreateProcessingPriorityMaximum()
         roddyBamFile.project.save(flush: true)
-        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
+        testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
+                "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${PRIORITY_NAME_MAXIMUM}")
     }
 
     void testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(String additionalImports) {
@@ -202,7 +208,8 @@ ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --usefeaturetoggleconfig=${featureTogglesConfigPath} \
 --usePluginVersion=${roddyBamFile.config.programVersion} \
---configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},${roddyBaseConfigsPath}/resource/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} \
+--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},\
+${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
 --additionalImports=${additionalImports} \
 workflowSpecificParameter \

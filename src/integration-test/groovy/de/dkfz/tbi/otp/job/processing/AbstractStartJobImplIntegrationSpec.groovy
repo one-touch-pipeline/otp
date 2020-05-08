@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Rollback
 @Integration
@@ -42,7 +43,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
         jep = DomainFactory.createJobExecutionPlan(enabled: true)
 
         job = [
-                getJobExecutionPlan : { -> jep },
+                getJobExecutionPlan: { -> jep },
         ] as AbstractStartJobImpl
         job.optionService = new ProcessingOptionService()
 
@@ -59,7 +60,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
         given:
         setupData()
         job = [
-                getJobExecutionPlan : { -> null },
+                getJobExecutionPlan: { -> null },
         ] as AbstractStartJobImpl
         job.schedulerService = Mock(SchedulerService) {
             _ * isActive() >> true

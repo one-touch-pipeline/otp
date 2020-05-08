@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -263,7 +263,8 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
                 "--usePluginVersion=${roddyBamFile.config.programVersion} " +
-                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},${roddyBaseConfigsPath}/resource/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} " +
+                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}," +
+                "${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} " +
                 "--useiodir=${viewByPid},${roddyBamFile.workDirectory}"
 
         LogThreadLocal.withThreadLog(System.out) {

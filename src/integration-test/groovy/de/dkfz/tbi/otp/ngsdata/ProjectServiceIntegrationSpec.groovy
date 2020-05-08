@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -48,6 +49,7 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
@@ -56,7 +58,7 @@ import java.time.LocalDate
 
 @Rollback
 @Integration
-class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, DomainFactoryProcessingPriority {
 
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
@@ -166,7 +168,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: nameInMetadataFiles,
                 forceCopyFiles: forceCopyFiles,
                 description: description,
-                processingPriority: processingPriority,
+                processingPriority: createProcessingPriority(priority:  processingPriority),
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
         )
@@ -185,7 +187,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.nameInMetadataFiles == nameInMetadataFiles
         project.forceCopyFiles == forceCopyFiles
         project.description == description
-        project.processingPriority == processingPriority.priority
+        project.processingPriority.priority == processingPriority
 
         where:
         name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
@@ -214,7 +216,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
@@ -263,7 +265,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
@@ -313,7 +315,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: nameInMetadataFiles,
                 forceCopyFiles: true,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
@@ -350,7 +352,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
@@ -381,7 +383,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
                 storageUntil: LocalDate.now(),
@@ -424,7 +426,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
@@ -479,7 +481,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 projectInfoFile: mockMultipartFile,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
@@ -549,7 +551,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 forceCopyFiles: true,
                 description: '',
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                processingPriority: ProcessingPriority.NORMAL,
+                processingPriority: createProcessingPriority(),
                 storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -645,15 +647,16 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         Project project = Project.findByName("testProject")
+        ProcessingPriority fastTrackProcessingPriority = findOrCreateProcessingPriorityFastrack()
 
         when:
-        assert !project.processingPriority
+        assert project.processingPriority != fastTrackProcessingPriority
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateProjectField(ProcessingPriority.FAST_TRACK.priority, "processingPriority", project)
+            projectService.updateProjectField(fastTrackProcessingPriority, "processingPriority", project)
         }
 
         then:
-        project.processingPriority == ProcessingPriority.FAST_TRACK.priority
+        project.processingPriority == fastTrackProcessingPriority
     }
 
     void "test updateTumor valid name"() {
@@ -663,7 +666,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         TumorEntity tumorEntity = DomainFactory.createTumorEntity()
 
         when:
-        assert !project.processingPriority
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(tumorEntity, "tumorEntity", project)
         }

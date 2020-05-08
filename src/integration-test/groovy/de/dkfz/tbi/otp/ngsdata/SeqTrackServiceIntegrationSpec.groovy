@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import javax.sql.DataSource
 
@@ -36,7 +38,7 @@ import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.UNKNOWN
 
 @Rollback
 @Integration
-class SeqTrackServiceIntegrationSpec extends Specification {
+class SeqTrackServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
     @Autowired
     DataSource dataSource
@@ -48,20 +50,22 @@ class SeqTrackServiceIntegrationSpec extends Specification {
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
-        DomainFactory.createSeqTrack(
+        SeqTrack seqTrack1 = createSeqTrack(
                 seqType: seqType,
                 dataInstallationState: state,
                 laneId: "1"
         )
+        seqTrack1.project.processingPriority = findOrCreateProcessingPriorityNormal()
+        seqTrack1.project.processingPriority.save(flush: true)
 
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrack(
+        SeqTrack seqTrack2 = createSeqTrack(
                 seqType: seqType,
                 dataInstallationState: state,
                 laneId: "2",
 
         )
-        seqTrack2.project.processingPriority = priority.priority
-        seqTrack2.save(flush: true)
+        seqTrack2.project.processingPriority = findOrCreateProcessingPriority(priority: priority)
+        seqTrack2.project.processingPriority.save(flush: true)
 
         when:
         String laneId = service.seqTrackReadyToInstall(inputPriority)?.laneId
@@ -103,8 +107,8 @@ class SeqTrackServiceIntegrationSpec extends Specification {
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         SeqType alignableSeqType = DomainFactory.createAllAlignableSeqTypes().first()
 
-        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
-        SeqTrack alignableSeqTrack = DomainFactory.createSeqTrack([
+        createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack alignableSeqTrack = createSeqTrack([
                 fastqcState: NOT_STARTED,
                 seqType    : alignableSeqType,
         ])
@@ -120,9 +124,14 @@ class SeqTrackServiceIntegrationSpec extends Specification {
         given:
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
+        ProcessingPriority normal = findOrCreateProcessingPriorityNormal()
 
-        SeqTrack oldestSeqTrack = DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
-        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack oldestSeqTrack = createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack newerSeqTrack = createSeqTrack([fastqcState: NOT_STARTED])
+        oldestSeqTrack.project.processingPriority = normal
+        oldestSeqTrack.project.save(flush: true)
+        newerSeqTrack.project.processingPriority = normal
+        newerSeqTrack.project.save(flush: true)
 
         when:
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
@@ -136,10 +145,13 @@ class SeqTrackServiceIntegrationSpec extends Specification {
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
 
-        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
-        SeqTrack importantSeqTrack = DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack firstSeqtract = createSeqTrack([fastqcState: NOT_STARTED])
+        firstSeqtract.processingPriority.priority = ProcessingPriority.NORMAL
+        firstSeqtract.save(flush: true)
+
+        SeqTrack importantSeqTrack = createSeqTrack([fastqcState: NOT_STARTED])
         Project importantProject = importantSeqTrack.project
-        importantProject.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        importantProject.processingPriority.priority = ProcessingPriority.FAST_TRACK
         importantProject.save(flush: true)
 
         when: "asked for normal priority"
@@ -159,7 +171,9 @@ class SeqTrackServiceIntegrationSpec extends Specification {
         given:
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
-        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack seqTrack = createSeqTrack([fastqcState: NOT_STARTED])
+        seqTrack.processingPriority.priority = ProcessingPriority.NORMAL
+        seqTrack.processingPriority.save(flush: true)
 
         when:
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK)

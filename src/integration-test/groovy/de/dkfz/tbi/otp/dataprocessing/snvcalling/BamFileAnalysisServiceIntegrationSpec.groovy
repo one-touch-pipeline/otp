@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 
@@ -72,8 +73,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         assert samplePair1.save(flush: true)
         Pipeline pipeline1 = pipeline()
         Map configProperties = [
-                project: samplePair1.project,
-                pipeline:  pipeline1,
+                project : samplePair1.project,
+                pipeline: pipeline1,
         ]
         if (pipeline1.usesRoddy()) {
             DomainFactory.createRoddyWorkflowConfig(configProperties + [
@@ -89,10 +90,10 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         null == service().samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
-        processingStatus            | pipeline                                       | service                  | optionName
-        "sophiaProcessingStatus"    | { DomainFactory.createSophiaPipelineLazy() }   | { this.sophiaService }   | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
-        "aceseqProcessingStatus"    | { DomainFactory.createAceseqPipelineLazy() }   | { this.aceseqService }   | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
-        "runYapsaProcessingStatus"  | { DomainFactory.createRunYapsaPipelineLazy() } | { this.runYapsaService } | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
+        processingStatus           | pipeline                                       | service                  | optionName
+        "sophiaProcessingStatus"   | { DomainFactory.createSophiaPipelineLazy() }   | { this.sophiaService }   | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "aceseqProcessingStatus"   | { DomainFactory.createAceseqPipelineLazy() }   | { this.aceseqService }   | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        "runYapsaProcessingStatus" | { DomainFactory.createRunYapsaPipelineLazy() } | { this.runYapsaService } | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
     }
 
     @Unroll
@@ -118,16 +119,16 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
                 pipeline: pipeline()
         )
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type: null,
+                name   : ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
+                type   : null,
                 project: null,
-                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+                value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
-                type: null,
+                name   : ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
+                type   : null,
                 project: null,
-                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+                value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
 
         expect:
@@ -169,16 +170,16 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
                 pipeline: pipeline()
         )
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type: null,
+                name   : ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
+                type   : null,
                 project: null,
-                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+                value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
-                type: null,
+                name   : ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
+                type   : null,
                 project: null,
-                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+                value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
 
         expect:

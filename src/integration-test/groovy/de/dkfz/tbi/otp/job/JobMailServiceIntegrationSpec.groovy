@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -40,7 +42,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
 @Integration
-class JobMailServiceIntegrationSpec extends Specification {
+class JobMailServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -52,15 +54,16 @@ class JobMailServiceIntegrationSpec extends Specification {
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
         jobStatusLoggingService.configService = configService
 
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        seqTrack.project.processingPriority = processingPriority.priority
-        seqTrack.ilseSubmission = DomainFactory.createIlseSubmission()
+        OtrsTicket otrsTicket = createOtrsTicket()
+        SeqTrack seqTrack = createSeqTrack()
+        seqTrack.ilseSubmission = createIlseSubmission()
         seqTrack.save(flush: true)
+        seqTrack.project.processingPriority = fasttrack ? findOrCreateProcessingPriorityFastrack() : findOrCreateProcessingPriorityNormal()
+        seqTrack.project.save(flush: true)
 
         DomainFactory.createDataFile([
                 seqTrack: seqTrack,
-                fastqImportInstance: DomainFactory.createFastqImportInstance([
+                fastqImportInstance: createFastqImportInstance([
                         otrsTicket: otrsTicket,
                 ])
         ])
@@ -112,7 +115,7 @@ class JobMailServiceIntegrationSpec extends Specification {
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
-                        assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK ? "FASTTRACK ERROR:" : "ERROR:")
+                        assert emailSubject.startsWith(fasttrack ? "FASTTRACK ERROR:" : "NORMAL ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
                         assert content.contains('\nOTP Job:\n')
@@ -146,13 +149,13 @@ class JobMailServiceIntegrationSpec extends Specification {
         configService.clean()
 
         where:
-        completedCount | failedCount | processingPriority
-        0              | 0           | ProcessingPriority.NORMAL
-        5              | 0           | ProcessingPriority.NORMAL
-        0              | 5           | ProcessingPriority.NORMAL
-        2              | 3           | ProcessingPriority.NORMAL
-        0              | 0           | ProcessingPriority.FAST_TRACK
-        5              | 0           | ProcessingPriority.FAST_TRACK
+        completedCount | failedCount | fasttrack
+        0              | 0           | false
+        5              | 0           | false
+        0              | 5           | false
+        2              | 3           | false
+        0              | 0           | true
+        5              | 0           | true
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,14 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Rollback
 @Integration
-class SnvCallingServiceIntegrationSpec extends Specification {
+class SnvCallingServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
     final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
     final static double COVERAGE_TOO_LOW = 20.0
@@ -54,6 +57,9 @@ class SnvCallingServiceIntegrationSpec extends Specification {
         roddyConfig1 = map.roddyConfig
 
         DomainFactory.createAllAnalysableSeqTypes()
+
+        samplePair1.project.processingPriority.priority = 0
+        samplePair1.project.processingPriority.save(flush: true)
     }
 
     @Unroll
@@ -335,7 +341,9 @@ class SnvCallingServiceIntegrationSpec extends Specification {
         given:
         setupData()
 
-        DomainFactory.createProcessableSamplePair()
+        SamplePair samplePair = DomainFactory.createProcessableSamplePair().samplePair
+        samplePair.project.processingPriority = samplePair1.project.processingPriority
+        samplePair.project.save(flush: true)
 
         expect:
         samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
@@ -348,7 +356,7 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
         SamplePair samplePairFastTrack = DomainFactory.createProcessableSamplePair().samplePair
         Project project = samplePairFastTrack.project
-        project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        project.processingPriority = findOrCreateProcessingPriorityFastrack()
         assert project.save(flush: true)
 
         expect:

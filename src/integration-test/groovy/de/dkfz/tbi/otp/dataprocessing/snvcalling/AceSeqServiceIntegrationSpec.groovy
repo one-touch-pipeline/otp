@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Rollback
 @Integration
@@ -91,10 +92,10 @@ class AceSeqServiceIntegrationSpec extends Specification {
         setupData()
         prepareSophiaForAceseq([:], [:])
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: Pipeline.Type.ACESEQ.toString(),
+                name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type   : Pipeline.Type.ACESEQ.toString(),
                 project: null,
-                value: "40",
+                value  : "40",
         ])
 
         expect:
@@ -122,8 +123,8 @@ class AceSeqServiceIntegrationSpec extends Specification {
         prepareSophiaForAceseqBase()
 
         Map defaultMap = [
-                processingState: AnalysisProcessingStates.FINISHED,
-                withdrawn: false,
+                processingState   : AnalysisProcessingStates.FINISHED,
+                withdrawn         : false,
                 sampleType1BamFile: bamFile1_1,
                 sampleType2BamFile: bamFile2_1,
         ]

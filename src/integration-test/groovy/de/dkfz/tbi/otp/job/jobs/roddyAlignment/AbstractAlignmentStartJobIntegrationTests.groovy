@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.job.jobs.TestAbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -39,12 +40,13 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Rollback
 @Integration
-class AbstractAlignmentStartJobIntegrationTests {
+class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessingPriority {
 
     @Autowired
     TestAbstractAlignmentStartJob testAbstractAlignmentStartJob
@@ -70,19 +72,20 @@ class AbstractAlignmentStartJobIntegrationTests {
     void testFindProcessableMergingWorkPackages_WhenSeveralMergingWorkPackages_ShouldReturnOrderedMergingWorkPackageList() {
         setupData()
         MergingWorkPackage tooLowPriority = createMergingWorkPackage()
-        tooLowPriority.project.processingPriority = ProcessingPriority.MINIMUM.priority
-        assert tooLowPriority.save(flush: true)
+        tooLowPriority.project.processingPriority = findOrCreateProcessingPriorityMinimum()
+        assert tooLowPriority.project.save(flush: true)
 
         MergingWorkPackage lowPriority = createMergingWorkPackage()
-        lowPriority.project.processingPriority = ProcessingPriority.NORMAL.priority
-        assert lowPriority.save(flush: true)
+        lowPriority.project.processingPriority = findOrCreateProcessingPriorityNormal()
+        assert lowPriority.project.save(flush: true)
 
         MergingWorkPackage highPriority = createMergingWorkPackage()
-        highPriority.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        highPriority.project.processingPriority = findOrCreateProcessingPriorityFastrack()
         assert highPriority.save(flush: true)
 
         MergingWorkPackage doesNotNeedProcessing = createMergingWorkPackage()
-        doesNotNeedProcessing.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        doesNotNeedProcessing.project.processingPriority = findOrCreateProcessingPriorityFastrack()
+        assert doesNotNeedProcessing.project.save(flush: true)
         doesNotNeedProcessing.needsProcessing = false
         assert doesNotNeedProcessing.save(flush: true)
 
@@ -103,10 +106,10 @@ class AbstractAlignmentStartJobIntegrationTests {
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsNotProcessedAndNotWithdrawn_ShouldReturnEmptyList() {
         setupData()
         DomainFactory.createRoddyBamFile([
-                workPackage: createMergingWorkPackage(),
+                workPackage        : createMergingWorkPackage(),
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-                md5sum: null,
-                withdrawn: false,
+                md5sum             : null,
+                withdrawn          : false,
         ])
 
         assert [] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
@@ -116,10 +119,10 @@ class AbstractAlignmentStartJobIntegrationTests {
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsNotProcessedButWithdrawn_ShouldReturnMergingWorkPackage() {
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage: createMergingWorkPackage(),
+                workPackage        : createMergingWorkPackage(),
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                md5sum: null,
-                withdrawn: true,
+                md5sum             : null,
+                withdrawn          : true,
         ])
 
         assert [roddyBamFile.workPackage] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
@@ -129,9 +132,9 @@ class AbstractAlignmentStartJobIntegrationTests {
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsProcessed_ShouldReturnMergingWorkPackage() {
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage: createMergingWorkPackage(),
+                workPackage        : createMergingWorkPackage(),
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                withdrawn: false,
+                withdrawn          : false,
         ])
 
         assert [roddyBamFile.workPackage] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
@@ -174,17 +177,17 @@ class AbstractAlignmentStartJobIntegrationTests {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
+                workPackage        : mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-                md5sum: null,
-                withdrawn: true,
+                md5sum             : null,
+                withdrawn          : true,
         ])
         DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
+                workPackage        : mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                md5sum: null,
-                withdrawn: true,
-                config: roddyBamFile.config,
+                md5sum             : null,
+                withdrawn          : true,
+                config             : roddyBamFile.config,
         ])
 
         assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
@@ -195,15 +198,15 @@ class AbstractAlignmentStartJobIntegrationTests {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile rbf = DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
+                workPackage        : mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
+                workPackage        : mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-                md5sum: null,
-                withdrawn: true,
-                config: rbf.config,
+                md5sum             : null,
+                withdrawn          : true,
+                config             : rbf.config,
         ])
 
         mwp.bamFileInProjectFolder = roddyBamFile
@@ -216,15 +219,15 @@ class AbstractAlignmentStartJobIntegrationTests {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
+                workPackage        : mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ])
         DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
+                workPackage        : mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-                md5sum: null,
-                withdrawn: true,
-                config: roddyBamFile.config,
+                md5sum             : null,
+                withdrawn          : true,
+                config             : roddyBamFile.config,
         ])
 
         mwp.bamFileInProjectFolder = roddyBamFile
@@ -244,7 +247,7 @@ class AbstractAlignmentStartJobIntegrationTests {
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
-                withdrawn: true,
+                withdrawn  : true,
         ])
 
         mwp.bamFileInProjectFolder = bamFile
@@ -340,7 +343,7 @@ class AbstractAlignmentStartJobIntegrationTests {
         RoddyWorkflowConfig.list()*.delete(flush: true)
         assert 0 == RoddyWorkflowConfig.list().size()
 
-        assert TestCase.shouldFail (AssertionError) {
+        assert TestCase.shouldFail(AssertionError) {
             testAbstractAlignmentStartJob.createBamFile(mwp, null)
         }.contains('RoddyWorkflowConfig')
     }
@@ -349,8 +352,8 @@ class AbstractAlignmentStartJobIntegrationTests {
     void testStartRoddyAlignment_WhenProcessingPriorityIsTooLow_ShouldNotCreateProcess() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
-        mwp.project.processingPriority = ProcessingPriority.NORMAL.priority - 1 as short
-        assert mwp.save(flush: true)
+        mwp.project.processingPriority = findOrCreateProcessingPriorityMinimum()
+        assert mwp.project.save(flush: true)
 
         withJobExecutionPlan {
             testAbstractAlignmentStartJob.startAlignment()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,15 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 trait StartJobIntegrationSpec {
 
     SamplePair setupSamplePair() {
         def map = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair = map.samplePair
+        samplePair.project.processingPriority.priority = ProcessingPriority.NORMAL
+        samplePair.project.processingPriority.save(flush: true)
 
         createConfig(samplePair, createPipeline())
 
