@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2020 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 <%@ page import="de.dkfz.tbi.otp.ngsdata.UserProjectRole" %>
 <%@ page import="de.dkfz.tbi.otp.ngsdata.TumorEntity" %>
 <%@ page import="de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain" %>
-<%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingPriority" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -303,8 +302,8 @@
             <tr>
                 <td><g:message code="project.processingPriority"/></td>
                 <td><g:select id="priority" name="processingPriority" class="use-select-2"
-                              from="${processingPriorities}" optionValue="nameWithPriority" required="true"
-                              value="${ProcessingPriority.getByPriorityNumberOrName(source.getByFieldName("processingPriority"))}"/></td>
+                              from="${processingPriorities}" optionKey="id" optionValue="nameWithPriority" required="true"
+                              value="${source.getByFieldName("processingPriority")?.id}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'processingPriority', cmd: cmd]"/>
             </tr>
             <tr>

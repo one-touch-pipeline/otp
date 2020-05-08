@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,13 +27,14 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -48,6 +49,7 @@ class ProjectConfigController implements CheckAndCall {
     ProjectSelectionService projectSelectionService
     SampleTypeService sampleTypeService
     ConfigService configService
+    ProcessingPriorityService processingPriorityService
 
     Map index() {
         Project project = projectSelectionService.selectedProject
@@ -64,8 +66,8 @@ class ProjectConfigController implements CheckAndCall {
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
                 tumorEntities                  : TumorEntity.list().sort(),
                 projectTypes                   : Project.ProjectType.values(),
-                processingPriority             : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
-                processingPriorities           : ProcessingPriority.displayPriorities,
+                processingPriority             : project?.processingPriority,
+                processingPriorities           : processingPriorityService.allSortedByPriority(),
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
                 allProjectGroups               : ProjectGroup.list(),
@@ -88,7 +90,7 @@ class ProjectConfigController implements CheckAndCall {
 
     JSON updateProcessingPriority(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(ProcessingPriority.valueOf(cmd.value).priority, cmd.fieldName, projectSelectionService.requestedProject)
+            projectService.updateProjectField(ProcessingPriority.get(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 

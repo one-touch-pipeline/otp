@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,11 +31,12 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 import de.dkfz.tbi.util.MultiObjectValueSource
 
 import java.time.LocalDate
@@ -50,6 +51,7 @@ class ProjectCreationController {
 
     ProjectService projectService
     ProjectGroupService projectGroupService
+    ProcessingPriorityService processingPriorityService
 
     def index(ProjectCreationBasisCommand cmd) {
         List<ProjectRequest> projectRequests = ProjectRequest.findAllByStatus(ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR)
@@ -59,21 +61,21 @@ class ProjectCreationController {
         if (cmd.baseProject) {
             usersToCopyFromBaseProject = projectService.getUsersToCopyFromBaseProject(cmd.baseProject)
             baseProjectOverride << [
-                name                      : "",
-                individualPrefix          : "",
-                dirName                   : "",
-                dirAnalysis               : "",
-                unixGroup                 : "",
-                relatedProjects           : ((cmd.baseProject.relatedProjects?.split(",") ?: []) + cmd.baseProject.name).join(","),
-                speciesWithStrain         : [id: null],
-                internalNotes             : "",
-                usersToCopyFromBaseProject: usersToCopyFromBaseProject,
-                nameInMetadataFiles       : "",
+                    name                      : "",
+                    individualPrefix          : "",
+                    dirName                   : "",
+                    dirAnalysis               : "",
+                    unixGroup                 : "",
+                    relatedProjects           : ((cmd.baseProject.relatedProjects?.split(",") ?: []) + cmd.baseProject.name).join(","),
+                    speciesWithStrain         : [id: null],
+                    internalNotes             : "",
+                    usersToCopyFromBaseProject: usersToCopyFromBaseProject,
+                    nameInMetadataFiles       : "",
             ]
         }
         Map<String, ?> defaults = [
                 qcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
-                processingPriority : ProcessingPriority.NORMAL,
+                processingPriority : processingPriorityService.defaultPriority(),
                 storageUntil       : "3000-01-01",
                 projectType        : Project.ProjectType.SEQUENCING,
                 forceCopyFiles     : true,
@@ -98,7 +100,7 @@ class ProjectCreationController {
                 tumorEntities                  : TumorEntity.list().sort { it.name },
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
                 qcThresholdHandlings           : QcThresholdHandling.values(),
-                processingPriorities           : ProcessingPriority.displayPriorities,
+                processingPriorities           : processingPriorityService.allSortedByPriority(),
                 projectTypes                   : Project.ProjectType.values(),
                 allSpeciesWithStrains          : SpeciesWithStrain.list().sort { it.toString() },
                 keywords                       : Keyword.listOrderByName() ?: [],
