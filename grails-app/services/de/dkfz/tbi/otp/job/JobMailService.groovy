@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,6 @@ import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
@@ -67,12 +66,10 @@ class JobMailService {
         ProcessingStep step = ProcessingStep.getInstance(job.getProcessingStep().id)
 
         def object = step.processParameterObject
-        String subjectPrefix = ""
         if (!object) {
             return //general workflow, no processing
-        } else if (object.processingPriority >= ProcessingPriority.FAST_TRACK.priority) {
-            subjectPrefix = "FASTTRACK "
         }
+        String subjectPrefix = object.processingPriority?.errorMailPrefix ?: "ERROR"
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
         Collection<String> openTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
@@ -153,7 +150,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
         String recipientsString = processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_ERRORS)
         if (recipientsString) {
             List<String> recipients = recipientsString.split(' ') as List
-            String subject = "${subjectPrefix}ERROR: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"
+            String subject = "${subjectPrefix}: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"
 
             mailHelperService.sendEmail(subject, message.toString(), recipients)
         }
