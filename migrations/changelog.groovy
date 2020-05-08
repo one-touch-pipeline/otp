@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -420,4 +420,6 @@ databaseChangeLog = {
     changeSet(author: "m39l", id: "otp-466") {
         sqlFile(path: 'changelogs/2020/otp-466.sql')
     }
+
+    include file: 'changelogs/2020/otp-375-priority-as-domain.groovy'
 }
