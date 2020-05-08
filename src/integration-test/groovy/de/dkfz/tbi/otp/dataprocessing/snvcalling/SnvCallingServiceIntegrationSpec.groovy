@@ -49,7 +49,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
     SnvCallingService snvCallingService
 
     void setupData() {
-        def map = DomainFactory.createProcessableSamplePair()
+        Map map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
         bamFile1_1 = map.bamFile1
@@ -75,7 +75,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         property << ["project", "seqType"]
@@ -89,7 +89,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
 
     void "samplePairForProcessing when the snvCallingInstance is already in progress"() {
@@ -105,9 +105,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         )
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
-
 
     void "samplePairForProcessing when a snvCallingInstance already finished"() {
         given:
@@ -130,7 +129,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        def map2 = DomainFactory.createProcessableSamplePair()
+        Map map2 = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair2 = map2.samplePair
 
         DomainFactory.createRoddySnvCallingInstance(
@@ -145,7 +144,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         samplePair1.individual != samplePair2.individual
         samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
-
 
     @Unroll
     void "samplePairForProcessing when bamFile#number does not contain all seqTracks"() {
@@ -164,7 +162,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         where:
         number << [1, 2]
     }
-
 
     @Unroll
     void "samplePairForProcessing when no samplepair for bamFile#number exists"() {
@@ -187,12 +184,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         samplePair1.delete(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         number << [1, 2]
     }
-
 
     @Unroll
     void "samplePairForProcessing when bamFile#number is still in progress"() {
@@ -206,12 +202,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert bamFileInProgress.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         number << [1, 2]
     }
-
 
     @Unroll
     void "samplePairForProcessing when for bamFile#number the coverage is too low"() {
@@ -223,12 +218,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         number << [1, 2]
     }
-
 
     @Unroll
     void "samplePairForProcessing when for bamFile#number the number of lanes is too low"() {
@@ -241,12 +235,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         number << [1, 2]
     }
-
 
     void "samplePairForProcessing when for both bam Files the number of lanes is too low"() {
         given:
@@ -258,9 +251,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
-
 
     void "samplePairForProcessing when for both bam Files the coverage is too low"() {
         given:
@@ -272,9 +264,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
-
 
     @Unroll
     void "samplePairForProcessing when for bamFile#number no threshold exists"() {
@@ -288,12 +279,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         number << [1, 2]
     }
-
 
     @Unroll
     void "samplePairForProcessing when for bamFile#number the processing threshold #property is null"() {
@@ -319,7 +309,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         2      | "numberOfLanes"
     }
 
-
     @Unroll
     void "samplePairForProcessing when bamFile#number is withdrawn"() {
         given:
@@ -330,12 +319,11 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         number << [1, 2]
     }
-
 
     void "samplePairForProcessing when check if the order correct"() {
         given:
@@ -348,7 +336,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         expect:
         samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
-
 
     void "samplePairForProcessing ensure that FastTrack is processed first"() {
         given:
@@ -363,15 +350,13 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
-
     void "samplePairForProcessing, make sure that min processing priority is taken into account"() {
         given:
         setupData()
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK)
+        snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK) == null
     }
-
 
     void "validateInputBamFiles, when all okay, return without exception"() {
         given:

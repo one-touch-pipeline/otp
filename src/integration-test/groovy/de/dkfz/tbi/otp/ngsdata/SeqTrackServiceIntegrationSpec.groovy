@@ -97,9 +97,9 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         where:
         shouldFind | params
         false      | { [fastqcState: UNKNOWN] }
-        false      | { [fastqcState: UNKNOWN, seqType: SeqTypeService.getExomePairedSeqType()] }
+        false      | { [fastqcState: UNKNOWN, seqType: SeqTypeService.exomePairedSeqType] }
         true       | { [fastqcState: NOT_STARTED] }
-        true       | { [fastqcState: NOT_STARTED, seqType: SeqTypeService.getExomePairedSeqType()] }
+        true       | { [fastqcState: NOT_STARTED, seqType: SeqTypeService.exomePairedSeqType] }
     }
 
     void "getSeqTrackReadyForFastqcProcessing should prioritise alignable over rest"() {

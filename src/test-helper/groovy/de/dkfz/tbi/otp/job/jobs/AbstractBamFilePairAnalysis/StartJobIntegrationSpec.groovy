@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 trait StartJobIntegrationSpec {
 
     SamplePair setupSamplePair() {
-        def map = DomainFactory.createProcessableSamplePair()
+        Map map = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair = map.samplePair
         samplePair.project.processingPriority.priority = ProcessingPriority.NORMAL
         samplePair.project.processingPriority.save(flush: true)

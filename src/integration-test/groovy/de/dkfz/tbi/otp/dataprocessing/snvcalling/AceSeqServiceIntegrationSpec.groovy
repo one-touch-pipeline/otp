@@ -41,7 +41,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
     AceseqService aceseqService
 
     void setupData() {
-        def map = DomainFactory.createProcessableSamplePair()
+        Map map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
         bamFile1_1 = map.bamFile1
@@ -57,7 +57,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
         prepareSophiaForAceseqBase()
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and not withdrawn and an older finish exist, should not return SamplePair"() {
@@ -66,7 +66,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: false])
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and withdrawn and an older finish exist, should return SamplePair"() {
@@ -84,7 +84,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: true], [processingState: AnalysisProcessingStates.FINISHED, withdrawn: true])
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
+        aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
 
     void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
@@ -101,7 +101,6 @@ class AceSeqServiceIntegrationSpec extends Specification {
         expect:
         !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
-
 
     private void prepareSophiaForAceseqBase() {
         samplePair1.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED

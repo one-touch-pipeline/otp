@@ -52,7 +52,7 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     RunYapsaService runYapsaService
 
     void setupData() {
-        def map = DomainFactory.createProcessableSamplePair()
+        Map map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
         bamFile1_1 = map.bamFile1
@@ -63,7 +63,6 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
 
         DomainFactory.createReferenceGenomeAndAnalysisProcessingOptions()
     }
-
 
     @Unroll
     void "samplePairForProcessing shouldn't find anything for wrong referenceGenome"() {
@@ -87,7 +86,7 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         }
 
         expect:
-        null == service().samplePairForProcessing(ProcessingPriority.NORMAL)
+        service().samplePairForProcessing(ProcessingPriority.NORMAL) == null
 
         where:
         processingStatus           | pipeline                                       | service                  | optionName
@@ -143,7 +142,6 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
         "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
     }
-
 
     @Unroll
     void "samplePairForProcessing should return a sample pair when qc of bam file is okay"() {

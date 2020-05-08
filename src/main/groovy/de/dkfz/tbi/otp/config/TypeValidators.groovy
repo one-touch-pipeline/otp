@@ -55,7 +55,7 @@ enum TypeValidators {
 
     MULTI_LINE_TEXT({ it ==~ /[\s\S]*/ }, null),
 
-    MAIL({ EmailValidator.getInstance().isValid(it) }, null),
+    MAIL({ EmailValidator.instance.isValid(it) }, null),
 
     PATH_COMPONENT({ OtpPath.isValidPathComponent(it) }, null),
 
@@ -89,11 +89,11 @@ enum TypeValidators {
 
     JOB_NAME_SEQ_TYPE({ validateTypeForClusterSubmission(it) }, { allowedValuesForClusterSubmission() }),
 
-    TIME_ZONE({ try { ZoneId.of(it); return true } catch (DateTimeException ignored) { return false } }, { ZoneId.getAvailableZoneIds().sort() }),
+    TIME_ZONE({ try { ZoneId.of(it); return true } catch (DateTimeException ignored) { return false } }, { ZoneId.availableZoneIds.sort() }),
 
     GUI_ANNOTATION({ GuiAnnotation.findByName(it) }, { GuiAnnotation.values()*.name() }),
 
-    private Closure validator
+    private final Closure validator
     private final Closure<List<String>> allowedValues
 
     TypeValidators(Closure validator, Closure<List<String>> allowedValues) {
@@ -108,9 +108,8 @@ enum TypeValidators {
     List<String> getAllowedValues() {
         if (allowedValues) {
             return allowedValues.call()
-        } else {
-            return null
         }
+        return null
     }
 
     private static boolean validateTypeForClusterSubmission(String name) {
@@ -123,18 +122,18 @@ enum TypeValidators {
         }
 
         ApplicationContext context = StaticApplicationContextWrapper.context
-        List<String> jobNames = context.getBeanNamesForType(AbstractOtpJob.class)
+        List<String> jobNames = context.getBeanNamesForType(AbstractOtpJob)
 
         return jobNames.any {
-            context.getType(it).getSimpleName() == split[0]
+            context.getType(it).simpleName == split[0]
         }
     }
 
     private static List<String> allowedValuesForClusterSubmission() {
         ApplicationContext context = StaticApplicationContextWrapper.context
-        List<String> beanNames = context.getBeanNamesForType(AbstractOtpJob.class)
+        List<String> beanNames = context.getBeanNamesForType(AbstractOtpJob)
         List<String> jobNames = beanNames.collect {
-            context.getType(it).getSimpleName()
+            context.getType(it).simpleName
         }
         List<String> seqTypes = SEQ_TYPE_PROCESSING_NAME.allowedValues
         List<String> result = jobNames.collectMany { String jobName ->

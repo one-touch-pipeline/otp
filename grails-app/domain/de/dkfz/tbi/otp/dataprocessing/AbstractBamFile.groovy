@@ -93,7 +93,6 @@ abstract class AbstractBamFile implements Entity {
      */
     State status = State.DECLARED
 
-
     abstract AbstractMergingWorkPackage getMergingWorkPackage()
     abstract Set<SeqTrack> getContainedSeqTracks()
     abstract AbstractQualityAssessment getOverallQualityAssessment()
@@ -109,9 +108,8 @@ abstract class AbstractBamFile implements Entity {
         hasMetricsFile validator: { val, obj ->
             if (obj.type == BamType.SORTED) {
                 return !val
-            } else {
-                return true
             }
+            return true
         }
         status validator: { val, obj ->
             if (val == State.NEEDS_PROCESSING) {
@@ -135,7 +133,6 @@ abstract class AbstractBamFile implements Entity {
         withdrawn index: "abstract_bam_file_withdrawn_idx"
         qualityAssessmentStatus index: "abstract_bam_file_quality_assessment_status_idx"
     }
-
 
     boolean isQualityAssessed() {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
@@ -181,7 +178,6 @@ abstract class AbstractBamFile implements Entity {
     ReferenceGenome getReferenceGenome() {
         return mergingWorkPackage?.referenceGenome
     }
-
 
     void withdraw() {
         withTransaction {

@@ -66,7 +66,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                     AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
                     AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-                    BamFilePairAnalysis analysis = getBamFileAnalysisService().getAnalysisClass().newInstance(
+                    BamFilePairAnalysis analysis = bamFileAnalysisService.analysisClass.newInstance(
                             samplePair: samplePair,
                             instanceName: getInstanceName(config),
                             config: config,
@@ -82,12 +82,11 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         }
     }
 
-
     @Override
     Process restart(Process process) {
         assert process
 
-        BamFilePairAnalysis failedAnalysis = process.getProcessParameterObject()
+        BamFilePairAnalysis failedAnalysis = process.processParameterObject
 
         tryToDeleteResultFilesOfFailedInstance(failedAnalysis)
 
@@ -95,7 +94,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
             failedAnalysis.withdrawn = true
             assert failedAnalysis.save(flush: true)
 
-            BamFilePairAnalysis newAnalysis = getBamFileAnalysisService().getAnalysisClass().newInstance(
+            BamFilePairAnalysis newAnalysis = bamFileAnalysisService.analysisClass.newInstance(
                     samplePair: failedAnalysis.samplePair,
                     instanceName: getInstanceName(failedAnalysis.config),
                     config: getConfig(failedAnalysis.samplePair),
@@ -108,23 +107,22 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         }
     }
 
-
     private void tryToDeleteResultFilesOfFailedInstance(BamFilePairAnalysis analysis) {
-        final Realm realm = analysis.project.realm
+        Realm realm = analysis.project.realm
 
-        String deleteFiles = "rm -rf ${analysis.getWorkDirectory()}"
+        String deleteFiles = "rm -rf ${analysis.workDirectory}"
 
         remoteShellHelper.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 
     SamplePair findSamplePairToProcess(int minPriority) {
-        return getBamFileAnalysisService().samplePairForProcessing(minPriority)
+        return bamFileAnalysisService.samplePairForProcessing(minPriority)
     }
 
     @Override
     String getFormattedDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm")
-        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), configService.getTimeZoneId())
+        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), configService.timeZoneId)
         return time.format(formatter).replaceAll('/', '_')
     }
 }

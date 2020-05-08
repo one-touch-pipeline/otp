@@ -170,10 +170,10 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * </ul>
      */
     protected int getMinimumProcessingPriorityForOccupyingASlot() {
-        if (!schedulerService.isActive()) {
+        if (!schedulerService.active) {
             return ProcessingPriority.SUPREMUM
         }
-        final JobExecutionPlan plan = getJobExecutionPlan()
+        final JobExecutionPlan plan = jobExecutionPlan
         if (!plan || plan.obsoleted || !plan.enabled) {
             return ProcessingPriority.SUPREMUM
         }
@@ -186,8 +186,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         final int slotsReservedForFastTrack = optionService.findOptionAsInteger(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, plan.name)
         if (occupiedSlots < totalSlots - slotsReservedForFastTrack) {
             return ProcessingPriority.MINIMUM
-        } else {
-            return ProcessingPriority.FAST_TRACK
         }
+        return ProcessingPriority.FAST_TRACK
     }
 }

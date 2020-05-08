@@ -80,7 +80,6 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         "ERROR" | 1
     }
 
-
     void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
         Realm realm = DomainFactory.createRealm()
@@ -113,7 +112,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
 
         then:
-        result.isEmpty()
+        result.isEmpty() //can not written as .empty
     }
 
     @Unroll
@@ -150,7 +149,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
 
         then:
-        def job = new ClusterJobIdentifier(realm, jobId)
+        ClusterJobIdentifier job = new ClusterJobIdentifier(realm, jobId)
         result.containsKey(job)
         result.get(job) == status
 
@@ -166,7 +165,6 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         "S"       || ClusterJobStatus.NOT_COMPLETED
     }
 
-
     private static String qstatOutput(String jobId, String status) {
         return """\
 
@@ -177,7 +175,6 @@ Job ID                  Username    Queue    Jobname          SessID  NDS   TSK 
 ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1      1     750mb  00:10:00 ${status}       --
 """
     }
-
 
     void "test executeJob, succeeds"() {
         given:
@@ -249,9 +246,8 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
                                 counter++
                                 if (queryExtendedJobStateByIdCallCount == counter && calledAmendClusterJob) {
                                     return [(new BEJobID(clusterId)): new GenericJobInfo(null, null, null, null, null)]
-                                } else {
-                                    throw new RuntimeException()
                                 }
+                                throw new RuntimeException()
                             }
                         }
                     }

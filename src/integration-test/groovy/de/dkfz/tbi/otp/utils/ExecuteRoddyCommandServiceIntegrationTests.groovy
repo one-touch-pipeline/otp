@@ -78,7 +78,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
         DomainFactory.createProcessingOptionLazy([
                 name: OptionName.OTP_USER_LINUX_GROUP,
-                value: configService.getTestingGroup(),
+                value: configService.testingGroup,
                 type: null,
         ])
 
@@ -148,7 +148,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         assert expectedCmd == actualCmd
     }
 
-
     @Test
     void testGetAnalysisIDinConfigFile_InputIsNull_ShouldFail() {
         setupData()
@@ -197,7 +196,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
             executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
         }.contains("The seqType ${roddyBamFile.seqType} can not be processed at the moment")
     }
-
 
     @Test
     void testDefaultRoddyExecutionCommand_ObjectIsNull_ShouldFail() {
@@ -294,7 +292,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
 
-        assert 1 == roddyBamFile.roddyExecutionDirectoryNames.size()
+        assert roddyBamFile.roddyExecutionDirectoryNames.size() == 1
         assert [RODDY_EXECUTION_DIR_NAME_1] == roddyBamFile.roddyExecutionDirectoryNames
     }
 
@@ -474,7 +472,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         setupData()
 
         // test data in temp-folder will be created with primary group, which is...
-        String primaryGroup = TestConfigService.getPrimaryGroup()
+        String primaryGroup = TestConfigService.primaryGroup
 
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
@@ -490,7 +488,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 }
         ] as RemoteShellHelper
 
-        String testingGroup = configService.getTestingGroup()
+        String testingGroup = configService.testingGroup
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
@@ -513,8 +511,8 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     @Test
     void testCorrectPermissionsAndGroups() {
         setupData()
-        String primaryGroup = configService.getWorkflowProjectUnixGroup()
-        String group = configService.getTestingGroup()
+        String primaryGroup = configService.workflowProjectUnixGroup
+        String group = configService.testingGroup
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 

@@ -85,8 +85,7 @@ class SeqTrackService {
      */
     List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
-            def c = Sequence.createCriteria()
-            return c.list {
+            return Sequence.withCriteria {
                 filteringClosure.delegate = delegate
                 filteringClosure(filtering)
                 if (max != -1) { //-1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
@@ -95,15 +94,14 @@ class SeqTrackService {
                 firstResult(offset)
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
-        } else {
-            List<Project> projects = projectService.getAllProjects()
-            return projects ? Sequence.findAllByProjectIdInList(projects*.id, [
-                    offset: offset,
-                    max: max,
-                    sort: column.columnName,
-                    order: sortOrder ? "asc" : "desc",
-            ]) : []
         }
+        List<Project> projects = projectService.allProjects
+        return projects ? Sequence.findAllByProjectIdInList(projects*.id, [
+                offset: offset,
+                max: max,
+                sort: column.columnName,
+                order: sortOrder ? "asc" : "desc",
+        ]) : []
     }
 
     /**
@@ -113,21 +111,19 @@ class SeqTrackService {
      */
     int countSequences(SequenceFiltering filtering) {
         if (filtering.enabled) {
-            def c = Sequence.createCriteria()
-            return c.get {
+            return Sequence.createCriteria().get {
                 filteringClosure.delegate = delegate
                 filteringClosure(filtering)
                 projections { count('mockPid') }
             }
-        } else {
-            // shortcut for unfiltered results
-            List<Project> projects = projectService.getAllProjects()
-            return projects ? Sequence.countByProjectIdInList(projects*.id) : 0
         }
+        // shortcut for unfiltered results
+        List<Project> projects = projectService.allProjects
+        return projects ? Sequence.countByProjectIdInList(projects*.id) : 0
     }
 
     Closure filteringClosure = { SequenceFiltering filtering ->
-        'in'('projectId', projectService.getAllProjects().collect { it.id })
+        'in'('projectId', projectService.allProjects*.id)
         if (filtering.project) {
             'in'('projectId', filtering.project)
         }
@@ -182,7 +178,7 @@ class SeqTrackService {
     }
 
     static boolean mayAlign(SeqTrack seqTrack, boolean log = true) {
-        def notAligning = { String reason ->
+        Closure notAligning = { String reason ->
             if (log) {
                 AbstractAlignmentDecider.logNotAligning(seqTrack, reason)
             }
@@ -204,7 +200,7 @@ class SeqTrackService {
             return false
         }
 
-        if (seqTrack.seqType.isExome() &&
+        if (seqTrack.seqType.exome &&
                 seqTrack.libraryPreparationKit == null &&
                 seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {
             notAligning('kitInfoReliability is UNKNOWN_VERIFIED')
@@ -226,11 +222,10 @@ class SeqTrackService {
      * @return a seqTrack without fastqc
      */
     SeqTrack getSeqTrackReadyForFastqcProcessing(int minPriority) {
-        List<SeqType> seqTypes = SeqTypeService.getAllAlignableSeqTypes()
+        List<SeqType> seqTypes = SeqTypeService.allAlignableSeqTypes
         List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
                      minPriority,
         ] + seqTypes*.id
-
 
         // this workaround is used because
         // HQL would support IN but doesn't support expressions in ORDER BY clauses,
@@ -302,12 +297,11 @@ LIMIT 1
             return null
         }
         SeqTrack seqTrack = null
-        if (identifier.isLong()) {
+        if (identifier.long) {
             seqTrack = SeqTrack.get(identifier as Long)
         }
         return seqTrack
     }
-
 
     /**
      * This method determines if a fastq file has to be linked or copied to the project folder and stores the information in the seqTrack.

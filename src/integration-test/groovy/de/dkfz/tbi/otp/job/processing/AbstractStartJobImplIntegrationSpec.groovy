@@ -81,7 +81,6 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
         job.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.SUPREMUM
     }
 
-
     @Unroll
     void "test getMinimumProcessingPriorityForOccupyingASlot, JobExecutionPlan obsoleted #obsoleted enabled #enabled"() {
         given:

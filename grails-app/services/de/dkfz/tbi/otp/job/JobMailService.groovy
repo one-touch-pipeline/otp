@@ -52,7 +52,6 @@ class JobMailService {
 
     ProcessingOptionService processingOptionService
 
-
     void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
         assert job: 'job may not be null'
         assert exceptionToBeHandled: 'exceptionToBeHandled may not be null'
@@ -65,7 +64,7 @@ class JobMailService {
 
         ProcessingStep step = ProcessingStep.getInstance(job.getProcessingStep().id)
 
-        def object = step.processParameterObject
+        ProcessParameterObject object = step.processParameterObject
         if (!object) {
             return //general workflow, no processing
         }
@@ -74,7 +73,7 @@ class JobMailService {
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
         Collection<String> openTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
             !otrsTicket.finalNotificationSent
-        }*.getUrl() : []
+        }*.url : []
 
         List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
@@ -123,7 +122,7 @@ class JobMailService {
                     eligible           : dateString(clusterJob.eligible), //time when job is ready for start (no hold anymore)
                     start              : dateString(clusterJob.started),
                     ended              : dateString(clusterJob.ended),
-                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.getElapsedWalltime().standardHours : 'na',
+                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na',
                     logFile            : clusterJob.jobLog,
 
                     exitStatus         : clusterJob.exitStatus,
@@ -156,7 +155,6 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
         }
     }
 
-
     private String dateString(DateTime date) {
         return dateString(date?.toDate())
     }
@@ -181,8 +179,7 @@ ${data.collect { key, value -> "  ${key}: ${value}" }.join('\n')}
         Process previous = Process.findByRestarted(process)
         if (previous) {
             return firstWorkflowJobId(previous)
-        } else {
-            return process
         }
+        return process
     }
 }

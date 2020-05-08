@@ -143,7 +143,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
             DomainFactory.with {
                 createProcessingOptionForNotificationRecipient()
-                createProcessingOptionLazy(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.getTestingGroup())
+                createProcessingOptionLazy(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
                 createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
                 createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
                 createProcessingOptionLazy(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
@@ -176,7 +176,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
             DomainFactory.createProcessingOptionLazy(
                     name: OptionName.RODDY_APPLICATION_INI,
-                    value: new File(getInputRootDirectory(), "applicationProperties-test.ini").absolutePath
+                    value: new File(inputRootDirectory, "applicationProperties-test.ini").absolutePath
             )
 
             assert schedulerService.running.empty
@@ -212,7 +212,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
         doCleanup()
 
-        log.info "Base directory: ${getBaseDirectory()}"
+        log.info "Base directory: ${baseDirectory}"
     }
 
     void doCleanup() {
@@ -244,15 +244,15 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     protected void setupDirectoriesAndRealm() {
         // check whether the wf test root dir is mounted
         // (assume it is mounted if it exists and contains files)
-        File rootDirectory = getInputRootDirectory()
+        File rootDirectory = inputRootDirectory
         assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
 
-        configService.setOtpProperty((OtpProperty.SSH_USER), configService.getWorkflowTestAccountName())
+        configService.setOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
 
         Map realmParams = [
                 name                       : 'REALM_NAME',
-                jobScheduler               : configService.getWorkflowTestScheduler(),
-                host                       : configService.getWorkflowTestHost(),
+                jobScheduler               : configService.workflowTestScheduler,
+                host                       : configService.workflowTestHost,
                 port                       : 22,
                 timeout                    : 0,
                 defaultJobSubmissionOptions: jobSubmissionOptions,
@@ -260,23 +260,25 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
         realm = Realm.list().find() ?: DomainFactory.createRealm(realmParams)
 
-        log.debug "Base directory: ${getBaseDirectory()}"
+        setupBaseDirectory()
+
+        log.debug "Base directory: ${baseDirectory}"
         [
-                (OtpProperty.PATH_PROJECT_ROOT)    : "${getBaseDirectory()}/root_path",
-                (OtpProperty.PATH_PROCESSING_ROOT) : "${getBaseDirectory()}/processing_root_path",
-                (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${getBaseDirectory()}/logging_root_path",
+                (OtpProperty.PATH_PROJECT_ROOT)    : "${baseDirectory}/root_path",
+                (OtpProperty.PATH_PROCESSING_ROOT) : "${baseDirectory}/processing_root_path",
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${baseDirectory}/logging_root_path",
         ].each { key, value ->
             configService.setOtpProperty(key, value)
         }
 
         createDirectories([
-                configService.getRootPath(),
-                new File(configService.getLoggingRootPath(), JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
+                configService.rootPath,
+                new File(configService.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
         ])
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getProcessingRootPath(), "reference_genomes").absolutePath)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.processingRootPath, "reference_genomes").absolutePath)
 
-        testDataDir = "${getInputRootDirectory()}/files"
-        ftpDir = "${getBaseDirectory()}/ftp"
+        testDataDir = "${inputRootDirectory}/files"
+        ftpDir = "${baseDirectory}/ftp"
     }
 
     private void createTestProcessingPriority() {
@@ -394,11 +396,11 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
      *
      * @return the base directory
      */
-    protected File getBaseDirectory() {
+    protected void setupBaseDirectory() {
         // Create the directory like a "singleton", since randomness is involved
         if (!baseDirectory) {
             String mkDirs = """\
-TEMP_DIR=`mktemp -d -p ${getResultRootDirectory().absolutePath} ${this.class.simpleName[0..-6]}-${System.getProperty('user.name')}-${
+TEMP_DIR=`mktemp -d -p ${resultRootDirectory.absolutePath} ${this.class.simpleName[0..-6]}-${System.getProperty('user.name')}-${
                 HelperUtils.formatter.print(new org.joda.time.DateTime())
             }-XXXXXXXXXXXXXXXX`
 chmod g+rwx \$TEMP_DIR
@@ -407,15 +409,14 @@ echo \$TEMP_DIR
             baseDirectory = new File(remoteShellHelper.executeCommandReturnProcessOutput(realm, mkDirs)
                     .assertExitCodeZeroAndStderrEmpty().stdout.trim())
         }
-        return baseDirectory
     }
 
     protected File getReferenceGenomeDirectory() {
-        return new File(getInputRootDirectory(), 'reference-genomes')
+        return new File(inputRootDirectory, 'reference-genomes')
     }
 
     ReferenceGenome createReferenceGenomeWithFile(String referenceGenomeSpecificPath, String fileNamePrefix, String cytosinePositionsIndex = null) {
-        File sourceDir = new File(getReferenceGenomeDirectory(), referenceGenomeSpecificPath)
+        File sourceDir = new File(referenceGenomeDirectory, referenceGenomeSpecificPath)
         File source = new File(sourceDir, CHROMOSOME_NAMES_FILE)
 
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(
@@ -458,7 +459,7 @@ echo \$TEMP_DIR
      * @see #getBaseDirectory()
      */
     protected File getInputRootDirectory() {
-        return configService.getWorkflowTestInputRootDir()
+        return configService.workflowTestInputRootDir
     }
 
     /**
@@ -469,7 +470,7 @@ echo \$TEMP_DIR
      * @return the root directory set in the configuration file, or the default location otherwise.
      */
     protected File getResultRootDirectory() {
-        return configService.getWorkflowTestResultRootDir()
+        return configService.workflowTestResultRootDir
     }
 
     /**
@@ -501,8 +502,8 @@ echo \$TEMP_DIR
         SessionUtils.withNewSession {
             updateProjectValuesForTestRunning()
             schedulerService.startup()
-            assert schedulerService.isStartupOk()
-            assert schedulerService.isActive()
+            assert schedulerService.startupOk
+            assert schedulerService.active
             if (!startJobRunning) {
                 AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
                 assert startJob: 'No start job found.'
@@ -526,7 +527,7 @@ echo \$TEMP_DIR
     }
 
     private void updateProjectValuesForTestRunning() {
-        String unixGroup = configService.getWorkflowProjectUnixGroup()
+        String unixGroup = configService.workflowProjectUnixGroup
         Project.list().each {
             it.unixGroup = unixGroup
             it.realm = realm
@@ -559,9 +560,9 @@ echo \$TEMP_DIR
 
     protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
         assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
-        String cmd = "find -L ${directory} -user ${configService.getWorkflowTestAccountName()} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
+        String cmd = "find -L ${directory} -user ${configService.workflowTestAccountName} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
         assert remoteShellHelper.executeCommand(realm, cmd).empty
-        cmd = "find -L ${directory} -user ${configService.getWorkflowTestAccountName()} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
+        cmd = "find -L ${directory} -user ${configService.workflowTestAccountName} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
         assert remoteShellHelper.executeCommand(realm, cmd).empty
     }
 }

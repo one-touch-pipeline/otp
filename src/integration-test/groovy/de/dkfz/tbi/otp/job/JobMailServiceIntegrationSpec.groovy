@@ -76,11 +76,10 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                 type: null,
                 value: "http:/localhost:8080",
         ])
-        String url = otrsTicket.getUrl()
+        String url = otrsTicket.url
 
         DomainFactory.createProcessingOptionForErrorRecipient()
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
-
 
         List<ClusterJob> completedClusterJobs = []
         completedCount.times {
@@ -158,13 +157,12 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         5              | 0           | true
     }
 
-
     void "restartCount, when not restarted, return 0"() {
         given:
         ProcessingStep step = DomainFactory.createProcessingStep()
 
         expect:
-        0 == new JobMailService().restartCount(step)
+        new JobMailService().restartCount(step) == 0
     }
 
     void "restartCount, when one time restarted, return 1"() {
@@ -172,7 +170,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         ProcessingStep step = DomainFactory.createRestartedProcessingStep()
 
         expect:
-        1 == new JobMailService().restartCount(step)
+        new JobMailService().restartCount(step) == 1
     }
 
     void "restartCount, when two time restarted, return 2"() {
@@ -180,6 +178,6 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         ProcessingStep step = DomainFactory.createRestartedProcessingStep(original: DomainFactory.createRestartedProcessingStep())
 
         expect:
-        2 == new JobMailService().restartCount(step)
+        new JobMailService().restartCount(step) == 2
     }
 }

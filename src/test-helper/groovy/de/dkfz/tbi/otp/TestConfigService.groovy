@@ -134,7 +134,7 @@ class TestConfigService extends ConfigService {
      * and then changed by the software-under-test to the testing-group. This behaviour cannot be verified if the testing-group is the same as default.
      */
     private void assertTestingGroupIsNotPrimary(String testingGroup) {
-        assert testingGroup != getPrimaryGroup() : "Standard testing group shouldn't be the user's primary group, please update your .otp.properties!"
+        assert testingGroup != primaryGroup : "Standard testing group shouldn't be the user's primary group, please update your .otp.properties!"
     }
 
     /**

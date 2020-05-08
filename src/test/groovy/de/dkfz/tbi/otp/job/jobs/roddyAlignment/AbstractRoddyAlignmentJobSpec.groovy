@@ -70,10 +70,8 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 ])
 class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFactory {
 
-
     @Rule
     public TemporaryFolder temporaryFolder
-
 
     void "prepareAndReturnAlignmentCValues, when RoddyBamFile is null, throw assert"() {
         given:
@@ -105,7 +103,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
                 "INDEX_PREFIX:${referenceGenomeFilePath.path}",
                 "GENOME_FA:${referenceGenomeFilePath.path}",
                 "CHROM_SIZES_FILE:${chromosomeStatSizeFilePath.path}",
-                "possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}",
+                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
         ]
 
@@ -132,7 +130,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         adapterTrimming << [true, false]
     }
 
-
     void "validate, when RoddyBamFile is null, throw assert"() {
         given:
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob)
@@ -144,7 +141,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         AssertionError e = thrown()
         e.message.contains("Input roddyBamFile must not be null")
     }
-
 
     void "validate, when changing permissions fail, throw assert"() {
         given:
@@ -167,7 +163,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         errorMessage == e.message
     }
 
-
     void "validate, when baseBamFile change, throw assert"() {
         given:
         String errorMessage = HelperUtils.uniqueString
@@ -189,7 +184,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         e.message.contains('The input BAM file seems to have changed ')
         errorMessage == e.cause.message
     }
-
 
     @Unroll
     void "validate, when #file not exist, throw assert"() {
@@ -240,7 +234,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         ]
     }
 
-
     void "validate, when wrong operation status, throw assert"() {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -271,7 +264,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         configService.clean()
     }
 
-
     void "validate, when all fine, return without exception"() {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -300,7 +292,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         cleanup:
         configService.clean()
     }
-
 
     void "validate, when all fine and seqtype is RNA, return without exception"() {
         given:
@@ -353,7 +344,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
-        roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
+        roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.readGroupName)
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
@@ -367,9 +358,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         String expectedErrorMessage = """\
             |Read groups in BAM file are not as expected.
             |Read groups in ${roddyBamFile.workBamFile}:
-            |${(roddyBamFile.containedSeqTracks - seqTrack).collect { it.getReadGroupName() }.sort().join('\n')}
+            |${(roddyBamFile.containedSeqTracks - seqTrack)*.readGroupName.sort().join('\n')}
             |Expected read groups:
-            |${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join('\n')}
+            |${roddyBamFile.containedSeqTracks*.readGroupName.sort().join('\n')}
             |""".stripMargin()
 
         when:
@@ -383,7 +374,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         configService.clean()
     }
 
-
     void "validateReadGroups, when read groups are fine, return without exception"() {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -395,7 +385,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         roddyBamFile.save(flush: true)
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
-        roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
+        roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.readGroupName)
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> configService
@@ -411,7 +401,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         configService.clean()
     }
 
-
     void "ensureCorrectBaseBamFileIsOnFileSystem, if no base bam file, all fine"() {
         when:
         Spy(AbstractRoddyAlignmentJob).ensureCorrectBaseBamFileIsOnFileSystem(null)
@@ -419,7 +408,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         then:
         noExceptionThrown()
     }
-
 
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist but not on file system, throw assert"() {
         given:
@@ -437,7 +425,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         AssertionError e = thrown()
         e.message.contains('assert bamFilePath.exists()')
     }
-
 
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist and is correct, return without exception"() {
         given:

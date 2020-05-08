@@ -95,7 +95,7 @@ class NotificationCreator {
         LogThreadLocal.threadLog?.debug("evaluating processFinished for OtrsTickets: ${otrsTickets}; " +
                 "SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
-            setFinishedTimestampsAndNotify(ticket)
+            finishedTimestampsAndNotify = ticket
         }
     }
 
@@ -129,7 +129,7 @@ class NotificationCreator {
                 otrsTicketService.markFinalNotificationSent(ticket)
             }
             if (justCompletedProcessingSteps.contains(OtrsTicket.ProcessingStep.INSTALLATION)) {
-                LogThreadLocal.getThreadLog()?.debug("installation just completed")
+                LogThreadLocal.threadLog?.debug("installation just completed")
                 sendImportSourceOperatorNotification(ticket)
             }
         }
@@ -242,9 +242,7 @@ class NotificationCreator {
         List<String> allPaths = []
         otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).each { MetaDataFile metaDataFile ->
             allPaths << metaDataFile.fullPath
-            List<String> dataFilePaths = metaDataFile.fastqImportInstance.dataFiles.collect { DataFile dataFile ->
-                dataFile.fullInitialPath
-            }
+            List<String> dataFilePaths = metaDataFile.fastqImportInstance.dataFiles*.fullInitialPath
             allPaths.addAll(dataFilePaths)
         }
         return getPrefixBlacklistFilteredStrings(allPaths)

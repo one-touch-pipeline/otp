@@ -234,7 +234,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
         usersToCopyFromBaseProject(nullable: true)
         tumorEntity(nullable: true)
         projectInfoFile(nullable: true, validator: { val, obj ->
-            if (val?.isEmpty()) {
+            if (val?.empty) {
                 return "empty"
             }
 
@@ -242,7 +242,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
                 return "invalid"
             }
 
-            if (val?.getSize() > ProjectService.PROJECT_INFO_MAX_SIZE) {
+            if (val?.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
                 "size"
             }
         })

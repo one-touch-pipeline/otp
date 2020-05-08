@@ -189,7 +189,7 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
     }
 
     File getProjectSequencingDirectory() {
-        new File(getProjectDirectory(), 'sequencing')
+        new File(projectDirectory, 'sequencing')
     }
 
     @Override

@@ -285,7 +285,7 @@ class RoddyWorkflowConfigUnitTests {
     @Test
     void testValidateConfig_shouldBeValid() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         RoddyWorkflowConfigService service = createService()
 
         service.validateConfig(roddyWorkflowConfig)
@@ -317,7 +317,7 @@ class RoddyWorkflowConfigUnitTests {
     @Test
     void testValidateConfig_shouldFailForPluginVersionInName() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         roddyWorkflowConfig.programVersion = "plugin:invalid"
         RoddyWorkflowConfigService service = createService()
 
@@ -342,7 +342,7 @@ class RoddyWorkflowConfigUnitTests {
         Individual individual = DomainFactory.createIndividual()
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
         configDir = new File(configDir, individual.pid)
-        createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         RoddyWorkflowConfigService service = createService()
 
         service.validateConfig(roddyWorkflowConfig)
@@ -353,7 +353,7 @@ class RoddyWorkflowConfigUnitTests {
     void testValidateConfig_withIndividual_PidNotInPath_shouldBeInvalid() {
         Individual individual = DomainFactory.createIndividual()
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
-        createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        createXml(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig)
         RoddyWorkflowConfigService service = createService()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "assert config.configFilePath.contains(config.individual.pid)") {

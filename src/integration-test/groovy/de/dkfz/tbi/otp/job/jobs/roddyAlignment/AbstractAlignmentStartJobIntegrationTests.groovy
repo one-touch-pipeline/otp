@@ -145,7 +145,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
 
-        assert false == AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
+        assert AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp) == false
     }
 
     @Test
@@ -169,7 +169,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
 
-        assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp) == null
     }
 
     @Test
@@ -190,7 +190,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
                 config             : roddyBamFile.config,
         ])
 
-        assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp) == null
     }
 
     @Test
@@ -211,7 +211,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
 
         mwp.bamFileInProjectFolder = roddyBamFile
 
-        assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp) == null
     }
 
     @Test
@@ -238,7 +238,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
     @Test
     void testFindUsableBaseBamFile_WhenMergingWorkPackageHasNoBamFile_ShouldReturnNull() {
         setupData()
-        assert null == testAbstractAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage())
+        assert testAbstractAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage()) == null
     }
 
     @Test
@@ -252,7 +252,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
 
         mwp.bamFileInProjectFolder = bamFile
 
-        assert null == testAbstractAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
+        assert testAbstractAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage) == null
     }
 
     @Test
@@ -297,16 +297,15 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, null)
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
-        assert null == rbf.baseBamFile
+        assert rbf.baseBamFile == null
         assert TestCase.containSame(seqTracks, rbf.seqTracks)
         assert seqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(seqTracks, rbf.containedSeqTracks)
         assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)
-        assert !rbf.isOldStructureUsed()
+        assert !rbf.oldStructureUsed
 
         return rbf
     }
-
 
     @Test
     void testCreateRoddyBamFile_WhenBaseBamFileIsNotNull() {
@@ -331,7 +330,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         assert baseBamFile.numberOfMergedLanes + additionalSeqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(additionalSeqTracks + baseBamFile.containedSeqTracks, rbf.containedSeqTracks)
         assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)
-        assert !rbf.isOldStructureUsed()
+        assert !rbf.oldStructureUsed
     }
 
     @Test
@@ -341,7 +340,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         DomainFactory.createSeqTrackWithDataFiles(mwp)
         DomainFactory.createRoddyProcessingOptions()
         RoddyWorkflowConfig.list()*.delete(flush: true)
-        assert 0 == RoddyWorkflowConfig.list().size()
+        assert RoddyWorkflowConfig.list().size() == 0
 
         assert TestCase.shouldFail(AssertionError) {
             testAbstractAlignmentStartJob.createBamFile(mwp, null)
@@ -398,13 +397,12 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         assert otrsTicket.alignmentStarted != null
     }
 
-
     private void assertRoddyBamFileConsistencyWithMwp(RoddyBamFile rbf, MergingWorkPackage mwp) {
         assert mwp == rbf.workPackage
         assert RoddyBamFile.maxIdentifier(mwp) == rbf.identifier
         assert mwp.pipeline == rbf.config.pipeline
         assert mwp.project == rbf.config.project
-        assert null == rbf.config.obsoleteDate
+        assert rbf.config.obsoleteDate == null
     }
 
     MergingWorkPackage createMergingWorkPackage() {

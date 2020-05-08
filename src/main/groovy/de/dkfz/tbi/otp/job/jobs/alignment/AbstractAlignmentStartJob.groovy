@@ -67,7 +67,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     Process restart(Process process) {
         assert process
 
-        AbstractMergedBamFile failedInstance = (AbstractMergedBamFile) process.getProcessParameterObject()
+        AbstractMergedBamFile failedInstance = (AbstractMergedBamFile) process.processParameterObject
 
         AbstractMergedBamFile.withTransaction {
             failedInstance.withdraw()
@@ -148,9 +148,8 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         AbstractMergedBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
         if (!bamFile || bamFile.withdrawn) {
             return null
-        } else {
-            return bamFile
         }
+        return bamFile
     }
 
     AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, AbstractMergedBamFile baseBamFile) {
@@ -172,9 +171,8 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         return bamFile
     }
 
-    abstract AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile = null)
+    abstract AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks,
+                                                       ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile = null)
 
     abstract ConfigPerProjectAndSeqType getConfig(MergingWorkPackage mergingWorkPackage)
 }
-
-

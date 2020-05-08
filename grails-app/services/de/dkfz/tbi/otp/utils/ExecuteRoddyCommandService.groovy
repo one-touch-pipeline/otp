@@ -43,7 +43,6 @@ class ExecuteRoddyCommandService {
     ExecutionHelperService executionHelperService
     ProcessingOptionService processingOptionService
 
-
     String activateModulesForRoddyCommand() {
         String loadModule = processingOptionService.findOptionAsString(OptionName.COMMAND_LOAD_MODULE_LOADER)
         String activateJava = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_JAVA)
@@ -96,7 +95,6 @@ class ExecuteRoddyCommandService {
         ].join('\n')
     }
 
-
     String roddyGetRuntimeConfigCommand(RoddyWorkflowConfig config, String nameInConfigFile, String analysisIDinConfigFile) {
         String roddyConfigCommand = [
                 roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.CONFIG),
@@ -109,7 +107,6 @@ class ExecuteRoddyCommandService {
         ].join('\n')
     }
 
-
     String commonRoddy(RoddyWorkflowConfig config, Realm.JobScheduler jobScheduler) {
         File roddyBaseConfigsPath = processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH) as File
         File applicationIniPath = processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI) as File
@@ -117,7 +114,6 @@ class ExecuteRoddyCommandService {
         //ensure that needed input files are available on the file system
         LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
-
 
         String programVersion = config.programVersion
         File configFile = new File(config.configFilePath)
@@ -133,7 +129,6 @@ class ExecuteRoddyCommandService {
                 "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath}${jobSchSpecificConfig}",
         ].join(" ")
     }
-
 
     String roddyBaseCommand(String configName, String analysisId, RoddyInvocationType type) {
         File roddyPath = processingOptionService.findOptionAsString(OptionName.RODDY_PATH) as File
@@ -159,11 +154,9 @@ class ExecuteRoddyCommandService {
             String roddyName = roddyResult.seqType.roddyName
             assert roddyName: "roddyName is not specified for ${roddyResult.seqType}"
             return roddyName
-        } else {
-            throw new RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
         }
+        throw new RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
     }
-
 
     void createWorkOutputDirectory(Realm realm, File file) {
         assert realm: "Realm must not be null"

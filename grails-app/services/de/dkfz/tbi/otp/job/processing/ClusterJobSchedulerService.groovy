@@ -58,7 +58,7 @@ import java.time.format.DateTimeFormatter
 @Transactional
 class ClusterJobSchedulerService {
 
-    static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.getCurrent() == Environment.TEST) ? 0 : 10000
+    static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000
 
     static final String CLUSTER_JOBS_STATE_LOG_DIRECTORY = "cluster-jobs-state"
 
@@ -109,7 +109,7 @@ class ClusterJobSchedulerService {
             )
         }
 
-        String jobName = processingStep.getClusterJobName()
+        String jobName = processingStep.clusterJobName
         String logFile = jobStatusLoggingService.constructLogFileLocation(realm, processingStep)
         String logMessage = jobStatusLoggingService.constructMessage(realm, processingStep)
         File clusterLogDirectory = clusterJobLoggingService.createAndGetLogDirectory(realm, processingStep)
@@ -158,7 +158,7 @@ class ClusterJobSchedulerService {
         )
 
         BEJobResult jobResult = jobManager.submitJob(job)
-        if (!jobResult.isSuccessful()) {
+        if (!jobResult.successful) {
             try {
                 jobManager.killJobs([job])
             } catch (Exception e) {
@@ -169,13 +169,13 @@ class ClusterJobSchedulerService {
         jobManager.startHeldJobs([job])
 
         ClusterJob clusterJob = clusterJobService.createClusterJob(
-                realm, job.jobID.shortID, configService.getSshUser(), processingStep, seqType, jobName
+                realm, job.jobID.shortID, configService.sshUser, processingStep, seqType, jobName
         )
         retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
 
         LogThreadLocal.threadLog?.info("Log file: ${clusterJob.jobLog}")
 
-        return job.getJobID().shortID
+        return job.jobID.shortID
     }
 
     /**
@@ -194,7 +194,8 @@ class ClusterJobSchedulerService {
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
                     new ClusterJobIdentifier(realm, jobId.id),
-                    (state in finished || state in failed) ? ClusterJobStatus.COMPLETED : state == JobState.UNKNOWN ? ClusterJobStatus.UNKNOWN : ClusterJobStatus.NOT_COMPLETED,
+                    (state in finished || state in failed) ? ClusterJobStatus.COMPLETED :
+                            state == JobState.UNKNOWN ? ClusterJobStatus.UNKNOWN : ClusterJobStatus.NOT_COMPLETED,
             ]
         } as Map<ClusterJobIdentifier, ClusterJobStatus>
     }
@@ -203,7 +204,7 @@ class ClusterJobSchedulerService {
         Map<BEJobID, JobState> jobStates
         StringBuilder logStringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(logStringBuilder) {
-            ((SimpleLogger) LogThreadLocal.threadLog).setLevel(Level.DEBUG)
+            ((SimpleLogger) LogThreadLocal.threadLog).level = Level.DEBUG
             jobStates = jobManager.queryJobStatusAll()
         }
 
@@ -217,16 +218,15 @@ class ClusterJobSchedulerService {
     private Path pathForLogging() {
         String dateDirectory = LocalDateTime.now().format(PATH_FORMATTER)
 
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
-        Path baseLogDir = fileSystem.getPath(configService.getLoggingRootPath().path)
+        Path baseLogDir = fileSystem.getPath(configService.loggingRootPath.path)
 
         Path logFile = baseLogDir.resolve(CLUSTER_JOBS_STATE_LOG_DIRECTORY).resolve(dateDirectory)
         assert logFile.absolute
 
         return logFile
     }
-
 
     void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)

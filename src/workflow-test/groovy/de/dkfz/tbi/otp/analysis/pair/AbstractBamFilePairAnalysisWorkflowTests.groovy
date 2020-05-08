@@ -61,7 +61,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
             pairedInSequencing: 2120,
     ]
 
-
     final Map createProcessMergedBamFileProperties() {
         DomainFactory.randomProcessedBamFileProperties + [
                 coverage            : COVERAGE,
@@ -96,7 +95,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         commonBamFileSetup()
         createBedFileAndLibPrepKit()
     }
-
 
     void setupProcessedMergedBamFile() {
         MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
@@ -153,7 +151,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         createBedFileAndLibPrepKit()
     }
 
-
     private void commonBamFileSetup() {
         individual = bamFileTumor.individual
         project = individual.project
@@ -179,7 +176,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         setupBamFilesInFileSystem()
     }
 
-
     void createSampleTypeCategories() {
         DomainFactory.createSampleTypePerProject(
                 project: project,
@@ -195,7 +191,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
         samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
     }
-
 
     void createThresholds() {
         DomainFactory.createProcessingThresholds(
@@ -216,7 +211,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     }
 
     void setupBamFilesInFileSystem() {
-        BamFileSet bamFileSet = getBamFileSet()
+        BamFileSet bamFileSet = this.bamFileSet
 
         File diseaseBamFile = bamFileTumor.pathForFurtherProcessing
         File diseaseBaiFile = new File(diseaseBamFile.parentFile, bamFileTumor.baiFileName)
@@ -237,12 +232,11 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         assert bamFileControl.save(flush: true)
     }
 
-
     abstract File getWorkflowData()
 
     @Override
     File getBamFilePairBaseDirectory() {
-        new File(getInputRootDirectory(), 'bamFiles')
+        new File(inputRootDirectory, 'bamFiles')
     }
 
     void createBedFileAndLibPrepKit() {

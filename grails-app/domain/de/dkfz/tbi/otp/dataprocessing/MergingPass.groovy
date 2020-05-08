@@ -112,12 +112,11 @@ class MergingPass implements ProcessParameterObject, Entity {
 
     static int nextIdentifier(final MergingSet mergingSet) {
         assert mergingSet
-        final Integer maxIdentifier = maxIdentifier(mergingSet)
+        Integer maxIdentifier = maxIdentifier(mergingSet)
         if (maxIdentifier == null) {
             return 0
-        } else {
-            return maxIdentifier + 1
         }
+        return maxIdentifier + 1
     }
 
     static mapping = { mergingSet index: "merging_pass_merging_set_idx" }

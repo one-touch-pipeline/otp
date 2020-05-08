@@ -67,7 +67,6 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
 
     QcTrafficLightStatus qcTrafficLightStatus
 
-
     static constraints = {
         sampleType1BamFile validator: { AbstractMergedBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
@@ -121,7 +120,7 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
     }
 
     File getWorkDirectory() {
-        return getInstancePath().absoluteDataManagementPath
+        return instancePath.absoluteDataManagementPath
     }
 
     abstract OtpPath getInstancePath()

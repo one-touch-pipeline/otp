@@ -29,14 +29,13 @@ import de.dkfz.tbi.otp.utils.WaitingFileUtils
  * This interface must be implemented by all result objects which are created with a Roddy workflow.
  * With this interface it is ensured that all information, needed to call Roddy out of OTP, are provided.
  */
+@SuppressWarnings('JavaIoPackageAccess')
 trait RoddyResult {
 
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
     static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
 
-
     List<String> roddyExecutionDirectoryNames = []
-
 
     abstract Project getProject()
 
@@ -81,7 +80,7 @@ trait RoddyResult {
 
         File latestWorkDirectory = new File(workExecutionStoreDirectory, latestDirectoryName)
         WaitingFileUtils.waitUntilExists(latestWorkDirectory)
-        assert latestWorkDirectory.isDirectory()
+        assert latestWorkDirectory.directory
 
         return latestWorkDirectory
     }

@@ -130,7 +130,7 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         bamFile.save(flush: true)
 
-        assert bamFile.isMostRecentBamFile()
+        assert bamFile.mostRecentBamFile
 
         MergingPass secondMergingPass = new MergingPass(
                 identifier: 2,
@@ -140,8 +140,8 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(secondMergingPass)
         secondBamFile.save(flush: true)
 
-        assert !bamFile.isMostRecentBamFile()
-        assert secondBamFile.isMostRecentBamFile()
+        assert !bamFile.mostRecentBamFile
+        assert secondBamFile.mostRecentBamFile
 
         MergingSet secondMergingSet = new MergingSet(
                 identifier: 2,
@@ -156,8 +156,8 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile firstBamFileOfSecondMergingSet = DomainFactory.createProcessedMergedBamFile(firstMergingPassOfSecondMergingSet)
         firstBamFileOfSecondMergingSet.save(flush: true)
 
-        assert !secondBamFile.isMostRecentBamFile()
-        assert firstBamFileOfSecondMergingSet.isMostRecentBamFile()
+        assert !secondBamFile.mostRecentBamFile
+        assert firstBamFileOfSecondMergingSet.mostRecentBamFile
     }
 
     @Test

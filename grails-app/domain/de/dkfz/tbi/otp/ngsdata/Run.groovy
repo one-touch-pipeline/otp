@@ -68,9 +68,8 @@ class Run implements ProcessParameterObject, Entity {
         List<SeqType> seqTypes = SeqTrack.findAllByRun(this)*.seqType
         if (seqTypes.unique().size() == 1) {
             return seqTypes.get(0)
-        } else {
-            return null
         }
+        return null
     }
 
     /*
@@ -83,9 +82,8 @@ class Run implements ProcessParameterObject, Entity {
         List<Individual> individuals = SeqTrack.findAllByRun(this)*.individual
         if (individuals.unique().size() == 1) {
             return individuals.first()
-        } else {
-            return null
         }
+        return null
     }
 
     @Override

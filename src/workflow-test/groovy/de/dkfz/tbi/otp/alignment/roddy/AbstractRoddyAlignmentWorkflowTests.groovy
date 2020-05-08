@@ -95,13 +95,11 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     File fingerPrintingFile
 
-
     ProcessingOptionService processingOptionService
 
     AbstractBamFileService abstractBamFileService
 
     ProjectService projectService
-
 
     @Override
     List<String> getWorkflowScripts() {
@@ -118,8 +116,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     @Override
     void setup() {
         SessionUtils.withNewSession {
-            String group = configService.getTestingGroup()
-            executionHelperService.setGroup(realm, configService.getRootPath() as File, group)
+            String group = configService.testingGroup
+            executionHelperService.setGroup(realm, configService.rootPath as File, group)
 
             setUpFilesVariables()
 
@@ -129,7 +127,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
             createProjectConfig(workPackage)
 
-            if (SeqTypeService.getExomePairedSeqType() == findSeqType()) {
+            if (SeqTypeService.exomePairedSeqType == findSeqType()) {
                 BedFile bedFile = new BedFile(
                         referenceGenome: workPackage.referenceGenome,
                         libraryPreparationKit: workPackage.libraryPreparationKit,
@@ -183,7 +181,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         LibraryPreparationKit kit = new LibraryPreparationKit(
                 name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
                 shortDisplayName: "~* xX lPk Xx *~",
-                adapterFile: new File(getInputRootDirectory(), 'adapters/TruSeq3-PE.fa').absolutePath,
+                adapterFile: new File(inputRootDirectory, 'adapters/TruSeq3-PE.fa').absolutePath,
                 reverseComplementAdapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         ).save(flush: true)
 
@@ -192,8 +190,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 seqType: seqType,
                 referenceGenome: referenceGenome,
                 needsProcessing: false,
-                statSizeFileName: getChromosomeStatFileName(),
-                libraryPreparationKit: seqType.isWgbs() ? null : kit,
+                statSizeFileName: chromosomeStatFileName,
+                libraryPreparationKit: seqType.wgbs ? null : kit,
         )
 
         workPackage.individual.pid = 'pid_4'  // This name is encoded in @RG of the test BAM file
@@ -208,7 +206,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         workPackage.seqPlatformGroup.mergingCriteria = DomainFactory.createMergingCriteria(
                 project: workPackage.individual.project,
                 seqType: workPackage.seqType,
-                useLibPrepKit: !seqType.isWgbs(),
+                useLibPrepKit: !seqType.wgbs,
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
         workPackage.seqPlatformGroup.save(flush: true)
@@ -245,7 +243,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
         ] + properties
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
-        if (findSeqType().isWgbs() || findSeqType().isChipSeq()) {
+        if (findSeqType().wgbs || findSeqType().chipSeq) {
             seqTrack.libraryPreparationKit = exactlyOneElement(LibraryPreparationKit.findAll())
             seqTrack.kitInfoReliability = InformationReliability.KNOWN
             seqTrack.save(flush: true)
@@ -263,7 +261,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         workPackage.save(flush: true)
         return seqTrack
     }
-
 
     List<File> createFileListForFirstBam(RoddyBamFile firstBamFile, String finalOrWork) {
         Map<SeqTrack, File> singleLaneQa = firstBamFile."${finalOrWork}SingleLaneQAJsonFiles"
@@ -290,7 +287,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         }
         linkMapSourceLink.put(firstBamFile.workMergedQADirectory, firstBamFile.finalMergedQADirectory)
 
-        [firstBamFile.getWorkExecutionDirectories(), firstBamFile.getFinalExecutionDirectories()].transpose().each {
+        [firstBamFile.workExecutionDirectories, firstBamFile.finalExecutionDirectories].transpose().each {
             linkMapSourceLink.put(it[0], it[1])
         }
 
@@ -303,7 +300,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         return linkMapSourceLink
     }
-
 
     RoddyBamFile createFirstRoddyBamFile(boolean oldStructure = false) {
         assert firstBamFile.exists()
@@ -332,7 +328,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             firstBamFile.workDirectoryName = "${RoddyBamFile.WORK_DIR_PREFIX}_0"
         }
         assert firstBamFile.save(flush: true)
-
 
         Map<File, String> filesWithContent = [:]
         Map<File, String> links = [:]
@@ -385,7 +380,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         )
         assert qaPass
 
-
         bamFile.seqTracks.each {
             List<RoddySingleLaneQa> qa = RoddySingleLaneQa.findAllBySeqTrack(it)
             assert qa
@@ -394,7 +388,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             }
         }
 
-        bamFile.getFinalSingleLaneQAJsonFiles().each { seqTrack, qaFile ->
+        bamFile.finalSingleLaneQAJsonFiles.each { seqTrack, qaFile ->
             JSONObject json = JSON.parse(qaFile.text)
             Iterator chromosomes = json.keys()
             chromosomes.each { String chromosome ->
@@ -403,7 +397,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         }
         RoddyMergedBamQa mergedQa = RoddyMergedBamQa.findByQualityAssessmentMergedPassAndChromosome(qaPass, RoddyQualityAssessment.ALL)
         assert mergedQa
-        JSONObject json = JSON.parse(bamFile.getFinalMergedQAJsonFile().text)
+        JSONObject json = JSON.parse(bamFile.finalMergedQAJsonFile.text)
         json.keys().each { String chromosome ->
             assert RoddyMergedBamQa.findByChromosomeAndQualityAssessmentMergedPass(chromosome, qaPass)
         }
@@ -413,7 +407,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
         assert bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
-        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+        if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByQualityAssessmentMergedPass(qaPass)
             assert libraryQas
             assert libraryQas*.libraryDirectoryName as Set == bamFile.seqTracks*.libraryDirectoryName as Set
@@ -431,7 +425,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkDataBaseState_alignBaseBamAndNewLanes() {
         checkWorkPackageState()
 
-        assert 2 == RoddyBamFile.findAll().size()
+        assert RoddyBamFile.findAll().size() == 2
         RoddyBamFile firstBamFile = RoddyBamFile.findByIdentifier(0)
         RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
 
@@ -482,10 +476,10 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void assertBamFileFileSystemPropertiesNotSet(RoddyBamFile bamFile) {
-        assert null == bamFile.md5sum
+        assert bamFile.md5sum == null
         assert !bamFile.fileExists
-        assert null == bamFile.dateFromFileSystem
-        assert -1L == bamFile.fileSize
+        assert bamFile.dateFromFileSystem == null
+        assert bamFile.fileSize == -1L
     }
 
     void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
@@ -505,7 +499,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert bamFileProperties.withdrawn == bamFile.withdrawn
 
         assert bamFileProperties.identifier == bamFile.identifier
-        assert bamFileProperties.mostResentBamFile == bamFile.isMostRecentBamFile()
+        assert bamFileProperties.mostResentBamFile == bamFile.mostRecentBamFile
     }
 
     void checkWorkPackageState() {
@@ -518,7 +512,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void checkFileSystemState(RoddyBamFile bamFile) {
         //content of the final dir: root
-        if (!bamFile.seqType.isRna()) {
+        if (!bamFile.seqType.rna) {
             List<File> rootDirs = [
                     bamFile.finalQADirectory,
                     bamFile.finalExecutionStoreDirectory,
@@ -531,7 +525,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                     bamFile.finalMd5sumFile,
                     bamFile.finalMergedQADirectory,
             ]
-            if (bamFile.seqType.isWgbs()) {
+            if (bamFile.seqType.wgbs) {
                 rootDirs += [
                         bamFile.finalMethylationDirectory,
                 ]
@@ -544,7 +538,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                             bamFile.finalLibraryQADirectories.values()
                 }
             }
-            if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
+            if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
                 rootDirs << bamFile.baseBamFile.workDirectory
             }
             TestCase.checkDirectoryContentHelper(bamFile.baseDirectory, rootDirs, [], rootLinks)
@@ -552,7 +546,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         //check work directories
         checkWorkDirFileSystemState(bamFile)
-        if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
+        if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
             checkWorkDirFileSystemState(bamFile.baseBamFile, true)
         }
 
@@ -560,26 +554,26 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert bamFile.md5sum == bamFile.finalMd5sumFile.text.replaceAll("\n", "")
 
         // content of the final dir: qa
-        if (!bamFile.seqType.isRna()) {
+        if (!bamFile.seqType.rna) {
             List<File> qaDirs = bamFile.finalSingleLaneQADirectories.values() + [bamFile.finalMergedQADirectory]
             List<File> qaSubDirs = []
             if (bamFile.baseBamFile) {
-                if (bamFile.baseBamFile.isOldStructureUsed()) {
+                if (bamFile.baseBamFile.oldStructureUsed) {
                     qaSubDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
                 } else {
                     qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
                 }
             }
-            if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
                 qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
             }
             TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, qaSubDirs, [], qaDirs)
         }
 
         // qa only for merged and one for each read group
-        if (!bamFile.seqType.isRna()) {
+        if (!bamFile.seqType.rna) {
             int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
-            if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
                 numberOfFilesInFinalQaDir += bamFile.seqTracks*.libraryDirectoryName.unique().size()
             }
             assert numberOfFilesInFinalQaDir == bamFile.finalQADirectory.list().length
@@ -605,7 +599,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void checkWorkDirFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile = false) {
         // content of the work dir: root
-        if (!bamFile.seqType.isRna()) {
+        if (!bamFile.seqType.rna) {
             List<File> rootDirs = [
                     bamFile.workQADirectory,
                     bamFile.workExecutionStoreDirectory,
@@ -623,7 +617,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                         bamFile.workMd5sumFile,
                 ]
             }
-            if (bamFile.seqType.isWgbs()) {
+            if (bamFile.seqType.wgbs) {
                 rootDirs += [
                         bamFile.workMethylationDirectory,
                         bamFile.workMergedMethylationDirectory,
@@ -639,18 +633,18 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         // content of the work dir: qa
         List<File> qaJson = [bamFile.workMergedQAJsonFile]
-        if (!bamFile.seqType.isRna()) {
+        if (!bamFile.seqType.rna) {
             List<File> qaDirs = [bamFile.workMergedQADirectory]
             qaDirs.addAll(bamFile.workSingleLaneQADirectories.values())
             qaJson.addAll(bamFile.workSingleLaneQAJsonFiles.values())
-            if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
                 qaDirs.addAll(bamFile.workLibraryQADirectories.values())
                 qaJson.addAll(bamFile.workLibraryQAJsonFiles.values())
             }
             TestCase.checkDirectoryContentHelper(bamFile.workQADirectory, qaDirs)
         }
         qaJson.each {
-            assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
+            assert it.exists() && it.file && it.canRead() && it.size() > 0
             JSON.parse(it.text) // throws ConverterException when the JSON content is not valid
         }
 

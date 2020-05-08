@@ -99,17 +99,17 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetRoddyBamFileName() {
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam" == roddyBamFile.getBamFileName()
+        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam" == roddyBamFile.bamFileName
     }
 
     @Test
     void testGetRoddyBaiFileName() {
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.bai" == roddyBamFile.getBaiFileName()
+        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.bai" == roddyBamFile.baiFileName
     }
 
     @Test
     void testGetRoddyMd5sumFileName() {
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.getMd5sumFileName()
+        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.md5sumFileName
     }
 
     @Test
@@ -120,7 +120,7 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetWorkQADirectory_AllFine() {
         assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}" ==
-                roddyBamFile.getWorkQADirectory().path
+                roddyBamFile.workQADirectory.path
     }
 
     @Test
@@ -296,7 +296,7 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetLatestWorkExecutionDirectory_WhenRoddyExecutionDirectoryNamesEmpty_ShouldFail() {
         shouldFail(RuntimeException) {
-            roddyBamFile.getLatestWorkExecutionDirectory()
+            roddyBamFile.latestWorkExecutionDirectory
         }
     }
 
@@ -306,7 +306,7 @@ class RoddyBamFileUnitTests {
         roddyBamFile.save(flush: true)
 
         shouldFail(AssertionError) {
-            roddyBamFile.getLatestWorkExecutionDirectory()
+            roddyBamFile.latestWorkExecutionDirectory
         }
     }
 
@@ -315,7 +315,7 @@ class RoddyBamFileUnitTests {
         roddyBamFile.roddyExecutionDirectoryNames.add("someName")
 
         shouldFail(AssertionError) {
-            roddyBamFile.getLatestWorkExecutionDirectory()
+            roddyBamFile.latestWorkExecutionDirectory
         }
     }
 
@@ -324,7 +324,7 @@ class RoddyBamFileUnitTests {
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_DIR_NAME)
 
         shouldFail(AssertionError) {
-            roddyBamFile.getLatestWorkExecutionDirectory()
+            roddyBamFile.latestWorkExecutionDirectory
         }
     }
 
@@ -337,7 +337,7 @@ class RoddyBamFileUnitTests {
         roddyBamFile.roddyExecutionDirectoryNames.add(fileName)
 
         shouldFail(AssertionError) {
-            roddyBamFile.getLatestWorkExecutionDirectory()
+            roddyBamFile.latestWorkExecutionDirectory
         }
     }
 
@@ -357,7 +357,7 @@ class RoddyBamFileUnitTests {
         File file = new File(roddyBamFile.workExecutionStoreDirectory, roddyExecutionDirName)
         file.mkdirs()
 
-        assert file == roddyBamFile.getLatestWorkExecutionDirectory()
+        assert file == roddyBamFile.latestWorkExecutionDirectory
     }
 
     @Test
@@ -378,14 +378,14 @@ class RoddyBamFileUnitTests {
     void testIsOldStructureUsed_useOldStructure_shouldReturnTrue() {
         roddyBamFile.workDirectoryName = null
 
-        assert roddyBamFile.isOldStructureUsed()
+        assert roddyBamFile.oldStructureUsed
     }
 
     @Test
     void testIsOldStructureUsed_useLinkStructure_shouldReturnFalse() {
         roddyBamFile.workDirectoryName = 'someWorkDirectory'
 
-        assert !roddyBamFile.isOldStructureUsed()
+        assert !roddyBamFile.oldStructureUsed
     }
 
     @Test
@@ -395,7 +395,7 @@ class RoddyBamFileUnitTests {
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert roddyBamFile.finalBamFile == roddyBamFile.getPathForFurtherProcessing()
+        assert roddyBamFile.finalBamFile == roddyBamFile.pathForFurtherProcessing
     }
 
     @Test
@@ -405,7 +405,7 @@ class RoddyBamFileUnitTests {
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert roddyBamFile.workBamFile == roddyBamFile.getPathForFurtherProcessing()
+        assert roddyBamFile.workBamFile == roddyBamFile.pathForFurtherProcessing
     }
 
     @Test
@@ -413,12 +413,9 @@ class RoddyBamFileUnitTests {
         roddyBamFile.workDirectoryName = 'someDir'
         assert roddyBamFile.save(flush: true)
         TestCase.shouldFail(IllegalStateException) {
-            roddyBamFile.getPathForFurtherProcessing()
+            roddyBamFile.pathForFurtherProcessing
         }
     }
-
-
-
 
     void helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
         roddyBamFile.roddyExecutionDirectoryNames.addAll(roddyExecutionDirectoryNames)

@@ -46,7 +46,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         SamplePair samplePair = DomainFactory.createSamplePair()
 
         when:
-        getService().getConfig(samplePair)
+        service.getConfig(samplePair)
 
         then:
         RuntimeException e = thrown()
@@ -62,7 +62,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         ConfigPerProjectAndSeqType configPerProject = createConfig(samplePair, pipeline)
 
         then:
-        configPerProject == getService().getConfig(samplePair)
+        configPerProject == service.getConfig(samplePair)
     }
 
     void "findSamplePairToProcess, all fine"() {
@@ -71,7 +71,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         DomainFactory.createExomeSeqType()
 
         expect:
-        samplePair == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
+        samplePair == service.findSamplePairToProcess(ProcessingPriority.NORMAL)
     }
 
     void "findSamplePairToProcess, wrong seqType should return null"() {
@@ -84,12 +84,12 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         assert samplePair.mergingWorkPackage2.save(flush: true)
 
         expect:
-        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
+        service.findSamplePairToProcess(ProcessingPriority.NORMAL) == null
     }
 
     void "prepareCreatingTheProcessAndTriggerTracking, when input is null shall throw an exception"() {
         when:
-        getService().prepareCreatingTheProcessAndTriggerTracking(null)
+        service.prepareCreatingTheProcessAndTriggerTracking(null)
 
         then:
         AssertionError e = thrown()
@@ -98,7 +98,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
 
     void "prepareCreatingTheProcessAndTriggerTracking, when all fine"() {
         given:
-        BamFilePairAnalysis instance = getInstance()
+        BamFilePairAnalysis instance = this.instance
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         FastqImportInstance.list().each {
             it.otrsTicket = otrsTicket
@@ -110,17 +110,16 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         getProcessingStatus(instance.samplePair) != SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
 
         when:
-        getService().prepareCreatingTheProcessAndTriggerTracking(instance)
+        service.prepareCreatingTheProcessAndTriggerTracking(instance)
 
         then:
         getStartedDate(otrsTicket) != null
         getProcessingStatus(instance.samplePair) == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
     }
 
-
     void "test method restart, fail when process is null"() {
         when:
-        getService().restart(null)
+        service.restart(null)
 
         then:
         AssertionError error = thrown()
@@ -129,12 +128,12 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
 
     void "test method restart with AbstractBamFilePairAnalysisStartJob"() {
         given:
-        AbstractBamFilePairAnalysisStartJob service = getService()
+        AbstractBamFilePairAnalysisStartJob service = this.service
         RemoteShellHelper remoteShellHelper = service.remoteShellHelper
         SchedulerService schedulerService = service.schedulerService
 
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
-        BamFilePairAnalysis failedInstance = getInstance()
+        BamFilePairAnalysis failedInstance = this.instance
 
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)

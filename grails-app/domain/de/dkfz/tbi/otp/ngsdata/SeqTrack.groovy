@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
 
+import java.util.regex.Matcher
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /*
@@ -188,9 +190,8 @@ class SeqTrack implements ProcessParameterObject, Entity {
         libraryPreparationKit(nullable: true, validator: { LibraryPreparationKit val, SeqTrack obj ->
             if (obj.kitInfoReliability == InformationReliability.KNOWN || obj.kitInfoReliability == InformationReliability.INFERRED) {
                 return val != null
-            } else {
-                return val == null
             }
+            return val == null
         })
         libraryName(nullable: true, shared: "pathComponent")
         normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
@@ -212,9 +213,8 @@ class SeqTrack implements ProcessParameterObject, Entity {
                     .replaceAll(/(?<!\d)0+/, '0')
                     .replaceAll(/(?<!\d)0([1-9])/, '$1').toLowerCase(Locale.ENGLISH)
                     .replaceAll(/(?:^lib(?:rary)?)|[_-]/, '')
-        } else {
-            return null
         }
+        return null
     }
 
     // To be consistent on the filesystem the library value to use is created like this and not directly derived from libraryName
@@ -228,7 +228,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     @Deprecated
     DataProcessingState getAlignmentState() {
         Collection<AlignmentPass> allPasses = AlignmentPass.findAllBySeqTrack(this)
-        Collection<AlignmentPass> latestPasses = allPasses.findAll({ it.isLatestPass() })
+        Collection<AlignmentPass> latestPasses = allPasses.findAll { it.latestPass }
         assert allPasses.empty == latestPasses.empty
         switch (latestPasses.size()) {
             case 0:
@@ -244,7 +244,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     String nBaseString() {
         return nBasePairs ? String.format("%.1f G", (nBasePairs / 1e9)) : "N/A"
     }
-
 
     String alignmentLogString() {
         String text = ""
@@ -326,7 +325,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
      * Note that the configuration may change in the future.
      */
     ReferenceGenome getConfiguredReferenceGenome() {
-        return getConfiguredReferenceGenomeProjectSeqType()?.referenceGenome
+        return configuredReferenceGenomeProjectSeqType?.referenceGenome
     }
 
     ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType() {
@@ -341,7 +340,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return DataFile.findAllBySeqTrackAndIndexFile(this, false)
     }
 
-
     /**
      * @deprecated Can't use save in a domain object, use SeqTrackService.logToSeqTrack() instead
      */
@@ -355,14 +353,13 @@ class SeqTrack implements ProcessParameterObject, Entity {
             DataFile dataFile = exactlyOneElement(dataFilesWhereIndexFileIsFalse)
             String fileNameWithoutExtension = dataFile.vbpFileName.split(/\./).first()
             return "${RUN_PREFIX}${run.name}_${fileNameWithoutExtension}"
-        } else {
-            List<DataFile> dataFiles = dataFilesWhereIndexFileIsFalse
-            assert dataFiles.size() == 2
-            // if the names of datafile1 and datafile2 of one seqTrack are the same, something strange happened -> should fail
-            assert dataFiles[0].vbpFileName != dataFiles[1].vbpFileName
-            String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].vbpFileName, dataFiles[1].vbpFileName)
-            return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
         }
+        List<DataFile> dataFiles = dataFilesWhereIndexFileIsFalse
+        assert dataFiles.size() == 2
+        // if the names of datafile1 and datafile2 of one seqTrack are the same, something strange happened -> should fail
+        assert dataFiles[0].vbpFileName != dataFiles[1].vbpFileName
+        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].vbpFileName, dataFiles[1].vbpFileName)
+        return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
     }
 
     static String getLongestCommonPrefixBeforeLastUnderscore(String filename1, String filename2) {
@@ -370,22 +367,21 @@ class SeqTrack implements ProcessParameterObject, Entity {
         assert filename2: "The input filename2 must not be null"
         String commonFastqFilePrefix = StringUtils.longestCommonPrefix(filename1, filename2)
         String pattern = /^(.*)_([^_]*)$/
-        def matcher = commonFastqFilePrefix =~ pattern
+        Matcher matcher = commonFastqFilePrefix =~ pattern
         if (matcher.matches()) {
             return matcher.group(1)
-        } else {
-            return commonFastqFilePrefix
         }
+        return commonFastqFilePrefix
     }
 
     long totalFileSize() {
-        return getDataFiles().sum { it.fileSize } as Long ?: 0
+        return dataFiles.sum { it.fileSize } as Long ?: 0
     }
 
     String getSampleIdentifier() {
         return exactlyOneElement(MetaDataEntry.findAllByKeyAndDataFileInList(
                 exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_ID.name())), dataFilesWhereIndexFileIsFalse
-        )*.getValue().unique())
+        )*.value.unique())
     }
 
     static mapping = {
