@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -87,6 +87,10 @@ enum OtpProperty {
     TEST_WORKFLOW_INPUT_DIR('otp.testing.workflows.input', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_RESULT_DIR('otp.testing.workflows.result', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY('otp.testing.workflows.roddy.sharedFiles', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
+    TEST_WORKFLOW_QUEUE('otp.testing.workflows.queue', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
+    TEST_WORKFLOW_CONFIG_SUFFIX('otp.testing.workflows.config.suffix', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
+    TEST_WORKFLOW_FASTTRACK_QUEUE('otp.testing.workflows.roddy.fasttrack.queue', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
+    TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX('otp.testing.workflows.config.fasttrack.suffix', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
 
     final String key
 

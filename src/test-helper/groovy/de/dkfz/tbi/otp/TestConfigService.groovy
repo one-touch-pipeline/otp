@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,6 +61,10 @@ class TestConfigService extends ConfigService {
                         OtpProperty.TEST_TESTING_GROUP,
                         OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP,
                         OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY,
+                        OtpProperty.TEST_WORKFLOW_QUEUE,
+                        OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX,
+                        OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE,
+                        OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX,
                 ]
             }
         } else {
@@ -169,6 +173,19 @@ class TestConfigService extends ConfigService {
 
     File getWorkflowTestRoddySharedFilesBaseDir() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
+    }
+
+    String getWorkflowTestQueue() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_QUEUE))
+    }
+    String getWorkflowTestConfigSuffix() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX))
+    }
+    String getWorkflowTestFasttrackQueue() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE))
+    }
+    String getWorkflowTestFasttrackConfigSuffix() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX))
     }
 
     private String getAndAssertValue(OtpProperty property) {
