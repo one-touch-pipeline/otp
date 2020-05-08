@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -152,7 +152,8 @@ class OtpTagLib {
             return render(template: template, model: model)
         } else {
             // read only
-            return "<div><span class='wordBreak keep-whitespace'>${model.value != null ? model.value : ""}</span></div>"
+            String value = model.value != null ? (model.optionValue ? model.value[model.optionValue] : model.value) : ""
+            return "<div><span class='wordBreak keep-whitespace'>${value}</span></div>"
         }
     }
 
