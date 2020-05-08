@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -103,12 +104,13 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     String prepareAndReturnAdditionalImports(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
 
-        String fasttrack = (roddyResult.processingPriority >= ProcessingPriority.FAST_TRACK.priority) ?
-                "-fasttrack"
+        ProcessingPriority processingPriority = roddyResult.processingPriority
+        String roddyConfigSuffix = processingPriority ?
+                "-${processingPriority.roddyConfigSuffix}"
                 : ""
         String programVersion = roddyResult.config.programVersion
         String seqType = roddyResult.seqType.roddyName.toLowerCase()
-        return "--additionalImports=${programVersion}-${seqType}${fasttrack}"
+        return "--additionalImports=${programVersion}-${seqType}${roddyConfigSuffix}"
     }
 
     String prepareAndReturnCValues(R roddyResult) {
