@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 @Transactional
 class ExecuteRoddyCommandService {
+
+    static final String RESOURCE_PATH = "resource-generated"
 
     @Autowired
     RemoteShellHelper remoteShellHelper
@@ -121,7 +123,7 @@ class ExecuteRoddyCommandService {
         File configFile = new File(config.configFilePath)
         String jobSchSpecificConfig = ""
         if (jobScheduler) {
-            jobSchSpecificConfig = ",${roddyBaseConfigsPath}/resource/${jobScheduler.toString().toLowerCase()}"
+            jobSchSpecificConfig = ",${roddyBaseConfigsPath}/${RESOURCE_PATH}/${jobScheduler.toString().toLowerCase()}"
         }
 
         return [
