@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
@@ -411,8 +412,8 @@ class NotificationCreator {
     }
 
     static <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
-                                                            Closure<WorkflowProcessingStatus> getObjectStatus,
-                                                            WorkflowProcessingStatus additionalStatus = null) {
+                                                        Closure<WorkflowProcessingStatus> getObjectStatus,
+                                                        WorkflowProcessingStatus additionalStatus = null) {
         Done done = additionalStatus?.done
         boolean mightDoMore = additionalStatus?.mightDoMore ?: false
         for (O object : objects) {
