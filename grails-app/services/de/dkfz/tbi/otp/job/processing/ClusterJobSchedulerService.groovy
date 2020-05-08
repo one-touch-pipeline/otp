@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,6 @@ import de.dkfz.roddy.tools.BufferValue
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -41,14 +40,13 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.logging.SimpleLogger
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE
 
 /**
  * This class contains methods to communicate with the cluster job scheduler.
@@ -103,12 +101,11 @@ class ClusterJobSchedulerService {
         Map<JobSubmissionOption, String> options = clusterJobSubmissionOptionsService.readOptionsFromDatabase(processingStep, realm)
         options.putAll(jobSubmissionOptions)
 
-        // check if the project has FASTTRACK priority
-        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL.priority
-        if (processingPriority >= ProcessingPriority.FAST_TRACK.priority) {
+        ProcessingPriority processingPriority = domainObject?.processingPriority
+        if (processingPriority) {
             options.put(
                     JobSubmissionOption.QUEUE,
-                    processingOptionService.findOptionAsString(CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE)
+                    processingPriority.queue
             )
         }
 
