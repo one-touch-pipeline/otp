@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -79,7 +79,7 @@ output << bamFile.collect {
             it.seqType.singleCell ? 'single cell' : 'bulk',
             it.mergingWorkPackage.libraryPreparationKit ?: '',
             it.referenceGenome,
-            (it.processingPriority >= ProcessingPriority.FAST_TRACK.priority) ? 'FAST_TRACK' : 'NORMAL',
+            it.processingPriority.name,
             it.dateCreated,
             it.workDirectory,
     ].join('|')
