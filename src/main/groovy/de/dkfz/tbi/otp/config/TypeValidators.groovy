@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.time.DateTimeException
 import java.time.ZoneId
@@ -82,6 +84,8 @@ enum TypeValidators {
     SEQ_TYPE_PROCESSING_NAME({ SeqType.findByDisplayName(it) }, { SeqType.all*.displayName.unique() }),
 
     WORKFLOW_NAME({ JobExecutionPlan.findByName(it) }, { JobExecutionPlan.findAllByObsoleted(false)*.name }),
+
+    PROCESSING_PRIORITY_NAME({ CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(it)) }, { ProcessingPriority.list([sort: 'name'])*.name }),
 
     JOB_NAME_SEQ_TYPE({ validateTypeForClusterSubmission(it) }, { allowedValuesForClusterSubmission() }),
 

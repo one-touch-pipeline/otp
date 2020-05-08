@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -362,6 +362,12 @@ class ProcessingOption implements Entity {
             Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
         ),
 
+        //defaults
+        PROCESSING_PRIORITY_DEFAULT_NAME(
+                "The default processing priority, used as preselection in project creation. If not given, the oldest object is used as default.",
+                Necessity.REQUIRED, null, TypeValidators.PROCESSING_PRIORITY_NAME
+        ),
+
         //realm
         REALM_DEFAULT_VALUE(
                 "The default realm by name",
@@ -435,6 +441,7 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION,
                 TypeValidators.JOB_NAME_SEQ_TYPE,
         ),
+        @Deprecated
         CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE(
                 "name of the queue used by fast track projects",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
