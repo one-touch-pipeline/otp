@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 /**
  * Run represents one sequencing Run. It is one of the most important classes
@@ -44,8 +44,8 @@ class Run implements ProcessParameterObject, Entity {
     SeqPlatform seqPlatform
 
     static belongsTo = [
-        seqCenter: SeqCenter,
-        seqPlatform: SeqPlatform,
+            seqCenter  : SeqCenter,
+            seqPlatform: SeqPlatform,
     ]
 
     static constraints = {
@@ -62,6 +62,7 @@ class Run implements ProcessParameterObject, Entity {
      * returns null if a run has more than one sequencing type,
      * because this case is unusable for creating Cluster Jobs
      */
+
     @Override
     SeqType getSeqType() {
         List<SeqType> seqTypes = SeqTrack.findAllByRun(this)*.seqType
@@ -76,6 +77,7 @@ class Run implements ProcessParameterObject, Entity {
      * returns the individual being sequenced in this run
      * returns null if a run has more than one individual
      */
+
     @Override
     Individual getIndividual() {
         List<Individual> individuals = SeqTrack.findAllByRun(this)*.individual
@@ -87,7 +89,7 @@ class Run implements ProcessParameterObject, Entity {
     }
 
     @Override
-    Set<SeqTrack> getContainedSeqTracks () {
+    Set<SeqTrack> getContainedSeqTracks() {
         return new HashSet<SeqTrack>(SeqTrack.findAllByRun(this))
     }
 
@@ -95,8 +97,10 @@ class Run implements ProcessParameterObject, Entity {
      * It returns the highest priority of the corresponding projects.
      */
     @Override
-    short getProcessingPriority() {
-        return DataFile.findAllByRun(this)*.project*.processingPriority.max() ?: ProcessingPriority.NORMAL.priority
+    ProcessingPriority getProcessingPriority() {
+        return DataFile.findAllByRun(this)*.project*.processingPriority.max {
+            it.priority
+        }
     }
 
     static mapping = {

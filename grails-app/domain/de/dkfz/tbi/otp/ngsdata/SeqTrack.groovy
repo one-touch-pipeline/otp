@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -145,13 +145,13 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     static belongsTo = [
             /** This attribute is used externally. Please discuss a change in the team */
-            antibodyTarget: AntibodyTarget,
+            antibodyTarget       : AntibodyTarget,
             libraryPreparationKit: LibraryPreparationKit,
-            run: Run,
+            run                  : Run,
             /** This attribute is used externally. Please discuss a change in the team */
-            sample: Sample,
+            sample               : Sample,
             /** This attribute is used externally. Please discuss a change in the team */
-            seqType: SeqType,
+            seqType              : SeqType,
     ]
 
     static hasMany = [
@@ -318,11 +318,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return new HashSet<SeqTrack>([this])
-    }
-
-    @Override
-    short getProcessingPriority() {
-        return project.processingPriority
     }
 
     /**

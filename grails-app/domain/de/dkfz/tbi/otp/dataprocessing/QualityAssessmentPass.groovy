@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -88,11 +88,6 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
     @Override
     Project getProject() {
         return processedBamFile.project
-    }
-
-    @Override
-    short getProcessingPriority() {
-        return project.processingPriority
     }
 
     SeqTrack getSeqTrack() {

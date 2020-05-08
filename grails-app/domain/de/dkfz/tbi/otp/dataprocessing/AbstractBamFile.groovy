@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -153,10 +153,6 @@ abstract class AbstractBamFile implements Entity {
 
     Project getProject() {
         return individual?.project
-    }
-
-    short getProcessingPriority() {
-        return project.processingPriority
     }
 
     Individual getIndividual() {

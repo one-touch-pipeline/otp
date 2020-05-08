@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.utils.WaitingFileUtils
  * This interface must be implemented by all result objects which are created with a Roddy workflow.
  * With this interface it is ensured that all information, needed to call Roddy out of OTP, are provided.
  */
-
 trait RoddyResult {
 
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
@@ -54,10 +53,6 @@ trait RoddyResult {
     abstract File getBaseDirectory()
 
     abstract ReferenceGenome getReferenceGenome()
-
-    short getProcessingPriority() {
-        return project.processingPriority
-    }
 
     File getWorkExecutionStoreDirectory() {
         return new File(workDirectory, RODDY_EXECUTION_STORE_DIR)
