@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,23 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.time.LocalDate
 import java.time.ZoneId
 
 trait DomainFactoryCore implements DomainFactoryHelper {
+
+    ProcessingPriority createProcessingPriority(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ProcessingPriority, [
+                name                       : "name_${nextId}",
+                priority                   : nextId,
+                errorMailPrefix            : "errorMailPrefix_${nextId}",
+                queue                      : "queue_${nextId}",
+                roddyConfigSuffix          : "roddyConfigSuffix${nextId}",
+                allowedParallelWorkflowRuns: 1,
+        ], properties, saveAndValidate)
+    }
 
     Project createProject(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Project, [
@@ -45,6 +57,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
                 unixGroup                     : "unixGroup_${nextId}",
+                processingPriority            : { createProcessingPriority() },
         ], properties, saveAndValidate)
     }
 
@@ -214,7 +227,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     SeqTrack createChipSeqSeqTrack(Map properties = [:]) {
-        return createSeqTrack(properties + (properties.seqType ? [:] : [seqType : DomainFactory.createChipSeqType()]) +
+        return createSeqTrack(properties + (properties.seqType ? [:] : [seqType: DomainFactory.createChipSeqType()]) +
                 (properties.antibodyTarget ? [:] : [antibodyTarget: createAntibodyTarget()]))
     }
 
