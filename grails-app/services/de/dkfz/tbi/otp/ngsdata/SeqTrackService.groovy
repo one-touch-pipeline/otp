@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -225,10 +225,10 @@ class SeqTrackService {
      *
      * @return a seqTrack without fastqc
      */
-    SeqTrack getSeqTrackReadyForFastqcProcessing(ProcessingPriority minPriority) {
+    SeqTrack getSeqTrackReadyForFastqcProcessing(int minPriority) {
         List<SeqType> seqTypes = SeqTypeService.getAllAlignableSeqTypes()
         List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
-                     minPriority.priority,
+                     minPriority,
         ] + seqTypes*.id
 
 
@@ -244,12 +244,13 @@ FROM seq_track AS st
 JOIN sample ON st.sample_id = sample.id
 JOIN individual ON sample.individual_id = individual.id
 JOIN project ON individual.project_id = project.id
+join processing_priority ON project.processing_priority_id = processing_priority.id
 
 WHERE st.fastqc_state = ?
-AND project.processing_priority >= ?
+AND processing_priority.priority >= ?
 AND NOT EXISTS (SELECT seq_track_id FROM data_file WHERE file_withdrawn = true AND seq_track_id = st.id)
 
-ORDER BY project.processing_priority DESC, (st.seq_type_id IN (${questionMarksSeparatedByCommas})) DESC, st.id ASC
+ORDER BY processing_priority.priority DESC, (st.seq_type_id IN (${questionMarksSeparatedByCommas})) DESC, st.id ASC
 LIMIT 1
 ;
 """
@@ -369,14 +370,16 @@ LIMIT 1
         }.unique().findAll()
     }
 
-    SeqTrack seqTrackReadyToInstall(ProcessingPriority minPriority) {
+    SeqTrack seqTrackReadyToInstall(int minPriority) {
         return SeqTrack.createCriteria().get {
             eq('dataInstallationState', SeqTrack.DataProcessingState.NOT_STARTED)
             sample {
                 individual {
                     project {
-                        ge('processingPriority', minPriority.priority)
-                        order('processingPriority', 'desc')
+                        processingPriority {
+                            ge('priority', minPriority)
+                            order('priority', 'desc')
+                        }
                     }
                 }
             }

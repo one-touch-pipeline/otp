@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -50,8 +51,8 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Override
     void execute() {
         SessionUtils.withNewSession {
-            ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
-            if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority == ProcessingPriority.SUPREMUM) {
                 return
             }
             SamplePair.withTransaction {
@@ -95,9 +96,9 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
             assert failedAnalysis.save(flush: true)
 
             BamFilePairAnalysis newAnalysis = getBamFileAnalysisService().getAnalysisClass().newInstance(
-                    samplePair        : failedAnalysis.samplePair,
-                    instanceName      : getInstanceName(failedAnalysis.config),
-                    config            : getConfig(failedAnalysis.samplePair),
+                    samplePair: failedAnalysis.samplePair,
+                    instanceName: getInstanceName(failedAnalysis.config),
+                    config: getConfig(failedAnalysis.samplePair),
                     sampleType1BamFile: failedAnalysis.sampleType1BamFile,
                     sampleType2BamFile: failedAnalysis.sampleType2BamFile,
             )
@@ -116,7 +117,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         remoteShellHelper.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 
-    SamplePair findSamplePairToProcess(ProcessingPriority minPriority) {
+    SamplePair findSamplePairToProcess(int minPriority) {
         return getBamFileAnalysisService().samplePairForProcessing(minPriority)
     }
 

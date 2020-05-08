@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 /**
  * Abstract base class for {@link StartJob}s.
@@ -42,7 +43,7 @@ import de.dkfz.tbi.otp.tracking.NotificationCreator
  *
  * @see StartJob
  */
-abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent>, BeanNameAware  {
+abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent>, BeanNameAware {
 
     @Autowired
     ProcessingOptionService optionService
@@ -150,11 +151,11 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * {@link #getMinimumProcessingPriorityForOccupyingASlot()} instead.
      */
     protected boolean isFreeSlotAvailable() {
-        return minimumProcessingPriorityForOccupyingASlot.priority <= ProcessingPriority.MAXIMUM.priority
+        return minimumProcessingPriorityForOccupyingASlot < ProcessingPriority.SUPREMUM
     }
 
     /**
-     * Returns the minimum {@link ProcessingPriority} value which data needs to have such that this {@link StartJob} is
+     * Returns the minimum priority value which data needs to have such that this {@link StartJob} is
      * allowed to create a new {@link Process} for processing that data.
      *
      * <p>
@@ -163,12 +164,12 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      *     <li>Whether the {@link JobExecutionPlan} (returned from {@link #getJobExecutionPlan()}) is obsolete or disabled.</li>
      *     <li>The number of {@link Process}es which are already running for the {@link JobExecutionPlan}.</li>
      *     <li>The maximum number of parallel {@link Process}es for the {@link JobExecutionPlan} (as configured in the
-     *         {@link ProcessingOption} with the name specified by {@link OptionName#MAXIMUM_NUMBER_OF_JOBS}).</li>
+     * {@link ProcessingOption} with the name specified by {@link OptionName#MAXIMUM_NUMBER_OF_JOBS}).</li>
      *     <li>The maximum number of slots reserved for fast track (as configured in the {@link ProcessingOption} with
      *         the name specified by {@link OptionName#MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK}).</li>
      * </ul>
      */
-    protected ProcessingPriority getMinimumProcessingPriorityForOccupyingASlot() {
+    protected int getMinimumProcessingPriorityForOccupyingASlot() {
         if (!schedulerService.isActive()) {
             return ProcessingPriority.SUPREMUM
         }

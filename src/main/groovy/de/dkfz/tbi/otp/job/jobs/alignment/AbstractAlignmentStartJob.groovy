@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Slf4j
 abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
@@ -45,8 +46,8 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     }
 
     protected void startAlignment() {
-        ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
+        int minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority == ProcessingPriority.SUPREMUM) {
             return
         }
 
@@ -66,7 +67,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     Process restart(Process process) {
         assert process
 
-        AbstractMergedBamFile failedInstance = (AbstractMergedBamFile)process.getProcessParameterObject()
+        AbstractMergedBamFile failedInstance = (AbstractMergedBamFile) process.getProcessParameterObject()
 
         AbstractMergedBamFile.withTransaction {
             failedInstance.withdraw()
@@ -81,24 +82,24 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
 
     abstract List<SeqType> getSeqTypes()
 
-    List<MergingWorkPackage> findProcessableMergingWorkPackages(ProcessingPriority minPriority) {
+    List<MergingWorkPackage> findProcessableMergingWorkPackages(int minPriority) {
         return MergingWorkPackage.findAll(
                 'FROM MergingWorkPackage mwp ' +
-                'WHERE needsProcessing = true ' +
-                'AND seqType IN (:seqTypes)' +
-                'AND NOT EXISTS ( ' +
-                    'FROM AbstractMergedBamFile ' +
-                    'WHERE workPackage = mwp ' +
-                    'AND fileOperationStatus <> :processed ' +
-                    'AND withdrawn = false ' +
-                ') ' +
-                'AND mwp.seqTracks is not empty ' +
-                'AND sample.individual.project.processingPriority >= :minPriority ' +
-                'ORDER BY sample.individual.project.processingPriority DESC, mwp.id ASC',
+                        'WHERE needsProcessing = true ' +
+                        'AND seqType IN (:seqTypes)' +
+                        'AND NOT EXISTS ( ' +
+                        'FROM AbstractMergedBamFile ' +
+                        'WHERE workPackage = mwp ' +
+                        'AND fileOperationStatus <> :processed ' +
+                        'AND withdrawn = false ' +
+                        ') ' +
+                        'AND mwp.seqTracks is not empty ' +
+                        'AND sample.individual.project.processingPriority.priority >= :minPriority ' +
+                        'ORDER BY sample.individual.project.processingPriority.priority DESC, mwp.id ASC',
                 [
-                        processed: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                        minPriority: minPriority.priority,
-                        seqTypes: seqTypes,
+                        processed  : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                        minPriority: minPriority,
+                        seqTypes   : seqTypes,
                 ]
         )
     }
@@ -116,13 +117,13 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         // the moving was successful or not.
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.find(
                 'FROM AbstractMergedBamFile ' +
-                'WHERE fileOperationStatus IN (:inprogress, :processed) ' +
-                'AND workPackage = :mergingWorkPackage ' +
-                'ORDER BY identifier DESC',
+                        'WHERE fileOperationStatus IN (:inprogress, :processed) ' +
+                        'AND workPackage = :mergingWorkPackage ' +
+                        'ORDER BY identifier DESC',
                 [
                         mergingWorkPackage: mergingWorkPackage,
-                        inprogress: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-                        processed: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                        inprogress        : AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                        processed         : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 ],
         )
         assert bamFile?.id == mergingWorkPackage.bamFileInProjectFolder?.id
@@ -155,7 +156,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, AbstractMergedBamFile baseBamFile) {
         assert mergingWorkPackage
         AbstractMergedBamFile previousBamFile = mergingWorkPackage.bamFileInProjectFolder
-        List<Long> mergableSeqTracks =  mergingWorkPackage.seqTracks*.id
+        List<Long> mergableSeqTracks = mergingWorkPackage.seqTracks*.id
         List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
         Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqTracks - containedSeqTracks) as Set
 

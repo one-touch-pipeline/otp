@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
      * - pair is not already in processing
      * - config file is available
      */
-    SamplePair samplePairForProcessing(ProcessingPriority minPriority, SamplePair sp = null) {
+    SamplePair samplePairForProcessing(int minPriority, SamplePair sp = null) {
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"
         final String SAMPLE_TYPE = "${SAMPLE}.sampleType"
@@ -98,7 +98,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
 
                 (sp ? "AND sp = :sp " : '') +
                 //check that processing priority of the corresponding project is high enough
-                'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority >= :minPriority ' +
+                'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority >= :minPriority ' +
                 'AND sp.mergingWorkPackage1.seqType in (:seqTypes) ' +
                 checkReferenceGenome() +
 
@@ -120,12 +120,12 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
                 //check that the second bam file fulfill the criteria
                 testIfBamFileFulfillCriteria("2") +
 
-                "ORDER BY sp.mergingWorkPackage1.sample.individual.project.processingPriority DESC, sp.dateCreated"
+                "ORDER BY sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority DESC, sp.dateCreated"
 
         Map parameters = [
                 needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
                 processingStates: processingStatesNotProcessable,
-                minPriority: minPriority.priority,
+                minPriority: minPriority,
                 analysis: getAnalysisType(),
                 seqTypes: seqTypes,
                 threshold: threshold,
