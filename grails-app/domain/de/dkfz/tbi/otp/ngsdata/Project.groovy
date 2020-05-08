@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.administration.ProjectInfo
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -53,7 +55,7 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
      */
     boolean forceCopyFiles = false
 
-    short processingPriority = ProcessingPriority.NORMAL.priority
+    ProcessingPriority processingPriority
 
     /**
      * The name which is used in the {@link MetaDataColumn#PROJECT} column of metadata files.
@@ -100,12 +102,12 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
 
     static hasMany = [
             projectInfos: ProjectInfo,
-            keywords: Keyword,
+            keywords    : Keyword,
     ]
 
     static belongsTo = [
             projectGroup: ProjectGroup,
-            realm: Realm,
+            realm       : Realm,
     ]
 
     static mappedBy = [
@@ -137,9 +139,7 @@ class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProje
 
         projectGroup(nullable: true)
 
-        processingPriority max: ProcessingPriority.MAXIMUM.priority
-
-        nameInMetadataFiles(nullable: true, blank: false,  validator: { val, obj ->
+        nameInMetadataFiles(nullable: true, blank: false, validator: { val, obj ->
             if (val) {
                 Project projectByMetadata = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
                 Project projectByName = atMostOneElement(Project.findAllByName(val))
