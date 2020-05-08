@@ -465,14 +465,16 @@ class MetadataImportService {
                 ilseSubmission = null
             }
 
+            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
+                    sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString, project)
+
             Map properties = [
                     laneId               : laneId,
                     ilseSubmission       : ilseSubmission,
-                    // TODO OTP-2050: Use a different fallback value?
                     insertSize           : tryParseInt(uniqueColumnValue(rows, FRAGMENT_SIZE), 0),
                     run                  : run,
-                    sample               : (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
-                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString, project)).sample,
+                    sample               : sampleIdentifier.sample,
+                    sampleIdentifier     : sampleIdentifier.name,
                     seqType              : seqType,
                     pipelineVersion      : SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
                     kitInfoReliability   : kitInfoReliability,
@@ -506,6 +508,7 @@ class MetadataImportService {
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
             mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
+            sampleIdentifier.delete(flush: true)
         }
     }
 

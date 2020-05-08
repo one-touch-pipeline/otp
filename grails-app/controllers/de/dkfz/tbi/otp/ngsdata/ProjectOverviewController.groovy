@@ -91,7 +91,6 @@ class ProjectOverviewController {
         Project project = projectSelectionService.requestedProject
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
-        boolean hideSampleIdentifier = ProjectOverviewService.hideSampleIdentifier(project)
         /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
         Map dataLastMap = [:]
 
@@ -125,21 +124,10 @@ class ProjectOverviewController {
             getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.pipeline.id, []).add(it)
         }
 
-        if (!hideSampleIdentifier) {
-            List<SampleIdentifier> sampleIdentifier = projectOverviewService.overviewSampleIdentifier(project)
-            sampleIdentifier.each { mockPidSampleTypeMinSampleId ->
-                InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(mockPidSampleTypeMinSampleId[0], mockPidSampleTypeMinSampleId[1])
-                informationOfSample.sampleIdentifier = mockPidSampleTypeMinSampleId[2]
-            }
-        }
-
         List data = []
         dataLastMap.each { String individual, Map<String, InfoAboutOneSample> dataMap ->
             dataMap.each { String sampleType, InfoAboutOneSample informationOfSample ->
                 List<String> line = [individual, sampleType]
-                if (!hideSampleIdentifier) {
-                    line << informationOfSample.sampleIdentifier
-                }
                 seqTypes.each { SeqType seqType ->
                     line << informationOfSample.laneCountRegistered[seqType.id]
 

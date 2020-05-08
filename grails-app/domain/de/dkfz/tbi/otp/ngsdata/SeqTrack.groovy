@@ -103,6 +103,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     int insertSize = -1
     Run run
     Sample sample
+    String sampleIdentifier
     SeqType seqType
     SoftwareTool pipelineVersion
     String antibody
@@ -162,7 +163,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     ]
 
     static constraints = {
-        laneId(blank: false, validator: { String val, SeqTrack obj ->
+        laneId blank: false, validator: { String val, SeqTrack obj ->
             // custom unique constraint on laneId, run, cellPosition and project
             List<SeqTrack> seqTracks = findAllWhere([
                     "laneId"             : obj.laneId,
@@ -177,35 +178,42 @@ class SeqTrack implements ProcessParameterObject, Entity {
             if (!OtpPath.isValidPathComponent(val)) {
                 return 'validator.path.component'
             }
-        })
-        hasOriginalBam()
-        seqType()
-        sample()
-        pipelineVersion()
+        }
+
+        sampleIdentifier nullable: false, blank: false, minSize: 3
+
         // for old data and data which is sequenced by external facilities this information might not be provided.
-        ilseSubmission(nullable: true)
+        ilseSubmission nullable: true
+
         nBasePairs nullable: true
 
         //libraryPreparationKit and inferred state
-        kitInfoReliability(nullable: false)
-        libraryPreparationKit(nullable: true, validator: { LibraryPreparationKit val, SeqTrack obj ->
+        kitInfoReliability nullable: false
+
+        libraryPreparationKit nullable: true, validator: { LibraryPreparationKit val, SeqTrack obj ->
             if (obj.kitInfoReliability == InformationReliability.KNOWN || obj.kitInfoReliability == InformationReliability.INFERRED) {
                 return val != null
             }
             return val == null
-        })
-        libraryName(nullable: true, shared: "pathComponent")
-        normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
+        }
+
+        libraryName nullable: true, shared: "pathComponent"
+
+        normalizedLibraryName nullable: true, validator: { String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
-        })
+        }
+
         singleCellWellLabel nullable: true
+
         problem nullable: true
-        antibody(nullable: true, blank: false, validator: { String val, SeqTrack obj ->
+
+        antibody nullable: true, blank: false, validator: { String val, SeqTrack obj ->
             return obj.antibodyTarget || !val
-        })
-        antibodyTarget(nullable: true, validator: { AntibodyTarget val, SeqTrack obj ->
+        }
+
+        antibodyTarget nullable: true, validator: { AntibodyTarget val, SeqTrack obj ->
             return !obj.seqType?.hasAntibodyTarget == !val
-        })
+        }
     }
 
     static String normalizeLibraryName(String libraryName) {
@@ -377,12 +385,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     long totalFileSize() {
         return dataFiles.sum { it.fileSize } as Long ?: 0
-    }
-
-    String getSampleIdentifier() {
-        return exactlyOneElement(MetaDataEntry.findAllByKeyAndDataFileInList(
-                exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_NAME.name())), dataFilesWhereIndexFileIsFalse
-        )*.value.unique())
     }
 
     static mapping = {

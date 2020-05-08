@@ -243,25 +243,6 @@ ${getFixGroupCommand(neww)}
     }
 
     /**
-     * rename all sample identifiers of the given identifier. The new name is the old name added with the text
-     * "was changed on" and the current date.
-     *
-     * @param sample the sample which identifier should be renamed
-     * @return void
-     */
-    void renameSampleIdentifiers(Sample sample, StringBuilder log) {
-        List<SampleIdentifier> sampleIdentifiers = SampleIdentifier.findAllBySample(sample)
-        log << "\n  sampleIdentifier for sample ${sample} (${sampleIdentifiers.size()}): ${sampleIdentifiers}"
-        String postfix = " was changed on ${new Date().format('yyyy-MM-dd')}"
-        sampleIdentifiers.each { SampleIdentifier sampleIdentifier ->
-            String oldSampleIdentifier = sampleIdentifier.name
-            sampleIdentifier.name += postfix
-            sampleIdentifier.save(flush: true)
-            changeMetadataEntry(sample, MetaDataColumn.SAMPLE_NAME.name(), oldSampleIdentifier, sampleIdentifier.name)
-        }
-    }
-
-    /**
      * function to rename data files and connect to a new project.
      * It is also checked, that the files and the view by pid links do not exist anymore in the old directory, but exist in
      * the new directory.
@@ -517,7 +498,7 @@ ln -s '${newDirectFileName}' \\
         samples.each { Sample sample ->
             SampleType newSampleType = SampleType.findByName(sampleTypeMap.get(sample.sampleType.name))
             log << "\n    change ${sample.sampleType.name} to ${newSampleType.name}"
-            renameSampleIdentifiers(sample, log)
+            SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
             sample.sampleType = newSampleType
             sample.save(flush: true)
         }
@@ -694,7 +675,7 @@ ln -s '${newDirectFileName}' \\
         bashScriptToMoveFiles << "################ move data files ################ \n"
         bashScriptToMoveFiles << renameDataFiles(dataFiles, newProject, dataFileMap, oldDataFileNameMap, sameLsdf, log)
 
-        renameSampleIdentifiers(sample, log)
+        SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
 
         List<String> newFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 

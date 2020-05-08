@@ -44,7 +44,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
     DataSwapService dataSwapService
     LsdfFilesService lsdfFilesService
-    DataProcessingFilesService dataProcessingFilesService
     TestConfigService configService
 
     @Rule
@@ -227,23 +226,6 @@ class DataSwapServiceTests implements UserAndRoles {
         dataSwapService.changeMetadataEntry(sample, metaDataKey.name, metaDataEntry.value, newValue)
 
         assert metaDataEntry.value == newValue
-    }
-
-    @Test
-    void test_renameSampleIdentifiers() {
-        setupData()
-
-        Sample sample = DomainFactory.createSample()
-        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier(sample: sample)
-        String sampleIdentifierName = sampleIdentifier.name
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = DomainFactory.createMetaDataKey(name: "SAMPLE_NAME")
-        DomainFactory.createMetaDataEntry(key: metaDataKey, dataFile: dataFile)
-
-        dataSwapService.renameSampleIdentifiers(sample, new StringBuilder())
-
-        assert sampleIdentifierName != sampleIdentifier.name
     }
 
     @Test

@@ -32,7 +32,7 @@
                     <strong><g:message code="document.delete"/></strong>
                 </td>
             </tr>
-        <g:each in="${sample.sampleIdentifiers}" var="sampleIdentifier" status="i">
+        <g:each in="${sample.sampleIdentifierObjects}" var="sampleIdentifier" status="i">
             <tr>
                 <td>
                     <input type="text" name="editedSampleIdentifiers[${i}].name" value="${sampleIdentifier.name}"/>

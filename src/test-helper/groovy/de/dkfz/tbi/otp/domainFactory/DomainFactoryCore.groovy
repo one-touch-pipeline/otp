@@ -241,6 +241,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     private Map getSeqTrackProperties(Map properties = [:]) {
         return [
                 laneId               : "laneId_${nextId}",
+                sampleIdentifier     : "sampleIdentifier_${nextId}",
                 sample               : { createSample() },
                 pipelineVersion      : { createSoftwareTool() },
                 run                  : { createRun() },

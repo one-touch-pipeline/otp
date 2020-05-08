@@ -104,36 +104,38 @@
             </div>
         </div>
 
-        <h2><g:message code="individual.show.samples"/></h2>
-        <div id="individualSampleTbl" class="tableBlock">
-            <table>
-                <g:each var="sample" in="${individual.samples}">
+        <sec:access expression="hasRole('ROLE_OPERATOR')">
+            <h2><g:message code="individual.show.samples"/></h2>
+            <div id="individualSampleTbl" class="tableBlock">
+                <table>
+                    <g:each var="sample" in="${individual.samples}">
+                        <tr>
+                            <td class="myKey">${sample.sampleType.name}</td>
+                            <td class="myValue">
+                                <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
+                                    ${sample.sampleIdentifierObjects.join(", ")}
+                                </sec:access>
+                                <sec:access expression="hasRole('ROLE_OPERATOR')">
+                                    <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
+                                        <g:render template="editorSampleIdentifier" model="[sample: sample]"></g:render>
+                                    </otp:expandable>
+                                </sec:access>
+                            </td>
+                        </tr>
+                    </g:each>
                     <tr>
-                        <td class="myKey">${sample.sampleType.name}</td>
+                        <td class="myKey"></td>
                         <td class="myValue">
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                ${sample.sampleIdentifiers.join(", ")}
-                            </sec:access>
-                            <sec:access expression="hasRole('ROLE_OPERATOR')">
-                                <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
-                                    <g:render template="editorSampleIdentifier" model="[sample: sample]"></g:render>
-                                </otp:expandable>
-                            </sec:access>
+                            <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="newValue"
+                                link="${g.createLink(controller: 'individual', action: 'newSampleType', id: individual.id)}"
+                                values="${sampleTypeDropDown}"/>
                         </td>
                     </tr>
-                </g:each>
-                <tr>
-                    <td class="myKey"></td>
-                    <td class="myValue">
-                        <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="newValue"
-                            link="${g.createLink(controller: 'individual', action: 'newSampleType', id: individual.id)}"
-                            values="${sampleTypeDropDown}"/>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                </table>
+            </div>
+        </sec:access>
 
         <h2><g:message code="individual.show.laneOverview.header"/></h2>
         <div class="tableBlock">
@@ -145,6 +147,7 @@
                             <th><%-- contains withdrawn data warning placeholder --%></th>
                             <th><%-- details link placeholder --%></th>
                             <th><g:message code="individual.show.laneOverview.sampleType"/></th>
+                            <th>Sample ID</th>
                             <th title="${g.message(code: "individual.show.laneOverview.numberOfLanes.tooltip")}"><g:message code="individual.show.laneOverview.numberOfLanes"/></th>
                             <th><g:message code="individual.show.laneOverview.numberOfBases"/></th>
                             <th><g:message code="individual.show.laneOverview.numberOfFiles"/></th>
@@ -164,6 +167,7 @@
                                 </td>
                                 <td><g:link controller="seqTrack" action="seqTrackSet" params="${seqTrackSelection}">Details</g:link></td>
                                 <td><strong>${sampleType}</strong></td>
+                                <td>${seqTrackSet.seqTracks*.sampleIdentifier.join(", ")}</td>
 
                                 <td>${seqTrackSet.numberOfLanes}</td>
                                 <td title="${seqTrackSet.numberOfBases ? UnitHelper.asNucleobases(seqTrackSet.numberOfBases) : "N/A"}">

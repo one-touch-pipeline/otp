@@ -182,7 +182,8 @@ class AbstractBamFileServiceIntegrationTests {
                 sample: sample,
                 seqType: wholeGenomeSeqType,
                 seqPlatform: seqPlatform,
-                pipelineVersion: softwareTool
+                pipelineVersion: softwareTool,
+                sampleIdentifier: "sampleIdentifier",
                 )
         assertNotNull(seqTrack.save([flush: true]))
 
@@ -194,7 +195,8 @@ class AbstractBamFileServiceIntegrationTests {
                 seqPlatform: seqPlatform,
                 pipelineVersion: softwareTool,
                 libraryPreparationKit: libraryPreparationKit,
-                kitInfoReliability: InformationReliability.KNOWN
+                kitInfoReliability: InformationReliability.KNOWN,
+                sampleIdentifier: "sampleIdentifier",
                 )
         assertNotNull(exomeSeqTrack.save([flush: true]))
 

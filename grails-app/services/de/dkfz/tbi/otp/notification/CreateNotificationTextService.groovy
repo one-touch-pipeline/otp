@@ -115,7 +115,7 @@ class CreateNotificationTextService {
             seqTracksOfSample.groupBy {
                 it.alignmentProcessingStatus != NOTHING_DONE_WONT_DO
             }.each { boolean willAlign, List<SeqTrackProcessingStatus> seqTracksOfAlign ->
-                samples.add("${willAlign ? '[A]' : '[-]'} ${sample}${getSampleIdentifiers(seqTracksOfAlign*.seqTrack)}")
+                samples.add("${willAlign ? '[A]' : '[-]'} ${sample} (${seqTracksOfAlign*.seqTrack.sampleIdentifier.unique().sort().join(", ")})")
             }
         }
 
@@ -169,7 +169,7 @@ class CreateNotificationTextService {
         String sampleNames = seqTracks.groupBy {
             getSampleName(it)
         }.sort().collect { String sample, List<SeqTrack> seqTracksOfSample ->
-            "${sample}${getSampleIdentifiers(seqTracksOfSample)}"
+            "${sample} (${seqTracksOfSample*.sampleIdentifier.unique().sort().join(", ")})"
         }.join('\n')
 
         Collection<AbstractMergedBamFile> allGoodBamFiles =
@@ -376,30 +376,6 @@ class CreateNotificationTextService {
         assert seqTrack
 
         return "${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
-    }
-
-    String getSampleIdentifiers(Collection<SeqTrack> seqTracks) {
-        assert seqTracks
-
-        if (ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(
-                exactlyOneElement(
-                        seqTracks*.project.unique(), 'seqtracks must be of the same project'
-                ).name)
-        ) {
-            return ''
-        } else {
-            return ' (' + MetaDataEntry.createCriteria().list {
-                projections {
-                    dataFile {
-                        'in'('seqTrack', seqTracks)
-                    }
-                    key {
-                        eq('name', MetaDataColumn.SAMPLE_NAME.name())
-                    }
-                    distinct('value')
-                }
-            }.sort().join(', ') + ')'
-        }
     }
 
     @SuppressWarnings('JavaIoPackageAccess')

@@ -456,4 +456,7 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/delete-sample-swap.groovy'
+    changeSet(author: "wieset", id: "otp-369") {
+        sqlFile(path: 'changelogs/2020/otp-369.sql')
+    }
 }

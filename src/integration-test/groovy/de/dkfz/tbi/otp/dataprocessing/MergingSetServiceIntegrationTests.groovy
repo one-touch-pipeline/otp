@@ -100,7 +100,8 @@ class MergingSetServiceIntegrationTests {
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
+                        pipelineVersion: softwareTool,
+                        sampleIdentifier: "sampleIdentifier",
                         )
         assertNotNull(seqTrack.save([flush: true]))
         seqTrack2 = new SeqTrack(
@@ -109,7 +110,8 @@ class MergingSetServiceIntegrationTests {
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
+                        pipelineVersion: softwareTool,
+                        sampleIdentifier: "sampleIdentifier",
         )
         assertNotNull(seqTrack2.save([flush: true]))
     }

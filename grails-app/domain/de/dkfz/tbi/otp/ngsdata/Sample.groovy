@@ -57,9 +57,9 @@ class Sample implements Entity {
     }
 
     /**
-     * @return List of SampleIdentifier for this Sample.
+     * @return List of SampleIdentifier objects for this Sample.
      */
-    List<SampleIdentifier> getSampleIdentifiers() {
+    List<SampleIdentifier> getSampleIdentifierObjects() {
         return SampleIdentifier.findAllBySample(this)
     }
 

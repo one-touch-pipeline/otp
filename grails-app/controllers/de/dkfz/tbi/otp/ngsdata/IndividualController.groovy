@@ -72,7 +72,7 @@ class IndividualController {
                 tableHeader    : IndividualColumn.values()*.message,
                 filterTree: [
                         [name : 'projectSelection', msgcode: 'individual.search.project',
-                         type : 'LIST', from: projectService.getAllProjects(),,
+                         type : 'LIST', from: projectService.getAllProjects(),
                          value: 'displayName', key: 'id'],
                         [name: 'pidSearch', msgcode: 'individual.search.pid', type: 'TEXT'],
                         [name: 'mockFullNameSearch', msgcode: 'individual.search.mockFullName', type: 'TEXT'],

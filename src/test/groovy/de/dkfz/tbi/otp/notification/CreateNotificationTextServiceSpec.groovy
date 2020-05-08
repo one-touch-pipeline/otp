@@ -183,101 +183,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         name.contains(seqTrack.individual.displayName)
     }
 
-    void "getSampleIdentifiers, when no seqTracks exist, throw assert"() {
-        when:
-        new CreateNotificationTextService().getSampleIdentifiers(null)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('assert seqTracks')
-    }
-
-    void "getSampleIdentifiers, when no metadataEntries exist, return only brackets"() {
-        given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-
-        when:
-        String value = new CreateNotificationTextService().getSampleIdentifiers([seqTrack])
-
-        then:
-        ' ()' == value
-    }
-
-    void "getSampleIdentifiers, when metadataEntries exist and sample identifier should be hidden, return empty string"() {
-        given:
-        String identifier = 'SomeName'
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-        seqTrack.project.name = ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.first()
-        seqTrack.dataFiles.each {
-            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, identifier)
-        }
-
-        when:
-        String value = new CreateNotificationTextService().getSampleIdentifiers([seqTrack])
-
-        then:
-        '' == value
-    }
-
-    void "getSampleIdentifiers, when metadataEntries exist and sample identifier should be shown, return sample identifier in brackets"() {
-        given:
-        String identifier = 'SomeName'
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-        seqTrack.dataFiles.each {
-            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, identifier)
-        }
-        String expected = " (${identifier})"
-
-        when:
-        String value = new CreateNotificationTextService().getSampleIdentifiers([seqTrack])
-
-        then:
-        expected == value
-    }
-
-    void "getSampleIdentifiers, when multiple seqtracks exist with multiple sample identifiers, return unique and sorted sample identifiers in brackets"() {
-        given:
-        Project project = DomainFactory.createProject()
-        List<String> identifiers = [
-                'sample6',
-                'sample3',
-                'sample8',
-                'sample3',
-                'sample6',
-        ]
-        List<SeqTrack> seqTracks = identifiers.collect { String identifier ->
-            SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-            seqTrack.individual.project = project
-            seqTrack.dataFiles.each {
-                it.project = project
-                DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, identifier)
-            }
-            return seqTrack
-        }
-        String expected = " (sample3, sample6, sample8)"
-
-        when:
-        String value = new CreateNotificationTextService().getSampleIdentifiers(seqTracks)
-
-        then:
-        expected == value
-    }
-
-    void "getSampleIdentifiers, when samples are mixed, throw assert"() {
-        given:
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
-        and:
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
-        seqTrack2.project.name = ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.first()
-
-        when:
-        new CreateNotificationTextService().getSampleIdentifiers([seqTrack1, seqTrack2])
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('seqtracks must be of the same project')
-    }
-
     void "getSeqTypeDirectories, when seqTracks is null, throw assert"() {
         when:
         new CreateNotificationTextService().getSeqTypeDirectories(null)
@@ -476,10 +381,10 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
-        List<String> samples = ["[-] ${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.sampleId1})"]
+        List<String> samples = ["[-] ${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.seqTrack.sampleIdentifier})"]
         if (installationProcessingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE) {
             seqTracks.add(data2.seqTrack)
-            samples.add("${align ? '[A]' : '[-]'} ${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})")
+            samples.add("${align ? '[A]' : '[-]'} ${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.seqTrack.sampleIdentifier})")
         }
 
         String expectedPaths = createNotificationTextService.getSeqTypeDirectories(seqTracks)
@@ -601,11 +506,11 @@ ${expectedAlign}"""
         List<SeqTrack> seqTracks = [data1.seqTrack]
         List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair]
         List<SamplePair> samplePairWithVariantCalling = []
-        List<String> expectedSamples = ["${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.sampleId1})"]
+        List<String> expectedSamples = ["${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.seqTrack.sampleIdentifier})"]
         List<String> variantCallingPipelines = []
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
-            expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
+            expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.seqTrack.sampleIdentifier})"
             if (indel || snv || sophia || aceseq || runYapsa) {
                 samplePairWithVariantCalling.add(data2.samplePair)
                 // the If-cases have to be ordered alphabetically

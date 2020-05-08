@@ -306,8 +306,7 @@ class MetaDataExport {
         properties.put('OTP_PID_DISPLAYED_IDENTIFIER', seqTrack.individual.mockFullName)
         properties.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
         properties.put('OTP_WITHDRAWN_COMMENT', dataFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
-        put(SAMPLE_NAME, preferredOrLongest(
-                properties.get(SAMPLE_NAME.toString()), SampleIdentifier.findAllBySample(seqTrack.sample)*.name))
+        put(SAMPLE_ID, seqTrack.sampleIdentifier)
         put(FASTQ_GENERATOR, preferredOrLongest(
                 properties.get(FASTQ_GENERATOR.toString()), SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name))
         put(FRAGMENT_SIZE, String.valueOf(seqTrack.insertSize))
