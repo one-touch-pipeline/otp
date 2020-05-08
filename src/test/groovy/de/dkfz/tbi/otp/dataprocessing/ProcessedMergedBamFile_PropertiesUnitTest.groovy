@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.test.mixin.Mock
 import org.junit.*
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Mock([
         LibraryPreparationKit,
@@ -38,6 +40,7 @@ import de.dkfz.tbi.otp.ngsdata.*
         SeqTrack,
         SampleType,
         Pipeline,
+        ProcessingPriority,
         Project,
         ProcessedMergedBamFile,
         Individual,
@@ -50,10 +53,9 @@ import de.dkfz.tbi.otp.ngsdata.*
         Run,
         Realm,
 ])
-class ProcessedMergedBamFile_PropertiesUnitTest {
+class ProcessedMergedBamFile_PropertiesUnitTest implements DomainFactoryCore {
 
-    static final short PROCESSING_PRIORITY = 1
-
+    ProcessingPriority processingPriority
     SampleType sampleType
     Sample sample
     SeqType seqType
@@ -65,8 +67,9 @@ class ProcessedMergedBamFile_PropertiesUnitTest {
 
     @Before
     void setUp() {
+        processingPriority = createProcessingPriority()
         sampleType = DomainFactory.createSampleType()
-        project = DomainFactory.createProject(processingPriority: PROCESSING_PRIORITY)
+        project = DomainFactory.createProject(processingPriority: processingPriority)
         individual = DomainFactory.createIndividual(project: project)
         sample = DomainFactory.createSample(sampleType: sampleType, individual: individual)
         referenceGenome = DomainFactory.createReferenceGenome()
@@ -101,7 +104,7 @@ class ProcessedMergedBamFile_PropertiesUnitTest {
 
     @Test
     void testGetProcessingPriority() {
-        assert PROCESSING_PRIORITY == bamFile.processingPriority
+        assert processingPriority == bamFile.processingPriority
     }
 
     @Test

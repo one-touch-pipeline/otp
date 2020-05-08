@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,10 +32,12 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Mock([
         Individual,
         Pipeline,
+        ProcessingPriority,
         Project,
         Realm,
         RoddyWorkflowConfig,

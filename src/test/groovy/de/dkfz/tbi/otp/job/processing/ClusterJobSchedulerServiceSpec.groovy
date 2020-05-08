@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -30,7 +29,7 @@ import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -38,10 +37,11 @@ import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.FileSystems
 
-class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
+class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -185,10 +185,11 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
         SeqType seqType = DomainFactory.createSeqType()
         Realm realm = DomainFactory.createRealm()
         String clusterJobId = "123"
+        ProcessingPriority processingPriority = createProcessingPriority()
 
         ProcessParameterObject ppo = Stub(ProcessParameterObject) {
             getSeqType() >> seqType
-            getProcessingPriority() >> ProcessingPriority.NORMAL.priority
+            getProcessingPriority() >> processingPriority
         }
         ProcessingStep step = Stub(ProcessingStep) {
             getProcessParameterObject() >> ppo

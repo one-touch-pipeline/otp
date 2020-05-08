@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static org.junit.Assert.*
 
@@ -41,6 +42,7 @@ import static org.junit.Assert.*
 @TestMixin(GrailsUnitTestMixin)
 @Mock([
         ProcessingOption,
+        ProcessingPriority,
         Project,
         Realm,
         ReferenceGenome,

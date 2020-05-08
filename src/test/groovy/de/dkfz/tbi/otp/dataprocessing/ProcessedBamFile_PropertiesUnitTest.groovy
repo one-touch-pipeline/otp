@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,11 @@ package de.dkfz.tbi.otp.dataprocessing
 import org.junit.*
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 class ProcessedBamFile_PropertiesUnitTest {
 
-    static final short PROCESSING_PRIORITY = 1
-
+    ProcessingPriority processingPriority
     SampleType sampleType
     Sample sample
     SeqType seqType
@@ -40,8 +40,9 @@ class ProcessedBamFile_PropertiesUnitTest {
 
     @Before
     void setUp() {
+        processingPriority = new ProcessingPriority()
         sampleType = new SampleType()
-        project = new Project(processingPriority: PROCESSING_PRIORITY)
+        project = new Project(processingPriority: processingPriority)
         individual = new Individual(project: project)
         sample = new Sample(sampleType: sampleType, individual: individual)
         referenceGenome = new ReferenceGenome()
@@ -75,7 +76,7 @@ class ProcessedBamFile_PropertiesUnitTest {
 
     @Test
     void testGetProcessingPriority() {
-        assert PROCESSING_PRIORITY == bamFile.processingPriority
+        assert processingPriority == bamFile.processingPriority
     }
 
     @Test
