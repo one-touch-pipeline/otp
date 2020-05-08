@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -199,7 +199,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         workPackage.individual.pid = 'pid_4'  // This name is encoded in @RG of the test BAM file
         workPackage.individual.save(flush: true)
 
-        workPackage.sampleType.name = "CONTROL"
+        workPackage.sampleType.name = "control"
         workPackage.sampleType.save(flush: true)
 
         workPackage.project.realm = realm
@@ -218,7 +218,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {
         lsdfFilesService.createDirectory(workPackage.project.projectSequencingDirectory, realm)
-
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
@@ -690,8 +689,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void fastTrackSetup() {
         SeqTrack seqTrack = createSeqTrack("readGroup1")
-        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert seqTrack.project.save(flush: true)
+        updateProcessingPriorityToFastrack()
     }
 
     protected void check_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {

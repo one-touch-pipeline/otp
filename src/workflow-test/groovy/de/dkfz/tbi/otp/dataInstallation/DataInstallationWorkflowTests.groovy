@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import spock.lang.Shared
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.WorkflowTestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
@@ -120,8 +119,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
         SessionUtils.withNewSession {
             seqTrack = createChipSeqSeqTrack()
             createDataFiles(seqTrack)
-            seqTrack.project.realm = realm
-            assert seqTrack.project.save(flush: true)
         }
 
         when:
@@ -143,8 +140,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
                     singleCellWellLabel: null,
             ])
             createDataFiles(seqTrack)
-            seqTrack.project.realm = realm
-            assert seqTrack.project.save(flush: true)
         }
 
         when:
@@ -165,8 +160,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
             Run run = createRun()
             FileType fileType = createFileType()
             Sample sample = createSample()
-            sample.project.realm = realm
-            assert sample.project.save(flush: true)
             seqTracks = (1..3).collect {
                 String fileNameR1 = "${it}_${fastqR1Filename}"
                 String fileNameR2 = "${it}_${fastqR2Filename}"
@@ -208,8 +201,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
         SeqTrack seqTrack
         SessionUtils.withNewSession {
             seqTrack = createWholeGenomeSetup()
-            seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
-            assert seqTrack.save(flush: true)
+            updateProcessingPriorityToFastrack()
         }
 
         when:
@@ -282,8 +274,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         SeqTrack seqTrack = createSeqTrack([seqType: seqType, linkedExternally: linkedExternally])
         createDataFiles(seqTrack)
-        seqTrack.project.realm = realm
-        assert seqTrack.project.save(flush: true)
         return seqTrack
     }
 
