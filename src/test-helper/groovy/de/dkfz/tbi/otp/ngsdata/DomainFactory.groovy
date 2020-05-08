@@ -357,7 +357,6 @@ class DomainFactory {
         return createDomainObject(Workflow, [
                 name              : "${counter++}",
                 enabled           : true,
-                maxParallelRunning: 1,
         ], properties)
     }
 

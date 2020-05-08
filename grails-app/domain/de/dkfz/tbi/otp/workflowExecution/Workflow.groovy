@@ -47,8 +47,6 @@ class Workflow implements Entity, Commentable {
 
     WesServer wesServer
 
-    int maxParallelRunning
-
     Set<ReferenceGenome> allowedReferenceGenomes
 
     Set<SeqType> supportedSeqTypes
@@ -57,7 +55,6 @@ class Workflow implements Entity, Commentable {
         beanName nullable: true
         deprecatedDate nullable: true
         wesServer nullable: true
-        maxParallelRunning shared: 'greaterThanZero'
         comment nullable: true
     }
 
