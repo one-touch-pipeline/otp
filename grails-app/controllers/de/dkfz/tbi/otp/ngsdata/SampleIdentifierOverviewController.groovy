@@ -39,21 +39,20 @@ class SampleIdentifierOverviewController {
     JSON dataTableSourceListSampleIdentifierByProject(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject
-        Map data = projectOverviewService.listSampleIdentifierByProject(project)
+        Map<List<String>, List<String>> data = projectOverviewService.listSampleIdentifierByProject(project)
 
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = []
 
-        data.each { individualMap ->
-            individualMap.value.each { sampleMap ->
-                List line = [
-                        individualMap.key,
-                        sampleMap.key,
-                        sampleMap.value.collect { it[2] }.join(", "),
-                ]
-                dataToRender.aaData << line
-            }
+        data.each { key, ids ->
+            List<String> line = [
+                    key[0], // mockpid
+                    key[1], // sampleType
+                    key[2], // seqType
+                    ids.join(", "), // the different sample identifiers
+            ]
+            dataToRender.aaData << line
         }
         render dataToRender as JSON
     }

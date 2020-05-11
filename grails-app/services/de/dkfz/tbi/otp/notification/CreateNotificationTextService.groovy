@@ -41,7 +41,6 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Transactional
 class CreateNotificationTextService {

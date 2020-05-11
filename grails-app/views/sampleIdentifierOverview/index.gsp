@@ -36,6 +36,7 @@
             <otp:dataTable codes="${[
                     'sampleIdentifierOverview.index.pid',
                     'sampleIdentifierOverview.index.sampleType',
+                    'sampleIdentifierOverview.index.seqType',
                     'sampleIdentifierOverview.index.sampleIdentifier',
             ]}" id="sampleIdentifierOverviewTable" />
         </div>

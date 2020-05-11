@@ -774,7 +774,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ExplicitHashSetInstantiation {
-        priority = HIGH
+        priority = CRITICAL
     }
     ExplicitLinkedHashMapInstantiation {
         priority = CRITICAL

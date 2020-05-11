@@ -23,10 +23,21 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+/**
+ * Semi-temporary domain object to specify the proper import target (Project, Individual, Sample) for new data.
+ *
+ * When the destination for new fastq files can't automatically be parsed by a {@link SampleIdentifierParser},
+ * this can be manually created by operators to explicitly define the target instead.
+ *
+ * Since it is persisted into the {@link SeqTrack} during import, it can safely be throws away after use.
+ * It should only need to exist in the database in the brief window between the operator defining it, and
+ * the import using it.
+ */
 class SampleIdentifier implements Entity {
 
     String name

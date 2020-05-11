@@ -78,14 +78,11 @@
         </otp:annotation>
 
         <div class="otpDataTables">
-            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
+            <table id="laneOverviewId"  data-ignore-filter-columns="2" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
                 <thead>
                     <tr>
                         <th></th>
                         <th></th>
-                        <g:if test="${!hideSampleIdentifier}">
-                            <th></th>
-                        </g:if>
                         <g:each var="seqType" in="${seqTypes}">
                             <th colspan="${pipelines.size() + 1}">${seqType}</th>
                         </g:each>

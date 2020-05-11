@@ -85,23 +85,22 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         given:
         new TestConfigService()
 
-        SingleCellBamFile singleCellBamFile = createBamFile()
+        String sampleIdentifier1 = "qwert"
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage()
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithDataFiles(mwp,
+                [ sampleIdentifier: sampleIdentifier1, ]
+        )
+        SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])
         Path sampleDirectory = singleCellBamFile.sampleDirectory.toPath()
-        String sampleIdentifier = "qwert"
 
-        Path mate1 = sampleDirectory.resolve(sampleIdentifier).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R1_001.fastq.gz")
-        Path mate2 = sampleDirectory.resolve(sampleIdentifier).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R2_001.fastq.gz")
+        Path mate1 = sampleDirectory.resolve(sampleIdentifier1).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R1_001.fastq.gz")
+        Path mate2 = sampleDirectory.resolve(sampleIdentifier1).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R2_001.fastq.gz")
 
         String file1 = 'file1'
         String file2 = 'file2'
 
         Path filePath1 = Paths.get(file1)
         Path filePath2 = Paths.get(file2)
-        singleCellBamFile.seqTracks.each { SeqTrack seqTrack ->
-            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), sampleIdentifier)
-            }
-        }
 
         String sampleIdentifier2 = "as*ÄÜ?°!§%&/()=?`dfg"
         String sampleIdentifier2DirName = "as_______________dfg"
@@ -114,10 +113,9 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Path filePath3 = Paths.get(file3)
         Path filePath4 = Paths.get(file4)
 
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(CellRangerMergingWorkPackage.all.find())
-        seqTrack2.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-            DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), sampleIdentifier2)
-        }
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(CellRangerMergingWorkPackage.all.find(),
+                [ sampleIdentifier: sampleIdentifier2, ]
+        )
         singleCellBamFile.seqTracks.add(seqTrack2)
         singleCellBamFile.save(flush: true)
 
@@ -254,14 +252,15 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         final File indexFile = new File(TestCase.uniqueNonExistentPath, 'someIndex')
 
-        SingleCellBamFile singleCellBamFile = createBamFile()
-        singleCellBamFile.mergingWorkPackage.expectedCells = expectedCells
-        singleCellBamFile.mergingWorkPackage.enforcedCells = enforcedCells
-        singleCellBamFile.seqTracks.each { SeqTrack seqTrack ->
-            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
-            }
-        }
+        String sampleIdentifier = "asdfg"
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage([
+                expectedCells: expectedCells,
+                enforcedCells: enforcedCells,
+        ])
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithDataFiles(mwp,
+                [ sampleIdentifier: sampleIdentifier, ]
+        )
+        SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])
 
         CellRangerService cellRangerService = new CellRangerService([
                 referenceGenomeIndexService: Mock(ReferenceGenomeIndexService) {

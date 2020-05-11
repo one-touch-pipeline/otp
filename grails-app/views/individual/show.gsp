@@ -115,11 +115,9 @@
                                 <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
                                     ${sample.sampleIdentifierObjects.join(", ")}
                                 </sec:access>
-                                <sec:access expression="hasRole('ROLE_OPERATOR')">
-                                    <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
-                                        <g:render template="editorSampleIdentifier" model="[sample: sample]"></g:render>
-                                    </otp:expandable>
-                                </sec:access>
+                                <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
+                                    <g:render template="editorSampleIdentifier" model="[sample: sample]"></g:render>
+                                </otp:expandable>
                             </td>
                         </tr>
                     </g:each>
@@ -167,7 +165,11 @@
                                 </td>
                                 <td><g:link controller="seqTrack" action="seqTrackSet" params="${seqTrackSelection}">Details</g:link></td>
                                 <td><strong>${sampleType}</strong></td>
-                                <td>${seqTrackSet.seqTracks*.sampleIdentifier.join(", ")}</td>
+                                <td>
+                                    <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
+                                        ${seqTrackSet.seqTracks*.sampleIdentifier.join(", ")}
+                                    </sec:access>
+                                </td>
 
                                 <td>${seqTrackSet.numberOfLanes}</td>
                                 <td title="${seqTrackSet.numberOfBases ? UnitHelper.asNucleobases(seqTrackSet.numberOfBases) : "N/A"}">

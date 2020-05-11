@@ -55,7 +55,6 @@ class ProjectOverviewController {
         String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
 
         return [
-                hideSampleIdentifier: ProjectOverviewService.hideSampleIdentifier(project),
                 seqTypes            : seqTypes,
                 sampleTypes         : sampleTypes,
                 sampleType          : sampleTypeName,
@@ -68,7 +67,6 @@ class ProjectOverviewController {
     }
 
     class InfoAboutOneSample {
-        String sampleIdentifier
         // Map<SeqType.id, value>>
         Map<Long, String> laneCountRegistered = [:]
         // Map<SeqType.id, Map<Pipeline.id, Collection<bamFileInProjectFolder>>>

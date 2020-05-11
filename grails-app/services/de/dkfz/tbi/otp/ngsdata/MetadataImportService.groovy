@@ -91,11 +91,9 @@ class MetadataImportService {
     SeqTrackService seqTrackService
     SeqTypeService seqTypeService
 
-
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
     static final String MATE_NUMBER_EXPRESSION = /^(?<index>i|I)?(?<number>[1-9]\d*)$/
-
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -389,6 +387,10 @@ class MetadataImportService {
             importSeqTracks(context, fastqImportInstance, run, rows, align)
             log.debug("seqTracks stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
+
+        // Now that all rows are processed, we can clean up.
+        // flush=false, because we don't care when it's cleaned up; it can just fade away together with the context.
+        context.usedSampleIdentifiers*.delete(flush: false)
     }
 
     protected Run getOrCreateRun(String runName, List<Row> rows) {
@@ -467,6 +469,7 @@ class MetadataImportService {
 
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
                     sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString, project)
+            context.usedSampleIdentifiers.add(sampleIdentifier)
 
             Map properties = [
                     laneId               : laneId,
@@ -508,11 +511,11 @@ class MetadataImportService {
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
             mergingCriteriaService.createDefaultMergingCriteria(project, seqType)
-            sampleIdentifier.delete(flush: true)
         }
     }
 
-    private static void importDataFiles(MetadataValidationContext context, FastqImportInstance fastqImportInstance, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
+    private static void importDataFiles(MetadataValidationContext context, FastqImportInstance fastqImportInstance, SeqTrack seqTrack,
+                                        Collection<Row> seqTrackRows) {
         Map<String, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy {
             extractMateNumber(it).value
         }

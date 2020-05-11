@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -37,10 +38,16 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     final DirectoryStructure directoryStructure
     final String directoryStructureDescription
 
+    /**
+     * Keep track of which SampleIdentifiers were actually used in the processing of this MetaDataFile, for cleanup later.
+     */
+    final Set<SampleIdentifier> usedSampleIdentifiers
+
     private MetadataValidationContext(Path metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure, String directoryStructureDescription, byte[] content) {
         super(metadataFile, metadataFileMd5sum, spreadsheet, problems, content)
         this.directoryStructure = directoryStructure
         this.directoryStructureDescription = directoryStructureDescription
+        this.usedSampleIdentifiers = [] as Set
     }
 
     static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription) {
