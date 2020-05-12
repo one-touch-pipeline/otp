@@ -82,6 +82,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
                 linkMissingFiles(sourceBaseDir, targetBaseDir, relativePath, realm)
             }
         }
+        validate()
         return NextAction.SUCCEED
     }
 

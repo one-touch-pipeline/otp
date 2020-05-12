@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.utils
 
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 @SuppressWarnings('JavaIoPackageAccess') //helper class for FileAccess, so its fine
 class CreateFileHelper {
@@ -35,8 +37,13 @@ class CreateFileHelper {
     }
 
     static File createSymbolicLinkFile(File source, File target = new File('/tmp')) {
-        source.parentFile.mkdirs()
-        Files.createSymbolicLink(source.toPath(), target.toPath())
+        createSymbolicLinkFile(source.toPath(), target.toPath())
+        return source
+    }
+
+    static Path createSymbolicLinkFile(Path source, Path target = Paths.get('/tmp')) {
+        Files.createDirectories(source.parent)
+        Files.createSymbolicLink(source, target)
         return source
     }
 

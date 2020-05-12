@@ -21,11 +21,13 @@
  */
 package de.dkfz.tbi.otp.importExternallyMergedBam
 
+
 import de.dkfz.tbi.otp.WorkflowTestCase
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.*
@@ -244,6 +246,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             importProcess.save(flush: true)
             importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile bamFile ->
                 bamFile.maximumReadLength = 100
+                bamFile.md5sum = HelperUtils.randomMd5sum
                 bamFile.save(flush: true)
             }
         }
@@ -258,6 +261,10 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess.externallyProcessedMergedBamFiles.each {
                 it.refresh()
+                assert it.fileSize > 0
+                assert it.fileExists
+                assert it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+
                 Path baseDirSource = fs.getPath(it.importedFrom).parent
                 Path baseDirTarget = fs.getPath(it.importFolder.path)
 
