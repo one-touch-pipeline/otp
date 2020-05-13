@@ -33,9 +33,10 @@ class WorkflowStep implements Entity, Commentable {
 
     enum State {
         CREATED,
-        RUN,
+        RUNNING,
+        SKIPPED,
         SUCCESS,
-        FAIL,
+        FAILED,
     }
 
     WorkflowRun workflowRun

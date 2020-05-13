@@ -353,6 +353,14 @@ class DomainFactory {
         ], properties)
     }
 
+    static WorkflowStep createWorkflowStep(Map properties = [:]) {
+        return createDomainObject(WorkflowStep, [
+                workflowRun: { createWorkflowRun() },
+                beanName   : "beanName_${counter++}",
+                state      : WorkflowStep.State.CREATED,
+        ], properties)
+    }
+
     static Workflow createWorkflow(Map properties = [:]) {
         return createDomainObject(Workflow, [
                 name              : "${counter++}",
