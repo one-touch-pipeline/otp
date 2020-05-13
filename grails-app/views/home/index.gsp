@@ -27,6 +27,7 @@
     <title><g:message code="otp.welcome.title"/></title>
     <asset:javascript src="modules/graph"/>
     <asset:javascript src="pages/home/index/projectOverview.js"/>
+    <asset:javascript src="taglib/ExpandableText.js"/>
 </head>
 <body>
     <div class="body home">
@@ -34,26 +35,7 @@
 
         <h2><g:message code="home.yourProjects.title"/></h2>
         <g:if test="${userProjects}">
-            <div class="table-with-fixed-header">
-                <table>
-                     <thead>
-                        <tr>
-                            <th><g:message code="home.project"/></th>
-                            <th><g:message code="home.pis"/></th>
-                            <th><g:message code="home.desc"/></th>
-                            <th><g:message code="home.seqType"/></th>
-                        </tr>
-                    </thead>
-                    <g:each in="${userProjects}" var="project">
-                        <tr>
-                            <td><g:link controller="projectOverview" action="index" params="[(projectParameter): project.name]">${project.displayName}</g:link></td>
-                            <td>${project.pis?.join(", ") ?: "-"}</td>
-                            <td title="${project.description}">${project.shortDescription ?: "-"}</td>
-                            <td>${project.st.collect { "${it.seqType} (${it.numberOfSamples})" }.join(", ")}</td>
-                        </tr>
-                    </g:each>
-                </table>
-            </div>
+            <g:render template="projectOverviewTable" model="[projects: userProjects, linkProjectName: true]"/>
         </g:if>
         <g:else>
             No projects
@@ -61,26 +43,7 @@
         <br>
         <g:if test="${publicProjects}">
             <h2><g:message code="home.publicProjects.title"/></h2>
-            <div class="table-with-fixed-header">
-                <table>
-                    <thead>
-                    <tr>
-                        <th><g:message code="home.project"/></th>
-                        <th><g:message code="home.pis"/></th>
-                        <th><g:message code="home.desc"/></th>
-                        <th><g:message code="home.seqType"/></th>
-                    </tr>
-                    </thead>
-                    <g:each in="${publicProjects}" var="project">
-                        <tr>
-                            <td>${project.displayName}</td>
-                            <td>${project.pis?.join(", ") ?: "-"}</td>
-                            <td title="${project.description}">${project.shortDescription ?: "-"}</td>
-                            <td>${project.st.collect { "${it.seqType} (${it.numberOfSamples})" }.join(", ")}</td>
-                        </tr>
-                    </g:each>
-                </table>
-            </div>
+            <g:render template="projectOverviewTable" model="[projects: publicProjects, linkProjectName: false]"/>
         </g:if>
 
         <h2><g:message code="home.graph.title"/></h2>

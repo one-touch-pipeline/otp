@@ -84,6 +84,7 @@ class HomeService {
             String shortDescription = description.length() > 200 ? "${description[0..200]}..." : description
             new ProjectData(
                     project.name,
+                    project.projectType,
                     pis[project.id]*.first() as List<String>,
                     project.displayName,
                     description,
@@ -101,6 +102,7 @@ class HomeService {
     @TupleConstructor
     static class ProjectData {
         String name
+        Project.ProjectType projectType
         List<String> pis
         String displayName
         String description

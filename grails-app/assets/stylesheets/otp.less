@@ -1344,10 +1344,13 @@ td div {
 
 .table-with-fixed-header {
     overflow-y: auto;
-    max-height: 40ch;
+    max-height: 80ch;
     thead th {
         position: sticky;
         top: 0;
+    }
+    td {
+        padding-right: 15px;
     }
 }
 .home {
@@ -1367,7 +1370,7 @@ td div {
         width: 25%;
     }
     td:nth-child(1) {
-        line-break: anywhere;
+        overflow-wrap: break-word;
     }
 }
 
