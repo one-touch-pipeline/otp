@@ -160,14 +160,15 @@ class ConfigService implements ApplicationContextAware {
     boolean useBackdoor() {
         if (Environment.isDevelopmentMode()) {
             return getBooleanValue(OtpProperty.DEVEL_USE_BACKDOOR, false)
-        } else {
-            return false
         }
+        return Environment.getCurrent() == Environment.TEST
     }
 
     String getBackdoorUser() {
         if (Environment.isDevelopmentMode()) {
             return otpProperties.get(OtpProperty.DEVEL_BACKDOOR_USER)
+        } else if (Environment.getCurrent() == Environment.TEST) {
+            return 'otp'
         } else {
             return null
         }

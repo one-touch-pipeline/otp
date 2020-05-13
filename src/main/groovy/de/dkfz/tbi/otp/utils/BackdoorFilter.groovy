@@ -71,7 +71,7 @@ class BackdoorFilter extends GenericFilterBean {
     /**
      * The filter injects a user with the ROLE_ADMIN authority
      */
-    private List<GrantedAuthority> authorities = [
+    private final List<GrantedAuthority> authorities = [
             new SimpleGrantedAuthority(Role.ROLE_ADMIN),
     ]
 
@@ -87,12 +87,12 @@ class BackdoorFilter extends GenericFilterBean {
         }
         HttpRequestResponseHolder holder = new HttpRequestResponseHolder(request, response)
 
-        if (!Environment.isDevelopmentMode()) {
-            // if we are not in development mode, the filter is inactive
+        if (!Environment.developmentMode && Environment.current != Environment.TEST) {
+            // if we are not in development or testing mode, the filter is inactive
             chain.doFilter(request, response)
             return
         }
-        if (!configService.useBackdoor() || !configService.getBackdoorUser()) {
+        if (!configService.useBackdoor() || !configService.backdoorUser) {
             // backdoor filter disabled by configuration
             chain.doFilter(request, response)
             return
@@ -100,11 +100,14 @@ class BackdoorFilter extends GenericFilterBean {
 
         try {
             Authentication authentication = SecurityContextHolder.context.authentication
-            if (!authentication || !authentication.isAuthenticated()) {
-                Principal userDetails = new Principal(configService.getBackdoorUser(), "OTP Developer", authorities)
-                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+            if (Environment.current == Environment.TEST) {
+                    Principal userDetails = new Principal(configService.backdoorUser, "OTP TEST", authorities)
+                    SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+            } else if (!authentication || !authentication.authenticated) {
+                    Principal userDetails = new Principal(configService.backdoorUser, "OTP Developer", authorities)
+                    SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             }
-            chain.doFilter(holder.getRequest(), holder.getResponse())
+            chain.doFilter(holder.request, holder.response)
         } finally {
             request.removeAttribute(FILTER_APPLIED)
         }
