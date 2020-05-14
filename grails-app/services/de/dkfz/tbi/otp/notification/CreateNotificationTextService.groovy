@@ -354,7 +354,7 @@ class CreateNotificationTextService {
         return messageSourceService.createMessage(referencesKey)
     }
 
-    String createOtpLinks(List<Project> projects, String controller, String action) {
+    String createOtpLinks(List<Project> projects, String controller, String action, Map params = [:]) {
         assert projects
         assert controller
         assert action
@@ -366,7 +366,7 @@ class CreateNotificationTextService {
                     absolute  : true,
                     params    : [
                             (ProjectSelectionService.PROJECT_SELECTION_PARAMETER): it,
-                    ]
+                    ] + params
             ])
         }.join('\n')
     }

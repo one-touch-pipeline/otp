@@ -81,16 +81,13 @@ class QcTrafficLightNotificationService {
             ])
         }
 
-        return messageSourceService.createMessage(
-                "notification.template.alignment.qcTrafficBlockedMessage",
-                [
-                        bamFile              : bamFile,
-                        link                 : createNotificationTextService.createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index'),
-                        emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
-                        thresholdPage        : linkGenerator.link(controller: 'qcThreshold', action: 'projectConfiguration', absolute: true, params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): bamFile.project,]),
-                        faq                  : faq,
-                ]
-        )
+        return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage", [
+                bamFile              : bamFile,
+                link                 : createNotificationTextService.createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index', [seqType: bamFile.seqType.id]),
+                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                thresholdPage        : linkGenerator.link(controller: 'qcThreshold', action: 'projectConfiguration', absolute: true, params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): bamFile.project]),
+                faq                  : faq,
+        ])
     }
 
     void informResultsAreBlocked(AbstractMergedBamFile bamFile) {

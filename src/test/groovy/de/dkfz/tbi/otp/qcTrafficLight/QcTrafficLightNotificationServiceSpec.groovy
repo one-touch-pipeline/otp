@@ -132,7 +132,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         }
 
         service.createNotificationTextService = Mock(CreateNotificationTextService) {
-            1 * createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index') >> LINK
+            1 * createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index', [seqType: bamFile.seqType.id]) >> LINK
             0 * _
         }
 
