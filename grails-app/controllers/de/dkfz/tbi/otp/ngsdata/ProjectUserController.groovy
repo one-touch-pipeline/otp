@@ -271,9 +271,9 @@ class UserEntry {
         } else if (!should && is && changeRequested) {
             return PermissionStatus.PENDING_DENIAL
         } else if (should && !is && !changeRequested) {
-            return PermissionStatus.INCONSISTENCY_DENIAL
-        } else if (!should && is && !changeRequested) {
             return PermissionStatus.INCONSISTENCY_APPROVAL
+        } else if (!should && is && !changeRequested) {
+            return PermissionStatus.INCONSISTENCY_DENIAL
         }
         throw new OtpRuntimeException("Case should not occur: should: ${should}, is: ${is}, changeRequested: ${changeRequested}")
     }
