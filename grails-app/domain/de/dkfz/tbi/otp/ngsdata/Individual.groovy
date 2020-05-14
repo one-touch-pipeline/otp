@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * (Decided together with the OTP Product Owner on 2016-07-19.)
  */
 /** This table is used externally. Please discuss a change in the team */
-class Individual implements CommentableWithProject, Entity {
+class Individual extends CommentableWithProject implements Entity {
 
     /**
      * Identifier used in the file system. It should never change.

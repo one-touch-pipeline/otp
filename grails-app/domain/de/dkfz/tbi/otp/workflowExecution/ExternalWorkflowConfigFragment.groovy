@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
 
-class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
+class ExternalWorkflowConfigFragment extends Commentable implements Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 
     String name
     String configValues

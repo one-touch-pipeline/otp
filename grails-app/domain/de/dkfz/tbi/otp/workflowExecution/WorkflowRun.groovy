@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
-class WorkflowRun implements Commentable, Entity {
+class WorkflowRun extends Commentable implements Entity {
 
     enum State {
         //unfinished

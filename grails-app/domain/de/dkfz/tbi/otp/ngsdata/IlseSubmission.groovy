@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
-class IlseSubmission implements Entity, Commentable {
+class IlseSubmission extends Commentable implements Entity {
 
     int ilseNumber
 

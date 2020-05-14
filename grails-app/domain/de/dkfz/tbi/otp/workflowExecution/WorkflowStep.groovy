@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -29,7 +28,7 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
-class WorkflowStep implements Entity, Commentable {
+class WorkflowStep extends Commentable implements Entity {
 
     enum State {
         CREATED,
@@ -58,8 +57,6 @@ class WorkflowStep implements Entity, Commentable {
     Set<ClusterJob> clusterJobs
 
     List<WorkflowLog> logs
-
-    Comment comment
 
     static hasMany = [
             clusterJobs: ClusterJob,

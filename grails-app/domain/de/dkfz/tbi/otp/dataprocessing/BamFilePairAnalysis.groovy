@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
-abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessParameterObject, Entity {
+abstract class BamFilePairAnalysis extends CommentableWithProject implements ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */

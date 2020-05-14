@@ -45,7 +45,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @see Job
  * @see StartJob
  */
-class Process implements Serializable, CommentableWithProject, Entity {
+class Process extends CommentableWithProject implements Serializable, Entity {
     /**
      * The Date when this process was started.
      */

@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /** This table is used externally. Please discuss a change in the team */
-class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProject, Entity {
+class Project extends CommentableWithProject implements ProjectPropertiesGivenWithRequest, Entity {
 
     enum ProjectType {
         SEQUENCING,

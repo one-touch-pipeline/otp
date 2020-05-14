@@ -29,6 +29,8 @@ class Comment implements Entity {
     String author
     Date modificationDate
 
+    static belongsTo = Commentable
+
     static mapping = {
         comment type: "text"
     }

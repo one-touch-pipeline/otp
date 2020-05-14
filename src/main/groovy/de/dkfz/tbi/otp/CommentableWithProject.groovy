@@ -23,6 +23,6 @@ package de.dkfz.tbi.otp
 
 import de.dkfz.tbi.otp.project.Project
 
-trait CommentableWithProject implements Commentable {
+abstract class CommentableWithProject extends Commentable {
     abstract Project getProject()
 }

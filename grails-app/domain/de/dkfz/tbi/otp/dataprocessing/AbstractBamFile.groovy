@@ -21,13 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-abstract class AbstractBamFile implements Entity {
+abstract class AbstractBamFile extends CommentableWithProject implements Entity {
 
     /**
      * This ENUM declares the different states a {@link AbstractBamFile} can have while it is assigned to a {@link MergingSet}
@@ -123,6 +124,7 @@ abstract class AbstractBamFile implements Entity {
         deletionDate(nullable: true)
         coverage(nullable: true)
         coverageWithN(nullable: true)
+        comment nullable: true
     }
 
     List<BamType> getAllowedTypes() {
@@ -149,6 +151,7 @@ abstract class AbstractBamFile implements Entity {
         return exactlyOneElement(bedFiles, "Wrong BedFile count, found: ${bedFiles}")
     }
 
+    @Override
     Project getProject() {
         return individual?.project
     }

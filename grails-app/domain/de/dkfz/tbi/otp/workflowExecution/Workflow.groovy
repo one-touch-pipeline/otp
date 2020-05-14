@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import java.time.LocalDate
 
-class Workflow implements Entity, Commentable {
+class Workflow extends Commentable implements Entity {
 
     String name
 
