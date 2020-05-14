@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
@@ -76,11 +78,10 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ]
     }
 
-    TestConfigService configService
+    static final int MIN_CONFIDENCE_SCORE = 8
 
     @Rule
     public TemporaryFolder temporaryFolder
-
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddySnvCallingInstance is null, throw assert"() {
         when:
@@ -90,7 +91,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         AssertionError e = thrown()
         e.message.contains('assert roddySnvCallingInstance')
     }
-
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
@@ -159,7 +159,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         configService.clean()
     }
 
-
     @Unroll
     void "prepareAndReturnWorkflowSpecificParameter, return always empty String"() {
         expect:
@@ -185,6 +184,15 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                     1 * validateInputBamFiles(_) >> { }
                 },
         ])
+        job.metaClass.searchResultRequiredForRunYapsa = {  final File workDirecotry, final String matcherForFileRequiredForRunYapsa ->
+            File file = temporaryFolder.newFile("snvs_pid_1_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf")
+            file.text = "SOME_CONTENT"
+            return file
+        }
+
+        job.fileSystemService = new TestFileSystemService()
+        job.fileService = new FileService()
+
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
@@ -199,7 +207,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         configService.clean()
     }
 
-
     void "validate, when roddySnvCallingInstance is null, throw assert"() {
         when:
         new ExecuteRoddySnvJob().validate(null)
@@ -208,7 +215,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         AssertionError e = thrown()
         e.message.contains('The input roddyResult must not be null. Expression')
     }
-
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
@@ -238,7 +244,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         configService.clean()
     }
 
-
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
@@ -248,7 +253,11 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> { }
                 },
+                snvCallingService: Mock(SnvCallingService),
         ])
+
+        job.fileSystemService = new TestFileSystemService()
+
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)

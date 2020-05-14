@@ -21,8 +21,9 @@
  */
 package de.dkfz.tbi.otp.job.jobs
 
-
 import grails.testing.gorm.DataTest
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -33,8 +34,10 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.runYapsa.ExecuteRunYapsaJob
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
@@ -82,8 +85,12 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         ]
     }
 
-    void "test createScript"() {
-        given:
+    static final int MIN_CONFIDENCE_SCORE = 8
+
+    @Rule
+    TemporaryFolder temporaryFolder
+
+    RunYapsaInstance setupData() {
         DomainFactory.createProcessingOptionLazy(
                 name: COMMAND_LOAD_MODULE_LOADER,
                 value: "module load",
@@ -97,8 +104,6 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
                 value: "load",
         )
 
-        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root", (OtpProperty.PATH_TOOLS): "/tools"])
-
         RunYapsaInstance instance = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
 
         DomainFactory.createRoddySnvCallingInstance(instance.samplePair, [
@@ -106,13 +111,34 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
                 sampleType2BamFile: RoddyBamFile.findByWorkPackage(instance.samplePair.mergingWorkPackage2),
         ])
 
-        ExecuteRunYapsaJob job = new ExecuteRunYapsaJob([configService: configService])
+        return instance
+    }
+
+    void "test createScript"() {
+        given:
+        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root", (OtpProperty.PATH_TOOLS): "/tools"])
+
+        RunYapsaInstance instance = setupData()
+
+        ExecuteRunYapsaJob job = new ExecuteRunYapsaJob([
+            snvCallingService: Mock(SnvCallingService) {
+                1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_, _) >> {
+                    new File(
+                            "/root/projectDirName_1/sequencing/whole_genome_sequencing/view-by-pid/pid_1/snv_results/paired/" +
+                                    "sample-type-name-1_sample-type-name-1/instance-1/snvs_pid_1_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf"
+                    ).toPath()
+                }
+            }
+        ])
+
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(_) >> { ReferenceGenome referenceGenome ->
                 return new File("/reference/genome.fa")
             }
         }
         job.processingOptionService = new ProcessingOptionService()
+        job.fileSystemService = new TestFileSystemService()
+        job.fileService = new FileService()
 
         when:
         String result = job.createScript(instance)
@@ -123,7 +149,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
 
             mkdir -p -m 2755 /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+
 
-            runYAPSA.R -i /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/snv_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_8_to_10.vcf -o /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+ -s WGS -r /reference/genome.fa -v
+            runYAPSA.R -i /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/snv_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf -o /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+ -s WGS -r /reference/genome.fa -v
 
             """.stripIndent()
 

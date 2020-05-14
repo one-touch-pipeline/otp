@@ -665,6 +665,32 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_BAM_FILE_PERMISSION
     }
 
+    void "findFileInPath, file can be found with regular expression"() {
+        given:
+        Path file1 = temporaryFolder.newFile("Test1_XYZ.csv").toPath()
+        Path file2 = temporaryFolder.newFile("Test1_ABC.csv").toPath()
+        file1.text = SOME_CONTENT
+        file2.text = SOME_CONTENT
+        String matcher = "Test[0-9]{1}_XYZ.csv"
+
+        expect:
+        FileService.findFileInPath(temporaryFolder.root.toPath(), matcher) == file1
+    }
+
+    void "findFileInPath, file can not be found with regular expression"() {
+        given:
+        Path file = temporaryFolder.newFile("file.txt").toPath()
+        file.text = SOME_CONTENT
+        String matcher = "not-matching"
+
+        when:
+        FileService.findFileInPath(temporaryFolder.root.toPath(), matcher) == file
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ /Cannot find any file for the given regex/
+    }
+
     //----------------------------------------------------------------------------------------------------
     // test for isFileReadableAndNotEmpty
 
@@ -721,6 +747,41 @@ class FileServiceSpec extends Specification implements DataTest {
 
         expect:
         !FileService.isFileReadableAndNotEmpty(file)
+    }
+
+    void "ensureFileIsReadable, fails when the file does not exist"() {
+        given:
+        File file = temporaryFolder.newFile()
+        file.delete()
+
+        when:
+        FileService.ensureFileIsReadable(file.toPath())
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "ensureFileIsReadable, fails when file is no regular file"() {
+        given:
+        Path path = temporaryFolder.newFolder().toPath()
+
+        when:
+        FileService.ensureFileIsReadable(path)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "ensureFileIsReadable, fails when the file is not readable"() {
+        given:
+        File file = temporaryFolder.newFile()
+        file.setReadable(false)
+
+        when:
+        FileService.ensureFileIsReadable(file.toPath())
+
+        then:
+        thrown(AssertionError)
     }
 
     //----------------------------------------------------------------------------------------------------

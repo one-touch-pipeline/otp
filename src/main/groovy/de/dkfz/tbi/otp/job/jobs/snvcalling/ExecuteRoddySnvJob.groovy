@@ -30,8 +30,10 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Path
@@ -47,6 +49,9 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
 
     @Autowired
     SnvCallingService snvCallingService
+
+    @Autowired
+    FileSystemService fileSystemService
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddySnvCallingInstance roddySnvCallingInstance) {
@@ -103,17 +108,17 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
                 roddySnvCallingInstance.getCombinedPlotPath(),
                 roddySnvCallingInstance.getSnvCallingResult(),
                 roddySnvCallingInstance.getSnvDeepAnnotationResult(),
-                roddySnvCallingInstance.getResultRequiredForRunYapsa(),
         ]
 
         directories.each {
-            LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
+            FileService.ensureDirIsReadableAndNotEmpty(it.toPath())
         }
 
         files.each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+            FileService.ensureFileIsReadableAndNotEmpty(it.toPath())
         }
 
+        snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(roddySnvCallingInstance, fileSystemService.filesystemForProcessingForRealm)
         snvCallingService.validateInputBamFiles(roddySnvCallingInstance)
 
         roddySnvCallingInstance.processingState = AnalysisProcessingStates.FINISHED

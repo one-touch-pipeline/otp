@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
@@ -89,18 +90,19 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
 
     void createRunYapsaInput() {
+        int minConfidenceScore = 8
         File sourceSnvCallingInputFile
 
         if (seqType == SeqTypeService.wholeGenomePairedSeqType) {
-            sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_8_to_10-wgs.vcf")
+            sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_${minConfidenceScore}_to_10-wgs.vcf")
         } else if (seqType == SeqTypeService.exomePairedSeqType) {
-            sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_8_to_10-wes.vcf")
+            sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_${minConfidenceScore}_to_10-wes.vcf")
         } else {
             throw new UnsupportedOperationException("The SeqType '${seqType}' is not supported by runYapsa workflow")
         }
 
         RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(samplePair)
-        File runYapsaInputFile = snvCallingInstance.getResultRequiredForRunYapsa()
+        File runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore)
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         assert sp.save(flush: true)

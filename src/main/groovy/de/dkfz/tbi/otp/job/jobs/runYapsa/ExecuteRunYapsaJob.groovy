@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -47,24 +49,26 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired ReferenceGenomeService referenceGenomeService
     @Autowired ConfigService configService
     @Autowired ProcessingOptionService processingOptionService
+    @Autowired FileService fileService
+    @Autowired FileSystemService fileSystemService
+    @Autowired SnvCallingService snvCallingService
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
-        final RunYapsaInstance instance = getProcessParameterObject()
-        final Realm realm = instance.project.realm
+        final RunYapsaInstance RUN_YAPSA_INSTANCE = processParameterObject
+        final Realm REALM = RUN_YAPSA_INSTANCE.project.realm
 
-        String jobScript = createScript(instance)
+        String jobScript = createScript(RUN_YAPSA_INSTANCE)
 
-        clusterJobSchedulerService.executeJob(realm, jobScript)
+        clusterJobSchedulerService.executeJob(REALM, jobScript)
 
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 
-
-    private createScript(RunYapsaInstance instance) {
-        final RunYapsaConfig config = instance.config
-        File outputDirectory = instance.getWorkDirectory()
-        ReferenceGenome referenceGenome = instance.getReferenceGenome()
+    private String createScript(RunYapsaInstance runYapsaInstance) {
+        final RunYapsaConfig CONFIG = runYapsaInstance.config
+        File outputDirectory = runYapsaInstance.workDirectory
+        ReferenceGenome referenceGenome = runYapsaInstance.referenceGenome
 
         String moduleLoader = processingOptionService.findOptionAsString(COMMAND_LOAD_MODULE_LOADER)
         String rActivation = processingOptionService.findOptionAsString(COMMAND_ACTIVATION_R)
@@ -72,19 +76,19 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
         List<String> runYapsaCall = []
         runYapsaCall << "runYAPSA.R"
-        runYapsaCall << "-i ${instance.samplePair.findLatestSnvCallingInstance().getResultRequiredForRunYapsa()}"
+        runYapsaCall << "-i ${snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(runYapsaInstance, fileSystemService.filesystemForProcessingForRealm)}"
         runYapsaCall << "-o ${outputDirectory.absolutePath}"
-        if (instance.seqType == SeqTypeService.wholeGenomePairedSeqType) {
+        if (runYapsaInstance.seqType == SeqTypeService.wholeGenomePairedSeqType) {
             runYapsaCall << "-s WGS"
-        } else if (instance.seqType == SeqTypeService.exomePairedSeqType) {
+        } else if (runYapsaInstance.seqType == SeqTypeService.exomePairedSeqType) {
             runYapsaCall << "-s WES"
             BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(
                     referenceGenome,
-                    instance.getLibraryPreparationKit(),
+                    runYapsaInstance.libraryPreparationKit,
             )
             runYapsaCall << "-t ${bedFileService.filePath(bedFile)}"
         } else {
-            throw new UnsupportedOperationException("Sequencing type '${instance.seqType}' not supported by runYapsa")
+            throw new UnsupportedOperationException("Sequencing type '${runYapsaInstance.seqType}' not supported by runYapsa")
         }
         runYapsaCall << "-r ${referenceGenomeService.fastaFilePath(referenceGenome)}"
         runYapsaCall << "-v"
@@ -92,7 +96,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         return """\
             ${moduleLoader}
             ${rActivation}
-            ${runYapsaActivationPrefix} ${config.programVersion}
+            ${runYapsaActivationPrefix} ${CONFIG.programVersion}
 
             mkdir -p -m 2755 ${outputDirectory.absolutePath}
 
@@ -101,11 +105,10 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
             """.stripIndent()
     }
 
-
     @Override
     protected final void validate() throws Throwable {
-        final RunYapsaInstance instance = getProcessParameterObject()
-        instance.processingState = AnalysisProcessingStates.FINISHED
-        instance.save(flush: true)
+        final RunYapsaInstance RUN_YAPSA_INSTANCE = processParameterObject
+        RUN_YAPSA_INSTANCE.processingState = AnalysisProcessingStates.FINISHED
+        RUN_YAPSA_INSTANCE.save(flush: true)
     }
 }

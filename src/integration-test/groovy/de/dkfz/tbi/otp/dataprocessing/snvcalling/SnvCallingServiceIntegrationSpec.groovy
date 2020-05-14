@@ -23,20 +23,32 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+
+import java.nio.file.*
 
 @Rollback
 @Integration
 class SnvCallingServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
+
+    @Rule
+    public TemporaryFolder temporaryFolder
 
     final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
     final static double COVERAGE_TOO_LOW = 20.0
@@ -401,5 +413,38 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         then:
         RuntimeException e = thrown()
         e.message.contains('The input BAM files have changed on the file system while this job processed them.')
+    }
+
+    void "getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty, should find the file"() {
+        given:
+        setupData()
+
+        SnvCallingService snvCallingService = new SnvCallingService(fileService: new FileService())
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+
+        RoddySnvCallingInstance instance = DomainFactory.createRoddySnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                samplePair: samplePair1,
+                config: roddyConfig1,
+                sampleType1BamFile: bamFile1_1,
+                sampleType2BamFile: bamFile2_1,
+                processingState: AnalysisProcessingStates.FINISHED,
+        )
+
+        Path resultDir = Paths.get(instance.workDirectory.absolutePath)
+        Path expected = Files.createFile(Files.createDirectories(resultDir).resolve("snvs_${instance.individual.pid}_somatic_snvs_conf_6_to_10.vcf"))
+        expected.text = "SOME_CONTENT"
+
+        FileSystem fileSystem = new TestFileSystemService().filesystemForProcessingForRealm
+
+        when:
+        Path result = snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(instance, fileSystem)
+
+        then:
+        noExceptionThrown()
+        result == expected
+
+        cleanup:
+        configService.clean()
     }
 }

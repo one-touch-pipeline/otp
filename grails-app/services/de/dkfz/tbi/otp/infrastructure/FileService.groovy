@@ -170,34 +170,66 @@ class FileService {
         return Files.exists(file) && Files.isRegularFile(file) && Files.isReadable(file) && Files.size(file) > 0L
     }
 
-    static void ensureFileIsReadableAndNotEmpty(final Path file) {
-        ensureFileIsReadable(file)
-        assert Files.size(file) > 0L
+    /**
+     * Finds first available file using the given regex
+     */
+    static Path findFileInPath(final Path DIR, final String FILE_REGEX) {
+        ensureDirIsReadable(DIR)
+        Path match = null
+        assert ThreadUtils.waitFor({
+            Stream<Path> stream = null
+            try {
+                stream = Files.list(DIR)
+                match = stream.find({ Path content ->
+                    content =~ FILE_REGEX
+                }) as Path
+            } finally {
+                stream?.close()
+            }
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES) : "Cannot find any file for the given regex"
+        return match
     }
 
-    static void ensureFileIsReadable(final Path file) {
-        assert file.absolute
-        waitUntilExists(file)
-        assert Files.isRegularFile(file)
-        assert Files.isReadable(file)
+    /**
+     * Finds first available file using the given regex and ensures match is readable and not empty.
+     */
+    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final File workDirectory, final String FILE_REGEX, final FileSystem FILE_SYSTEM) {
+        final Path FOUND_FILE = findFileInPath(
+                toPath(workDirectory, FILE_SYSTEM),
+                FILE_REGEX
+        )
+        ensureFileIsReadableAndNotEmpty(FOUND_FILE)
+        return FOUND_FILE
     }
 
-    static void ensureDirIsReadableAndNotEmpty(final Path dir) {
-        ensureDirIsReadable(dir)
+    static void ensureFileIsReadableAndNotEmpty(final Path FILE) {
+        ensureFileIsReadable(FILE)
+        assert Files.size(FILE) > 0L
+    }
+
+    static void ensureFileIsReadable(final Path FILE) {
+        assert FILE.absolute
+        waitUntilExists(FILE)
+        assert Files.isRegularFile(FILE)
+        assert Files.isReadable(FILE)
+    }
+
+    static void ensureDirIsReadableAndNotEmpty(final Path DIR) {
+        ensureDirIsReadable(DIR)
         Stream<Path> stream = null
         try {
-            stream = Files.list(dir)
+            stream = Files.list(DIR)
             assert stream.count() != 0
         } finally {
             stream?.close()
         }
     }
 
-    static void ensureDirIsReadable(final Path dir) {
-        assert dir.absolute
-        waitUntilExists(dir)
-        assert Files.isDirectory(dir)
-        assert Files.isReadable(dir)
+    static void ensureDirIsReadable(final Path DIR) {
+        assert DIR.absolute
+        waitUntilExists(DIR)
+        assert Files.isDirectory(DIR)
+        assert Files.isReadable(DIR)
     }
 
     static String readFileToString(Path path, Charset encoding) throws IOException {
@@ -247,7 +279,7 @@ class FileService {
                         "${shouldExist ? 'is not accessible or does not exist' : 'still exists'}"
     }
 
-    private static Duration getTimeout() {
+    static Duration getTimeout() {
         return (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(
                 StaticApplicationContextWrapper.context.processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.FILESYSTEM_TIMEOUT)
         )

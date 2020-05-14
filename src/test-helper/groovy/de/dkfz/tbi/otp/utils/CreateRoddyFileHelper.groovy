@@ -82,7 +82,7 @@ class CreateRoddyFileHelper {
         createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Final")
     }
 
-    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance) {
+    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, int minConfidenceScore = 8) {
         CreateFileHelper.createFile(new File(roddySnvCallingInstance.workExecutionStoreDirectory, 'someFile'))
 
         roddySnvCallingInstance.workExecutionDirectories.each {
@@ -94,10 +94,14 @@ class CreateRoddyFileHelper {
         [
                 roddySnvCallingInstance.getSnvCallingResult(),
                 roddySnvCallingInstance.getSnvDeepAnnotationResult(),
-                roddySnvCallingInstance.getResultRequiredForRunYapsa(),
+                getSnvResultRequiredForRunYapsa(roddySnvCallingInstance, minConfidenceScore),
         ].each {
             CreateFileHelper.createFile(it)
         }
+    }
+
+    static File getSnvResultRequiredForRunYapsa(RoddySnvCallingInstance instance, int minConfidenceScore) {
+        return new File(instance.workDirectory, "snvs_${instance.individual.pid}_somatic_snvs_conf_${minConfidenceScore}_to_10.vcf")
     }
 
     static void createIndelResultFiles(IndelCallingInstance indelCallingInstance) {

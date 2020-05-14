@@ -22,8 +22,14 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+
+import java.nio.file.Path
+import java.nio.file.FileSystem
 
 class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
+
+    FileService fileService
 
     @Override
     protected String getProcessingStateCheck() {
@@ -43,5 +49,12 @@ class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAn
     @Override
     Pipeline.Name getPipelineName() {
         return Pipeline.Name.RODDY_SNV
+    }
+
+    Path getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(BamFilePairAnalysis bamFilePairAnalysis, FileSystem fileSystem) {
+        final File WORK_DIRECTORY = bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance().workDirectory
+        final String MIN_CONFIDENCE_SCORE = /[0-9]/
+        final String MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA = ".*snvs_${bamFilePairAnalysis.individual.pid}_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf"
+        return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(WORK_DIRECTORY, MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA, fileSystem)
     }
 }
