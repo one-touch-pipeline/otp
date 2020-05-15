@@ -19,21 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.util
+package de.dkfz.tbi.util.ldap
 
 import groovy.transform.TupleConstructor
-
-import de.dkfz.tbi.otp.administration.LdapKey
-
-import javax.naming.directory.Attributes
-
-class LdapHelper {
-
-    static boolean getIsDeactivatedFromAttributes(Attributes a) {
-        int uacValue = (a.get(LdapKey.USER_ACCOUNT_CONTROL)?.get()?.toString()?.toInteger())
-        return UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uacValue)
-    }
-}
 
 /**
  * Names and associated masks for the LDAP value userAccountControl

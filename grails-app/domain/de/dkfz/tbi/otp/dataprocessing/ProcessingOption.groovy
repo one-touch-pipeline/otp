@@ -468,6 +468,10 @@ class ProcessingOption implements Entity {
                 "The grace period in days before OTP removes a user from all projects, when they are deactivated in the LDAP",
                 Necessity.REQUIRED, null, TypeValidators.POSITIVE_NUMBER
         ),
+        LDAP_RESPECT_DEACTIVATED_USER(
+                "Should OTP consider deactivated users? true = evaluate; false = skip evaluation, all users are activated",
+                Necessity.OPTIONAL, "true", TypeValidators.BOOLEAN
+        ),
 
         //gui
         GUI_TRACKING_PIWIK_URL(

@@ -30,11 +30,12 @@ import org.springframework.ldap.core.support.LdapContextSource
 import org.springframework.ldap.query.ContainerCriteria
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
-import de.dkfz.tbi.util.LdapHelper
-import de.dkfz.tbi.util.UserAccountControl
+import de.dkfz.tbi.util.ldap.UserAccountControl
 
 import javax.naming.NamingException
 import javax.naming.directory.Attributes
@@ -47,6 +48,8 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query
 class LdapService implements InitializingBean {
 
     ConfigService configService
+    ProcessingOptionService processingOptionService
+
     private LdapTemplate ldapTemplate
 
     @Override
@@ -70,7 +73,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                         .and(configService.ldapSearchAttribute).is(username),
-                new LdapUserDetailsAttributesMapper())[0]
+                new LdapUserDetailsAttributesMapper(ldapService: this))[0]
     }
 
     List<LdapUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {
@@ -95,11 +98,11 @@ class LdapService implements InitializingBean {
 
         return ldapTemplate.search(
                 query().countLimit(countLimit)
-                        .attributes(configService.ldapSearchAttribute, LdapKey.MAIL, LdapKey.GIVEN_NAME, LdapKey.SURNAME, LdapKey.DEPARTMENT)
+                        .attributes(configService.ldapSearchAttribute, LdapKey.MAIL, LdapKey.GIVEN_NAME, LdapKey.SURNAME, LdapKey.DEPARTMENT, LdapKey.USER_ACCOUNT_CONTROL)
                         .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.PERSON)
                         .and(LdapKey.MAIL).isPresent()
                         .and(dynamicQuery),
-                new LdapUserDetailsAttributesMapper())
+                new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
     String getDistinguishedNameOfGroupByGroupName(String groupName) {
@@ -153,7 +156,7 @@ class LdapService implements InitializingBean {
                 .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                 .and(configService.ldapSearchAttribute).is(user.username)
-        return ldapTemplate.search(query, new IsUserDeactivatedMapper())[0]
+        return ldapTemplate.search(query, new IsUserDeactivatedMapper(ldapService: this))[0]
     }
 
     Integer getUserAccountControlOfUser(User user) {
@@ -173,9 +176,21 @@ class LdapService implements InitializingBean {
             [(field): UserAccountControl.isSet(field, value)]
         }
     }
+
+    boolean getIsDeactivatedFromAttributes(Attributes a) {
+        if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.LDAP_RESPECT_DEACTIVATED_USER)) {
+            int uacValue = a.get(LdapKey.USER_ACCOUNT_CONTROL)?.get()?.toString()?.toInteger() ?: 0
+            return UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uacValue)
+        }
+        return false
+    }
 }
 
-class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetails> {
+abstract class LdapServiceAwareAttributesMapper<T> implements AttributesMapper<T> {
+    LdapService ldapService
+}
+
+class LdapUserDetailsAttributesMapper extends LdapServiceAwareAttributesMapper<LdapUserDetails> {
     @Override
     LdapUserDetails mapFromAttributes(Attributes a) throws NamingException {
         List<String> memberOfList = a.get(LdapKey.MEMBER_OF)?.getAll()?.collect {
@@ -184,7 +199,7 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
                 return matcher.group("group")
             }
         }
-        boolean deactivated = LdapHelper.getIsDeactivatedFromAttributes(a)
+        boolean deactivated = ldapService.getIsDeactivatedFromAttributes(a)
         String givenName = a.get(LdapKey.GIVEN_NAME)?.get()
         String sn = a.get(LdapKey.SURNAME)?.get()
         boolean realNameCreatable = givenName && sn
@@ -197,6 +212,13 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
                 deactivated      : deactivated,
                 memberOfGroupList: memberOfList,
         ])
+    }
+}
+
+class IsUserDeactivatedMapper extends LdapServiceAwareAttributesMapper<Boolean> {
+    @Override
+    Boolean mapFromAttributes(Attributes a) throws NamingException {
+        return ldapService.getIsDeactivatedFromAttributes(a)
     }
 }
 
@@ -222,13 +244,6 @@ class UsernameAttributesMapper implements AttributesMapper<String> {
     @Override
     String mapFromAttributes(Attributes a) throws NamingException {
         return a.get(ConfigService.getInstance().getLdapSearchAttribute())?.get()?.toString()
-    }
-}
-
-class IsUserDeactivatedMapper implements AttributesMapper<Boolean> {
-    @Override
-    Boolean mapFromAttributes(Attributes a) throws NamingException {
-        return LdapHelper.getIsDeactivatedFromAttributes(a)
     }
 }
 
