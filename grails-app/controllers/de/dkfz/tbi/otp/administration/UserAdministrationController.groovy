@@ -126,6 +126,23 @@ class UserAdministrationController implements CheckAndCall {
         ]
     }
 
+    def ldapProperties(SelectUserCommand cmd) {
+        if (cmd.hasErrors()) {
+            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
+            redirect(action: "index")
+            return
+        }
+        User user = cmd.user
+        boolean userExists = ldapService.existsInLdap(user)
+        Map ldapProperties = userExists ? ldapService.getAllLdapValuesForUser(user) : [:]
+
+        return [
+                user            : user,
+                userExistsInLdap: userExists,
+                ldapProperties  : ldapProperties,
+        ]
+    }
+
     def editUser(EditUserCommand cmd) {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("An error occurred", cmd.errors)

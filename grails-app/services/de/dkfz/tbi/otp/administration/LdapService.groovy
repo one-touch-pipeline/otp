@@ -31,6 +31,7 @@ import org.springframework.ldap.query.ContainerCriteria
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.LdapHelper
 import de.dkfz.tbi.util.UserAccountControl
@@ -140,6 +141,13 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new DistinguishedNameAttributesMapper()).size() >= 1
     }
 
+    Map<String, String> getAllLdapValuesForUser(User user) {
+        ContainerCriteria query = query()
+                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                .and(configService.ldapSearchAttribute).is(user.username)
+        return CollectionUtils.exactlyOneElement(ldapTemplate.search(query, new AllAttributesMapper()))
+    }
+
     Boolean isUserDeactivated(User user) {
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
@@ -189,6 +197,17 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
                 deactivated      : deactivated,
                 memberOfGroupList: memberOfList,
         ])
+    }
+}
+
+class AllAttributesMapper implements AttributesMapper<Map<String, String>> {
+    @Override
+    Map<String, String> mapFromAttributes(Attributes a) throws NamingException {
+        Map<String, String> map = [:]
+        a.all.each {
+            map[it.getID()] = it.get().toString()
+        }
+        return map
     }
 }
 

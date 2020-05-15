@@ -30,20 +30,15 @@
     <body>
         <div class="body">
             <g:render template="/templates/messages"/>
+            <g:render template="detailCommonHeader" model="[user: user, userExistsInLdap: userExistsInLdap]"/>
 
-            <h1><g:message code="user.administration.show.header"/></h1>
             <g:form controller="userAdministration" action="editUser" params='["user": user.id]'>
                 <table class="key-value-table key-input">
                     <thead></thead>
                     <tbody>
                         <tr>
                             <td><g:message code="user.administration.user.fields.username"/>:</td>
-                            <td>
-                                ${user.username}
-                                <g:if test="${!userExistsInLdap}">
-                                    <otp:annotation type="danger" variant="inline"><g:message code="user.administration.user.fields.username.nonLdap"/></otp:annotation>
-                                </g:if>
-                            </td>
+                            <td>${user.username}</td>
                         </tr>
                         <tr>
                             <td><g:message code="user.administration.user.fields.realName"/>:</td>
