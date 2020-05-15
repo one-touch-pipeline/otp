@@ -21,31 +21,63 @@
  */
 package de.dkfz.tbi.util
 
-import de.dkfz.tbi.otp.config.ConfigService
+import groovy.transform.TupleConstructor
+
+import de.dkfz.tbi.otp.administration.LdapKey
 
 import javax.naming.directory.Attributes
-import java.time.Instant
-import java.time.LocalDateTime
 
 class LdapHelper {
 
-    static long convertAdTimestampToUnixTimestampInMs(long windowsEpoch) {
-        // http://meinit.nl/convert-active-directory-lastlogon-time-to-unix-readable-time
-        // in milliseconds because Date.getTime() also returns milliseconds
-        return ((windowsEpoch / 10000000) - 11644473600) * 1000
-    }
-
-    static LocalDateTime getLocalDateTimeFromMs(long ms) {
-        LocalDateTime.ofInstant(Instant.ofEpochMilli(ms), ConfigService.instance.timeZoneId)
-    }
-
-    @SuppressWarnings("UnusedMethodParameter")
     static boolean getIsDeactivatedFromAttributes(Attributes a) {
-        // temporary: disabled until it is clear what has to be checked
-        return false
-        /*
-        long accountExpires = (a.get(LdapKey.ACCOUNT_EXPIRES)?.get()?.toString()?.toLong()) ?: 0
-        return convertAdTimestampToUnixTimestampInMs(accountExpires) < new Date().time
-         */
+        int uacValue = (a.get(LdapKey.USER_ACCOUNT_CONTROL)?.get()?.toString()?.toInteger())
+        return UserAccountControl.isSet(UserAccountControl.ACCOUNTDISABLE, uacValue)
+    }
+}
+
+/**
+ * Names and associated masks for the LDAP value userAccountControl
+ *
+ * see: https://support.microsoft.com/de-de/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
+ */
+@TupleConstructor
+enum UserAccountControl {
+    SCRIPT                         (0b00000000000000000000000000000001),
+    ACCOUNTDISABLE                 (0b00000000000000000000000000000010),
+    // UNUSED                      (0b00000000000000000000000000000100),
+    HOMEDIR_REQUIRED               (0b00000000000000000000000000001000),
+    LOCKOUT                        (0b00000000000000000000000000010000),
+    PASSWD_NOTREQD                 (0b00000000000000000000000000100000),
+    PASSWD_CANT_CHANGE             (0b00000000000000000000000001000000),
+    ENCRYPTED_TEXT_PWD_ALLOWED     (0b00000000000000000000000010000000),
+    TEMP_DUPLICATE_ACCOUNT         (0b00000000000000000000000100000000),
+    NORMAL_ACCOUNT                 (0b00000000000000000000001000000000),
+    // UNUSED                      (0b00000000000000000000010000000000),
+    INTERDOMAIN_TRUST_ACCOUNT      (0b00000000000000000000100000000000),
+    WORKSTATION_TRUST_ACCOUNT      (0b00000000000000000001000000000000),
+    SERVER_TRUST_ACCOUNT           (0b00000000000000000010000000000000),
+    // UNUSED                      (0b00000000000000000100000000000000),
+    // UNUSED                      (0b00000000000000001000000000000000),
+    DONT_EXPIRE_PASSWORD           (0b00000000000000010000000000000000),
+    MNS_LOGON_ACCOUNT              (0b00000000000000100000000000000000),
+    SMARTCARD_REQUIRED             (0b00000000000001000000000000000000),
+    TRUSTED_FOR_DELEGATION         (0b00000000000010000000000000000000),
+    NOT_DELEGATED                  (0b00000000000100000000000000000000),
+    USE_DES_KEY_ONLY               (0b00000000001000000000000000000000),
+    DONT_REQ_PREAUTH               (0b00000000010000000000000000000000),
+    PASSWORD_EXPIRED               (0b00000000100000000000000000000000),
+    TRUSTED_TO_AUTH_FOR_DELEGATION (0b00000001000000000000000000000000),
+    // UNUSED                      (0b00000010000000000000000000000000),
+    PARTIAL_SECRETS_ACCOUNT        (0b00000100000000000000000000000000),
+    // UNUSED                      (0b00001000000000000000000000000000),
+    // UNUSED                      (0b00010000000000000000000000000000),
+    // UNUSED                      (0b00100000000000000000000000000000),
+    // UNUSED                      (0b01000000000000000000000000000000),
+    // UNUSED                      (0b10000000000000000000000000000000),
+
+    int bitMask
+
+    static boolean isSet(UserAccountControl field, int value) {
+        return (field.bitMask & value) == field.bitMask
     }
 }

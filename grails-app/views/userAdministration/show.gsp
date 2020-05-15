@@ -32,14 +32,18 @@
             <g:render template="/templates/messages"/>
 
             <h1><g:message code="user.administration.show.header"/></h1>
-            <div>
             <g:form controller="userAdministration" action="editUser" params='["user": user.id]'>
                 <table class="key-value-table key-input">
                     <thead></thead>
                     <tbody>
                         <tr>
                             <td><g:message code="user.administration.user.fields.username"/>:</td>
-                            <td>${user.username}</td>
+                            <td>
+                                ${user.username}
+                                <g:if test="${!userExistsInLdap}">
+                                    <otp:annotation type="danger" variant="inline"><g:message code="user.administration.user.fields.username.nonLdap"/></otp:annotation>
+                                </g:if>
+                            </td>
                         </tr>
                         <tr>
                             <td><g:message code="user.administration.user.fields.realName"/>:</td>
@@ -60,7 +64,6 @@
                     </tbody>
                 </table>
             </g:form>
-            </div>
             <br>
             <h2><g:message code="user.administration.projectOverview.heading" args="[user.username]"/></h2>
             <table class="otpDataTables">
@@ -103,6 +106,24 @@
             <br>
             <h2><g:message code="user.administration.groups.heading" args="[user.username]"/></h2>
             ${ldapGroups.sort().join(", ")}
+            <br>
+            <h2><g:message code="user.administration.groups.userAccountControl" args="[userAccountControlValue]"/></h2>
+            <table class="key-value-table key-input user-account-control-table">
+                <thead>
+                    <tr>
+                        <th><g:message code="user.administration.groups.userAccountControl.field"/></th>
+                        <th><g:message code="user.administration.groups.userAccountControl.value"/></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <g:each in="${userAccountControlMap.sort()}" var="entry">
+                        <tr>
+                            <td>${entry.key}</td>
+                            <td><span style="${entry.value ? "font-weight: bold" : ""}">${entry.value}</span></td>
+                        </tr>
+                    </g:each>
+                </tbody>
+            </table>
             <br>
             <g:each var="type" in="${["Group", "Role"]}">
                 <h3 id="${type}_anchor"><g:message code="user.administration.role.heading.manage${type}s" args="[user.username]"/></h3>

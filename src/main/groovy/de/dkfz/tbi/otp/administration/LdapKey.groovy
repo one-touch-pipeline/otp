@@ -33,6 +33,6 @@ class LdapKey {
     final static DEPARTMENT = "department"
     final static GROUP = "group"
     final static THUMBNAIL_PHOTO = "thumbnailPhoto"
-    final static ACCOUNT_EXPIRES = "accountExpires"
     final static DISTINGUISHED_NAME = "distinguishedName"
+    final static USER_ACCOUNT_CONTROL = "userAccountControl"
 }

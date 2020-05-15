@@ -115,11 +115,14 @@ class UserAdministrationController implements CheckAndCall {
         roleLists['availableGroup'] = userService.getAllGroups() - roleLists['userGroup']
 
         return [
-                userProjectRoles: UserProjectRole.findAllByUser(user).sort { it.project.name },
-                user            : user,
-                ldapGroups      : ldapService.getGroupsOfUserByUsername(user.username) ?: [],
-                roleLists       : roleLists,
-                cmd             : flash.cmd as EditUserCommand,
+                userProjectRoles       : UserProjectRole.findAllByUser(user).sort { it.project.name },
+                user                   : user,
+                ldapGroups             : ldapService.getGroupsOfUserByUsername(user.username) ?: [],
+                roleLists              : roleLists,
+                userExistsInLdap       : ldapService.existsInLdap(user),
+                userAccountControlValue: ldapService.getUserAccountControlOfUser(user),
+                userAccountControlMap  : ldapService.getAllUserAccountControlFlagsOfUser(user),
+                cmd                    : flash.cmd as EditUserCommand,
         ]
     }
 

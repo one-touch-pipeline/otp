@@ -179,7 +179,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: new ProcessingOptionService(),
                 ldapService: Mock(LdapService) {
-                    _ * isAccountExpired(_) >> { User user ->
+                    _ * isUserDeactivated(_) >> { User user ->
                         return user in expiredUsers
                     }
                     _ * existsInLdap(_) >> { return true }

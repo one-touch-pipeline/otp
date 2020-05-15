@@ -71,7 +71,7 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
     UserService userService
 
     List<User> getUsersToCheckForDeactivation() {
-        return UserProjectRole.createCriteria().list {
+        List<User> enabledProjectUsers = UserProjectRole.withCriteria {
             eq("enabled", true)
             user {
                 isNotNull("username")
@@ -80,6 +80,12 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
                 distinct("user")
             }
         } as List<User>
+
+        List<User> otherScheduledUsers = User.withCriteria {
+            isNotNull("plannedDeactivationDate")
+        } as List<User>
+
+        return (enabledProjectUsers + otherScheduledUsers).unique()
     }
 
     long getDeactivationGracePeriod() {
@@ -110,8 +116,13 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         log.info("Reset deactivation date of ${user}")
     }
 
-    boolean userIsExpired(User user) {
-        return ldapService.isAccountExpired(user)
+    /**
+     * This function defines what is considered a deactivated user in the context of this job.
+     *
+     * Non-existing users are to be handled as deactivated.
+     */
+    boolean userIsDeactivated(User user) {
+        return !ldapService.existsInLdap(user) || ldapService.isUserDeactivated(user)
     }
 
     String getMailBodyWithInvalidUsers(Set<UserProjectRole> invalidUsers) {
@@ -169,16 +180,14 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
     ActionPlan buildActionPlan() {
         ActionPlan plan = new ActionPlan()
         usersToCheckForDeactivation.sort { it.username }.each { User user ->
-            if (ldapService.existsInLdap(user)) {
-                if (userIsExpired(user)) {
-                    if (!user.plannedDeactivationDate) {
-                        plan.usersToSetDate.add(user)
-                        plan.addUserToNotificationMap(user)
-                    }
-                } else {
-                    if (user.plannedDeactivationDate) {
-                        plan.usersToResetDate.add(user)
-                    }
+            if (userIsDeactivated(user)) {
+                if (!user.plannedDeactivationDate) {
+                    plan.usersToSetDate.add(user)
+                    plan.addUserToNotificationMap(user)
+                }
+            } else {
+                if (user.plannedDeactivationDate) {
+                    plan.usersToResetDate.add(user)
                 }
             }
         }
@@ -198,9 +207,7 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
 
     @Override
     void wrappedExecute() {
-        log.info("${this.class} has been hardcoded to not run")
-        return
-        //executeActionPlan(buildActionPlan())
+        executeActionPlan(buildActionPlan())
     }
 }
 

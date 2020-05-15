@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.LdapHelper
+import de.dkfz.tbi.util.UserAccountControl
 
 import javax.naming.NamingException
 import javax.naming.directory.Attributes
@@ -139,12 +140,30 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new DistinguishedNameAttributesMapper()).size() >= 1
     }
 
-    Boolean isAccountExpired(User user) {
+    Boolean isUserDeactivated(User user) {
         ContainerCriteria query = query()
-                .attributes(configService.ldapSearchAttribute, LdapKey.ACCOUNT_EXPIRES)
+                .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                 .and(configService.ldapSearchAttribute).is(user.username)
-        return ldapTemplate.search(query, new IsAccountExpiredMapper())[0]
+        return ldapTemplate.search(query, new IsUserDeactivatedMapper())[0]
+    }
+
+    Integer getUserAccountControlOfUser(User user) {
+        ContainerCriteria query = query()
+                .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
+                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                .and(configService.ldapSearchAttribute).is(user.username)
+        return ldapTemplate.search(query, new UserAccountControlMapper())[0]
+    }
+
+    Map<UserAccountControl, Boolean> getAllUserAccountControlFlagsOfUser(User user) {
+        Integer value = getUserAccountControlOfUser(user)
+        if (value == null) {
+            return [:]
+        }
+        return UserAccountControl.values().collectEntries { UserAccountControl field ->
+            [(field): UserAccountControl.isSet(field, value)]
+        }
     }
 }
 
@@ -187,10 +206,17 @@ class UsernameAttributesMapper implements AttributesMapper<String> {
     }
 }
 
-class IsAccountExpiredMapper implements AttributesMapper<Boolean> {
+class IsUserDeactivatedMapper implements AttributesMapper<Boolean> {
     @Override
     Boolean mapFromAttributes(Attributes a) throws NamingException {
         return LdapHelper.getIsDeactivatedFromAttributes(a)
+    }
+}
+
+class UserAccountControlMapper implements AttributesMapper<Integer> {
+    @Override
+    Integer mapFromAttributes(Attributes a) throws NamingException {
+        return a.get(LdapKey.USER_ACCOUNT_CONTROL)?.get()?.toString()?.toInteger()
     }
 }
 
