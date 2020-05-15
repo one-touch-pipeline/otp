@@ -244,7 +244,7 @@ class UserProjectRoleService {
     }
 
     @TupleConstructor
-    private enum OperatorAction {
+    enum OperatorAction {
         ADD(ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET),
         REMOVE(ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET),
 
@@ -563,10 +563,14 @@ class UserProjectRoleService {
         ].flatten()
     }
 
-    private String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
+    String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
+        return commandTemplate(userProjectRole.project.unixGroup, userProjectRole.user.username, action)
+    }
+
+    String commandTemplate(String unixGroup, String username, OperatorAction action) {
         return new SimpleTemplateEngine()
                 .createTemplate(processingOptionService.findOptionAsString(action.commandTemplateOptionName))
-                .make([unixGroup: userProjectRole.project.unixGroup, username: userProjectRole.user.username])
+                .make([unixGroup: unixGroup, username: username])
                 .toString()
     }
 }

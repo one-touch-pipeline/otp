@@ -31,8 +31,7 @@ import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
 
@@ -85,6 +84,9 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 mailHelperService: Mock(MailHelperService) {
                     1 * sendEmail({ it.contains(expectedContent) }, _, _) >> { }
                 },
+                userProjectRoleService: Mock(UserProjectRoleService) {
+                    _ * commandTemplate(_, _) >> "removal command"
+                }
         ])
 
         expect:

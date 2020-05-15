@@ -64,9 +64,8 @@ class DeactivateUsersJob extends ScheduledJob {
         } as List<User>
     }
 
-    static String getUserRemovalCommandHelper(String unixGroup, User user) {
-        // TODO: adapt this to add the script when otp-280 is done
-        return "remove ${unixGroup} ${user.username}"
+    String getUserRemovalCommandHelper(String unixGroup, User user) {
+        return userProjectRoleService.commandTemplate(unixGroup, user.username, UserProjectRoleService.OperatorAction.REMOVE)
     }
 
     void notifyAdministration(User user, Set<String> allGroups) {
@@ -81,7 +80,6 @@ class DeactivateUsersJob extends ScheduledJob {
                 |${allGroups.join(", ")}
                 |
                 |Removal helper command:
-                |(If those are not valid commands, remind an OTP developer to change this)
                 |${allGroups.collect { String unixGroup -> getUserRemovalCommandHelper(unixGroup, user) }.join("\n")}
                 |""".stripMargin()
         } else {
