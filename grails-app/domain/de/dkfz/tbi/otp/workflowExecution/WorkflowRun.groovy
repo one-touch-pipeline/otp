@@ -79,6 +79,7 @@ class WorkflowRun implements Commentable, Entity {
     static mapping = {
         combinedConfig type: "text"
         priority index: 'workflow_run_priority_idx'
+        state index: 'workflow_run_state_idx'
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

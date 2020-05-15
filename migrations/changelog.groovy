@@ -426,4 +426,6 @@ databaseChangeLog = {
     include file: 'changelogs/2020/otp-507.groovy'
 
     include file: 'changelogs/2020/otp-512.groovy'
+
+    include file: 'changelogs/2020/otp-508-workflow-run-scheduler.groovy'
 }

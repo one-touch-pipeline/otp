@@ -21,42 +21,32 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Withdrawable
-import de.dkfz.tbi.otp.utils.Entity
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
-class WorkflowArtefact implements Withdrawable, Entity {
+class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<WorkflowRunService>, DataTest, WorkflowSystemDomainFactory {
 
-    enum State {
-        PLANNED_OR_RUNNING,
-        SUCCESS,
-        SKIPPED,
-        FAILED,
-        LEGACY,
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                WorkflowRun,
+        ]
     }
 
-    WorkflowRun producedBy
-
-    State state = State.LEGACY
-
-    static constraints = {
-        producedBy nullable: true
-        withdrawnDate nullable: true
-        withdrawnComment nullable: true, validator: { val, obj ->
-            if (obj.withdrawnDate && !val) {
-                return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
-            }
+    void 'countOfRunningWorkflows, return all workflows in state RUNNING and WAITING'() {
+        given:
+        int countOfRunningWorkflowStates = WorkflowRunService.STATES_COUNTING_AS_RUNNING.size()
+        WorkflowRun.State.values().each {
+            createWorkflowRun(state: it)
         }
-    }
 
-    static mapping = {
-        withdrawnComment type: "text"
-        state index: 'workflow_artefact_state_idx'
-    }
+        when:
+        int count = service.countOfRunningWorkflows()
 
-    // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
-    Optional<Artefact> getArtefact() {
-        Optional.ofNullable(atMostOneElement(executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])) as Artefact)
+        then:
+        count == countOfRunningWorkflowStates
     }
 }

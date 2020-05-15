@@ -34,4 +34,9 @@ class WorkflowRunInputArtefact implements Entity {
         role unique: 'workflowRun'
         workflowArtefact unique: 'workflowRun'
     }
+
+    static mapping = {
+        workflowRun index: 'workflow_run_input_workflow_run_idx'
+        workflowArtefact index: 'workflow_run_input_artefact_workflow_artefact_idx'
+    }
 }

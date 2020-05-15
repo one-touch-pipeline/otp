@@ -19,44 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.Withdrawable
-import de.dkfz.tbi.otp.utils.Entity
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-
-class WorkflowArtefact implements Withdrawable, Entity {
-
-    enum State {
-        PLANNED_OR_RUNNING,
-        SUCCESS,
-        SKIPPED,
-        FAILED,
-        LEGACY,
-    }
-
-    WorkflowRun producedBy
-
-    State state = State.LEGACY
-
-    static constraints = {
-        producedBy nullable: true
-        withdrawnDate nullable: true
-        withdrawnComment nullable: true, validator: { val, obj ->
-            if (obj.withdrawnDate && !val) {
-                return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
-            }
+    changeSet(author: "borufka (generated)", id: "1589896749669-3") {
+        createIndex(indexName: "workflow_artefact_state_idx", tableName: "workflow_artefact") {
+            column(name: "state")
         }
     }
 
-    static mapping = {
-        withdrawnComment type: "text"
-        state index: 'workflow_artefact_state_idx'
+    changeSet(author: "borufka (generated)", id: "1589896749669-4") {
+        createIndex(indexName: "workflow_run_input_artefact_workflow_artefact_idx", tableName: "workflow_run_input_artefact") {
+            column(name: "workflow_artefact_id")
+        }
     }
 
-    // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
-    Optional<Artefact> getArtefact() {
-        Optional.ofNullable(atMostOneElement(executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])) as Artefact)
+    changeSet(author: "borufka (generated)", id: "1589896749669-5") {
+        createIndex(indexName: "workflow_run_input_workflow_run_idx", tableName: "workflow_run_input_artefact") {
+            column(name: "workflow_run_id")
+        }
+    }
+
+    changeSet(author: "borufka (generated)", id: "1589896749669-6") {
+        createIndex(indexName: "workflow_run_state_idx", tableName: "workflow_run") {
+            column(name: "state")
+        }
     }
 }

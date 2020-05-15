@@ -21,42 +21,31 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Withdrawable
-import de.dkfz.tbi.otp.utils.Entity
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.Scheduled
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+class WorkflowRunScheduler {
 
-class WorkflowArtefact implements Withdrawable, Entity {
+    @Autowired
+    JobService jobService
 
-    enum State {
-        PLANNED_OR_RUNNING,
-        SUCCESS,
-        SKIPPED,
-        FAILED,
-        LEGACY,
-    }
+    @Autowired
+    WorkflowRunService workflowRunService
 
-    WorkflowRun producedBy
+    @Autowired
+    WorkflowSystemService workflowSystemService
 
-    State state = State.LEGACY
-
-    static constraints = {
-        producedBy nullable: true
-        withdrawnDate nullable: true
-        withdrawnComment nullable: true, validator: { val, obj ->
-            if (obj.withdrawnDate && !val) {
-                return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
-            }
+    //This delay should have at least double size of the delay of {@link WorkflowRunScheduler#scheduleJob} to avoid problems of queues.
+    @Scheduled(fixedDelay = 5000L)
+    void scheduleWorkflowRun() {
+        if (!workflowSystemService.enabled) {
+            return
         }
-    }
+        int runningWorkflowCount = workflowRunService.countOfRunningWorkflows()
+        WorkflowRun workflowRun = workflowRunService.nextWaitingWorkflow(runningWorkflowCount)
 
-    static mapping = {
-        withdrawnComment type: "text"
-        state index: 'workflow_artefact_state_idx'
-    }
-
-    // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
-    Optional<Artefact> getArtefact() {
-        Optional.ofNullable(atMostOneElement(executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])) as Artefact)
+        if (workflowRun) {
+            jobService.createNextJob(workflowRun)
+        }
     }
 }
