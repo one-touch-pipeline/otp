@@ -27,11 +27,11 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
-class JobServiceSpec extends Specification implements ServiceUnitTest<JobService>, DataTest {
+class JobServiceSpec extends Specification implements ServiceUnitTest<JobService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -44,7 +44,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     void "test createNextJob, first step"() {
         given:
-        WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
+        WorkflowRun workflowRun = createWorkflowRun()
         workflowRun.workflow.beanName = "workflow bean"
         workflowRun.workflow.save(flush: true)
         service.applicationContext = Mock(ApplicationContext) {
@@ -67,8 +67,8 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     void "test createNextJob, existing step"() {
         given:
-        WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
-        WorkflowStep existingStep = DomainFactory.createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean")
+        WorkflowRun workflowRun = createWorkflowRun()
+        WorkflowStep existingStep = createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean")
         workflowRun.workflow.beanName = "workflow bean"
         workflowRun.workflow.save(flush: true)
         service.applicationContext = Mock(ApplicationContext) {
@@ -93,7 +93,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     void "test createNextJob, workflow.beanName not set"() {
         given:
-        WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
+        WorkflowRun workflowRun = createWorkflowRun()
         workflowRun.workflow.beanName = null
         workflowRun.workflow.save(flush: true)
 
@@ -106,10 +106,10 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     void "test createRestartedJob"() {
         given:
-        WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
-        WorkflowStep step1 = DomainFactory.createWorkflowStep(workflowRun: workflowRun)
-        WorkflowStep stepToRestart = DomainFactory.createWorkflowStep(workflowRun: workflowRun)
-        WorkflowStep step2 = DomainFactory.createWorkflowStep(workflowRun: workflowRun)
+        WorkflowRun workflowRun = createWorkflowRun()
+        WorkflowStep step1 = createWorkflowStep(workflowRun: workflowRun)
+        WorkflowStep stepToRestart = createWorkflowStep(workflowRun: workflowRun)
+        WorkflowStep step2 = createWorkflowStep(workflowRun: workflowRun)
         workflowRun.save(flush: true)
 
         when:
@@ -127,7 +127,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     void "test createRestartedJobAfterJobFailure"() {
         given:
-        WorkflowStep failedStep = DomainFactory.createWorkflowStep(state: WorkflowStep.State.FAILED)
+        WorkflowStep failedStep = createWorkflowStep(state: WorkflowStep.State.FAILED)
         failedStep.workflowRun.state = WorkflowRun.State.FAILED
         failedStep.workflowRun.save(flush: true)
         JobService service = Spy(JobService) {
@@ -144,7 +144,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
     @Unroll
     void "test createRestartedJobAfterJobFailure, not failed"() {
         given:
-        WorkflowStep failedStep = DomainFactory.createWorkflowStep(state: stepState)
+        WorkflowStep failedStep = createWorkflowStep(state: stepState)
         failedStep.workflowRun.state = runState
         failedStep.workflowRun.save(flush: true)
 
@@ -163,7 +163,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     void "test createRestartedJobAfterSystemRestart"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep(state: WorkflowStep.State.RUNNING)
+        WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.RUNNING)
         workflowStep.workflowRun.state = WorkflowRun.State.RUNNING
         workflowStep.workflowRun.save(flush: true)
         JobService service = Spy(JobService) {
@@ -181,7 +181,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
     @Unroll
     void "test createRestartedJobAfterSystemRestart, not running"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep(state: stepState)
+        WorkflowStep workflowStep = createWorkflowStep(state: stepState)
         workflowStep.workflowRun.state = runState
         workflowStep.workflowRun.save(flush: true)
 

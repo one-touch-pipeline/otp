@@ -25,10 +25,10 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class WorkflowServiceSpec extends Specification implements ServiceUnitTest<WorkflowService>, DataTest {
+class WorkflowServiceSpec extends Specification implements ServiceUnitTest<WorkflowService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -43,18 +43,18 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         given:
         service.jobService = Mock(JobService)
 
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep()
-        WorkflowArtefact wa1 = DomainFactory.createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
-        WorkflowArtefact wa2 = DomainFactory.createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
+        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
         workflowStep.workflowRun.state = WorkflowRun.State.FAILED
         workflowStep.workflowRun.outputArtefacts = [asdf: wa1, qwertz: wa2]
         workflowStep.workflowRun.save(flush: true)
 
-        WorkflowRun wr2 = DomainFactory.createWorkflowRun()
-        DomainFactory.createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
+        WorkflowRun wr2 = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
 
-        WorkflowRun wr3 = DomainFactory.createWorkflowRun()
-        DomainFactory.createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
+        WorkflowRun wr3 = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
         service.createRestartedWorkflow(workflowStep, startDirectly)

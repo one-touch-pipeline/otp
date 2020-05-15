@@ -27,12 +27,12 @@ import spock.lang.Ignore
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
 @Integration
-class WorkflowDeletionServiceIntegrationSpec extends Specification implements DomainFactoryCore {
+class WorkflowDeletionServiceIntegrationSpec extends Specification implements DomainFactoryCore, WorkflowSystemDomainFactory {
 
     WorkflowDeletionService workflowDeletionService
 
@@ -41,7 +41,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Do
     void "test deleteWorkflowRun"() {
         given:
         WorkflowRunInputArtefact wria = createData()
-        WorkflowRun workflowRun = DomainFactory.createWorkflowRun()
+        WorkflowRun workflowRun = createWorkflowRun()
         wria.workflowArtefact.producedBy = workflowRun
         wria.save(flush: true)
 
@@ -59,7 +59,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Do
     void "test deleteWorkflowArtefact"() {
         given:
         WorkflowRunInputArtefact wria = createData()
-        DomainFactory.createWorkflowArtefact(producedBy: wria.workflowRun)
+        createWorkflowArtefact(producedBy: wria.workflowRun)
 
         when:
         workflowDeletionService.deleteWorkflowArtefact(wria.workflowArtefact)
@@ -71,8 +71,8 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Do
     }
 
     private WorkflowRunInputArtefact createData() {
-        WorkflowArtefact wa = DomainFactory.createWorkflowArtefact()
-        WorkflowRun workflowRun2 = DomainFactory.createWorkflowRun()
-        return DomainFactory.createWorkflowRunInputArtefact(workflowRun: workflowRun2, role: "whatever", workflowArtefact: wa)
+        WorkflowArtefact wa = createWorkflowArtefact()
+        WorkflowRun workflowRun2 = createWorkflowRun()
+        return createWorkflowRunInputArtefact(workflowRun: workflowRun2, role: "whatever", workflowArtefact: wa)
     }
 }

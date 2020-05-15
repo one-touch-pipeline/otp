@@ -26,9 +26,9 @@ import grails.testing.services.ServiceUnitTest
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
-class WorkflowStateChangeServiceSpec extends Specification implements ServiceUnitTest<WorkflowStateChangeService>, DataTest {
+class WorkflowStateChangeServiceSpec extends Specification implements ServiceUnitTest<WorkflowStateChangeService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -41,19 +41,19 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToSkipped"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep()
         SkippedMessage skippedMessage = new SkippedMessage(message: "asdf", category: SkippedMessage.Category.WORKFLOW_COVERAGE_REJECTION)
-        WorkflowArtefact wa1 = DomainFactory.createWorkflowArtefact()
+        WorkflowArtefact wa1 = createWorkflowArtefact()
         workflowStep.workflowRun.outputArtefacts = [asdf: wa1]
         workflowStep.workflowRun.save(flush: true)
 
-        WorkflowArtefact wa2 = DomainFactory.createWorkflowArtefact(state: WorkflowArtefact.State.FAILED)
-        WorkflowRun wr2 = DomainFactory.createWorkflowRun(state: WorkflowRun.State.FAILED, outputArtefacts: [asdf: wa2])
-        DomainFactory.createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED)
+        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED, outputArtefacts: [asdf: wa2])
+        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
 
-        WorkflowArtefact wa3 = DomainFactory.createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
-        WorkflowRun wr3 = DomainFactory.createWorkflowRun(state: WorkflowRun.State.PENDING, outputArtefacts: [asdf: wa3])
-        DomainFactory.createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
+        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
+        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING, outputArtefacts: [asdf: wa3])
+        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
         service.changeStateToSkipped(workflowStep, skippedMessage)
@@ -74,7 +74,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToWaiting"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep()
 
         when:
         service.changeStateToWaiting(workflowStep)
@@ -86,18 +86,18 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToFinalFailed"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep()
-        WorkflowArtefact wa1 = DomainFactory.createWorkflowArtefact()
+        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowArtefact wa1 = createWorkflowArtefact()
         workflowStep.workflowRun.outputArtefacts = [asdf: wa1]
         workflowStep.workflowRun.save(flush: true)
 
-        WorkflowArtefact wa2 = DomainFactory.createWorkflowArtefact(state: WorkflowArtefact.State.FAILED)
-        WorkflowRun wr2 = DomainFactory.createWorkflowRun(state: WorkflowRun.State.FAILED, outputArtefacts: [asdf: wa2])
-        DomainFactory.createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED)
+        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED, outputArtefacts: [asdf: wa2])
+        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
 
-        WorkflowArtefact wa3 = DomainFactory.createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
-        WorkflowRun wr3 = DomainFactory.createWorkflowRun(state: WorkflowRun.State.PENDING, outputArtefacts: [asdf: wa3])
-        DomainFactory.createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
+        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
+        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING, outputArtefacts: [asdf: wa3])
+        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
         service.changeStateToFinalFailed(workflowStep)
@@ -117,7 +117,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToFailed"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep()
 
         when:
         service.changeStateToFailed(workflowStep)
@@ -129,8 +129,8 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToSuccess, is not last step"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep(beanName: "1st job bean")
-        WorkflowArtefact workflowArtefact = DomainFactory.createWorkflowArtefact()
+        WorkflowStep workflowStep = createWorkflowStep(beanName: "1st job bean")
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
         workflowStep.workflowRun.workflow.beanName = "workflow bean"
         workflowStep.workflowRun.outputArtefacts = [abc: workflowArtefact]
         workflowStep.workflowRun.workflow.save(flush: true)
@@ -151,8 +151,8 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToSuccess, is last step"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep(beanName: "2nd job bean")
-        WorkflowArtefact workflowArtefact = DomainFactory.createWorkflowArtefact()
+        WorkflowStep workflowStep = createWorkflowStep(beanName: "2nd job bean")
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
         workflowStep.workflowRun.workflow.beanName = "workflow bean"
         workflowStep.workflowRun.outputArtefacts = [abc: workflowArtefact]
         workflowStep.workflowRun.workflow.save(flush: true)
@@ -173,7 +173,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     void "test changeStateToRunning"() {
         given:
-        WorkflowStep workflowStep = DomainFactory.createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep()
 
         when:
         service.changeStateToRunning(workflowStep)

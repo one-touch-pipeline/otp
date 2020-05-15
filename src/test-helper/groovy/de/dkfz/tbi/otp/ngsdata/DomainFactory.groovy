@@ -54,7 +54,6 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -332,39 +331,6 @@ class DomainFactory {
                 process  : { createProcessingStepUpdate().process },
                 value    : "${counter++}",
                 className: "${counter++}",
-        ], properties)
-    }
-
-    static WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
-        return createDomainObject(WorkflowArtefact, [:], properties)
-    }
-
-    static WorkflowRunInputArtefact createWorkflowRunInputArtefact(Map properties = [:]) {
-        return createDomainObject(WorkflowRunInputArtefact, [
-                workflowRun: { createWorkflowRun() },
-                role: "role_${counter++}",
-                workflowArtefact: { createWorkflowArtefact() },
-        ], properties)
-    }
-
-    static WorkflowRun createWorkflowRun(Map properties = [:]) {
-        return createDomainObject(WorkflowRun, [
-                workflow: { createWorkflow() },
-        ], properties)
-    }
-
-    static WorkflowStep createWorkflowStep(Map properties = [:]) {
-        return createDomainObject(WorkflowStep, [
-                workflowRun: { createWorkflowRun() },
-                beanName   : "beanName_${counter++}",
-                state      : WorkflowStep.State.CREATED,
-        ], properties)
-    }
-
-    static Workflow createWorkflow(Map properties = [:]) {
-        return createDomainObject(Workflow, [
-                name              : "${counter++}",
-                enabled           : true,
         ], properties)
     }
 
