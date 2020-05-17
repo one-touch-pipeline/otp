@@ -42,7 +42,6 @@ class UserService {
     SpringSecurityService springSecurityService
     ConfigService configService
 
-
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void editUser(User user, String email, String realName) {
         updateEmail(user, email)
@@ -121,13 +120,13 @@ class UserService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getRolesOfUser(User user) {
-        List<Role> roles = getAllRoles()
+        List<Role> roles = allRoles
         return roles ? UserRole.findAllByUserAndRoleInList(user, roles)*.role : []
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getGroupsOfUser(User user) {
-        List<Role> groups = getAllGroups()
+        List<Role> groups = allGroups
         return groups ? UserRole.findAllByUserAndRoleInList(user, groups)*.role : []
     }
 
@@ -135,7 +134,7 @@ class UserService {
     void addRoleToUser(User user, Role role) {
         assert user : "User can not be null"
         assert role : "Role can not be null"
-        if (!UserRole.findByUserAndRole(user, role)) {
+        if (!CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRole(user, role))) {
             UserRole.create(user, role)
         }
     }
@@ -144,7 +143,7 @@ class UserService {
     void removeRoleFromUser(User user, Role role) {
         assert user : "User can not be null"
         assert role : "Role can not be null"
-        UserRole userRole = UserRole.findByUserAndRole(user, role)
+        UserRole userRole = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRole(user, role))
         if (userRole) {
             userRole.delete(flush: true)
         }
@@ -153,12 +152,12 @@ class UserService {
     boolean isPrivacyPolicyAccepted() {
         // HACK: skip in  case we are not logged in yet, otherwise we will never get to the log-in page...
         // (this _should_ probably be solved in a different layer of OTP)
-        if (!springSecurityService.isLoggedIn()) {
+        if (!springSecurityService.loggedIn) {
             return true
         }
         // switched users need not be checked, because before switching, they must have been a user that must
         // have already accepted the policy (or else they couldn't have reached the "switch user" page in the first place)
-        if (SpringSecurityUtils.isSwitched()) {
+        if (SpringSecurityUtils.switched) {
             return true
         }
         // privacy policy does not need to be accepted when OTP is executed with a backdoor user
@@ -166,13 +165,13 @@ class UserService {
             return true
         }
 
-        User user = springSecurityService.getCurrentUser()
+        User user = springSecurityService.currentUser
         return user.acceptedPrivacyPolicy
     }
 
     void acceptPrivacyPolicy() {
-        if (springSecurityService.isLoggedIn()) {
-            User user = springSecurityService.getCurrentUser() as User
+        if (springSecurityService.loggedIn) {
+            User user = springSecurityService.currentUser as User
             setAcceptPrivacyPolicy(user, true)
         }
     }
@@ -225,7 +224,7 @@ No user exists yet, create user ${currentUser} with admin rights.
     }
 
     List<Role> getRolesOfCurrentUser() {
-        return getRolesOfUser(springSecurityService.getCurrentUser() as User)
+        return getRolesOfUser(springSecurityService.currentUser as User)
     }
 
     boolean checkRolesContainsAdministrativeRole(List <Role> roles) {
@@ -235,6 +234,6 @@ No user exists yet, create user ${currentUser} with admin rights.
     }
 
     boolean isCurrentUserAllowedToSeeRuns() {
-        return checkRolesContainsAdministrativeRole(getRolesOfCurrentUser())
+        return checkRolesContainsAdministrativeRole(rolesOfCurrentUser)
     }
 }

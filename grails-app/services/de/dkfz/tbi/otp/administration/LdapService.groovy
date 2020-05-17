@@ -98,7 +98,8 @@ class LdapService implements InitializingBean {
 
         return ldapTemplate.search(
                 query().countLimit(countLimit)
-                        .attributes(configService.ldapSearchAttribute, LdapKey.MAIL, LdapKey.GIVEN_NAME, LdapKey.SURNAME, LdapKey.DEPARTMENT, LdapKey.USER_ACCOUNT_CONTROL)
+                        .attributes(configService.ldapSearchAttribute, LdapKey.MAIL, LdapKey.GIVEN_NAME,
+                                LdapKey.SURNAME, LdapKey.DEPARTMENT, LdapKey.USER_ACCOUNT_CONTROL)
                         .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.PERSON)
                         .and(LdapKey.MAIL).isPresent()
                         .and(dynamicQuery),

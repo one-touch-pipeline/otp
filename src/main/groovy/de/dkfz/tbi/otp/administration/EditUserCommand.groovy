@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.administration
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 
 class EditUserCommand implements Validateable {
@@ -35,7 +36,7 @@ class EditUserCommand implements Validateable {
 
     static constraints = {
         email(nullable: false, blank: false, email: true, validator: { val, obj ->
-            User userByMail = User.findByEmail(val)
+            User userByMail = CollectionUtils.atMostOneElement(User.findAllByEmail(val))
             if (userByMail != null && userByMail != obj.user) {
                 return 'default.not.unique.message'
             }

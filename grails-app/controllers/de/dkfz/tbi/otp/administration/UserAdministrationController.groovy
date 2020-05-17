@@ -105,7 +105,7 @@ class UserAdministrationController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
             redirect(action: "index")
-            return
+            return [:]
         }
         User user = cmd.user
         Map<String, List<Role>> roleLists = [:]
@@ -130,7 +130,7 @@ class UserAdministrationController implements CheckAndCall {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
             redirect(action: "index")
-            return
+            return [:]
         }
         User user = cmd.user
         boolean userExists = ldapService.existsInLdap(user)

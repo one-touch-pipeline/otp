@@ -27,20 +27,21 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
 class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     UserService userService = new UserService()
 
-    def setupData() {
+    void setupData() {
         createUserAndRoles()
     }
 
     void "test updateEmail valid input"() {
         given:
         setupData()
-        User user = User.findByUsername(TESTUSER)
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
         String newMail = "dummy@dummy.de"
 
         when:
@@ -55,7 +56,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     void "test updateEmail invalid input"() {
         given:
         setupData()
-        User user = User.findByUsername(TESTUSER)
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -69,7 +70,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     void "test updateRealName valid input"() {
         given:
         setupData()
-        User user = User.findByUsername(TESTUSER)
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -84,7 +85,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     void "test updateRealName invalid input no name"() {
         given:
         setupData()
-        User user = User.findByUsername(TESTUSER)
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(TESTUSER))
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -98,16 +99,16 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     void "getRolesOfCurrentUser, return the role of the current user"() {
         given:
         setupData()
-        User user = User.findByUsername(username)
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
         List<Role> roles
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
-            roles = userService.getRolesOfCurrentUser()
+            roles = userService.rolesOfCurrentUser
         }
 
         then:
-        user.getAuthorities() == roles as Set
+        user.authorities == roles as Set
 
         where:
         username << [
@@ -143,7 +144,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
-            check = userService.isCurrentUserAllowedToSeeRuns()
+            check = userService.currentUserAllowedToSeeRuns
         }
 
         then:
