@@ -42,6 +42,13 @@ import java.time.LocalDateTime
 @Slf4j
 abstract class ScheduledJob {
 
+    static final List<Class> ALL_JOB_CLASSES = [
+            CheckForAdUpdateJob,
+            DeactivateUsersJob,
+            ScheduleUsersForDeactivationJob,
+            UnknownLdapUsersJob,
+    ]
+
     @Autowired
     ProcessingOptionService processingOptionService
 
@@ -59,7 +66,7 @@ abstract class ScheduledJob {
         SessionUtils.withNewSession {
             try {
                 User.withTransaction {
-                    if (!scheduledJobRunPreconditionsMet()) {
+                    if (!scheduledJobRunPreconditionsMet) {
                         log.info("Scheduled job ${this.class} did not meet the preconditions to run")
                         return
                     }
@@ -71,8 +78,14 @@ abstract class ScheduledJob {
         }
     }
 
-    boolean scheduledJobRunPreconditionsMet() {
-        return schedulerService.active
+    boolean isScheduledJobRunPreconditionsMet() {
+        return schedulerService.active &&
+                processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.CRONJOB_ACTIVE, this.class.canonicalName) &&
+                additionalRunConditionsMet
+    }
+
+    boolean isAdditionalRunConditionsMet() {
+        return true
     }
 
     void sendStacktraceToMaintainer(Throwable t) {

@@ -535,6 +535,12 @@ class ProcessingOption implements Entity {
                 TypeValidators.GUI_ANNOTATION
         ),
 
+        CRONJOB_ACTIVE(
+                "Defines if the cronjob of the given subtype should be executed or not",
+                Necessity.OPTIONAL, "true", TypeValidators.BOOLEAN,
+                TypeValidators.CRONJOB_CLASS
+        ),
+
         //naming
         CLUSTER_NAME(
                 "The common name to refer to the cluster OTP uses",

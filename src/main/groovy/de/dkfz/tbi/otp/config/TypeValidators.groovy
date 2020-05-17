@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.config
 import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.context.ApplicationContext
 
+import de.dkfz.tbi.otp.cron.ScheduledJob
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -92,6 +93,8 @@ enum TypeValidators {
     TIME_ZONE({ try { ZoneId.of(it); return true } catch (DateTimeException ignored) { return false } }, { ZoneId.availableZoneIds.sort() }),
 
     GUI_ANNOTATION({ GuiAnnotation.findByName(it) }, { GuiAnnotation.values()*.name() }),
+
+    CRONJOB_CLASS({ it in ScheduledJob.ALL_JOB_CLASSES*.canonicalName }, { ScheduledJob.ALL_JOB_CLASSES*.canonicalName }),
 
     private final Closure validator
     private final Closure<List<String>> allowedValues

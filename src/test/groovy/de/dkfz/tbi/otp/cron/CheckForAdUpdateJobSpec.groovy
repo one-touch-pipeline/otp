@@ -29,6 +29,8 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -41,6 +43,7 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                ProcessingOption,
                 UserProjectRole,
         ]
     }
@@ -119,10 +122,11 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
                     _ * isActive() >> jobSystem
                     0 * _
                 },
+                processingOptionService: new ProcessingOptionService(),
         ])
 
         when:
-        boolean met = job.scheduledJobRunPreconditionsMet()
+        boolean met = job.scheduledJobRunPreconditionsMet
 
         then:
         expected == met
