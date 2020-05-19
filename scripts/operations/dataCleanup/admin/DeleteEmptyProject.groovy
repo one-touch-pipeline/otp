@@ -68,7 +68,7 @@ Project.withTransaction {
         }
     }.isEmpty() : "The project contains already data"
 
-    String out = "rm -rf ${p.getProjectDirectory()}"
+    String out = "rm -rf ${p.getProjectDirectory()}\nrm -rf ${p.dirAnalysis}"
     ctx.deletionService.deleteProject(p)
     println "Execute the following line on the filesystem:"
     println out
