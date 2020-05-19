@@ -72,16 +72,28 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         wr3.skippedMessage == skippedMessage
     }
 
-    void "test changeStateToWaiting"() {
+    void "test changeStateToWaitingOnUser"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
 
         when:
-        service.changeStateToWaiting(workflowStep)
+        service.changeStateToWaitingOnUser(workflowStep)
 
         then:
         workflowStep.state == WorkflowStep.State.SUCCESS
-        workflowStep.workflowRun.state == WorkflowRun.State.WAITING
+        workflowStep.workflowRun.state == WorkflowRun.State.WAITING_ON_USER
+    }
+
+    void "test changeStateToWaitingOnSystem"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        when:
+        service.changeStateToWaitingOnSystem(workflowStep)
+
+        then:
+        workflowStep.state == WorkflowStep.State.SUCCESS
+        workflowStep.workflowRun.state == WorkflowRun.State.WAITING_ON_SYSTEM
     }
 
     void "test changeStateToFinalFailed"() {

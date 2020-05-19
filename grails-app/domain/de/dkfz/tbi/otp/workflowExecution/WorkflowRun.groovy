@@ -29,7 +29,8 @@ class WorkflowRun implements Commentable, Entity {
     enum State {
         //unfinished
         PENDING,
-        WAITING,
+        WAITING_ON_SYSTEM,
+        WAITING_ON_USER,
         RUNNING,
         FAILED,
         //finished

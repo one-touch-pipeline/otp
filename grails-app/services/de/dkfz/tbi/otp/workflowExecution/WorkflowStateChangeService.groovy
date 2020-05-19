@@ -55,9 +55,18 @@ class WorkflowStateChangeService {
         }
     }
 
-    void changeStateToWaiting(WorkflowStep step) {
+    void changeStateToWaitingOnUser(WorkflowStep step) {
         assert step
-        step.workflowRun.state = WorkflowRun.State.WAITING
+        step.workflowRun.state = WorkflowRun.State.WAITING_ON_USER
+        step.workflowRun.save(flush: true)
+
+        step.state = WorkflowStep.State.SUCCESS
+        step.save(flush: true)
+    }
+
+    void changeStateToWaitingOnSystem(WorkflowStep step) {
+        assert step
+        step.workflowRun.state = WorkflowRun.State.WAITING_ON_SYSTEM
         step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.SUCCESS
