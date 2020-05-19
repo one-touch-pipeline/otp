@@ -21,10 +21,10 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryHelper
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.workflowExecution.*
 
-trait WorkflowSystemDomainFactory implements DomainFactoryHelper {
+trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     Workflow createWorkflow(Map properties = [:]) {
         return createDomainObject(Workflow, [
@@ -36,6 +36,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryHelper {
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         return createDomainObject(WorkflowRun, [
                 workflow: { createWorkflow() },
+                priority: { createProcessingPriority() },
         ], properties)
     }
 

@@ -50,7 +50,7 @@ class WorkflowRun implements Commentable, Entity {
 
     String combinedConfig
 
-    short priority = 0
+    ProcessingPriority priority
 
     State state = State.LEGACY
 
@@ -77,6 +77,7 @@ class WorkflowRun implements Commentable, Entity {
 
     static mapping = {
         combinedConfig type: "text"
+        priority index: 'workflow_run_priority_idx'
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

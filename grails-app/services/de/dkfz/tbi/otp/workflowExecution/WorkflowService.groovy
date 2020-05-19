@@ -32,6 +32,7 @@ class WorkflowService {
         assert step.workflowRun.state == WorkflowRun.State.FAILED
         WorkflowRun run = new WorkflowRun(
                 workflow: step.workflowRun.workflow,
+                priority: step.workflowRun.priority,
         ).save(flush: true)
 
         Map<String, WorkflowArtefact> newArtefacts = step.workflowRun.outputArtefacts.collectEntries { String role, WorkflowArtefact oldArtefact ->
