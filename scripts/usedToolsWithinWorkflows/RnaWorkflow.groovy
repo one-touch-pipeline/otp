@@ -24,15 +24,39 @@ package usedToolsWithinWorkflows
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 
 /*
 Input area
 Please provide the name of the project you want to get the version information for
+If you have specific PIDs you can also provide those instead of the project name.
+Please provide the PIDs in a comma separated list, e.g. ["pid1", "pid2", ...]
  */
-def projectName = "???"
-assert projectName : "Please provide a project name"
-assert Project.findByName(projectName) : "No project with name ${projectName} could be found"
+def projectName = ""
+def pids = []
+
+
+/*
+Input checks
+ */
+assert (projectName || !pids.empty) : "Please provide either a project name or pids"
+if (projectName) {
+    assert Project.findByName(projectName) : "No project with name ${projectName} could be found"
+}
+
+if (pids) {
+    def noPids = []
+    pids.each { pid ->
+        if (!Individual.findByPid(pid)) {
+            noPids << pid
+        }
+    }
+    if (noPids) {
+        println "No individual could be found for the following pids: ${noPids.join(',')}"
+        assert false
+    }
+}
 
 /*
 Script area
@@ -86,9 +110,15 @@ RnaRoddyBamFile.createCriteria().list {
             eq("name", SeqTypeNames.RNA.seqTypeName)
         }
         sample {
-            individual {
-                project {
-                    eq("name", projectName)
+            if (pids) {
+                individual {
+                    'in'("pid", pids)
+                }
+            } else {
+                individual {
+                    project {
+                        eq("name", projectName)
+                    }
                 }
             }
         }
