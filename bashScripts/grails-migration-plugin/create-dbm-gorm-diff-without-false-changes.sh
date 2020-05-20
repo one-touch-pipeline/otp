@@ -91,6 +91,8 @@ perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\
 perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
 perl -0pi -e "s/databaseChangeLog = \{\n\}\n//g" $changelogPath
+# delete local usernames
+perl -0pi -e "s/author: \".*?\"/author: \"\"/g" $changelogPath
 # delete anything before the line with "databaseChangeLog = {"
 sed -i -e/databaseChangeLog\ \=\ \{/\{ -e:1 -en\;b1 -e\} -ed $changelogPath
 
