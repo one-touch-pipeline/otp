@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.project.ProjectPropertiesGivenWithRequest
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 

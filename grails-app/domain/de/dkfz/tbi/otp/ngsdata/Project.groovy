@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.ProjectPropertiesGivenWithRequest
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
