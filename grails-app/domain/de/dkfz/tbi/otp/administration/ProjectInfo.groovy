@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.ngsdata.ProjectService
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.Entity
 
 import java.text.DateFormat

@@ -27,7 +27,7 @@ import groovy.transform.Canonical
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.ProjectService
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
 class ProcessingOptionController {

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.ngsdata.PanCanAlignmentConfiguration
+import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
 
 class RoddyPanCanConfigTemplate {
 

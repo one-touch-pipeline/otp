@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.databinding.BindingFormat
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectProgressDataTableCommand extends DataTableCommand {

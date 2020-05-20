@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.interceptor
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
-import de.dkfz.tbi.otp.ngsdata.ProjectService
+import de.dkfz.tbi.otp.project.ProjectService
 
 @CompileStatic
 class NoProjectInterceptor {

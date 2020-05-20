@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 

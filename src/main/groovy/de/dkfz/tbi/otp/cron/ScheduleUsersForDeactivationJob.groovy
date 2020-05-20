@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 
 import java.time.LocalDateTime

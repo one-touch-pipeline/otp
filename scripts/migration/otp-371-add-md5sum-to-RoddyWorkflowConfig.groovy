@@ -24,7 +24,8 @@ package migration
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
+import de.dkfz.tbi.otp.project.RoddyConfiguration
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 

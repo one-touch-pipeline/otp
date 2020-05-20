@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ProjectSelectionCommand
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 
 @CompileStatic
 class ProjectSelectionInterceptor {

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
@@ -39,8 +39,23 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectRequestService
+import de.dkfz.tbi.otp.ngsdata.GeneModel
+import de.dkfz.tbi.otp.ngsdata.GeneModelService
+import de.dkfz.tbi.otp.ngsdata.ProjectCreationCommand
+import de.dkfz.tbi.otp.ngsdata.ProjectGroup
+import de.dkfz.tbi.otp.ngsdata.ProjectRole
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndexService
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqTypeAlignmentProperty
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 

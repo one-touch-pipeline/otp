@@ -27,6 +27,7 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SequenceController {
