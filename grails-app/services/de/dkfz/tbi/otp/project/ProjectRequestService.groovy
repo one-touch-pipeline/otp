@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 

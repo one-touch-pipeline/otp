@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.StoragePeriod" %>
+<%@ page import="de.dkfz.tbi.otp.project.StoragePeriod" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
