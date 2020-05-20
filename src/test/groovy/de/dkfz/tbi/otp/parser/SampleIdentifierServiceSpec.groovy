@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.Delimiter
 

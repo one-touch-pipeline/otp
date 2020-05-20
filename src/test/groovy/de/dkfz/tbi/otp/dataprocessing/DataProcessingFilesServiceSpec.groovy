@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class DataProcessingFilesServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 

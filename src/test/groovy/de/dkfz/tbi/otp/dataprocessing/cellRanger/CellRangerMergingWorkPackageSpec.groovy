@@ -29,6 +29,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class CellRangerMergingWorkPackageSpec extends Specification implements CellRangerFactory, DataTest {
 

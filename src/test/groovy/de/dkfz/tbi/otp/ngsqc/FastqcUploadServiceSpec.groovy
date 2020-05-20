@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class FastqcUploadServiceSpec extends Specification implements DataTest {
 

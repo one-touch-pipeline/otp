@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.project.Project
 
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue

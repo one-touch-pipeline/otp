@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.project.Project
 
 import java.text.SimpleDateFormat
 

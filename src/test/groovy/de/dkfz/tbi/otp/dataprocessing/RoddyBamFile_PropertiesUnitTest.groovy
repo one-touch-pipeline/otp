@@ -27,6 +27,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Mock([

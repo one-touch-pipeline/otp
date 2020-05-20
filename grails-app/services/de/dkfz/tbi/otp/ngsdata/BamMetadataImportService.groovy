@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 

@@ -23,7 +23,7 @@
 import grails.validation.*
 
 import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 
 /**

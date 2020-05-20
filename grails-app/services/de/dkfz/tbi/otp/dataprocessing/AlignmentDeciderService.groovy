@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 
 @Transactional
 class AlignmentDeciderService {

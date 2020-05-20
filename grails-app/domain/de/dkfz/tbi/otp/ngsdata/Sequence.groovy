@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.project.Project
+
 /**
  * This domain class represents a database view called "sequences".
  *

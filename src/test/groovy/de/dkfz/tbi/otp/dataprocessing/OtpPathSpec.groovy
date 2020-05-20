@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 
 class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 

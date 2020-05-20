@@ -25,6 +25,7 @@ import grails.converters.JSON
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.project.Project
 
 class StatisticController {
 

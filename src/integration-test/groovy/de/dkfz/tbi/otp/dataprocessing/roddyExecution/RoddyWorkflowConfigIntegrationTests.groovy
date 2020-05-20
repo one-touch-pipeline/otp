@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration

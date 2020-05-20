@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils

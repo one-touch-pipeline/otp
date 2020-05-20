@@ -30,6 +30,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 

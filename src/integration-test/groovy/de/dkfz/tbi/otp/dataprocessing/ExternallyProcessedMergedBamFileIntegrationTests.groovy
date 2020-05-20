@@ -27,6 +27,7 @@ import org.junit.Test
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import static org.junit.Assert.assertNotNull
 

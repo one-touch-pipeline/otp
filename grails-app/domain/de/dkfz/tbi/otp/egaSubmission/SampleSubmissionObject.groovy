@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 class SampleSubmissionObject implements Entity, SubmissionObject {

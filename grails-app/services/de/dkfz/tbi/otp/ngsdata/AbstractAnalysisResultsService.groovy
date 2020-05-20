@@ -27,6 +27,7 @@ import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.project.Project
 
 import java.text.SimpleDateFormat
 

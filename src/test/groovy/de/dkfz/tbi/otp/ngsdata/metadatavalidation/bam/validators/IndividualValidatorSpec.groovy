@@ -28,6 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 

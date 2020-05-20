@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService

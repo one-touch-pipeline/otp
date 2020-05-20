@@ -27,6 +27,7 @@ import org.junit.Test
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration

@@ -28,6 +28,7 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 @Transactional
 class MergingCriteriaService {

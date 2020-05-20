@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.SessionUtils
 

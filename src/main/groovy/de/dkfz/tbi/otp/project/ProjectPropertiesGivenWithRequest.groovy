@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.project
 
-import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TumorEntity
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 

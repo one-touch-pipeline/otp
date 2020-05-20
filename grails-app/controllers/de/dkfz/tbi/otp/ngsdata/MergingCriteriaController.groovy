@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
+import de.dkfz.tbi.otp.project.Project
 
 class MergingCriteriaController {
 

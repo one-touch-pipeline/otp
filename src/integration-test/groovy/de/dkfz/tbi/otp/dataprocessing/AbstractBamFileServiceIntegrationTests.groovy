@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull

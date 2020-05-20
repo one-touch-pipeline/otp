@@ -25,6 +25,7 @@ import grails.converters.JSON
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SnvController extends AbstractAnalysisController {

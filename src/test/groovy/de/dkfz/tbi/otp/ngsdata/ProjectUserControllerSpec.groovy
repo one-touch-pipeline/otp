@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY

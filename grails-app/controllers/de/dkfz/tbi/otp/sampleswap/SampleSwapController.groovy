@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.sampleswap
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class SampleSwapController {
 

@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import de.dkfz.tbi.otp.project.Project
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import de.dkfz.tbi.otp.ngsdata.*
 

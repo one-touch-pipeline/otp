@@ -29,7 +29,7 @@ import org.springframework.security.acls.AclPermissionEvaluator
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 
 @Component

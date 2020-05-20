@@ -30,6 +30,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Principal
 
 @Rollback

@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
+import de.dkfz.tbi.otp.project.Project
 
 class IndividualSpec extends Specification implements DataTest {
 

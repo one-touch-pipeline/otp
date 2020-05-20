@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.ValidatorUtil
 

@@ -22,7 +22,7 @@
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
 /**

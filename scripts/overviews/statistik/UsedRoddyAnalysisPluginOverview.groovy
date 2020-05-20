@@ -23,6 +23,7 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 /**
  * Show all used roddy analysis plugins per pipeline and project.

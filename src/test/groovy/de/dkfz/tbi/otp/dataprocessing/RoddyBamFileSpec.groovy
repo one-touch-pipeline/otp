@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 

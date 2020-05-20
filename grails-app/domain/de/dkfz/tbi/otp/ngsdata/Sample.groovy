@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */

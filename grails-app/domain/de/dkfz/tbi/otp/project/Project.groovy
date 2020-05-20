@@ -19,14 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.project
 
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.ProjectGroup
+import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.project.ProjectPropertiesGivenWithRequest
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority

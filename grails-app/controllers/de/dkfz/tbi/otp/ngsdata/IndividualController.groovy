@@ -29,6 +29,7 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 

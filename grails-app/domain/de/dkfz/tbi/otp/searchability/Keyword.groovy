@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.searchability
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 class Keyword implements Entity {

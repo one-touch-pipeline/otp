@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils

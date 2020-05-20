@@ -34,6 +34,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles

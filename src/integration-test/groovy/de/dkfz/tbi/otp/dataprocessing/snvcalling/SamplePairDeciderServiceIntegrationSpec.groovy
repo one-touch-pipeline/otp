@@ -30,6 +30,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration

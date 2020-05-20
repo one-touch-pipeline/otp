@@ -49,6 +49,7 @@
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.charset.StandardCharsets

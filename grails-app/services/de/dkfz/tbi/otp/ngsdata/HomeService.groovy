@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.project.Project
+
 @Transactional
 class HomeService {
     ProjectService projectService

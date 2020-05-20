@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration

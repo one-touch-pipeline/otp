@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Files

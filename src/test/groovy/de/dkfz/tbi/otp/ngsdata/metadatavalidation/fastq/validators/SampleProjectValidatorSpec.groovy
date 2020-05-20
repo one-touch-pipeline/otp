@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem

@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 @Transactional
 class OverallQualityAssessmentMergedService {

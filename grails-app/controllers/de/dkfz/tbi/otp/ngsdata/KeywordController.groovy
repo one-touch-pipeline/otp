@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 

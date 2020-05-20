@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 class ProjectSpec extends Specification implements DomainFactoryCore, DataTest {

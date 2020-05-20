@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.FileSystems
 import java.nio.file.Path

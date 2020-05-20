@@ -31,6 +31,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 

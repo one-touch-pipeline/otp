@@ -30,6 +30,7 @@ import org.springframework.validation.ObjectError
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.parser.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext

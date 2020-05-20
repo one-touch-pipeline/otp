@@ -26,6 +26,7 @@ import grails.test.mixin.TestFor
 import org.junit.Test
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 /**

@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.*

@@ -30,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ProcessOutput
 

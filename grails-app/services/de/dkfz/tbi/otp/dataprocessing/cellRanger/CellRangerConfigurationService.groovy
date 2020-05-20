@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils

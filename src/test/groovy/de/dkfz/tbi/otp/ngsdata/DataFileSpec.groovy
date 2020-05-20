@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.Project
 
 class DataFileSpec extends Specification implements DataTest, DomainFactoryCore {
 

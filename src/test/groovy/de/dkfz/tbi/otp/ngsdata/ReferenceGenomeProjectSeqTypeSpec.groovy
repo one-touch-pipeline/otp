@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.project.Project
 
 class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTest {
 

@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.utils.StringUtils
 

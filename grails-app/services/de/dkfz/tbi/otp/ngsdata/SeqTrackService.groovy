@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 

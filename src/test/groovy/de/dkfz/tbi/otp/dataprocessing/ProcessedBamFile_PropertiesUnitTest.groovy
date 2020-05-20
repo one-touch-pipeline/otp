@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import org.junit.*
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 class ProcessedBamFile_PropertiesUnitTest {

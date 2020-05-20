@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 

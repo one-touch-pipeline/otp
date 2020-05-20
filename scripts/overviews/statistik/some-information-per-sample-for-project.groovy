@@ -22,6 +22,7 @@
 package overviews.statistik
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 

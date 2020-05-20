@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 
 import java.nio.file.Path

@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
+import de.dkfz.tbi.otp.project.Project
 
 class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelineController {
 

@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.MailHelperService

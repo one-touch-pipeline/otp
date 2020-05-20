@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -66,7 +67,7 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.groupBy { metadataImportService.getSeqTypeFromMetadata(it) }.each { SeqType seqType, List<ValueTuple> valueTuplesSameSeqType ->
             if (seqType) {
-                valueTuplesSameSeqType.groupBy { MetadataImportService.getProjectFromMetadata(it) }.each { Project project,  List<ValueTuple> valueTuplesSameProject ->
+                valueTuplesSameSeqType.groupBy { MetadataImportService.getProjectFromMetadata(it) }.each { Project project, List<ValueTuple> valueTuplesSameProject ->
                     if (project) {
                         if (seqType in SeqTypeService.roddyAlignableSeqTypes) {
                             Pipeline pipeline = Pipeline.findByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT)

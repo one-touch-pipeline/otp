@@ -28,6 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 class ProjectOverviewServiceSpec extends Specification implements DataTest {

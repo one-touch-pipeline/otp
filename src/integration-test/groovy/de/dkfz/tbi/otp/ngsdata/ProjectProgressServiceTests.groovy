@@ -26,6 +26,8 @@ import grails.transaction.Rollback
 import org.junit.After
 import org.junit.Test
 
+import de.dkfz.tbi.otp.project.Project
+
 @Rollback
 @Integration
 class ProjectProgressServiceTests {

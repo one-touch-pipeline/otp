@@ -30,6 +30,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority

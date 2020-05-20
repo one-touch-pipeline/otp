@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole

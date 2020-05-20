@@ -28,6 +28,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 

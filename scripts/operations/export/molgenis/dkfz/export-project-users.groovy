@@ -21,7 +21,7 @@
  */
 
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity

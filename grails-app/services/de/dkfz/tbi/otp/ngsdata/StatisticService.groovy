@@ -26,6 +26,8 @@ import org.joda.time.*
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
+import de.dkfz.tbi.otp.project.Project
+
 @Transactional
 class StatisticService {
 

@@ -26,6 +26,7 @@
  */
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 List<Long> projectIds = UserProjectRole.withCriteria {
     projections {

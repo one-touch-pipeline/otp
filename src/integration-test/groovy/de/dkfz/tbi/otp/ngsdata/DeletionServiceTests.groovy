@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 

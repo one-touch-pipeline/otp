@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.SampleIdentifierService.BulkSampleCreationHeader.*

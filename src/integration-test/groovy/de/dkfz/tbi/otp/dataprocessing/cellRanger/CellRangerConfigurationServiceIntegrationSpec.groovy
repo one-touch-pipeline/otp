@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.CellRangerMwpParameter
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils

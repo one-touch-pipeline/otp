@@ -22,9 +22,8 @@
 
 package operations.dataCleanup.admin
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.Project
+
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 

@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.Files
 

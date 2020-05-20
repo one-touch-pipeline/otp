@@ -29,6 +29,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class RootController {
     ProjectService projectService

@@ -26,6 +26,7 @@ import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import static org.springframework.util.Assert.notNull
 

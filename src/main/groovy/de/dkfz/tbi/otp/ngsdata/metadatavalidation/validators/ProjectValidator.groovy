@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationCont
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level

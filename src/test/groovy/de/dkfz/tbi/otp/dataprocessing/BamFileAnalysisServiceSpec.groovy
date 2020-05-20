@@ -27,6 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class BamFileAnalysisServiceSpec extends Specification implements DataTest {
 

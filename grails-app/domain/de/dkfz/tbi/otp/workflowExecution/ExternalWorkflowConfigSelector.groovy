@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 

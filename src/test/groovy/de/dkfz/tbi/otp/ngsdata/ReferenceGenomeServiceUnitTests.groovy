@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority

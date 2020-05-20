@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.ProjectRequestRole
 import de.dkfz.tbi.otp.security.User

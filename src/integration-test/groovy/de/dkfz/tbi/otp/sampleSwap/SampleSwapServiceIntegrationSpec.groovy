@@ -31,6 +31,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.sampleswap.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils

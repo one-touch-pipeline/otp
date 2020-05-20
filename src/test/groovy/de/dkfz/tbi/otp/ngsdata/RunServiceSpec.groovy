@@ -26,6 +26,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.project.Project
 
 class RunServiceSpec extends Specification implements DataTest {
 

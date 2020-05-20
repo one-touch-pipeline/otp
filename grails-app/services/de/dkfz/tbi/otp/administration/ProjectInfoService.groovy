@@ -27,7 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.security.User
 

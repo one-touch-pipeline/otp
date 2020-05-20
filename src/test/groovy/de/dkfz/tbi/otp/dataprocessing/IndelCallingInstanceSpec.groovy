@@ -28,6 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class IndelCallingInstanceSpec extends Specification implements DataTest {
 

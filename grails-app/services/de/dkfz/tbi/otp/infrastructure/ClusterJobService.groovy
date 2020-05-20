@@ -30,6 +30,7 @@ import de.dkfz.roddy.tools.BufferUnit
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import javax.sql.DataSource
 

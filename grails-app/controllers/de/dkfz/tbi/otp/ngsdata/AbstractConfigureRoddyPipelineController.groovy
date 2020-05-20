@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.project.Project
 
 abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigurePipelineController implements ConfigurePipelineHelper {
 

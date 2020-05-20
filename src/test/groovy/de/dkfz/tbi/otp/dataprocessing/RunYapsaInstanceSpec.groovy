@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class RunYapsaInstanceSpec extends Specification implements DataTest {
 

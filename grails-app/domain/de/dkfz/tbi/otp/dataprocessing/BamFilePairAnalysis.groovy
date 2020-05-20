@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessParameterObject, Entity {

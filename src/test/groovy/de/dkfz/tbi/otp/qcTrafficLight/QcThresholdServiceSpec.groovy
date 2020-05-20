@@ -30,6 +30,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
 

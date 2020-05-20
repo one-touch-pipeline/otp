@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 

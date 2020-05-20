@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CreateFileHelper

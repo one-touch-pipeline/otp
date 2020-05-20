@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.parser
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 interface ParsedSampleIdentifier {
 

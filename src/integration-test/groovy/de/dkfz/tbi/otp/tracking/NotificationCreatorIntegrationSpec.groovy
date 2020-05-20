@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.utils.*
 

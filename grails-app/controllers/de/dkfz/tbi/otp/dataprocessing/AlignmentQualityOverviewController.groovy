@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 

@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {

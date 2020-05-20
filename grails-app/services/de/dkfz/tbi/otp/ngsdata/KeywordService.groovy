@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 

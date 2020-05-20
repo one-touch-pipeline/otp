@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class BamFilePairAnalysisSpec extends Specification implements DataTest {
 

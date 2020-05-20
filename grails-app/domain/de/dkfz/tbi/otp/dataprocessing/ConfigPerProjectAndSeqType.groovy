@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Entity
 

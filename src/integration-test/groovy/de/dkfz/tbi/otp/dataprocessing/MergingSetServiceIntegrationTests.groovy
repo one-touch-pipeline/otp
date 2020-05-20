@@ -28,6 +28,7 @@ import org.junit.Test
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
+import de.dkfz.tbi.otp.project.Project
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull

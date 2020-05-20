@@ -57,6 +57,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.monitor.*
 import de.dkfz.tbi.otp.monitor.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 //name of runs
 String runString = """

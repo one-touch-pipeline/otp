@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement

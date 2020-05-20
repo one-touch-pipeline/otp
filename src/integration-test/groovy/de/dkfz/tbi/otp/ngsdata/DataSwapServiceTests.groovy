@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 

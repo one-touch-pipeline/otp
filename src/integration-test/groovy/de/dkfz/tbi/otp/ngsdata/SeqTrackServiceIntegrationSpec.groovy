@@ -29,6 +29,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import javax.sql.DataSource

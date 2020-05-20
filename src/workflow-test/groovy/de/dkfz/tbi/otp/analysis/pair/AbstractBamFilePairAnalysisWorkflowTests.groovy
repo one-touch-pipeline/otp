@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFiles
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import java.time.Duration
 

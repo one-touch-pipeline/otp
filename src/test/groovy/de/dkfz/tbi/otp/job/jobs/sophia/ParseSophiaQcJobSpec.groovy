@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 

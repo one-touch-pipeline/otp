@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService

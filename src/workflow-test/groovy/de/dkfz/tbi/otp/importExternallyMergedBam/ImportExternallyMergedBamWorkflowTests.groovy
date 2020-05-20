@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 

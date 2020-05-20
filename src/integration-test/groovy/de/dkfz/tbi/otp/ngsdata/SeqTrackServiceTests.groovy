@@ -28,6 +28,7 @@ import org.junit.Test
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration

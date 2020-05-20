@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 
 //---------------------------
 //input

@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut

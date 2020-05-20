@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.ToString
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 /**

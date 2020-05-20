@@ -28,6 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTest<FastqcDataFilesService>, DataTest {
 

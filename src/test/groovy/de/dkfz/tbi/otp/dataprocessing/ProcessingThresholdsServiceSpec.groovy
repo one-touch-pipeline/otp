@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class ProcessingThresholdsServiceSpec extends Specification implements DataTest, DomainFactoryCore {
     private static final Integer LANES = 1

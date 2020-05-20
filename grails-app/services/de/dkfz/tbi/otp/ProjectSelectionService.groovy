@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.grails.web.util.WebUtils
 import org.springframework.security.access.AccessDeniedException
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 
 import javax.servlet.http.HttpServletRequest

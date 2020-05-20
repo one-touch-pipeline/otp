@@ -25,6 +25,7 @@ import grails.converters.JSON
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunYapsaController extends AbstractAnalysisController {

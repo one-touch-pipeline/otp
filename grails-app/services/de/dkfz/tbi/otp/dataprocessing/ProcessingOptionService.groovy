@@ -26,7 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.singleElement
 

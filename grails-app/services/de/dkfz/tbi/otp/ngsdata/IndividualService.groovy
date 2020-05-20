@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.project.Project
 
 @Transactional
 class IndividualService {

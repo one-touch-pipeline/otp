@@ -33,6 +33,7 @@ import org.springframework.security.web.authentication.switchuser.SwitchUserFilt
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Principal
 
 import static org.junit.Assert.assertNotNull

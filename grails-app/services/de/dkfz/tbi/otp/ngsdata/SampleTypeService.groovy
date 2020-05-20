@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.project.Project
 
 @Transactional
 class SampleTypeService {

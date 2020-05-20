@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 class CopyFilesJobSpec extends Specification implements DataTest {

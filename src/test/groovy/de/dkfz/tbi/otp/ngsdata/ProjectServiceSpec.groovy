@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.LocalDate

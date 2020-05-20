@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdStrategy.*
 

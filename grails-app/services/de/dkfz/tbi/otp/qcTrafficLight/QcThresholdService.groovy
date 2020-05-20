@@ -27,7 +27,7 @@ import groovy.transform.Canonical
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.FormatHelper
 

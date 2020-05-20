@@ -25,6 +25,8 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.*
 
+import de.dkfz.tbi.otp.project.Project
+
 @Rollback
 @Integration
 class UserProjectRoleIntegrationSpec extends Specification {

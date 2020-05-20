@@ -26,6 +26,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class ExternalMergingWorkPackageSpec extends Specification implements DataTest {
 

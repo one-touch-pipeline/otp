@@ -29,6 +29,7 @@ import org.springframework.context.i18n.LocaleContextHolder
 import de.dkfz.tbi.otp.ProjectSelectionCommand
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 @CompileStatic
 class ProjectSelectionInterceptor {

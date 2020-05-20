@@ -30,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 @CompileStatic
 @Transactional

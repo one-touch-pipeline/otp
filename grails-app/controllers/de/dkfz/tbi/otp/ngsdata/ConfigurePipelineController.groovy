@@ -27,6 +27,7 @@ import groovy.transform.ToString
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 

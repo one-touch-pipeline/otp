@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 
 import java.util.regex.Pattern
 

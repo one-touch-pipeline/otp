@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement

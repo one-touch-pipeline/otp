@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Column
 import de.dkfz.tbi.util.spreadsheet.validation.Level

@@ -1,4 +1,4 @@
-<%@ page import="de.dkfz.tbi.otp.ngsdata.Project" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project" %>
 %{--
   - Copyright 2011-2020 The OTP authors
   -
@@ -45,7 +45,7 @@
                 <td><otp:expandableText shortened="${project.shortDescription ?: "-"}" full="${project.description ?: "-"}"/></td>
                 <td>
                     ${project.st.collect { "${it.seqType} (${it.numberOfSamples})" }.join(", ") ?: g.message(code: "home.data.none")}
-                    <g:if test="${project.projectType == de.dkfz.tbi.otp.ngsdata.Project.ProjectType.USER_MANAGEMENT}">
+                    <g:if test="${project.projectType == de.dkfz.tbi.otp.project.Project.ProjectType.USER_MANAGEMENT}">
                         <g:message code="home.data.userManagement"/>
                     </g:if>
                 </td>

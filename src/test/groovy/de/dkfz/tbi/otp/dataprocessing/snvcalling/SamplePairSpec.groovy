@@ -28,6 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class SamplePairSpec extends Specification implements DataTest {
 

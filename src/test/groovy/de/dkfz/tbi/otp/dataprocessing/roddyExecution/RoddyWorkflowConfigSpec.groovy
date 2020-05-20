@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 class RoddyWorkflowConfigSpec extends Specification implements DataTest {
 

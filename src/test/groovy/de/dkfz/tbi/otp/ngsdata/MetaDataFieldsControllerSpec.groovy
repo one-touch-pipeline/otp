@@ -30,6 +30,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 
 import static javax.servlet.http.HttpServletResponse.*
