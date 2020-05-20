@@ -34,12 +34,13 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
-import static de.dkfz.tbi.otp.ngsdata.ProjectRequest.Status.*
+import static de.dkfz.tbi.otp.project.ProjectRequest.Status.*
 
 @Rollback
 @Integration

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
