@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.project
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
@@ -45,6 +45,22 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.GeneModel
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.ProjectCreationCommand
+import de.dkfz.tbi.otp.ngsdata.ProjectGroup
+import de.dkfz.tbi.otp.ngsdata.ProjectRole
+import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.TumorEntity
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
 import de.dkfz.tbi.otp.project.Project
