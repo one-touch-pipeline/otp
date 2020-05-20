@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectRequestService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand

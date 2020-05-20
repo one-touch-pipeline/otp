@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.project.ProjectRequestService
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.MultiObjectValueSource
