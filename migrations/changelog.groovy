@@ -424,4 +424,6 @@ databaseChangeLog = {
     include file: 'changelogs/2020/otp-375-priority-as-domain.groovy'
 
     include file: 'changelogs/2020/otp-507.groovy'
+
+    include file: 'changelogs/2020/otp-512.groovy'
 }

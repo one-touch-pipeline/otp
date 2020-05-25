@@ -23,15 +23,11 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * This service is able to track the execution of jobs on the cluster.
@@ -43,80 +39,18 @@ import de.dkfz.tbi.otp.utils.SessionUtils
  */
 @Component
 @Slf4j
-class ClusterJobMonitor {
-
-    @Autowired
-    ClusterJobSchedulerService clusterJobSchedulerService
+class OldClusterJobMonitor extends AbstractClusterJobMonitor {
 
     @Autowired
     Scheduler scheduler
 
-    @Autowired
-    SchedulerService schedulerService
-
-    @Scheduled(fixedDelay = 30000L)
-    void check() {
-        if (!schedulerService.isActive()) {
-            return //job system is inactive
-        }
-
-        SessionUtils.withNewSession {
-            doCheck()
-        }
+    @Override
+    protected List<ClusterJob> findAllClusterJobsToCheck() {
+        return ClusterJob.findAllByCheckStatusAndOldSystem(ClusterJob.CheckStatus.CHECKING, true)
     }
 
-    @SuppressWarnings('CatchThrowable')
-    private void doCheck() {
-        List<ClusterJob> clusterJobsToCheck = ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING)
-        log.debug("Check for finished cluster jobs: ${clusterJobsToCheck.size()}")
-
-        clusterJobsToCheck.groupBy { ClusterJob clusterJob ->
-            clusterJob.realm
-        }.each { Realm realm, List<ClusterJob> clusterJobs ->
-            Map<ClusterJobIdentifier, ClusterJobStatus> jobStates = [:]
-            List<String> finishedClusterJobIds = []
-            try {
-                jobStates = clusterJobSchedulerService.retrieveKnownJobsWithState(realm)
-                log.debug("Retrieving job states for ${realm}")
-            } catch (Throwable e) {
-                log.error("Retrieving job states for ${realm} failed, skip", e)
-                return
-            }
-
-            clusterJobs.each { ClusterJob clusterJob ->
-                ClusterJobStatus status = jobStates.get(new ClusterJobIdentifier(clusterJob), ClusterJobStatus.COMPLETED)
-                boolean completed = (status == ClusterJobStatus.COMPLETED)
-                boolean unknown = (status == ClusterJobStatus.UNKNOWN)
-                log.debug("Checking cluster job ID ${clusterJob.clusterJobId}: ${completed ? 'finished' : unknown ? 'state UNKNOWN' : 'still running'}")
-                if (completed) {
-                    handleFinishedClusterJob(clusterJob)
-                    finishedClusterJobIds.add(clusterJob.clusterJobId)
-                }
-            }
-            log.debug("Finshed ${finishedClusterJobIds.size()} cluster jobs on ${realm}: ${finishedClusterJobIds.sort().join(', ')}")
-        }
-    }
-
-    private void handleFinishedClusterJob(ClusterJob clusterJob) {
-        saveJobFinishedInformation(clusterJob)
-        notifyJobAboutFinishedClusterJob(clusterJob)
-    }
-
-    @SuppressWarnings('CatchThrowable')
-    private void saveJobFinishedInformation(ClusterJob clusterJob) {
-        ClusterJob.withTransaction {
-            clusterJob.refresh()
-            try {
-                clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
-            } catch (Throwable e) {
-                log.warn("Failed to fill in runtime statistics for ${clusterJob}", e)
-            }
-            clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-            clusterJob.save(flush: true)
-        }
-    }
-
-    protected void notifyJobAboutFinishedClusterJob(final ClusterJob clusterJob) {
+    @Override
+    protected void handleFinishedClusterJobs(final ClusterJob clusterJob) {
         MonitoringJob monitoringJob = schedulerService.getJobForProcessingStep(clusterJob.processingStep)
         assert monitoringJob : """\n\n-----------------------------------------------
 No monitor job found for ${clusterJob.processingStep}

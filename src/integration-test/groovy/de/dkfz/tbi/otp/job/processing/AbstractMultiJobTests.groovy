@@ -58,7 +58,7 @@ class AbstractMultiJobTests implements UserAndRoles {
 
     @Autowired
     ApplicationContext applicationContext
-    ClusterJobMonitor clusterJobMonitor
+    OldClusterJobMonitor oldClusterJobMonitor
     RestartCheckerService restartCheckerService
     Scheduler scheduler
 
@@ -236,7 +236,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //check that the expected cluster jobs are in checking
             assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING)*.clusterJobId == [CLUSTER_JOB_1_ID]
 
-            clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+            oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
 
             //still in phase 1, since cluster 2 two of phase 1 still run
             assert atomicPhase.get() == 1
@@ -261,7 +261,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //check that no further jobs are in checking
             assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).empty
 
-            clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+            oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
 
             //check that job is in phase 2, since all cluster jobs of phase 1 finished
             assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
@@ -307,7 +307,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //check that no further cluster job is in checking
             assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).empty
 
-            clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+            oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
 
             //check that job is in phase 3, since all cluster jobs of phase 1 finished
             assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
@@ -387,7 +387,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 
-            clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+            oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
             assert atomicPhase.get() == 1
             assert job.state == AbstractJobImpl.State.STARTED
             assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
@@ -397,7 +397,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)
 
-            clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+            oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
             assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
             assert atomicPhase.get() == 2
 

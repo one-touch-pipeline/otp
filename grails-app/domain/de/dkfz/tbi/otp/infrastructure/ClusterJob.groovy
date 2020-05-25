@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.gorm.mapper.PersistentDurationAsMillis
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -237,6 +238,8 @@ class ClusterJob implements Entity {
 
     Individual individual
 
+    WorkflowStep workflowStep
+
     static hasMany = [
             dependencies: ClusterJob,
     ]
@@ -280,6 +283,17 @@ class ClusterJob implements Entity {
         userSuspendStateDuration nullable: true
         startCount nullable: true, min: 1
         individual(nullable: true)
+
+        oldSystem validator: { val, obj ->
+            if (val ^ !obj.workflowStep) {
+                return false
+            }
+            if (!val ^ !obj.processingStep) {
+                return false
+            }
+        }
+        workflowStep nullable: true
+        processingStep nullable: true
     }
 
     static mapping = {
@@ -296,6 +310,7 @@ class ClusterJob implements Entity {
 
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"
+        workflowStep index: "cluster_job_workflow_step_idx"
     }
 
     /*

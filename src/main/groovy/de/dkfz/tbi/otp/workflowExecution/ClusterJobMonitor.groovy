@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,26 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflowExecution
 
-/**
- * Lists the cluster jobs which are currently being monitored by the {@link OldClusterJobMonitor}.
- */
-
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.OldClusterJobMonitor
+import de.dkfz.tbi.otp.job.scheduler.AbstractClusterJobMonitor
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+@Component
+@Slf4j
+class ClusterJobMonitor extends AbstractClusterJobMonitor {
+    @Autowired
+    JobService jobService
 
+    @Override
+    protected List<ClusterJob> findAllClusterJobsToCheck() {
+        return ClusterJob.findAllByCheckStatusAndOldSystem(ClusterJob.CheckStatus.CHECKING, false)
+    }
 
-ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).groupBy {
-    it.processingStep
-}.each { ProcessingStep processingStep, List<ClusterJob> clusterJobs ->
-    Process process = processingStep.process
-    println "ProcessingStep ${processingStep.id}: ${processingStep.jobDefinition.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(process))?.toObject()}"
-    clusterJobs.each {
-        println "  ${it}"
+    @Override
+    protected void handleFinishedClusterJobs(ClusterJob clusterJob) {
+        if (clusterJob.workflowStep.clusterJobs.every { it.checkStatus == ClusterJob.CheckStatus.FINISHED }) {
+            jobService.createNextJob(clusterJob.workflowStep.workflowRun)
+        }
     }
 }
-''

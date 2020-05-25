@@ -42,9 +42,9 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
-class ClusterJobMonitorSpec extends Specification implements DataTest {
+class OldClusterJobMonitorSpec extends Specification implements DataTest {
 
-    ClusterJobMonitor clusterJobMonitor
+    OldClusterJobMonitor clusterJobMonitor
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -61,7 +61,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
         SchedulerService schedulerService = new SchedulerService(
                 processService: new ProcessService()
         )
-        clusterJobMonitor = new ClusterJobMonitor([
+        clusterJobMonitor = new OldClusterJobMonitor([
                 clusterJobSchedulerService: Mock(ClusterJobSchedulerService),
                 scheduler: new Scheduler([
                         jobMailService: Mock(JobMailService),
@@ -148,7 +148,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
             0 * _
         }
 
-        clusterJobMonitor = new ClusterJobMonitor()
+        clusterJobMonitor = new OldClusterJobMonitor()
         clusterJobMonitor.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
             1 * getJobForProcessingStep(clusterJobCheckingRealm1.processingStep) >> monitoringJob1
@@ -216,7 +216,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
         ])
 
-        ClusterJobMonitor clusterJobMonitor = new ClusterJobMonitor()
+        OldClusterJobMonitor clusterJobMonitor = new OldClusterJobMonitor()
         clusterJobMonitor.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> false
             0 * _
@@ -241,7 +241,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
                 checkStatus: ClusterJob.CheckStatus.FINISHED,
         ])
 
-        ClusterJobMonitor clusterJobMonitor = new ClusterJobMonitor()
+        OldClusterJobMonitor clusterJobMonitor = new OldClusterJobMonitor()
         clusterJobMonitor.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
             0 * _
@@ -297,7 +297,8 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobMonitor.schedulerService.running.add(testJob)
         assert LogThreadLocal.threadLog == null
 
-        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+        clusterJobMonitor.handleFinishedClusterJobs(clusterJob)
+
         assert clusterJobMonitor.schedulerService.jobExecutedByCurrentThread == null
         assert LogThreadLocal.threadLog == null
         assert testJob.executed

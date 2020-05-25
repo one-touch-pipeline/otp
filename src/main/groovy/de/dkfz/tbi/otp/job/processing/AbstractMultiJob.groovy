@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.job.scheduler.*
 abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 
     @Autowired
-    ClusterJobMonitor clusterJobMonitor
+    OldClusterJobMonitor oldClusterJobMonitor
 
     @Autowired
     Scheduler scheduler

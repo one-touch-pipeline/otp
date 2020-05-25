@@ -22,13 +22,13 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitor
+import de.dkfz.tbi.otp.job.scheduler.OldClusterJobMonitor
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
 
 /**
  * Interface for {@link Job}s which are long running. An example is to
  * keep track of jobs running on a cluster. The interface is needed
- * in communication with the {@link ClusterJobMonitor} as this service
+ * in communication with the {@link OldClusterJobMonitor} as this service
  * invokes methods on this interface to notify the Job about state changes
  * of the tracked job on the cluster.
  *

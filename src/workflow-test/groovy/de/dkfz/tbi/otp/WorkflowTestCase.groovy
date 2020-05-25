@@ -187,7 +187,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             // this is done here so they will be stopped when each test is finished,
             // otherwise there would be problems with the database being deleted
             scheduler.scheduleWithFixedDelay({
-                Holders.applicationContext.getBean(ClusterJobMonitor).check()
+                Holders.applicationContext.getBean(OldClusterJobMonitor).check()
             } as Runnable, 0, 10, TimeUnit.SECONDS)
 
             scheduler.scheduleWithFixedDelay({
