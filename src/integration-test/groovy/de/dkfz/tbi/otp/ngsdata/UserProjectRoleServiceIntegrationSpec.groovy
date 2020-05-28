@@ -999,7 +999,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        // valid UserProjectRole of different Project
+        // valid UserProjectRole of different Projects
         DomainFactory.createUserProjectRole(manageUsers: true)
 
         Project project = createProject()
@@ -1050,10 +1050,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         // authoritative
         [PI].each { ProjectRole projectRole ->
-            [true, false].each { boolean enabled ->
-                expectedUsers << addUserProjectRole(projectRole: projectRole, enabled: true).user
-                addUserProjectRole(projectRole: projectRole, enabled: false)
-            }
+            expectedUsers << addUserProjectRole(projectRole: projectRole, enabled: true).user
+            addUserProjectRole(projectRole: projectRole, enabled: false)
         }
 
         // not authoritative
@@ -1068,6 +1066,46 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         projectAuthorities == expectedUsers
+    }
+
+    void "getBioinformaticianUsers, returns all enabled users of project with an Bioinformatician ProjectRole"() {
+        given:
+        setupData()
+
+        List<ProjectRole> bioInfProjectRoles = [RESPONSIBLE_BIOINFORMATICIAN, LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN]
+
+        // valid UserProjectRole of different Projects
+        bioInfProjectRoles.each { ProjectRole pr ->
+            DomainFactory.createUserProjectRole(projectRole: pr)
+        }
+
+        Project project = createProject()
+        Closure<UserProjectRole> addUserProjectRole = { Map properties = [:] ->
+            return DomainFactory.createUserProjectRole([
+                    project: project,
+            ] + properties)
+        }
+
+        List<User> expectedUsers = []
+
+        // bioinformaticians
+        bioInfProjectRoles.each { ProjectRole projectRole ->
+            expectedUsers << addUserProjectRole(projectRole: projectRole, enabled: true).user
+            addUserProjectRole(projectRole: projectRole, enabled: false)
+        }
+
+        // not bioinformaticians
+        [PI, SUBMITTER, DomainFactory.createProjectRole()].each { ProjectRole projectRole ->
+            [true, false].each { boolean enabled ->
+                addUserProjectRole(projectRole: projectRole, enabled: enabled)
+            }
+        }
+
+        when:
+        List<User> projectBioinformaticians = UserProjectRoleService.getBioinformaticianUsers(project)
+
+        then:
+        CollectionUtils.containSame(projectBioinformaticians, expectedUsers)
     }
 
     void "handleSharedUnixGroupOnProjectCreation, project with shared unix group"() {

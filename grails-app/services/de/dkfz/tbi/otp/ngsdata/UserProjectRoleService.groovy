@@ -534,12 +534,24 @@ class UserProjectRoleService {
         return UserProjectRole.findAllByProjectAndManageUsersAndEnabled(project, true, true)*.user
     }
 
-    private static List<User> getProjectAuthorities(Project project) {
+    static List<User> getProjectAuthorities(Project project) {
         return UserProjectRole.findAllByProjectAndProjectRoleInListAndEnabled(
                 project,
                 ProjectRole.findAllByNameInList(ProjectRole.AUTHORITY_PROJECT_ROLES),
                 true
         )*.user
+    }
+
+    static List<User> getBioinformaticianUsers(Project project) {
+        List<ProjectRole> bioinformaticians = ProjectRole.findAllByNameInList(ProjectRole.BIOINFORMATICIAN_PROJECT_ROLES)
+        return UserProjectRole.createCriteria().list {
+            eq("project", project)
+            'in'("projectRole", bioinformaticians)
+            eq("enabled", true)
+            user {
+                eq("enabled", true)
+            }
+        }*.user
     }
 
     List<OtpPermissionCode> getPermissionDiff(boolean added, Map flags, UserProjectRole oldUPR) {

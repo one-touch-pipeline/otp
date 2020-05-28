@@ -358,8 +358,8 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.BOOLEAN
         ),
         FILESYSTEM_TIMEOUT(
-            "The amount of time (im minutes) the FileService allows the filesystem until a given commands times out",
-            Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
+                "The amount of time (im minutes) the FileService allows the filesystem until a given commands times out",
+                Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
         ),
 
         //defaults
@@ -535,6 +535,16 @@ class ProcessingOption implements Entity {
         CLUSTER_NAME(
                 "The common name to refer to the cluster OTP uses",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+
+        // CellRanger cleanup
+        CELLRANGER_CLEANUP_WEEKS_TILL_DELETION_AFTER_REMINDER(
+                "How many weeks to wait, after reminder was sent, before uncategorised CellRanger results are deleted again",
+                Necessity.OPTIONAL, "4", TypeValidators.POSITIVE_NUMBER
+        ),
+        CELLRANGER_CLEANUP_WEEKS_TILL_REMINDER(
+                "How many weeks to wait before bioinformaticians of a project are reminded that they must categorise their CellRanger results",
+                Necessity.OPTIONAL, "12", TypeValidators.POSITIVE_NUMBER
         ),
 
         private final String description

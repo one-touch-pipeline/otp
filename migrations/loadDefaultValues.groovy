@@ -25,5 +25,9 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/defaultValues/workflow.sql')
     }
 
+    changeSet(author: "", id: "project-roles", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/project-roles.sql')
+    }
+
     include file: 'changelogs/defaultValues/createSpeciesAndStrains.groovy'
 }

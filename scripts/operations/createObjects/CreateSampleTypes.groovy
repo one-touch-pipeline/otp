@@ -40,7 +40,7 @@ SampleType.SpecificReferenceGenome specificReferenceGenome =
 SampleType.withTransaction {
     sampleTypeNames.each {
         println "create: " + new SampleType (
-                name: it,
+                name: it.toString().toLowerCase(),
                 specificReferenceGenome: specificReferenceGenome,
         ).save(flush: true)
     }

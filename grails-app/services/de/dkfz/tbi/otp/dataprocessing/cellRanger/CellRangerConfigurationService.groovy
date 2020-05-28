@@ -221,7 +221,7 @@ class CellRangerConfigurationService {
         } as List<CellRangerMergingWorkPackage>)
     }
 
-    private void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete) {
+    void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete) {
         mwpToDelete.each {
             assert it.status != CellRangerMergingWorkPackage.Status.FINAL
         }
@@ -230,5 +230,10 @@ class CellRangerConfigurationService {
             it.save(flush: true)
             cellRangerWorkflowService.deleteOutputDirectory(it.bamFileInProjectFolder as SingleCellBamFile)
         }
+    }
+
+    void setInformedFlag(CellRangerMergingWorkPackage crmwp, Date date) {
+        crmwp.informed = date
+        crmwp.save(flush: true)
     }
 }

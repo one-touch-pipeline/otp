@@ -37,6 +37,9 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.sql.Timestamp
+import java.time.LocalDate
+
 @Rollback
 @Integration
 class CellRangerConfigurationServiceIntegrationSpec extends Specification implements CellRangerFactory, UserAndRoles {
@@ -407,5 +410,52 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         then:
         mwp1.status == CellRangerMergingWorkPackage.Status.FINAL
         mwp2.status == CellRangerMergingWorkPackage.Status.DELETED
+    }
+
+    void "deleteMwps, sets status and calls delete"() {
+        given:
+        CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService(
+            cellRangerWorkflowService: Mock(CellRangerWorkflowService)
+        )
+        List<CellRangerMergingWorkPackage> mwps = (1..3).collect { createMergingWorkPackage() }
+
+        when:
+        cellRangerConfigurationService.deleteMwps(mwps)
+
+        then:
+        mwps.size() * cellRangerConfigurationService.cellRangerWorkflowService.deleteOutputDirectory(_)
+        mwps.every {
+            it.status == CellRangerMergingWorkPackage.Status.DELETED
+        }
+    }
+
+    void "deleteMwps, mwps contains final package, causes assertion error"() {
+        given:
+        CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService(
+                cellRangerWorkflowService: Mock(CellRangerWorkflowService)
+        )
+        List<CellRangerMergingWorkPackage> mwps = (1..2).collect { createMergingWorkPackage() }
+        mwps << createMergingWorkPackage(status: CellRangerMergingWorkPackage.Status.FINAL)
+
+        when:
+        cellRangerConfigurationService.deleteMwps(mwps)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "setting an attribute should succeed"() {
+        given:
+        CellRangerConfigurationService crmwps = new CellRangerConfigurationService()
+
+        CellRangerMergingWorkPackage crmwp = createMergingWorkPackage([
+                informed: null,
+        ])
+
+        when: "setting value via service"
+        crmwps.setInformedFlag(crmwp, Timestamp.valueOf(LocalDate.now().atStartOfDay()))
+
+        then:
+        crmwp.informed == Timestamp.valueOf(LocalDate.now().atStartOfDay())
     }
 }
