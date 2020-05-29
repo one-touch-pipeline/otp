@@ -44,10 +44,9 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         service.jobService = Mock(JobService)
 
         WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
+        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "asdf")
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "qwertz")
         workflowStep.workflowRun.state = WorkflowRun.State.FAILED
-        workflowStep.workflowRun.outputArtefacts = [asdf: wa1, qwertz: wa2]
         workflowStep.workflowRun.save(flush: true)
 
         WorkflowRun wr2 = createWorkflowRun()

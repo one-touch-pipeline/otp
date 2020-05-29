@@ -38,10 +38,22 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     WorkflowRun producedBy
 
+    // 'role' of the artefact for the workflow it was produced by, e.g. "disease" and "control"
+    String outputRole
+
     State state = State.LEGACY
 
     static constraints = {
-        producedBy nullable: true
+        producedBy nullable: true, validator: { val, obj ->
+            if (obj.outputRole && !val) {
+                return ['default.when.X.then.Y', 'set', 'outputRole', 'set']
+            }
+        }
+        outputRole nullable: true, validator: { val, obj ->
+            if (obj.producedBy && !val) {
+                return ['default.when.X.then.Y', 'set', 'producedBy', 'set']
+            }
+        }
         withdrawnDate nullable: true
         withdrawnComment nullable: true, validator: { val, obj ->
             if (obj.withdrawnDate && !val) {

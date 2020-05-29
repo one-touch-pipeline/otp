@@ -78,10 +78,7 @@ joinTables="\
 (swap_info_seq_track)|\
 (workflow_command_log)|\
 (workflow_message_log)|\
-(workflow_run_input_artefacts)|\
-(workflow_run_output_artefacts)|\
 (workflow_run_workflow_config)|\
-(workflow_run_workflow_step)|\
 (workflow_step_workflow_log)|\
 "
 

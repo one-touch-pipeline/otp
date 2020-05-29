@@ -35,10 +35,11 @@ class WorkflowService {
                 priority: step.workflowRun.priority,
         ).save(flush: true)
 
-        Map<String, WorkflowArtefact> newArtefacts = step.workflowRun.outputArtefacts.collectEntries { String role, WorkflowArtefact oldArtefact ->
+        step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
             WorkflowArtefact newArtefact = new WorkflowArtefact(
                     state: WorkflowArtefact.State.PLANNED_OR_RUNNING,
                     producedBy: run,
+                    outputRole: oldArtefact.outputRole,
             ).save(flush: true)
 
             WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->
@@ -48,11 +49,7 @@ class WorkflowService {
 
             oldArtefact.state = WorkflowArtefact.State.FAILED
             oldArtefact.save(flush: true)
-
-            return [(role): newArtefact]
-        } as Map<String, WorkflowArtefact>
-        run.outputArtefacts = newArtefacts
-        run.save(flush: true)
+        }
 
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
         step.workflowRun.save(flush: true)

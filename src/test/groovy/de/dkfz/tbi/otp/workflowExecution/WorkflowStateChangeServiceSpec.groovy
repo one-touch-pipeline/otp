@@ -43,16 +43,14 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         SkippedMessage skippedMessage = new SkippedMessage(message: "asdf", category: SkippedMessage.Category.WORKFLOW_COVERAGE_REJECTION)
-        WorkflowArtefact wa1 = createWorkflowArtefact()
-        workflowStep.workflowRun.outputArtefacts = [asdf: wa1]
-        workflowStep.workflowRun.save(flush: true)
+        WorkflowArtefact wa1 = createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "asdf")
 
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED)
-        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED, outputArtefacts: [asdf: wa2])
+        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED, producedBy: wr2, outputRole: "asdf")
         createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
 
-        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
-        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING, outputArtefacts: [asdf: wa3])
+        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING)
+        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING, producedBy: wr3, outputRole: "asdf")
         createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
@@ -99,16 +97,15 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "test changeStateToFinalFailed"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowArtefact wa1 = createWorkflowArtefact()
-        workflowStep.workflowRun.outputArtefacts = [asdf: wa1]
+        WorkflowArtefact wa1 = createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "asdf")
         workflowStep.workflowRun.save(flush: true)
 
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED)
-        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED, outputArtefacts: [asdf: wa2])
+        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED, producedBy: wr2, outputRole: "asdf")
         createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
 
-        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
-        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING, outputArtefacts: [asdf: wa3])
+        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING)
+        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING, producedBy: wr3, outputRole: "asdf")
         createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
@@ -142,9 +139,8 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "test changeStateToSuccess, is not last step"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(beanName: "1st job bean")
-        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
+        createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "abc")
         workflowStep.workflowRun.workflow.beanName = "workflow bean"
-        workflowStep.workflowRun.outputArtefacts = [abc: workflowArtefact]
         workflowStep.workflowRun.workflow.save(flush: true)
         service.applicationContext = Mock(ApplicationContext) {
             getBean("workflow bean", OtpWorkflow) >> { [getJobBeanNames: { ["1st job bean", "2nd job bean"] }] as OtpWorkflow }
@@ -164,9 +160,8 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "test changeStateToSuccess, is last step"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(beanName: "2nd job bean")
-        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
+        createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "abc")
         workflowStep.workflowRun.workflow.beanName = "workflow bean"
-        workflowStep.workflowRun.outputArtefacts = [abc: workflowArtefact]
         workflowStep.workflowRun.workflow.save(flush: true)
         service.applicationContext = Mock(ApplicationContext) {
             getBean("workflow bean", OtpWorkflow) >> { [getJobBeanNames: { ["1st job bean", "2nd job bean"] }] as OtpWorkflow }
