@@ -34,5 +34,6 @@ class ExternalWorkflowConfigFragment extends Commentable implements Deprecateabl
 
     static mapping = {
         configValues type: "text"
+        previous nullable: true
     }
 }
