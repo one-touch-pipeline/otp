@@ -36,7 +36,7 @@
         </sec:access>
         <th title="${g.message(code: 'projectUser.table.receivesNotifications.tooltip')}"><g:message code="projectUser.table.receivesNotifications"/></th>
     </g:if>
-    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <th><g:message code="projectUser.table.projectAccess"/></th>
     </sec:access>
 </tr>

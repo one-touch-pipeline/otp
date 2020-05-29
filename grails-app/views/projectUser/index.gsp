@@ -50,7 +50,7 @@
                 </g:if>
             </div>
         </div>
-        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
             <h2><g:message code="projectUser.addMember.action" args="[selectedProject?.name]"/></h2>
             <otp:annotation type="info"><g:message code="projectUser.annotation.delayedFileAccessChanges"/></otp:annotation>
             <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject">
@@ -182,7 +182,7 @@
                                     value="${userEntry.user.email}"/>
                         </td>
                         <td>
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                 <otp:editorSwitch
                                         template="dropDown"
                                         link="${g.createLink(controller: "projectUser", action: "updateProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
@@ -190,26 +190,26 @@
                                         value="${userEntry.projectRoleName}"
                                         confirmation="${confirmationText}"/>
                             </sec:access>
-                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                 ${userEntry.projectRoleName}
                             </sec:noAccess>
                         </td>
                         <g:if test="${userEntry.inLdap}">
                             <td>
-                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                     <otp:editorSwitch
                                             template="toggle"
                                             link="${g.createLink(controller: "projectUser", action: "setAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
                                             value="${userEntry.otpAccess.toBoolean()}"
                                             confirmation="${confirmationText}"/>
                                 </sec:access>
-                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                     <span class="icon-${userEntry.otpAccess}"></span>
                                 </sec:noAccess>
                             </td>
                             <td>
                                 <div class="filesAccessHandler-${userEntry.fileAccess}">
-                                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                         <otp:editorSwitch
                                                 template="toggle"
                                                 tooltip="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"
@@ -219,20 +219,20 @@
                                                 pageReload="${userEntry.fileAccess.inconsistency.toString()}"
                                         />
                                     </sec:access>
-                                    <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                    <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                         <span></span>
                                     </sec:noAccess>
                                 </div>
                             </td>
                             <td>
-                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
+                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
                                     <otp:editorSwitch
                                             template="toggle"
                                             link="${g.createLink(controller: "projectUser", action: "setManageUsers", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
                                             value="${userEntry.manageUsers.toBoolean()}"
                                             confirmation="${confirmationText}"/>
                                 </sec:access>
-                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
+                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
                                     <span class="icon-${userEntry.manageUsers}"></span>
                                 </sec:noAccess>
                             </td>
@@ -256,18 +256,18 @@
                             </sec:access>
                         </g:else>
                         <td>
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
                                 <otp:editorSwitch
                                         template="toggle"
                                         link="${g.createLink(controller: "projectUser", action: "setReceivesNotifications", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
                                         value="${userEntry.receivesNotifications.toBoolean()}"
                                         confirmation="${confirmationText}"/>
                             </sec:access>
-                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
+                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
                                 <span class="icon-${userEntry.receivesNotifications}"></span>
                             </sec:noAccess>
                         </td>
-                        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                             <td>
                                 <g:form action="setEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id, "value": false]'>
                                     <input id="deactivateButton" type="submit" value="${g.message(code: 'projectUser.table.deactivateUser')}"
@@ -286,7 +286,7 @@
                 <g:message code="projectUser.table.copyEmail" />
             </button>
         </sec:access>
-        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable">
             <h2><g:message code="projectUser.formerUsers"/></h2>
             <table class="fixed-table-header">
@@ -317,7 +317,7 @@
                                 value="${userEntry.user.email}"/>
                     </td>
                     <td>${userEntry.projectRoleName}</td>
-                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                         <td>
                             <g:form action="setEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id, "value": true]'>
                                 <input id="reactivateButton" type="submit" value="${g.message(code: 'projectUser.table.reactivateUser', "value": true)}"
