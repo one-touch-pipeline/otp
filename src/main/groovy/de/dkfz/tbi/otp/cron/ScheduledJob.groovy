@@ -43,6 +43,7 @@ import java.time.LocalDateTime
 abstract class ScheduledJob {
 
     static final List<Class> ALL_JOB_CLASSES = [
+            CellRangerDataCleanupJob,
             CheckForAdUpdateJob,
             DeactivateUsersJob,
             ScheduleUsersForDeactivationJob,
