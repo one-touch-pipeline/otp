@@ -127,17 +127,20 @@ class LdapService implements InitializingBean {
                 new UsernameAttributesMapper())
     }
 
-    List<String> getGroupsOfUserByUsername(String username) {
-        if (username == null) {
-            return []
+    List<String> getGroupsOfUser(User user) {
+        if (!user.username) {
+            return null
         }
-        return ldapTemplate.search(
-                query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
-                        .and(configService.ldapSearchAttribute).is(username),
-                new MemberOfAttributesMapper())[0]
+        ContainerCriteria query = query()
+                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                .and(configService.ldapSearchAttribute).is(user.username)
+        return ldapTemplate.search(query, new MemberOfAttributesMapper())[0]
     }
 
     boolean existsInLdap(User user) {
+        if (!user.username) {
+            return null
+        }
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
@@ -146,6 +149,9 @@ class LdapService implements InitializingBean {
     }
 
     Map<String, String> getAllLdapValuesForUser(User user) {
+        if (!user.username) {
+            return null
+        }
         ContainerCriteria query = query()
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                 .and(configService.ldapSearchAttribute).is(user.username)
@@ -153,6 +159,9 @@ class LdapService implements InitializingBean {
     }
 
     Boolean isUserDeactivated(User user) {
+        if (!user.username) {
+            return null
+        }
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
@@ -161,6 +170,9 @@ class LdapService implements InitializingBean {
     }
 
     Integer getUserAccountControlOfUser(User user) {
+        if (!user.username) {
+            return null
+        }
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)
                 .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)

@@ -40,7 +40,7 @@ UserProjectRole.withTransaction {
         }
         User user = userProjectRole.user
         if (!cache[user.username]) {
-            cache[user.username] = ldapService.getGroupsOfUserByUsername(user.username)
+            cache[user.username] = ldapService.getGroupsOfUser(user)
         }
         boolean fileAccessInOtp = userProjectRole.accessToFiles
         boolean fileAccessInLdap = userProjectRole.project.unixGroup in cache[user.username]

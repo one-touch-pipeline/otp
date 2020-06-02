@@ -59,7 +59,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         given:
         DeactivateUsersJob job = new DeactivateUsersJob([
                 ldapService: Mock(LdapService) {
-                    _ * getGroupsOfUserByUsername(_) >> {
+                    _ * getGroupsOfUser(_) >> {
                         return ["GroupA", "GroupB"]
                     }
                 },
@@ -106,7 +106,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsLong(_) { return 0L }
                 },
                 ldapService: Mock(LdapService) {
-                    _ * getGroupsOfUserByUsername(_) >> { return ["group"] }
+                    _ * getGroupsOfUser(_) >> { return ["group"] }
                 },
                 userService: new UserService(),
                 mailHelperService: Mock(MailHelperService) {
@@ -138,7 +138,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsLong(_) { return 0L }
                 },
                 ldapService: Mock(LdapService) {
-                    1 * getGroupsOfUserByUsername(_) >> { return ["group"] }
+                    1 * getGroupsOfUser(_) >> { return ["group"] }
                 },
                 userService: new UserService(),
                 mailHelperService: Mock(MailHelperService) {

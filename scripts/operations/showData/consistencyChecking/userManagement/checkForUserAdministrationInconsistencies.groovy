@@ -141,7 +141,7 @@ UserProjectRole.findAll().each { UserProjectRole userProjectRole ->
         return
     }
     boolean fileAccessInOtp = userProjectRole.accessToFiles
-    boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
+    boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUser(userProjectRole.user)
     if (fileAccessInOtp != fileAccessInLdap) {
         output << sprintf(
                 format,

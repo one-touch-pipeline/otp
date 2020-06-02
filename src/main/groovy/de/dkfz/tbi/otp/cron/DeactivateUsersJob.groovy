@@ -91,7 +91,7 @@ class DeactivateUsersJob extends ScheduledJob {
     }
 
     boolean isInGroup(User user, String unixGroup) {
-        return unixGroup in ldapService.getGroupsOfUserByUsername(user.username)
+        return unixGroup in ldapService.getGroupsOfUser(user)
     }
 
     void disableUserAndNotify(User user) {

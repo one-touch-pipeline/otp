@@ -117,7 +117,7 @@ class UserAdministrationController implements CheckAndCall {
         return [
                 userProjectRoles       : UserProjectRole.findAllByUser(user).sort { it.project.name },
                 user                   : user,
-                ldapGroups             : ldapService.getGroupsOfUserByUsername(user.username) ?: [],
+                ldapGroups             : ldapService.getGroupsOfUser(user) ?: [],
                 roleLists              : roleLists,
                 userExistsInLdap       : ldapService.existsInLdap(user),
                 userAccountControlValue: ldapService.getUserAccountControlOfUser(user),

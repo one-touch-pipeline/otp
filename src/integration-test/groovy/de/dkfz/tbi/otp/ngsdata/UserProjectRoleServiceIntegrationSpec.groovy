@@ -463,7 +463,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsername(_) >> ldapUserDetails
-            getGroupsOfUserByUsername(_) >> []
+            getGroupsOfUser(_) >> []
         }
 
         int expectedInvocations = accessToFiles ? 1 : 0
