@@ -27,18 +27,15 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.utils.logging.*
 
 // INPUT
-def samplePairs = SamplePair.withCriteria {
-    mergingWorkPackage1 {
-        sample {
-            individual {
-                'in'('pid', [
+//************ List of PIDs ************//
+String pids = """
+#PID1
+#PID2
 
-                ])
-            }
-        }
-    }
-}
 
+"""
+
+//************ Select witch analyses type should be triggered ************//
 List<String> analyses = [
         //"snv",
         //"indel",
@@ -47,6 +44,23 @@ List<String> analyses = [
         //"runYapsa",
 ]
 
+//************ Trigger analyses for disabled sample pairs. otherwise they will be ignored. ************//
+boolean runDisabledPairs = false
+
+
+
+//WORK
+def samplePairs = SamplePair.withCriteria {
+    mergingWorkPackage1 {
+        sample {
+            individual {
+                'in'('pid', pids.split("\n")*.trim().findAll {
+                    it && !it.startsWith('#')
+                })
+            }
+        }
+    }
+}
 
 // OVERVIEW
 println "Affected analyses: (${analyses.size()})"
@@ -93,7 +107,7 @@ LogThreadLocal.withThreadLog(System.out, {
                 String processingStatusName = analysisObjects['processingStatusName']
                 Class instanceClass = analysisObjects['instanceClass']
 
-                if (samplePair."$processingStatusName" == SamplePair.ProcessingStatus.DISABLED) {
+                if (samplePair."$processingStatusName" == SamplePair.ProcessingStatus.DISABLED && !runDisabledPairs) {
                     actions << "${processingStatusName} is ${SamplePair.ProcessingStatus.DISABLED} -> ignore"
                 } else {
                     instanceClass.findAllBySamplePair(samplePair).each { BamFilePairAnalysis instance ->
