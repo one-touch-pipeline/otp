@@ -53,7 +53,10 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
     }
 
     WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
-        return createDomainObject(WorkflowArtefact, [:], properties)
+        return createDomainObject(WorkflowArtefact, [
+                individual: { createIndividual() },
+                seqType: { createSeqType() },
+        ], properties)
     }
 
     WorkflowRunInputArtefact createWorkflowRunInputArtefact(Map properties = [:]) {

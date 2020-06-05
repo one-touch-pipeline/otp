@@ -93,17 +93,15 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     static boolean hasLibraryPreparationKitAndBedFile(SeqTrack seqTrack) {
         assert seqTrack: "The input seqTrack of method hasLibraryPreparationKitAndBedFile is null"
 
-        if (seqTrack.seqType.isExome()) {
+        if (seqTrack.seqType.exome) {
             return seqTrack.libraryPreparationKit && seqTrack.configuredReferenceGenome &&
                     BedFile.findWhere(
                             libraryPreparationKit: seqTrack.libraryPreparationKit,
                             referenceGenome: seqTrack.configuredReferenceGenome,
                     )
-        } else {
-            return true
         }
+        return true
     }
-
 
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
@@ -205,7 +203,7 @@ the current ones.""".stripMargin()
     }
 
     boolean canPipelineAlign(SeqTrack seqTrack) {
-        return SeqTypeService.getDefaultOtpAlignableSeqTypes().contains(seqTrack.seqType)
+        return SeqTypeService.defaultOtpAlignableSeqTypes.contains(seqTrack.seqType)
     }
 
     abstract void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign)
