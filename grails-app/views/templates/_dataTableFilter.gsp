@@ -39,7 +39,7 @@ To be used in conjunction with: common/DataTableFilter.js
                 </select>
             </td>
             <td class="value" style="">
-                <g:set var="valueWidth" value='42ch'/>
+                <g:set var="valueWidth" value='50ch'/>
                 <g:each in="${filterTree}" var="column">
                     <span id="dtf_${column.name}" class="dtf_value_span" style="display: none;">
                     <g:if test="${column.type == "LIST"}">
