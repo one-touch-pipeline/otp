@@ -92,7 +92,6 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
             }
         })
         informed(nullable: true)
-        requester(nullable: true)
     }
 
     @Override
