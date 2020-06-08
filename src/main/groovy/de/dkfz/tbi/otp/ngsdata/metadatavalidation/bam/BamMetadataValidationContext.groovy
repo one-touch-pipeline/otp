@@ -93,7 +93,7 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
                 checkFile(furtherFile, problems)
             }
         } else {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "The path '${furtherFile}' is not an absolute path.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "The path '${furtherFile}' is no absolute path.")
         }
     }
 

@@ -57,7 +57,7 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
             context.addProblem(cells, Level.ERROR, "Filename '${filePath}' does not end with '.bam'.", "At least one filename does not end with '.bam'.")
         }
         if (!OtpPath.isValidAbsolutePath(filePath)) {
-            context.addProblem(cells, Level.ERROR, "The path '${filePath}' is not an absolute path.", "At least one path is not an absolute path.")
+            context.addProblem(cells, Level.ERROR, "The path '${filePath}' is no absolute path.", "At least one path is no absolute path.")
         } else {
             try {
                 Path bamFile = context.fileSystem.getPath(filePath)

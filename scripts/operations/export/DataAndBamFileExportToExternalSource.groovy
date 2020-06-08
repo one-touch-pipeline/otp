@@ -65,7 +65,7 @@ StringBuilder output = new StringBuilder()
 
 Path targetFolder = Paths.get(targetOutputFolder)
 
-assert targetFolder.absolute : "targetOutputFolder is not an absolute path"
+assert targetFolder.absolute : "targetOutputFolder is no absolute path"
 assert seqTypesToCopy : "no seq type selected"
 
 def addToOutput = { String s ->

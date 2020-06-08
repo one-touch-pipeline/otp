@@ -76,13 +76,13 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "The path 'testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
+                        "The path 'testFile.bam' is no absolute path.", "At least one path is no absolute path."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The path 'abc/testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
+                        "The path 'abc/testFile.bam' is no absolute path.", "At least one path is no absolute path."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The path '../testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
+                        "The path '../testFile.bam' is no absolute path.", "At least one path is no absolute path."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The path './testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
+                        "The path './testFile.bam' is no absolute path.", "At least one path is no absolute path."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
                         "Filename '${wrongFormatFile}' does not end with '.bam'.", "At least one filename does not end with '.bam'."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
