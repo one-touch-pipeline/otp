@@ -245,8 +245,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         'no library preperation kit' | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
     }
 
-    @SuppressWarnings('LineLength')
-    //where table
     @Unroll
     void "validateAndImport, case #name with operation #linkOperation, then create no importProcess and return errors"() {
         given:

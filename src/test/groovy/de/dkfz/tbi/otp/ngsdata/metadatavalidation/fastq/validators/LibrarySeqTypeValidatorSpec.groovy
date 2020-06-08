@@ -86,7 +86,6 @@ class LibrarySeqTypeValidatorSpec extends Specification {
         "seqtype${SeqType.TAGMENTATION_SUFFIX}" | 'true'       | '4'
     }
 
-    @SuppressWarnings('LineLength')
     @Unroll
     void 'validate, invalid CUSTOMER_LIBRARY SEQUENCING_TYPE combinations (#seqTypeName, #tagmentation, #library), show warning'() {
         given:

@@ -587,12 +587,14 @@ All the Rules that will be used for OTP
         priority = HIGH
         length = 160
         doNotApplyToFilesMatching = "(.*/.*test.*/.*)|(.*Validator.*)"
+        ignoreLineRegex = /\s*\@((Pre)|(Post))Authorize\(.*\)/ //filter out Pre and PostAuthorize annotations
     }
     LineLength {
         priority = LOW
         length = 242
         applyToFileNames = TEST
         doNotApplyToFileNames = VALIDATOR
+        ignoreLineRegex = /((.*\s+\|{1,2}\s+.*)+)|(\s*void\s+\".*\"\(\)\s+\{)/ //filters out where block and test method names
     }
     MissingBlankLineAfterImports {
         priority = CRITICAL
