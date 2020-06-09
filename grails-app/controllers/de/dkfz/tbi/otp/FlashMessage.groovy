@@ -22,8 +22,10 @@
 package de.dkfz.tbi.otp
 
 import groovy.transform.Canonical
+import groovy.transform.ToString
 import org.springframework.validation.Errors
 
+@ToString
 @Canonical
 class FlashMessage {
 
