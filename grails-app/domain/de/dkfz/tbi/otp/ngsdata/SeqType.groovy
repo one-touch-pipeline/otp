@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MetadataField
 
@@ -31,7 +32,7 @@ import de.dkfz.tbi.otp.utils.MetadataField
  * Product Owner on 2016-07-19.)
  */
 /** This table is used externally. Please discuss a change in the team */
-class SeqType implements Entity, MetadataField {
+class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
 
     final static SINGLE_CELL_DNA = "Single-cell DNA"
 
@@ -162,6 +163,11 @@ class SeqType implements Entity, MetadataField {
 
     @Override
     String toString() {
+        return displayNameWithLibraryLayout
+    }
+
+    @Override
+    String getStringForProjectFieldDomainReference() {
         return displayNameWithLibraryLayout
     }
 }

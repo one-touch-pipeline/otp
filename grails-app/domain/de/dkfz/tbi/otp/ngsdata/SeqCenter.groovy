@@ -22,10 +22,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
-class SeqCenter implements Entity {
+class SeqCenter implements Entity, ProjectFieldReferenceAble {
 
     /** This attribute is used externally. Please discuss a change in the team */
     String name
@@ -71,5 +72,10 @@ class SeqCenter implements Entity {
     @Override
     String toString() {
         name
+    }
+
+    @Override
+    String getStringForProjectFieldDomainReference() {
+        return name
     }
 }
