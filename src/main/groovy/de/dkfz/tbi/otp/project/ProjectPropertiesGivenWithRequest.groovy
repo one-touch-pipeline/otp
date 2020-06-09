@@ -23,11 +23,15 @@ package de.dkfz.tbi.otp.project
 
 import de.dkfz.tbi.otp.ngsdata.TumorEntity
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 
 import java.time.LocalDate
 
 // doesn't work as abstract class
 trait ProjectPropertiesGivenWithRequest {
+
+    Set<AbstractFieldValue> projectFields
+
     /** This attribute is used externally. Please discuss a change in the team */
     String name
     String description

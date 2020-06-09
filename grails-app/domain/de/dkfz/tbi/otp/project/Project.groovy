@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.ProjectGroup
 import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -105,8 +106,9 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     QcThresholdHandling qcThresholdHandling
 
     static hasMany = [
-            projectInfos: ProjectInfo,
-            keywords    : Keyword,
+            projectInfos : ProjectInfo,
+            keywords     : Keyword,
+            projectFields: AbstractFieldValue,
     ]
 
     static belongsTo = [

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.project
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -93,6 +94,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
             leadBioinformaticians: User,
             bioinformaticians    : User,
             submitters           : User,
+            projectFields        : AbstractFieldValue,
     ]
 
     static mapping = {
