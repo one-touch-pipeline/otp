@@ -361,4 +361,7 @@ databaseChangeLog = {
         }
     }
 
+    changeSet(author: "otp (generated)", id: "1591707826049-3") {
+        addForeignKeyConstraint(baseColumnNames: "comment_id", baseTableName: "individual", constraintName: "FK69vjbfxq2vbvgbelt1co6vgu", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "comment")
+    }
 }
