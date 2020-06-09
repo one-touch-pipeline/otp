@@ -29,7 +29,6 @@ class NumberConverter implements ValueConverter {
 
     Class<?> targetType
 
-
     @Override
     boolean canConvert(Object value) {
         value instanceof String
@@ -40,6 +39,10 @@ class NumberConverter implements ValueConverter {
         String value = value1.toString().trim()
         if (value.contains(",")) {
             throw new IllegalArgumentException("Numbers must not contain ','")
+        }
+
+        if (!value) {
+            return null
         }
 
         if (targetType == Float || targetType == float) {
