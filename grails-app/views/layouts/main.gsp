@@ -83,6 +83,7 @@
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message code="projectOverview.projectInfos" /></g:link></li>
                                             <li class="allGranted"><g:link controller="projectRequest" action="index"><g:message code="otp.menu.projectRequest"/></g:link></li>
+                                            <li class="allGranted"><g:link controller="projectFields" action="index"><g:message code="otp.menu.configureProjectInformation"/></g:link></li>
                                         </sec:ifAnyGranted>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
                                             <li class="allGranted"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li>

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp
 import grails.converters.JSON
 import grails.validation.Validateable
 import grails.validation.ValidationException
+import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
 
 trait CheckAndCall {
@@ -37,7 +38,7 @@ trait CheckAndCall {
                 method()
                 data = [success: true] + additionalSuccessReturnValues()
             } catch (ValidationException e) {
-                data = getErrorData(e.errors.getFieldError())
+                data = getErrorData(e.errors.fieldError)
             } catch (AssertionError e) {
                 data = [success: false, error: "An error occurred: ${e.localizedMessage}"]
             }
@@ -56,6 +57,54 @@ trait CheckAndCall {
         }.invalidToken {
             flash.message = new FlashMessage(g.message(code: "default.expired.session") as String)
         }
+    }
+
+    @SuppressWarnings('CatchRuntimeException')
+    void checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure method) {
+        Map data
+        if (cmd.hasErrors()) {
+            data = createErrorMessage(cmd.errors)
+        } else {
+            try {
+                method()
+                data = [success: true]
+            } catch (ValidationException e) {
+                data = createErrorMessage(e.errors)
+            } catch (NumberFormatException e) {
+                data = [
+                        success: false,
+                        error: [
+                                g.message(code: 'default.message.error'),
+                                g.message(code: 'default.message.noNumberException'),
+                        ].join('\n    '),
+                ]
+            } catch (AssertionError | RuntimeException e) {
+                data = [
+                        success: false,
+                        error: [
+                                g.message(code: 'default.message.error'),
+                                e.localizedMessage,
+                        ].join('\n    '),
+                ]
+            }
+        }
+        render data as JSON
+    }
+
+    private Map createErrorMessage(Errors errors) {
+        List<String> errorMessages = []
+        if (errors.errorCount == 1) {
+            errorMessages << g.message(code: "default.message.error")
+        } else {
+            errorMessages << g.message(code: "default.message.errors", args: errors.errorCount)
+        }
+        errors.allErrors.each {
+            errorMessages << g.message(error: it)
+        }
+        return [
+                success: false,
+                error  : errorMessages.join('\n    '),
+        ]
     }
 
     private Map getErrorData(FieldError errors) {

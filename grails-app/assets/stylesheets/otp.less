@@ -27,6 +27,9 @@
 @darkblue: #81BEF7;
 @otpBlack: #222;
 @danger: #c82333;
+@tableColor1: #A5D3FF;
+@tableColor2: #FFF;
+@tableBorderVertical: #A4C3CA;
 
 // re-usable colours for errors, see also: .input-error
 @errorText: #cc0000;
@@ -2597,6 +2600,20 @@ table.key-value-table {
         background-color: #f8d7da;
         border-color: #f5c6cb;
     }
+
+    &.type-dark {
+        color: #1b1e21;
+        background-color: #d6d8d9;
+        border-color: #c6c8ca;
+    }
+
+    &.type-footnote { //dark alert of bootstrap
+        .type-dark;
+
+        li {
+            list-style-type: none;
+        }
+    }
 }
 
 .vertical-align-middle * {
@@ -2616,4 +2633,114 @@ input[type=submit].submitting {
     div {
         padding-right: 5px;
     }
+}
+
+.scroll-screen-width {
+    width: 100%;
+    min-width: unset;
+    max-width: 100%;
+    overflow: auto;
+    max-height: 600px;
+}
+
+#otp .additionalFields {
+    .scroll-screen-width;
+    th {
+        *[title]:after {
+            content: "";
+            display: inline-block;
+            background: url("help.png") no-repeat center;
+            width: 16px;
+            height: 16px;
+            background-size: 16px; //show round icon
+        }
+        white-space: unset;
+        min-width: 22ch;
+        &.name {
+            z-index: 1;
+        }
+    }
+
+    tr:nth-last-child(2n) td {
+        background-color: @tableColor1;
+    }
+
+    tr:nth-last-child(2n+1) td {
+        background-color: @tableColor2;
+    }
+
+    th, td {
+        &:nth-child(1) {
+            border-right-color: @tableBorderVertical;
+            border-right-width: thin;
+            border-right-style: solid;
+        }
+    }
+
+    table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .defaultWordBreak {
+        .wordBreak {
+            word-break: unset;
+        }
+    }
+
+    .name {
+        min-width: 30ch;
+        position: sticky;
+        position: -webkit-sticky;
+        left: 0;
+        background-color: #9e0bff;
+    }
+
+    .description {
+        min-width: 50ch;
+    }
+
+    .fieldExistenceType {
+        .defaultWordBreak;
+
+        select {
+            width: 20ch;
+        }
+    }
+
+    .sourceOfData {
+        .defaultWordBreak;
+
+        select {
+            width: 15ch;
+        }
+    }
+
+    .projectDisplayOnConfigPage {
+        .defaultWordBreak;
+
+        select {
+            width: 25ch;
+        }
+    }
+
+    .typeValidator {
+        .defaultWordBreak;
+
+        select {
+            width: 25ch;
+        }
+    }
+
+    .defaultValue {
+        .defaultWordBreak;
+
+        select {
+            width: 50ch;
+        }
+    }
+}
+
+.inputTemplate {
+    display: none;
 }
