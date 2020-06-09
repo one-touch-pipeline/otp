@@ -42,6 +42,8 @@ joinTables="\
 (aceseq_instance_roddy_execution_directory_names)|\
 (antibody_target_import_alias)|\
 (cluster_job_cluster_job)|\
+(date_field_definition_allowed_date_values)|\
+(decimal_number_field_definition_allowed_decimal_number_values)|\
 (ega_library_selection_library_preparation_kit)|\
 (ega_library_source_seq_type)|\
 (ega_library_strategy_seq_type)|\
@@ -52,6 +54,7 @@ joinTables="\
 (externally_processed_merged_bam_file_further_files)|\
 (import_process_externally_processed_merged_bam_file)|\
 (indel_calling_instance_roddy_execution_directory_names)|\
+(integer_field_definition_allowed_integer_values)|\
 (job_definition_parameter)|\
 (job_error_definition_job_definition)|\
 (job_error_definition_job_error_definition)|\
@@ -76,6 +79,7 @@ joinTables="\
 (software_tool_program_name_program_version_type_key)|\
 (sophia_instance_roddy_execution_directory_names)|\
 (swap_info_seq_track)|\
+(text_field_definition_allowed_text_values)|\
 (workflow_command_log)|\
 (workflow_message_log)|\
 (workflow_run_workflow_config)|\

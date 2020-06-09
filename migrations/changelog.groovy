@@ -445,4 +445,5 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2020/otp-569.sql')
     }
 
+    include file: 'changelogs/2020/otp-333-project-fields.groovy'
 }
