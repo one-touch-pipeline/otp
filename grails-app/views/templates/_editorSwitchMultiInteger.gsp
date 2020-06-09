@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2020 The OTP authors
+  - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +20,7 @@
   - SOFTWARE.
   --}%
 
-<div class="edit-switch edit-switch-drop-down">
-    <p class="edit-switch-editor" style="display: none">
-        <input type="hidden" name="target" value="${link}"/>
-        <g:select id="" name="dropdown"
-                  optionKey="${optionKey}"
-                  optionValue="${optionValue}"
-                  noSelection="${noSelection}"
-                  from="${values}"
-                  value="${value}"
-                  class="use-select-2"/>
-        <button class="save" data-confirmation="${confirmation}"><g:message code="default.button.update.label"/></button>
-        <button class="cancel"><g:message code="default.button.cancel.label"/></button>
-    </p>
-    <p class="edit-switch-label">
-        <span class="wordBreak">
-            ${value ? optionValue ? value[optionValue] : value : ''}
-        </span>
-        <button class="edit js-edit">&nbsp;</button>
-    </p>
+<div class="multi-edit-switch edit-switch-multi-input edit-switch-multi-integer">
+    <input class="inputTemplate" type="number" name="value" value=""/>
+    <g:render template="/templates/editorSwitchMultiCommon" model="${model}"/>
 </div>

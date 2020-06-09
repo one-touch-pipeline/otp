@@ -133,6 +133,14 @@ class OtpTagLib {
                 return "/templates/editorSwitchToggle"
             case "date":
                 return "/templates/editorSwitchDate"
+            case "integer":
+                return "/templates/editorSwitchInteger"
+            case "multiText":
+                return "/templates/editorSwitchMultiText"
+            case "multiDate":
+                return "/templates/editorSwitchMultiDate"
+            case "multiInteger":
+                return "/templates/editorSwitchMultiInteger"
             default:
                 return "/templates/editorSwitch"
         }

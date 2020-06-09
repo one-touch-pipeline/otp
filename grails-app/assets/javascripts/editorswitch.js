@@ -75,28 +75,33 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-text p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save").click(function () {
         "use strict";
-        var container, outerContainer;
+        var container, outerContainer, inputField;
         container = $(this).parent();
         outerContainer = container.parent();
+        inputField = $("input[name=value]", container);
+        if (!inputField[0].validity.valid) {
+            window.alert("The input is not valid. Please provide a valid input value.");
+            return
+        }
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
             dataType: "json",
             type: "POST",
-            data: {value: $("input:text[name=value]", container).val()},
+            data: {value: inputField.val()},
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
-                    $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
+                    $("p.edit-switch-label span", outerContainer).text($("input[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
-                    $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
+                    $("input[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
-                $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
+                $("input[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -418,5 +423,84 @@ $(function() {
         if (outerContainer.hasClass("edit-switch-checkboxes")) {
             resetCheckboxes(outerContainer);
         }
+    });
+
+
+    $("div.multi-edit-switch .edit-switch-label button.js-edit").click(function () {
+        "use strict";
+        var outerContainer = $(this).parent().parent();
+        var multiInputField = $(".multi-input-field", outerContainer);
+        var template = $(".inputTemplate", outerContainer);
+        var dataValues = multiInputField.data('values');
+        var first = true;
+        for (var i in dataValues) {
+            var field = $("<div class=\"field\"></div>");
+            var clonedField = template.clone();
+            clonedField.removeClass("inputTemplate");
+            clonedField.val(dataValues[i]);
+            field.append(clonedField);
+            if (first) {
+                field.append(" <button class=\"add-field\">+</button>");
+                first=false;
+            } else {
+                field.append(" <button class=\"remove-field\">-</button>");
+            }
+            $.otp.applySelect2($("select.use-select-2", clonedField));
+            multiInputField.append(field);
+        }
+        $(".edit-switch-editor", outerContainer).show();
+        $(".edit-switch-label", outerContainer).hide();
+    });
+
+    $("div.multi-edit-switch .edit-switch-editor button.cancel").click(function () {
+        "use strict";
+        var outerContainer = $(this).parent().parent();
+        $(".edit-switch-editor", outerContainer).hide();
+        $(".edit-switch-label", outerContainer).show();
+        $(".multi-input-field .field", outerContainer).remove()
+    });
+
+    /*jslint unparam: true */
+    $("div.edit-switch-multi-input .edit-switch-editor button.save").click(function () {
+        "use strict";
+        var container, outerContainer, dataValues = {}, i=0, displayValue = '';
+        container = $(this).parent();
+        outerContainer = container.parent();
+        var multiInputField = $(".multi-input-field", outerContainer);
+        var valid = true;
+        $("input", multiInputField).each(function() {
+            if (!($(this)[0].validity.valid)) {
+                window.alert("The input is not valid. Please provide a valid input value.");
+                valid = false;
+                return
+            }
+            dataValues['value['+i+']'] = $(this).val();
+            displayValue = displayValue + $(this).val() + ', ';
+            i++;
+        });
+        if (!valid) {
+            return
+        }
+        $.ajax({
+            url: $("input:hidden[name=target]", container).val(),
+            dataType: "json",
+            type: "POST",
+            data: dataValues,
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage("Data stored successfully");
+                    $(".edit-switch-label span", outerContainer).text(displayValue);
+                    multiInputField.data('values', dataValues);
+                } else {
+                    $.otp.warningMessage(data.error);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+            }
+        });
+        $(".edit-switch-editor", outerContainer).hide();
+        $(".edit-switch-label", outerContainer).show();
+        $(".field", multiInputField).remove()
     });
 });
