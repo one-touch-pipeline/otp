@@ -95,8 +95,8 @@
                     <td>${projectRequest.deputyPis?.join(", ")}</td>
                 </tr>
                 <tr>
-                    <td><g:message code="projectRequest.responsibleBioinformatician"/></td>
-                    <td>${projectRequest.responsibleBioinformaticians?.join(", ")}</td>
+                    <td><g:message code="projectRequest.leadBioinformatician"/></td>
+                    <td>${projectRequest.leadBioinformaticians?.join(", ")}</td>
                 </tr>
                 <tr>
                     <td><g:message code="projectRequest.bioinformatician"/></td>

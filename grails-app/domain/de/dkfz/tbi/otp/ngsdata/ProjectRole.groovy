@@ -43,10 +43,11 @@ class ProjectRole implements Entity {
      * changelogs/defaultValues/project-roles.sql
      */
     static enum Basic {
+        COORDINATOR,
+        OTHER,
         PI,
         DEPUTY_PI,
         LEAD_BIOINFORMATICIAN,
-        RESPONSIBLE_BIOINFORMATICIAN,
         BIOINFORMATICIAN,
         SUBMITTER,
 
@@ -71,7 +72,6 @@ class ProjectRole implements Entity {
 
     static final List<String> BIOINFORMATICIAN_PROJECT_ROLES = asImmutableStringList([
             Basic.LEAD_BIOINFORMATICIAN,
-            Basic.RESPONSIBLE_BIOINFORMATICIAN,
             Basic.BIOINFORMATICIAN,
     ])
 

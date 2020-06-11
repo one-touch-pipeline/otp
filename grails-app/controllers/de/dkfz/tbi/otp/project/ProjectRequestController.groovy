@@ -79,7 +79,7 @@ class ProjectRequestController {
                 keywords                    : [""],
                 seqTypes                    : [null],
                 deputyPis                   : [""],
-                responsibleBioinformaticians: [""],
+                leadBioinformaticians       : [""],
                 bioinformaticians           : [""],
                 submitters                  : [""],
                 speciesWithStrain           : [id: null],
@@ -89,7 +89,7 @@ class ProjectRequestController {
             projectRequestHelper << [
                 pi                          : projectRequest.pi.username,
                 deputyPis                   : projectRequest.deputyPis*.username ?: null,
-                responsibleBioinformaticians: projectRequest.responsibleBioinformaticians*.username ?: null,
+                leadBioinformaticians       : projectRequest.leadBioinformaticians*.username ?: null,
                 bioinformaticians           : projectRequest.bioinformaticians*.username ?: null,
                 submitters                  : projectRequest.submitters*.username ?: null,
                 storagePeriod               : projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
@@ -246,7 +246,7 @@ class ProjectRequestCreationCommand {
 
     String pi
     List<String> deputyPis
-    List<String> responsibleBioinformaticians
+    List<String> leadBioinformaticians
     List<String> bioinformaticians
     List<String> submitters
 
@@ -278,9 +278,9 @@ class ProjectRequestCreationCommand {
         comments nullable: true, blank: false
         pi validator: { val, obj ->
             List<String> pi = [val]
-            List<String> userWithMultipleRoles = (pi.intersect(obj.deputyPis.findAll()) + pi.intersect(obj.responsibleBioinformaticians.findAll()) + pi.intersect(obj.bioinformaticians.findAll()) + pi.intersect(obj.submitters.findAll()) +
-                    obj.deputyPis.intersect(obj.responsibleBioinformaticians.findAll()) + obj.deputyPis.intersect(obj.bioinformaticians.findAll()) + obj.deputyPis.intersect(obj.submitters.findAll()) +
-                    obj.responsibleBioinformaticians.intersect(obj.bioinformaticians.findAll()) + obj.responsibleBioinformaticians.intersect(obj.submitters.findAll()) +
+            List<String> userWithMultipleRoles = (pi.intersect(obj.deputyPis.findAll()) + pi.intersect(obj.leadBioinformaticians.findAll()) + pi.intersect(obj.bioinformaticians.findAll()) + pi.intersect(obj.submitters.findAll()) +
+                    obj.deputyPis.intersect(obj.leadBioinformaticians.findAll()) + obj.deputyPis.intersect(obj.bioinformaticians.findAll()) + obj.deputyPis.intersect(obj.submitters.findAll()) +
+                    obj.leadBioinformaticians.intersect(obj.bioinformaticians.findAll()) + obj.leadBioinformaticians.intersect(obj.submitters.findAll()) +
                     obj.bioinformaticians.intersect(obj.submitters.findAll())).unique()
             if (userWithMultipleRoles) {
                 return ["multiple.roles", userWithMultipleRoles.join(", ")]

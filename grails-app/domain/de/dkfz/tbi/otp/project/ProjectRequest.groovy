@@ -51,7 +51,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     String comments
 
     Set<User> deputyPis
-    Set<User> responsibleBioinformaticians
+    Set<User> leadBioinformaticians
     Set<User> bioinformaticians
     Set<User> submitters
 
@@ -88,11 +88,11 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     }
 
     static hasMany = [
-            seqTypes: SeqType,
-            deputyPis: User,
-            responsibleBioinformaticians: User,
-            bioinformaticians: User,
-            submitters: User,
+            seqTypes             : SeqType,
+            deputyPis            : User,
+            leadBioinformaticians: User,
+            bioinformaticians    : User,
+            submitters           : User,
     ]
 
     static mapping = {
@@ -102,10 +102,10 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
                 key: "project_request_id",
                 column: "deputy_pi_id",
         ]
-        responsibleBioinformaticians joinTable: [
-                name: "project_request_responsible_bioinformatician",
+        leadBioinformaticians joinTable: [
+                name: "project_request_lead_bioinformatician",
                 key: "project_request_id",
-                column: "responsible_bioinformatician_id",
+                column: "lead_bioinformatician_id",
         ]
         bioinformaticians joinTable: [
                 name: "project_request_bioinformatician",
@@ -124,7 +124,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
 enum ProjectRequestRole {
     PI(true, true, true, true, true),
     DEPUTY_PI(true, false, true, false, true),
-    RESPONSIBLE_BIOINFORMATICIAN(true, true, false, false, true),
+    LEAD_BIOINFORMATICIAN(true, true, false, false, true),
     BIOINFORMATICIAN(true, true, false, false, true),
     SUBMITTER(true, false, false, false, true),
 

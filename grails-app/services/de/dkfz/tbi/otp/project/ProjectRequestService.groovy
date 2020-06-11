@@ -105,7 +105,7 @@ class ProjectRequestService {
                 pi                          : findOrCreateUsers([cmd.pi]).first(),
                 requester                   : springSecurityService.currentUser as User,
                 deputyPis                   : findOrCreateUsers(cmd.deputyPis),
-                responsibleBioinformaticians: findOrCreateUsers(cmd.responsibleBioinformaticians),
+                leadBioinformaticians       : findOrCreateUsers(cmd.leadBioinformaticians),
                 bioinformaticians           : findOrCreateUsers(cmd.bioinformaticians),
                 submitters                  : findOrCreateUsers(cmd.submitters),
         )
@@ -138,7 +138,7 @@ class ProjectRequestService {
 
             pi                           = findOrCreateUsers([cmd.pi]).first()
             deputyPis                    = findOrCreateUsers(cmd.deputyPis)
-            responsibleBioinformaticians = findOrCreateUsers(cmd.responsibleBioinformaticians)
+            leadBioinformaticians        = findOrCreateUsers(cmd.leadBioinformaticians)
             bioinformaticians            = findOrCreateUsers(cmd.bioinformaticians)
             submitters                   = findOrCreateUsers(cmd.submitters)
         }
@@ -204,7 +204,7 @@ class ProjectRequestService {
     void addUserRolesAndPermissions(ProjectRequest projectRequest) {
         addUserAndRolesFromProjectRequest([projectRequest.pi], ProjectRequestRole.PI, projectRequest.project)
         addUserAndRolesFromProjectRequest(projectRequest.deputyPis, ProjectRequestRole.DEPUTY_PI, projectRequest.project)
-        addUserAndRolesFromProjectRequest(projectRequest.responsibleBioinformaticians, ProjectRequestRole.RESPONSIBLE_BIOINFORMATICIAN, projectRequest.project)
+        addUserAndRolesFromProjectRequest(projectRequest.leadBioinformaticians, ProjectRequestRole.LEAD_BIOINFORMATICIAN, projectRequest.project)
         addUserAndRolesFromProjectRequest(projectRequest.bioinformaticians, ProjectRequestRole.BIOINFORMATICIAN, projectRequest.project)
         addUserAndRolesFromProjectRequest(projectRequest.submitters, ProjectRequestRole.SUBMITTER, projectRequest.project)
     }

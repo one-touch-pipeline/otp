@@ -1072,7 +1072,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        List<ProjectRole> bioInfProjectRoles = [RESPONSIBLE_BIOINFORMATICIAN, LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN]
+        List<ProjectRole> bioInfProjectRoles = [LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN]
 
         // valid UserProjectRole of different Projects
         bioInfProjectRoles.each { ProjectRole pr ->

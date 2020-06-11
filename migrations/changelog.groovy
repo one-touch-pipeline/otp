@@ -430,4 +430,8 @@ databaseChangeLog = {
     include file: 'changelogs/2020/otp-508-workflow-run-scheduler.groovy'
 
     include file: 'changelogs/2020/workflowrun-outputartefacts.groovy'
+
+    changeSet(author: "strubelp", id: "otp-557") {
+        sqlFile(path: 'changelogs/2020/otp-557.sql')
+    }
 }

@@ -227,13 +227,13 @@
             </td>
         </tr>
         <tr>
-            <td><label for="responsibleBioinformatician">${g.message(code: "projectRequest.responsibleBioinformatician")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.responsibleBioinformatician.detail")}"></td>
+            <td><label for="leadBioinformatician">${g.message(code: "projectRequest.leadBioinformatician")}</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.leadBioinformatician.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
-                <g:each in="${source.getByFieldName("responsibleBioinformaticians") ?: [""]}" var="responsibleBioinformatician" status="i">
+                <g:each in="${source.getByFieldName("leadBioinformaticians") ?: [""]}" var="leadBioinformatician" status="i">
                     <div class="field">
-                        <input name="responsibleBioinformaticians" id="responsibleBioinformatician" type="text" autocomplete="off"
-                               placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${responsibleBioinformatician}">
+                        <input name="leadBioinformaticians" id="leadBioinformatician" type="text" autocomplete="off"
+                               placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${leadBioinformatician}">
                         <g:if test="${i == 0}">
                             <button class="add-field">+</button>
                         </g:if>
