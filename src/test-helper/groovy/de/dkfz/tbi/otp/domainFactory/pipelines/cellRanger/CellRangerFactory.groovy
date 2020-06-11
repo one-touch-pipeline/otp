@@ -60,6 +60,7 @@ trait CellRangerFactory implements IsAlignment {
                             project : sample.project,
                     ])
                 },
+                requester: DomainFactory.createUser(),
         ], properties, saveAndValidate)
     }
 

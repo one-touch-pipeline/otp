@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import groovy.transform.*
 import org.springframework.security.access.prepost.PreAuthorize
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -39,6 +41,8 @@ import de.dkfz.tbi.otp.utils.Entity
 
 @Transactional
 class CellRangerConfigurationService {
+
+    SpringSecurityService springSecurityService
 
     @Immutable
     @ToString
@@ -146,7 +150,8 @@ class CellRangerConfigurationService {
         CellRangerMwpParameter parameter = new CellRangerMwpParameter(expectedCells, enforcedCells, referenceGenomeIndex, seqType)
 
         try {
-            List<CellRangerMergingWorkPackage> mwps = createMergingWorkPackagesForSamples(samples, parameter)
+            User requester = springSecurityService.currentUser as User
+            List<CellRangerMergingWorkPackage> mwps = createMergingWorkPackagesForSamples(samples, parameter, requester)
             resetAllTicketsOfSeqTracksForCellRangerExecution(mwps.collectMany { return it.seqTracks } as Set<SeqTrack>)
         } catch (ValidationException e) {
             return e.errors
@@ -166,13 +171,13 @@ class CellRangerConfigurationService {
         ticket.save(flush: true)
     }
 
-    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSamples(List<Sample> samples, CellRangerMwpParameter parameter) {
+    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSamples(List<Sample> samples, CellRangerMwpParameter parameter, User requester) {
         return samples.collectMany { Sample sample ->
-            return createMergingWorkPackagesForSample(sample, parameter)
+            return createMergingWorkPackagesForSample(sample, parameter, requester)
         }
     }
 
-    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSample(Sample sample, CellRangerMwpParameter parameter) {
+    List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSample(Sample sample, CellRangerMwpParameter parameter, User requester) {
         Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == parameter.seqType })
         constrainSeqTracksGroupedByPlatformGroupAndKit(map)
         return map.collect { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->
@@ -191,6 +196,7 @@ class CellRangerConfigurationService {
                     seqPlatformGroup     : platformGroupAndKit.seqPlatformGroup,
                     libraryPreparationKit: platformGroupAndKit.libraryPreparationKit,
                     needsProcessing      : true,
+                    requester            : requester,
             ).save(flush: true)
         }
     }

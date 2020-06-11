@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
@@ -157,10 +158,18 @@ class CellRangerDataCleanupJob extends ScheduledJob {
 
         String subject = messageSourceService.createMessage("cellRanger.notification.${recipientType}.${informationType}.subject", [project: project])
         String content
-        content = (informationType == InformationType.DELETION) ?  buildDeletionMessageBody(project, cellRangerMwps, recipientType):
-                buildReminderMessageBody(project, cellRangerMwps, recipientType)
+        switch (informationType) {
+            case InformationType.DELETION:
+                content = buildDeletionMessageBody(project, cellRangerMwps, recipientType)
+                break
+            case InformationType.REMINDER:
+                content = buildReminderMessageBody(project, cellRangerMwps, recipientType)
+                break
+            default:
+                throw new OtpException("Invalid state ${informationType} for informationType")
+        }
 
-        mailHelperService.sendEmail(subject, content, recipientsAndTemplate.getaValue())
+        mailHelperService.sendEmail(subject, content, (recipientsAndTemplate.getaValue() + cellRangerMwps*.requester*.email).unique())
     }
 
     String buildDeletionMessageBody(Project project, List<CellRangerMergingWorkPackage> cellRangerMwps, InformationRecipientType recipientType) {

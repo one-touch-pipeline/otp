@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -54,6 +55,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
     SeqTrack seqTrackA
     SeqTrack seqTrackB
     ReferenceGenomeIndex referenceGenomeIndex
+    User requester
 
     CellRangerMwpParameter createCellRangerMwpParameter(Map properties = [:]) {
         return new CellRangerMwpParameter([
@@ -73,6 +75,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
     void setupData() {
         createUserAndRoles()
+        requester = DomainFactory.createUser()
 
         project = createProject()
         seqType = createSeqType()
@@ -279,7 +282,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         List<Sample> samples = [sampleA, sampleB]
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSamples(samples, parameter)
+        cellRangerConfigurationService.createMergingWorkPackagesForSamples(samples, parameter, requester)
 
         then:
         List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
@@ -297,7 +300,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         CellRangerMwpParameter parameter = createCellRangerMwpParameter(expectedCells: expectedCells, enforcedCells: enforcedCells)
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter)
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter, requester)
 
         then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
@@ -321,7 +324,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         List<SeqTrack> seqTracks = setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits()
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter)
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter, requester)
 
         then:
         seqTracks.size() == 8
@@ -360,7 +363,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         sampleA.refresh()
 
         when:
-        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter)
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(sampleA, parameter, requester)
 
         then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)

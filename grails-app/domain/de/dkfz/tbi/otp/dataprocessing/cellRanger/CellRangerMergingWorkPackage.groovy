@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class CellRangerMergingWorkPackage extends MergingWorkPackage {
@@ -39,6 +40,7 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
     CellRangerConfig config
     Status status = Status.UNSET
     Date informed
+    User requester
 
     static constraints = {
         sample(validator: { val, obj ->
@@ -90,6 +92,7 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
             }
         })
         informed(nullable: true)
+        requester(nullable: true)
     }
 
     @Override

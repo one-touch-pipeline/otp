@@ -111,27 +111,29 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
                 createNotificationTextService: Mock(CreateNotificationTextService),
         )
 
-        Closure<CellRangerMergingWorkPackage> createMwpForProject = { Project project ->
+        User user = DomainFactory.createUser()
+        User user2 = DomainFactory.createUser()
+        User requester = DomainFactory.createUser()
+
+        Closure<CellRangerMergingWorkPackage> createMwpForProjectAsUser = { Project project, User req ->
             Sample sample = createSample(
                     individual: createIndividual(
                             project: project ?: createProject()
                     )
             )
-            return createMergingWorkPackage(sample: sample)
+            return createMergingWorkPackage(sample: sample, requester: req)
         }
 
         Project project1 = createProject()
-        CellRangerMergingWorkPackage crmwp1 = createMwpForProject(project1)
-        CellRangerMergingWorkPackage crmwp2 = createMwpForProject(project1)
+        CellRangerMergingWorkPackage crmwp1 = createMwpForProjectAsUser(project1, requester)
+        CellRangerMergingWorkPackage crmwp2 = createMwpForProjectAsUser(project1, requester)
 
         Project project2 = createProject()
-        CellRangerMergingWorkPackage crmwp3 = createMwpForProject(project2)
+        CellRangerMergingWorkPackage crmwp3 = createMwpForProjectAsUser(project2, user2)
 
         ProjectRole projectRoleToNotify = LEAD_BIOINFORMATICIAN
         ProjectRole projectRoleOnlyToNotifyIfNoBioinfs = PI
-
-        User user = DomainFactory.createUser()
-        User user2 = DomainFactory.createUser()
+        ProjectRole projectRoleRequester = DomainFactory.createProjectRole(name: ":)")
 
         // UserProjectRoles for project1
         DomainFactory.createUserProjectRole(
@@ -142,6 +144,11 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         DomainFactory.createUserProjectRole(
                 project    : project1,
                 projectRole: projectRoleOnlyToNotifyIfNoBioinfs,
+        )
+        DomainFactory.createUserProjectRole(
+                project    : project1,
+                user       : requester,
+                projectRole: projectRoleRequester,
         )
 
         // UserProjectRoles for project2
@@ -158,7 +165,7 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
                 '[message subject bioinformatician]',
                 '[message body bioinformatician]',
-                [user.email, EMAIL_RECIPIENT]
+                [user.email, EMAIL_RECIPIENT, requester.email]
         )
         1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project1], 'cellRanger', 'finalRunSelection')
 
@@ -169,7 +176,7 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         0 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
                 '[message subject bioinformatician]',
                 '[message body bioinformatician]',
-                [user.email]
+                [user.email, requester.email]
         )
         1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
                 '[message subject authorities]',
