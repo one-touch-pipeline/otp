@@ -177,8 +177,12 @@ class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
 
     static constraints = {
         expectedOrEnforcedCellsValue nullable: true, validator: { val, obj ->
-            if (val != null && !(val ==~ /^[0-9]+$/)) {
-                return "validator.not.a.number"
+            if (val != null) {
+                if (!val.isInteger()) {
+                    return "validator.not.an.integer"
+                } else if ((val as int) < 0) {
+                    return 'validator.greater.or.equal.zero'
+                }
             }
         }
     }
