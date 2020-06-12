@@ -65,7 +65,11 @@ class WorkflowStep extends Commentable implements Entity {
 
     static constraints = {
         wesIdentifier nullable: true
-        workflowError nullable: true
+        workflowError nullable: true, validator: { val, obj ->
+            if ((obj.state == State.FAILED) ^ (val != null)) {
+                return false
+            }
+        }
         previous nullable: true
         restartedFrom nullable: true
         comment nullable: true
@@ -77,5 +81,23 @@ class WorkflowStep extends Commentable implements Entity {
 
     String getWesData() {
         return null
+    }
+
+    WorkflowStep getOriginalRestartedFrom() {
+        WorkflowStep step = restartedFrom
+        while (step?.restartedFrom) {
+            step = step.restartedFrom
+        }
+        return step
+    }
+
+    int getRestartCount() {
+        int count = 0
+        WorkflowStep step = this
+        while (step.restartedFrom) {
+            step = step.restartedFrom
+            count++
+        }
+        return count
     }
 }

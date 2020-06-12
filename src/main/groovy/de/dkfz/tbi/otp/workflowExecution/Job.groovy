@@ -27,7 +27,7 @@ package de.dkfz.tbi.otp.workflowExecution
  * To implement a job, the existing specialized abstract classes should be extended
  */
 interface Job {
-    void execute(WorkflowStep workflowStep)
+    void execute(WorkflowStep workflowStep) throws Throwable
     JobStage getJobStage()
     List<Long> getValidExitCodes()
 

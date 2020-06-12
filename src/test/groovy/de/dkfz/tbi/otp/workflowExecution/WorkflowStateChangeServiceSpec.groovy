@@ -127,12 +127,14 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "test changeStateToFailed"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
+        Throwable throwable = new IOException("test")
 
         when:
-        service.changeStateToFailed(workflowStep)
+        service.changeStateToFailed(workflowStep, throwable)
 
         then:
         workflowStep.state == WorkflowStep.State.FAILED
+        workflowStep.workflowError.message == throwable.message
         workflowStep.workflowRun.state == WorkflowRun.State.FAILED
     }
 

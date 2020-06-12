@@ -1153,6 +1153,7 @@ All the Rules that will be used for OTP
     }
     UnnecessaryObjectReferences {
         priority = LOW
+        doNotApplyToFileNames = TEST // conditions in `then` block don't work inside `with()`
     }
     UnnecessaryOverridingMethod {
         priority = DEFAULT

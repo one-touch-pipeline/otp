@@ -90,4 +90,22 @@ class WorkflowRun extends Commentable implements Entity {
             [it.outputRole, it]
         }
     }
+
+    WorkflowRun getOriginalRestartedFrom() {
+        WorkflowRun run = restartedFrom
+        while (run?.restartedFrom) {
+            run = run.restartedFrom
+        }
+        return run
+    }
+
+    int getRestartCount() {
+        int count = 0
+        WorkflowRun run = this
+        while (run.restartedFrom) {
+            run = run.restartedFrom
+            count++
+        }
+        return count
+    }
 }

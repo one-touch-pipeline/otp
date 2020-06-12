@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 @Rollback
 @Integration
@@ -53,11 +54,13 @@ class WorkflowStepServiceIntegrationSpec extends Specification implements Workfl
     }
 
     private WorkflowStep create(WorkflowStep.State stepState, WorkflowRun.State runState) {
+        WorkflowError workflowError = (stepState == WorkflowStep.State.FAILED) ? new WorkflowError(message: "message", stacktrace: "stacktrace") : null
         return createWorkflowStep([
-                workflowRun: createWorkflowRun([
+                workflowRun  : createWorkflowRun([
                         state: runState,
                 ]),
-                state      : stepState,
+                state        : stepState,
+                workflowError: workflowError,
         ])
     }
 }
