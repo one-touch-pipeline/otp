@@ -273,44 +273,49 @@ class ProcessesController {
 
     def processData(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
+
         Process process = processService.getProcess(params.id as long)
         List<ProcessingStep> steps = processService.getAllProcessingSteps(process, cmd.iDisplayLength, cmd.iDisplayStart, "id", cmd.sortOrder)
         dataToRender.iTotalRecords = processService.getNumberOfProcessingSteps(process)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        PromiseList promiseList = new PromiseList()
-        def auth = SecurityContextHolder.context.authentication
-        steps.each { ProcessingStep step ->
-            // spin off threads to fetch the data in parallel
-            promiseList << {
+
+        Authentication auth = SecurityContextHolder.context.authentication
+        List<Promise> promises = steps.collect { ProcessingStep processingStep ->
+            task {
                 SecurityContextHolder.context.authentication = auth
-                Map data = [:]
-                SessionUtils.withNewSession {
-                    ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
-                    data.put("step", step)
-                    data.put("state", update?.state)
-                    data.put("firstUpdate", TimestampHelper.asTimestamp(processService.getFirstUpdate(step)))
-                    data.put("lastUpdate", TimestampHelper.asTimestamp(update?.date))
-                    data.put("duration", processService.getProcessingStepDuration(step))
-                    data.put("error", update?.error?.errorMessage)
+                try {
+                    SessionUtils.withNewSession {
+                        ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(processingStep)
+                        return [
+                                "step"       : processingStep,
+                                "state"      : update?.state,
+                                "firstUpdate": TimestampHelper.asTimestamp(processService.getFirstUpdate(processingStep)),
+                                "lastUpdate" : TimestampHelper.asTimestamp(update?.date),
+                                "duration"   : processService.getProcessingStepDuration(processingStep),
+                                "error"      : update?.error?.errorMessage,
+                        ]
+                    }
+                } finally {
+                    SecurityContextHolder.context.authentication = null
                 }
-                return data
             }
         }
-        promiseList.get().each { data ->
-            def actions = []
+
+        waitAll(promises).each { Map data ->
+            List<String> actions = []
             if (data.state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
                 actions << "restart"
             }
             dataToRender.aaData << [
-                data.step.id,
-                data.state,
-                data.step.jobDefinition.name,
-                data.step.jobClass ? [name: data.step.jobClass] : null,
-                data.firstUpdate,
-                data.lastUpdate,
-                data.duration,
-                [state: data.state, error: data.error],
-                [actions: actions],
+                    data.step.id,
+                    data.state,
+                    data.step.jobDefinition.name,
+                    data.step.jobClass ? [name: data.step.jobClass] : null,
+                    data.firstUpdate,
+                    data.lastUpdate,
+                    data.duration,
+                    [state: data.state, error: data.error],
+                    [actions: actions],
             ]
         }
         render dataToRender as JSON
