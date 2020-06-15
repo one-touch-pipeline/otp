@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.async.Promise
-import grails.async.PromiseList
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
 import org.springframework.security.core.Authentication
@@ -279,6 +278,7 @@ class ProcessesController {
         dataToRender.iTotalRecords = processService.getNumberOfProcessingSteps(process)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
+        List<Map> data = Collections.synchronizedList([])
         Authentication auth = SecurityContextHolder.context.authentication
         List<Promise> promises = steps.collect { ProcessingStep processingStep ->
             task {
@@ -286,13 +286,27 @@ class ProcessesController {
                 try {
                     SessionUtils.withNewSession {
                         ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(processingStep)
-                        return [
-                                "step"       : processingStep,
-                                "state"      : update?.state,
-                                "firstUpdate": TimestampHelper.asTimestamp(processService.getFirstUpdate(processingStep)),
-                                "lastUpdate" : TimestampHelper.asTimestamp(update?.date),
-                                "duration"   : processService.getProcessingStepDuration(processingStep),
-                                "error"      : update?.error?.errorMessage,
+                        ExecutionState state = update?.state
+
+                        List<String> actions = []
+                        if (state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
+                            actions << "restart"
+                        }
+                        data << [
+                                processingStep: [
+                                        id      : processingStep.id,
+                                        jobName : processingStep.jobDefinition.name,
+                                        jobClass: processingStep.jobClass,
+                                ],
+                                times: [
+                                    creation  : TimestampHelper.asTimestamp(processService.getFirstUpdate(processingStep)),
+                                    lastUpdate: TimestampHelper.asTimestamp(update?.date),
+                                    duration  : processService.getProcessingStepDuration(processingStep),
+                                ],
+                                lastUpdate: [
+                                        state: state,
+                                ],
+                                actions: actions,
                         ]
                     }
                 } finally {
@@ -301,23 +315,10 @@ class ProcessesController {
             }
         }
 
-        waitAll(promises).each { Map data ->
-            List<String> actions = []
-            if (data.state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
-                actions << "restart"
-            }
-            dataToRender.aaData << [
-                    data.step.id,
-                    data.state,
-                    data.step.jobDefinition.name,
-                    data.step.jobClass ? [name: data.step.jobClass] : null,
-                    data.firstUpdate,
-                    data.lastUpdate,
-                    data.duration,
-                    [state: data.state, error: data.error],
-                    [actions: actions],
-            ]
-        }
+        waitAll(promises)
+
+        dataToRender.aaData = data.sort { -it.processingStep.id }
+
         render dataToRender as JSON
     }
 

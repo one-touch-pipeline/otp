@@ -335,43 +335,46 @@ $.otp.workflows = {
             action: 'processData',
             id: processId + '/'
         }), false, function (json) {
-            var i, j, rowData, stepId, actions;
-            for (i = 0; i < json.aaData.length; i += 1) {
-                rowData = json.aaData[i];
-                stepId = rowData[0];
-                rowData[0] = $.otp.createLinkMarkup({
+            json.aaData.forEach(function (data, index) {
+                var row = [];
+                row[0] = $.otp.createLinkMarkup({
                     controller: 'processes',
-                    action: 'processingStep',
-                    id: stepId,
-                    text: "<div style='padding: 17px 0px 17px 10px;'>"+stepId+"</div>"
+                    action    : 'processingStep',
+                    id        : data.processingStep.id,
+                    text      : "<div style='padding: 17px 0px 17px 10px;'>" + data.processingStep.id + "</div>"
                 });
-                rowData[1] = $.otp.workflows.statusDivHtml(rowData[1]);
-                if (rowData[3]) {
-                    rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>";
-                } else {
-                    rowData[3] = "-";
+                row[1] = $.otp.workflows.statusDivHtml(data.lastUpdate.state);
+                row[2] = data.processingStep.jobName;
+
+                var jobClass = "-";
+                if (data.processingStep) {
+                    jobClass = data.processingStep.jobClass
                 }
-                rowData[4] = $.otp.workflows.renderDate(rowData[4]);
-                rowData[5] = $.otp.workflows.renderDate(rowData[5]);
-                if (rowData[6]) {
-                    rowData[6] = $.otp.workflows.formatTimespan(rowData[6]);
-                } else {
-                    rowData[6] = "-";
+                row[3] = '<span title="' + jobClass + '">' + jobClass.split("\.").pop() + "</span><br/>";
+
+                row[4] = $.otp.workflows.renderDate(data.times.creation);
+                row[5] = $.otp.workflows.renderDate(data.times.lastUpdate);
+
+                row[6] = "-";
+                if (data.times.duration) {
+                    row[6] = $.otp.workflows.formatTimespan(data.times.duration);
                 }
-                rowData[7] = rowData[7].state;
-                actions = rowData[8].actions;
-                rowData[8] = "";
-                for (j = 0; j < actions.length; j += 1) {
-                    switch (actions[j]) {
-                    case "restart":
-                        rowData[8] += $.otp.workflows.createRestartProcessingStepLink(stepId, selector);
-                        break;
-                    default:
-                        // nothing
-                        break;
+
+                row[7] = data.lastUpdate.state;
+
+                row[8] = "";
+                for (var action of data.actions) {
+                    switch (action) {
+                        case "restart":
+                            row[8] += $.otp.workflows.createRestartProcessingStepLink(data.processingStep.id, selector);
+                            break;
+                        default:
+                            // nothing
+                            break;
                     }
                 }
-            }
+                json.aaData[index] = row
+            });
         }, [
             { "bSortable": true,  "aTargets": [0] },
             { "bSortable": false, "aTargets": [1] },
@@ -382,9 +385,7 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [6] },
             { "bSortable": false, "aTargets": [7] },
             { "bSortable": false, "aTargets": [8] }
-        ],
-            undefined,
-            270);
+        ], undefined, 100);
     },
     processingStep: {
         processingStepId: null,
