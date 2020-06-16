@@ -1023,8 +1023,9 @@ ln -s '${newDirectFileName}' \\
         seqTracks*.sample = newSample
         notNull(seqTracks*.save(flush: true))
         seqTracks = seqTracks.collect {
-            if (newSeqType.hasAntibodyTarget) {
-                throw new UnsupportedOperationException("Changing to ${newSeqType} is not supported yet because new need antibody, which is not avilable.")
+            if (oldSeqType.hasAntibodyTarget != newSeqType.hasAntibodyTarget) {
+                throw new UnsupportedOperationException("Old and new SeqTypes (old: ${oldSeqType}; new: ${newSeqType}) differ in antibody target usage and " +
+                        "thus can not be swapped, as we would be missing the antibody target information.")
             }
             it.seqType = newSeqType
             assert it.save(flush: true)
