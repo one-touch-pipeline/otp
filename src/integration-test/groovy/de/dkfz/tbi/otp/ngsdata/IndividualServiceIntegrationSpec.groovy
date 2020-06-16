@@ -164,35 +164,86 @@ a: 2
 """
     }
 
-    void "createComment, when comment already exists, should add new comment"() {
+    @Unroll
+    void "createComment, with different combinations of preexisting comments; old individual: #oldHasComment, new individual: #newHasComment"() {
         given:
         setupData()
 
-        Individual indOld = DomainFactory.createIndividual(comment: DomainFactory.createComment(comment: "old comment"))
-        Individual indNew = DomainFactory.createIndividual()
+        Closure<Individual> createIndividualWithComment = { boolean hasComment ->
+            return DomainFactory.createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
+        }
+
         String operation = "operation"
-        Map mapOld = [individual: indOld]
-        Map mapNew = [individual: indNew]
+        Individual oldIndividual = createIndividualWithComment(oldHasComment)
+        Individual newIndividual = createIndividualWithComment(newHasComment)
 
         DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
 
+        String expected = """\
+            |${newHasComment ? newIndividual.comment.comment : ""}
+            |
+            |== ${operation} - ${new DateTime().toDate().format("yyyy-MM-dd HH:mm")} ==
+            |Old:
+            |individual: ${oldIndividual}
+            |New:
+            |individual: ${newIndividual}
+            |
+            |
+            |${oldHasComment ? oldIndividual.comment.comment : ""}""".stripMargin().trim()
+
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            individualService.createComment(operation, mapOld, mapNew)
+            individualService.createComment(operation, [individual: oldIndividual], [individual: newIndividual])
         }
 
-        String comment = indNew.comment.comment
+        then:
+        newIndividual.comment.comment == expected
+
+        cleanup:
+        DateTimeUtils.setCurrentMillisSystem()
+
+        where:
+        oldHasComment | newHasComment
+        false         | false
+        false         | true
+        true          | false
+        true          | true
+    }
+
+    @Unroll
+    void "createComment, when target and source individual are the same, does not copy over source comment (with existing comment: #hasComment)"() {
+        given:
+        setupData()
+
+        String operation = "operation"
+        Individual individual = DomainFactory.createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
+
+        DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
+
+        String expected = """\
+            |${hasComment ? individual.comment.comment : ""}
+            |
+            |== ${operation} - ${new DateTime().toDate().format("yyyy-MM-dd HH:mm")} ==
+            |Old:
+            |diff: A
+            |New:
+            |diff: B""".stripMargin().trim()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            individualService.createComment(operation, [individual: individual, diff: "A"], [individual: individual, diff: "B"])
+        }
 
         then:
-        comment == """== operation - ${new DateTime().toDate().format("yyyy-MM-dd HH:mm")} ==
-Old:
-individual: ${indOld}
-New:
-individual: ${indNew}
+        individual.comment.comment == expected
 
-${indOld.comment.comment}"""
-
+        cleanup:
         DateTimeUtils.setCurrentMillisSystem()
+
+        where:
+        hasComment | _
+        false      | _
+        true       | _
     }
 
     void "createComment, should fail when parameters are null"() {

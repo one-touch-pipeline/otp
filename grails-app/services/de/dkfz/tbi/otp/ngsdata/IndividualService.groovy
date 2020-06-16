@@ -333,17 +333,35 @@ class IndividualService {
      * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
      */
     void createComment(String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
-        assert oldProperties
-        assert oldProperties.individual
-        assert newProperties
-        assert newProperties.individual
+        Closure<Individual> assertAndGetIndividual = { Map properties ->
+            assert properties
+            assert properties.individual
+            return (properties.individual as Individual).refresh()
+        }
+
+        Individual oldIndividual = assertAndGetIndividual(oldProperties)
+        Individual newIndividual = assertAndGetIndividual(newProperties)
         assert oldProperties.keySet() == newProperties.keySet()
 
         Date date = new DateTime().toDate()
 
         String output = createCommentString(operation, oldProperties, newProperties, date, additionalInformation)
-        commentService.saveComment(newProperties.individual, oldProperties.individual.comment?.comment ? "${output}\n" +
-                "${oldProperties.individual.comment.comment}" : "${output}")
+        boolean sameIndividual = (oldIndividual == newIndividual)
+
+        /* The target of the comment is the new individual, the old individual remains unchanged.
+         * The comment is build in this order:
+         * - the active comment of this individual
+         * - whatever new comment has been created
+         * - the comment of the old individual (if it isnt the same individual)
+         */
+        String revisedComment = """\
+            |${newIndividual.comment?.comment ?: ""}
+            |
+            |${output}
+            |
+            |${sameIndividual ? "" : oldIndividual.comment?.comment ?: ""}""".stripMargin().trim()
+
+        commentService.saveComment(newIndividual, revisedComment)
     }
 
     /**
