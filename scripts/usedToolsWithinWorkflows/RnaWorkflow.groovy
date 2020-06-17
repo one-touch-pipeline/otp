@@ -128,6 +128,7 @@ RnaRoddyBamFile.createCriteria().list {
     println "${bam.sample} ${bam.seqType}"
     boolean correctEnvironment = false
     def versions = []
+    versions << bam.config.programVersion
     def dir = bam.getFinalExecutionDirectories().first()
     if (bam.config.programVersion == "RNAseqWorkflow:1.0.22-1") {
         correctEnvironment = true
