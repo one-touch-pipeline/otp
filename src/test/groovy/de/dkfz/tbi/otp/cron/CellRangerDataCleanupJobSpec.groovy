@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.cron
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -95,25 +96,28 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         return mwp.save(flush: true)
     }
 
-    void "sendNotificationEmail, Type Reminder, the email should only be sent to the correct people and the ticket system"() {
+    @Unroll
+    void "sendNotificationEmail, Type #type, the email should only be sent to requester, the ticket system and users with receivesNotifications='true'"() {
         given:
         setupData()
-
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
-                processingOptionService      : new ProcessingOptionService(),
-                messageSourceService         : Stub(MessageSourceService) {
-                    createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationRecipientType.BIOINFOMRATICIAN}.decisionReminder.subject", _ as Map) >> '[message subject bioinformatician]'
-                    createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationRecipientType.BIOINFOMRATICIAN}.decisionReminder.body", _ as Map) >> '[message body bioinformatician]'
-                    createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationRecipientType.AUTHORITIES}.decisionReminder.subject", _ as Map) >> '[message subject authorities]'
-                    createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationRecipientType.AUTHORITIES}.decisionReminder.body", _ as Map) >> '[message body authorities]'
-                },
-                mailHelperService            : Mock(MailHelperService),
-                createNotificationTextService: Mock(CreateNotificationTextService),
-        )
 
         User user = DomainFactory.createUser()
         User user2 = DomainFactory.createUser()
         User requester = DomainFactory.createUser()
+        User requester2 = DomainFactory.createUser()
+
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+                processingOptionService      : new ProcessingOptionService(),
+                messageSourceService         : Stub(MessageSourceService) {
+                    createMessage("cellRanger.notification.${type.templateName}.subject", _ as Map) >> "${type.templateName} subject"
+                    createMessage("cellRanger.notification.${type.templateName}.body", _ as Map) >> "${type.templateName} body"
+                },
+                mailHelperService            : Mock(MailHelperService),
+                createNotificationTextService: Mock(CreateNotificationTextService),
+                userProjectRoleService       : Stub(UserProjectRoleService) {
+                    getEmailsOfToBeNotifiedProjectUsers(_) >> [user.email, requester.email]
+                },
+        )
 
         Closure<CellRangerMergingWorkPackage> createMwpForProjectAsUser = { Project project, User req ->
             Sample sample = createSample(
@@ -126,64 +130,41 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
 
         Project project1 = createProject()
         CellRangerMergingWorkPackage crmwp1 = createMwpForProjectAsUser(project1, requester)
-        CellRangerMergingWorkPackage crmwp2 = createMwpForProjectAsUser(project1, requester)
+        CellRangerMergingWorkPackage crmwp2 = createMwpForProjectAsUser(project1, requester2)
 
-        Project project2 = createProject()
-        CellRangerMergingWorkPackage crmwp3 = createMwpForProjectAsUser(project2, user2)
-
-        ProjectRole projectRoleToNotify = LEAD_BIOINFORMATICIAN
-        ProjectRole projectRoleOnlyToNotifyIfNoBioinfs = PI
-        ProjectRole projectRoleRequester = DomainFactory.createProjectRole(name: ":)")
-
-        // UserProjectRoles for project1
         DomainFactory.createUserProjectRole(
-                project    : project1,
-                user       : user,
-                projectRole: projectRoleToNotify,
+                project: project1,
+                user: user,
+                receivesNotifications: true,
         )
         DomainFactory.createUserProjectRole(
-                project    : project1,
-                projectRole: projectRoleOnlyToNotifyIfNoBioinfs,
+                project: project1,
+                user: user2,
+                receivesNotifications: false,
         )
         DomainFactory.createUserProjectRole(
-                project    : project1,
-                user       : requester,
-                projectRole: projectRoleRequester,
+                project: project1,
+                user: requester,
+                receivesNotifications: true,
         )
-
-        // UserProjectRoles for project2
         DomainFactory.createUserProjectRole(
-                project    : project2,
-                user       : user2,
-                projectRole: projectRoleOnlyToNotifyIfNoBioinfs,
+                project: project1,
+                user: requester2,
+                receivesNotifications: false,
         )
 
-        when: "all MWPs of Project 1"
-        cellRangerDataCleanupJob.sendNotificationEmail(project1, [crmwp1, crmwp2], CellRangerDataCleanupJob.InformationType.REMINDER)
+        when:
+        cellRangerDataCleanupJob.sendNotificationEmail(project1, [crmwp1, crmwp2], type as CellRangerDataCleanupJob.InformationType)
 
-        then: "there should only be one recipient"
+        then:
         1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
-                '[message subject bioinformatician]',
-                '[message body bioinformatician]',
-                [user.email, EMAIL_RECIPIENT, requester.email]
+                "${type.templateName} subject",
+                "${type.templateName} body",
+                [user.email, requester.email, EMAIL_RECIPIENT, requester2.email]
         )
-        1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project1], 'cellRanger', 'finalRunSelection')
 
-        when: "all MWPs of Project 2"
-        cellRangerDataCleanupJob.sendNotificationEmail(project2, [crmwp3], CellRangerDataCleanupJob.InformationType.REMINDER)
-
-        then: "Beside the ticket system, PI Users should be notified only"
-        0 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
-                '[message subject bioinformatician]',
-                '[message body bioinformatician]',
-                [user.email, requester.email]
-        )
-        1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
-                '[message subject authorities]',
-                '[message body authorities]',
-                [user2.email, EMAIL_RECIPIENT])
-        1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project2], 'cellRanger', 'finalRunSelection')
-        1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project2], 'projectUser', 'index')
+        where:
+        type << CellRangerDataCleanupJob.InformationType.findAll()
     }
 
     void "getResultsToDelete, only deletes too old mwps"() {
@@ -277,10 +258,10 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         ]
 
         when: "the email body is build"
-        cellRangerDataCleanupJob.buildReminderMessageBody(project, cellRangerMergingWorkPackages, CellRangerDataCleanupJob.InformationRecipientType.BIOINFOMRATICIAN)
+        cellRangerDataCleanupJob.buildReminderMessageBody(project, cellRangerMergingWorkPackages)
 
         then: "message creation is called with the correct parameters"
-        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationRecipientType.BIOINFOMRATICIAN}.decisionReminder.body", [
+        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.decisionReminder.body", [
                 project                 : project.name,
                 plannedDeletionDate     : cellRangerDataCleanupJob.formattedPlannedDeletionDate,
                 formattedMwpList        : CellRangerDataCleanupJob.getFormattedMwpList(cellRangerMergingWorkPackages),
@@ -303,6 +284,7 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
                 messageSourceService          : Mock(MessageSourceService),
                 createNotificationTextService : Mock(CreateNotificationTextService),
                 mailHelperService             : Mock(MailHelperService),
+                userProjectRoleService        : new UserProjectRoleService(),
         )
         LocalDate baseDate = LocalDate.now()
 
@@ -371,6 +353,7 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
                 createNotificationTextService : Mock(CreateNotificationTextService),
                 cellRangerConfigurationService: Mock(CellRangerConfigurationService),
                 mailHelperService             : Mock(MailHelperService),
+                userProjectRoleService        : new UserProjectRoleService(),
         )
         LocalDate baseDate = LocalDate.now()
 
@@ -393,15 +376,13 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         cellRangerDataCleanupJob.checkAndNotifyUncategorisedResults()
 
         then:
-        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification." +
-                "${CellRangerDataCleanupJob.InformationRecipientType.AUTHORITIES}.${CellRangerDataCleanupJob.InformationType.REMINDER}." +
+        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationType.REMINDER}." +
                 "subject", [project: project1])
         1 * cellRangerDataCleanupJob.cellRangerConfigurationService.setInformedFlag(crmwp1, _)
         1 * cellRangerDataCleanupJob.cellRangerConfigurationService.setInformedFlag(crmwp2, _)
 
         and:
-        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification." +
-                "${CellRangerDataCleanupJob.InformationRecipientType.AUTHORITIES}.${CellRangerDataCleanupJob.InformationType.REMINDER}." +
+        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationType.REMINDER}." +
                 "subject", [project: project2])
         1 * cellRangerDataCleanupJob.cellRangerConfigurationService.setInformedFlag(crmwp3, _)
     }

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.util.Pair
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -91,23 +90,6 @@ class CellRangerDataCleanupJob extends ScheduledJob {
         }
     }
 
-    @TupleConstructor
-    enum InformationRecipientType {
-        AUTHORITIES("authorities"),
-        BIOINFOMRATICIAN("bioinformatician"),
-
-        final String recipientType
-
-        InformationRecipientType(String recipientType) {
-            this.recipientType = recipientType
-        }
-
-        @Override
-        String toString() {
-            return recipientType
-        }
-    }
-
     void notifyAndDeletion() {
         resultsToDelete.groupBy { CellRangerMergingWorkPackage mwp ->
             mwp.project
@@ -141,47 +123,33 @@ class CellRangerDataCleanupJob extends ScheduledJob {
         }
     }
 
-    private Pair<List<String>, InformationRecipientType> getRecipientsAndTemplate(Project project) {
-        List<String> recipients = UserProjectRoleService.getBioinformaticianUsers(project)*.email
-        InformationRecipientType recipientType = InformationRecipientType.BIOINFOMRATICIAN
-        if (recipients.size() == 0) {
-            recipients = UserProjectRoleService.getProjectAuthorities(project)*.email
-            recipientType = InformationRecipientType.AUTHORITIES
-        }
-        recipients += processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
-        return new Pair<List<String>, InformationRecipientType>(recipients, recipientType)
-    }
-
     void sendNotificationEmail(Project project, List<CellRangerMergingWorkPackage> cellRangerMwps, InformationType informationType) {
-        Pair<List<String>, InformationRecipientType> recipientsAndTemplate = getRecipientsAndTemplate(project)
-        InformationRecipientType recipientType = recipientsAndTemplate.getbValue()
-
-        String subject = messageSourceService.createMessage("cellRanger.notification.${recipientType}.${informationType}.subject", [project: project])
+        String subject = messageSourceService.createMessage("cellRanger.notification.${informationType}.subject", [project: project])
         String content
         switch (informationType) {
             case InformationType.DELETION:
-                content = buildDeletionMessageBody(project, cellRangerMwps, recipientType)
+                content = buildDeletionMessageBody(project, cellRangerMwps)
                 break
             case InformationType.REMINDER:
-                content = buildReminderMessageBody(project, cellRangerMwps, recipientType)
+                content = buildReminderMessageBody(project, cellRangerMwps)
                 break
             default:
                 throw new OtpException("Invalid state ${informationType} for informationType")
         }
-
-        mailHelperService.sendEmail(subject, content, (recipientsAndTemplate.getaValue() + cellRangerMwps*.requester*.email).unique())
+        mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project) +
+                processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION) + cellRangerMwps*.requester*.email).unique())
     }
 
-    String buildDeletionMessageBody(Project project, List<CellRangerMergingWorkPackage> cellRangerMwps, InformationRecipientType recipientType) {
-        return messageSourceService.createMessage("cellRanger.notification.${recipientType}.deletionInformation.body", [
+    String buildDeletionMessageBody(Project project, List<CellRangerMergingWorkPackage> cellRangerMwps) {
+        return messageSourceService.createMessage("cellRanger.notification.deletionInformation.body", [
                 "project"               : project.name,
                 "formattedMwpList"      : getFormattedMwpList(cellRangerMwps),
                 "otpLinkUserManagement" : getOtpLinksUserManagement(project),
         ])
     }
 
-    String buildReminderMessageBody(Project project, List<CellRangerMergingWorkPackage> cellRangerMwps, InformationRecipientType recipientType) {
-        return messageSourceService.createMessage("cellRanger.notification.${recipientType}.decisionReminder.body", [
+    String buildReminderMessageBody(Project project, List<CellRangerMergingWorkPackage> cellRangerMwps) {
+        return messageSourceService.createMessage("cellRanger.notification.decisionReminder.body", [
                 "project"               : project.name,
                 "plannedDeletionDate"   : formattedPlannedDeletionDate,
                 "formattedMwpList"      : getFormattedMwpList(cellRangerMwps),
