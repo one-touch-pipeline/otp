@@ -152,7 +152,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         CollectionUtils.containSame(context.problems,  expectedProblems)
     }
 
-    void 'validate metadata, when sample ID column exist for project with internal note, adds info'() {
+    void 'validate metadata, when sample name column exist for project with internal note, adds info'() {
         given:
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
         sampleIdentifier.project.internalNotes = INTERNAL_NOTES

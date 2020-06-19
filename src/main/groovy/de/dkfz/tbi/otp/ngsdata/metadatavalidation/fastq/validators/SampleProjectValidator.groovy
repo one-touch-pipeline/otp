@@ -61,20 +61,20 @@ class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationCont
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
-            String sampleId = it.getValue(SAMPLE_NAME.name())
+            String sampleName = it.getValue(SAMPLE_NAME.name())
             String projectName = it.getValue(PROJECT.name())
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
 
-            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
             if (sampleIdentifier) {
                 if (![sampleIdentifier.project.name, sampleIdentifier.project.nameInMetadataFiles].contains(projectName)) {
-                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' is already registered in OTP with project '${sampleIdentifier.project.name}', not with project '${projectName}'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project '${sampleIdentifier.project.name}' and ignore the value '${project?.name ?: projectName}' in the '${PROJECT}' column.", "At least one sample identifier is already registered in OTP but with another project.")
+                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleName}' is already registered in OTP with project '${sampleIdentifier.project.name}', not with project '${projectName}'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project '${sampleIdentifier.project.name}' and ignore the value '${project?.name ?: projectName}' in the '${PROJECT}' column.", "At least one sample identifier is already registered in OTP but with another project.")
                 }
             } else if (project) {
                 if (project.sampleIdentifierParserBeanName != SampleIdentifierParserBeanName.NO_PARSER) {
-                    ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
+                    ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
                     if (!parsedIdentifier) {
-                        context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' can not be parsed with the sampleIdentifierParser '${project.sampleIdentifierParserBeanName.displayName}' given by project '${project}'.", "At least one sample identifier looks like it does not belong to the project in the '${PROJECT}' column.")
+                        context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleName}' can not be parsed with the sampleIdentifierParser '${project.sampleIdentifierParserBeanName.displayName}' given by project '${project}'.", "At least one sample identifier looks like it does not belong to the project in the '${PROJECT}' column.")
                     }
                 }
             }

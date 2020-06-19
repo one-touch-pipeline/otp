@@ -184,8 +184,8 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
     }
 
     private Sample findExistingSampleForValueTuple(ValueTuple valueTuple) {
-        String sampleId = valueTuple.getValue(SAMPLE_NAME.name())
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
         if (sampleIdentifier) {
             return sampleIdentifier.sample
         }
@@ -195,7 +195,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
             return
         }
 
-        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
+        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
         if (!parsedSampleIdentifier) {
             return
         }

@@ -40,7 +40,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
     static final String PROJECT = 'project'
     static final String RUN_ID = "runName"
-    static final String SAMPLE_ID = "sampleIdentifierName"
+    static final String SAMPLE_NAME = "sampleIdentifierName"
     static final String DATAFILE = "DataFileFileName.gz"
     static final String DATAFILE_NEW = "DataFileFileNameNew.gz"
 
@@ -63,7 +63,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     void 'validate, when file name does not exist for specified run and project (not using parseSampleIdentifier)'() {
         given:
         setupData()
-        DomainFactory.createSampleIdentifier(["name": SAMPLE_ID, "sample": dataFile.seqTrack.sample]).name
+        DomainFactory.createSampleIdentifier(["name": SAMPLE_NAME, "sample": dataFile.seqTrack.sample]).name
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +

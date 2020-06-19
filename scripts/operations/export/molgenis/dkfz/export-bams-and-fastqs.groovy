@@ -224,7 +224,7 @@ class MolgenisDataFile extends MolgenisEntity {
     List<String> header = DataFileColumns.values()*.columnName + MetaDataKey.list()*.name.sort()
 
     static Map properties = [
-            sampleIdKey: CollectionUtils.exactlyOneElement(MetaDataKey.findAllByName("SAMPLE_ID"))
+            sampleIdKey: CollectionUtils.exactlyOneElement(MetaDataKey.findAllByName("SAMPLE_NAME"))
     ]
 
     MolgenisDataFile(Map<String, String> map = [:]) {

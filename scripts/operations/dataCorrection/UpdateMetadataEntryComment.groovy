@@ -28,7 +28,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 /**
  * Script to add/change the COMMENT for meta data entries
  * The input for this script is the path to a tsv file containing
- * SAMPLE_ID's (which should be unique) and their associated COMMENT.
+ * SAMPLE_NAME's (which should be unique) and their associated COMMENT.
  * (You can use either the normal metadata tsv file used for import, or create a new file with just these two columns)
  */
 

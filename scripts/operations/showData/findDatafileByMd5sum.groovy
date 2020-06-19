@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
- * This script looks up DataFiles for the given md5sums. It lists Project, PID, SeqType, SampleType and SAMPLE_ID.
+ * This script looks up DataFiles for the given md5sums. It lists Project, PID, SeqType, SampleType and SAMPLE_NAME.
  * Simply list the md5sums in the input section below.
  */
 
@@ -50,7 +50,7 @@ Closure<List<String>> nameStringToList = { String nameString ->
     return list
 }
 
-MetaDataKey sampleIdKey = MetaDataKey.findByName("SAMPLE_ID")
+MetaDataKey sampleIdKey = MetaDataKey.findByName("SAMPLE_NAME")
 
 List<String> md5sumList = nameStringToList(md5sums)
 
@@ -60,16 +60,16 @@ md5sumList.each { String md5sum ->
     int numberOfFoundFiles = dataFiles.size()
     println "${md5sum} ${numberOfFoundFiles > 1 ? "[found ${numberOfFoundFiles} files with the given md5!]" : ''}"
     dataFiles.each { DataFile dataFile ->
-        MetaDataEntry sampleIdMDEntry = exactlyOneElement(MetaDataEntry.findAllByDataFileAndKey(dataFile, sampleIdKey), "Could not find exactly one SAMPLE_ID metadata entry for DataFile")
+        MetaDataEntry sampleIdMDEntry = exactlyOneElement(MetaDataEntry.findAllByDataFileAndKey(dataFile, sampleIdKey), "Could not find exactly one SAMPLE_NAME metadata entry for DataFile")
         SeqTrack dfSeqTrack = dataFile.seqTrack
         println """\
         ---> ${dataFile.fileName}
              ${ctx.lsdfFilesService.getFileFinalPath(dataFile)}
-             Project:    ${dfSeqTrack.project}
-             PID:        ${dfSeqTrack.individual.pid}
-             SeqType:    ${dfSeqTrack.seqType}
-             SampleType: ${dfSeqTrack.sample.sampleType}
-             SAMPLE_ID:  ${sampleIdMDEntry.value}
+             Project:     ${dfSeqTrack.project}
+             PID:         ${dfSeqTrack.individual.pid}
+             SeqType:     ${dfSeqTrack.seqType}
+             SampleType:  ${dfSeqTrack.sample.sampleType}
+             SAMPLE_NAME: ${sampleIdMDEntry.value}
         """.stripIndent()
     }
 }

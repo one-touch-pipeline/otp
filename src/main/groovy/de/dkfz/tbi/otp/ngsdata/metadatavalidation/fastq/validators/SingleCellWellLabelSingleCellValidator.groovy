@@ -80,9 +80,9 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
     }
 
     private boolean valueByParserProvided(ValueTuple valueTuple) {
-        String sampleId = valueTuple.getValue(SAMPLE_NAME.name())
+        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
-        return sampleId && projectName && sampleIdentifierService.parseCellPosition(sampleId, Project.getByNameOrNameInMetadataFiles(projectName))
+        return sampleName && projectName && sampleIdentifierService.parseCellPosition(sampleName, Project.getByNameOrNameInMetadataFiles(projectName))
     }
 }

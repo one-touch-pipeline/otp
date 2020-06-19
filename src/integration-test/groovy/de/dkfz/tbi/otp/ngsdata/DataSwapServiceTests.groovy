@@ -238,7 +238,7 @@ class DataSwapServiceTests implements UserAndRoles {
         String sampleIdentifierName = sampleIdentifier.name
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = DomainFactory.createMetaDataKey(name: "SAMPLE_ID")
+        MetaDataKey metaDataKey = DomainFactory.createMetaDataKey(name: "SAMPLE_NAME")
         DomainFactory.createMetaDataEntry(key: metaDataKey, dataFile: dataFile)
 
         dataSwapService.renameSampleIdentifiers(sample, new StringBuilder())

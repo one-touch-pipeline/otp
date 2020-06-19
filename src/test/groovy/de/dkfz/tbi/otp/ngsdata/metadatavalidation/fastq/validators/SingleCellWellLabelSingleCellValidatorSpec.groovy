@@ -127,7 +127,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
     }
 
     @Unroll
-    void "validate, when base material is '#baseMaterial' and well is '#well' and project is '#project' and sampleId is '#sampleId', then create warning"() {
+    void "validate, when base material is '#baseMaterial' and well is '#well' and project is '#project' and sampleName is '#sampleName', then create warning"() {
         given:
         createProject([
                 name: PROJECT_NAME,
@@ -166,11 +166,11 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
         problem.message.contains(SingleCellWellLabelSingleCellValidator.WARNING_MESSAGE)
 
         where:
-        baseMaterial            | well | projectName  | sampleId | parseCount
-        SeqType.SINGLE_CELL_DNA | ''   | ''           | ''       | 0
-        SeqType.SINGLE_CELL_DNA | ''   | ''           | 'id'     | 0
-        SeqType.SINGLE_CELL_DNA | ''   | 'unknown'    | 'id'     | 0
-        SeqType.SINGLE_CELL_DNA | ''   | PROJECT_NAME | ''       | 0
-        SeqType.SINGLE_CELL_DNA | ''   | PROJECT_NAME | 'id'     | 1
+        baseMaterial            | well | projectName  | sampleName | parseCount
+        SeqType.SINGLE_CELL_DNA | ''   | ''           | ''         | 0
+        SeqType.SINGLE_CELL_DNA | ''   | ''           | 'id'       | 0
+        SeqType.SINGLE_CELL_DNA | ''   | 'unknown'    | 'id'       | 0
+        SeqType.SINGLE_CELL_DNA | ''   | PROJECT_NAME | ''         | 0
+        SeqType.SINGLE_CELL_DNA | ''   | PROJECT_NAME | 'id'       | 1
     }
 }

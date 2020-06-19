@@ -81,7 +81,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         problem.message.contains("The project '${project.name}' is closed.")
     }
 
-    void 'validate metadata, when sample ID column exist but project is closed, add problem'() {
+    void 'validate metadata, when sample name column exist but project is closed, add problem'() {
         given:
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
         sampleIdentifier.sample.project.closed = true
@@ -101,7 +101,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         problem.message.contains("The project '${sampleIdentifier.project}' is closed.")
     }
 
-    void 'validate metadata, when sample ID is unknown and project is not given'() {
+    void 'validate metadata, when sample name is unknown and project is not given'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\n" +
@@ -115,7 +115,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         context.problems.empty
     }
 
-    void 'validate metadata, when sample ID is unknown and project does not exist'() {
+    void 'validate metadata, when sample name is unknown and project does not exist'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}\n" +

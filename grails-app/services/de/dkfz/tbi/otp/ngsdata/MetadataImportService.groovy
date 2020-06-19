@@ -623,9 +623,9 @@ class MetadataImportService {
     }
 
     static Project getProjectFromMetadata(ValueTuple tuple) {
-        String sampleId = tuple.getValue(SAMPLE_NAME.name())
+        String sampleName = tuple.getValue(SAMPLE_NAME.name())
         String projectName = tuple.getValue(PROJECT.name()) ?: ''
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
         if (sampleIdentifier) {
             return sampleIdentifier.project
         } else {

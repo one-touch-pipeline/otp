@@ -34,7 +34,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 class SampleLibraryValidatorSpec extends Specification {
 
-    void 'validate, when SAMPLE_ID and CUSTOMER_LIBRARY are missing, add error'() {
+    void 'validate, when SAMPLE_NAME and CUSTOMER_LIBRARY are missing, add error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
@@ -44,7 +44,7 @@ class SampleLibraryValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Required column 'SAMPLE_ID' is missing.")
+                        "Required column 'SAMPLE_NAME' is missing.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -67,7 +67,7 @@ class SampleLibraryValidatorSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate, when SAMPLE_ID is missing, add error'() {
+    void 'validate, when SAMPLE_NAME is missing, add error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${CUSTOMER_LIBRARY}\n" +
@@ -80,12 +80,12 @@ class SampleLibraryValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Required column 'SAMPLE_ID' is missing.")
+                        "Required column 'SAMPLE_NAME' is missing.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate, valid SAMPLE_ID and CUSTOMER_LIBRARY combinations, succeeds'() {
+    void 'validate, valid SAMPLE_NAME and CUSTOMER_LIBRARY combinations, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${CUSTOMER_LIBRARY}\n" +
@@ -102,7 +102,7 @@ class SampleLibraryValidatorSpec extends Specification {
         context.problems.empty
     }
 
-    void 'validate, when SAMPLE_ID does contain "lib" and CUSTOMER_LIBRARY is empty, adds warning'() {
+    void 'validate, when SAMPLE_NAME does contain "lib" and CUSTOMER_LIBRARY is empty, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${CUSTOMER_LIBRARY}\n" +

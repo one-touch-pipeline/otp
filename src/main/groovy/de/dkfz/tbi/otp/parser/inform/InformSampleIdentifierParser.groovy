@@ -90,10 +90,10 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         String sampleTypeOrderNumber = "(?<sampleTypeOrderNumber>([0-9]))"
         String orderNumber = "(?<orderNumber>([0-9]{1,2}))"
 
-        String sampleId = "(${sampleTypeNumber}${tissueTypeKey}${sampleTypeOrderNumber}_[DRPI]${orderNumber})"
+        String sampleName = "(${sampleTypeNumber}${tissueTypeKey}${sampleTypeOrderNumber}_[DRPI]${orderNumber})"
         return "^" +
                 "(?<pid>${pidRegex})_" +
-                "${sampleId}" +
+                "${sampleName}" +
                 /$/
     }
 }

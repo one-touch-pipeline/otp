@@ -94,7 +94,7 @@
                         <th><g:message code="projectOverview.index.PID"/></th>
                         <th><g:message code="projectOverview.index.sampleType"/></th>
                         <g:if test="${!hideSampleIdentifier}">
-                            <th><g:message code="projectOverview.index.sampleID"/></th>
+                            <th><g:message code="projectOverview.index.sampleIdentifier"/></th>
                         </g:if>
                         <g:each var="seqType" in="${seqTypes}">
                             <th title="<g:message code="projectOverview.mouseOver.lane"/>"><span hidden>${seqType.displayNameWithLibraryLayout}: </span><g:message code="projectOverview.index.registeredLanes"/></th>

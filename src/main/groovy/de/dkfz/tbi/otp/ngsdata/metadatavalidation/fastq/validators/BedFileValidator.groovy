@@ -94,13 +94,13 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
             return
         }
 
-        String sampleId = valueTuple.getValue(SAMPLE_NAME.name())
+        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
         Project project = Project.getByNameOrNameInMetadataFiles(projectName)
         SampleType sampleType
 
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
         if (sampleIdentifier) {
             project = sampleIdentifier.project
             sampleType = sampleIdentifier.sampleType
@@ -109,7 +109,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 return
             }
 
-            ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
+            ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
             if (!parsedSampleIdentifier) {
                 return
             }
@@ -139,7 +139,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 )
         )
         if (!bedFile) {
-            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleId}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.", "No BED file is configured for at least on sample.")
+            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleName}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.", "No BED file is configured for at least on sample.")
         }
     }
 }
