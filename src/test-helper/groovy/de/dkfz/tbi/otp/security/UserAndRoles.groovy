@@ -47,7 +47,7 @@ trait UserAndRoles {
     final static String TESTUSER = "testuser"
     final static String USER = "user"
 
-    ProjectRole COORDINATOR, OTHER, PI, DEPUTY_PI, LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN, SUBMITTER
+    ProjectRole COORDINATOR, OTHER, PI, LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN, SUBMITTER
 
     /**
      * Creates four users and their roles:

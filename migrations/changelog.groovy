@@ -431,6 +431,10 @@ databaseChangeLog = {
 
     include file: 'changelogs/2020/workflowrun-outputartefacts.groovy'
 
+    changeSet(author: "kosnac", id: "default-project-roles", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/project-roles.sql')
+    }
+
     changeSet(author: "strubelp", id: "otp-557") {
         sqlFile(path: 'changelogs/2020/otp-557.sql')
     }
@@ -446,4 +450,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/otp-333-project-fields.groovy'
+
+    changeSet(author: "kosnac", id: "otp-555") {
+        sqlFile(path: 'changelogs/2020/otp-555.sql')
+    }
 }

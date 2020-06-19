@@ -61,7 +61,6 @@ joinTables="\
 (library_preparation_kit_import_alias)|\
 (merging_work_package_seq_track)|\
 (project_request_bioinformatician)|\
-(project_request_deputy_pi)|\
 (project_request_keywords)|\
 (project_request_lead_bioinformatician)|\
 (project_request_seq_type)|\

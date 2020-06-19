@@ -91,10 +91,6 @@
                     <td>${projectRequest.pi}</td>
                 </tr>
                 <tr>
-                    <td><g:message code="projectRequest.deputyPi"/></td>
-                    <td>${projectRequest.deputyPis?.join(", ")}</td>
-                </tr>
-                <tr>
                     <td><g:message code="projectRequest.leadBioinformatician"/></td>
                     <td>${projectRequest.leadBioinformaticians?.join(", ")}</td>
                 </tr>

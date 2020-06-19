@@ -139,7 +139,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     void "test create"() {
         given:
         User pi = DomainFactory.createUser()
-        User deputyPi = DomainFactory.createUser()
+        User bioinformatician = DomainFactory.createUser()
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 value: "service@mail.com",
@@ -150,7 +150,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 organizationalUnit: "ou",
                 projectType: Project.ProjectType.SEQUENCING,
                 pi: pi.username,
-                deputyPis: [deputyPi.username],
+                bioinformaticians: [bioinformatician.username],
         )
         ProjectRequestService service = serviceWithMockedCurrentUser
         service.linkGenerator = Mock(LinkGenerator) {
@@ -164,7 +164,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
         service.userProjectRoleService = Mock(UserProjectRoleService) {
             1 * createUserWithLdapData(pi.username) >> pi
-            1 * createUserWithLdapData(deputyPi.username) >> deputyPi
+            1 * createUserWithLdapData(bioinformatician.username) >> bioinformatician
         }
 
         when:
@@ -182,7 +182,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 organizationalUnit: "ou",
                 projectType: Project.ProjectType.SEQUENCING,
                 pi: DomainFactory.createUser().username,
-                deputyPis: ["non-existent"],
+                bioinformaticians: ["non-existent"],
         )
         ProjectRequestService service = serviceWithMockedCurrentUser
         service.linkGenerator = Mock(LinkGenerator) {

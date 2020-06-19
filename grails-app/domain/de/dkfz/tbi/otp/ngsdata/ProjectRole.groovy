@@ -46,7 +46,6 @@ class ProjectRole implements Entity {
         COORDINATOR,
         OTHER,
         PI,
-        DEPUTY_PI,
         LEAD_BIOINFORMATICIAN,
         BIOINFORMATICIAN,
         SUBMITTER,

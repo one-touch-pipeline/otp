@@ -28,9 +28,7 @@ import groovy.transform.TupleConstructor
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.ngsdata.LdapUserCreationException
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.TumorEntity
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -76,23 +74,21 @@ class ProjectRequestController {
     def index(Long id) {
         ProjectRequest projectRequest = projectRequestService.get(id)
         Map<String, ?> defaults = [
-                keywords                    : [""],
-                seqTypes                    : [null],
-                deputyPis                   : [""],
-                leadBioinformaticians       : [""],
-                bioinformaticians           : [""],
-                submitters                  : [""],
-                speciesWithStrain           : [id: null],
+                keywords             : [""],
+                seqTypes             : [null],
+                leadBioinformaticians: [""],
+                bioinformaticians    : [""],
+                submitters           : [""],
+                speciesWithStrain    : [id: null],
         ]
         Map<String, ?> projectRequestHelper = [:]
         if (projectRequest) {
             projectRequestHelper << [
-                pi                          : projectRequest.pi.username,
-                deputyPis                   : projectRequest.deputyPis*.username ?: null,
-                leadBioinformaticians       : projectRequest.leadBioinformaticians*.username ?: null,
-                bioinformaticians           : projectRequest.bioinformaticians*.username ?: null,
-                submitters                  : projectRequest.submitters*.username ?: null,
-                storagePeriod               : projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
+                pi                   : projectRequest.pi.username,
+                leadBioinformaticians: projectRequest.leadBioinformaticians*.username ?: null,
+                bioinformaticians    : projectRequest.bioinformaticians*.username ?: null,
+                submitters           : projectRequest.submitters*.username ?: null,
+                storagePeriod        : projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
             ]
         }
 
@@ -245,7 +241,6 @@ class ProjectRequestCreationCommand {
     String comments
 
     String pi
-    List<String> deputyPis
     List<String> leadBioinformaticians
     List<String> bioinformaticians
     List<String> submitters
@@ -278,10 +273,14 @@ class ProjectRequestCreationCommand {
         comments nullable: true, blank: false
         pi validator: { val, obj ->
             List<String> pi = [val]
-            List<String> userWithMultipleRoles = (pi.intersect(obj.deputyPis.findAll()) + pi.intersect(obj.leadBioinformaticians.findAll()) + pi.intersect(obj.bioinformaticians.findAll()) + pi.intersect(obj.submitters.findAll()) +
-                    obj.deputyPis.intersect(obj.leadBioinformaticians.findAll()) + obj.deputyPis.intersect(obj.bioinformaticians.findAll()) + obj.deputyPis.intersect(obj.submitters.findAll()) +
-                    obj.leadBioinformaticians.intersect(obj.bioinformaticians.findAll()) + obj.leadBioinformaticians.intersect(obj.submitters.findAll()) +
-                    obj.bioinformaticians.intersect(obj.submitters.findAll())).unique()
+            List<String> userWithMultipleRoles = (
+                            pi.intersect(obj.leadBioinformaticians.findAll()) +
+                            pi.intersect(obj.bioinformaticians.findAll()) +
+                            pi.intersect(obj.submitters.findAll()) +
+                            obj.leadBioinformaticians.intersect(obj.bioinformaticians.findAll()) +
+                            obj.leadBioinformaticians.intersect(obj.submitters.findAll()) +
+                            obj.bioinformaticians.intersect(obj.submitters.findAll())
+            ).unique()
             if (userWithMultipleRoles) {
                 return ["multiple.roles", userWithMultipleRoles.join(", ")]
             }
