@@ -42,7 +42,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     private static final Delimiter DEFAULT_DELIMITER = Delimiter.COMMA
     private static final SampleType.SpecificReferenceGenome DEFAULT_SPECIFIC_REF_GEN = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     private static final String HEADER = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(DEFAULT_DELIMITER)
-    private static final String SAMPLE_IDENTIFER_NAME = "New name"
+    private static final String SAMPLE_IDENTIFIER_NAME = "New name"
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -596,10 +596,10 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
 
         when:
-        sampleIdentifierService.updateSampleIdentifierName(sampleIdentifier, SAMPLE_IDENTIFER_NAME)
+        sampleIdentifierService.updateSampleIdentifierName(sampleIdentifier, SAMPLE_IDENTIFIER_NAME)
 
         then:
-        sampleIdentifier.name == SAMPLE_IDENTIFER_NAME
+        sampleIdentifier.name == SAMPLE_IDENTIFIER_NAME
     }
 
     void "check if deleteSampleIdentifier, deletes sample identifier"() {
@@ -620,10 +620,10 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
 
         when:
-        SampleIdentifier newSampleIdentifier = sampleIdentifierService.createSampleIdentifier(SAMPLE_IDENTIFER_NAME, sample)
+        SampleIdentifier newSampleIdentifier = sampleIdentifierService.createSampleIdentifier(SAMPLE_IDENTIFIER_NAME, sample)
 
         then:
-        newSampleIdentifier.name == SAMPLE_IDENTIFER_NAME
+        newSampleIdentifier.name == SAMPLE_IDENTIFIER_NAME
         newSampleIdentifier.sample == sample
     }
 
@@ -633,10 +633,10 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Sample sample = createSample()
 
         when:
-        SampleIdentifier newSampleIdentifier = sampleIdentifierService.getOrCreateSampleIdentifier(SAMPLE_IDENTIFER_NAME, sample)
+        SampleIdentifier newSampleIdentifier = sampleIdentifierService.getOrCreateSampleIdentifier(SAMPLE_IDENTIFIER_NAME, sample)
 
         then:
-        newSampleIdentifier.name == SAMPLE_IDENTIFER_NAME
+        newSampleIdentifier.name == SAMPLE_IDENTIFIER_NAME
         newSampleIdentifier.sample == sample
     }
 
