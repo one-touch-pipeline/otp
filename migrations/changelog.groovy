@@ -440,4 +440,9 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/otp-547.groovy'
+
+    changeSet(author: "kosnac", id: "otp-569") {
+        sqlFile(path: 'changelogs/2020/otp-569.sql')
+    }
+
 }

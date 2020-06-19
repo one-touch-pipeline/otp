@@ -34,7 +34,7 @@ enum MetaDataColumn {
     RUN_ID,
     RUN_DATE,
     LANE_NO,
-    SAMPLE_ID,
+    SAMPLE_NAME(["SAMPLE_ID"]),
     SEQUENCING_TYPE,
     ANTIBODY_TARGET,
     ANTIBODY,
