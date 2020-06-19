@@ -1,18 +1,22 @@
 digraph workflows {
   labelloc="t";
-  label="PanCan workflow";
+  label="OTP flow and dependency Graph";
 
-  DataInstallation [label="DataInstallation (per lane)"];
-  Fastqc [label="Fastqc (per lane)"];
+  DataInstallation [label="Data Installation (per lane)"];
+  FastQC [label="FastQC (per lane)"];
+
   PanCan [label="PanCan (per merged BAM file)"];
-  Snv [label="Snv (per pair of merged BAM files)"];
+  CellRanger [label="Cell Ranger (per merged BAM file)"];
+
+  SNV [label="SNV (per pair of merged BAM files)"];
   runYapsa [label="runYapsa (per pair of merged BAM files)"];
   Indel [label="Indel (per pair of merged BAM files)"];
   Sophia [label="Sophia (per pair of merged BAM files)"];
   ACEseq [label="ACEseq (per pair of merged BAM files)"];
 
-  DataInstallation -> Fastqc
-  DataInstallation -> PanCan -> Snv -> runYapsa
+  DataInstallation -> FastQC
+  DataInstallation -> PanCan -> SNV -> runYapsa
   PanCan -> Indel
   PanCan -> Sophia -> ACEseq
+  DataInstallation -> CellRanger
 }
