@@ -21,6 +21,10 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import de.dkfz.tbi.TestCase
+
+import java.time.LocalDate
+
 class DateFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
 
     @Override
@@ -33,5 +37,30 @@ class DateFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
     @Override
     AbstractFieldDefinition createDefinition() {
         return createDateFieldDefinition()
+    }
+
+    void "test, when default value is in list of allowed value, then the validation pass"() {
+        given:
+        DateFieldDefinition definition = createDateFieldDefinition()
+
+        when:
+        definition.defaultDateValue = new LocalDate(2020, 2, 3)
+        definition.allowedDateValues = [new LocalDate(2020, 1, 1), new LocalDate(2020, 2, 3), new LocalDate(2020, 4, 5)]
+        definition.validate()
+
+        then:
+        definition.errors.errorCount == 0
+    }
+
+    void "test, when default value is not in list of allowed value, then the validation fail"() {
+        given:
+        DateFieldDefinition definition = createDateFieldDefinition()
+
+        when:
+        definition.defaultDateValue = new LocalDate(2020, 2, 3)
+        definition.allowedDateValues = [new LocalDate(2020, 1, 1), new LocalDate(2020, 4, 5)]
+
+        then:
+        TestCase.assertValidateError(definition, 'allowedDateValues', 'validator.defaultValue.not.in.allowedValues')
     }
 }

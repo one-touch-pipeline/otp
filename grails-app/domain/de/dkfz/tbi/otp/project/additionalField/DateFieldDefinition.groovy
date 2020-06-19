@@ -32,6 +32,11 @@ class DateFieldDefinition extends AbstractFieldDefinition {
 
     static constraints = {
         defaultDateValue nullable: true
+        allowedDateValues validator: { value, obj ->
+            if (value && obj.defaultDateValue && !value.contains(obj.defaultDateValue)) {
+                return ['validator.defaultValue.not.in.allowedValues', obj.defaultDateValue]
+            }
+        }
     }
 
     static mapping = {

@@ -29,6 +29,11 @@ class DecimalNumberFieldDefinition extends AbstractFieldDefinition {
 
     static constraints = {
         defaultDecimalNumberValue nullable: true
+        allowedDecimalNumberValues validator: { value, obj ->
+            if (value && obj.defaultDecimalNumberValue && !value.contains(obj.defaultDecimalNumberValue)) {
+                return ['validator.defaultValue.not.in.allowedValues', obj.defaultDecimalNumberValue]
+            }
+        }
     }
 
     static mapping = {

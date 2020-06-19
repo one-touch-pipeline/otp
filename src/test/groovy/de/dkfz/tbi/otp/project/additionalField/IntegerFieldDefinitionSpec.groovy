@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import de.dkfz.tbi.TestCase
+
 class IntegerFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
 
     @Override
@@ -33,5 +35,30 @@ class IntegerFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
     @Override
     AbstractFieldDefinition createDefinition() {
         return createIntegerFieldDefinition()
+    }
+
+    void "test, when default value is in list of allowed value, then the validation pass"() {
+        given:
+        IntegerFieldDefinition definition = createIntegerFieldDefinition()
+
+        when:
+        definition.defaultIntegerValue = 3
+        definition.allowedIntegerValues = [2, 3, 4]
+        definition.validate()
+
+        then:
+        definition.errors.errorCount == 0
+    }
+
+    void "test, when default value is not in list of allowed value, then the validation fail"() {
+        given:
+        IntegerFieldDefinition definition = createIntegerFieldDefinition()
+
+        when:
+        definition.defaultIntegerValue = 3
+        definition.allowedIntegerValues = [2, 4]
+
+        then:
+        TestCase.assertValidateError(definition, 'allowedIntegerValues', 'validator.defaultValue.not.in.allowedValues')
     }
 }

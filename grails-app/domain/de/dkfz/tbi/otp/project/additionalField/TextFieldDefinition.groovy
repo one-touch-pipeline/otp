@@ -23,6 +23,9 @@ package de.dkfz.tbi.otp.project.additionalField
 
 import de.dkfz.tbi.otp.config.TypeValidators
 
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
+
 class TextFieldDefinition extends AbstractFieldDefinition {
 
     TypeValidators typeValidator
@@ -34,9 +37,27 @@ class TextFieldDefinition extends AbstractFieldDefinition {
     String defaultTextValue
 
     static constraints = {
-        typeValidator nullable: true
-        regularExpression nullable: true
+        typeValidator nullable: true, validator: { value, obj ->
+            if (value && obj.defaultTextValue && !value.validate(obj.defaultValue)) {
+                return ['validator.defaultValue.do.not.pass.validator', obj.defaultTextValue]
+            }
+        }
+        regularExpression nullable: true, validator: { value, obj ->
+            if (value) {
+                if (!isValidPattern(value)) {
+                    return 'validator.regularExpression.isNotValid'
+                }
+                if (obj.defaultTextValue && !(obj.defaultValue ==~ value)) {
+                    return ['validator.defaultValue.do.not.pass.regExpression', obj.defaultTextValue]
+                }
+            }
+        }
         defaultTextValue nullable: true
+        allowedTextValues validator: { value, obj ->
+            if (value && obj.defaultTextValue && !value.contains(obj.defaultTextValue)) {
+                return ['validator.defaultValue.not.in.allowedValues', obj.defaultTextValue]
+            }
+        }
     }
 
     static mapping = {
@@ -58,5 +79,14 @@ class TextFieldDefinition extends AbstractFieldDefinition {
     @Override
     List<Object> getValueList() {
         return allowedTextValues
+    }
+
+    static private boolean isValidPattern(String pattern) {
+        try {
+            Pattern.compile(pattern)
+            return true
+        } catch (PatternSyntaxException e) {
+            return false
+        }
     }
 }

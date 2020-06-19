@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import de.dkfz.tbi.TestCase
+
 class DecimalNumberFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
 
     @Override
@@ -33,5 +35,30 @@ class DecimalNumberFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
     @Override
     AbstractFieldDefinition createDefinition() {
         return createDecimalFieldDefinition()
+    }
+
+    void "test, when default value is in list of allowed value, then the validation pass"() {
+        given:
+        DecimalNumberFieldDefinition definition = createDecimalFieldDefinition()
+
+        when:
+        definition.defaultDecimalNumberValue = 3.4d
+        definition.allowedDecimalNumberValues = [2.2d, 3.4d, 4.5d]
+        definition.validate()
+
+        then:
+        definition.errors.errorCount == 0
+    }
+
+    void "test, when default value is not in list of allowed value, then the validation fail"() {
+        given:
+        DecimalNumberFieldDefinition definition = createDecimalFieldDefinition()
+
+        when:
+        definition.defaultDecimalNumberValue = 3.4
+        definition.allowedDecimalNumberValues = [2.2, 4.5]
+
+        then:
+        TestCase.assertValidateError(definition, 'allowedDecimalNumberValues', 'validator.defaultValue.not.in.allowedValues')
     }
 }

@@ -124,10 +124,29 @@ class TestCase {
      * @param objectToCheck the object which validate should be failed
      * @param fieldToCheck the name of the property the check fails for
      * @param failedConstraint the name of the constraint the check fails for
+     */
+    static void assertValidateError(Object objectToCheck, String failedField, String failedConstraint) {
+        assertValidateError(objectToCheck, failedField, failedConstraint, objectToCheck[failedField])
+    }
+
+    /**
+     * Helper to check that a validation failed for the given constraint on the given field with the given value.
+     * The assert fails if
+     * <ul>
+     * <li>The validate method return true</li>
+     * <li>There is more then one error</li>
+     * <li>The error is not of type {@link FieldError} </li>
+     * <li>The {@link FieldError} is not caused by the given field</li>
+     * <li>The {@link FieldError} is not caused by the given constraint</li>
+     * <li>The {@link FieldError} is not caused by the given value</li>
+     * </ul>
+     *
+     * @param objectToCheck the object which validate should be failed
+     * @param fieldToCheck the name of the property the check fails for
+     * @param failedConstraint the name of the constraint the check fails for
      * @param rejectedValue the value which is rejected by the check
      */
-    @SuppressWarnings(['NoDef', 'MethodParameterTypeRequired'])
-    static void assertValidateError(def objectToCheck, String failedField, String failedConstraint, Object rejectedValue) {
+    static void assertValidateError(Object objectToCheck, String failedField, String failedConstraint, Object rejectedValue) {
         assert !objectToCheck.validate()
         Errors errors = objectToCheck.errors
         assert errors.errorCount == 1

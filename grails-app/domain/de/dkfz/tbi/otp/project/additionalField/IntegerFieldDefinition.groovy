@@ -29,6 +29,11 @@ class IntegerFieldDefinition extends AbstractFieldDefinition {
 
     static constraints = {
         defaultIntegerValue nullable: true
+        allowedIntegerValues validator: { value, obj ->
+            if (value && obj.defaultIntegerValue && !value.contains(obj.defaultIntegerValue)) {
+                return ['validator.defaultValue.not.in.allowedValues', obj.defaultIntegerValue]
+            }
+        }
     }
 
     static mapping = {

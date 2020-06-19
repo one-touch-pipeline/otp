@@ -21,7 +21,14 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.TypeValidators
+
 class TextFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
+
+    static private final String DEFAULT_VALUE = 'DEFAULT VALUE'
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -33,5 +40,55 @@ class TextFieldDefinitionSpec extends AbstractFieldDefinitionSpec {
     @Override
     AbstractFieldDefinition createDefinition() {
         return createTextFieldDefinition()
+    }
+
+    @Unroll
+    void "test, when default value is valid for constraint #property, then the validation pass"() {
+        given:
+        TextFieldDefinition definition = createTextFieldDefinition()
+
+        when:
+        definition.defaultTextValue = DEFAULT_VALUE
+        definition[property] = value
+        definition.validate()
+
+        then:
+        definition.errors.errorCount == 0
+
+        where:
+        property            | value
+        'allowedTextValues' | ['test1', DEFAULT_VALUE, 'test2']
+        'typeValidator'     | TypeValidators.SINGLE_LINE_TEXT
+        'regularExpression' | '[A-Z ]*'
+    }
+
+    @Unroll
+    void "test, when default value is not valid for constraint #property, then the validation fail"() {
+        given:
+        TextFieldDefinition definition = createTextFieldDefinition()
+
+        when:
+        definition.defaultTextValue = DEFAULT_VALUE
+        definition[property] = value
+
+        then:
+        TestCase.assertValidateError(definition, property, constraint)
+
+        where:
+        property            | value                           | constraint
+        'allowedTextValues' | ['test1', 'test2']              | 'validator.defaultValue.not.in.allowedValues'
+        'typeValidator'     | TypeValidators.SINGLE_WORD_TEXT | 'validator.defaultValue.do.not.pass.validator'
+        'regularExpression' | '[A-Z]*'                        | 'validator.defaultValue.do.not.pass.regExpression'
+    }
+
+    void "test, when regular expression is not valid pattern, then the validation fail"() {
+        given:
+        TextFieldDefinition definition = createTextFieldDefinition()
+
+        when:
+        definition.regularExpression = '[abc['
+
+        then:
+        TestCase.assertValidateError(definition, 'regularExpression', 'validator.regularExpression.isNotValid')
     }
 }
