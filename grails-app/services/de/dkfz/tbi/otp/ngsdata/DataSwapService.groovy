@@ -256,7 +256,7 @@ mv '${old}' \\
             String oldSampleIdentifier = sampleIdentifier.name
             sampleIdentifier.name += postfix
             sampleIdentifier.save(flush: true)
-            changeMetadataEntry(sample, MetaDataColumn.SAMPLE_ID.name(), oldSampleIdentifier, sampleIdentifier.name)
+            changeMetadataEntry(sample, MetaDataColumn.SAMPLE_NAME.name(), oldSampleIdentifier, sampleIdentifier.name)
         }
     }
 

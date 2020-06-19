@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 @Component
 class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
@@ -49,7 +49,7 @@ class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> imp
 
     @Override
     List<String> getOptionalColumnTitles(ValidationContext context) {
-        return [PROJECT, SAMPLE_ID]*.name()
+        return [PROJECT, SAMPLE_NAME]*.name()
     }
 
     @Override

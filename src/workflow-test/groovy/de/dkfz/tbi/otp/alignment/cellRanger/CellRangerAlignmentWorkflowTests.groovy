@@ -132,7 +132,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             mwp.save(flush: true)
 
             seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), "asdfg")
+                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
             }
         }
 
@@ -163,7 +163,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
             crmwp.seqTracks.each { SeqTrack seqTrack ->
                 seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                    DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), "asdfg")
+                    DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
                 }
             }
         }

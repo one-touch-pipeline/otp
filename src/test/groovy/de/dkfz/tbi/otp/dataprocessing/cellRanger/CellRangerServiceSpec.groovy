@@ -99,7 +99,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Path filePath2 = Paths.get(file2)
         singleCellBamFile.seqTracks.each { SeqTrack seqTrack ->
             seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), sampleIdentifier)
+                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), sampleIdentifier)
             }
         }
 
@@ -116,7 +116,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(CellRangerMergingWorkPackage.all.find())
         seqTrack2.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-            DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), sampleIdentifier2)
+            DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), sampleIdentifier2)
         }
         singleCellBamFile.seqTracks.add(seqTrack2)
         singleCellBamFile.save(flush: true)
@@ -259,7 +259,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         singleCellBamFile.mergingWorkPackage.enforcedCells = enforcedCells
         singleCellBamFile.seqTracks.each { SeqTrack seqTrack ->
             seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_ID.name(), "asdfg")
+                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
             }
         }
 

@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
@@ -48,7 +48,7 @@ class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationCont
     }
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID, PROJECT]*.name()
+        return [SAMPLE_NAME, PROJECT]*.name()
     }
 
     @Override
@@ -61,7 +61,7 @@ class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationCont
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
-            String sampleId = it.getValue(SAMPLE_ID.name())
+            String sampleId = it.getValue(SAMPLE_NAME.name())
             String projectName = it.getValue(PROJECT.name())
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
 

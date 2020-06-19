@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 @Component
 class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
@@ -37,12 +37,12 @@ class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationCont
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If '${LIB}' is contained in the '${SAMPLE_ID}' then the tagementation library number (CUSTOMER LIBRARY) should be given."]
+        return ["If '${LIB}' is contained in the '${SAMPLE_NAME}' then the tagementation library number (CUSTOMER LIBRARY) should be given."]
     }
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID]*.name()
+        return [SAMPLE_NAME]*.name()
     }
 
     @Override
@@ -56,7 +56,7 @@ class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationCont
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            String sample = valueTuple.getValue(SAMPLE_ID.name())
+            String sample = valueTuple.getValue(SAMPLE_NAME.name())
             if (sample.toLowerCase(Locale.ENGLISH).contains(LIB) && !valueTuple.getValue(CUSTOMER_LIBRARY.name())) {
                 context.addProblem(valueTuple.cells, Level.WARNING, "For sample '${sample}' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.")
             }

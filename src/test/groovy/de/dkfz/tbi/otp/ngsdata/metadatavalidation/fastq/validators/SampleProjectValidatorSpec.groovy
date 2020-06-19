@@ -37,7 +37,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 class SampleProjectValidatorSpec extends Specification implements DataTest {
 
@@ -57,7 +57,7 @@ class SampleProjectValidatorSpec extends Specification implements DataTest {
     void 'validate adds expected warnings'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext((
-                "${PROJECT} ${SAMPLE_ID}\n" +
+                "${PROJECT} ${SAMPLE_NAME}\n" +
                         "A not_parseable\n" +  // neither in DB nor can be parsed
                         "B project_B\n" +      // SampleIdentifier in DB, name matches
                         "C project_C\n" +      // SampleIdentifier in DB, nameInMetadataFiles matches

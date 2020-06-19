@@ -438,7 +438,7 @@ class MetadataImportService {
                     [libraryLayout: libLayout, singleCell: isSingleCell],
             )
             String pipelineVersionString = uniqueColumnValue(rows, FASTQ_GENERATOR) ?: 'unknown'
-            String sampleIdString = uniqueColumnValue(rows, SAMPLE_ID)
+            String sampleIdString = uniqueColumnValue(rows, SAMPLE_NAME)
             String libPrepKitString = uniqueColumnValue(rows, LIB_PREP_KIT)
             InformationReliability kitInfoReliability
             LibraryPreparationKit libraryPreparationKit = null
@@ -623,7 +623,7 @@ class MetadataImportService {
     }
 
     static Project getProjectFromMetadata(ValueTuple tuple) {
-        String sampleId = tuple.getValue(SAMPLE_ID.name())
+        String sampleId = tuple.getValue(SAMPLE_NAME.name())
         String projectName = tuple.getValue(PROJECT.name()) ?: ''
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
         if (sampleIdentifier) {

@@ -95,7 +95,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
                                 MetaDataColumn.BASE_MATERIAL,
                                 MetaDataColumn.SINGLE_CELL_WELL_LABEL,
                                 MetaDataColumn.PROJECT,
-                                MetaDataColumn.SAMPLE_ID,
+                                MetaDataColumn.SAMPLE_NAME,
                         ],
                         [
                                 baseMaterial,
@@ -139,7 +139,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
                                 MetaDataColumn.BASE_MATERIAL,
                                 MetaDataColumn.SINGLE_CELL_WELL_LABEL,
                                 MetaDataColumn.PROJECT,
-                                MetaDataColumn.SAMPLE_ID,
+                                MetaDataColumn.SAMPLE_NAME,
                         ],
                         [
                                 baseMaterial,

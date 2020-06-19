@@ -209,7 +209,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
         seqTrack.project.name = ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.first()
         seqTrack.dataFiles.each {
-            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_ID, identifier)
+            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, identifier)
         }
 
         when:
@@ -224,7 +224,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         String identifier = 'SomeName'
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
         seqTrack.dataFiles.each {
-            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_ID, identifier)
+            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, identifier)
         }
         String expected = " (${identifier})"
 
@@ -250,7 +250,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
             seqTrack.individual.project = project
             seqTrack.dataFiles.each {
                 it.project = project
-                DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_ID, identifier)
+                DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, identifier)
             }
             return seqTrack
         }
@@ -1047,9 +1047,9 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 run    : run,
         ])
         seqTrack.dataFiles.each {
-            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_ID, sampleId1)
+            DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, sampleId1)
             if (sampleId2) {
-                DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_ID, sampleId2)
+                DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_NAME, sampleId2)
             }
         }
 

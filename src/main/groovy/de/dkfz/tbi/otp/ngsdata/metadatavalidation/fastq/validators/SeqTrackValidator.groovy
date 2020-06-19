@@ -41,7 +41,7 @@ import static de.dkfz.tbi.otp.utils.StringUtils.extractDistinguishingCharacter
 class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final Collection<MetaDataColumn> EQUAL_ATTRIBUTES = [
-            SAMPLE_ID,
+            SAMPLE_NAME,
             ANTIBODY_TARGET,
             ANTIBODY,
             SEQUENCING_TYPE,

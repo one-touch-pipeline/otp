@@ -87,7 +87,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         sampleIdentifier.sample.project.closed = true
         sampleIdentifier.sample.project.save(flush: true)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SAMPLE_ID}\n" +
+                "${MetaDataColumn.SAMPLE_NAME}\n" +
                         "${sampleIdentifier.name}\n"
         )
 
@@ -104,7 +104,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
     void 'validate metadata, when sample ID is unknown and project is not given'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SAMPLE_ID}\n" +
+                "${MetaDataColumn.SAMPLE_NAME}\n" +
                         "asdf\n"
         )
 
@@ -118,7 +118,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
     void 'validate metadata, when sample ID is unknown and project does not exist'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SAMPLE_ID}\t${MetaDataColumn.PROJECT}\n" +
+                "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}\n" +
                         "asdf\tasdf\n"
         )
 

@@ -394,7 +394,7 @@ class CreateNotificationTextService {
                         'in'('seqTrack', seqTracks)
                     }
                     key {
-                        eq('name', MetaDataColumn.SAMPLE_ID.name())
+                        eq('name', MetaDataColumn.SAMPLE_NAME.name())
                     }
                     distinct('value')
                 }

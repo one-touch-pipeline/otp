@@ -40,12 +40,12 @@ File input = new File("/absolute/path/to/file.tsv")
 
 Spreadsheet s = new Spreadsheet(input.text)
 
-[MetaDataColumn.SAMPLE_ID, MetaDataColumn.COMMENT]*.name().each { String it ->
+[MetaDataColumn.SAMPLE_NAME, MetaDataColumn.COMMENT]*.name().each { String it ->
     assert it in s.header.cells*.text : "Input file doesn't contain column ${it}."
 }
 
 s.dataRows.each { Row row ->
-    Sample sample = SampleIdentifier.findByName(row.getCellByColumnTitle(MetaDataColumn.SAMPLE_ID.name()).text).sample
+    Sample sample = SampleIdentifier.findByName(row.getCellByColumnTitle(MetaDataColumn.SAMPLE_NAME.name()).text).sample
     List<MetaDataEntry> entries = MetaDataEntry.createCriteria().list {
         key {
             eq("name", MetaDataColumn.COMMENT.name())

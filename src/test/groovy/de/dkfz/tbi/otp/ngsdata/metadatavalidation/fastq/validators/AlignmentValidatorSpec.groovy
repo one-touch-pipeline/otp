@@ -85,7 +85,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout}
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${BASE_MATERIAL}' is missing."),
                 new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${PROJECT}' is missing."),
-                new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${SAMPLE_ID}' is missing."),
+                new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${SAMPLE_NAME}' is missing."),
                 new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${TAGMENTATION_BASED_LIBRARY}' is missing."),
         ]
 
@@ -103,7 +103,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout}
         SeqType seqType = createSeqType()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
 ${seqType.name},${createProject().name},,,DNA,${LibraryLayout.SINGLE}
 """.replaceAll(',', '\t'))
 
@@ -128,7 +128,7 @@ ${seqType.name},${createProject().name},,,DNA,${LibraryLayout.SINGLE}
         Project project = createProject()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
 ${seqType1.name},${project.name},,1,DNA,${LibraryLayout.PAIRED}
 ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
 """.replaceAll(',', '\t'))
@@ -160,7 +160,7 @@ ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PA
         DomainFactory.proxyCellRanger.createConfig(project: project)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_ID},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${TAGMENTATION_BASED_LIBRARY},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
 ${seqType1.name},${project.name},,1,DNA,${LibraryLayout.PAIRED}
 ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
 """.replaceAll(',', '\t'))

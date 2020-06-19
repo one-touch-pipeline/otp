@@ -381,7 +381,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     String getSampleIdentifier() {
         return exactlyOneElement(MetaDataEntry.findAllByKeyAndDataFileInList(
-                exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_ID.name())), dataFilesWhereIndexFileIsFalse
+                exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_NAME.name())), dataFilesWhereIndexFileIsFalse
         )*.value.unique())
     }
 

@@ -572,7 +572,7 @@ ${INDEX}                        -             barcode8      barcode8      barcod
 ${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}     ${SC_EXON}
 ${SEQUENCING_READ_TYPE}         ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
 ${READ}                         1             1             2             1             2             1             1             1             1
-${SAMPLE_ID}                    ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
+${SAMPLE_NAME}                    ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
 ${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true          -
 ${BASE_MATERIAL}                -             -             -             -             -             -             -             -             ${scMaterial}
 """
@@ -935,7 +935,7 @@ ${LANE_NO}                      1                                           1
 ${SEQUENCING_TYPE}              ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}
 ${SEQUENCING_READ_TYPE}         ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
 ${READ}                         1                                           2
-${SAMPLE_ID}                    ${sampleIdentifier.name}                    ${sampleIdentifier.name}
+${SAMPLE_NAME}                    ${sampleIdentifier.name}                    ${sampleIdentifier.name}
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
 ${FASTQ_GENERATOR}             ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
@@ -1106,8 +1106,8 @@ ${FASTQ_GENERATOR}             ${softwareToolIdentifier.name}              ${sof
                 (LANE_NO)             : '1',
                 (SEQUENCING_TYPE)     : seqType.name,
                 (SEQUENCING_READ_TYPE): seqType.libraryLayout,
-                (SAMPLE_ID)           : sampleIdentifier.name,
-                (FASTQ_GENERATOR)    : softwareToolIdentifier.name,
+                (SAMPLE_NAME)         : sampleIdentifier.name,
+                (FASTQ_GENERATOR)     : softwareToolIdentifier.name,
         ].asImmutable()
 
         Map fastqData1 = [

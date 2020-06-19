@@ -52,7 +52,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     }
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID]*.name()
+        return [SAMPLE_NAME]*.name()
     }
 
     @Override
@@ -69,7 +69,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
         Collection<String> parsedSampleIdentifiers = []
 
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
-            String sampleId = it.getValue(SAMPLE_ID.name())
+            String sampleId = it.getValue(SAMPLE_NAME.name())
             String projectName = it.getValue(PROJECT.name()) ?: ''
             String pid = it.getValue(PATIENT_ID.name()) ?: ''
             String sampleType = it.getValue(BIOMATERIAL_ID.name()) ?: ''
@@ -133,7 +133,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), Level.WARNING,
                     'The sample identifiers belong to different projects:\n' +
                             byProjectName.collect { projectName, valueTuplesOfProject ->
-                                return "Project '${projectName}':\n        ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_ID.name())}'" }.sort().join('\n        ')}"
+                                return "Project '${projectName}':\n        ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_NAME.name())}'" }.sort().join('\n        ')}"
                             }.join('\n'))
         }
     }

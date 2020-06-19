@@ -53,7 +53,7 @@ List<Project> projects = projectInputArea.split('\n')*.trim().findAll { String l
     CollectionUtils.exactlyOneElement(Project.findAllByName(it))
 }
 
-MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.SAMPLE_ID.toString())
+MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.SAMPLE_NAME.toString())
 
 println MetaDataEntry.createCriteria().list {
     eq('key', key)

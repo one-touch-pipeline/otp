@@ -153,7 +153,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
         ].join('\t')
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${PROJECT}\t${BASE_MATERIAL}\t${ANTIBODY_TARGET}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${LIB_PREP_KIT}\n" +
+                "${SAMPLE_NAME}\t${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${PROJECT}\t${BASE_MATERIAL}\t${ANTIBODY_TARGET}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${LIB_PREP_KIT}\n" +
                         "sample1\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n" +
                         "sample2\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\t\t\t${furtherValues}\n" +
                         "sample3\t${bulkSeqTypeWithAntibodyTarget.name}\t${bulkSeqTypeWithAntibodyTarget.libraryLayout.name()}\t\t\t${antibodyTarget.name}\t${furtherValues}\n" +
@@ -453,7 +453,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
 
         String content = [
                 (PROJECT)             : mergingWorkPackage.project.name,
-                (SAMPLE_ID)           : sampleIdentifier.name,
+                (SAMPLE_NAME)         : sampleIdentifier.name,
                 (SEQUENCING_TYPE)     : mergingWorkPackage.seqType.name,
                 (SEQUENCING_READ_TYPE): mergingWorkPackage.seqType.libraryLayout,
                 (BASE_MATERIAL)       : mergingWorkPackage.seqType.singleCell ? SeqType.SINGLE_CELL_DNA : '',

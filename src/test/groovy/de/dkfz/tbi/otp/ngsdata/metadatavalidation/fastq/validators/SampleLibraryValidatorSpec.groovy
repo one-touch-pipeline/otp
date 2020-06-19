@@ -30,7 +30,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 class SampleLibraryValidatorSpec extends Specification {
 
@@ -52,7 +52,7 @@ class SampleLibraryValidatorSpec extends Specification {
     void 'validate, when CUSTOMER_LIBRARY is missing, add warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\n" +
+                "${SAMPLE_NAME}\n" +
                 "testSample\n" +
                 "testSampleLib\n"
         )
@@ -88,7 +88,7 @@ class SampleLibraryValidatorSpec extends Specification {
     void 'validate, valid SAMPLE_ID and CUSTOMER_LIBRARY combinations, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\n" +
+                "${SAMPLE_NAME}\t${CUSTOMER_LIBRARY}\n" +
                         "testSampleLib\tlib\n" +
                         "testSample\tlib\n" +
                         "testSample\n" +
@@ -105,7 +105,7 @@ class SampleLibraryValidatorSpec extends Specification {
     void 'validate, when SAMPLE_ID does contain "lib" and CUSTOMER_LIBRARY is empty, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\n" +
+                "${SAMPLE_NAME}\t${CUSTOMER_LIBRARY}\n" +
                         "testSampleLib\n"
         )
 

@@ -57,7 +57,7 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
 
     @Override
     List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
-        return [SINGLE_CELL_WELL_LABEL, PROJECT, SAMPLE_ID]*.name()
+        return [SINGLE_CELL_WELL_LABEL, PROJECT, SAMPLE_NAME]*.name()
     }
 
     @Override
@@ -80,7 +80,7 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
     }
 
     private boolean valueByParserProvided(ValueTuple valueTuple) {
-        String sampleId = valueTuple.getValue(SAMPLE_ID.name())
+        String sampleId = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
         return sampleId && projectName && sampleIdentifierService.parseCellPosition(sampleId, Project.getByNameOrNameInMetadataFiles(projectName))

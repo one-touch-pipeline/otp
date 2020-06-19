@@ -38,7 +38,7 @@ import java.util.regex.Pattern
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SampleValidatorSpec extends Specification implements DataTest {
@@ -67,7 +67,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not parseable but in DB, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\nABC")
+                "${SAMPLE_NAME}\t${PROJECT}\nABC")
         DomainFactory.createSampleIdentifier(name: 'ABC')
 
         when:
@@ -80,7 +80,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifiers are neither parseable nor in DB, adds errors and info'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nABC\nAAA")
+                "${SAMPLE_NAME}\nABC\nAAA")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "Sample identifier 'ABC' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
@@ -99,7 +99,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is not in DB, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
 
         when:
         validator.validate(context)
@@ -113,7 +113,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is not in DB but individual is, adds errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, Level.ERROR,
@@ -132,7 +132,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         DomainFactory.createProject(name: 'X')
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
 
@@ -148,7 +148,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is not in DB but parseable and project is in DB, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         DomainFactory.createProject(name: 'X')
 
         when:
@@ -163,7 +163,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'z')
 
         when:
@@ -178,7 +178,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is in DB and parseable and individual is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'z')
 
         when:
@@ -193,7 +193,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifier is in DB and parseable and sample type is inconsistent, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
+                "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'c')
 
         when:
@@ -208,7 +208,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
     void 'validate, when identifiers belong to different projects, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\n" +
+                "${SAMPLE_NAME}\n" +
                         "SampleA\n" +
                         "SampleB\n" +
                         "SampleC1\n" +
@@ -251,7 +251,7 @@ Project 'C':
     void 'validate, when all known identifiers belong to the same project, adds no warning about different projects'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\n" +
+                "${SAMPLE_NAME}\n" +
                         "SampleA\n" +
                         "SampleB\n" +
                         "${SAMPLE_N}\n")
@@ -274,7 +274,7 @@ Project 'C':
     void 'validate, when PROJECT column is missing and all identifiers are known and belong to the same project, adds info'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\n" +
+                "${SAMPLE_NAME}\n" +
                         "SampleB\n" +
                         "${SAMPLE_N}\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
@@ -294,7 +294,7 @@ Project 'C':
     void 'validate, when PROJECT column is present and all identifiers are known and belong to the same project, adds no problem'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\n" +
+                "${SAMPLE_NAME}\t${PROJECT}\n" +
                         "SampleB\n" +
                         "${SAMPLE_N}\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')

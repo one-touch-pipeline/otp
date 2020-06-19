@@ -63,7 +63,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
         /** This content is used externally. Please discuss a change in the team */
-        return [SAMPLE_ID, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
+        return [SAMPLE_NAME, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
@@ -184,7 +184,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
     }
 
     private Sample findExistingSampleForValueTuple(ValueTuple valueTuple) {
-        String sampleId = valueTuple.getValue(SAMPLE_ID.name())
+        String sampleId = valueTuple.getValue(SAMPLE_NAME.name())
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
         if (sampleIdentifier) {
             return sampleIdentifier.sample

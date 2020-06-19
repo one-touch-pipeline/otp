@@ -53,7 +53,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE, LIB_PREP_KIT, SAMPLE_ID, PROJECT]*.name()
+        return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE, LIB_PREP_KIT, SAMPLE_NAME, PROJECT]*.name()
     }
 
     @Override
@@ -94,7 +94,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
             return
         }
 
-        String sampleId = valueTuple.getValue(SAMPLE_ID.name())
+        String sampleId = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
         Project project = Project.getByNameOrNameInMetadataFiles(projectName)

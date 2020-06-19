@@ -157,7 +157,7 @@
             <tr>
                 <td class="myKey">${metaDataEntry.key.name}</td>
                 <td class="myValue">
-                    <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_ID.name() && ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
+                    <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_NAME.name() && ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
                         <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
                     </g:if>
                     <g:else>

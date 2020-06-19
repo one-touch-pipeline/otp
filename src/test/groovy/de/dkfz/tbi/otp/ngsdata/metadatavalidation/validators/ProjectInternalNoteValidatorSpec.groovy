@@ -158,7 +158,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         sampleIdentifier.project.internalNotes = INTERNAL_NOTES
         sampleIdentifier.project.save(flush: true)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SAMPLE_ID}\n" +
+                "${MetaDataColumn.SAMPLE_NAME}\n" +
                         "${sampleIdentifier.name}\n"
         )
 
