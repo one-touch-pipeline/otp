@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /** This table is used externally. Please discuss a change in the team */
-class Project extends CommentableWithProject implements ProjectPropertiesGivenWithRequest, Entity {
+class Project implements CommentableWithProject, ProjectPropertiesGivenWithRequest, Entity {
 
     enum ProjectType {
         SEQUENCING,
@@ -182,6 +182,7 @@ class Project extends CommentableWithProject implements ProjectPropertiesGivenWi
         dirAnalysis type: "text"
         description type: "text"
         internalNotes type: "text"
+        comment cascade: "all-delete-orphan"
     }
 
     String getDisplayName() {

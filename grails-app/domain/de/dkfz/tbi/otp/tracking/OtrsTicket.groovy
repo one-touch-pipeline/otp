@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
-class OtrsTicket extends Commentable implements Entity {
+class OtrsTicket implements Commentable, Entity {
 
     @TupleConstructor
     enum ProcessingStep {
@@ -146,9 +146,8 @@ class OtrsTicket extends Commentable implements Entity {
 
     static mapping = {
         seqCenterComment type: "text"
+        comment cascade: "all-delete-orphan"
     }
-
-
 
     Date getFirstImportTimestamp() {
         return (Date) MetaDataFile.createCriteria().get {

@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
-class DataFile extends CommentableWithProject implements  Entity {
+class DataFile implements CommentableWithProject,  Entity {
 
     String fileName                // file name
     String pathName                // path from run folder to file
@@ -208,6 +208,7 @@ class DataFile extends CommentableWithProject implements  Entity {
         fileType index: "data_file_file_type_idx"
         initialDirectory type: 'text'
         dateLastChecked index: 'data_file_date_last_checked_idx'
+        comment cascade: "all-delete-orphan"
     }
 
     long getNBasePairs() {

@@ -45,7 +45,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @see Job
  * @see StartJob
  */
-class Process extends CommentableWithProject implements Serializable, Entity {
+class Process implements CommentableWithProject, Serializable, Entity {
     /**
      * The Date when this process was started.
      */
@@ -73,8 +73,8 @@ class Process extends CommentableWithProject implements Serializable, Entity {
     static mapping = {
         finished index: 'finished_idx'
         jobExecutionPlan index: 'job_execution_plan_idx'
+        comment cascade: "all-delete-orphan"
     }
-
 
     static constraints = {
         jobExecutionPlan(nullable: false)

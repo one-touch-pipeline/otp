@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * (Decided together with the OTP Product Owner on 2016-07-19.)
  */
 /** This table is used externally. Please discuss a change in the team */
-class Individual extends CommentableWithProject implements Entity {
+class Individual implements CommentableWithProject, Entity {
 
     /**
      * Identifier used in the file system. It should never change.
@@ -148,5 +148,6 @@ order by type.name asc, type.libraryLayout
         pid index: "individual_pid_idx"
         mockPid index: "individual_mock_pid_idx"
         mockFullName index: "individual_mock_full_name_idx"
+        comment cascade: "all-delete-orphan"
     }
 }

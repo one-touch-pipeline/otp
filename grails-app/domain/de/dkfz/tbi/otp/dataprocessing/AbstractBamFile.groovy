@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-abstract class AbstractBamFile extends CommentableWithProject implements Entity {
+abstract class AbstractBamFile implements CommentableWithProject, Entity {
 
     /**
      * This ENUM declares the different states a {@link AbstractBamFile} can have while it is assigned to a {@link MergingSet}
@@ -135,6 +135,7 @@ abstract class AbstractBamFile extends CommentableWithProject implements Entity 
         'class' index: "abstract_bam_file_class_idx"
         withdrawn index: "abstract_bam_file_withdrawn_idx"
         qualityAssessmentStatus index: "abstract_bam_file_quality_assessment_status_idx"
+        comment cascade: "all-delete-orphan"
     }
 
     boolean isQualityAssessed() {

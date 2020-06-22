@@ -21,10 +21,6 @@
  */
 package de.dkfz.tbi.otp
 
-abstract class Commentable {
+trait Commentable {
     Comment comment
-
-    static mapping = {
-        comment cascade: "all-delete-orphan"
-    }
 }

@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
 
-class ExternalWorkflowConfigFragment extends Commentable implements Deprecateable<ExternalWorkflowConfigFragment>, Entity {
+class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 
     String name
     String configValues
@@ -35,5 +35,7 @@ class ExternalWorkflowConfigFragment extends Commentable implements Deprecateabl
     static mapping = {
         configValues type: "text"
         previous nullable: true
+        comment cascade: "all-delete-orphan"
     }
+
 }

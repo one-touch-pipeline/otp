@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
-class WorkflowRun extends Commentable implements Entity {
+class WorkflowRun implements Commentable, Entity {
 
     enum State {
         //unfinished
@@ -77,6 +77,7 @@ class WorkflowRun extends Commentable implements Entity {
         combinedConfig type: "text"
         priority index: 'workflow_run_priority_idx'
         state index: 'workflow_run_state_idx'
+        comment cascade: "all-delete-orphan"
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

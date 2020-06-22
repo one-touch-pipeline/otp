@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
-class WorkflowStep extends Commentable implements Entity {
+class WorkflowStep implements Commentable, Entity {
 
     enum State {
         CREATED,
@@ -73,6 +73,10 @@ class WorkflowStep extends Commentable implements Entity {
         previous nullable: true
         restartedFrom nullable: true
         comment nullable: true
+    }
+
+    static mapping = {
+        comment cascade: "all-delete-orphan"
     }
 
     WorkflowStep getNext() {

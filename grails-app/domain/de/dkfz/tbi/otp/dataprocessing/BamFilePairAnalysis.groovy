@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
-abstract class BamFilePairAnalysis extends CommentableWithProject implements ProcessParameterObject, Entity {
+abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
@@ -98,6 +98,7 @@ abstract class BamFilePairAnalysis extends CommentableWithProject implements Pro
         qcTrafficLightStatus index: "bam_file_pair_analysis_qc_traffic_light_status_idx"
         samplePair index: "bam_file_pair_analysis_sample_pair_idx"
         config lazy: false
+        comment cascade: "all-delete-orphan"
     }
 
     @Override

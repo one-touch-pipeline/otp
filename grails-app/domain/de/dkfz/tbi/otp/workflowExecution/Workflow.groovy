@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import java.time.LocalDate
 
-class Workflow extends Commentable implements Entity {
+class Workflow implements Commentable, Entity {
 
     String name
 
@@ -56,6 +56,10 @@ class Workflow extends Commentable implements Entity {
         deprecatedDate nullable: true
         wesServer nullable: true
         comment nullable: true
+    }
+
+    static mapping = {
+        comment cascade: "all-delete-orphan"
     }
 
     @Override

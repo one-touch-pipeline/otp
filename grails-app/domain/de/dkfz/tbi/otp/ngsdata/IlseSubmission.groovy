@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
-class IlseSubmission extends Commentable implements Entity {
+class IlseSubmission implements Commentable, Entity {
 
     int ilseNumber
 
@@ -39,5 +39,9 @@ class IlseSubmission extends Commentable implements Entity {
                 }
             }
         }
+    }
+
+    static mapping = {
+        comment cascade: "all-delete-orphan"
     }
 }
