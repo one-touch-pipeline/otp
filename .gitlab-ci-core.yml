@@ -28,6 +28,7 @@ image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
 ## putting the expire time to a variable does not work
 variables:
   GRADLE_OPTS: '-Xms4g -Xms1g'
+  GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
   GRADLE_WRAPPER: $CI_PROJECT_DIR/.gradle/wrapper
