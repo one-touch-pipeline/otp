@@ -56,9 +56,7 @@ class ProcessingOptionService {
     void obsoleteOptionByName(OptionName name, String type = null, Project project = null) {
         ProcessingOption option = findOption(name, type, project)
         if (option) {
-            if (option.name.necessity == Necessity.REQUIRED &&
-                    !option.name.isDeprecated()
-            ) {
+            if (option.name.necessity == Necessity.REQUIRED && !option.name.isDeprecated()) {
                 throw new ProcessingException("Required options can't be obsoleted")
             }
             obsoleteOption(option)

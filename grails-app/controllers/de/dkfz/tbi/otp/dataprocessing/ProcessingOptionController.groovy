@@ -27,6 +27,8 @@ import groovy.transform.Canonical
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
@@ -41,7 +43,7 @@ class ProcessingOptionController {
     ProjectService projectService
     PropertiesValidationService propertiesValidationService
 
-    private static int MAX_LENGTH = 100
+    private static final int MAX_LENGTH = 100
 
     def index() {
         List<ProcessingOption> existingOptions = processingOptionService.listProcessingOptions()
@@ -80,7 +82,7 @@ class ProcessingOptionController {
                                 existingOption?.value,
                         ),
                         name.validatorForValue.allowedValues?.sort(),
-                        existingOption?.project?.name,
+                        existingOption?.project,
                         existingOption?.dateCreated?.format("yyyy-MM-dd HH:mm:ss"),
                         name.validatorForValue == TypeValidators.MULTI_LINE_TEXT,
                 )
@@ -92,13 +94,25 @@ class ProcessingOptionController {
         ]
     }
 
-    def update(ProcessingOptionCommand cmd) {
+    def update(ProcessingOptionValueCommand cmd) {
         try {
-            processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type == "" ? null : cmd.type)
+            processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type, cmd.specificProject)
             flash.message = new FlashMessage(g.message(code: "processingOption.store.success") as String)
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "processingOption.store.failure") as String, e.errors)
-       }
+        }
+        redirect(action: "index")
+    }
+
+    def obsolete(ProcessingOptionCommand cmd) {
+        try {
+            processingOptionService.obsoleteOptionByName(cmd.optionName, cmd.type, cmd.specificProject)
+            flash.message = new FlashMessage(g.message(code: "processingOption.obsolete.success") as String)
+        } catch (ValidationException e) {
+            flash.message = new FlashMessage(g.message(code: "processingOption.obsolete.failure") as String, e.errors)
+        } catch (ProcessingException e) {
+            flash.message = new FlashMessage(g.message(code: "processingOption.obsolete.failure") as String, e.message)
+        }
         redirect(action: "index")
     }
 }
@@ -106,6 +120,18 @@ class ProcessingOptionController {
 class ProcessingOptionCommand {
     OptionName optionName
     String type
+    Project specificProject
+
+    void setType(String type) {
+        this.type = type ?: null
+    }
+
+    static constraints = {
+        specificProject nullable: true
+    }
+}
+
+class ProcessingOptionValueCommand extends ProcessingOptionCommand {
     String value
 
     static constraints = {
@@ -119,7 +145,7 @@ class OptionRow {
     TableCellValue type
     TableCellValue value
     List<String> allowedValues
-    String project
+    Project project
     String dateCreated
     boolean multiline
 }

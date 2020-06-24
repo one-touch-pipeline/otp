@@ -42,6 +42,7 @@
                     <th><g:message code="processingOption.list.headers.type"/></th>
                     <th><g:message code="processingOption.list.headers.value"/></th>
                     <th></th>
+                    <th></th>
                     <th><g:message code="processingOption.list.headers.dateCreated"/></th>
                     <th><g:message code="processingOption.list.headers.project"/></th>
                 </tr>
@@ -50,10 +51,11 @@
                 <g:each in="${options}" var="option">
                     <otp:editTable>
                         <g:form action="update">
-                            <td><otp:tableCell cell="${option.name}"/></td>
                             <input type="hidden" name="optionName" value="${option.name.value}">
-                            <td><otp:tableCell cell="${option.type}"/></td>
                             <input type="hidden" name="type" value="${option.type.value}">
+                            <input type="hidden" name="specificProject.id" value="${option.project?.id}">
+                            <td><otp:tableCell cell="${option.name}"/></td>
+                            <td><otp:tableCell cell="${option.type}"/></td>
                             <td>
                                 <span class="edit-fields" style="display: none;">
                                     <g:if test="${option.allowedValues}">
@@ -71,8 +73,9 @@
                                 </span>
                             </td>
                             <td><otp:editTableButtons/></td>
+                            <td><g:actionSubmit action="obsolete" name="obsolete" value="Obsolete"/></td>
                             <td>${option.dateCreated}</td>
-                            <td>${option.project}</td>
+                            <td>${option.project?.name}</td>
                         </g:form>
                     </otp:editTable>
                 </g:each>
