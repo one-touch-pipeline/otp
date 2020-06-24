@@ -35,7 +35,7 @@
         <h1><g:message code="processingOption.title"/></h1>
 
         <div class="otpDataTables">
-            <table class="fixed-table-header">
+            <table class="fixed-table-header processing-options-table">
                 <thead>
                 <tr>
                     <th><g:message code="processingOption.list.headers.name"/></th>
@@ -60,10 +60,10 @@
                                         <g:select id="" name="value" class="use-select-2" from="${option.allowedValues}" value="${option.value.value}"/>
                                     </g:if>
                                     <g:elseif test="${option.multiline}">
-                                        <g:textArea name="value" rows="25" cols="60">${option.value.tooltip}</g:textArea>
+                                        <g:textArea class="editor-field" name="value" rows="10">${option.value.tooltip}</g:textArea>
                                     </g:elseif>
                                     <g:else>
-                                        <input class="" name="value" value="${option.value.tooltip}"/>
+                                        <input class="editor-field" name="value" value="${option.value.tooltip}"/>
                                     </g:else>
                                 </span>
                                 <span class="show-fields">
@@ -74,7 +74,6 @@
                             <td>${option.dateCreated}</td>
                             <td>${option.project}</td>
                         </g:form>
-
                     </otp:editTable>
                 </g:each>
                 </tbody>

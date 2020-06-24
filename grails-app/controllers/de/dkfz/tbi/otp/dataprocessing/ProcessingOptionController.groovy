@@ -41,7 +41,7 @@ class ProcessingOptionController {
     ProjectService projectService
     PropertiesValidationService propertiesValidationService
 
-    private static final int MAX_LENGTH = 20
+    private static int MAX_LENGTH = 100
 
     def index() {
         List<ProcessingOption> existingOptions = processingOptionService.listProcessingOptions()
