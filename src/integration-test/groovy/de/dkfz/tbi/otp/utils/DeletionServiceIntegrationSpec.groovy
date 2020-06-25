@@ -54,6 +54,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         deletionService.seqTrackService = Mock(SeqTrackService)
         deletionService.analysisDeletionService = new AnalysisDeletionService()
         deletionService.fileService = new FileService()
+        deletionService.runService = new RunService()
     }
 
     void "test delete project content"() {
@@ -77,6 +78,39 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         DataFile.count() == 0
         Individual.count() == 0
         Project.count() == 1
+    }
+
+    void "deleteSeqTrack, delete an empty run"() {
+        given:
+        setupData()
+        Run run = createRun()
+        SeqTrack seqTrack = createSeqTrack(run: run)
+
+        assert Run.count() == 1
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        Run.count() == 0
+    }
+
+    void "deleteSeqTrack, keep an non empty run"() {
+        given:
+        setupData()
+        Run run = createRun()
+        List<SeqTrack> seqTrackList = []
+        (0..1).collect {
+            seqTrackList <<  createSeqTrack(run: run)
+        }
+
+        assert Run.count() == 1
+
+        when:
+        deletionService.deleteSeqTrack(seqTrackList.first())
+
+        then:
+        Run.count() == 1
     }
 
     void "test delete project content without any content"() {
@@ -282,7 +316,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
 
     void "test deleteProcessParameters"() {
         given:
-        ProcessParameter processParameter = DomainFactory.createProcessParameter(className: SeqTrack.class.name)
+        ProcessParameter processParameter = DomainFactory.createProcessParameter(className: SeqTrack.name)
         processParameter.process.finished = true
         processParameter.process.save(flush: true)
 

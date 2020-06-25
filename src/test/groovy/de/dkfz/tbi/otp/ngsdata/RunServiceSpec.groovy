@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-class RunServiceSpec extends Specification implements DataTest {
+class RunServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -77,5 +77,26 @@ class RunServiceSpec extends Specification implements DataTest {
         runService.retrieveMetaDataFiles(runWithoutDataFile).isEmpty()
         TestCase.assertContainSame(runService.retrieveMetaDataFiles(run1), [run1MetaDataFileA, run1MetaDataFileB, run1MetaDataFileC])
         TestCase.assertContainSame(runService.retrieveMetaDataFiles(run2), [run2MetaDataFile])
+    }
+
+    void 'check if run is empty'() {
+        given:
+        Run run1 = createRun() // will contain SeqTrack and DataFile
+        SeqTrack seqTrack1 = createSeqTrack(run: run1)
+        createDataFile(seqTrack: seqTrack1)
+
+        Run run2 = createRun() // will contain SeqTrack only
+        createSeqTrack(run: run2)
+
+        Run run3 = createRun() // will contain DataFile only
+        createDataFile(run: run3)
+
+        Run run4 = createRun() // empty
+
+        expect:
+        !runService.isRunEmpty(run1)
+        !runService.isRunEmpty(run2)
+        !runService.isRunEmpty(run3)
+        runService.isRunEmpty(run4)
     }
 }

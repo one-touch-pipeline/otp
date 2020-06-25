@@ -55,6 +55,7 @@ class DeletionService {
     AnalysisDeletionService analysisDeletionService
     FileService fileService
     DataSwapService dataSwapService
+    RunService runService
 
     void deleteProjectContent(Project project) {
         // Delete individuals for a project
@@ -315,7 +316,6 @@ class DeletionService {
         fastqcProcessedFiles*.delete(flush: true)
     }
 
-
     /**
      * Removes all metadata-entries, which belong to the dataFile
      *
@@ -326,7 +326,6 @@ class DeletionService {
         MetaDataEntry.findAllByDataFile(dataFile)*.delete(flush: true)
     }
 
-
     /**
      * Removes all information about the consistency checks of the input dataFile
      *
@@ -336,7 +335,6 @@ class DeletionService {
         notNull(dataFile, "The input dataFiles is null")
         ConsistencyStatus.findAllByDataFile(dataFile)*.delete(flush: true)
     }
-
 
     /**
      * Removes all QA-Information & the MarkDuplicate-metrics for an AbstractBamFile.
@@ -620,7 +618,17 @@ class DeletionService {
         MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
 
         seqTrack.delete(flush: true)
+
+        if (runService.isRunEmpty(seqTrack.run)) {
+            deleteEmptyRun(seqTrack.run)
+        }
         return dirsToDelete
+    }
+
+    void deleteEmptyRun(Run run) {
+        assert run: "The input run of the method deleteRun is null"
+        deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), Run.name))
+        run.delete(flush: true)
     }
 
     /**
@@ -643,8 +651,10 @@ class DeletionService {
             return deleteSeqTrack(it).get("dirsToDelete")
         }.flatten() as List<File>
 
-        deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), run.class.name))
-        run.delete(flush: true)
+        if (Run.exists(run.id) && runService.isRunEmpty(run)) {
+            deleteEmptyRun(run)
+        }
+
         return dirsToDelete
     }
 
@@ -779,7 +789,7 @@ class DeletionService {
                 if (mergingDir.exists()) {
                     List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
                     files.each {
-                        externalMergedBamFolders.add(it.getNonOtpFolder().getAbsoluteDataManagementPath().path)
+                        externalMergedBamFolders.add(it.nonOtpFolder.absoluteDataManagementPath.path)
                     }
                     mergingDir.listFiles().each {
                         dirsToDelete.add(it.path)

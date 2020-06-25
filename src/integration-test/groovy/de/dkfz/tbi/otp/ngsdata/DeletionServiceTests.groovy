@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.junit.*
@@ -473,7 +472,7 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     private void createFastqFiles(AbstractMergedBamFile bamFile) {
-        createFastqFiles(bamFile.getContainedSeqTracks() as List)
+        createFastqFiles(bamFile.containedSeqTracks as List)
     }
 
     private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealm = true) {
@@ -600,14 +599,14 @@ class DeletionServiceTests implements UserAndRoles {
         dataBaseSetupForMergedBamFiles(controlBamFiles, false)
         createFastqFiles(controlBamFiles)
 
-        File snvFolder = snvCallingInstance.getInstancePath().absoluteDataManagementPath
+        File snvFolder = snvCallingInstance.instancePath.absoluteDataManagementPath
         CreateFileHelper.createFile(new File(snvFolder, "test.vcf"))
 
         return snvCallingInstance
     }
 
     private void deleteProcessingFilesOfProject_RBF_SNV_Validation(AbstractSnvCallingInstance snvCallingInstance) {
-        File snvFolder = snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
+        File snvFolder = snvCallingInstance.samplePair.snvSamplePairPath.absoluteDataManagementPath
 
         Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
         assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
@@ -652,13 +651,13 @@ class DeletionServiceTests implements UserAndRoles {
                         seqType: seqTrack.seqType,
                 )
         )
-        CreateFileHelper.createFile(bamFile.getNonOtpFolder())
+        CreateFileHelper.createFile(bamFile.nonOtpFolder)
 
         return bamFile
     }
 
     private void deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(ExternallyProcessedMergedBamFile bamFile) {
-        File nonOtpFolder = bamFile.getNonOtpFolder()
+        File nonOtpFolder = bamFile.nonOtpFolder
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
         assert !outputFile.text.contains(nonOtpFolder.path)
@@ -723,7 +722,7 @@ class DeletionServiceTests implements UserAndRoles {
         List<String> allFilesToDeleteCmd = deletionService.deleteIndividual(pid)
         String allFilesToDeleteCmdConcatenated = allFilesToDeleteCmd[0] + allFilesToDeleteCmd[1]
 
-        assert !Individual.findByPid(pid)
+        assert !Individual.findAllByPid(pid)
 
         filesToDelete.flatten().each { File file ->
             assert allFilesToDeleteCmdConcatenated.contains(file.absolutePath)

@@ -146,7 +146,7 @@ class RunServiceTests implements UserAndRoles {
 
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
         assert process.save(flush: true)
-        ProcessParameter param = new ProcessParameter(value: run.id, className: Run.class.name, process: process)
+        ProcessParameter param = new ProcessParameter(value: run.id, className: Run.name, process: process)
         assert param.save(flush: true)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -156,7 +156,7 @@ class RunServiceTests implements UserAndRoles {
 
         Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
         assert process2.save(flush: true)
-        ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.class.name, process: process2)
+        ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.name, process: process2)
         assert param2.save(flush: true)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {

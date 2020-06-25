@@ -57,8 +57,7 @@ class RunService {
         if (!seqCenters) {
             return []
         }
-        def c = Run.createCriteria()
-        return c.list {
+        return Run.createCriteria().list {
             'in'('seqCenter', seqCenters)
             if (filterString.length() >= 3) {
                 String filter = "%${filterString}%"
@@ -102,7 +101,7 @@ class RunService {
             } else {
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
-        }
+        } as List<Run>
     }
     /**
      * Counts the Runs the User has access to by applying the provided filtering.
@@ -112,8 +111,7 @@ class RunService {
      */
     int countRun(RunFiltering filtering, String filterString) {
         if (filtering.enabled) {
-            def c = Run.createCriteria()
-            return c.get {
+            return Run.createCriteria().get {
                 'in'('seqCenter', seqCenterService.allSeqCenters())
                 if (filterString.length() >= 3) {
                     String filter = "%${filterString}%"
@@ -153,12 +151,11 @@ class RunService {
                 projections {
                     count('name')
                 }
-            }
-        } else {
-            // shortcut for unfiltered results
-            List<SeqCenter> seqCenters = seqCenterService.allSeqCenters()
-            return seqCenters ? Run.countBySeqCenterInList(seqCenters) : 0
+            } as int
         }
+        // shortcut for unfiltered results
+        List<SeqCenter> seqCenters = seqCenterService.allSeqCenters()
+        return seqCenters ? Run.countBySeqCenterInList(seqCenters) : 0
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -201,7 +198,6 @@ class RunService {
         }
         return ProcessParameter.findAllByValueAndClassName("${run.id}", run.class.name)
     }
-
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Collection<MetaDataFile> retrieveMetaDataFiles(Run run) {
@@ -255,5 +251,16 @@ class RunService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<DataFile> dataFilesWithError(Run run) {
         return DataFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
+    }
+
+    /**
+     * Checkes if an run is empty.
+     * @param run to check.
+     * @return boolean false or true.
+     * */
+    @SuppressWarnings("AvoidFindWithoutAll")
+    boolean isRunEmpty(Run run) {
+        assert run: "The input run of the method isRunEmpty is null"
+        return !(DataFile.findByRun(run) || SeqTrack.findByRun(run))
     }
 }

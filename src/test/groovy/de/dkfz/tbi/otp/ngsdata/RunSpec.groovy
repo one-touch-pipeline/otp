@@ -51,7 +51,7 @@ class RunSpec extends Specification implements DataTest {
         )
 
         expect:
-        run.getSeqType() == seqType1
+        run.seqType == seqType1
     }
 
     void "test getSeqType, when run has multiple seq types, return null"() {
@@ -72,7 +72,7 @@ class RunSpec extends Specification implements DataTest {
         )
 
         expect:
-        run.getSeqType() == null
+        run.seqType == null
     }
 
     void "test getIndividual"() {
@@ -96,7 +96,7 @@ class RunSpec extends Specification implements DataTest {
         )
 
         expect:
-        individual1 == run.getIndividual()
+        individual1 == run.individual
     }
 
     void "test getIndividual, when run has multiple individuals, return null"() {
@@ -125,6 +125,6 @@ class RunSpec extends Specification implements DataTest {
         )
 
         expect:
-        run.getIndividual() == null
+        run.individual == null
     }
 }
