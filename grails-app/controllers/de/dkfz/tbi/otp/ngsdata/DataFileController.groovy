@@ -45,29 +45,20 @@ class DataFileController {
             response.sendError(404)
             return
         }
-        List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort: "key.id"])
-        List<String> keys = []
-        List<String> values = []
 
-        keys <<  "fullPath"
-        values << lsdfFilesService.getFileFinalPath(dataFile)
-
-        keys << "view-by-pid path"
-        values << lsdfFilesService.getFileViewByPidPath(dataFile)
-
-        [
-                dataFile: dataFile,
-                entries: entries,
-                values: values*.replaceAll('//', '/'),
-                comment: dataFile.comment,
+        return [
+                dataFile       : dataFile,
+                entries        : MetaDataEntry.findAllByDataFile(dataFile, [sort: "key.id"]),
+                fullPath       : lsdfFilesService.getFileFinalPath(dataFile),
+                vbpPath        : lsdfFilesService.getFileViewByPidPath(dataFile),
                 fastqcAvailable: fastqcResultsService.isFastqcAvailable(dataFile),
         ]
     }
 
-    def saveDataFileComment(CommentCommand cmd) {
+    JSON saveDataFileComment(CommentCommand cmd) {
         DataFile dataFile = metaDataService.getDataFile(cmd.id)
         commentService.saveComment(dataFile, cmd.comment)
-        def dataToRender = [date: dataFile.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: dataFile.comment.author]
+        Map dataToRender = [date: dataFile.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: dataFile.comment.author]
         render dataToRender as JSON
     }
 }

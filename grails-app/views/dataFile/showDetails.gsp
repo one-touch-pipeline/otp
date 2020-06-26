@@ -87,11 +87,11 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.fullPath"/></td>
-                <td class="myValue"><span class="wordBreak">${values.get(0)}</span></td>
+                <td class="myValue"><span class="wordBreak">${fullPath}</span></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.viewByPidFullPath"/></td>
-                <td class="myValue"><span class="wordBreak">${values.get(1)}</span></td>
+                <td class="myValue"><span class="wordBreak">${vbpPath}</span></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.fileExists"/></td>
