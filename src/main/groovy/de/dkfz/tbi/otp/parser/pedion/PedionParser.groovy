@@ -49,7 +49,7 @@ class PedionParser implements SampleIdentifierParser {
     static final String PATIENT_PSEUDONYM = /[A-Z]{6}/
 
     static final String CATEGORY = "(?<${CATEGORY_KEY}>[${PedionCategory.values()*.letter.join()}])"
-    static final String TISSUE_TYPE = "(?<${TISSUE_TYPE_KEY}>[${PedionTissue.values()*.letter.join()}])"
+    static final String TISSUE_TYPE = "(?<${TISSUE_TYPE_KEY}>(${PedionTissue.values()*.code.join(")|(")}))"
 
     /**
      * Char as Biological replicate, represent different biopsy timepoints.

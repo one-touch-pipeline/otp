@@ -22,36 +22,38 @@
 package de.dkfz.tbi.otp.parser.pedion
 
 enum PedionTissue {
-    BLOOD('A'),
-    LIVER('B'),
-    PANCREAS('C'),
-    OVAR('D'),
-    BRAIN('E'),
-    PROSTATE('F'),
-    INTESTINE('G'),
-    RECTUM('H'),
-    SMALL_INTESTINE('I'),
-    BONE_MARROW('J'),
-    ORGANOID_LIVER('N', 'organoid-liver'),
-    ORGANOID_PANCREAS('O', 'organoid-pancreas'),
+    BLOOD('1A'),
+    LIVER('1B'),
+    PANCREAS('1C'),
+    OVARY('1D'),
+    BRAIN('1E'),
+    PROSTATE('1F'),
+    NEURAL_TISSUE('1G'),
+    RECTUM('1H'),
+    SMALL_INTESTINE('1I'),
+    BONE_MARROW('1J'),
+    BLADDER('1K'),
+    TONGUE('1L'),
+    GINGIVA('1M'),
+    DIAPHRAGMA_ORIS('1N'),
+    LIPS('1O'),
+    LYMPH_NODE('1P'),
+    COLON('1Q'),
+    SIGMOID_COLON('1R'),
+    ADRENAL_GLAND('1S'),
+    MUSCLE('1T'),
+    UNKNOWN('1Z'),
 
-    final String letter
+    final String code
     final String usedName
 
-    PedionTissue(String letter) {
-        this.letter = letter
+    PedionTissue(String code) {
+        this.code = code
         this.usedName = name().toLowerCase().replace("_", "-")
-        assert letter.size() == 1
-    }
-
-    PedionTissue(String letter, String usedName) {
-        this.letter = letter
-        this.usedName = usedName
-        assert letter.size() == 1
-        assert usedName == usedName.toLowerCase()
+        assert code.size() == 2
     }
 
     static final Map<String, String> LETTER_TO_NAME_MAP = values().collectEntries {
-        [it.letter, it.usedName]
+        [it.code, it.usedName]
     }.asImmutable()
 }

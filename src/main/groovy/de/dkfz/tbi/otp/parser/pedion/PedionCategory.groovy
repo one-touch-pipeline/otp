@@ -35,13 +35,6 @@ enum PedionCategory {
         assert letter.size() == 1
     }
 
-    PedionCategory(String letter, String usedName) {
-        this.letter = letter
-        this.usedName = usedName
-        assert usedName == usedName.toLowerCase()
-        assert letter.size() == 1
-    }
-
     static final Map<String, String> LETTER_TO_NAME_MAP = values().collectEntries {
         [it.letter, it.usedName]
     }.asImmutable()
