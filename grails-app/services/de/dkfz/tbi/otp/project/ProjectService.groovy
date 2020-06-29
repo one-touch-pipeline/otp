@@ -835,7 +835,7 @@ chmod 0440 ${configFilePath}
         return """\
 mkdir -p -m ${initialPermission} ${projectDirectory}
 
-chgrp ${unixGroup} ${projectDirectory}
+chgrp -h ${unixGroup} ${projectDirectory}
 chmod ${permission} ${projectDirectory}
 """
     }

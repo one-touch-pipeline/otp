@@ -491,7 +491,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         String testingGroup = configService.testingGroup
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
-        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp -h ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
 
         executeRoddyCommandService.correctGroups(roddyBamFile, realm)
 
@@ -518,8 +518,8 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             chmod -R 777 ${roddyBamFile.workDirectory}
-            chgrp -R ${group} ${roddyBamFile.workDirectory}
-            chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
+            chgrp -hR ${group} ${roddyBamFile.workDirectory}
+            chgrp -h ${primaryGroup} ${roddyBamFile.baseDirectory}
             """.stripIndent()).empty
 
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->

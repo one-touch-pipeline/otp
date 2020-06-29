@@ -330,7 +330,7 @@ class FileService {
 
             remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
             if (groupString) {
-                remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+                remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
             }
         }
     }

@@ -631,7 +631,7 @@ md5sum -c [^ ]+.bam.bai.md5sum
 md5sum `find -L .* -type f` \\| sed -e 's#.*#.*#' > [^ ]+\\/md5sum.md5sum
 md5sum -c [^ ]+\\/md5sum.md5sum
 
-chgrp -R [^ ]+ [^ ]+
+chgrp -hR [^ ]+ [^ ]+
 chmod 644 `find [^ ]+ -type f`
 chmod 750 `find [^ ]+ -type d`
 

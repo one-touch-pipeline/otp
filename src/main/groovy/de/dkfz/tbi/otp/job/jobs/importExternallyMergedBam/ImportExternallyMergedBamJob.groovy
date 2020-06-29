@@ -173,7 +173,7 @@ md5sum -c ${targetBai}.md5sum
 md5sum `find -L ${furtherFilesSource} -type f` | ${updateBaseDir} > ${targetBaseDir}/md5sum.md5sum
 md5sum -c ${targetBaseDir}/md5sum.md5sum
 
-chgrp -R ${executionHelperService.getGroup(epmbf.project.realm, epmbf.project.projectDirectory)} ${targetBaseDir}
+chgrp -hR ${executionHelperService.getGroup(epmbf.project.realm, epmbf.project.projectDirectory)} ${targetBaseDir}
 chmod 644 `find ${targetBaseDir} -type f`
 chmod 750 `find ${targetBaseDir} -type d`
 

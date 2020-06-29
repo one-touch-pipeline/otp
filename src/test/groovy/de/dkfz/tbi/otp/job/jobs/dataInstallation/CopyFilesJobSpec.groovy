@@ -147,7 +147,7 @@ if \\[ -e ".*" \\]; then
 fi
 cp .* .*
 md5sum .* > .*
-chgrp .* .* .*
+chgrp -h .* .* .*
 chmod 440 .* .*
 """
             }
@@ -179,7 +179,7 @@ chmod 440 .* .*
     private RemoteShellHelper getRemoteShellHelper(SeqTrack seqTrack) {
         Mock(RemoteShellHelper) {
             10 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
-                assert command ==~ "(chmod 2750|chgrp ${seqTrack.project.unixGroup}) .*/${seqTrack.project.dirName}(/.*)?"
+                assert command ==~ "(chmod 2750|chgrp -h ${seqTrack.project.unixGroup}) .*/${seqTrack.project.dirName}(/.*)?"
                 return new ProcessOutput(command, '', 0)
             }
         }

@@ -100,7 +100,7 @@ if [ -e "${targetFile.path}" ]; then
 fi
 cp ${sourceFile} ${targetFile}
 md5sum ${targetFile.name} > ${md5SumFileName}
-chgrp ${seqTrack.project.unixGroup} ${targetFile} ${md5SumFileName}
+chgrp -h ${seqTrack.project.unixGroup} ${targetFile} ${md5SumFileName}
 chmod 440 ${targetFile} ${md5SumFileName}
 """
                 clusterJobSchedulerService.executeJob(realm, cmd)

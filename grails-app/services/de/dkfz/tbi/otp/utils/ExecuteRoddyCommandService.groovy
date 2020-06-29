@@ -163,11 +163,11 @@ class ExecuteRoddyCommandService {
         assert file: "File must not be null"
         if (file.exists()) {
             remoteShellHelper.executeCommand(realm,
-                    "umask 027; chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
+                    "umask 027; chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}; chmod 2770 ${file}")
         } else {
             remoteShellHelper.executeCommand(realm,
                     "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && " +
-                            "chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
+                            "chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
             WaitingFileUtils.waitUntilExists(file)
         }
     }
@@ -215,7 +215,8 @@ class ExecuteRoddyCommandService {
             groupname=`stat -c '%G' .`
             echo ""
             echo "correct group permission to" \$groupname
-            find -not -type l -not -group \$groupname -print -exec chgrp \$groupname '{}' \\; | wc -l
+
+            find -not -group \$groupname -print -exec chgrp -h \$groupname '{}' \\; | wc -l
             """.stripMargin()
         remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
