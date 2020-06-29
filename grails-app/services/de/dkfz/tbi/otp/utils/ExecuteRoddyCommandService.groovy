@@ -162,22 +162,36 @@ class ExecuteRoddyCommandService {
         assert realm: "Realm must not be null"
         assert file: "File must not be null"
         if (file.exists()) {
-            remoteShellHelper.executeCommand(realm,
-                    "umask 027; chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}; chmod 2770 ${file}")
+            remoteShellHelper.executeCommand(realm, """\
+                |umask 027
+                |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
+                |chmod 2750 ${file}""".stripMargin()
+            )
         } else {
-            remoteShellHelper.executeCommand(realm,
-                    "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && " +
-                            "chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
+            remoteShellHelper.executeCommand(realm, """\
+                |umask 027
+                |mkdir -m 2750 -p ${file.parent} && \\
+                |mkdir -m 2750 -p ${file} && \\
+                |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
+                |chmod 2750 ${file}""".stripMargin()
+            )
             WaitingFileUtils.waitUntilExists(file)
         }
     }
 
+    /**
+     * The order of first setting groups and then setting the permissions is very important because of the
+     * setgid and setuid bits.
+     * chgrp resets setgid and setuid on the affected files so you need to apply the group first and then
+     * apply the permissions.
+     */
     void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm) {
-        executionHelperService.setPermission(realm, roddyResult.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
-        correctPermissions(roddyResult, realm)
         String group = executionHelperService.getGroup(roddyResult.project.realm, roddyResult.baseDirectory)
         executionHelperService.setGroup(realm, roddyResult.workDirectory, group)
         correctGroups(roddyResult, realm)
+
+        correctPermissions(roddyResult, realm)
+        executionHelperService.setPermission(realm, roddyResult.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
     }
 
     @SuppressWarnings('LineLength')
@@ -200,10 +214,13 @@ class ExecuteRoddyCommandService {
             echo ""
             echo "correct file permission for bam/bai files"
             find -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
-            """.stripMargin()
+            """.stripIndent()
         remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
+    /**
+     * When using this be aware that chgrp resets the setgid and setuid of the affected files.
+     */
     void correctGroups(RoddyResult roddyResult, Realm realm) {
         assert roddyResult: "roddyResult should not be null"
         String cmd = """\
@@ -217,7 +234,7 @@ class ExecuteRoddyCommandService {
             echo "correct group permission to" \$groupname
 
             find -not -group \$groupname -print -exec chgrp -h \$groupname '{}' \\; | wc -l
-            """.stripMargin()
+            """.stripIndent()
         remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 

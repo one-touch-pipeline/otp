@@ -375,7 +375,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
             """.stripIndent())
         //make the 2 optional, since it does not work for all developers.
         String expected = """\
-            2?770
+            2?750
             ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}
             """.stripIndent()
 
@@ -400,7 +400,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
             """.stripIndent())
         //make the 2 optional, since it does not work for all developers.
         String expected = """\
-            2?770
+            2?750
             ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}
             """.stripIndent()
 
@@ -517,9 +517,9 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-            chmod -R 777 ${roddyBamFile.workDirectory}
             chgrp -hR ${group} ${roddyBamFile.workDirectory}
             chgrp -h ${primaryGroup} ${roddyBamFile.baseDirectory}
+            chmod -R 777 ${roddyBamFile.workDirectory}
             """.stripIndent()).empty
 
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->

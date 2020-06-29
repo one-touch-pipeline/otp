@@ -328,10 +328,11 @@ class FileService {
                 throw e
             }
 
-            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+            // chgrp needs to be done before chmod, as chgrp resets setgid and setuid
             if (groupString) {
                 remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
             }
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
         }
     }
 
