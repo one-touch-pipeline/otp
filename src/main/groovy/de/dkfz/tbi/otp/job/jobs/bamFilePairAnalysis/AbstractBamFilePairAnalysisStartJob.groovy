@@ -51,7 +51,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Override
     void execute() {
         SessionUtils.withNewSession {
-            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            int minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority == ProcessingPriority.SUPREMUM) {
                 return
             }
