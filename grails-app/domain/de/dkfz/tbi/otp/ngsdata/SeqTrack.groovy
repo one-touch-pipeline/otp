@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 import java.util.regex.Matcher
 
@@ -41,7 +42,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * lane. An explaining tooltip should be provided. (Decided together with the OTP Product Owner on 2016-07-19.)
  */
 /** This table is used externally. Please discuss a change in the team */
-class SeqTrack implements ProcessParameterObject, Entity {
+class SeqTrack implements ProcessParameterObject, Entity, Artefact {
 
     static final String RUN_PREFIX = "run"
 
@@ -215,6 +216,13 @@ class SeqTrack implements ProcessParameterObject, Entity {
         antibodyTarget nullable: true, validator: { AntibodyTarget val, SeqTrack obj ->
             return !obj.seqType?.hasAntibodyTarget == !val
         }
+        withdrawnDate nullable: true
+        withdrawnComment nullable: true, validator: { val, obj ->
+            if (obj.withdrawnDate && !val) {
+                return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
+            }
+        }
+        workflowArtefact nullable: true
     }
 
     static String normalizeLibraryName(String libraryName) {
@@ -397,5 +405,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         sampleIdentifier index: "seq_track_sample_identifier_idx"
         seqPlatform index: "seq_track_seq_platform_idx"
         seqType index: "seq_track_seq_type_idx"
+        workflowArtefact index: "seq_track_workflow_artefact_idx"
     }
 }
