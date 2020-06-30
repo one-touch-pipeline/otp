@@ -26,12 +26,14 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<WorkflowRunService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
+                SeqTrack,
                 WorkflowRun,
         ]
     }
@@ -48,5 +50,26 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
 
         then:
         count == countOfRunningWorkflowStates
+    }
+
+    void 'createWorkflowRun, when created, then the values should be correct'() {
+        given:
+        Workflow workflow = createWorkflow()
+        SeqTrack seqTrack = createSeqTrack()
+        String dir = "/tmp/baseDir${nextId}"
+
+        when:
+        WorkflowRun run = service.createWorkflowRun(workflow, seqTrack.processingPriority, dir)
+
+        then:
+        run
+        run.workDirectory == dir
+        run.configs == []
+        !run.combinedConfig
+        run.workflow == workflow
+        run.state == WorkflowRun.State.PENDING
+        run.restartedFrom == null
+        run.skippedMessage == null
+        run.workflowSteps == []
     }
 }
