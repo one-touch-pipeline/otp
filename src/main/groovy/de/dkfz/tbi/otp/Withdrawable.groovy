@@ -23,6 +23,18 @@ package de.dkfz.tbi.otp
 
 import java.time.LocalDate
 
+/**
+ * Trait for withdrawn data. The trait ensures same naming in all classes.
+ *
+ * Please add the following constraint in all classes implementing this trait:
+ * <pre>
+ *      withdrawnDate nullable: true
+ *      withdrawnComment nullable: true, validator: { val, obj ->
+ *      if (obj.withdrawnDate && !val) {
+ *          return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
+ *      }
+ * </pre>
+ */
 trait Withdrawable {
     LocalDate withdrawnDate
     String withdrawnComment

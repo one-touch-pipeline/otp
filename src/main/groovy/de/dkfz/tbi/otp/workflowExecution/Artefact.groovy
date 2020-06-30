@@ -21,6 +21,16 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.Withdrawable
+
+/**
+ * Trait for concrete artefact.
+ *
+ * Please add the following constraint in all classes implementing this trait:
+ * <pre>
+ *      workflowArtefact nullable: true
+ * </pre>
+ */
 trait Artefact {
     WorkflowArtefact workflowArtefact
 }
