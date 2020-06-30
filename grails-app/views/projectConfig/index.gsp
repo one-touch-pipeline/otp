@@ -265,7 +265,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 optionKey="id"
-                                optionValue="nameWithPriority"
+                                optionValue="name"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingPriority', params: ['fieldName': 'processingPriority'])}"
                                 values="${processingPriorities}"
                                 value="${processingPriority}"/>

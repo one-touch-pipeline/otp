@@ -86,8 +86,4 @@ class ProcessingPriority implements Entity {
     static mapping = {
         allowedParallelWorkflowRuns index: 'processing_priority_allowed_parallel_workflow_runs_idx'
     }
-
-    String getNameWithPriority() {
-        return "${name} (${priority})"
-    }
 }

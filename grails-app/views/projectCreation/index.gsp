@@ -298,7 +298,7 @@
             <tr>
                 <td><g:message code="project.processingPriority"/></td>
                 <td><g:select id="priority" name="processingPriority" class="use-select-2"
-                              from="${processingPriorities}" optionKey="id" optionValue="nameWithPriority" required="true"
+                              from="${processingPriorities}" optionKey="id" optionValue="name" required="true"
                               value="${source.getByFieldName("processingPriority")?.id}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'processingPriority', cmd: cmd]"/>
             </tr>
