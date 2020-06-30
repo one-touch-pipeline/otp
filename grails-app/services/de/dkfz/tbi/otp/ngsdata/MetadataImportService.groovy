@@ -46,6 +46,9 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -76,6 +79,9 @@ class MetadataImportService {
     @Autowired
     RemoteShellHelper remoteShellHelper
     AntibodyTargetService antibodyTargetService
+    DataInstallationInitializationService dataInstallationInitializationService
+    @Autowired
+    AllDecider allDecider
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
@@ -321,12 +327,20 @@ class MetadataImportService {
         )
         assert fastqImportInstance.save(flush: false)
         Long timeStarted = System.currentTimeMillis()
-        log.debug('runs stared')
+        log.debug("runs started")
         importRuns(context, fastqImportInstance, context.spreadsheet.dataRows, align)
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
         fastqImportInstance.refresh()
-        notifyAboutUnsetConfig(fastqImportInstance.dataFiles*.seqTrack as List, fastqImportInstance.otrsTicket)
+
+        Long timeCreateWorkflowRuns = System.currentTimeMillis()
+        log.debug("create workflow runs started")
+        List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
+        log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
+        Long timeDecider = System.currentTimeMillis()
+        log.debug("decider started")
+        allDecider.decide(runs, false)
+        log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
 
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName           : context.metadataFile.fileName.toString(),
@@ -335,6 +349,8 @@ class MetadataImportService {
                 fastqImportInstance: fastqImportInstance,
         )
         assert metaDataFile.save(flush: true)
+
+        notifyAboutUnsetConfig(fastqImportInstance.dataFiles*.seqTrack as List, fastqImportInstance.otrsTicket)
 
         log.debug("import stopped ${metaDataFile.fileName} ${timeImportStarted}: ${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile

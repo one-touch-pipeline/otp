@@ -238,6 +238,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         return seqTrack
     }
 
+    SeqTrack createSeqTrackWithTwoDataFile(Map seqTrackProperties = [:], Map dataFile1Properties = [:], Map dataFile2Properties = [:]) {
+        SeqTrack seqTrack = createSeqTrack(seqTrackProperties)
+        createSequenceDataFile(dataFile1Properties + [seqTrack: seqTrack])
+        createSequenceDataFile(dataFile2Properties + [seqTrack: seqTrack])
+        return seqTrack
+    }
+
     private Map getSeqTrackProperties(Map properties = [:]) {
         return [
                 laneId               : "laneId_${nextId}",

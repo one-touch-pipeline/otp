@@ -89,6 +89,6 @@ class WorkflowArtefact implements Withdrawable, Entity {
     }
 
     Project getProject() {
-        return individual.project
+        return individual?.project
     }
 }

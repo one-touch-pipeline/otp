@@ -52,6 +52,8 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
+import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -557,14 +559,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             findByNameOrImportAlias(target1) >> antibodyTarget1
             findByNameOrImportAlias(target2) >> antibodyTarget2
         }
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            seqTrackCount * findOrCreateSamplePairs([]) >> []
-            0 * _
-        }
 
-        service.mergingCriteriaService = Mock(MergingCriteriaService) {
-            seqTrackCount * createDefaultMergingCriteria(_, _)
-        }
+        mockAdditionalServices(service, seqTrackCount)
 
         File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
         DirectoryStructure directoryStructure = [
@@ -921,14 +917,8 @@ ${ILSE_NO}                      -             1234          1234          -     
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             findByNameOrImportAlias(antibodyTarget.name) >> antibodyTarget
         }
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            1 * findOrCreateSamplePairs([]) >> []
-            0 * _
-        }
 
-        service.mergingCriteriaService = Mock(MergingCriteriaService) {
-            1 * createDefaultMergingCriteria(_, _)
-        }
+        mockAdditionalServices(service)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
@@ -1095,14 +1085,8 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
             ]) >> seqType
             0 * _
         }
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            1 * findOrCreateSamplePairs([]) >> []
-            0 * _
-        }
 
-        service.mergingCriteriaService = Mock(MergingCriteriaService) {
-            1 * createDefaultMergingCriteria(_, _)
-        }
+        mockAdditionalServices(service)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
@@ -1779,5 +1763,21 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         then:
         run
         run.id == data.run.id
+    }
+
+    private void mockAdditionalServices(MetadataImportService service, int count = 1) {
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            count * findOrCreateSamplePairs([]) >> []
+            0 * _
+        }
+        service.mergingCriteriaService = Mock(MergingCriteriaService) {
+            count * createDefaultMergingCriteria(_, _)
+        }
+        service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
+            _ * createWorkflowRuns(_) >> []
+        }
+        service.allDecider = Mock(AllDecider) {
+            _ * decide(_, _) >> []
+        }
     }
 }

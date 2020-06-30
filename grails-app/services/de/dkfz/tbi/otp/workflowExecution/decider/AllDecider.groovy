@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
@@ -29,6 +30,7 @@ knows all deciders and also the order of the deciders based on the input and out
 can be called during Fastq or BAM import, realignment, …
 is called with a list of new/changed workflowArtefacts (see method decide in Decider)
 */
+@Component
 class AllDecider implements Decider {
     /** this list is empty for now and with each workflow migration will be filled in the correct order*/
     List<AbstractWorkflowDecider> deciders = []
