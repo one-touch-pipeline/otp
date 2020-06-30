@@ -449,6 +449,8 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2020/otp-569.sql')
     }
 
+    include file: 'changelogs/2020/otp-582-migrate-data-installation-start-job.groovy'
+
     include file: 'changelogs/2020/otp-333-project-fields.groovy'
 
     changeSet(author: "kosnac", id: "otp-555") {
