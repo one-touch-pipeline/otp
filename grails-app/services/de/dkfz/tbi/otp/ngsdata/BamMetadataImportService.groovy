@@ -156,7 +156,7 @@ class BamMetadataImportService {
                         fileName: getNameFromPath(bamFilePath),
                         coverage: coverage ? Double.parseDouble(coverage) : null,
                         md5sum: md5sum ?: null,
-                        maximalReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
+                        maximumReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
                         furtherFiles: [] as Set,
                         insertSizeFile: insertSizeFile
                 ).save(flush: true)

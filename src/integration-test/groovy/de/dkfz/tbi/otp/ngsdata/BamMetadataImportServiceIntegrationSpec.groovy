@@ -203,6 +203,31 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         TestCase.assertContainSame(expectedErrorMessages, foundErrorMessages)
     }
 
+    void "validateAndImport, if all values given, then all values should be set"() {
+        given:
+        DataBamImportRow dataBamImportRow = new DataBamImportRow(temporaryFolder, [:])
+        DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(temporaryFolder, [dataBamImportRow])
+        Map results
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            results = bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+                    dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, [])
+        }
+
+        then:
+        assertResultNoError(results, dataBamImportRow, dataBamImportMetaData.metadataFile)
+
+        and:
+        ExternallyProcessedMergedBamFile bamFile = results.importProcess.externallyProcessedMergedBamFiles[0]
+        bamFile.md5sum
+        bamFile.coverage
+        bamFile.maximumReadLength
+        bamFile.insertSizeFile
+        bamFile.overallQualityAssessment
+        bamFile.mergingWorkPackage.libraryPreparationKit
+    }
+
     @Unroll
     void "validateAndImport, case #name with operation #linkOperation, then create importProcess without any errors"() {
         given:
