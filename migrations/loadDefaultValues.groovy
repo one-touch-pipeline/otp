@@ -30,4 +30,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/defaultValues/createSpeciesAndStrains.groovy'
+
+    include file: 'changelogs/defaultValues/tool-names-of-reference-genome-indexes.sql'
 }
