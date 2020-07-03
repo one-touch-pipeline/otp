@@ -27,12 +27,9 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectRequestService
-import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
@@ -44,26 +41,23 @@ import java.text.SimpleDateFormat
 
 class ProjectConfigController implements CheckAndCall {
 
-    ProjectService projectService
-    ProjectRequestService projectRequestService
-    ProjectOverviewService projectOverviewService
-    ProcessingThresholdsService processingThresholdsService
     CommentService commentService
-    ProjectSelectionService projectSelectionService
-    SampleTypeService sampleTypeService
     ConfigService configService
     ProcessingPriorityService processingPriorityService
+    ProjectRequestService projectRequestService
+    ProjectSelectionService projectSelectionService
+    ProjectService projectService
+
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
 
     Map index() {
         Project project = projectSelectionService.selectedProject
         String projectRequestComments = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
                 projectRequestService.findProjectRequestByProject(project)?.comments : '')
 
-        Map<String, String> dates = getDates(project)
-
         return [
-                creationDate                   : dates.creationDate,
-                lastReceivedDate               : dates.lastReceivedDate,
+                creationDate                   : simpleDateFormat.format(project.dateCreated),
+                lastReceivedDate               : getLastReceivedDate(project),
                 projectRequestComments         : projectRequestComments,
                 directory                      : project ? LsdfFilesService.getPath(configService.rootPath.path, project.dirName) : "",
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
@@ -176,19 +170,18 @@ class ProjectConfigController implements CheckAndCall {
         render map as JSON
     }
 
-    Map<String, String> getDates(Project project) {
-        Timestamp[] timestamps = Sequence.createCriteria().get {
-            eq("projectId", project?.id)
+    private String getLastReceivedDate(Project project) {
+        Timestamp[] timestamps = SeqTrack.createCriteria().get {
+            sample {
+                individual {
+                    eq("project", project)
+                }
+            }
             projections {
-                min("dateCreated")
                 max("dateCreated")
             }
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
-        return [
-                creationDate    : timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null,
-                lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null,
-        ]
+        return timestamps ? simpleDateFormat.format(timestamps[0]) : "-"
     }
 }
 
