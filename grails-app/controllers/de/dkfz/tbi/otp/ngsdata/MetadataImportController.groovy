@@ -141,8 +141,8 @@ class MetadataImportController {
     }
 
     def details() {
-        FastqImportInstance fastqImportInstance = (FastqImportInstance.get(params.id))
-        [
+        FastqImportInstance fastqImportInstance = FastqImportInstance.get(params.id)
+        return [
                 data               : getMetadataDetails(fastqImportInstance),
                 fastqImportInstance: fastqImportInstance,
         ]
@@ -152,7 +152,7 @@ class MetadataImportController {
         List<MetaDataFile> metaDataFiles = params.metaDataFiles.collect {
             MetaDataFile.get(it)
         }
-        [
+        return [
                 metaDataFiles: metaDataFiles,
         ]
     }

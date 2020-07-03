@@ -20,66 +20,54 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.FastqImportInstance; de.dkfz.tbi.otp.tracking.OtrsTicket; org.joda.time.DateTime"
-        contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.joda.time.DateTime" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
-    <title>${g.message(code: "metadataImport.details.title")}</title>
+    <title><g:message code="metadataImport.details.title"/></title>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 
 <body>
 <div class="body">
-    <h2>${g.message(code: "metadataImport.details.otrsTicket")}</h2>
+    <h2><g:message code="metadataImport.details.otrsTicket"/></h2>
     <table style="width: auto;">
         <tr>
-            <td>
-                <g:message code="metadataImport.details.otrsTicketNumber"/>
-            </td>
+            <td><g:message code="metadataImport.details.otrsTicketNumber"/></td>
             <td>
                 <otp:editorSwitch
                         template="urlValue"
                         roles="ROLE_OPERATOR"
-                        link="${g.createLink(
-                                controller: 'metadataImport',
-                                action: 'assignOtrsTicketToFastqImportInstance',
-                                id: fastqImportInstance.id)}"
+                        link="${g.createLink(controller: 'metadataImport', action: 'assignOtrsTicketToFastqImportInstance', id: fastqImportInstance.id)}"
                         url="${fastqImportInstance.otrsTicket?.url ?: "#"}"
                         value="${fastqImportInstance.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
             </td>
         </tr>
         <g:if test="${fastqImportInstance.otrsTicket}">
             <tr>
-                <td>
-                    <g:message code="metadataImport.otrs.automaticNotificationFlag"/>:
-                </td>
+                <td><g:message code="metadataImport.otrs.automaticNotificationFlag"/>:</td>
                 <td>
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="dropDown"
                             link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
-                            values="${["true","false"]}"
+                            values="${["true", "false"]}"
                             value="${fastqImportInstance.otrsTicket.automaticNotification}"/>
                 </td>
             </tr>
             <tr>
-                <td>
-                    <g:message code="metadataImport.otrs.finalNotificationFlag"/>:
-                </td>
+                <td><g:message code="metadataImport.otrs.finalNotificationFlag"/>:</td>
                 <td>
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="dropDown"
                             link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
-                            values="${["true","false"]}"
+                            values="${["true", "false"]}"
                             value="${fastqImportInstance.otrsTicket.finalNotificationSent}"/>
                 </td>
             </tr>
             <tr>
-                <td>
-                    <g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/>
-                </td>
+                <td><g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/></td>
                 <td>
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
@@ -90,25 +78,28 @@
             </tr>
         </g:if>
     </table>
-    <h2>${g.message(code: "metadataImport.details.metadataFiles")}</h2>
+
+    <h2><g:message code="metadataImport.details.metadataFiles"/></h2>
     <ul>
         <g:each in="${data.metaDataFiles}" var="metaDataFile">
             <li>
                 ${metaDataFile.fullPath}<br>
-                ${g.message(code: "metadataImport.details.dateCreated")} ${new DateTime(metaDataFile.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}${metaDataFile.md5sum ? ", ${g.message(code: "metadataImport.details.md5")} ${metaDataFile.md5sum}" : ""}
+                <g:message code="metadataImport.details.dateCreated"/>: ${new DateTime(metaDataFile.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}<br>
+                <g:message code="metadataImport.details.md5"/>: ${metaDataFile.md5sum ?: "-"}
             </li>
         </g:each>
     </ul>
 
-    <h2>${g.message(code: "metadataImport.details.dataFiles")}</h2>
+    <h2><g:message code="metadataImport.details.dataFiles"/></h2>
     <g:each in="${data.runs}" var="run">
-        <h3>${g.message(code: "metadataImport.details.run")}
-        <g:link controller="run" action="show" id="${run.run.id}">${run.run.name}</g:link>,
-        ${[
-                run.run.seqCenter.name,
-                run.run.seqPlatform.fullName(),
-                run.run.dateExecuted?.format("yyyy-MM-dd")
-        ].findAll().join(', ')}
+        <h3>
+            <g:message code="metadataImport.details.run"/>
+            <g:link controller="run" action="show" id="${run.run.id}">${run.run.name}</g:link>,
+            ${[
+                    run.run.seqCenter.name,
+                    run.run.seqPlatform.fullName(),
+                    run.run.dateExecuted?.format("yyyy-MM-dd")
+            ].findAll().join(', ')}
         </h3>
         <ul>
             <g:each in="${run.seqTracks}" var="seqTrack">
@@ -151,7 +142,7 @@
         </ul>
     </g:each>
 
-    <h3>${g.message(code: "metadataImport.details.notAssigned")}</h3>
+    <h3><g:message code="metadataImport.details.notAssigned"/></h3>
     <g:if test="${data.dataFilesNotAssignedToSeqTrack}">
         <ul>
             <g:each in="${data.dataFilesNotAssignedToSeqTrack}" var="dataFile">
@@ -159,7 +150,7 @@
             </g:each>
         </ul>
     </g:if><g:else>
-    ${g.message(code: "metadataImport.details.none")}
+    <g:message code="metadataImport.details.none"/>
 </g:else>
 </div>
 </body>
