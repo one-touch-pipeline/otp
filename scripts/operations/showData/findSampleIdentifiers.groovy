@@ -21,13 +21,17 @@
  */
 
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
- * Script checks the given sample identifier.
+ * Script checks if the given sample identifiers are known to OTP.
  *
- * If a sample identifier exist, it prints its sample and project. Otherwise it says, that the identifier is unknown.
+ * SampleIdentifiers can exist either as 'raw' SampleIdentifier, meant as a preparation for import,
+ * or as label on a SeqTrack.
+ * This script will find both types, and let you know which it was.
  *
- * All input lines are trimmed. Empty lines and lines start with # are skipped.
+ * All input lines are trimmed of whitespace.
+ * Empty lines and comments (starting with '#') are skipped.
  */
 
 
@@ -47,9 +51,15 @@ input.split('\n')*.trim().findAll {
     it && !it.startsWith('#')
 }.each {
     SampleIdentifier sampleIdentifier = SampleIdentifier.findByName(it)
+    List<SeqTrack> seqTracks = SeqTrack.findAllBySampleIdentifier(it)
+
     if (sampleIdentifier) {
-        println "found ${sampleIdentifier}: ${sampleIdentifier.sample} (${sampleIdentifier.project})"
-    } else {
+        println "found SampleIdentifier ${sampleIdentifier}: ${sampleIdentifier.sample} (${sampleIdentifier.project})"
+    }
+    if (seqTracks) {
+        println "found SeqTracks: ${seqTracks.size()} SeqTrack(s): ${seqTracks*.sample.unique()} (in project(s) ${seqTracks*.project})"
+    }
+    if (!sampleIdentifier && ! seqTracks) {
         println "unknown: ${it}"
     }
 }

@@ -44,23 +44,25 @@ Spreadsheet s = new Spreadsheet(input.text)
     assert it in s.header.cells*.text : "Input file doesn't contain column ${it}."
 }
 
-s.dataRows.each { Row row ->
-    Sample sample = SampleIdentifier.findByName(row.getCellByColumnTitle(MetaDataColumn.SAMPLE_NAME.name()).text).sample
-    List<MetaDataEntry> entries = MetaDataEntry.createCriteria().list {
-        key {
-            eq("name", MetaDataColumn.COMMENT.name())
-        }
-        dataFile {
-            seqTrack {
-                eq("sample", sample)
+MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
+
+MetaDataEntry.withTransaction {
+    s.dataRows.each { Row row ->
+        String sampleName = row.getCellByColumnTitle(MetaDataColumn.SAMPLE_NAME.name()).text
+        String newComment = row.getCellByColumnTitle(MetaDataColumn.COMMENT.name()).text
+
+        MetaDataEntry.createCriteria().list {
+            eq('key', commentKey)
+            dataFile {
+                seqTrack {
+                    eq("sampleIdentifier", sampleName)
+                }
             }
+        }.each { MetaDataEntry entry ->
+            entry.value = newComment
+            entry.save()
         }
-    } as List<MetaDataEntry>
-    String comment = row.getCellByColumnTitle(MetaDataColumn.COMMENT.name()).text
-    entries.each { MetaDataEntry entry ->
-        entry.value = comment
-        entry.save(flush: true)
     }
 }
 
-[]
+''
