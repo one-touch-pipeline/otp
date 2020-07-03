@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ActiveProjectWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 /**
  * creates workflow runs for one workflow

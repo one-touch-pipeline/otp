@@ -35,7 +35,7 @@ class WorkflowRunScheduler {
     @Autowired
     WorkflowSystemService workflowSystemService
 
-    //This delay should have at least double size of the delay of {@link WorkflowRunScheduler#scheduleJob} to avoid problems of queues.
+    /** This delay should have at least double size of the delay of {@link JobScheduler#scheduleJob} to avoid problems of queues. */
     @Scheduled(fixedDelay = 5000L)
     void scheduleWorkflowRun() {
         if (!workflowSystemService.enabled) {

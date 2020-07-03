@@ -28,7 +28,7 @@ class SkippedMessage implements Entity {
     enum Category {
         PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
         PROJECT_THRESHOLD_REJECTION,
-        WORKFLOW_COVERAGE_REJECTION
+        WORKFLOW_COVERAGE_REJECTION,
     }
 
     String message
