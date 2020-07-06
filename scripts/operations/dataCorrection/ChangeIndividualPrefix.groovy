@@ -26,12 +26,17 @@ import de.dkfz.tbi.otp.project.Project
 //input
 String projectName = ''
 
-String individualPrefix = ''
+String newPrefix = ''
 
 /* this must 'true' if you want to set the prefix for more than 1 project or 'null'
  * if true -> it will mark all projects with the given prefix as 'old project'
  */
 boolean oldProject = false
+
+/*
+If a project already has a prefix you need to set this value to true to overwrite the existing prefix
+ */
+boolean overwrite = false
 
 
 //-----------------------------
@@ -41,29 +46,37 @@ assert projectName : "No project name given"
 Project.withTransaction {
     Project project = Project.findByName(projectName)
     Project project1 = null
-    if (individualPrefix) {
-        project1 = Project.findByIndividualPrefix(individualPrefix)
+    if (newPrefix) {
+        project1 = Project.findByIndividualPrefix(newPrefix)
     } else {
-        individualPrefix = null
+        newPrefix = null
     }
 
     if (project1 && !oldProject) {
-        println "A project with this individual prefix ${individualPrefix} already exists"
+        println "A project with this individual prefix ${newPrefix} already exists. " +
+                "Set oldProject to true if you want to reuse this prefix."
         return
     }
 
-    if (oldProject && individualPrefix) {
-        Project.findAllByIndividualPrefix(individualPrefix).each {
-            it.uniqueIndividualPrefix = !oldProject
-            it.save(flush: true)
-        }
+    if (project.individualPrefix && !overwrite) {
+        println "The prefix ${project.individualPrefix} is set for the selected project ${project.name}. " +
+                "If you want to overwrite it with ${newPrefix} set overwrite to true"
     }
 
-    project.individualPrefix = individualPrefix
-    project.uniqueIndividualPrefix = !oldProject
-    project.save(flush: true)
+    if (overwrite || !project.individualPrefix) {
+        if (oldProject && newPrefix) {
+            Project.findAllByIndividualPrefix(newPrefix).each {
+                it.uniqueIndividualPrefix = !oldProject
+                it.save(flush: true)
+            }
+        }
 
-    println "changed"
+        project.individualPrefix = newPrefix
+        project.uniqueIndividualPrefix = !oldProject
+        project.save(flush: true)
 
-    assert false : "DEBUG: transaction intentionally failed to rollback changes"
+        println "changed"
+
+        assert false : "DEBUG: transaction intentionally failed to rollback changes"
+    }
 }
