@@ -32,12 +32,12 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
-    Workflow createWorkflow(Map properties = [:]) {
+    Workflow createWorkflow(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Workflow, [
                 name    : "name_${nextId}",
                 beanName: "beanName_${nextId}",
                 enabled : true,
-        ], properties)
+        ], properties, saveAndValidate)
     }
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {

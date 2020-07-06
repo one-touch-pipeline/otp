@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
 import java.time.LocalDate
@@ -82,5 +83,57 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
 
         then:
         thrown(AssertionError)
+    }
+
+    void "validate, when workflow name not exist yet, then object is valid"() {
+        Workflow workflow = createWorkflow([
+                name: WORKFLOW_NAME,
+        ], false)
+
+        when:
+        workflow.validate()
+
+        then:
+        workflow.errors.errorCount == 0
+    }
+
+    void "validate, when only deprecated workflows of the name exist, then object is valid"() {
+        createWorkflow([
+                name          : WORKFLOW_NAME,
+                deprecatedDate: LocalDate.now(),
+        ])
+        Workflow workflow = createWorkflow([
+                name: WORKFLOW_NAME,
+        ], false)
+
+        when:
+        workflow.validate()
+
+        then:
+        workflow.errors.errorCount == 0
+    }
+
+    void "validate, when already a non deprecate workflow exist, then object is invalid"() {
+        createWorkflow([
+                name: WORKFLOW_NAME,
+        ])
+        Workflow workflow = createWorkflow([
+                name: WORKFLOW_NAME,
+        ], false)
+
+        expect:
+        TestCase.assertValidateError(workflow, 'name', 'validator.not.unique.deprecate.message', WORKFLOW_NAME)
+    }
+
+    void "validate, when saved object is validate again, then the object is still valid"() {
+        Workflow workflow = createWorkflow([
+                name: WORKFLOW_NAME,
+        ])
+
+        when:
+        workflow.validate()
+
+        then:
+        workflow.errors.errorCount == 0
     }
 }
