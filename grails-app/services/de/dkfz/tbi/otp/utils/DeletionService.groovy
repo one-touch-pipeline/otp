@@ -451,13 +451,21 @@ class DeletionService {
     /**
      * Deletes a dataFile and all corresponding information
      */
-    void deleteDataFile(DataFile dataFile) {
+    List<File> deleteDataFile(DataFile dataFile) {
         notNull(dataFile, "The dataFile input of method deleteDataFile is null")
+
+        String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
+        List<File> dirs = [
+                fileFinalPath,
+                "${fileFinalPath}.md5sum",
+                lsdfFilesService.getFileViewByPidPath(dataFile),
+        ].collect { new File(it) }
 
         deleteFastQCInformationFromDataFile(dataFile)
         deleteMetaDataEntryForDataFile(dataFile)
         deleteConsistencyStatusInformationForDataFile(dataFile)
         dataFile.delete(flush: true)
+        return dirs
     }
 
     /**
@@ -612,9 +620,13 @@ class DeletionService {
             dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
 
-        Map<String, List<File>> dirsToDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
+        List<File> dirsToDelete = []
+        Map<String, List<File>> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
+        dirsToDelete.addAll(seqTrackDelete["dirsToDelete"])
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
-        DataFile.findAllBySeqTrack(seqTrack).each { deleteDataFile(it) }
+        DataFile.findAllBySeqTrack(seqTrack).each { DataFile df ->
+            dirsToDelete.addAll(deleteDataFile(df))
+        }
         MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
 
         seqTrack.delete(flush: true)
@@ -622,7 +634,8 @@ class DeletionService {
         if (runService.isRunEmpty(seqTrack.run)) {
             deleteEmptyRun(seqTrack.run)
         }
-        return dirsToDelete
+
+        return ["dirsToDelete": dirsToDelete, "dirsToDeleteWithOtherUser": seqTrackDelete["dirsToDeleteWithOtherUser"]]
     }
 
     void deleteEmptyRun(Run run) {
@@ -643,13 +656,15 @@ class DeletionService {
     List<File> deleteRun(Run run) {
         notNull(run, "The input run of the method deleteRun is null")
 
+        List<File> dirsToDelete = []
+
         DataFile.findAllByRun(run).each {
-            deleteDataFile(it)
+            dirsToDelete.addAll(deleteDataFile(it))
         }
 
-        List<File> dirsToDelete = SeqTrack.findAllByRun(run).collect {
+        dirsToDelete.addAll(SeqTrack.findAllByRun(run).collect {
             return deleteSeqTrack(it).get("dirsToDelete")
-        }.flatten() as List<File>
+        }.flatten() as List<File>)
 
         if (Run.exists(run.id) && runService.isRunEmpty(run)) {
             deleteEmptyRun(run)

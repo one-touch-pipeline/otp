@@ -46,7 +46,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
 
     void setupData() {
         deletionService = new DeletionService()
-        deletionService.lsdfFilesService = Mock(LsdfFilesService)
+        deletionService.lsdfFilesService = new LsdfFilesService()
         deletionService.dataSwapService = Mock(DataSwapService)
         deletionService.commentService = Mock(CommentService)
         deletionService.fastqcDataFilesService = Mock(FastqcDataFilesService)

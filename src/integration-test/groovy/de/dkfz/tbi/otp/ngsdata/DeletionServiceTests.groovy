@@ -207,11 +207,18 @@ class DeletionServiceTests implements UserAndRoles {
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
         DomainFactory.createMetaDataEntry(dataFile: dataFile)
-
         DomainFactory.createConsistencyStatus(dataFile: dataFile)
 
-        deletionService.deleteDataFile(dataFile)
+        String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
+        List<File> expected = [
+                fileFinalPath,
+                "${fileFinalPath}.md5sum",
+                lsdfFilesService.getFileViewByPidPath(dataFile),
+        ].collect { new File(it) }
 
+        List<File> result = deletionService.deleteDataFile(dataFile)
+
+        assert expected == result
         assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
     }
 
