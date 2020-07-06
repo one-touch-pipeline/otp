@@ -77,16 +77,14 @@ joinTables="\
 (single_cell_bam_file_seq_track)|\
 (software_tool_program_name_program_version_type_key)|\
 (sophia_instance_roddy_execution_directory_names)|\
-(swap_info_seq_track)|\
 (text_field_definition_allowed_text_values)|\
 (workflow_command_log)|\
 (workflow_message_log)|\
 (workflow_run_workflow_config)|\
 (workflow_step_workflow_log)|\
 "
-
-perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath
 perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${joinTables})\"${suffix}" $changelogPath
+
 perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
