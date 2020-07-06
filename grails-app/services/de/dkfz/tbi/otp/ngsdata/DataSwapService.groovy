@@ -203,6 +203,7 @@ class DataSwapService {
 mkdir -p -m 2750 '${neww.parent}';
 mv '${old}' \\
    '${neww}';
+${getFixGroupCommand(neww)}
 \n"""
             }
         } else {
@@ -323,14 +324,17 @@ mkdir -p -m 2750 '${directFile.parent}';"""
                     bashMoveDirectFile += """
 mv '${oldDirectFileName}' \\
    '${newDirectFileName}';
+${getFixGroupCommand(directFile.toPath())}
 if [ -e '${oldDirectFileName}.md5sum' ]; then
   mv '${oldDirectFileName}.md5sum' \\
      '${newDirectFileName}.md5sum';
+  ${getFixGroupCommand(directFile.toPath().resolveSibling("${directFile.name}.md5sum"))}
 fi
 """
                 } else {
                     bashMoveDirectFile += """
 cp '${oldDirectFileName}' '${newDirectFileName}';
+${getFixGroupCommand(directFile.toPath())}
 echo '${it.md5sum}  ${newDirectFileName}' | md5sum -c
 chmod 440 ${newDirectFileName}
 # rm -f '${oldDirectFileName}'
@@ -354,6 +358,10 @@ ln -s '${newDirectFileName}' \\
             bashScriptToMoveFiles += '\n\n'
         }
         return bashScriptToMoveFiles
+    }
+
+    String getFixGroupCommand(Path file) {
+        "chgrp -h `stat -c '%G' ${file.parent}` ${file}"
     }
 
     protected String createSingeCellScript(DataFile dataFile, Map<String, ?> oldValues) {
