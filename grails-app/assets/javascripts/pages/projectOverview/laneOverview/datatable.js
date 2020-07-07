@@ -70,20 +70,6 @@ $.otp.projectOverviewTable = {
                                     mockPid: mockPid
                                 }
                             });
-                            var projectName = $.otp.projectName;
-                            if (projectName !== "ICGC_MMML" &&
-                                projectName !== "ICGC_MMML_XP" &&
-                                projectName !== "ICGC_MMML_RARE_LYMPHOMA_XP" &&
-                                projectName !== "ICGC_MMML_RARE_LYMPHOMA_EXOMES") {
-                                row[2] = $.otp.createLinkMarkup({
-                                    controller: 'individual',
-                                    action: 'show',
-                                    text: row[2],
-                                    parameters: {
-                                        mockPid: mockPid
-                                    }
-                                });
-                            }
                         }
                         fnCallback(json);
                         oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;

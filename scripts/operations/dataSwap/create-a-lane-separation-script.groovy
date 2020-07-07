@@ -180,7 +180,11 @@ createSwapScript(swapLabel).printToStdout()
  ********************************************************************************/
 
 private List<DataFile> getDataFilesBySampleIdentifierString(String sampleIdentifier) {
-    return MetaDataEntry.findAllByKeyAndValue(MetaDataKey.findByName("SAMPLE_NAME"), sampleIdentifier)*.dataFile
+    return DataFile.withCriteria {
+        seqTrack {
+            eq('sampleIdentifier', sampleIdentifier)
+        }
+    }
 }
 
 private SampleComponents parseSampleAndGetComponents(String sampleName) {

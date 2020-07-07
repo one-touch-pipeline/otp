@@ -48,6 +48,7 @@ class RunController {
             response.sendError(404)
             return
         }
+        //This page requires using SAMPLE_NAME, since the DataFile has no connection to a SeqTrack. Its only used for legacy objects
         List<MetaDataKey> keys = []
         keys[0] = MetaDataKey.findByName(MetaDataColumn.SAMPLE_NAME.name())
         keys[1] = MetaDataKey.findByName(MetaDataColumn.WITHDRAWN.name())

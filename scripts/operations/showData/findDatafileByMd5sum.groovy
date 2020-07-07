@@ -50,8 +50,6 @@ Closure<List<String>> nameStringToList = { String nameString ->
     return list
 }
 
-MetaDataKey sampleIdKey = MetaDataKey.findByName("SAMPLE_NAME")
-
 List<String> md5sumList = nameStringToList(md5sums)
 
 md5sumList.each { String md5sum ->
@@ -60,7 +58,6 @@ md5sumList.each { String md5sum ->
     int numberOfFoundFiles = dataFiles.size()
     println "${md5sum} ${numberOfFoundFiles > 1 ? "[found ${numberOfFoundFiles} files with the given md5!]" : ''}"
     dataFiles.each { DataFile dataFile ->
-        MetaDataEntry sampleIdMDEntry = exactlyOneElement(MetaDataEntry.findAllByDataFileAndKey(dataFile, sampleIdKey), "Could not find exactly one SAMPLE_NAME metadata entry for DataFile")
         SeqTrack dfSeqTrack = dataFile.seqTrack
         println """\
         ---> ${dataFile.fileName}
@@ -69,7 +66,7 @@ md5sumList.each { String md5sum ->
              PID:         ${dfSeqTrack.individual.pid}
              SeqType:     ${dfSeqTrack.seqType}
              SampleType:  ${dfSeqTrack.sample.sampleType}
-             SAMPLE_NAME: ${sampleIdMDEntry.value}
+             SAMPLE_NAME: ${dfSeqTrack.sampleIdentifier}
         """.stripIndent()
     }
 }

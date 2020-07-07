@@ -150,6 +150,7 @@
             <tbody>
             <g:each var="file" in="${errorFiles}">
                 <tr>
+                    %{--This code require metadata fields, since there is no connection to a SeqTrack--}%
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0])?.value}</td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>

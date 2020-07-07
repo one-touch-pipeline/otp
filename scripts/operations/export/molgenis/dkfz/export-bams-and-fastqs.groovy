@@ -75,7 +75,7 @@ enum DataFileColumns {
         return dataFile.seqTrack.sample.individual.project.speciesWithStrain.strain.name
     }),
     SAMPLE_IDENTIFIER("Sample Identifier", { DataFile dataFile, Map properties = [:] ->
-        return CollectionUtils.exactlyOneElement(MetaDataEntry.findAllByKeyAndDataFile(properties["sampleIdKey"] as MetaDataKey, dataFile)).value
+        return dataFile.seqTrack.sampleIdentifier
     }),
     SAMPLE_TYPE("Sample Type", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.sampleType.name
@@ -223,9 +223,7 @@ class MolgenisDataFile extends MolgenisEntity {
 
     List<String> header = DataFileColumns.values()*.columnName + MetaDataKey.list()*.name.sort()
 
-    static Map properties = [
-            sampleIdKey: CollectionUtils.exactlyOneElement(MetaDataKey.findAllByName("SAMPLE_NAME"))
-    ]
+    static Map properties = [:]
 
     MolgenisDataFile(Map<String, String> map = [:]) {
         super(map)

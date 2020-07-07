@@ -472,31 +472,6 @@ class ProjectOverviewService {
     }
 
     /**
-     * fetch and return all combination of {@link Individual} (as mockpid) and {@link SampleType} with the first {@link SampleIdentifier}
-     * as list.
-     * <br> Example:[[patient1, sampleType1, SampleIdentifier1],[patient1, sampleType2, SampleIdentifier2],[patient1, sampleType3, SampleIdentifier3]...]
-     * @param project the project for filtering the result
-     * @return all combination of name of individual(mockPid) and sampleTypeName with the first SampleIdentifier as list
-     */
-    List<Object> overviewSampleIdentifier(Project project) {
-        List<Object> sampleIdentifiers = SampleIdentifier.withCriteria {
-            projections {
-                sample {
-                    individual {
-                        eq("project", project)
-                        groupProperty("mockPid")
-                    }
-                    sampleType {
-                        groupProperty("name")
-                    }
-                }
-                min("name")
-            }
-        }
-        return sampleIdentifiers
-    }
-
-    /**
      * fetch and return all combination of {@link Individual} (as mockpid) and of Sample type name with the number of lanes depend of {@link SeqType}
      * as list.
      * <br> Example:[

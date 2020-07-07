@@ -20,10 +20,9 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-
 
 /**
  * Create overview of SampleIdentifier with the corresponding Project, Individual, SeqType, SampleType and ilse number.
@@ -53,27 +52,19 @@ List<Project> projects = projectInputArea.split('\n')*.trim().findAll { String l
     CollectionUtils.exactlyOneElement(Project.findAllByName(it))
 }
 
-MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.SAMPLE_NAME.toString())
-
-println MetaDataEntry.createCriteria().list {
-    eq('key', key)
-    dataFile {
-        seqTrack {
-            sample {
-                individual {
-                    'in'('project', projects)
-                }
-            }
+println SeqTrack.createCriteria().list {
+    sample {
+        individual {
+            'in'('project', projects)
         }
     }
-}.collect { MetaDataEntry entry ->
-    DataFile dataFile = entry.dataFile
+}.collect { SeqTrack seqTrack ->
     [
-            dataFile.project,
-            dataFile.individual,
-            dataFile.sampleType,
-            dataFile.seqType.displayNameWithLibraryLayout,
-            dataFile.seqTrack.ilseId,
-            entry.value
+            seqTrack.project,
+            seqTrack.individual,
+            seqTrack.sampleType,
+            seqTrack.seqType.displayNameWithLibraryLayout,
+            seqTrack.ilseId,
+            seqTrack.sampleIdentifier,
     ].join(',')
 }.sort().join('\n')
