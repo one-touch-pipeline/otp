@@ -32,6 +32,7 @@ import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -1234,6 +1235,100 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         thrown(MissingPropertyException)
+    }
+
+    UserProjectRole createProjectUserForNotificationTest(Project project, boolean receivesNotifications, boolean userEnabled, boolean projectUserEnabled) {
+        return DomainFactory.createUserProjectRole(
+                project              : project ?: createProject(),
+                user                 : DomainFactory.createUser(enabled: userEnabled),
+                receivesNotifications: receivesNotifications,
+                enabled              : projectUserEnabled,
+        )
+    }
+
+    List<UserProjectRole> setupProjectUserForAllNotificationCombinations(Project project = null) {
+        List<UserProjectRole> projectUsers = []
+        [true, false].each { boolean receivesNotifications ->
+            [true, false].each { boolean userEnabled ->
+                [true, false].each { boolean projectUserEnabled ->
+                    projectUsers << createProjectUserForNotificationTest(project, receivesNotifications, userEnabled, projectUserEnabled)
+                }
+            }
+        }
+        return projectUsers
+    }
+
+    void "getEmailsForNotification, mails of all to be notified users, sorted and concatenated with ','"() {
+        given:
+        setupData()
+
+        Project project = DomainFactory.createProject()
+        List<UserProjectRole> projectUsers = setupProjectUserForAllNotificationCombinations(project)
+
+        String expected = projectUsers.findAll { UserProjectRole projectUser ->
+            projectUser.enabled && projectUser.user.enabled && projectUser.receivesNotifications
+        }*.user*.email.sort().join(",")
+
+        expect:
+        userProjectRoleService.getEmailsForNotification(project) == expected
+    }
+
+    void "getEmailsForNotification, returns empty string for project without users"() {
+        given:
+        setupData()
+
+        expect:
+        userProjectRoleService.getEmailsForNotification(DomainFactory.createProject()) == ""
+    }
+
+    void "getProjectUsersToBeNotified, only fully enabled project users with notification true of given project"() {
+        given:
+        setupData()
+
+        setupProjectUserForAllNotificationCombinations()
+
+        Project project = DomainFactory.createProject()
+        List<UserProjectRole> projectUsers = setupProjectUserForAllNotificationCombinations(project)
+
+        List<UserProjectRole> expected = projectUsers.findAll { UserProjectRole projectUser ->
+            projectUser.enabled && projectUser.user.enabled && projectUser.receivesNotifications
+        }
+
+        when:
+        List<UserProjectRole> projectUsersToBeNotified = userProjectRoleService.getProjectUsersToBeNotified(project)
+
+        then:
+        TestCase.assertContainSame(projectUsersToBeNotified, expected)
+    }
+
+    void "getProjectUsersToBeNotified, on project without users, returns empty list"() {
+        given:
+        setupData()
+
+        expect:
+        userProjectRoleService.getProjectUsersToBeNotified(DomainFactory.createProject()) == []
+    }
+
+    void "getMails, converts all objects, regardless of notification status"() {
+        given:
+        setupData()
+
+        List<UserProjectRole> projectUsers = setupProjectUserForAllNotificationCombinations()
+        List<String> expected = projectUsers*.user*.email
+
+        when:
+        List<String> mails = userProjectRoleService.getMails(projectUsers)
+
+        then:
+        TestCase.assertContainSame(mails, expected)
+    }
+
+    void "getMails, on empty list, returns empty string list"() {
+        given:
+        setupData()
+
+        expect:
+        userProjectRoleService.getMails([]) == []
     }
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {

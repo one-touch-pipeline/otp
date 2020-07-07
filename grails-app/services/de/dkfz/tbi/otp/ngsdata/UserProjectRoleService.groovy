@@ -499,7 +499,22 @@ class UserProjectRoleService {
 
     String getEmailsForNotification(Project project) {
         assert project: 'No project given'
-        return UserProjectRole.findAllByProjectAndReceivesNotificationsAndEnabled(project, true, true)*.user.findAll { it.enabled }*.email?.sort()?.join(',') ?: ''
+        return getMails(getProjectUsersToBeNotified(project)).sort().join(',')
+    }
+
+    List<UserProjectRole> getProjectUsersToBeNotified(Project project) {
+        return UserProjectRole.withCriteria {
+            eq("project", project)
+            eq("receivesNotifications", true)
+            eq("enabled", true)
+            user {
+                eq("enabled", true)
+            }
+        } as List<UserProjectRole>
+    }
+
+    List<String> getMails(List<UserProjectRole> projectUser) {
+        return projectUser*.user*.email
     }
 
     /**
