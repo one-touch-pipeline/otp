@@ -82,6 +82,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         final String HEADER = 'HEADER'
         final String BODY = 'BODY'
         final String LINK = 'LINK'
+        final String FAQ = 'FAQ'
 
         AbstractMergedBamFile bamFile = createBamFile()
         bamFile.project.qcTrafficLightNotification = qcTrafficLightNotification
@@ -126,15 +127,14 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 assert properties['emailSenderSalutation'] == emailSenderSalutation
                 assert properties['link'] == LINK
                 assert properties['thresholdPage'] == LINK
-                assert properties['faq'] == ""
+                assert properties['faq'] == FAQ
                 return BODY
             }
             0 * _
         }
 
         service.createNotificationTextService = Mock(CreateNotificationTextService) {
-            1 * createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index', [seqType: bamFile.seqType.id]) >> LINK
-            0 * _
+            1 * getFaq() >> FAQ
         }
 
         service.userProjectRoleService = Mock(UserProjectRoleService) {
@@ -152,7 +152,8 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         }
 
         service.linkGenerator = Mock(LinkGenerator) {
-            1 * link(_) >> LINK
+            1 * link({ it.controller == 'qcThreshold' }) >> LINK
+            1 * link({ it.controller == 'alignmentQualityOverview' }) >> LINK
         }
 
         expect:

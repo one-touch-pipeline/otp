@@ -27,13 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.IlseSubmission
-import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.*
 
 @Transactional
 class QcTrafficLightNotificationService {
@@ -48,7 +47,7 @@ class QcTrafficLightNotificationService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
 
-    private String createResultsAreBlockedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
+    String createResultsAreBlockedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
         if (toBeSent) {
             subject << 'TO BE SENT: '
@@ -60,34 +59,62 @@ class QcTrafficLightNotificationService {
         List<IlseSubmission> ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
         String ilse = ilseSubmissions ? "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] " : ""
 
-        subject << messageSourceService.createMessage(
-                "notification.template.alignment.qcTrafficBlockedSubject",
-                [
+        subject << messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedSubject", [
                         ticketNumber: ticketNumber,
                         ilse        : ilse,
                         bamFile     : bamFile,
-                ]
-        )
+        ])
 
         return subject.toString()
     }
 
-    private String createResultsAreBlockedMessage(AbstractMergedBamFile bamFile) {
-        String faq = processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)
-        if (faq != "") {
-            faq = messageSourceService.createMessage("notification.template.base.faq", [
-                    faqLink: faq,
-                    contactMail: processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL),
-            ])
-        }
-
+    String createResultsAreBlockedMessage(AbstractMergedBamFile bamFile) {
         return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage", [
                 bamFile              : bamFile,
-                link                 : createNotificationTextService.createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index', [seqType: bamFile.seqType.id]),
+                link                 : getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType),
                 emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
-                thresholdPage        : linkGenerator.link(controller: 'qcThreshold', action: 'projectConfiguration', absolute: true, params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): bamFile.project]),
-                faq                  : faq,
+                thresholdPage        : getThresholdPageLink(bamFile.project),
+                faq                  : createNotificationTextService.faq,
         ])
+    }
+
+    String createResultsAreBlockedMessage(List<AbstractMergedBamFile> bamFiles) {
+        return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage.multiple", [
+                content              : buildContentForMultipleBamsBlockedMessage(bamFiles),
+                faq                  : createNotificationTextService.faq,
+                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+        ])
+    }
+
+    String buildContentForMultipleBamsBlockedMessage(List<AbstractMergedBamFile> bamFiles) {
+        Project project = CollectionUtils.exactlyOneElement(bamFiles.collect { it.project }.unique())
+
+        String bamListing = bamFiles.groupBy { it.seqType }.collect { SeqType seqType, List<AbstractMergedBamFile> bams ->
+            return buildSeqTypeBlockForNotification(seqType, bams)
+        }.join("\n")
+
+        return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage.multiple.content", [
+                project      : project,
+                bamListing   : bamListing,
+                thresholdPage: getThresholdPageLink(project),
+        ])
+    }
+
+    String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractMergedBamFile> bamFiles) {
+        Project project = CollectionUtils.exactlyOneElement(bamFiles.collect { it.project }.unique())
+        return """\
+            |${seqType}
+            |Quality overview: ${getAlignmentQualityOverviewLink(project, seqType)}
+            |
+            |${bamFiles.collect { AbstractMergedBamFile bam -> buildBamFileForNotification(bam) }.join("\n\n")}""".stripMargin()
+    }
+
+    String buildBamFileForNotification(AbstractMergedBamFile bamFile, int indent = 4) {
+        String i = " " * indent
+        return """\
+            |${i}${bamFile.sample}
+            |${i}Quality Overview: ${getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType, bamFile.sample)}
+            |${i}Filesystem: ${bamFile.workDirectory}""".stripMargin()
     }
 
     void informResultsAreBlocked(AbstractMergedBamFile bamFile) {
@@ -101,5 +128,30 @@ class QcTrafficLightNotificationService {
         String content = createResultsAreBlockedMessage(bamFile)
         recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
         mailHelperService.sendEmail(subject, content, recipients)
+    }
+
+    String getThresholdPageLink(Project project) {
+        return linkGenerator.link(
+                controller: 'qcThreshold',
+                action    : 'projectConfiguration',
+                absolute  : true,
+                params    : [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project],
+        )
+    }
+
+    String getAlignmentQualityOverviewLink(Project project, SeqType seqType, Sample sample = null) {
+        Map conditionalParams = [:]
+        if (sample) {
+            conditionalParams["sample"] = sample.id
+        }
+        return linkGenerator.link(
+                controller: 'alignmentQualityOverview',
+                action    : 'index',
+                absolute  : true,
+                params    : [
+                        (ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project,
+                        seqType                                              : seqType.id,
+                ] + conditionalParams
+        )
     }
 }
