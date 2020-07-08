@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.*
-import org.hibernate.criterion.CriteriaSpecification
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -38,7 +37,7 @@ class EgaSubmissionService {
 
     SeqTrackService seqTrackService
 
-    private final String RAW_PREFIX = "UNMAPPED:"
+    static protected final String RAW_PREFIX = "UNMAPPED:"
 
     enum FileType {
         BAM,
@@ -405,6 +404,57 @@ class EgaSubmissionService {
         return dataFileAliases
     }
 
+    @TupleConstructor
+    @EqualsAndHashCode
+    class ExperimentalDataRow {
+        SeqType seqType
+        SeqPlatformModelLabel seqPlatformModelLabel
+        String seqPlatformName
+        LibraryPreparationKit libraryPreparationKit
+
+        ExperimentalDataRow (DataFileSubmissionObject dataFileSubmissionObject) {
+            seqType = dataFileSubmissionObject.dataFile.seqType
+            seqPlatformModelLabel = dataFileSubmissionObject.dataFile.run.seqPlatform.seqPlatformModelLabel
+            seqPlatformName = dataFileSubmissionObject.dataFile.run.seqPlatform.name
+            libraryPreparationKit = dataFileSubmissionObject.dataFile.seqTrack.libraryPreparationKit
+        }
+
+        ExperimentalDataRow (SeqTrack seqTrack) {
+            seqType = seqTrack.seqType
+            seqPlatformModelLabel = seqTrack.seqPlatform.seqPlatformModelLabel
+            seqPlatformName = seqTrack.seqPlatform.name
+            libraryPreparationKit = seqTrack.libraryPreparationKit
+        }
+    }
+
+    @CompileDynamic
+    List getExperimentalMetadata(EgaSubmission submission) {
+        List metadata = []
+        List<ExperimentalDataRow> experimentalDataRows = []
+
+        submission.dataFilesToSubmit.each { DataFileSubmissionObject dataFileSubmissionObject ->
+            experimentalDataRows << new ExperimentalDataRow(dataFileSubmissionObject)
+        }
+
+        submission.bamFilesToSubmit.each { BamFileSubmissionObject bamFileSubmissionObject ->
+            bamFileSubmissionObject.bamFile.containedSeqTracks.each {
+                experimentalDataRows << new ExperimentalDataRow(it)
+            }
+        }
+        experimentalDataRows.unique().each { ExperimentalDataRow experimentalDataRow ->
+            metadata << [
+                    libraryLayout             : experimentalDataRow.seqType.libraryLayout,
+                    displayName               : experimentalDataRow.seqType.displayName,
+                    libraryPreparationKit     : experimentalDataRow.libraryPreparationKit,
+                    mappedEgaPlatformModel    : mapEgaPlatformModel(experimentalDataRow.seqPlatformModelLabel),
+                    mappedEgaLibrarySource    : mapEgaLibrarySource(experimentalDataRow.seqType),
+                    mappedEgaLibraryStrategy  : mapEgaLibraryStrategy(experimentalDataRow.seqType),
+                    mappedEgaLibrarySelection : mapEgaLibrarySelection(experimentalDataRow.libraryPreparationKit),
+            ]
+        }
+        return metadata
+    }
+
     Map generateDefaultEgaAliasesForBamFiles(List<BamFileAndSampleAlias> bamFilesAndSampleAliases) {
         Map<String, String> bamFileAliases = [:]
 
@@ -420,40 +470,6 @@ class EgaSubmissionService {
         }
 
         return bamFileAliases
-    }
-
-    @CompileDynamic
-    List getExperimentalMetadata(EgaSubmission submission) {
-        List metadata = SeqTrack.createCriteria().list {
-            resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
-            projections {
-                sample {
-                    'in'('id', submission.samplesToSubmit*.sample.id)
-                    seqTracks {
-                        run {
-                            seqPlatform {
-                                property('seqPlatformModelLabel', 'seqPlatformModelLabel')
-                            }
-                        }
-                    }
-                }
-                seqType {
-                    property('id', 'seqTypeId')
-                    property('libraryLayout', 'libraryLayout')
-                    property('displayName', 'displayName')
-                }
-                property('libraryPreparationKit', 'libraryPreparationKit')
-            }
-        }.unique()
-
-        metadata.each { Map it ->
-            it.put("mappedEgaPlatformModel", mapEgaPlatformModel(it.seqPlatformModelLabel))
-            it.put("mappedEgaLibrarySource", mapEgaLibrarySource(SeqType.get(it.seqTypeId)))
-            it.put("mappedEgaLibraryStrategy", mapEgaLibraryStrategy(SeqType.get(it.seqTypeId)))
-            it.put("mappedEgaLibrarySelection", mapEgaLibrarySelection(it.libraryPreparationKit))
-        }
-
-        return metadata
     }
 
     @CompileDynamic

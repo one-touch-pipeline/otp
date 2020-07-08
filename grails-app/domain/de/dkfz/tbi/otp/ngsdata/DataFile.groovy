@@ -186,6 +186,10 @@ class DataFile implements CommentableWithProject,  Entity {
         return seqTrack ? seqTrack.individual : alignmentLog.seqTrack.individual
     }
 
+    Sample getSample() {
+        return seqTrack ? seqTrack.sample : alignmentLog.seqTrack.sample
+    }
+
     SampleType getSampleType() {
         return seqTrack ? seqTrack.sampleType : alignmentLog.seqTrack.sampleType
     }

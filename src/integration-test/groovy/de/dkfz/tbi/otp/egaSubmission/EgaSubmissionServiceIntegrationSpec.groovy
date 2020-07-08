@@ -322,25 +322,94 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         submission.bamFilesToSubmit.size() == BamFileSubmissionObject.findAll().size()
     }
 
-    void "test get experimental metadata"() {
+    void "getExperimentalMetadata, when a datafile is given, then return one experiment of this datafile"() {
         given:
-        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
-        SeqType seqType = createSeqType()
-        createSeqTrack(
-                sample: sampleSubmissionObject.sample,
-                seqType: seqType
-        )
-        sampleSubmissionObject.sample.refresh()
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
+        DataFile dataFile = dataFileSubmissionObject.dataFile
+
         EgaSubmission submission = createEgaSubmission(
-                samplesToSubmit: [sampleSubmissionObject]
+                dataFilesToSubmit: [dataFileSubmissionObject],
         )
 
         when:
-        Map experimentalMetadata = egaSubmissionService.getExperimentalMetadata(submission)[0] as Map
+        List<Map> experimentalMetadata = egaSubmissionService.getExperimentalMetadata(submission)
 
         then:
-        experimentalMetadata.libraryPreparationKit == sampleSubmissionObject.sample.seqTracks[0].libraryPreparationKit
-        experimentalMetadata.libraryLayout == seqType.libraryLayout
-        experimentalMetadata.displayName == seqType.displayName
+        experimentalMetadata.size() == 1
+        Map metadata = experimentalMetadata[0] as Map
+        metadata['libraryLayout'] == dataFile.seqType.libraryLayout
+        metadata['displayName'] == dataFile.seqType.displayName
+        metadata['libraryPreparationKit'] == dataFile.seqTrack.libraryPreparationKit
+        metadata['mappedEgaPlatformModel']
+        metadata['mappedEgaLibrarySource']
+        metadata['mappedEgaLibraryStrategy']
+        metadata['mappedEgaLibrarySelection']
+    }
+
+    void "getExperimentalMetadata, when a bam file with one seqplatform and one library preparation kit, then return one experiment of this bam file"() {
+        given:
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
+        AbstractBamFile bamFile = bamFileSubmissionObject.bamFile
+
+        EgaSubmission submission = createEgaSubmission(
+                bamFilesToSubmit: [bamFileSubmissionObject],
+        )
+
+        when:
+        List<Map> experimentalMetadata = egaSubmissionService.getExperimentalMetadata(submission)
+
+        then:
+        experimentalMetadata.size() == 1
+        Map metadata = experimentalMetadata[0] as Map
+        metadata['libraryLayout'] == bamFile.seqType.libraryLayout
+        metadata['displayName'] == bamFile.seqType.displayName
+        metadata['libraryPreparationKit'] == bamFile.mergingWorkPackage.libraryPreparationKit
+        metadata['mappedEgaPlatformModel']
+        metadata['mappedEgaLibrarySource']
+        metadata['mappedEgaLibraryStrategy']
+        metadata['mappedEgaLibrarySelection']
+    }
+
+    void "getExperimentalMetadata, when a bam file with three seqPlatform and three library preparation kits, then return three experiments of this bam file"() {
+        given:
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
+        RoddyBamFile bamFile = bamFileSubmissionObject.bamFile
+        SeqTrack seqTrack2 = createSeqTrack()
+        SeqTrack seqTrack3 = createSeqTrack()
+        bamFile.addToSeqTracks(seqTrack2)
+        bamFile.addToSeqTracks(seqTrack3)
+        bamFile.numberOfMergedLanes = 3
+        bamFile.save(flush: true)
+
+        EgaSubmission submission = createEgaSubmission(
+                bamFilesToSubmit: [bamFileSubmissionObject],
+        )
+
+        when:
+        List<Map> experimentalMetadata = egaSubmissionService.getExperimentalMetadata(submission)
+
+        then:
+        experimentalMetadata.size() == 3
+    }
+
+    void "getExperimentalMetadata, when a patient has multiple data, then return only the experiment of the data in the submission"() {
+        given:
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
+        DataFile dataFile = dataFileSubmissionObject.dataFile
+        createDataFile([
+                seqTrack: createSeqTrack([
+                        sample: dataFile.sample,
+                ])
+        ])
+
+        EgaSubmission submission = createEgaSubmission(
+                dataFilesToSubmit: [dataFileSubmissionObject],
+        )
+
+        when:
+        List<Map> experimentalMetadata = egaSubmissionService.getExperimentalMetadata(submission)
+
+        then:
+        experimentalMetadata.size() == 1
     }
 }
