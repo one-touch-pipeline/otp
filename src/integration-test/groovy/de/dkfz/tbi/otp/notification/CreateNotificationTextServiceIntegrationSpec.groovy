@@ -33,6 +33,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -44,7 +45,7 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 @Rollback
 @Integration
-class CreateNotificationTextServiceIntegrationSpec extends Specification {
+class CreateNotificationTextServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     static final String CONTROLLER = 'controller'
     static final String ACTION = 'action'
@@ -84,9 +85,9 @@ faq:${faq}
     void "createOtpLinks, when input valid, return sorted URLs of the projects"() {
         given:
         List<Project> projects = [
-                DomainFactory.createProject(name: 'project3'),
-                DomainFactory.createProject(name: 'project5'),
-                DomainFactory.createProject(name: 'project2'),
+                createProject(name: 'project3'),
+                createProject(name: 'project5'),
+                createProject(name: 'project2'),
         ]
 
         String expected = [
@@ -101,9 +102,9 @@ faq:${faq}
 
     void "test: notification if faq link is set"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        OtrsTicket ticket = createOtrsTicket()
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK, "some_link")
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.EMAIL_REPLY_TO, "a.b@c.de")
         ProcessingStatus processingStatus = new ProcessingStatus()
@@ -130,9 +131,9 @@ faq:${faq}
 
     void "test: notification if faq link is not set"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        OtrsTicket ticket = createOtrsTicket()
         ProcessingStatus processingStatus = new ProcessingStatus()
 
 
@@ -158,13 +159,13 @@ faq:${faq}
     @Unroll
     void "notification, return message (#processingStep, otrs comment: #otrsTicketSeqCenterComment, default: #generalSeqCenterComment)"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(
+        OtrsTicket ticket = createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
-        DomainFactory.createDataFile(
-                fastqImportInstance: DomainFactory.createFastqImportInstance(
+        createDataFile(
+                fastqImportInstance: createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
@@ -204,15 +205,13 @@ faq:${faq}
 
         if (otrsTicketSeqCenterComment || generalSeqCenterComment) {
             if (otrsTicketSeqCenterComment?.contains(generalSeqCenterComment)) {
-                expectedSeqCenterComment = """
-
+                expectedSeqCenterComment = """\
 ******************************
 Note from sequencing center:
 ${otrsTicketSeqCenterComment}
 ******************************"""
             } else {
-                expectedSeqCenterComment = """
-
+                expectedSeqCenterComment = """\
 ******************************
 Note from sequencing center:
 ${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalSeqCenterComment}
@@ -256,18 +255,18 @@ faq:
         given:
         String seqCenterMessage1 = "Message of seq center 1"
         String seqCenterMessage2 = "Message of seq center 2"
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(
+        OtrsTicket ticket = createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
-        DataFile dataFile1 = DomainFactory.createDataFile(
-                fastqImportInstance: DomainFactory.createFastqImportInstance(
+        DataFile dataFile1 = createDataFile(
+                fastqImportInstance: createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
-        DataFile dataFile2 = DomainFactory.createDataFile(
-                fastqImportInstance: DomainFactory.createFastqImportInstance(
+        DataFile dataFile2 = createDataFile(
+                fastqImportInstance: createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
@@ -301,8 +300,7 @@ faq:
         String expectedSeqCenterComment
 
         if (otrsTicketSeqCenterComment) {
-            expectedSeqCenterComment = """
-
+            expectedSeqCenterComment = """\
 ******************************
 Note from sequencing center:
 ${otrsTicketSeqCenterComment}

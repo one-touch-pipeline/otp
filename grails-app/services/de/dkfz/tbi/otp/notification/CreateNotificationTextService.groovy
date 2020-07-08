@@ -53,51 +53,111 @@ class CreateNotificationTextService {
     ProjectOverviewService projectOverviewService
     ProcessingOptionService processingOptionService
 
+    /**
+     * Helper function to create the notification for exactly one ProcessingStep.
+     */
     String notification(OtrsTicket otrsTicket, ProcessingStatus status, ProcessingStep processingStep, Project project) {
+        assert processingStep
+        return multiStepNotification(otrsTicket, status, [processingStep], project)
+    }
+
+    /**
+     * Prepares the entire body of a processing step update mail for the given steps.
+     *
+     * The body is structured as follows: First a greeting to the customer, followed by the custom
+     * notification of all provided steps, followed by the seqCenterComment, followed by a common
+     * conclusion and ended with a reference to the FAQs.
+     */
+    String multiStepNotification(OtrsTicket otrsTicket, ProcessingStatus status, List<ProcessingStep> processingSteps, Project project) {
         assert otrsTicket
         assert status
-        assert processingStep
         assert project
 
-        String stepInformation = "${processingStep}Notification"(status).trim()
+        String stepInformation = buildStepNotifications(processingSteps, status)
 
         if (!stepInformation) {
             return ''
         }
 
-        String otrsTicketSeqCenterComment = otrsTicket.seqCenterComment ?: ""
-        List<SeqCenter> seqCenters = otrsTicket.findAllSeqTracks()*.seqCenter.unique()
-        String generalSeqCenterComment = seqCenters.size() == 1 ? processingOptionService.findOptionAsString(
-                OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                seqCenters.first().name,
-        ) : ""
-        String seqCenterComment = ""
-
-        if (otrsTicketSeqCenterComment || generalSeqCenterComment) {
-            String prefix = "\n\n******************************\nNote from sequencing center:\n"
-            String suffix = "\n******************************"
-            if (otrsTicketSeqCenterComment.replaceAll("[\r\n ]+", ' ').trim().contains(generalSeqCenterComment.replaceAll("[\r\n ]+", ' ').trim())) {
-                seqCenterComment = otrsTicketSeqCenterComment
-            } else {
-                seqCenterComment = "${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalSeqCenterComment}"
-            }
-            seqCenterComment = "${prefix}${seqCenterComment}${suffix}"
-        }
-
-        String faq = ""
-        if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
-            faq = messageSourceService.createMessage('notification.template.base.faq', [
-                    faqLink    : processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
-                    contactMail: processingOptionService.findOptionAsString(OptionName.EMAIL_REPLY_TO),
-            ])
-        }
-
         return messageSourceService.createMessage('notification.template.base', [
                 stepInformation      : stepInformation,
-                seqCenterComment     : seqCenterComment,
+                seqCenterComment     : buildSeqCenterComment(otrsTicket),
                 emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 faq                  : faq,
         ])
+    }
+
+    /**
+     * Builds the notification body for multiple steps.
+     *
+     * If the notification is done for more than one ProcessingStep it will add a header to each
+     * section like: '# Installation'
+     *
+     * Only creates the notification for finished steps and omits others, even if provided.
+     */
+    String buildStepNotifications(List<ProcessingStep> processingSteps, ProcessingStatus status) {
+        Map<ProcessingStep, String> validNotifications = processingSteps.collectEntries { ProcessingStep processingStep ->
+            [(processingStep): "${processingStep}Notification"(status).trim()]
+        }.findAll { Map.Entry entry ->
+            entry.value
+        }
+
+        return validNotifications.collect { ProcessingStep step, String notification ->
+            return "${validNotifications.size() > 1 ? "# ${step.displayName.capitalize()}:\n" : ""}${notification.trim()}"
+        }.join("\n" * 3).trim()
+    }
+
+    /**
+     * Build the SeqCenter comment.
+     *
+     * Properly combines the comments of different sources and applies them in the common format.
+     *
+     * The comment is SeqCenter specific. Should there be data from more than one SeqCenter connected
+     * to the ticket it will return an empty comment string.
+     */
+    String buildSeqCenterComment(OtrsTicket otrsTicket) {
+        String ticketComment = otrsTicket.seqCenterComment ?: ""
+
+        List<SeqCenter> seqCenters = otrsTicket.findAllSeqTracks()*.seqCenter.unique()
+        String generalComment = seqCenters.size() == 1 ? processingOptionService.findOptionAsString(
+                OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
+                seqCenters.first().name
+        ) : ""
+
+        if (ticketComment || generalComment) {
+            return """\
+                |******************************
+                |Note from sequencing center:
+                |${combineSeqCenterComments(ticketComment, generalComment)}
+                |******************************""".stripMargin()
+        }
+        return ""
+    }
+
+    /**
+     * Combine the general SeqCenter note with the comment provided by the import ticket.
+     *
+     * The typical use case is to just join the two strings with a newline. However, if the general secondary note
+     * is completely contained in the primary note, it is shortened to the primary note only.
+     */
+    String combineSeqCenterComments(String primary, String secondary) {
+        Closure<String> equalize = { String input ->
+            return input.replaceAll("[\r\n ]+", ' ').trim()
+        }
+        if (equalize(primary).contains(equalize(secondary))) {
+            return primary
+        }
+        return "${primary}\n${secondary}".trim()
+    }
+
+    String getFaq() {
+        if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
+            return messageSourceService.createMessage("notification.template.base.faq", [
+                    faqLink    : processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
+                    contactMail: processingOptionService.findOptionAsString(OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL),
+            ])
+        }
+        return ""
     }
 
     String installationNotification(ProcessingStatus statusInput) {
@@ -171,12 +231,10 @@ class CreateNotificationTextService {
             "${sample} (${seqTracksOfSample*.sampleIdentifier.unique().sort().join(", ")})"
         }.join('\n')
 
-        Collection<AbstractMergedBamFile> allGoodBamFiles =
-                status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
-        Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig =
-                allGoodBamFiles*.alignmentConfig.unique().collectEntries {
-                    [it, projectOverviewService.getAlignmentInformationFromConfig(it)]
-                }
+        Collection<AbstractMergedBamFile> allGoodBamFiles = status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
+        Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = allGoodBamFiles*.alignmentConfig.unique().collectEntries {
+            [it, projectOverviewService.getAlignmentInformationFromConfig(it)]
+        }
 
         String links = createOtpLinks(allGoodBamFiles*.project, 'alignmentQualityOverview', 'index')
 
@@ -373,7 +431,6 @@ class CreateNotificationTextService {
 
     String getSampleName(SeqTrack seqTrack) {
         assert seqTrack
-
         return "${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
     }
 

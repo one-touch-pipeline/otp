@@ -205,8 +205,11 @@ class NotificationCreator {
         }
 
         StringBuilder content = new StringBuilder()
-        content.append(status.toString())
-        content.append('\n').append(seqTracks.size()).append(' SeqTrack(s) in ticket ').append(ticket.ticketNumber).append(':\n')
+        content.append("""\
+        |${status.toString()}
+        |
+        |${seqTracks.size()} SeqTrack(s) in ticket ${ticket.ticketNumber}:
+        |""".stripMargin())
         for (SeqTrack seqTrack : seqTracks.sort { a, b -> a.ilseId <=> b.ilseId ?: a.run.name <=> b.run.name ?: a.laneId <=> b.laneId }) {
             appendSeqTrackString(content, seqTrack)
             content.append('\n')
