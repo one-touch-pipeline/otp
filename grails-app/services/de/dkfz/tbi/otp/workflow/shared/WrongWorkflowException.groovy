@@ -19,39 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.shared
 
-import org.springframework.beans.factory.annotation.Autowired
+import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
-
-/**
- * Prepares the request, writes configuration to the file system, and executes the pipeline
- */
-abstract class AbstractExecutePipelineJob implements Job {
-
-    @Autowired
-    ConfigService configService
-
-    @Autowired
-    FileSystemService fileSystemService
-
-    @Autowired
-    FileService fileService
-
-    @Autowired
-    WorkflowStateChangeService workflowStateChangeService
-
-    @Override
-    JobStage getJobStage() {
-        return JobStage.EXECUTE_PIPELINE
-    }
-
-    @Override
-    List<Long> getValidExitCodes() {
-        return []
-    }
+@InheritConstructors
+class WrongWorkflowException extends WorkflowException {
 }

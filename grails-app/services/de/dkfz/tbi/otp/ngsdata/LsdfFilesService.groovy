@@ -31,7 +31,8 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.Paths
+import java.nio.file.FileSystem
+import java.nio.file.Path
 import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
@@ -83,6 +84,10 @@ class LsdfFilesService {
         return "${dataFile.initialDirectory}/${dataFile.fileName}"
     }
 
+    Path getFileInitialPathAsPath(DataFile dataFile, FileSystem fileSystem) {
+        return fileSystem.getPath(getFileInitialPath(dataFile))
+    }
+
 
     /**
      * Important function.
@@ -103,6 +108,10 @@ class LsdfFilesService {
         String basePath = file.project.projectSequencingDirectory
         String path = "${basePath}/${seqTypeDir}/${centerDir}/${file.run.dirName}/${file.pathName}/${file?.fileName}"
         return path
+    }
+
+    Path getFileFinalPathAsPath(DataFile file, FileSystem fileSystem) {
+        return fileSystem.getPath(getFileFinalPath(file))
     }
 
     boolean checkFinalPathDefined(DataFile dataFile) {

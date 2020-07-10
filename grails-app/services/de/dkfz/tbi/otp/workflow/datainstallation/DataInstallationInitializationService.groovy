@@ -24,6 +24,9 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.shared.NoArtefactOfRoleException
+import de.dkfz.tbi.otp.workflow.shared.NoConcreteArtefactException
+import de.dkfz.tbi.otp.workflow.shared.WrongWorkflowException
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -63,5 +66,22 @@ class DataInstallationInitializationService {
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
         return run
+    }
+
+    SeqTrack getSeqTrack(WorkflowStep workflowStep) {
+        WorkflowRun run = workflowStep.workflowRun
+        if (run.workflow.name != DataInstallationInitializationService.WORKFLOW) {
+            throw new WrongWorkflowException("The step is from workflow ${run.workflow.name}, but expected is ${WORKFLOW}")
+        }
+        WorkflowArtefact artefact = run.outputArtefacts[DataInstallationInitializationService.OUTPUT_ROLE]
+        if (!artefact) {
+            throw new NoArtefactOfRoleException("The WorkflowRun ${run} has no output artefact of role " +
+                    "${DataInstallationInitializationService.OUTPUT_ROLE}, only ${run.outputArtefacts.keySet().sort()}")
+        }
+        Optional<Artefact> optionalArtefact = artefact.artefact
+        if (!optionalArtefact.isPresent()) {
+            throw new NoConcreteArtefactException("The WorkflowArtefact ${artefact} of WorkflowRun ${run} has no concreate artefact yet")
+        }
+        return optionalArtefact.get()
     }
 }

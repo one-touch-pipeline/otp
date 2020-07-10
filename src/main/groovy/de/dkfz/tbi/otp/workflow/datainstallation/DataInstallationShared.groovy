@@ -19,39 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.datainstallation
 
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * Prepares the request, writes configuration to the file system, and executes the pipeline
- */
-abstract class AbstractExecutePipelineJob implements Job {
+trait DataInstallationShared {
 
     @Autowired
-    ConfigService configService
+    LsdfFilesService lsdfFilesService
 
     @Autowired
-    FileSystemService fileSystemService
+    DataInstallationInitializationService dataInstallationInitializationService
 
-    @Autowired
-    FileService fileService
-
-    @Autowired
-    WorkflowStateChangeService workflowStateChangeService
-
-    @Override
-    JobStage getJobStage() {
-        return JobStage.EXECUTE_PIPELINE
-    }
-
-    @Override
-    List<Long> getValidExitCodes() {
-        return []
+    SeqTrack getSeqTrack(WorkflowStep workflowStep) {
+        dataInstallationInitializationService.getSeqTrack(workflowStep)
     }
 }
