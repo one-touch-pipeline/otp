@@ -21,7 +21,9 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
+
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore {
@@ -64,6 +66,18 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 workflowRun     : { createWorkflowRun() },
                 role            : "role_${nextId}",
                 workflowArtefact: { createWorkflowArtefact() },
+        ], properties)
+    }
+
+    WorkflowJobErrorDefinition createWorkflowJobErrorDefinition(Map properties = [:]) {
+        return createDomainObject(WorkflowJobErrorDefinition, [
+                sourceType          : WorkflowJobErrorDefinition.SourceType.MESSAGE,
+                action              : WorkflowJobErrorDefinition.Action.RESTART_JOB,
+                errorExpression     : "error_${nextId}",
+                allowRestartingCount: nextId,
+                jobBeanName         : "jobBeanName_${nextId}",
+                name                : "name_${nextId}",
+                beanToRestart       : "beanToRestart_${nextId}",
         ], properties)
     }
 }
