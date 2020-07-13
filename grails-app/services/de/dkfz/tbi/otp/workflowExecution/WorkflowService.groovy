@@ -33,6 +33,7 @@ class WorkflowService {
         WorkflowRun run = new WorkflowRun(
                 workflow: step.workflowRun.workflow,
                 priority: step.workflowRun.priority,
+                project:  step.workflowRun.project,
         ).save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->

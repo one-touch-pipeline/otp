@@ -39,6 +39,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
         return createDomainObject(WorkflowRun, [
                 workflow: { createWorkflow() },
                 priority: { createProcessingPriority() },
+                project : { createProject() },
         ], properties)
     }
 
