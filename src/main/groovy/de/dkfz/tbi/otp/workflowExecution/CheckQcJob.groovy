@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.jobs.Job
+import de.dkfz.tbi.otp.workflow.jobs.JobStage
 
 /**
  * Checks the QC, if available for the workflow and seq type, and enabled for the project

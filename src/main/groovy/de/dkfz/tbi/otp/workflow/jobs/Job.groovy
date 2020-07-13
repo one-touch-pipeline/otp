@@ -32,20 +32,20 @@ interface Job {
     void execute(WorkflowStep workflowStep) throws Throwable
     JobStage getJobStage()
     List<Long> getValidExitCodes()
+}
 
-    /**
-     * Name of the different steps
-     */
-    enum JobStage {
-        CHECK_PREREQUIREMENTS,
-        PREPARE,
-        EXECUTE_PIPELINE,
-        VALIDATION,
-        OUTPUT_UNIFICATION,
-        PARSE,
-        CHECK_QC,
-        CLEANUP,
-        LINK,
-        CORRECT_PERMISSION,
-    }
+/**
+ * Name of the different steps
+ */
+enum JobStage {
+    CHECK_PREREQUIREMENTS,
+    PREPARE,
+    EXECUTE_PIPELINE,
+    VALIDATION,
+    OUTPUT_UNIFICATION,
+    PARSE,
+    CHECK_QC,
+    CLEANUP,
+    LINK,
+    CORRECT_PERMISSION,
 }
