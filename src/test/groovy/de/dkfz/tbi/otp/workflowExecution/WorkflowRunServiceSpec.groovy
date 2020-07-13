@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.project.Project
 
 class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<WorkflowRunService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -56,10 +57,11 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         given:
         Workflow workflow = createWorkflow()
         SeqTrack seqTrack = createSeqTrack()
+        Project project = createProject()
         String dir = "/tmp/baseDir${nextId}"
 
         when:
-        WorkflowRun run = service.createWorkflowRun(workflow, seqTrack.processingPriority, dir)
+        WorkflowRun run = service.createWorkflowRun(workflow, seqTrack.processingPriority, dir, project)
 
         then:
         run

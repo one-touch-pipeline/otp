@@ -61,7 +61,7 @@ class DataInstallationInitializationService {
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
         String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
-        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory)
+        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project)
         WorkflowArtefact artefact = workflowArtefactService.createWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType)
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)

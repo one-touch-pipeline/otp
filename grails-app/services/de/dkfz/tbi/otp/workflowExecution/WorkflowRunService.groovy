@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.project.Project
+
 class WorkflowRunService {
 
     private final static String WAITING_WORKFLOW_QUERY = """
@@ -64,10 +66,11 @@ class WorkflowRunService {
         ])
     }
 
-    WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, List<ExternalWorkflowConfigFragment> configs = []) {
+    WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<ExternalWorkflowConfigFragment> configs = []) {
         return new WorkflowRun([
                 workDirectory : workDirectory,
                 state         : WorkflowRun.State.PENDING,
+                project       : project,
                 configs       : configs,
                 combinedConfig: null,
                 priority      : priority,
