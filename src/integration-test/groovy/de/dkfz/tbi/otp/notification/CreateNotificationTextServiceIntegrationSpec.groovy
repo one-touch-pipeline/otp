@@ -109,7 +109,6 @@ faq:${faq}
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.EMAIL_REPLY_TO, "a.b@c.de")
         ProcessingStatus processingStatus = new ProcessingStatus()
 
-
         CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
             1 * alignmentNotification(_) >> "something"
         }
@@ -135,7 +134,6 @@ faq:${faq}
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
         OtrsTicket ticket = createOtrsTicket()
         ProcessingStatus processingStatus = new ProcessingStatus()
-
 
         CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
             1 * alignmentNotification(processingStatus) >> "something"

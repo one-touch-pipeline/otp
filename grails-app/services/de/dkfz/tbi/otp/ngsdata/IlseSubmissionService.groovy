@@ -51,4 +51,16 @@ class IlseSubmissionService {
         commentService.saveComment(ilseSubmission, comment)
         return  ilseSubmission
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    String buildIlseIdentifierFromSeqTracks(List<SeqTrack> seqTracks) {
+        List<Integer> ilseNumbers = seqTracks.collect { it?.ilseSubmission?.ilseNumber }
+        return buildIlseIdentifier(ilseNumbers)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    String buildIlseIdentifier(List<Integer> ilseNumbers) {
+        List<Integer> validIlseNumbers = ilseNumbers.findAll()
+        return validIlseNumbers ? "[S#${validIlseNumbers.unique().sort().join(',')}]" : ""
+    }
 }

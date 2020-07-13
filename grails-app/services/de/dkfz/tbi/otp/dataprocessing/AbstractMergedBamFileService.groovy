@@ -83,4 +83,18 @@ class AbstractMergedBamFileService {
         assert file.length() == bamFile.getFileSize()
         return file
     }
+
+    List<AbstractMergedBamFile> getActiveBlockedBamsContainingSeqTracks(List<SeqTrack> sts) {
+        List<MergingWorkPackage> mwps = sts ? MergingWorkPackage.withCriteria {
+            seqTracks {
+                inList("id", sts*.id)
+            }
+        } as List<MergingWorkPackage> : []
+
+        return mwps ? AbstractMergedBamFile.withCriteria {
+            'in'("workPackage", mwps)
+            eq("qcTrafficLightStatus", AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)
+            eq("withdrawn", false)
+        } as List<AbstractMergedBamFile> : []
+    }
 }

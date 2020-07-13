@@ -340,4 +340,22 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         then:
         expected == result
     }
+
+    void "getAllFastqImportInstances, returns all FastqImportInstances related to the given ticket"() {
+        given:
+        OtrsTicket otrsTicket = createOtrsTicket()
+        List<FastqImportInstance> expected = instancesToCreate.collect {
+            createFastqImportInstance(otrsTicket: otrsTicket)
+        }
+        createFastqImportInstance()
+
+        when:
+        List<FastqImportInstance> result = otrsTicketService.getAllFastqImportInstances(otrsTicket)
+
+        then:
+        TestCase.assertContainSame(expected, result)
+
+        where:
+        instancesToCreate << [0, 1, 2]
+    }
 }

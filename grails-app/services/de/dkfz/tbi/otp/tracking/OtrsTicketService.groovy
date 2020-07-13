@@ -201,8 +201,16 @@ class OtrsTicketService {
         } as List<MetaDataFile>
     }
 
+    List<FastqImportInstance> getAllFastqImportInstances(OtrsTicket otrsTicket) {
+        return FastqImportInstance.findAllByOtrsTicket(otrsTicket)
+    }
+
     static String buildTicketDirectLink(OtrsTicket otrsTicket) {
         return buildTicketDirectLink(otrsTicket.ticketNumber)
+    }
+
+    static String buildTicketDirectLinkNullPointerSave(OtrsTicket otrsTicket) {
+        return otrsTicket ? buildTicketDirectLink(otrsTicket.ticketNumber) : ""
     }
 
     static String buildTicketDirectLink(String ticketNumber) {

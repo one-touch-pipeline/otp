@@ -368,7 +368,6 @@ class CreateNotificationTextService {
                     it.samplePair.seqType in seqTypes
                 }.groupBy { it."${notificationStep}ProcessingStatus" }
 
-
         List<SamplePair> samplePairsFinished = map[ALL_DONE]*.samplePair
         if (!samplePairsFinished) {
             log.debug("No ${notificationStep.displayName} finished yet.")

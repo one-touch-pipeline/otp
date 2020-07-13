@@ -1541,6 +1541,34 @@ td div {
     }
 }
 
+.basic-flex-box {
+    display: flex;
+
+    .item {
+        flex-basis: auto;
+        &.basic-right-padding {
+            margin-right: 50px;
+        }
+    }
+}
+
+.project-notification-box {
+    display: inline;
+    .item {
+        display: inline-block;
+        border: 1px solid black;
+        width: 30px;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .true {
+        background-color: #5fde68;
+    }
+    .false {
+        background-color: #ff706f;
+    }
+}
+
 .projectSelectMultiple {
     margin-top:-25px;
     margin-left: 14px;

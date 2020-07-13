@@ -142,15 +142,15 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
                 createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runB, laneId: '8'),
                 createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runA, laneId: '8'),
         ] as Set
-        String expectedContent = """
-Installation: ALL_DONE
-FastQC:       PARTLY_DONE_MIGHT_DO_MORE
-Alignment:    NOTHING_DONE_MIGHT_DO
+        String expectedContent = """\
+INSTALLATION: ALL_DONE
+FASTQC:       PARTLY_DONE_MIGHT_DO_MORE
+ALIGNMENT:    NOTHING_DONE_MIGHT_DO
 SNV:          NOTHING_DONE_WONT_DO
-Indel:        NOTHING_DONE_MIGHT_DO
+INDEL:        NOTHING_DONE_MIGHT_DO
 SOPHIA:       NOTHING_DONE_MIGHT_DO
-ACEseq:       NOTHING_DONE_MIGHT_DO
-runYAPSA:     NOTHING_DONE_WONT_DO
+ACESEQ:       NOTHING_DONE_MIGHT_DO
+RUN_YAPSA:    NOTHING_DONE_WONT_DO
 
 6 SeqTrack(s) in ticket ${ticket.ticketNumber}:
 runA, lane 8, ${sampleText}

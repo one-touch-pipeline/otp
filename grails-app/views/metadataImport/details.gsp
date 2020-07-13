@@ -30,54 +30,76 @@
 
 <body>
 <div class="body">
-    <h2><g:message code="metadataImport.details.otrsTicket"/></h2>
-    <table style="width: auto;">
-        <tr>
-            <td><g:message code="metadataImport.details.otrsTicketNumber"/></td>
-            <td>
-                <otp:editorSwitch
-                        template="urlValue"
-                        roles="ROLE_OPERATOR"
-                        link="${g.createLink(controller: 'metadataImport', action: 'assignOtrsTicketToFastqImportInstance', id: fastqImportInstance.id)}"
-                        url="${fastqImportInstance.otrsTicket?.url ?: "#"}"
-                        value="${fastqImportInstance.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
-            </td>
-        </tr>
+    <g:render template="/templates/messages"/>
+
+    <div class="basic-flex-box">
+        <div class="item basic-right-padding">
+            <h2><g:message code="metadataImport.details.otrsTicket"/></h2>
+            <table>
+                <tr>
+                    <td><g:message code="metadataImport.details.otrsTicketNumber"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="urlValue"
+                                link="${g.createLink(controller: 'metadataImport', action: 'assignOtrsTicketToFastqImportInstance', id: fastqImportInstance.id)}"
+                                url="${fastqImportInstance.otrsTicket?.url ?: "#"}"
+                                value="${fastqImportInstance.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketless")}"/>
+                    </td>
+                </tr>
+                <g:if test="${fastqImportInstance.otrsTicket}">
+                    <tr>
+                        <td><g:message code="metadataImport.otrs.automaticNotificationFlag"/>:</td>
+                        <td>
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="dropDown"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
+                                    values="${["true", "false"]}"
+                                    value="${fastqImportInstance.otrsTicket.automaticNotification}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><g:message code="metadataImport.otrs.finalNotificationFlag"/>:</td>
+                        <td>
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="dropDown"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
+                                    values="${["true", "false"]}"
+                                    value="${fastqImportInstance.otrsTicket.finalNotificationSent}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/></td>
+                        <td>
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="textArea"
+                                    link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", id: fastqImportInstance.otrsTicket.id)}"
+                                    value="${fastqImportInstance.otrsTicket.seqCenterComment}"/>
+                        </td>
+                    </tr>
+                </g:if>
+            </table>
+        </div>
         <g:if test="${fastqImportInstance.otrsTicket}">
-            <tr>
-                <td><g:message code="metadataImport.otrs.automaticNotificationFlag"/>:</td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
-                            values="${["true", "false"]}"
-                            value="${fastqImportInstance.otrsTicket.automaticNotification}"/>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="metadataImport.otrs.finalNotificationFlag"/>:</td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
-                            values="${["true", "false"]}"
-                            value="${fastqImportInstance.otrsTicket.finalNotificationSent}"/>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="textArea"
-                            link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", id: fastqImportInstance.otrsTicket.id)}"
-                            value="${fastqImportInstance.otrsTicket.seqCenterComment}"/>
-                </td>
-            </tr>
+            <div class="item basic-right-padding">
+                <h2><g:message code="notification.notificationSelection.notification"/></h2>
+                <g:form controller="notification" action="notificationPreview">
+                    <g:render template="/notification/notificationSelection" model="[
+                            otrsTicket         : fastqImportInstance.otrsTicket,
+                            fastqImportInstance: fastqImportInstance,
+                    ]"/>
+                    <br><br>
+                    <g:submitButton name="notificationPreview" value="Prepare notification report"/>
+                </g:form>
+            </div>
+            <div class="item basic-right-padding">
+                <g:render template="/notification/notificationAnnotation"/>
+            </div>
         </g:if>
-    </table>
+    </div>
 
     <h2><g:message code="metadataImport.details.metadataFiles"/></h2>
     <ul>

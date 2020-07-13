@@ -29,22 +29,43 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-class IlseSubmissionServiceSpec extends Specification implements DataTest {
+class IlseSubmissionServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
                 Comment,
                 IlseSubmission,
+                Individual,
+                ProcessingPriority,
+                Project,
+                Realm,
+                Sample,
+                SampleType,
         ]
+    }
+
+    private IlseSubmissionService createIlseSubmissionServiceHelper() {
+        return new IlseSubmissionService(
+                commentService: new CommentService(
+                        springSecurityService: Mock(SpringSecurityService) {
+                            getPrincipal() >> GroovyMock(Object) {
+                                getUsername() >> 'username'
+                            }
+                        }
+                )
+        )
     }
 
     @Unroll
     void "test getSortedBlacklistedIlseSubmissions single"() {
         given:
-        DomainFactory.createIlseSubmission(
+        createIlseSubmission(
                 comment: DomainFactory.createComment(),
                 warning: blacklisted
         )
@@ -62,16 +83,15 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest {
         false       || 0
     }
 
-
     @Unroll
     void "test getSortedBlacklistedIlseSubmissions multiple"() {
         given:
-        DomainFactory.createIlseSubmission(
+        createIlseSubmission(
                 ilseNumber: ilse1,
                 comment: DomainFactory.createComment(),
                 warning: true
         )
-        DomainFactory.createIlseSubmission(
+        createIlseSubmission(
                 ilseNumber: ilse2,
                 comment: DomainFactory.createComment(),
                 warning: blacklisted
@@ -91,11 +111,10 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest {
         true        | 4321  | 23456 || [23456, 4321]
     }
 
-
     @Unroll
     void "test checkIfIlseNumberDoesNotExist"() {
         given:
-        DomainFactory.createIlseSubmission(
+        createIlseSubmission(
                 ilseNumber: 1234,
         )
         IlseSubmissionService service = new IlseSubmissionService()
@@ -109,7 +128,6 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest {
         2345 || true
     }
 
-
     void "test createNewIlseSubmission valid"() {
         given:
         IlseSubmissionService service = createIlseSubmissionServiceHelper()
@@ -118,7 +136,6 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest {
         IlseSubmission ilseSubmission = service.createNewIlseSubmission(1234, HelperUtils.uniqueString)
         ilseSubmission.id
     }
-
 
     @Unroll
     void "test createNewIlseSubmission invalid"() {
@@ -138,16 +155,28 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest {
         1234 | null                     || 'comment'
     }
 
+    SeqTrack createSeqTrackWithIlseNumber(Integer ilseNumber) {
+        IlseSubmission ilseSubmission = ilseNumber ? (IlseSubmission.findByIlseNumber(ilseNumber) ?: createIlseSubmission(ilseNumber: ilseNumber)) : null
+        return createSeqTrack(ilseSubmission: ilseSubmission)
+    }
 
-    private IlseSubmissionService createIlseSubmissionServiceHelper() {
-        return new IlseSubmissionService(
-                commentService: new CommentService(
-                        springSecurityService: Mock(SpringSecurityService) {
-                            getPrincipal() >> GroovyMock(Object) {
-                                getUsername() >> 'username'
-                            }
-                        }
-                )
-        )
+    @Unroll
+    void "buildIlseIdentifier and buildIlseIdentifierFromSeqTracks, all given, some missing, all missing, empty"() {
+        given:
+        IlseSubmissionService service = new IlseSubmissionService()
+        List<SeqTrack> seqTracks = ilses.collect { Integer ilseNumber ->
+            createSeqTrackWithIlseNumber(ilseNumber)
+        }
+
+        expect:
+        expected == service.buildIlseIdentifierFromSeqTracks(seqTracks)
+        expected == service.buildIlseIdentifier(ilses)
+
+        where:
+        ilses           || expected
+        [3, 1, 1, 2]    || "[S#1,2,3]"
+        [6, 4, 5, null] || "[S#4,5,6]"
+        [null, null]    || ""
+        []              || ""
     }
 }

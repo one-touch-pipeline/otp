@@ -29,11 +29,13 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Rollback
 @Integration
-class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
+class AbstractMergedBamFileServiceIntegrationSpec extends Specification implements IsRoddy {
 
     AbstractMergedBamFileService abstractMergedBamFileService
 
@@ -143,6 +145,45 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
 
         where:
         analysisName << processingSteps
+    }
+
+    void "getActiveBlockedBamsContainingSeqTracks, only returns not withdrawn blocked bams"() {
+        given:
+        Closure<RoddyBamFile> createRoddyBamFileHelper = { boolean blocked, boolean withdrawn ->
+            Map props = [:]
+            if (blocked) {
+                props << [qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED]
+            }
+            if (withdrawn) {
+                props << [withdrawn: true]
+            }
+            return createRoddyBamFile(props, RoddyBamFile)
+        }
+        createRoddyBamFile(RoddyBamFile)
+        List<SeqTrack> seqTracks =  [
+                createRoddyBamFileHelper(false, false),
+                createRoddyBamFileHelper(false, true),
+                createRoddyBamFileHelper(true, false),
+                createRoddyBamFileHelper(true, true),
+        ].collect {
+            it.containedSeqTracks
+        }.flatten()
+
+        when:
+        List<AbstractMergedBamFile> bams = abstractMergedBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracks)
+
+        then:
+        bams.size() == 1
+    }
+
+    void "getActiveBlockedBamsContainingSeqTracks, empty merging work package list is properly handled"() {
+        expect:
+        [] == abstractMergedBamFileService.getActiveBlockedBamsContainingSeqTracks([createSeqTrack()])
+    }
+
+    void "getActiveBlockedBamsContainingSeqTracks, empty list is properly handled"() {
+        expect:
+        [] ==  abstractMergedBamFileService.getActiveBlockedBamsContainingSeqTracks([])
     }
 
     private SamplePair setSamplePairStatusToNeedProcessing_setup(ProcessingStatus processingStatus, String analysisName) {
