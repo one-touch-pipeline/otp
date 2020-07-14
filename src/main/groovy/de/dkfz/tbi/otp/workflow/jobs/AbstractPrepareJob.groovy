@@ -21,7 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -34,10 +38,39 @@ import java.nio.file.Path
  *  - create configuration files, if required
  */
 abstract class AbstractPrepareJob implements Job {
+
+    @Autowired FileService fileService
+    @Autowired WorkflowStateChangeService workflowStateChangeService
+
     @Override
-    void execute(WorkflowStep workflowStep) {
+    final void execute(WorkflowStep workflowStep) {
+        Path workDirectory = buildWorkDirectoryPath(workflowStep)
+        if (workDirectory) {
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
+                    workDirectory,
+                    workflowStep.workflowRun.project.realm,
+                    workflowStep.workflowRun.project.unixGroup,
+            )
+            workflowStep.workflowRun.workDirectory = workDirectory
+            workflowStep.workflowRun.save(flush: true)
+        }
+        generateMapForLinking(workflowStep).each { LinkEntry entry ->
+            fileService.createLink(
+                    entry.target,
+                    entry.link,
+                    workflowStep.workflowRun.project.realm,
+            )
+        }
+        doFurtherPreparation(workflowStep)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
-    abstract Path buildWorkDirectoryPath(WorkflowStep workflowStep)
-    abstract Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep)
+    @Override
+    final JobStage getJobStage() {
+        return JobStage.PREPARE
+    }
+
+    abstract protected Path buildWorkDirectoryPath(WorkflowStep workflowStep)
+    abstract protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep)
+    abstract protected void doFurtherPreparation(WorkflowStep workflowStep)
 }
