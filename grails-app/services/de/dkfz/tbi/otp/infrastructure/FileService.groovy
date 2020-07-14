@@ -428,6 +428,21 @@ class FileService {
         }
     }
 
+    String convertPermissionsToOctalString(Set<PosixFilePermission> permissions) {
+        LinkedHashMap<PosixFilePermission, Integer> mapping = [
+                (PosixFilePermission.OWNER_READ)    : 400,
+                (PosixFilePermission.OWNER_WRITE)   : 200,
+                (PosixFilePermission.OWNER_EXECUTE) : 100,
+                (PosixFilePermission.GROUP_READ)    : 40,
+                (PosixFilePermission.GROUP_WRITE)   : 20,
+                (PosixFilePermission.GROUP_EXECUTE) : 10,
+                (PosixFilePermission.OTHERS_READ)   : 4,
+                (PosixFilePermission.OTHERS_WRITE)  : 2,
+                (PosixFilePermission.OTHERS_EXECUTE): 1,
+        ]
+        return permissions.sum { PosixFilePermission it -> mapping[it] }
+    }
+
     /**
      * Delete the requested directory inclusive all entries recursively
      *

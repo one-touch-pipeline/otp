@@ -67,6 +67,19 @@ class FileServiceSpec extends Specification implements DataTest {
         }
     }
 
+    void "test convertPermissionsToOctalString"() {
+        expect:
+        output == fileService.convertPermissionsToOctalString(permission)
+
+        where:
+        permission                                                || output
+        FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION || "770"
+        FileService.OWNER_DIRECTORY_PERMISSION                    || "700"
+        FileService.DEFAULT_FILE_PERMISSION                       || "440"
+        FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION   || "640"
+        FileService.DEFAULT_BAM_FILE_PERMISSION                   || "444"
+    }
+
     @Unroll
     void "setPermission, if permission is set to #permission, then path has expected permission"() {
         given:
