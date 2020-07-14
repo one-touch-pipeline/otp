@@ -463,7 +463,7 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContentOnDefaultRealm(Path path, String content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+    void createFileWithContentOnDefaultRealm(Path path, String content, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
         createFileWithContent(path, content, configService.defaultRealm, filePermission)
     }
 
@@ -473,7 +473,7 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path, String content, Realm realm, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+    void createFileWithContent(Path path, String content, Realm realm, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
         createFileWithContentCommonPartHelper(path, realm, filePermission) {
             path.text = content
         }
@@ -485,7 +485,7 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContentOnDefaultRealm(Path path, byte[] content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+    void createFileWithContentOnDefaultRealm(Path path, byte[] content, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
         createFileWithContent(path, content, configService.defaultRealm, filePermission)
     }
 
@@ -495,13 +495,13 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path, byte[] content, Realm realm, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+    void createFileWithContent(Path path, byte[] content, Realm realm, Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION) {
         createFileWithContentCommonPartHelper(path, realm, filePermission) {
             path.bytes = content
         }
     }
 
-    private void createFileWithContentCommonPartHelper(Path path, Realm realm, Set<PosixFileAttributes> filePermission, Closure closure) {
+    private void createFileWithContentCommonPartHelper(Path path, Realm realm, Set<PosixFilePermission> filePermission, Closure closure) {
         assert path
         assert path.absolute
         assert !Files.exists(path)
