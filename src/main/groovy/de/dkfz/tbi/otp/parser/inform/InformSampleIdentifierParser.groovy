@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.parser.inform
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -40,12 +39,13 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
         if (matcher) {
+            assert matcher.matches()
             return new DefaultParsedSampleIdentifier(
                     'INFORM',
                     matcher.group('pid'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
-                    SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+                    InformTissueType.fromKey(matcher.group('tissueTypeKey')).specificReferenceGenome,
             )
         }
         return null
@@ -62,7 +62,6 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
     }
 
     private String buildSampleTypeDbName(Matcher matcher) {
-        assert matcher.matches()
         List<String> tissueType = []
         tissueType << InformTissueType.fromKey(matcher.group('tissueTypeKey'))
 

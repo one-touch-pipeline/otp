@@ -21,18 +21,26 @@
  */
 package de.dkfz.tbi.otp.parser.inform
 
+import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+
+import static de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+import static de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+
 enum InformTissueType {
-    TUMOR                     ('T'),
-    METASTASIS                ('M'),
-    CONTROL                   ('C'),
-    FFPE                      ('F'),
-    PLASMA                    ('L'),
-    OTHER                     ('X'),
+    TUMOR     ('T', USE_PROJECT_DEFAULT),
+    METASTASIS('M', USE_PROJECT_DEFAULT),
+    CONTROL   ('C', USE_PROJECT_DEFAULT),
+    FFPE      ('F', USE_PROJECT_DEFAULT),
+    PDX       ('P', USE_SAMPLE_TYPE_SPECIFIC),
+    PLASMA    ('L', USE_PROJECT_DEFAULT),
+    OTHER     ('X', USE_PROJECT_DEFAULT),
 
     final char key
+    final SpecificReferenceGenome specificReferenceGenome
 
-    private InformTissueType(String key) {
+    private InformTissueType(String key, SpecificReferenceGenome specificReferenceGenome) {
         this.key = key as char
+        this.specificReferenceGenome = specificReferenceGenome
     }
 
     static InformTissueType fromKey(String key) {
