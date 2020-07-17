@@ -557,7 +557,7 @@ class FileService {
     }
 
     /**
-     * Create a link from linkPath to existingPath.
+     * Create a link from link to target.
      *
      * The destination has to exist, the link may only exist if option {@link CreateLinkOption#DELETE_EXISTING_FILE} is given.
      * Both parameters have to be absolute.
@@ -568,53 +568,53 @@ class FileService {
      * If {@link CreateLinkOption#DELETE_EXISTING_FILE} is given and the link exist and is of type symbolic link or regularfile, it will be deleted
      * and the link is recreated.
      *
-     * If the existingPath is a directory, linkPath will be a link to that directory,
-     * if the existingPath is a regular file, linkPath will a link to that file,
+     * If the target is a directory, link will be a link to that directory,
+     * if the target is a regular file, link will a link to that file,
      * it is NOT possible to use this method like {code ln -s /dir1/file.txt /dir2/}.
      *
-     * @param linkPath the path of the link
-     * @param existingPath the exiting path the link point to
+     * @param link the path of the link
+     * @param target the exiting path the link point to
      * @param realm the realm to use for remote access
      * @param groupString the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
     @SuppressWarnings('Instanceof')
-    void createLink(Path linkPath, Path existingPath, Realm realm, String groupString = '', CreateLinkOption... options) {
-        assert linkPath
-        assert existingPath
-        assert linkPath.absolute
-        assert existingPath.absolute
-        assert Files.exists(existingPath)
+    void createLink(Path link, Path target, Realm realm, String groupString = '', CreateLinkOption... options) {
+        assert link
+        assert target
+        assert link.absolute
+        assert target.absolute
+        assert Files.exists(target)
         if (options.contains(CreateLinkOption.DELETE_EXISTING_FILE)) {
-            assert !Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS) || Files.isRegularFile(linkPath, LinkOption.NOFOLLOW_LINKS) ||
-                    Files.isSymbolicLink(linkPath)
+            assert !Files.exists(link, LinkOption.NOFOLLOW_LINKS) || Files.isRegularFile(link, LinkOption.NOFOLLOW_LINKS) ||
+                    Files.isSymbolicLink(link)
         } else {
-            assert !Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)
+            assert !Files.exists(link, LinkOption.NOFOLLOW_LINKS)
         }
-        assert linkPath.fileSystem == existingPath.fileSystem
+        assert link.fileSystem == target.fileSystem
         //SimpleAbstractPath doesn't take special meaning of "." and ".." into consideration
-        assert linkPath.every { it.toString() != ".." && it.toString() != "." }
+        assert link.every { it.toString() != ".." && it.toString() != "." }
 
-        if (linkPath == existingPath) {
+        if (link == target) {
             return
         }
 
-        if (options.contains(CreateLinkOption.DELETE_EXISTING_FILE) && Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)) {
-            Files.delete(linkPath)
+        if (options.contains(CreateLinkOption.DELETE_EXISTING_FILE) && Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
+            Files.delete(link)
         }
 
-        Path existing = (options.contains(CreateLinkOption.ABSOLUTE)) ?
-                existingPath :
-                linkPath.parent.relativize(existingPath)
+        Path targetPath = (options.contains(CreateLinkOption.ABSOLUTE)) ?
+                target :
+                link.parent.relativize(target)
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(linkPath.parent, realm, groupString)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(link.parent, realm, groupString)
 
         // SFTP does not support creating symbolic links
-        if (linkPath.fileSystem.provider() instanceof SFTPFileSystemProvider) {
+        if (link.fileSystem.provider() instanceof SFTPFileSystemProvider) {
             // use -T option so behaviour is the same as createSymbolicLink()
-            remoteShellHelper.executeCommandReturnProcessOutput(realm, "ln -Ts '${existing}' '${linkPath}'")
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, "ln -Ts '${targetPath}' '${link}'")
         } else {
-            Files.createSymbolicLink(linkPath, existing)
+            Files.createSymbolicLink(link, targetPath)
         }
     }
 

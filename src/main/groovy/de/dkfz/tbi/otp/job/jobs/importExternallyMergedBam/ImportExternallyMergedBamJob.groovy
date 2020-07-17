@@ -72,25 +72,25 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         FileSystem fileSystem = fileSystemService.filesystemForBamImport
         importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
             Realm realm = epmbf.realm
-            Path sourceBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
-            Path targetBaseDir = fileSystem.getPath(epmbf.importFolder.absolutePath)
+            Path targetBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
+            Path linkBaseDir = fileSystem.getPath(epmbf.importFolder.absolutePath)
 
-            linkMissingFiles(sourceBaseDir, targetBaseDir, epmbf.bamFileName, realm)
-            linkMissingFiles(sourceBaseDir, targetBaseDir, epmbf.baiFileName, realm)
+            linkMissingFiles(targetBaseDir, linkBaseDir, epmbf.bamFileName, realm)
+            linkMissingFiles(targetBaseDir, linkBaseDir, epmbf.baiFileName, realm)
 
             epmbf.furtherFiles.each { String relativePath ->
-                linkMissingFiles(sourceBaseDir, targetBaseDir, relativePath, realm)
+                linkMissingFiles(targetBaseDir, linkBaseDir, relativePath, realm)
             }
         }
         validate()
         return NextAction.SUCCEED
     }
 
-    private void linkMissingFiles(Path sourceBaseDir, Path targetBaseDir, String pathToLink, Realm realm) {
-        Path source = sourceBaseDir.resolve(pathToLink)
+    private void linkMissingFiles(Path targetBaseDir, Path linkBaseDir, String pathToLink, Realm realm) {
         Path target = targetBaseDir.resolve(pathToLink)
-        if (!Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
-            fileService.createLink(target, source, realm, CreateLinkOption.ABSOLUTE)
+        Path link = linkBaseDir.resolve(pathToLink)
+        if (!Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
+            fileService.createLink(link, target, realm, CreateLinkOption.ABSOLUTE)
         }
     }
 

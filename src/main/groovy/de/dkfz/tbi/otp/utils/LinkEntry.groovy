@@ -27,6 +27,6 @@ import java.nio.file.Path
 
 @Canonical
 class LinkEntry {
-    Path source
+    Path link
     Path target
 }

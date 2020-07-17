@@ -432,101 +432,101 @@ class FileServiceSpec extends Specification implements DataTest {
     void "createLink, if input is valid, then create link"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
-        Path file = basePath.resolve('file')
+        Path target = basePath.resolve('target')
         Path link = basePath.resolve('link')
 
-        file.text = 'text'
+        target.text = 'text'
 
         when:
-        fileService.createLink(link, file, null, CreateLinkOption.ABSOLUTE)
+        fileService.createLink(link, target, null, CreateLinkOption.ABSOLUTE)
 
         then:
         Files.isSymbolicLink(link)
         Files.readSymbolicLink(link).absolute
-        Files.readSymbolicLink(link) == file
+        Files.readSymbolicLink(link) == target
     }
 
     @Unroll
     void "createLink, if input is #type, then throw an assertion"() {
         given:
-        Path file = fileName ? Paths.get(fileName) : null
+        Path target = targetName ? Paths.get(targetName) : null
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        fileService.createLink(link, file, null, CreateLinkOption.ABSOLUTE)
+        fileService.createLink(link, target, null, CreateLinkOption.ABSOLUTE)
 
         then:
         AssertionError e = thrown()
         e.message.contains(message)
 
         where:
-        type                   | fileName          | linkName    || message
-        'file is null'         | null              | '/somthing' || 'existingPath'
-        'link is null'         | '/tmp'            | null        || 'linkPath'
-        'file is not absolute' | 'tmp'             | '/somthing' || 'existingPath.absolute'
-        'link is not absolute' | '/tmp'            | 'somthing'  || 'linkPath.absolute'
-        'file does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(existingPath)'
-        'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)'
+        type                     | targetName        | linkName    || message
+        'target is null'         | null              | '/somthing' || 'target'
+        'link is null'           | '/tmp'            | null        || 'link'
+        'target is not absolute' | 'tmp'             | '/somthing' || 'target.absolute'
+        'link is not absolute'   | '/tmp'            | 'somthing'  || 'link.absolute'
+        'target does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(target)'
+        'link does exist'        | '/tmp'            | '/tmp'      || '!Files.exists(link, LinkOption.NOFOLLOW_LINKS)'
     }
 
     void "createRelativeLink, if input is valid, then create link"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
-        Path file = basePath.resolve('file')
+        Path target = basePath.resolve('target')
         Path link = basePath.resolve('link')
 
-        file.text = 'text'
+        target.text = 'text'
 
         when:
-        fileService.createLink(link, file, null)
+        fileService.createLink(link, target, null)
 
         then:
         Files.isSymbolicLink(link)
         !Files.readSymbolicLink(link).absolute
-        link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
+        link.parent.resolve(Files.readSymbolicLink(link)).normalize() == target
     }
 
     @Unroll
     void "createRelativeLink, if input is #type, then throw an assertion"() {
         given:
-        Path file = fileName ? Paths.get(fileName) : null
+        Path target = targetName ? Paths.get(targetName) : null
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        fileService.createLink(link, file, null)
+        fileService.createLink(link, target, null)
 
         then:
         AssertionError e = thrown()
         e.message.contains(message)
 
         where:
-        type                   | fileName          | linkName    || message
-        'file is null'         | null              | '/somthing' || 'existingPath'
-        'link is null'         | '/tmp'            | null        || 'linkPath'
-        'file is not absolute' | 'tmp'             | '/somthing' || 'existingPath.absolute'
-        'link is not absolute' | '/tmp'            | 'somthing'  || 'linkPath.absolute'
-        'file does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(existingPath)'
-        'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)'
+        type                     | targetName        | linkName    || message
+        'target is null'         | null              | '/somthing' || 'target'
+        'link is null'           | '/tmp'            | null        || 'link'
+        'target is not absolute' | 'tmp'             | '/somthing' || 'target.absolute'
+        'link is not absolute'   | '/tmp'            | 'somthing'  || 'link.absolute'
+        'target does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(target)'
+        'link does exist'        | '/tmp'            | '/tmp'      || '!Files.exists(link, LinkOption.NOFOLLOW_LINKS)'
     }
 
     @Unroll
     void "createRelativeLink, if linkPath already exist as '#name' and DELETE_EXISTING_FILE is given, then delete it and create link"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
-        Path file = basePath.resolve('file')
+        Path target = basePath.resolve('target')
         Path link = basePath.resolve('link')
 
-        file.text = 'text'
+        target.text = 'text'
 
         callback(link)
 
         when:
-        fileService.createLink(link, file, null, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(link, target, null, CreateLinkOption.DELETE_EXISTING_FILE)
 
         then:
         Files.isSymbolicLink(link)
         !Files.readSymbolicLink(link).absolute
-        link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
+        link.parent.resolve(Files.readSymbolicLink(link)).normalize() == target
 
         where:
         name   | callback
@@ -535,49 +535,49 @@ class FileServiceSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    void "createRelativeLink, if linkPath already exist and is dir and DELETE_EXISTING_FILE is given, then fail with assert"() {
+    void "createRelativeLink, if linkPath already exist and is dir and DELETE_EXISTING_FILE is not given, then fail with assert"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
-        Path file = basePath.resolve('file')
+        Path target = basePath.resolve('target')
         Path link = basePath.resolve('link')
 
-        file.text = 'text'
+        target.text = 'text'
 
         Files.createDirectory(link)
 
         when:
-        fileService.createLink(link, file, null, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(link, target, null, CreateLinkOption.DELETE_EXISTING_FILE)
 
         then:
         AssertionError e = thrown()
-        e.message.contains('!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)')
+        e.message.contains('!Files.exists(link, LinkOption.NOFOLLOW_LINKS)')
     }
 
     @Unroll
     void "createRelativeLink, if linkPath already exist as '#name' and DELETE_EXISTING_FILE is not given, then fail with assert"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
-        Path file = basePath.resolve('file')
+        Path target = basePath.resolve('target')
         Path link = basePath.resolve('link')
 
-        file.text = 'text'
+        target.text = 'text'
 
         callback(link)
 
         when:
-        fileService.createLink(link, file, null)
+        fileService.createLink(link, target, null)
 
         then:
         AssertionError e = thrown()
-        e.message.contains('!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)')
+        e.message.contains('!Files.exists(link, LinkOption.NOFOLLOW_LINKS)')
 
         where:
-        name            | callback
-        'file'          | { Path p -> p.text = 'File' }
-        'link'          | { Path p -> Files.createSymbolicLink(p, Paths.get('test')) }
-        'dir'           | { Path p -> Files.createDirectory(p) }
-        'dir with file' | { Path p -> Files.createDirectory(p); p.resolve('child').text = 'ChildFile' }
-        'dir with dir'  | { Path p -> Files.createDirectories(p.resolve('child')) }
+        name              | callback
+        'target'          | { Path p -> p.text = 'File' }
+        'link'            | { Path p -> Files.createSymbolicLink(p, Paths.get('test')) }
+        'dir'             | { Path p -> Files.createDirectory(p) }
+        'dir with target' | { Path p -> Files.createDirectory(p); p.resolve('child').text = 'ChildFile' }
+        'dir with dir'    | { Path p -> Files.createDirectories(p.resolve('child')) }
     }
 
     //----------------------------------------------------------------------------------------------------

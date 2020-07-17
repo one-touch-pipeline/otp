@@ -76,32 +76,32 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         seqTrack.dataFiles.each { DataFile dataFile ->
-            File sourceFile = new File(lsdfFilesService.getFileInitialPath(dataFile))
-            File targetFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
+            File initialFile = new File(lsdfFilesService.getFileInitialPath(dataFile))
+            File finalFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
 
             String md5SumFileName = checksumFileService.md5FileName(dataFile)
 
-            Path sourcePath = fileService.toPath(sourceFile, fileSystem)
-            Path targetPath = fileService.toPath(targetFile, fileSystem)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetPath.parent, realm, seqTrack.project.unixGroup)
+            Path initialPath = fileService.toPath(initialFile, fileSystem)
+            Path finalPath = fileService.toPath(finalFile, fileSystem)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(finalPath.parent, realm, seqTrack.project.unixGroup)
 
             if (seqTrack.linkedExternally) {
-                fileService.createLink(targetPath, sourcePath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(finalPath, initialPath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
                 returnValue = NextAction.SUCCEED
             } else {
                 String cmd = """
 #for debug kerberos problem
 klist || true
 
-cd ${targetFile.parent}
-if [ -e "${targetFile.path}" ]; then
-    echo "File ${targetFile.path} already exists."
-    rm ${targetFile.path}*
+cd ${finalFile.parent}
+if [ -e "${finalFile.path}" ]; then
+    echo "File ${finalFile.path} already exists."
+    rm ${finalFile.path}*
 fi
-cp ${sourceFile} ${targetFile}
-md5sum ${targetFile.name} > ${md5SumFileName}
-chgrp -h ${seqTrack.project.unixGroup} ${targetFile} ${md5SumFileName}
-chmod 440 ${targetFile} ${md5SumFileName}
+cp ${initialFile} ${finalFile}
+md5sum ${finalFile.name} > ${md5SumFileName}
+chgrp -h ${seqTrack.project.unixGroup} ${finalFile} ${md5SumFileName}
+chmod 440 ${finalFile} ${md5SumFileName}
 """
                 clusterJobSchedulerService.executeJob(realm, cmd)
                 returnValue = NextAction.WAIT_FOR_CLUSTER_JOBS

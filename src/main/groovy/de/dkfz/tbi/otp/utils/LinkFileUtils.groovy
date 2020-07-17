@@ -45,25 +45,25 @@ class LinkFileUtils {
     /**
      * Creates relative symbolic links.
      * Links which already exist are overwritten, parent directories are created automatically if necessary.
-     * @param sourceLinkMap The values of the map are used as link names, the keys as the link targets.
+     * @param targetLinkMap The values of the map are used as link names, the keys as the targets.
      */
-    void createAndValidateLinks(Map<File, File> sourceLinkMap, Realm realm, String unixGroup = '')  {
-        assert sourceLinkMap
+    void createAndValidateLinks(Map<File, File> targetLinkMap, Realm realm, String unixGroup = '')  {
+        assert targetLinkMap
         assert realm
 
-        if (!sourceLinkMap.isEmpty()) {
+        if (!targetLinkMap.isEmpty()) {
             FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-            sourceLinkMap.values().each {
+            targetLinkMap.values().each {
                 Path dir = fileService.toPath(it, fileSystem)
                 fileService.deleteDirectoryRecursively(dir)
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(dir.parent, realm, unixGroup)
             }
 
-            sourceLinkMap.each { File source, File link ->
-                Path sourcePath = fileService.toPath(source, fileSystem)
+            targetLinkMap.each { File target, File link ->
+                Path targetPath = fileService.toPath(target, fileSystem)
                 Path linkPath = fileService.toPath(link, fileSystem)
-                fileService.createLink(linkPath, sourcePath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(linkPath, targetPath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
             }
         }
     }
