@@ -116,6 +116,8 @@ class AlignmentQualityOverviewController {
             'alignment.quality.sampleType',
             'alignment.quality.qcStatus',
             'alignment.quality.cell.ranger.summary',
+            'alignment.quality.cell.ranger.referenceGenome',
+            'alignment.quality.cell.ranger.cellRangerVersion',
             'alignment.quality.cell.ranger.cells.expected',
             'alignment.quality.cell.ranger.cells.enforced',
             'alignment.quality.cell.ranger.estimatedNumberOfCells',
@@ -167,7 +169,7 @@ class AlignmentQualityOverviewController {
 
         if (cmd.sample && cmd.sample.project != project) {
             response.sendError(404)
-            return
+            return []
         }
 
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
@@ -410,6 +412,10 @@ class AlignmentQualityOverviewController {
                                         ],
                                 ).toString()
                             ),
+                            referenceGenome: abstractMergedBamFile.workPackage.referenceGenome.name,
+                            cellRangerVersion: abstractMergedBamFile.workPackage.referenceGenome.referenceGenomeIndexes.find {
+                                it.toolName.type == ToolName.Type.SINGLE_CELL
+                            }.indexToolVersion,
                     ]
                     qcKeys += [
                             'expectedCells',
@@ -449,10 +455,10 @@ class AlignmentQualityOverviewController {
         try {
             content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
         } catch (FileNotFoundException e) {
-            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.fileNotFound") as String, e.getMessage())
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.fileNotFound") as String, e.message)
             redirect(action: "index")
         } catch (AccessDeniedException e) {
-            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.accessDenied") as String, e.getMessage())
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.accessDenied") as String, e.message)
             redirect(action: "index")
         }
         render text: content, contentType: "text/html", encoding: "UTF-8"
@@ -473,7 +479,7 @@ class AlignmentQualityOverviewController {
         // This link is only generated for seqType RNA, so this cast is probably safe.
         if (cmd.abstractMergedBamFile instanceof RnaRoddyBamFile) {
             RnaRoddyBamFile rrbf = cmd.abstractMergedBamFile as RnaRoddyBamFile
-            File file = rrbf.getWorkArribaFusionPlotPdf()
+            File file = rrbf.workArribaFusionPlotPdf
             if (file.exists()) {
                 render file: file, contentType: "application/pdf"
             } else {

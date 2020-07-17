@@ -181,6 +181,8 @@ $.otp.alignmentQualityOverviewTable = {
                             } else if (seqType === 'CELL_RANGER') {
                                 columnNames = columnNames.concat([
                                     'summary',
+                                    'referenceGenome',
+                                    'cellRangerVersion',
                                     'expectedCells',
                                     'enforcedCells',
                                     'estimatedNumberOfCells',
