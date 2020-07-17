@@ -82,6 +82,7 @@ class ProjectCreationController {
                 storageUntil       : "3000-01-01",
                 projectType        : Project.ProjectType.SEQUENCING,
                 forceCopyFiles     : true,
+                fingerPrinting     : true,
         ]
         ProjectCreationCommand projectCreationCmd = flash.cmd as ProjectCreationCommand
         boolean showIgnoreUsersFromBaseObjects = flash.showIgnoreUsersFromBaseObjects as boolean
