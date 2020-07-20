@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.workflow.jobs.JobStage
  */
 @Component
 @Slf4j
-@SuppressWarnings("AnnotationsForJobs")
 class CheckQcJob implements Job {
     @Override
     void execute(WorkflowStep workflowStep) {
