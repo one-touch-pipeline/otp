@@ -36,6 +36,10 @@ import java.time.ZoneId
 
 trait DomainFactoryCore implements DomainFactoryHelper {
 
+    private static final int DEFAULT_PORT = -1
+
+    private static final int DEFAULT_TIMEOUT = -1
+
     ProcessingPriority createProcessingPriority(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ProcessingPriority, [
                 name                       : "name_${nextId}",
@@ -47,6 +51,17 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties, saveAndValidate)
     }
 
+    Realm createRealm(Map realmProperties = [:]) {
+        return createDomainObject(Realm, [
+                name                       : "realmName_${nextId}",
+                jobScheduler               : Realm.JobScheduler.PBS,
+                host                       : "test.host.invalid${nextId}",
+                port                       : DEFAULT_PORT,
+                timeout                    : DEFAULT_TIMEOUT,
+                defaultJobSubmissionOptions: '',
+        ], realmProperties)
+    }
+
     Project createProject(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Project, [
                 name                          : "project_${nextId}",
@@ -54,7 +69,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 dirName                       : "projectDirName_${nextId}",
                 projectType                   : Project.ProjectType.SEQUENCING,
                 storageUntil                  : LocalDate.now(),
-                realm                         : { DomainFactory.createRealm() },
+                realm                         : { createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
                 unixGroup                     : "unixGroup_${nextId}",
