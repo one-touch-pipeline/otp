@@ -42,10 +42,6 @@ class CheckQcJob implements Job {
         return JobStage.CHECK_QC
     }
 
-    @Override
-    List<Long> getValidExitCodes() {
-    }
-
     @SuppressWarnings("UnusedMethodParameter")
     void checkQc(WorkflowStep workflowStep) {
     }

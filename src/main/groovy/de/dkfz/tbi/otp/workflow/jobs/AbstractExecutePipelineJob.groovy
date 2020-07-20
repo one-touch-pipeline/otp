@@ -49,9 +49,4 @@ abstract class AbstractExecutePipelineJob implements Job {
     final JobStage getJobStage() {
         return JobStage.EXECUTE_PIPELINE
     }
-
-    @Override
-    List<Long> getValidExitCodes() {
-        return []
-    }
 }

@@ -62,9 +62,4 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
     protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep) {
         return []
     }
-
-    @Override
-    List<Long> getValidExitCodes() {
-        return []
-    }
 }

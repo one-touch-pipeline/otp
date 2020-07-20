@@ -42,10 +42,6 @@ class SetCorrectPermissionJob implements Job {
         return JobStage.CORRECT_PERMISSION
     }
 
-    @Override
-    List<Long> getValidExitCodes() {
-    }
-
     @SuppressWarnings("UnusedMethodParameter")
     void correctPermission(WorkflowStep workflowStep) {
     }
