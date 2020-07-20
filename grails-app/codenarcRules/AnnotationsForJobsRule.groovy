@@ -44,6 +44,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         if (isNoOrdinaryClass(node)) {
             return
         }
+        boolean isNewWorkflowSystem = node.text =~ /^de.dkfz.tbi.otp.workflow.*$/
 
         boolean hasComponent = false
         boolean hasScope = false
@@ -56,8 +57,12 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
                     break
                 case 'Scope':
                     hasScope = true
-                    if (annotationNode.members['value']?.text != 'prototype') {
-                        addViolation(node, "The @Scope annotation is missing the value 'prototype'")
+                    if (isNewWorkflowSystem) {
+                        addViolation(node, "The @Scope annotation should not given for the new job system")
+                    } else {
+                        if (annotationNode.members['value']?.text != 'prototype') {
+                            addViolation(node, "The @Scope annotation is missing the value 'prototype'")
+                        }
                     }
                     break
                 case 'Slf4j':
@@ -71,7 +76,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotati
         if (!hasComponent) {
             addViolation(node, buildErrorString("@Component"))
         }
-        if (!hasScope) {
+        if (!hasScope && !isNewWorkflowSystem) {
             addViolation(node, buildErrorString("@Scope"))
         }
         if (!hasLog) {
