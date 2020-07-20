@@ -28,7 +28,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class JobServiceSpec extends Specification implements ServiceUnitTest<JobService>, DataTest, WorkflowSystemDomainFactory {
@@ -169,13 +168,15 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         JobService service = Spy(JobService) {
             1 * createRestartedJob(workflowStep) >> { }
         }
+        service.logService = Mock(LogService) {
+            1 * addSimpleLogEntry(_, _)
+        }
 
         when:
         service.createRestartedJobAfterSystemRestart(workflowStep)
 
         then:
         workflowStep.state == WorkflowStep.State.FAILED
-        CollectionUtils.exactlyOneElement(workflowStep.logs).displayLog().contains("OTP restarted")
     }
 
     @Unroll

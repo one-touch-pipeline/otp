@@ -23,11 +23,11 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
-
 @Transactional
 class JobService {
+
+    LogService logService
+
     void createNextJob(WorkflowRun workflowRun) {
         assert workflowRun
         assert workflowRun.workflow.beanName
@@ -75,14 +75,7 @@ class JobService {
         assert workflowStep
         assert workflowStep.state == WorkflowStep.State.RUNNING && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING
         workflowStep.state = WorkflowStep.State.FAILED
-        WorkflowLog message = new WorkflowMessageLog(message: "OTP restarted")
-        message.save(flush: true)
-        if (workflowStep.logs) {
-            workflowStep.logs.add(message)
-        } else {
-            workflowStep.logs = [message]
-        }
-        workflowStep.save(flush: true)
+        logService.addSimpleLogEntry(workflowStep, "OTP restarted")
         createRestartedJob(workflowStep)
     }
 }
