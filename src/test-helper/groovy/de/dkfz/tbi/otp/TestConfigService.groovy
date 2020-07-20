@@ -30,8 +30,12 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
+import java.time.*
+
 @SuppressWarnings('JavaIoPackageAccess')
 class TestConfigService extends ConfigService {
+
+    Clock fixedClock
 
     static Map cleanProperties
 
@@ -98,8 +102,9 @@ class TestConfigService extends ConfigService {
 
     TestConfigService(File baseFolder, Map<OtpProperty, String> properties = [:]) {
         this([
-                (OtpProperty.PATH_PROJECT_ROOT)   : new File(baseFolder, 'root').path,
-                (OtpProperty.PATH_PROCESSING_ROOT): new File(baseFolder, 'processing').path,
+                (OtpProperty.PATH_PROJECT_ROOT)    : new File(baseFolder, 'root').path,
+                (OtpProperty.PATH_PROCESSING_ROOT) : new File(baseFolder, 'processing').path,
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): new File(baseFolder, 'logging').path,
         ] + properties)
     }
 
@@ -109,6 +114,18 @@ class TestConfigService extends ConfigService {
 
     void clean() {
         this.otpProperties = new HashMap<>(cleanProperties)
+        this.fixedClock = null
+    }
+
+    @Override
+    Clock getClock() {
+        return fixedClock ?: super.clock
+    }
+
+    @SuppressWarnings("ParameterCount")
+    void fixClockTo(int year = 2000, int month = 1, int dayOfMonth = 1, int hour = 0, int minute = 0, int second = 0) {
+        ZoneId zoneId = ZoneId.systemDefault()
+        fixedClock = Clock.fixed(Instant.from(ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, 0, zoneId)), zoneId)
     }
 
     String getTestingGroup() {
@@ -147,8 +164,8 @@ class TestConfigService extends ConfigService {
 
         assert testingGroup != projectGroup:
                 "'${OtpProperty.TEST_TESTING_GROUP.key             }' with value '${testingGroup}' does not differ from " +
-                "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key}' with value '${projectGroup}.'" +
-                "OTP needs the primary/'default' group and the 'project' group to differ, in order to test if data re-owning works."
+                        "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key}' with value '${projectGroup}.'" +
+                        "OTP needs the primary/'default' group and the 'project' group to differ, in order to test if data re-owning works."
     }
 
     String getWorkflowTestAccountName() {

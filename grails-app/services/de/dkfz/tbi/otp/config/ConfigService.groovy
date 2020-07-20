@@ -31,8 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-import java.time.Clock
-import java.time.ZoneId
+import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -155,6 +154,14 @@ class ConfigService implements ApplicationContextAware {
 
     Clock getClock() {
         return Clock.system(timeZoneId)
+    }
+
+    ZonedDateTime getZonedLocalDateTime() {
+        return ZonedDateTime.now(clock)
+    }
+
+    Date getCurrentDate() {
+        return Date.from(Instant.from(zonedLocalDateTime))
     }
 
     boolean useBackdoor() {
