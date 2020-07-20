@@ -413,9 +413,7 @@ class AlignmentQualityOverviewController {
                                 ).toString()
                             ),
                             referenceGenome: abstractMergedBamFile.workPackage.referenceGenome.name,
-                            cellRangerVersion: abstractMergedBamFile.workPackage.referenceGenome.referenceGenomeIndexes.find {
-                                it.toolName.type == ToolName.Type.SINGLE_CELL
-                            }.indexToolVersion,
+                            cellRangerVersion: abstractMergedBamFile.workPackage.referenceGenomeIndex.indexToolVersion,
                     ]
                     qcKeys += [
                             'expectedCells',
