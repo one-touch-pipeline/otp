@@ -39,7 +39,8 @@ class CheckQcJob implements Job {
     }
 
     @Override
-    JobStage getJobStage() {
+    final JobStage getJobStage() {
+        return JobStage.CHECK_QC
     }
 
     @Override

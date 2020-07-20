@@ -39,7 +39,8 @@ class SetCorrectPermissionJob implements Job {
     }
 
     @Override
-    JobStage getJobStage() {
+    final JobStage getJobStage() {
+        return JobStage.CORRECT_PERMISSION
     }
 
     @Override

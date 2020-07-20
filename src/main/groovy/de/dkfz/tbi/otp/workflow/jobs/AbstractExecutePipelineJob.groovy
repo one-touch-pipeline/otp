@@ -46,7 +46,7 @@ abstract class AbstractExecutePipelineJob implements Job {
     WorkflowStateChangeService workflowStateChangeService
 
     @Override
-    JobStage getJobStage() {
+    final JobStage getJobStage() {
         return JobStage.EXECUTE_PIPELINE
     }
 
