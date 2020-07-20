@@ -117,6 +117,8 @@ class OtpTagLib {
 
     private static String editorSwitchTemplate(String template) {
         switch (template) {
+            case "remove":
+                return "/templates/editorSwitchRemove"
             case "dropDown":
                 return "/templates/editorSwitchDropDown"
             case "urlValue":

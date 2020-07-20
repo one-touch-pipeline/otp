@@ -116,7 +116,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.request.method = 'POST'
         controller.params.addViaLdap = addViaLdap
         controller.params.searchString = "searchString"
-        controller.params.projectRoleName = "projectRole"
+        controller.params.projectRoleNames = ["projectRole"]
         controller.params.realName = "realName"
         controller.params.email = "email@dummy.de"
         controller.params.accessToFiles = true
@@ -153,7 +153,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.request.method = 'POST'
         controller.params.addViaLdap = addViaLdap
         controller.params.searchString = "searchString"
-        controller.params.projectRoleName = "projectRole"
+        controller.params.projectRoleNames = ["projectRole"]
         controller.params.realName = "realName"
         controller.params.email = "email@dummy.de"
         controller.params.accessToFiles = true

@@ -73,6 +73,10 @@
 .keep-whitespace {
     white-space: pre-wrap;
 }
+.remove-button {
+    .image-button;
+    background-image: url(../images/close.png);
+}
 .edit-button {
     .image-button;
     background-image: url(../images/document-edit.png);
@@ -666,6 +670,10 @@ td {
     }
     button.edit {
         .edit-button;
+        width: 16px;
+    }
+    button.remove {
+        .remove-button;
         width: 16px;
     }
     &.tableEntry {

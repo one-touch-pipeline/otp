@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.project.Project
 List<Long> projectIds = UserProjectRole.withCriteria {
     projections {
         eq('enabled', true)
-        projectRole {
+        projectRoles {
             eq('name', ProjectRole.Basic.PI.name())
         }
         project {

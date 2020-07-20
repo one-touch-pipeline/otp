@@ -67,12 +67,16 @@ $(function() {
     });
 
     $.otp.editorswitch = {};
-    $("div.edit-switch .edit-switch-label button.js-edit").click(function () {
+    $("div.edit-switch .edit-switch-label button.js-edit").click(function () { outerContainerSwitch($(this)) });
+
+    $("div.edit-switch .edit-switch-label button.js-remove").click(function() { outerContainerSwitch($(this)) });
+
+    function outerContainerSwitch (that) {
         "use strict";
-        var outerContainer = $(this).parent().parent();
+        var outerContainer = that.parent().parent();
         $(".edit-switch-editor", outerContainer).show();
         $(".edit-switch-label", outerContainer).hide();
-    });
+    }
 
     /*jslint unparam: true */
     $("div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save").click(function () {
@@ -162,10 +166,112 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     });
 
-    $("div.edit-switch-drop-down p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-drop-down p.edit-switch-editor button.delete").click(function () {deleteRole($(this))});
+
+    function deleteRole(that) {
+        "use strict";
+        var container, outerContainer, outerOuterContainer;
+        container = that.parent();
+        outerContainer = container.parent();
+        outerOuterContainer = outerContainer.parent();
+
+        var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
+        if (confirmationText) {
+            var confirmed = confirm(confirmationText);
+            if (confirmed == false) {
+                return
+            }
+        }
+        $.ajax({
+            url: $("input:hidden[name=targetDelete]", container).val(),
+            dataType: "json",
+            type: "POST",
+            data: { value: $("input:hidden[name=targetDeleteValue]", container).attr("value") },
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage("Data deleted successfully");
+                    $(outerContainer).remove();
+                    var submitContainer = $("div[name=submit-container]", outerOuterContainer)
+                    var selectRoles = $("select[name=newRoles]", submitContainer);
+                    selectRoles.append("<option value=" + data.currentRole + ">" + data.currentRole + "</option>")
+                } else {
+                    $.otp.warningMessage(data.error);
+                    $("p.edit-switch-editor", outerContainer).hide();
+                    $("p.edit-switch-label", outerContainer).show();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                $("p.edit-switch-editor", outerContainer).hide();
+                $("p.edit-switch-label", outerContainer).show();
+            }
+        });
+    }
+
+    $("div.submit-container button.addRole").click(function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
+        outerContainer = container.parent();
+
+        var selectedNewRoles = []
+        var selectNewRoles = $("select[name=newRoles]", container).children();
+        for (let i=0; i<selectNewRoles.length; i++) {
+            if (selectNewRoles[i].selected) {
+                selectedNewRoles.push(selectNewRoles[i].value)
+            }
+        }
+
+        if (selectedNewRoles.length !== 0) {
+            var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
+            if (confirmationText) {
+                var confirmed = confirm(confirmationText);
+                if (confirmed === false) {
+                    return
+                }
+            }
+        }
+
+        $.ajax({
+            url: $("input:hidden[name=targetAddRole]", container).val(),
+            dataType: "json",
+            type: "POST",
+            data: { value: JSON.stringify(selectedNewRoles) },
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage("Data stored successfully");
+                    // Update drop down menue
+                    for (let i=0; i<selectNewRoles.length; i++) {
+                        for (let j=0; j<data.currentProjectRole.length; j++) {
+                            if (selectNewRoles[i].value === data.currentProjectRole[j]) {
+                                $(selectNewRoles[i]).remove();
+                            }
+                        }
+                    }
+                    // Update Role-column
+                    for (let j=0; j<data.newProjectRolesNodes.length; j++) {
+                        outerContainer.prepend(data.newProjectRolesNodes[j])
+                        // update event listener for added object only
+                        $(outerContainer.children()[0]).find("button.js-remove").click(function() { outerContainerSwitch($(this)) });
+                        $(outerContainer.children()[0]).find("button.delete").click(function () {deleteRole($(this))});
+                        $(outerContainer.children()[0]).find("button.cancel").click(function () {cancelAddRoleCommand($(this))});
+                    }
+                } else {
+                    $.otp.warningMessage(data.error);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+            }
+        });
+    });
+
+    $("div.edit-switch-drop-down p.edit-switch-editor button.save").click(function () {saveRole($(this))});
+
+    function saveRole (that) {
+        "use strict";
+        var container, outerContainer;
+        container = that.parent();
         outerContainer = container.parent();
 
         var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
@@ -195,7 +301,7 @@ $(function() {
         });
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
-    });
+    }
 
     $("div.edit-switch-date p.edit-switch-editor button.save").click(function () {
         "use strict";
@@ -414,17 +520,18 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     });
 
-    $("div.edit-switch .edit-switch-editor button.cancel").click(function () {
+    $("div.edit-switch .edit-switch-editor button.cancel").click(function () {cancelAddRoleCommand($(this))});
+
+    function cancelAddRoleCommand(that) {
         "use strict";
-        var outerContainer = $(this).parent().parent();
+        var outerContainer = that.parent().parent();
         $(".edit-switch-editor", outerContainer).hide();
         $(".edit-switch-label", outerContainer).show();
         $(".edit-switch-input", $(this).parent()).val($("p.edit-switch-label span", outerContainer).text());
         if (outerContainer.hasClass("edit-switch-checkboxes")) {
             resetCheckboxes(outerContainer);
         }
-    });
-
+    }
 
     $("div.multi-edit-switch .edit-switch-label button.js-edit").click(function () {
         "use strict";

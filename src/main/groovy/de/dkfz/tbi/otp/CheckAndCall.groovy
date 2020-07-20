@@ -41,6 +41,8 @@ trait CheckAndCall {
                 data = getErrorData(e.errors.fieldError)
             } catch (AssertionError e) {
                 data = [success: false, error: "An error occurred: ${e.localizedMessage}"]
+            } catch (OtpRuntimeException e) {
+                data = [success: false, error: e.localizedMessage]
             }
         }
         render data as JSON

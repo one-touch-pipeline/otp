@@ -211,7 +211,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
 
         // Single project authority
         List<UserProjectRole> uprsProjectA = createProjectWithUsersHelper([
-                [user: pi1, projectRole: PI],
+                [user: pi1, projectRoles: [PI]],
                 [user: expiredUserA],
                 [user: expiredUserB],
                 [user: expiredAndScheduledUser],
@@ -219,8 +219,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
 
         // Multiple project authorities
         List<UserProjectRole> uprsProjectB = createProjectWithUsersHelper([
-                [user: pi1, projectRole: PI],
-                [user: pi2, projectRole: PI],
+                [user: pi1, projectRoles: [PI]],
+                [user: pi2, projectRoles: [PI]],
                 [user: expiredUserA],
                 [user: notExpiredAndScheduledUser],
                 [user: expiredUserB, enabled: false],
@@ -293,9 +293,9 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         ActionPlan plan = new ActionPlan()
 
         Project project = createProject()
-        UserProjectRole uprA = DomainFactory.createUserProjectRole(project: project, projectRole: PI)
-        UserProjectRole uprB = DomainFactory.createUserProjectRole(project: project, projectRole: PI)
-        DomainFactory.createUserProjectRole(project: project, projectRole: BIOINFORMATICIAN)
+        UserProjectRole uprA = DomainFactory.createUserProjectRole(project: project, projectRoles: [PI])
+        UserProjectRole uprB = DomainFactory.createUserProjectRole(project: project, projectRoles: [PI])
+        DomainFactory.createUserProjectRole(project: project, projectRoles: [BIOINFORMATICIAN])
         DomainFactory.createUserProjectRole(project: project, enabled: false)
         DomainFactory.createUserProjectRole(project: project, user: DomainFactory.createUser(username: null))
 
@@ -309,8 +309,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         ActionPlan plan = new ActionPlan()
 
         Project project = createProject()
-        UserProjectRole upr = DomainFactory.createUserProjectRole(project: project, projectRole: PI)
-        DomainFactory.createUserProjectRole(project: project, projectRole: BIOINFORMATICIAN)
+        UserProjectRole upr = DomainFactory.createUserProjectRole(project: project, projectRoles: [PI])
+        DomainFactory.createUserProjectRole(project: project, projectRoles: [BIOINFORMATICIAN])
         DomainFactory.createUserProjectRole(project: project, enabled: false)
         DomainFactory.createUserProjectRole(project: project, user: DomainFactory.createUser(username: null))
 

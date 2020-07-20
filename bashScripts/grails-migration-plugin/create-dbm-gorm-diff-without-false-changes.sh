@@ -78,6 +78,7 @@ joinTables="\
 (software_tool_program_name_program_version_type_key)|\
 (sophia_instance_roddy_execution_directory_names)|\
 (text_field_definition_allowed_text_values)|\
+(user_project_role_project_role)|\
 (workflow_command_log)|\
 (workflow_message_log)|\
 (workflow_run_workflow_config)|\

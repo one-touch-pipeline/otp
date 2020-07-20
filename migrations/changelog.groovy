@@ -455,6 +455,12 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2020/otp-555.sql')
     }
 
+    changeSet(author: "albrecjp", id: "otp-463") {
+        sqlFile(path: 'changelogs/2020/otp-463.sql')
+    }
+
+    include file: 'changelogs/2020/otp-463.groovy'
+
     include file: 'changelogs/2020/delete-sample-swap.groovy'
     changeSet(author: "wieset", id: "otp-369") {
         sqlFile(path: 'changelogs/2020/otp-369.sql')

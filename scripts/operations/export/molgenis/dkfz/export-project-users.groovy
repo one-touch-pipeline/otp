@@ -48,7 +48,7 @@ class ExportHelper {
                                 upr.id,
                                 upr.project.id, upr.project.name,
                                 upr.user.id, upr.user.username,
-                                upr.projectRole.id, upr.projectRole.name,
+                                upr.projectRoles*.id.join(","), upr.projectRoles*.name.join(","),
                         ]
                     },
             ),

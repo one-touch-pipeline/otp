@@ -1527,7 +1527,7 @@ class DomainFactory {
         return createDomainObject(UserProjectRole, [
                 user                  : { createUser() },
                 project               : { createProject() },
-                projectRole           : { createProjectRole() },
+                projectRoles          : { [createProjectRole()] },
                 accessToOtp           : true,
                 accessToFiles         : false,
                 manageUsers           : false,

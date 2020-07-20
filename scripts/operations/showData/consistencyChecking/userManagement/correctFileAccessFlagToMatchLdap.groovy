@@ -45,7 +45,7 @@ UserProjectRole.withTransaction {
         boolean fileAccessInOtp = userProjectRole.accessToFiles
         boolean fileAccessInLdap = userProjectRole.project.unixGroup in cache[user.username]
         if (fileAccessInOtp != fileAccessInLdap) {
-            println "${userProjectRole.user.username} ${userProjectRole.project.name} ${userProjectRole.projectRole.name}: ${fileAccessInOtp} -> ${fileAccessInLdap}"
+            println "${userProjectRole.user.username} ${userProjectRole.project.name} ${userProjectRole.projectRoles.name.join(", ")}: ${fileAccessInOtp} -> ${fileAccessInLdap}"
             userProjectRole.accessToFiles = fileAccessInLdap
             userProjectRole.save()
         }

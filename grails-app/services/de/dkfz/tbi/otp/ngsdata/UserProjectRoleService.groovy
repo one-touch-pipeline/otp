@@ -33,6 +33,7 @@ import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.impl.enums.DicomCode.OtpPermissionCode
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -55,10 +56,10 @@ class UserProjectRoleService {
     UserService userService
     ConfigService configService
 
-    private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, Map flags = [:]) {
+    UserProjectRole createUserProjectRole(User user, Project project, Set<ProjectRole> projectRoles, Map flags = [:]) {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
-        assert !UserProjectRole.findByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
+        assert !UserProjectRole.findAllByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
 
         String requester = springSecurityService?.principal?.hasProperty("username") ?
                 springSecurityService.principal.username : springSecurityService?.principal
@@ -69,9 +70,11 @@ class UserProjectRoleService {
         UserProjectRole userProjectRole = new UserProjectRole([
                 user                     : user,
                 project                  : project,
-                projectRole              : projectRole,
                 fileAccessChangeRequested: flags.accessToFiles ?: false,
         ] + flags)
+        projectRoles.each {
+            userProjectRole.addToProjectRoles(it)
+        }
         userProjectRole.save(flush: true)
 
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
@@ -99,15 +102,15 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
-    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username, Map flags = [:]) throws AssertionError {
+    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map flags = [:]) throws AssertionError {
         assert project: "project must not be null"
         User user = createUserWithLdapData(username)
 
         synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
-            createUserProjectRole(user, p, projectRole, flags)
+            createUserProjectRole(user, p, projectRolesSet, flags)
         }
 
-        UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProjectAndProjectRole(user, project, projectRole))
+        UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
         if (userProjectRole.accessToFiles) {
             sendFileAccessNotifications(userProjectRole)
         }
@@ -141,7 +144,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
-    void addExternalUserToProject(Project project, String realName, String email, ProjectRole projectRole) throws AssertionError {
+    void addExternalUserToProject(Project project, String realName, String email, Set<ProjectRole> projectRoles) throws AssertionError {
         assert project: "project must not be null"
 
         User user = CollectionUtils.atMostOneElement(User.findAllByEmail(email))
@@ -153,10 +156,10 @@ class UserProjectRoleService {
         }
 
         synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
-            createUserProjectRole(user, p, projectRole)
+            createUserProjectRole(user, p, projectRoles)
         }
 
-        UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProjectAndProjectRole(user, project, projectRole))
+        UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
 
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(userProjectRole)
@@ -217,13 +220,13 @@ class UserProjectRoleService {
                 realName: userProjectRole.user.realName,
                 username: userProjectRole.user.username,
                 email   : userProjectRole.user.email,
-                role    : userProjectRole.projectRole.name,
+                role    : userProjectRole.projectRoles*.name.join(", "),
         ])
         String requesterUserDetail = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.userDetail", [
                 realName: requester.realName,
                 username: requester.username + switchedUserAnnotation,
                 email   : requester.email,
-                role    : requesterUserProjectRole ? requesterUserProjectRole.projectRole.name : "Non-Project-User",
+                role    : requesterUserProjectRole ? requesterUserProjectRole.projectRoles*.name.join(", ") : "Non-Project-User",
         ])
 
         String body = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.body", [
@@ -254,12 +257,12 @@ class UserProjectRoleService {
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
         User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
 
-        String projectRoleName = userProjectRole.projectRole.name
+        List<String> projectRoleNames = userProjectRole.projectRoles*.name
         String projectName = userProjectRole.project.name
 
         List<Role> administrativeRoles = Role.findAllByAuthorityInList(Role.ADMINISTRATIVE_ROLES)
 
-        boolean userIsSubmitter = projectRoleName == ProjectRole.Basic.SUBMITTER.name()
+        boolean userIsSubmitter = projectRoleNames.any { it == ProjectRole.Basic.SUBMITTER.name() }
         boolean executingUserIsAdministrativeUser = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRoleInList(executingUser, administrativeRoles))
 
         String subject = messageSourceService.createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
@@ -269,7 +272,7 @@ class UserProjectRoleService {
             String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
             body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [
                     userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
-                    projectRole          : projectRoleName,
+                    projectRole          : projectRoleNames.join(", "),
                     projectName          : projectName,
                     supportTeamName      : supportTeamName,
                     supportTeamSalutation: supportTeamName,
@@ -277,7 +280,7 @@ class UserProjectRoleService {
         } else {
             body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember", [
                     userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
-                    projectRole   : projectRoleName,
+                    projectRole   : projectRoleNames.join(", "),
                     projectName   : projectName,
                     executingUser : executingUser.realName ?: executingUser.username,
             ])
@@ -318,7 +321,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToOtp(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.accessToOtp == value })) {
+        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == value }) {
             return userProjectRole
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
@@ -332,7 +335,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.accessToFiles == value })) {
+        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == value }) {
             return userProjectRole
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
@@ -352,7 +355,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
     UserProjectRole setManageUsers(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.manageUsers == value })) {
+        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.manageUsers == value }) {
             return userProjectRole
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
@@ -366,7 +369,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     UserProjectRole setManageUsersAndDelegate(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.manageUsersAndDelegate == value })) {
+        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.manageUsersAndDelegate == value }) {
             return userProjectRole
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
@@ -380,7 +383,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #userProjectRole.user.username == principal.username")
     UserProjectRole setReceivesNotifications(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.receivesNotifications == value })) {
+        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.receivesNotifications == value }) {
             return userProjectRole
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
@@ -394,7 +397,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.enabled == value })) {
+        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {
             return userProjectRole
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
@@ -420,12 +423,27 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole updateProjectRole(UserProjectRole userProjectRole, ProjectRole newProjectRole) {
-        if (nothingToChange(userProjectRole, { UserProjectRole upr -> upr.projectRole == newProjectRole })) {
-            return userProjectRole
+    UserProjectRole addProjectRolesToProjectUserRole(UserProjectRole userProjectRole, List<ProjectRole> newProjectRoles) {
+        newProjectRoles.each { ProjectRole newProjectRole ->
+            if (nothingToChange(userProjectRole) { UserProjectRole upr -> newProjectRole in upr.projectRoles }) {
+                return
+            }
+            synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+                upr.projectRoles.add(newProjectRole)
+                assert upr.save(flush: true)
+            }
+        }
+        return userProjectRole
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    UserProjectRole deleteProjectUserRole(UserProjectRole userProjectRole, ProjectRole currentProjectRole) {
+        assert currentProjectRole in userProjectRole.projectRoles
+        if (userProjectRole.projectRoles.size() <= 1) {
+            throw new OtpRuntimeException("A user must have at least one role!")
         }
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
-            upr.projectRole = newProjectRole
+            upr.projectRoles.remove(currentProjectRole)
             assert upr.save(flush: true)
         }
         return userProjectRole
@@ -453,7 +471,7 @@ class UserProjectRoleService {
             Map properties = [
                     project                  : targetProject,
                     user                     : userProjectRole.user,
-                    projectRole              : userProjectRole.projectRole,
+                    projectRoles             : new HashSet<ProjectRole>(userProjectRole.projectRoles),
                     enabled                  : userProjectRole.enabled,
                     accessToOtp              : userProjectRole.accessToOtp,
                     accessToFiles            : userProjectRole.accessToFiles,
@@ -535,21 +553,27 @@ class UserProjectRoleService {
     }
 
     static List<User> getProjectAuthorities(Project project) {
-        return UserProjectRole.findAllByProjectAndProjectRoleInListAndEnabled(
-                project,
-                ProjectRole.findAllByNameInList(ProjectRole.AUTHORITY_PROJECT_ROLES),
-                true
-        )*.user
-    }
-
-    static List<User> getBioinformaticianUsers(Project project) {
-        List<ProjectRole> bioinformaticians = ProjectRole.findAllByNameInList(ProjectRole.BIOINFORMATICIAN_PROJECT_ROLES)
-        return UserProjectRole.createCriteria().list {
+        UserProjectRole.createCriteria().list {
             eq("project", project)
-            'in'("projectRole", bioinformaticians)
             eq("enabled", true)
             user {
                 eq("enabled", true)
+            }
+            projectRoles {
+                'in'("name", ProjectRole.AUTHORITY_PROJECT_ROLES)
+            }
+        }*.user
+    }
+
+    static List<User> getBioinformaticianUsers(Project project) {
+        return UserProjectRole.createCriteria().list {
+            eq("project", project)
+            eq("enabled", true)
+            user {
+                eq("enabled", true)
+            }
+            projectRoles {
+                'in'("name", ProjectRole.BIOINFORMATICIAN_PROJECT_ROLES)
             }
         }*.user
     }
@@ -560,7 +584,7 @@ class UserProjectRoleService {
                 (added == flags.accessToFiles)          && (added == !oldUPR?.accessToFiles) ? [OtpPermissionCode.FILE_ACCESS] : [],
                 (added == flags.manageUsers)            && (added == !oldUPR?.manageUsers) ? [OtpPermissionCode.MANAGE_USERS] : [],
                 (added == flags.manageUsersAndDelegate) && (added == !oldUPR?.manageUsersAndDelegate) ? [OtpPermissionCode.DELEGATE_MANAGE_USERS] : [],
-        ].flatten()
+        ].flatten() as List<OtpPermissionCode>
     }
 
     String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {

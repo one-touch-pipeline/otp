@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.util.Pair
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,8 +40,6 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 
 import java.time.LocalDate
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Transactional
 class ProjectRequestService {
@@ -200,24 +199,38 @@ class ProjectRequestService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addUserRolesAndPermissions(ProjectRequest projectRequest) {
-        addUserAndRolesFromProjectRequest([projectRequest.pi], ProjectRequestRole.PI, projectRequest.project)
-        addUserAndRolesFromProjectRequest(projectRequest.leadBioinformaticians, ProjectRequestRole.LEAD_BIOINFORMATICIAN, projectRequest.project)
-        addUserAndRolesFromProjectRequest(projectRequest.bioinformaticians, ProjectRequestRole.BIOINFORMATICIAN, projectRequest.project)
-        addUserAndRolesFromProjectRequest(projectRequest.submitters, ProjectRequestRole.SUBMITTER, projectRequest.project)
+        Map<ProjectRequestRole, Set<User>> usersByRole = [
+                (ProjectRequestRole.PI)                   : [projectRequest.pi] as Set<User>,
+                (ProjectRequestRole.LEAD_BIOINFORMATICIAN): projectRequest.leadBioinformaticians,
+                (ProjectRequestRole.BIOINFORMATICIAN)     : projectRequest.bioinformaticians,
+                (ProjectRequestRole.SUBMITTER)            : projectRequest.submitters,
+        ]
+
+        Set<Pair<User, ProjectRequestRole>> pairSet = usersByRole.collectMany { ProjectRequestRole projectRequestRole, Set<User> users ->
+            users.collect {
+                return new Pair<User, ProjectRequestRole>(it, projectRequestRole)
+            }
+        }
+
+        addUserAndRolesFromProjectRequest(pairSet, projectRequest.project)
     }
 
-    private void addUserAndRolesFromProjectRequest(Collection<User> users, ProjectRequestRole role, Project project) {
-        users.each { User user ->
+    private void addUserAndRolesFromProjectRequest(Set<Pair<User, ProjectRequestRole>> pairSet, Project project) {
+        pairSet.groupBy { it.aValue }.each { User user, List<Pair<User, ProjectRequestRole>> projectRequestRoleList ->
             UserProjectRole upr = userProjectRoleService.createUserProjectRole(
                     user,
                     project,
-                    exactlyOneElement(ProjectRole.findAllByName(role.name())),
+                    ProjectRole.findAllByNameInList(projectRequestRoleList.collect { it.bValue.name() }) as Set<ProjectRole>,
             )
-            userProjectRoleService.setAccessToOtp(upr, role.accessToOtp)
-            userProjectRoleService.setAccessToFiles(upr, role.accessToFiles)
-            userProjectRoleService.setManageUsers(upr, role.manageUsers)
-            userProjectRoleService.setManageUsersAndDelegate(upr, role.manageUsersAndDelegate)
-            userProjectRoleService.setReceivesNotifications(upr, role.receivesNotifications)
+
+            List<ProjectRequestRole> permissionValueList = projectRequestRoleList*.bValue
+            userProjectRoleService.with {
+                setAccessToOtp(upr, permissionValueList*.accessToOtp.any())
+                setAccessToFiles(upr, permissionValueList*.accessToFiles.any())
+                setManageUsers(upr, permissionValueList*.manageUsers.any())
+                setManageUsersAndDelegate(upr, permissionValueList*.manageUsersAndDelegate.any())
+                setReceivesNotifications(upr, permissionValueList*.receivesNotifications.any())
+            }
         }
     }
 

@@ -88,7 +88,11 @@
                         </td>
                         <td>${userProjectRole.project.unixGroup}</td>
                         <td>${userProjectRole.project.costCenter}</td>
-                        <td>${userProjectRole.projectRole.name}</td>
+                        <td>
+                            <g:each var="projectRoles" in="${userProjectRole.projectRoles}">
+                                ${projectRoles.name} <br />
+                            </g:each>
+                        </td>
                         <td><span class="icon-${userProjectRole.accessToOtp}"></span></td>
                         <td><span class="icon-${userProjectRole.accessToFiles}"></span></td>
                         <td><span class="icon-${userProjectRole.manageUsers}"></span></td>

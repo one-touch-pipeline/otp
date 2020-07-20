@@ -33,7 +33,7 @@ class UserProjectRole implements Serializable, Entity {
     /** This attribute is used externally. Please discuss a change in the team */
     User user
     /** This attribute is used externally. Please discuss a change in the team */
-    ProjectRole projectRole
+    Set<ProjectRole> projectRoles
     /** This attribute is used externally. Please discuss a change in the team */
     boolean enabled = true
     boolean accessToOtp = false
@@ -48,13 +48,17 @@ class UserProjectRole implements Serializable, Entity {
      */
     boolean fileAccessChangeRequested = false
 
+    static hasMany = [
+        projectRoles: ProjectRole
+    ]
+
     static constraints = {
         project(unique: 'user')
     }
 
     static List<String> getAccessRelatedProperties() {
         return [
-                "projectRole",
+                "projectRoles",
                 "enabled",
                 "accessToOtp",
                 "accessToFiles",
@@ -70,6 +74,6 @@ class UserProjectRole implements Serializable, Entity {
 
     @Override
     String toString() {
-        return "UPR ${id}: ${project} ${user} ${projectRole}"
+        return "UPR ${id}: ${project} ${user} ${projectRoles}"
     }
 }

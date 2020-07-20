@@ -271,20 +271,7 @@ class ProjectRequestCreationCommand {
         approxNoOfSamples nullable: true
         seqTypes nullable: true
         comments nullable: true, blank: false
-        pi validator: { val, obj ->
-            List<String> pi = [val]
-            List<String> userWithMultipleRoles = (
-                            pi.intersect(obj.leadBioinformaticians.findAll()) +
-                            pi.intersect(obj.bioinformaticians.findAll()) +
-                            pi.intersect(obj.submitters.findAll()) +
-                            obj.leadBioinformaticians.intersect(obj.bioinformaticians.findAll()) +
-                            obj.leadBioinformaticians.intersect(obj.submitters.findAll()) +
-                            obj.bioinformaticians.intersect(obj.submitters.findAll())
-            ).unique()
-            if (userWithMultipleRoles) {
-                return ["multiple.roles", userWithMultipleRoles.join(", ")]
-            }
-        }
+        pi nullable: false, blank: false
     }
 
     void setCostCenter(String s) {

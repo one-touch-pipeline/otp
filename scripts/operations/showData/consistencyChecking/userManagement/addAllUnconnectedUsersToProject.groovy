@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  */
 
 // ProjectRole to use for the new UserProjectRoles
-ProjectRole projectRole = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
+Set<ProjectRole> projectRoles = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name()) as Set<ProjectRole>
 // UserProjectRole flags
 boolean enabled = true
 boolean accessToOtp = true
@@ -51,7 +51,7 @@ boolean receivesNotifications = true
 List<String> blacklistedUsernames = [
 ]
 
-assert projectRole: "ProjectRole not found"
+assert projectRoles: "ProjectRole not found"
 
 String getSortedListInfo(String text, List list) {
     return "${text}\n${list.sort()}\n${list.size()} entries\n"
@@ -89,7 +89,7 @@ Project.list().sort { it.name }.each { Project project ->
             newUPRs << new UserProjectRole(
                     user: CollectionUtils.exactlyOneElement(User.findAllByUsername(username)),
                     project: project,
-                    projectRole: projectRole,
+                    projectRoles: projectRoles,
                     enabled: enabled,
                     accessToOtp: accessToOtp,
                     accessToFiles: accessToFiles,
@@ -104,7 +104,7 @@ Project.list().sort { it.name }.each { Project project ->
 println("UserProjectRoles to be created:")
 println("username,project_name,project_role_name")
 newUPRs.each { UserProjectRole userProjectRole ->
-    println("${userProjectRole.user.username},${userProjectRole.project.name},${userProjectRole.projectRole.name}")
+    println("${userProjectRole.user.username},${userProjectRole.project.name},${userProjectRole.projectRoles.name.join(", ")}")
 }
 
 assert false: "Assert for debug, remove to continue"

@@ -47,7 +47,7 @@ class UserProjectRoleIntegrationSpec extends Specification {
     void setupComparableUserProjectRoleAAndB(Map additionalPropertiesA, Map additionalPropertiesB) {
         Map baseProperties = [
                 user: DomainFactory.createUser(),
-                projectRole: DomainFactory.createProjectRole(),
+                projectRoles: [DomainFactory.createProjectRole()],
         ] + flagProperties.collectEntries { [(it): true] }
 
         userProjectRoleA = DomainFactory.createUserProjectRole(baseProperties + additionalPropertiesA)
@@ -82,10 +82,9 @@ class UserProjectRoleIntegrationSpec extends Specification {
         flag << flagProperties
     }
 
-
     void "equalByAccessRelatedProperties, differing ProjectRoles"() {
         given:
-        setupComparableUserProjectRoleAAndB([:], [projectRole: DomainFactory.createProjectRole()])
+        setupComparableUserProjectRoleAAndB([:], [projectRoles: [DomainFactory.createProjectRole()]])
         boolean result
 
         when:

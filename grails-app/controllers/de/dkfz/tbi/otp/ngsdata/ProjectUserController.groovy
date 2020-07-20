@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 
 class ProjectUserController implements CheckAndCall {
@@ -85,7 +86,7 @@ class ProjectUserController implements CheckAndCall {
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
                 emails                     : userProjectRoleService.getEmailsForNotification(project),
-                currentUser                : springSecurityService.getCurrentUser() as User,
+                currentUser                : springSecurityService.currentUser as User,
         ]
     }
 
@@ -94,7 +95,7 @@ class ProjectUserController implements CheckAndCall {
         String errorMessage = null
         Project project = projectSelectionService.requestedProject
         if (cmd.hasErrors()) {
-            FieldError cmdErrors = cmd.errors.getFieldError()
+            FieldError cmdErrors = cmd.errors.fieldError
             errorMessage = "'${cmdErrors.rejectedValue}' is not a valid value for '${cmdErrors.field}'. Error code: '${cmdErrors.code}'"
             message = "An error occurred"
         } else {
@@ -102,7 +103,7 @@ class ProjectUserController implements CheckAndCall {
                 if (cmd.addViaLdap) {
                     userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                             project,
-                            ProjectRole.findByName(cmd.projectRoleName),
+                            ProjectRole.findAllByNameInList(cmd.projectRoleNames) as Set<ProjectRole>,
                             cmd.searchString,
                             [
                                     accessToOtp           : true,
@@ -117,7 +118,7 @@ class ProjectUserController implements CheckAndCall {
                             project,
                             cmd.realName,
                             cmd.email,
-                            ProjectRole.findByName(cmd.projectRoleName)
+                            ProjectRole.findAllByNameInList(cmd.projectRoleNames) as Set<ProjectRole>,
                     )
                 }
                 message = "Data stored successfully"
@@ -134,9 +135,38 @@ class ProjectUserController implements CheckAndCall {
         redirect(controller: "projectUser")
     }
 
-    JSON updateProjectRole(UpdateProjectRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole))
+    JSON addRoleToUserProjectRole(UpdateProjectRoleCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            userProjectRoleService.addProjectRolesToProjectUserRole(cmd.userProjectRole, ProjectRole.findAllByNameInList(cmd.newRoles))
+        }) {
+            UserProjectRole currentUserProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllById(cmd.userProjectRole.id))
+            List<Project> projectsOfUnixGroup = Project.findAllByUnixGroup(currentUserProjectRole.project.unixGroup)
+            List<String> currentProjectRoles = (currentUserProjectRole.projectRoles)*.name.sort()
+            List<String> newProjectRolesNodes = []
+            cmd.newRoles.each { String newUserRole ->
+                newProjectRolesNodes.add(otp.editorSwitch([
+                        template    : "remove",
+                        link        : g.createLink([controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': currentUserProjectRole.id, 'currentRole': newUserRole]]),
+                        value       : newUserRole,
+                        name        : newUserRole,
+                        confirmation: projectsOfUnixGroup.size() > 1 ? g.message(
+                                code: "projectUser.sharedUnixGroupConfirmation",
+                                args: [projectsOfUnixGroup.sort { it.name }.collect { "\n  - " + it }.join("")]
+                        ) : ''
+                ]) as String)
+            }
+            return [
+                    currentProjectRole  : currentProjectRoles,
+                    newProjectRolesNodes: newProjectRolesNodes,
+            ]
+        }
+    }
+
+    JSON deleteProjectRole(DeleteProjectRoleCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            userProjectRoleService.deleteProjectUserRole(cmd.userProjectRole, ProjectRole.findByName(cmd.currentRole))
+        }) {
+            return   [currentRole: cmd.currentRole]
         }
     }
 
@@ -149,12 +179,12 @@ class ProjectUserController implements CheckAndCall {
     JSON setAccessToFiles(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             userProjectRoleService.setAccessToFiles(cmd.userProjectRole, cmd.value)
-        }, {
+        }) {
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, ldapUserDetails)
             userEntry.fileAccess.toolTipKey
             [tooltip: g.message(code: userEntry.fileAccess.toolTipKey)]
-        })
+        }
     }
 
     JSON setManageUsers(SetFlagCommand cmd) {
@@ -230,7 +260,8 @@ class UserEntry {
     String realName
     String thumbnailPhoto
     String department
-    String projectRoleName
+    List<String> availableRoles
+    List<String> projectRoleNames
     PermissionStatus otpAccess
     PermissionStatus fileAccess
     PermissionStatus manageUsers
@@ -241,13 +272,14 @@ class UserEntry {
 
     UserEntry(User user, Project project, LdapUserDetails ldapUserDetails) {
         this.user = user
-        this.userProjectRole = UserProjectRole.findByUserAndProject(user, project)
+        this.userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProject(user, project))
 
         this.inLdap = ldapUserDetails?.username ?: false
         this.realName = inLdap ? ldapUserDetails.realName : user.realName
         this.thumbnailPhoto = inLdap ? ldapUserDetails.thumbnailPhoto.encodeAsBase64() : ""
         this.department = inLdap ? ldapUserDetails.department : ""
-        this.projectRoleName = userProjectRole.projectRole.name
+        this.projectRoleNames = userProjectRole.projectRoles*.name.sort()
+        this.availableRoles = (ProjectRole.findAll() - userProjectRole.projectRoles)*.name.sort()
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
         this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
@@ -305,7 +337,7 @@ class UpdateUserEmailCommand implements Validateable {
         newEmail(nullable: false, email: true, blank: false, validator: { val, obj ->
             if (val == obj.user?.email) {
                 return 'no.change'
-            } else if (User.findByEmail(val)) {
+            } else if (CollectionUtils.exactlyOneElement(User.findAllByEmail(val))) {
                 return 'default.not.unique.message'
             }
         })
@@ -327,10 +359,27 @@ class SetFlagCommand implements Validateable {
 
 class UpdateProjectRoleCommand implements Validateable {
     UserProjectRole userProjectRole
-    String newRole
+    String currentRole
+    List<String> newRoles
 
     void setValue(String value) {
-        this.newRole = value
+        this.newRoles = JSON.parse(value) as List<String>
+    }
+
+    static constraints = {
+        newRoles(nullable: false, validator: { val, obj ->
+            (val.size() == 0) || val.any { !(it in ProjectRole.findAll()*.name) } ? "Input not a valid ProjectRole" : true
+            })
+        }
+}
+
+class DeleteProjectRoleCommand implements Validateable {
+    UserProjectRole userProjectRole
+    String currentRole
+
+    static constraints = {
+        userProjectRole(nullable: false)
+        currentRole(nullable: false)
     }
 }
 
@@ -338,7 +387,7 @@ class AddUserToProjectCommand implements Serializable {
     boolean addViaLdap = true
 
     String searchString
-    String projectRoleName
+    List<String> projectRoleNames
     boolean accessToFiles = false
     boolean manageUsers = false
     boolean manageUsersAndDelegate = false
@@ -347,6 +396,10 @@ class AddUserToProjectCommand implements Serializable {
     String realName
     String email
 
+    void setProjectRoleNames(String value) {
+        this.projectRoleNames = JSON.parse(value) as List<String>
+    }
+
     static constraints = {
         addViaLdap(blank: false)
         searchString(nullable: true, validator: { val, obj ->
@@ -354,8 +407,8 @@ class AddUserToProjectCommand implements Serializable {
                 return "empty"
             }
         })
-        projectRoleName(nullable: true, validator: { val, obj ->
-            if (!obj.projectRoleName) {
+        projectRoleNames(nullable: true, validator: { val, obj ->
+            if (!obj.projectRoleNames) {
                 return "empty"
             }
         })

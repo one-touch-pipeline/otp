@@ -242,7 +242,7 @@ class ActionPlan {
             user {
                 isNotNull("username")
             }
-            projectRole {
+            projectRoles {
                 'in'("name", ProjectRole.AUTHORITY_PROJECT_ROLES)
             }
             eq("enabled", true)

@@ -574,7 +574,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ProjectRole bi = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
 
         Closure<UserProjectRole> createUserProjectRoleHelper = { ProjectRole projectRole, boolean enabled ->
-            return DomainFactory.createUserProjectRole(project: project, projectRole: projectRole, enabled: enabled)
+            return DomainFactory.createUserProjectRole(project: project, projectRoles: [projectRole], enabled: enabled)
         }
 
         List<UserProjectRole> userProjectRoles = [

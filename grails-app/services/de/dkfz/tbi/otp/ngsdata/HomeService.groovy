@@ -68,7 +68,7 @@ class HomeService {
             projections {
                 "in"("project", projects)
                 eq("enabled", true)
-                projectRole {
+                projectRoles {
                     eq("name", ProjectRole.Basic.PI.name())
                 }
                 user {

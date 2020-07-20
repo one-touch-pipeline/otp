@@ -242,7 +242,9 @@ class ProjectService {
     List<UserProjectRole> getUsersToCopyFromBaseProject(Project baseProject) {
         return UserProjectRole.withCriteria {
             eq("project", baseProject)
-            eq("projectRole", ProjectRole.findByName(ProjectRole.Basic.PI.name()))
+            projectRoles {
+                eq("name", ProjectRole.Basic.PI.name())
+            }
             eq("enabled", true)
         } as List<UserProjectRole>
     }

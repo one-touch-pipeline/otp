@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,18 @@
  * SOFTWARE.
  */
 
-/**
- * An overview script to show for all projects the active PI.
- * A PI is active, if he/she is enable for that project and for the whole OTP and has an AD account.
- *
- * Projects without PI are not shown here. For that purpose another script exist.
- */
 
-import de.dkfz.tbi.otp.ngsdata.ProjectRole
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+CREATE TABLE user_project_role_project_role(
+    user_project_role_project_roles_id BIGINT,
+    project_role_id BIGINT,
+    FOREIGN KEY (user_project_role_project_roles_id) REFERENCES user_project_role(id),
+    FOREIGN KEY (project_role_id) REFERENCES project_role(id),
+    PRIMARY KEY (user_project_role_project_roles_id, project_role_id)
+);
 
-println "project,account,real name"
-println UserProjectRole.withCriteria {
-    projections {
-        eq('enabled', true)
-        projectRoles {
-            eq('name', ProjectRole.Basic.PI.name())
-        }
-        project {
-            property('name')
-            order('name')
-        }
-        user {
-            property('username')
-            order('username')
-            property('realName')
-            eq('enabled', true)
-            isNotNull('username')
-        }
-    }
-}*.join(',').join('\n')
+CREATE INDEX user_project_role_project_roles_id_idx ON user_project_role_project_role(user_project_role_project_roles_id);
+CREATE INDEX project_role_id_idx ON user_project_role_project_role(project_role_id);
+
+INSERT INTO user_project_role_project_role
+SELECT id, project_role_id FROM user_project_role;
+

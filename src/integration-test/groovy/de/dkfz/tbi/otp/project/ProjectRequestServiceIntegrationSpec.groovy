@@ -288,4 +288,50 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         WAITING_FOR_PI                      | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | true          || 1    | APPROVED_BY_PI_WAITING_FOR_OPERATOR
         WAITING_FOR_PI                      | true  | DENIED_BY_PI                        | true           | true          || 0    | DENIED_BY_PI
     }
+
+    void "addUserRolesAndPermissions: create correct userProjectRoles"() {
+        given:
+        ProjectRequestService projectRequestService = new ProjectRequestService(
+                userProjectRoleService: Mock(UserProjectRoleService)
+        )
+
+        createAllBasicProjectRoles()
+
+        Project project = createProject()
+
+        User userPi = DomainFactory.createUser()
+        User userSubmitterAndBioinf = DomainFactory.createUser()
+        User userSubmitter2 = DomainFactory.createUser()
+
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                pi: userPi,
+                bioinformaticians: [userSubmitterAndBioinf],
+                submitters: [userSubmitterAndBioinf, userSubmitter2],
+                status: PROJECT_CREATED,
+                project: project,
+        ])
+
+        Set<ProjectRole> pi = ProjectRole.findAllByNameInList([ProjectRole.Basic.PI]) as Set<ProjectRole>
+        Set<ProjectRole> submitter_bioinformatician = ProjectRole.findAllByNameInList([
+                ProjectRole.Basic.BIOINFORMATICIAN, ProjectRole.Basic.SUBMITTER,
+        ]) as Set<ProjectRole>
+        Set<ProjectRole> submitter = ProjectRole.findAllByNameInList([ProjectRole.Basic.SUBMITTER]) as Set<ProjectRole>
+
+        when:
+        projectRequestService.addUserRolesAndPermissions(request)
+
+        then:
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(userPi,
+                project,
+                pi,
+        )
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(userSubmitterAndBioinf,
+                project,
+                submitter_bioinformatician,
+        )
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(userSubmitter2,
+                project,
+                submitter,
+        )
+    }
 }
