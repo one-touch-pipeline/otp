@@ -317,16 +317,7 @@ class FileService {
         } else {
             createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, realm, groupString, permissions)
 
-            try {
-                Files.createDirectory(path)
-            } catch (FileSystemException e) {
-                if (Files.exists(path) && Files.isDirectory(path)) {
-                    return //directory was created by another thread running parallel
-                    //Because SFTP does not use the more specific FileAlreadyExistsException, using of Files.createDirectories(path) does not help,
-                    //which catches only FileAlreadyExistsException.
-                }
-                throw e
-            }
+            createDirectoryHandlingParallelCreationOfSameDirectory(path)
 
             // chgrp needs to be done before chmod, as chgrp resets setgid and setuid
             if (groupString) {
@@ -354,8 +345,24 @@ class FileService {
         } else {
             createDirectoryRecursivelyInternal(path.parent)
 
-            Files.createDirectory(path)
+            createDirectoryHandlingParallelCreationOfSameDirectory(path)
             setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
+        }
+    }
+
+    /**
+     * Helper to create a directory and handle case, were multiple threads try to create directory parallel.
+     */
+    private void createDirectoryHandlingParallelCreationOfSameDirectory(Path path) {
+        try {
+            Files.createDirectory(path)
+        } catch (FileSystemException e) {
+            if (Files.exists(path) && Files.isDirectory(path)) {
+                return //directory was created by another thread running parallel
+                //Because SFTP does not use the more specific FileAlreadyExistsException, using of Files.createDirectories(path) does not help,
+                //which catches only FileAlreadyExistsException.
+            }
+            throw e
         }
     }
 
