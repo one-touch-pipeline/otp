@@ -56,11 +56,8 @@ class WorkflowStep implements Commentable, Entity {
 
     Set<ClusterJob> clusterJobs
 
-    List<WorkflowLog> logs
-
     static hasMany = [
             clusterJobs: ClusterJob,
-            logs: WorkflowLog,
     ]
 
     static constraints = {
@@ -103,5 +100,11 @@ class WorkflowStep implements Commentable, Entity {
             count++
         }
         return count
+    }
+
+    List<WorkflowLog> getLogs() {
+        WorkflowLog.findAllByWorkflowStep(this).sort {
+            it.dateCreated
+        }
     }
 }

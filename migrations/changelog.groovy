@@ -466,6 +466,8 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2020/otp-369.sql')
     }
 
+    include file: 'changelogs/2020/otp-588-change-log-connection-direction.groovy'
+
     include file: 'changelogs/2020/otp-613.groovy'
 
 }

@@ -22,8 +22,11 @@
 package de.dkfz.tbi.otp.workflowExecution.log
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 abstract class WorkflowLog implements Entity {
+
+    WorkflowStep workflowStep
 
     abstract String displayLog()
 
