@@ -29,7 +29,9 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
+import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -40,7 +42,7 @@ import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration
-class DeletionServiceIntegrationSpec extends Specification implements DomainFactoryCore {
+class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy {
 
     DeletionService deletionService
 
@@ -57,7 +59,32 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         deletionService.runService = new RunService()
     }
 
-    void "test delete project content"() {
+    void "assertNoEgaSubmissionsForProject, throws assertion error when there are connected EgaSubmissions"() {
+        given:
+        setupData()
+
+        Project project = createProject()
+        createEgaSubmission(project: project)
+
+        when:
+        deletionService.deleteProjectContent(project)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("There are Ega Submissions connected to this Project, thus it can not be deleted")
+    }
+
+    void "assertNoEgaSubmissionsForProject, does not throw an assertion error without connected EgaSubmissions"() {
+        given:
+        setupData()
+
+        Project project = createProject()
+
+        expect:
+        deletionService.deleteProjectContent(project)
+    }
+
+    void "deleteProjectContent"() {
         given:
         setupData()
         Project project = createProject()
@@ -78,6 +105,20 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         DataFile.count() == 0
         Individual.count() == 0
         Project.count() == 1
+    }
+
+    void "deleteProjectContent, for project with EgaSubmission"() {
+        given:
+        setupData()
+
+        EgaSubmission egaSubmission = createEgaSubmission()
+
+        when:
+        deletionService.deleteProjectContent(egaSubmission.project)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("There are Ega Submissions connected to this Project, thus it can not be deleted")
     }
 
     void "deleteSeqTrack, delete an empty run"() {
@@ -99,9 +140,8 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         given:
         setupData()
         Run run = createRun()
-        List<SeqTrack> seqTrackList = []
-        (0..1).collect {
-            seqTrackList <<  createSeqTrack(run: run)
+        List<SeqTrack> seqTrackList = (0..1).collect {
+            createSeqTrack(run: run)
         }
 
         assert Run.count() == 1
@@ -113,7 +153,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         Run.count() == 1
     }
 
-    void "test delete project content without any content"() {
+    void "deleteProjectContent without any content"() {
         given:
         setupData()
         Project project = createProject()
@@ -125,7 +165,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         Project.count() == 1
     }
 
-    void "test delete project"() {
+    void "deleteProject"() {
         given:
         setupData()
         Project project = createProject()
@@ -148,7 +188,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         Project.count() == 0
     }
 
-    void "test delete project without any content"() {
+    void "deleteProject without any content"() {
         given:
         setupData()
         Project project = createProject()
@@ -160,7 +200,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         Project.count() == 0
     }
 
-    void "test delete project with config per project and seq type"() {
+    void "deleteProject with config per project and seq type"() {
         given:
         setupData()
         Project project = createProject()
@@ -191,7 +231,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         Project.count() == 0
     }
 
-    void "test delete project with config per project and seq type reverse"() {
+    void "deleteProject with config per project and seq type reverse"() {
         given:
         setupData()
         Project project = createProject()
@@ -224,7 +264,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         Project.count() == 0
     }
 
-    void "test delete process with dependencies"() {
+    void "deleteProcess with dependencies"() {
         given:
         setupData()
         JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan()
@@ -314,7 +354,7 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         ClusterJob.count() == 0
     }
 
-    void "test deleteProcessParameters"() {
+    void "deleteProcessParameters"() {
         given:
         ProcessParameter processParameter = DomainFactory.createProcessParameter(className: SeqTrack.name)
         processParameter.process.finished = true

@@ -20,38 +20,115 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.DeletionService
 
 /**
- * delete a complete project from the OTP database
- * AND/OR
- * removes the complete content of a project from the OTP database
- * but not the files in the file-system. They are needed to include again to OTP.
- * When they are in OTP again, it is easy to remove the project manually from the filesystem.
+ * Delete a project from OTP and the filesystem
+ *
+ * There are two modes:
+ *   - DELETE_ALL: Delete the project in OTP and delete the entire project directory
+ *   - DELETE_SEQUENCING_ONLY: Delete the project data in OTP but delete only the sequencing directory
+ *
+ * There are multiple fine-tuning flags, for additional behaviour:
+ *   - assertProjectEmpty: check for dependent SeqTracks and Bams and fail if any are found
+ *   - deleteAnalysisDirectory: append a command to also delete the analysis directory
  */
 
 // input area
 //----------------------
 
 String projectName = ""
-boolean deleteOnlyProjectContent = false
+
+ProjectDeletionMode mode =
+        ProjectDeletionMode.DELETE_ALL
+        //ProjectDeletionMode.DELETE_SEQUENCING_ONLY
+
+boolean assertProjectEmpty = true
+boolean deleteAnalysisDirectory = true
+
 
 //script area
 //-----------------------------
 
-assert projectName : "No project name given"
+enum ProjectDeletionMode {
+    DELETE_ALL, DELETE_SEQUENCING_ONLY
+}
+
+DeletionService deletionService = ctx.deletionService
 
 Project.withTransaction {
-    Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
-    String output = "rm -rf ${project.getProjectDirectory()}"
-    if (deleteOnlyProjectContent) {
-        output += "/sequencing/*"
-        ctx.deletionService.deleteProjectContent(project)
-    } else {
-        ctx.deletionService.deleteProject(project)
+    Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "No project with the provided name could be found")
+    String absoluteProjectDirectory = project.getProjectDirectory()
+
+    if (assertProjectEmpty) {
+        assert !projectHasDataDependencies(project): "The project contains data, disable `assertProjectEmpty` to override this check"
     }
+
+    List<String> output = []
+
+    if (deleteAnalysisDirectory) {
+        output << """\
+            |# Analysis Directory
+            |${getDeletePotentialLinkAndTargetCommand(project.dirAnalysis)}""".stripMargin()
+    }
+
+    switch (mode) {
+        case ProjectDeletionMode.DELETE_ALL:
+            output << """\
+                |# Project Directory:"
+                |## Content:
+                |rm -rf ${absoluteProjectDirectory}/*
+                |
+                |## Directory:
+                |${getDeletePotentialLinkAndTargetCommand(absoluteProjectDirectory)}""".stripMargin()
+            deletionService.deleteProject(project)
+            break
+        case ProjectDeletionMode.DELETE_SEQUENCING_ONLY:
+            output << """\
+                |# Sequence Directory:"
+                |rm -rf ${absoluteProjectDirectory}/sequencing/""".stripMargin()
+            deletionService.deleteProjectContent(project)
+            break
+        default:
+            assert false: "no mode selected"
+    }
+
     println "Execute the following line:"
-    println output
+    println output.join("\n\n")
     assert false : "DEBUG: transaction intentionally failed to rollback changes"
+}
+
+String getDeletePotentialLinkAndTargetCommand(String path) {
+    Closure<String> rtrim = { String input ->
+        input.replaceAll(/\/*$/, '')
+    }
+    return """\
+        |rm -rf "`readlink -f ${path}`"
+        |rm -rf ${rtrim(path)}""".stripMargin()
+}
+
+boolean projectHasDataDependencies(Project project) {
+    boolean lanesFound = SeqTrack.withCriteria {
+        sample {
+            individual {
+                eq("project", project)
+            }
+        }
+    }
+
+    boolean bamsFound = AbstractMergedBamFile.withCriteria {
+        workPackage {
+            sample {
+                individual {
+                    eq("project", project)
+                }
+            }
+        }
+    }
+
+    return lanesFound || bamsFound
 }

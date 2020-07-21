@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -57,7 +58,13 @@ class DeletionService {
     DataSwapService dataSwapService
     RunService runService
 
+    void assertNoEgaSubmissionsForProject(Project project) {
+        assert !EgaSubmission.findAllByProject(project): "There are Ega Submissions connected to this Project, thus it can not be deleted"
+    }
+
     void deleteProjectContent(Project project) {
+        assertNoEgaSubmissionsForProject(project)
+
         // Delete individuals for a project
         Individual.findAllByProject(project).each { individual ->
             deleteIndividual(individual, false)
