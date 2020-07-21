@@ -37,7 +37,9 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
-class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest implements CellRangerFactory {
+abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest implements CellRangerFactory {
+
+    static final int CELLS = 1000
 
     Sample sample
     SeqType seqType
@@ -49,6 +51,8 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L002_R1_001.fastq.gz",
             "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L002_R2_001.fastq.gz",
     ]
+
+    abstract Map<String, Integer> getTestParameters()
 
     @Override
     void setup() {
@@ -89,6 +93,14 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
         }
     }
 
+    List<SeqTrack> createNSeqTracks(int n) {
+        assert n > 0: "create at least one SeqTrack"
+        assert n <= (fastqFiles.size() / 2): "more FastQs expected than provided"
+        return (0..(n * 2 - 1)).step(2).collect { Integer i ->
+            return createSeqTrack(fastqFiles[i], fastqFiles[i + 1])
+        }
+    }
+
     SeqTrack createSeqTrack(String fastq1, String fastq2) {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(mwp, [
                 seqType              : seqType,
@@ -99,11 +111,12 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
             dataFile.save(flush: true)
+            DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
         }
 
         linkFastqFiles(seqTrack, [
-                new File(getInputRootDirectory(), fastq1),
-                new File(getInputRootDirectory(), fastq2),
+                new File(inputRootDirectory, fastq1),
+                new File(inputRootDirectory, fastq2),
         ])
         return seqTrack
     }
@@ -121,51 +134,14 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
     }
 
     @Unroll
-    void "test CellRanger with one lane, with expectedCells #expected and enforcedCells #enforced"() {
+    void "test CellRanger with #p.nLanes lanes, with expectedCells #p.expected and enforcedCells #p.enforced"() {
         given:
         SessionUtils.withNewSession {
-            SeqTrack seqTrack = createSeqTrack(fastqFiles[0], fastqFiles[1])
-            mwp.refresh()
-            mwp.seqTracks = [seqTrack]
-            mwp.expectedCells = expected
-            mwp.enforcedCells = enforced
-            mwp.save(flush: true)
-
-            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
-            }
-        }
-
-        when:
-        execute()
-
-        then:
-        checkResults()
-
-        where:
-        expected | enforced
-        null     | null
-        1000     | null
-        null     | 1000
-    }
-
-    @Unroll
-    void "test CellRanger with two lanes, with expectedCells #expected and enforcedCells #enforced"() {
-        given:
-        SessionUtils.withNewSession {
-            SeqTrack seqTrack1 = createSeqTrack(fastqFiles[0], fastqFiles[1])
-            SeqTrack seqTrack2 = createSeqTrack(fastqFiles[2], fastqFiles[3])
             CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)
-            crmwp.seqTracks = [seqTrack1, seqTrack2]
-            mwp.expectedCells = expected
-            mwp.enforcedCells = enforced
+            crmwp.seqTracks = createNSeqTracks(p.nLanes)
+            mwp.expectedCells = p.expected
+            mwp.enforcedCells = p.enforced
             crmwp.save(flush: true)
-
-            crmwp.seqTracks.each { SeqTrack seqTrack ->
-                seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
-                    DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
-                }
-            }
         }
 
         when:
@@ -175,10 +151,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
         checkResults()
 
         where:
-        expected | enforced
-        null     | null
-        1000     | null
-        null     | 1000
+        p << [testParameters]
     }
 
     @Override
@@ -190,7 +163,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
     @Override
     Duration getTimeout() {
-        return Duration.ofHours(6)
+        return Duration.ofHours(3)
     }
 
     @Override
