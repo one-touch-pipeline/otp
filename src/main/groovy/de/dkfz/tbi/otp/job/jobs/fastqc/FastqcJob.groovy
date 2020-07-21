@@ -67,7 +67,6 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired
     ProcessingOptionService processingOptionService
 
-
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
         final SeqTrack seqTrack = getProcessParameterObject()
@@ -96,7 +95,6 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
             }
         }
     }
-
 
     @Override
     protected final void validate() throws Throwable {
@@ -161,7 +159,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                     ${decompressFileCommand}
                     ${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
                     ${deleteDecompressedFileCommand}
-                    chmod -R 440 ${outDir}/*.zip
+                    ${getChmodOnFastqcResultsCommand(outDir)}
                     """.stripIndent()
             clusterJobSchedulerService.executeJob(realm, command)
             createFastqcProcessedFileIfNotExisting(dataFile)
@@ -177,13 +175,11 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         }
     }
 
-
     private createFastqcProcessedFileIfNotExisting(DataFile dataFile) {
         if (!FastqcProcessedFile.findByDataFile(dataFile)) {
             fastqcDataFilesService.createFastqcProcessedFile(dataFile)
         }
     }
-
 
     private void createAndExecuteCopyCommand(Realm realm, List<DataFile> dataFiles, File outDir) {
         dataFiles.each { dataFile ->
@@ -195,7 +191,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                     cd ${seqCenterFastQcFile.parent};
                     md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName};
                     cp ${seqCenterFastQcFile} ${outDir};
-                    chmod 0644 ${outDir}/*
+                    ${getChmodOnFastqcResultsCommand(outDir)}
                     """.stripIndent()
             remoteShellHelper.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(outDir, seqCenterFastQcFile.fileName.toString()))
@@ -209,6 +205,10 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         }
     }
 
+    String getChmodOnFastqcResultsCommand(File resultDirectory) {
+        assert resultDirectory: "resultDirectory required to build command"
+        return "find ${resultDirectory.absolutePath} -type f -not -perm 440 -print -exec chmod 440 '{}' \\;"
+    }
 
     private boolean fastQcResultsFromSeqCenterAvailable(SeqTrack seqTrack) {
         List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)

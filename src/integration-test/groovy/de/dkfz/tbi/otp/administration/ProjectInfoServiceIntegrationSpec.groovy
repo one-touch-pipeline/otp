@@ -21,15 +21,14 @@
  */
 package de.dkfz.tbi.otp.administration
 
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile
-import spock.lang.Ignore
-import spock.lang.Specification
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -37,6 +36,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -52,7 +52,6 @@ import java.nio.file.attribute.PosixFilePermission
 @Integration
 class ProjectInfoServiceIntegrationSpec extends Specification implements UserAndRoles, DocumentFactory {
 
-    ProjectService projectService
     ProjectInfoService projectInfoService
     TestConfigService configService
 
@@ -61,6 +60,16 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
     void setupData() {
         createUserAndRoles()
+        projectInfoService = new ProjectInfoService(
+                executionHelperService: Mock(ExecutionHelperService),
+                fileSystemService     : Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                },
+                fileService           : new FileService(),
+                springSecurityService : Mock(SpringSecurityService) {
+                    _ * getCurrentUser() >> getUser(ADMIN)
+                },
+        )
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
                 (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
@@ -170,7 +179,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         }
 
         then:
-        Path projectInfoFile = Paths.get("${project.projectDirectory}/${projectService.PROJECT_INFO}/${file.name}")
+        Path projectInfoFile = Paths.get("${project.projectDirectory}/${ProjectService.PROJECT_INFO}/${file.name}")
         PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
 
         projectInfoFile.bytes == file.bytes
@@ -336,13 +345,6 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
     void "uploadProjectInfoToProjectFolder, creates file"() {
         given:
         setupData()
-
-        projectInfoService = new ProjectInfoService([
-            fileSystemService: Mock(FileSystemService) {
-                1 * getFilesystemForConfigFileChecksForRealm() >> FileSystems.default
-            },
-            fileService      : new FileService(),
-        ])
 
         byte[] content = "content".bytes
         ProjectInfo projectInfo = createProjectInfo()

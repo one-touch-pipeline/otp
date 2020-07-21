@@ -32,8 +32,10 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Principal
 
 import static org.junit.Assert.assertNotNull
@@ -76,6 +78,10 @@ trait UserAndRoles {
         ProjectRole.ALL_BASIC_PROJECT_ROLES.each { String name ->
             this[name] = DomainFactory.createProjectRole(name: name)
         }
+    }
+
+    User getUser(String username) {
+        return CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
     }
 
     static Object doWithAnonymousAuth(final Closure closure) {

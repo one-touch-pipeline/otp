@@ -174,8 +174,9 @@ md5sum `find -L ${furtherFilesSource} -type f` | ${updateBaseDir} > ${targetBase
 md5sum -c ${targetBaseDir}/md5sum.md5sum
 
 chgrp -hR ${executionHelperService.getGroup(epmbf.project.realm, epmbf.project.projectDirectory)} ${targetBaseDir}
-chmod 644 `find ${targetBaseDir} -type f`
-chmod 750 `find ${targetBaseDir} -type d`
+find ${targetBaseDir} -type d -not -perm 2750 -print -exec chmod 2750 '{}' \\;
+find ${targetBaseDir} -type f -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '{}' \\;
+find ${targetBaseDir} -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\;
 
 touch ${checkpoint}
 """

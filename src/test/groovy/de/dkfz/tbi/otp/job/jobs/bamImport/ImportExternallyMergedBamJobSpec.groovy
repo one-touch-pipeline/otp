@@ -216,7 +216,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         CreateFileHelper.createFile(epmbfWithMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
-                assert command ==~ getScript("echo [0-9a-f]{32}  [^ ]+.bam > [^ ]+.bam.md5sum")
+                assert command ==~ getScript("echo [0-9a-f]{32}  \\S+.bam > \\S+.bam.md5sum")
             }
         }
 
@@ -608,34 +608,35 @@ set -v
 module load samtools
 module load groovy
 
-if \\[ -e "[^ ]+" \\]; then
-    echo "File [^ ]+.bam already exists."
-    rm -rf [^ ]+\\* [^ ]+
+if \\[ -e "\\S+" \\]; then
+    echo "File \\S+.bam already exists."
+    rm -rf \\S+\\* \\S+
 fi
 
-mkdir -p -m 2750 [^ ]+
+mkdir -p -m 2750 \\S+
 # copy and calculate max read length at the same time
-cat [^ ]+.bam \\| tee [^ ]+.bam \\| samtools view - \\| groovy /asdf/bamMaxReadLength.groovy > [^ ]+.bam.maxReadLength
-cp -HL [^ ]+.bam.bai [^ ]+.bam.bai
+cat \\S+.bam \\| tee \\S+.bam \\| samtools view - \\| groovy /asdf/bamMaxReadLength.groovy > \\S+.bam.maxReadLength
+cp -HL \\S+.bam.bai \\S+.bam.bai
 
-mkdir -p -m 2750 [^ ]+
-cp -HLR [^ ]+ [^ ]+
+mkdir -p -m 2750 \\S+
+cp -HLR \\S+ \\S+
 
-cd [^ ]+
+cd \\S+
 ${hasOrNotMd5SumCmd}
-md5sum -c [^ ]+.bam.md5sum
+md5sum -c \\S+.bam.md5sum
 
-md5sum .*.bam.bai \\| sed -e 's#.*#.*#' > [^ ]+.bam.bai.md5sum
-md5sum -c [^ ]+.bam.bai.md5sum
+md5sum .*.bam.bai \\| sed -e 's#.*#.*#' > \\S+.bam.bai.md5sum
+md5sum -c \\S+.bam.bai.md5sum
 
-md5sum `find -L .* -type f` \\| sed -e 's#.*#.*#' > [^ ]+\\/md5sum.md5sum
-md5sum -c [^ ]+\\/md5sum.md5sum
+md5sum `find -L .* -type f` \\| sed -e 's#.*#.*#' > \\S+\\/md5sum.md5sum
+md5sum -c \\S+\\/md5sum.md5sum
 
-chgrp -hR [^ ]+ [^ ]+
-chmod 644 `find [^ ]+ -type f`
-chmod 750 `find [^ ]+ -type d`
+chgrp -hR \\S+ \\S+
+find \\S+ -type d -not -perm 2750 -print -exec chmod 2750 '\\{\\}' \\\\;
+find \\S+ -type f -not -perm 440 -not -name "\\*.bam" -not -name "\\*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '\\{\\}' \\\\;
+find \\S+ -type f -not -perm 444 \\\\\\( -name "\\*.bam" -or -name "\\*.bai" \\\\\\) -print -exec chmod 444 '\\{\\}' \\\\;
 
-touch [^ ]+
+touch \\S+
 """
     }
 }

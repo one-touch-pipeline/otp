@@ -26,20 +26,20 @@ import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 
-import java.nio.file.FileSystem
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
 @Transactional
 class ProjectInfoService {
 
     SpringSecurityService springSecurityService
+    ExecutionHelperService executionHelperService
     FileSystemService fileSystemService
     FileService fileService
 
@@ -100,7 +100,7 @@ class ProjectInfoService {
         cmd.validate()
         assert !cmd.errors.hasErrors()
         ProjectInfo projectInfo = cmd.projectInfo
-        FileSystem fs = fileSystemService.getRemoteFileSystem(projectInfo.project.realm)
+        FileSystem fs = getRemoteFileSystemForProject(projectInfo.project)
         Path path = fs.getPath(projectInfo.path)
         fileService.deleteDirectoryRecursively(path)
         projectInfo.project = null
@@ -110,23 +110,23 @@ class ProjectInfoService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
-        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
-        Path file = fs.getPath(projectInfo.path)
+        Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(projectInfo.path)
 
         return Files.exists(file) ? file.bytes : [] as byte[]
     }
 
     private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
-        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
-        Path projectDirectory = fs.getPath(projectInfo.project.projectDirectory.toString())
-        Path projectInfoDirectory = projectDirectory.resolve(ProjectService.PROJECT_INFO)
+        String absoluteFilePath = "${projectInfo.project.projectDirectory.absolutePath}/${ProjectService.PROJECT_INFO}/${projectInfo.fileName}"
+        Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(absoluteFilePath)
 
-        Path file = projectInfoDirectory.resolve(projectInfo.fileName)
+        fileService.createFileWithContent(file, content, [PosixFilePermission.OWNER_READ] as Set)
+        executionHelperService.setGroup(projectInfo.project.realm, new File(absoluteFilePath), projectInfo.project.unixGroup)
 
-        fileService.createFileWithContent(file, content, [
-                PosixFilePermission.OWNER_READ,
-        ] as Set)
         return file
+    }
+
+    FileSystem getRemoteFileSystemForProject(Project project) {
+        return fileSystemService.getRemoteFileSystem(project.realm)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
