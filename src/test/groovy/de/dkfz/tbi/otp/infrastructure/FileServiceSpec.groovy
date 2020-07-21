@@ -26,6 +26,8 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
@@ -667,28 +669,86 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "findFileInPath, file can be found with regular expression"() {
         given:
-        Path file1 = temporaryFolder.newFile("Test1_XYZ.csv").toPath()
-        Path file2 = temporaryFolder.newFile("Test1_ABC.csv").toPath()
-        file1.text = SOME_CONTENT
-        file2.text = SOME_CONTENT
-        String matcher = "Test[0-9]{1}_XYZ.csv"
+        Path expected = temporaryFolder.newFile("Test1_XYZ.csv").toPath()
+        temporaryFolder.newFile("Test1_ABC.csv")
+
+        String matcher = "Test[0-9]_XYZ.csv"
 
         expect:
-        FileService.findFileInPath(temporaryFolder.root.toPath(), matcher) == file1
+        FileService.findFileInPath(temporaryFolder.root.toPath(), matcher) == expected
     }
 
     void "findFileInPath, file can not be found with regular expression"() {
         given:
-        Path file = temporaryFolder.newFile("file.txt").toPath()
-        file.text = SOME_CONTENT
-        String matcher = "not-matching"
+        temporaryFolder.newFile("file.txt")
 
         when:
-        FileService.findFileInPath(temporaryFolder.root.toPath(), matcher) == file
+        FileService.findFileInPath(temporaryFolder.root.toPath(), "not-matching")
 
         then:
         AssertionError e = thrown()
-        e.message =~ /Cannot find any file for the given regex/
+        e.message =~ /Cannot find any file with the filename matching/
+    }
+
+    void "findFileInPath, only matches filename, not absolute path"() {
+        given:
+        String matcher = "this-matches"
+        Path parent = temporaryFolder.newFolder("${matcher}").toPath()
+        temporaryFolder.newFile("${matcher}/file.txt")
+
+        when:
+        FileService.findFileInPath(parent, matcher)
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ /Cannot find any file with the filename matching/
+    }
+
+    @Unroll
+    void "findAllFilesInPath, finds all files with regex: #matcher"() {
+        given:
+        List<Path> files = ["file1.txt", "file2.txt", "record3.txt"].collect {
+            temporaryFolder.newFile(it).toPath()
+        }
+
+        when:
+        List<Path> output = FileService.findAllFilesInPath(temporaryFolder.root.toPath(), matcher)
+
+        then:
+        CollectionUtils.containSame(files[expectedFiles], output)
+
+        where:
+        matcher || expectedFiles
+        ".*"    || [0, 1, 2]
+        "fi.*"  || [0, 1]
+        "r.*"   || [2]
+    }
+
+    void "findAllFilesInPath, cannot find a file"() {
+        given:
+        temporaryFolder.newFile("fileNotFound.txt").toPath()
+
+        when:
+        FileService.findAllFilesInPath(temporaryFolder.root.toPath(), "wantToFindFile.txt")
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ /Cannot find any files with their filenames matching/
+    }
+
+    void "findAllFilesInPath, only matches filename, not absolute path"() {
+        given:
+        String matcher = "this-matches"
+        Path parent = temporaryFolder.newFolder("${matcher}").toPath()
+        temporaryFolder.newFile("${matcher}/file1.txt")
+        temporaryFolder.newFile("${matcher}/file2.txt")
+
+        when:
+        FileService.findAllFilesInPath(parent, matcher)
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ /Cannot find any files with their filenames matching/
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -775,7 +835,7 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureFileIsReadable, fails when the file is not readable"() {
         given:
         File file = temporaryFolder.newFile()
-        file.setReadable(false)
+        file.readable = false
 
         when:
         FileService.ensureFileIsReadable(file.toPath())
@@ -952,6 +1012,76 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
+    }
+
+    void "ensureDirIsReadableAndExecutable, succeed when isReadable and isExecutable"() {
+        given:
+        Path path = temporaryFolder.newFolder().toPath()
+        path.toFile().executable = true
+
+        when:
+        FileService.ensureDirIsReadableAndExecutable(path)
+
+        then:
+        noExceptionThrown()
+    }
+
+    @Unroll
+    void "ensureDirIsReadableAndExecutable, fail when file #errorCase"() {
+        given:
+        Path path = temporaryFolder.newFolder().toPath()
+        path.toFile().executable = executable
+        path.toFile().readable = readable
+
+        when:
+        FileService.ensureDirIsReadableAndExecutable(path)
+
+        then:
+        thrown(AssertionError)
+
+        where:
+        errorCase        || executable | readable
+        "not executable" || false      | true
+        "not readable"   || true       | false
+        "neither"        || false      | false
+    }
+
+    //----------------------------------------------------------------------------------------------------
+    // test for ensurePathIsReadable
+
+    void "ensurePathIsReadable, fails when the path does not exist"() {
+        given:
+        Path file = temporaryFolder.newFolder().toPath()
+        file.toFile().delete()
+
+        when:
+        FileService.ensurePathIsReadable(file)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "ensurePathIsReadable, fails when the path is not readable"() {
+        given:
+        Path file = temporaryFolder.newFolder().toPath()
+        file.toFile().readable = false
+
+        when:
+        FileService.ensurePathIsReadable(file)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "ensurePathIsReadable, succeed when path is a file"() {
+        given:
+        Path file = temporaryFolder.newFile().toPath()
+
+        when:
+        FileService.ensurePathIsReadable(file)
+
+        then:
+        noExceptionThrown()
     }
 
     //----------------------------------------------------------------------------------------------------

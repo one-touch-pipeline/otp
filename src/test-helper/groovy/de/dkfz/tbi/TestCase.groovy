@@ -25,12 +25,14 @@ import org.junit.Assert
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Files
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
@@ -199,21 +201,22 @@ class TestCase {
         assert shouldFail(clazz, code).contains(messagePart)
     }
 
-    static void checkDirectoryContentHelper(File baseDir, List<File> expectedDirs, List<File> expectedFiles = [], List<File> expectedLinks = []) {
+    static void checkDirectoryContentHelper(Path baseDir, List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
         expectedDirs.each {
-            assert it.exists() && it.isDirectory() && it.canRead() && it.canExecute()
+            FileService.ensureDirIsReadableAndExecutable(it)
         }
         expectedFiles.each {
-            assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
+            FileService.ensureFileIsReadableAndNotEmpty(it)
         }
         expectedLinks.each {
-            assert it.exists() && Files.isSymbolicLink(it.toPath()) && it.canRead()
+            FileService.ensurePathIsReadable(it)
+            assert Files.isSymbolicLink(it)
         }
 
-        Set<File> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {
-            it.parentFile == baseDir
+        Set<Path> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {
+            it.parent == baseDir
         } as Set
-        Set<File> foundEntries = baseDir.listFiles() as Set
+        Set<Path> foundEntries = FileService.findAllFilesInPath(baseDir)
         assert expectedEntries == foundEntries
     }
 

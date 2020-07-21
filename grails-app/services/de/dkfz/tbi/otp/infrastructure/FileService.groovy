@@ -171,65 +171,93 @@ class FileService {
     }
 
     /**
-     * Finds first available file using the given regex
+     * Finds and returns first available file with the filename matching the given regex
      */
-    static Path findFileInPath(final Path DIR, final String FILE_REGEX) {
-        ensureDirIsReadable(DIR)
+    static Path findFileInPath(final Path dir, final String fileRegex) {
+        ensureDirIsReadable(dir)
         Path match = null
         assert ThreadUtils.waitFor({
             Stream<Path> stream = null
             try {
-                stream = Files.list(DIR)
-                match = stream.find({ Path content ->
-                    content =~ FILE_REGEX
-                }) as Path
+                stream = Files.list(dir)
+                match = stream.find { Path path ->
+                    path.fileName =~ fileRegex
+                } as Path
             } finally {
                 stream?.close()
             }
-        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES) : "Cannot find any file for the given regex"
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES) : "Cannot find any file with the filename matching '${fileRegex}'"
         return match
+    }
+
+    /**
+     * Finds and returns all available files with filenames matching the given regex
+     */
+    static List<Path> findAllFilesInPath(final Path dir, final String fileRegex = ".*") {
+        ensureDirIsReadable(dir)
+        List<Path> matches = []
+        assert ThreadUtils.waitFor({
+            Stream<Path> stream = null
+            try {
+                stream = Files.list(dir)
+                matches = stream.findAll { Path path ->
+                    path.fileName =~ fileRegex
+                } as List<Path>
+            } finally {
+                stream?.close()
+            }
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES) : "Cannot find any files with their filenames matching '${fileRegex}'"
+        return matches
     }
 
     /**
      * Finds first available file using the given regex and ensures match is readable and not empty.
      */
-    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final File workDirectory, final String FILE_REGEX, final FileSystem FILE_SYSTEM) {
-        final Path FOUND_FILE = findFileInPath(
-                toPath(workDirectory, FILE_SYSTEM),
-                FILE_REGEX
-        )
-        ensureFileIsReadableAndNotEmpty(FOUND_FILE)
-        return FOUND_FILE
+    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final File workDirectory, final String regex, final FileSystem fileSystem) {
+        Path foundFile = findFileInPath(toPath(workDirectory, fileSystem), regex)
+        ensureFileIsReadableAndNotEmpty(foundFile)
+        return foundFile
     }
 
-    static void ensureFileIsReadableAndNotEmpty(final Path FILE) {
-        ensureFileIsReadable(FILE)
-        assert Files.size(FILE) > 0L
+    static void ensureFileIsReadableAndNotEmpty(final Path file) {
+        ensureFileIsReadable(file)
+        assert Files.size(file) > 0L
     }
 
-    static void ensureFileIsReadable(final Path FILE) {
-        assert FILE.absolute
-        waitUntilExists(FILE)
-        assert Files.isRegularFile(FILE)
-        assert Files.isReadable(FILE)
+    static void ensureFileIsReadable(final Path file) {
+        assert file.absolute
+        waitUntilExists(file)
+        assert Files.isRegularFile(file)
+        assert Files.isReadable(file)
     }
 
-    static void ensureDirIsReadableAndNotEmpty(final Path DIR) {
-        ensureDirIsReadable(DIR)
+    static void ensurePathIsReadable(final Path file) {
+        assert file.absolute
+        waitUntilExists(file)
+        assert Files.isReadable(file)
+    }
+
+    static void ensureDirIsReadableAndNotEmpty(final Path dir) {
+        ensureDirIsReadable(dir)
         Stream<Path> stream = null
         try {
-            stream = Files.list(DIR)
+            stream = Files.list(dir)
             assert stream.count() != 0
         } finally {
             stream?.close()
         }
     }
 
-    static void ensureDirIsReadable(final Path DIR) {
-        assert DIR.absolute
-        waitUntilExists(DIR)
-        assert Files.isDirectory(DIR)
-        assert Files.isReadable(DIR)
+    static void ensureDirIsReadable(final Path dir) {
+        assert dir.absolute
+        waitUntilExists(dir)
+        assert Files.isDirectory(dir)
+        assert Files.isReadable(dir)
+    }
+
+    static void ensureDirIsReadableAndExecutable(final Path dir) {
+        ensureDirIsReadable(dir)
+        assert Files.isExecutable(dir)
     }
 
     static String readFileToString(Path path, Charset encoding) throws IOException {
