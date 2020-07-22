@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.*
@@ -36,6 +37,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import static de.dkfz.tbi.otp.administration.Document.FormatType.CSV
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
+@Secured('ROLE_OPERATOR')
 class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     static allowedMethods = [

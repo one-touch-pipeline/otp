@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationException
 import groovy.transform.TupleConstructor
 import org.springframework.validation.Errors
@@ -36,6 +37,7 @@ import de.dkfz.tbi.util.MultiObjectValueSource
 
 import java.time.LocalDate
 
+@Secured('ROLE_OPERATOR')
 class ProjectRequestController {
 
     static allowedMethods = [
