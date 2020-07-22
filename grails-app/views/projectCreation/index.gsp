@@ -340,6 +340,11 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'internalNotes', cmd: cmd, type: 'multi-line-string']"/>
             </tr>
             <tr>
+                <td><g:message code="project.publiclyAvailable"/></td>
+                <td><g:checkBox name="publiclyAvailable" checked="${source.getByFieldName("publiclyAvailable")}" value="true"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'publiclyAvailable', cmd: cmd, type: 'boolean']"/>
+            </tr>
+            <tr>
                 <td></td>
                 <td><g:submitButton name="submit" value="Submit"/></td>
                 <td></td>

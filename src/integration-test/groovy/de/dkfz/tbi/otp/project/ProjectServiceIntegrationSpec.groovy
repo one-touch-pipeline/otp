@@ -158,20 +158,21 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
         }
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: name,
-                dirName: dirName,
-                individualPrefix: 'individualPrefix',
-                dirAnalysis: dirAnalysis,
+                name                          : name,
+                dirName                       : dirName,
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : dirAnalysis,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
-                qcThresholdHandling: qcThresholdHandling,
-                unixGroup: unixGroup,
-                projectGroup: projectGroup,
-                nameInMetadataFiles: nameInMetadataFiles,
-                forceCopyFiles: forceCopyFiles,
-                description: description,
-                processingPriority: createProcessingPriority(priority:  processingPriority),
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : qcThresholdHandling,
+                unixGroup                     : unixGroup,
+                projectGroup                  : projectGroup,
+                nameInMetadataFiles           : nameInMetadataFiles,
+                forceCopyFiles                : forceCopyFiles,
+                description                   : description,
+                processingPriority            : createProcessingPriority(priority: processingPriority),
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
+                publiclyAvailable             : false,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)

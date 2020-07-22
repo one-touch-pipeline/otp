@@ -197,6 +197,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     String grantId
     String internalNotes
     boolean ignoreUsersFromBaseObjects
+    boolean publiclyAvailable
 
     static constraints = {
         name(blank: false, validator: { val, obj ->
