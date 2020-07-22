@@ -137,9 +137,6 @@ class CopyFilesJobSpec extends Specification implements DataTest {
         copyFilesJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
-#for debug kerberos problem
-klist \\|\\| true
-
 cd .*
 if \\[ -e ".*" \\]; then
     echo "File .* already exists."

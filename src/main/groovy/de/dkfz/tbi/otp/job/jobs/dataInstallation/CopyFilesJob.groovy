@@ -90,9 +90,6 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
                 returnValue = NextAction.SUCCEED
             } else {
                 String cmd = """
-#for debug kerberos problem
-klist || true
-
 cd ${finalFile.parent}
 if [ -e "${finalFile.path}" ]; then
     echo "File ${finalFile.path} already exists."
