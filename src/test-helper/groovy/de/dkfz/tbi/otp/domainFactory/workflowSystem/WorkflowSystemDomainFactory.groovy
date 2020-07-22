@@ -66,6 +66,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 individual : { createIndividual() },
                 seqType    : { createSeqType() },
                 displayName: "displayName_${nextId}",
+                outputRole: { properties.producedBy ? "role ${nextId}" : null },
         ], properties)
     }
 
