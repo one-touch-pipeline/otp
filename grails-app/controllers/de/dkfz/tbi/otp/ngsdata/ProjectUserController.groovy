@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.Validateable
-import groovy.json.JsonBuilder
 import groovy.transform.TupleConstructor
 import org.apache.commons.lang.WordUtils
 import org.springframework.validation.FieldError
@@ -222,10 +221,6 @@ class ProjectUserController implements CheckAndCall {
         checkErrorAndCallMethod(cmd) {
             userService.updateEmail(cmd.user, cmd.newEmail)
         }
-    }
-
-    JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
-        render new JsonBuilder(ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)) as JSON
     }
 }
 
@@ -442,13 +437,5 @@ class AddUserToProjectCommand implements Serializable {
 
     void setEmail(String email) {
         this.email = StringUtils.trimAndShortenWhitespace(email)
-    }
-}
-
-class UserSearchSuggestionsCommand implements Serializable {
-    String searchString
-
-    void setValue(String value) {
-        this.searchString = value
     }
 }

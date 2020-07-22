@@ -37,6 +37,7 @@ class NoProjectInterceptor {
         matchAll()
                 .except(controller: 'errors')
                 .except(controller: 'projectRequest')
+                .except(controller: 'ldap')
                 .except(controller: 'projectCreation')
                 .except(controller: 'privacyPolicy')
                 .except(controller: 'logout', action: 'index')

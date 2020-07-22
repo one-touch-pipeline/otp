@@ -52,7 +52,7 @@ $(function () {
         $.ajax({
             type: 'GET',
             url: $.otp.createLink({
-                controller: 'projectUser',
+                controller: 'ldap',
                 action: 'getUserSearchSuggestions',
                 parameters: {
                     "searchString": searchElement.val()
