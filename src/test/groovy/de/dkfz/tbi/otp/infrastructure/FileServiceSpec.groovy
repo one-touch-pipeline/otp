@@ -845,6 +845,26 @@ class FileServiceSpec extends Specification implements DataTest {
     }
 
     //----------------------------------------------------------------------------------------------------
+    //test for isFileReadable
+
+    void "isFileReadable, returns true if file is readable"() {
+        given:
+        Path path = temporaryFolder.newFile().toPath()
+
+        expect:
+        FileService.isFileReadable(path)
+    }
+
+    void "isFileReadable, returns false if file is not readable"() {
+        given:
+        Path path = temporaryFolder.newFile().toPath()
+        path.toFile().readable = false
+
+        expect:
+        !FileService.isFileReadable(path)
+    }
+
+    //----------------------------------------------------------------------------------------------------
     //test for isFileReadableAndNotEmpty
 
     void "ensureFileIsReadableAndNotEmpty, if file exists and has content, then return without error"() {
@@ -1232,5 +1252,20 @@ class FileServiceSpec extends Specification implements DataTest {
                 PosixFilePermission.GROUP_WRITE,
                 PosixFilePermission.GROUP_EXECUTE,
         ])
+    }
+
+    void "fileSizeExceeded, false if fileSize is larger than threshold"() {
+        Path newFile = temporaryFolder.newFile().toPath()
+        newFile.text = SOME_CONTENT
+
+        expect:
+        fileService.fileSizeExceeded(newFile.toFile(), 1)
+    }
+
+    void "fileSizeExceeded, true if fileSize is smaller than threshold"() {
+        Path newFile = temporaryFolder.newFile().toPath()
+
+        expect:
+        !fileService.fileSizeExceeded(newFile.toFile(), newFile.size() + 1)
     }
 }

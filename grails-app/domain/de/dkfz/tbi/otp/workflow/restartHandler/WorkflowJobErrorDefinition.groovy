@@ -60,9 +60,9 @@ class WorkflowJobErrorDefinition implements Entity {
     enum SourceType {
         /** check the error message */
         MESSAGE,
-        /**c heck the cluster logs of jobs sending directly by otp or by roddy */
+        /** check the cluster logs of jobs sent directly by OTP or by Roddy */
         CLUSTER_JOB,
-        /** check the was run log */
+        /** check the WES run log */
         WES_RUN_LOG,
         /** check the wes task logs */
         WES_TASK_LOG,

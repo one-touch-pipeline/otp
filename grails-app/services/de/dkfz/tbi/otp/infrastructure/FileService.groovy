@@ -237,6 +237,15 @@ class FileService {
         assert Files.isReadable(file)
     }
 
+    static boolean isFileReadable(final Path file) {
+        try {
+            ensureFileIsReadable(file)
+        } catch (AssertionError ignored) {
+            return false
+        }
+        return true
+    }
+
     static void ensureDirIsReadableAndNotEmpty(final Path dir) {
         ensureDirIsReadable(dir)
         Stream<Path> stream = null
@@ -311,6 +320,10 @@ class FileService {
         return (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(
                 StaticApplicationContextWrapper.context.processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.FILESYSTEM_TIMEOUT)
         )
+    }
+
+    boolean fileSizeExceeded(File file, long limitInBytes) {
+        return file.size() > limitInBytes
     }
 
     /**
