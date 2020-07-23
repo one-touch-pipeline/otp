@@ -19,33 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * Base interface for all jobs
- *
- * To implement a job, the existing specialized abstract classes should be extended
- */
-interface Job {
-    void execute(WorkflowStep workflowStep) throws Throwable
-    JobStage getJobStage()
-}
+import de.dkfz.tbi.otp.workflow.jobs.Job
+import de.dkfz.tbi.otp.workflow.jobs.JobStage
 
-/**
- * Name of the different steps
- */
-enum JobStage {
-    CONDITIONAL_FAIL,
-    CHECK_PREREQUIREMENTS,
-    PREPARE,
-    EXECUTE_PIPELINE,
-    VALIDATION,
-    OUTPUT_UNIFICATION,
-    PARSE,
-    CHECK_QC,
-    CLEANUP,
-    LINK,
-    CORRECT_PERMISSION,
+abstract class AbstractConditionalFailJob implements Job {
+
+    @Autowired WorkflowStateChangeService workflowStateChangeService
+
+    @Override
+    final void execute(WorkflowStep workflowStep) throws Throwable {
+        check(workflowStep)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
+    }
+
+    abstract protected void check(WorkflowStep workflowStep)
+
+    @Override
+    final JobStage getJobStage() {
+        return JobStage.CONDITIONAL_FAIL
+    }
 }
