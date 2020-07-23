@@ -37,6 +37,10 @@ class ClusterJobSubmissionOptionsService {
 
     ProcessingOptionService processingOptionService
 
+    Map<JobSubmissionOption, String> readDefaultOptions(Realm realm) {
+        return convertJsonStringToMap(realm.defaultJobSubmissionOptions)
+    }
+
     /**
      * Method to read options for job submission to the cluster job scheduler from the database.
      * Options are read in the following order: from Realm, from job-specific processing option,
@@ -52,7 +56,7 @@ class ClusterJobSubmissionOptionsService {
         String jobClass = processingStep.nonQualifiedJobClass
 
         // default options for the realm
-        Map<JobSubmissionOption, String> options = convertJsonStringToMap(realm.defaultJobSubmissionOptions)
+        Map<JobSubmissionOption, String> options = readDefaultOptions(realm)
 
         // options for the job class
         options.putAll(convertJsonStringToMap(

@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import javax.sql.DataSource
 
@@ -71,6 +72,7 @@ class ClusterJobService {
     /**
      * creates a cluster job object with at this time known attributes
      */
+    @SuppressWarnings("ParameterCount")
     ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
                                 ProcessingStep processingStep, SeqType seqType = null,
                                 String clusterJobName = processingStep.getClusterJobName(),
@@ -87,6 +89,25 @@ class ClusterJobService {
                 queued: new DateTime(),
         ).save(flush: true)
         assert job != null
+        return job
+    }
+
+    /**
+     * creates a cluster job object with at this time known attributes
+     */
+    @SuppressWarnings("ParameterCount")
+    ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
+                                WorkflowStep workflowStep, String clusterJobName,
+                                String jobClass = workflowStep.class.simpleName) {
+        ClusterJob job = new ClusterJob([
+                workflowStep  : workflowStep,
+                realm         : realm,
+                clusterJobId  : clusterJobId,
+                userName      : userName,
+                clusterJobName: clusterJobName,
+                jobClass      : jobClass,
+                queued        : new DateTime(),
+        ]).save(flush: true)
         return job
     }
 

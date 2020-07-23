@@ -102,6 +102,10 @@ class WorkflowStep implements Commentable, Entity {
         return count
     }
 
+    ProcessingPriority getPriority() {
+        return workflowRun.priority
+    }
+
     List<WorkflowLog> getLogs() {
         WorkflowLog.findAllByWorkflowStep(this).sort {
             it.dateCreated
