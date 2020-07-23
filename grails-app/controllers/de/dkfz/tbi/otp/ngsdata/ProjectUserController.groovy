@@ -102,7 +102,7 @@ class ProjectUserController implements CheckAndCall {
                 if (cmd.addViaLdap) {
                     userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                             project,
-                            ProjectRole.findAllByNameInList(cmd.projectRoleNames) as Set<ProjectRole>,
+                            ProjectRole.findAllByNameInList(cmd.projectRoleNameList) as Set<ProjectRole>,
                             cmd.searchString,
                             [
                                     accessToOtp           : true,
@@ -117,7 +117,7 @@ class ProjectUserController implements CheckAndCall {
                             project,
                             cmd.realName,
                             cmd.email,
-                            ProjectRole.findAllByNameInList(cmd.projectRoleNames) as Set<ProjectRole>,
+                            ProjectRole.findAllByNameInList(cmd.projectRoleNameList) as Set<ProjectRole>,
                     )
                 }
                 message = "Data stored successfully"
@@ -382,7 +382,7 @@ class AddUserToProjectCommand implements Serializable {
     boolean addViaLdap = true
 
     String searchString
-    List<String> projectRoleNames
+    List<String> projectRoleNameList
     boolean accessToFiles = false
     boolean manageUsers = false
     boolean manageUsersAndDelegate = false
@@ -392,7 +392,7 @@ class AddUserToProjectCommand implements Serializable {
     String email
 
     void setProjectRoleNames(String value) {
-        this.projectRoleNames = JSON.parse(value) as List<String>
+        this.projectRoleNameList = value.split(',')*.trim()
     }
 
     static constraints = {
@@ -402,8 +402,8 @@ class AddUserToProjectCommand implements Serializable {
                 return "empty"
             }
         })
-        projectRoleNames(nullable: true, validator: { val, obj ->
-            if (!obj.projectRoleNames) {
+        projectRoleNameList(nullable: true, validator: { val, obj ->
+            if (!obj.projectRoleNameList) {
                 return "empty"
             }
         })
