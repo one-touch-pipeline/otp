@@ -24,11 +24,13 @@
  */
 
 $(function() {
-    $(".expandable-more").click(function() {
+    $(".expandable-more").click(function(e) {
+        e.preventDefault();
         $(this).parent().css("display", "none");
         $(this).parent().siblings(".expandable-full").css("display", "");
     });
-    $(".expandable-less").click(function() {
+    $(".expandable-less").click(function(e) {
+        e.preventDefault();
         $(this).parent().css("display", "none");
         $(this).parent().siblings(".expandable-shortened").css("display", "");
     });
