@@ -213,6 +213,10 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
+    PseudoEnvironment getPseudoEnvironment() {
+        return PseudoEnvironment.resolveByEnvironmentName(environmentName)
+    }
+
     String getAutoImportSecret() {
         return otpProperties.get(OtpProperty.CONFIG_AUTO_IMPORT_SECRET) ?: ''
     }

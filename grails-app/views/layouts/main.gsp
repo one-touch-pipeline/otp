@@ -31,18 +31,7 @@
     <meta name="contextPath" content="${request.contextPath}">
     <meta name="projectName" content="${selectedProject?.name}">
     <meta name="projectParameter" content="${projectParameter}">
-    <g:if test="${otp.environmentName() == 'production'}">
-        <link rel="shortcut icon" href="${assetPath(src: 'favicon.ico')}" type="image/x-icon">
-    </g:if>
-    <g:elseif test="${otp.environmentName() in ['alpha', 'beta', 'gamma']}">
-        <link rel="shortcut icon" href="${assetPath(src: 'favicon_light_goldenrod.ico')}" type="image/x-icon">
-    </g:elseif>
-    <g:elseif test="${otp.environmentName() == 'development' }">
-        <link rel="shortcut icon" href="${assetPath(src: 'favicon_pale_green.ico')}" type="image/x-icon">
-    </g:elseif>
-    <g:else>
-        <link rel="shortcut icon" href="${assetPath(src: 'favicon_light_slate_blue.ico')}" type="image/x-icon">
-    </g:else>
+    <otp:favicon/>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:stylesheet src="modules/defaultPageDependencies.css"/>
     <asset:stylesheet src="modules/style.css"/>

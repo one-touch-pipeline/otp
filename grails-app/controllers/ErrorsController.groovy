@@ -74,4 +74,10 @@ class ErrorsController {
     }
 
     def noProject() { }
+
+    def switchedUserDeniedException() {
+        return [
+                exception: request.getAttribute('exception')
+        ]
+    }
 }

@@ -102,7 +102,14 @@ class OtpTagLib {
      * This name can be used to have environment or instance specific CSS classes.
      */
     def environmentName = {
-        out << configService.getEnvironmentName()
+        out << configService.environmentName
+    }
+
+    /**
+     * Returns an environment depending favicon
+     */
+    def favicon = {
+        out << "<link rel=\"shortcut icon\" href=\"${g.assetPath(src: configService.pseudoEnvironment.ico)}\" type=\"image/x-icon\">"
     }
 
     /**
@@ -287,7 +294,7 @@ class OtpTagLib {
         if (expandable.toBoolean()) {
             out << """\
             |<span>
-            |<span class='expandable-shortened'>${shortened} <a class='expandable-more' href='#'>[show more]</a></span>
+            |<span class='expandable-shortened'>${shortened} <a class='expandable-more' href=''>[show more]</a></span>
             |<span class='expandable-full keep-whitespace' style='display: none'>${full} <a class='expandable-less' href='#'>[show less]</a></span>
             |</span>""".stripMargin()
         } else {
