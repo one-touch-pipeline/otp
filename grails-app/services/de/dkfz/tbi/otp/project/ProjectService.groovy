@@ -39,23 +39,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.GeneModel
-import de.dkfz.tbi.otp.ngsdata.GeneModelService
-import de.dkfz.tbi.otp.ngsdata.ProjectCreationCommand
-import de.dkfz.tbi.otp.ngsdata.ProjectGroup
-import de.dkfz.tbi.otp.ngsdata.ProjectRole
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndexService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqTypeAlignmentProperty
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
-import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -104,6 +89,8 @@ class ProjectService {
     UserProjectRoleService userProjectRoleService
     WorkflowConfigService workflowConfigService
     MailHelperService mailHelperService
+    MessageSourceService messageSourceService
+    CreateNotificationTextService createNotificationTextService
 
     /**
      * @return List of all available Projects
@@ -295,6 +282,24 @@ class ProjectService {
                 assert false: "ProcessingOption EMAIL_RECIPIENT_ERRORS has to be set so OTP can sent emails about needed manual steps"
             }
         }
+    }
+
+    void sendProjectCreationNotificationEmail(Project project) {
+        String subject = messageSourceService.createMessage("notification.projectCreation.subject", [projectName: project.displayName])
+        String content = messageSourceService.createMessage("notification.projectCreation.message",
+                [
+                        projectName               : project.displayName,
+                        linkProjectConfig         : createNotificationTextService.createOtpLinks([project], 'projectConfig', 'index'),
+                        projectFolder             : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
+                        analysisFolder            : project.dirAnalysis,
+                        linkUserManagementConfig  : createNotificationTextService.createOtpLinks([project], 'projectUser', 'index'),
+                        clusterName               : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
+                        clusterAdministrationEmail: processingOptionService.findOptionAsString(OptionName.EMAIL_CLUSTER_ADMINISTRATION),
+                        contactEmail              : processingOptionService.findOptionAsString(OptionName.EMAIL_OTP_MAINTENANCE),
+                        teamSignature             : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                ])
+        mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project).sort() +
+                processingOptionService.findOptionAsList(OptionName.EMAIL_RECIPIENT_NOTIFICATION)).unique())
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

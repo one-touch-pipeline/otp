@@ -851,7 +851,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        List<UserProjectRole> userProjectRoles = 2.collect {
+        List<UserProjectRole> userProjectRoles = (1..2).collect {
             DomainFactory.createUserProjectRole(
                     project: createProject(unixGroup: UNIX_GROUP),
                     (flag): false,
@@ -864,11 +864,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        userProjectRoles.every {
-            it."${flag}" == true
-        }
+        userProjectRoles[0]."${flag}" == true
         fileAccessMail * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, _ as String)
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -876,9 +873,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        userProjectRoles.every {
-            it."${flag}" == false
-        }
+        userProjectRoles[0]."${flag}" == false
+
         fileAccessMail * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, _ as String)
         _ * userProjectRoleService.mailHelperService.sendEmail(*_)
 
@@ -890,6 +886,37 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "manageUsersAndDelegate" | 0
         "receivesNotifications"  | 0
         "enabled"                | 0
+    }
+
+    void "test setAccessToFilesWithUserNotification"() {
+        given:
+        setupData()
+
+        List<UserProjectRole> userProjectRoles = (1..2).collect {
+            DomainFactory.createUserProjectRole(
+                    project: createProject(unixGroup: UNIX_GROUP),
+                    accessToFiles: false,
+            )
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.setAccessToFilesWithUserNotification(userProjectRoles[0], true)
+        }
+
+        then:
+        userProjectRoles.accessToFiles.each { it == true }
+        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, _ as String)
+        1 * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.setAccessToFilesWithUserNotification(userProjectRoles[0], false)
+        }
+
+        then:
+        userProjectRoles.accessToFiles.each { it == false }
+        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, _ as String)
     }
 
     @Unroll

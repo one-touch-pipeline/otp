@@ -33,9 +33,7 @@ import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectRequest
-import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -77,13 +75,14 @@ class ProjectCreationController {
             ]
         }
         Map<String, ?> defaults = [
-                qcThresholdHandling    : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
-                processingPriority     : processingPriorityService.defaultPriority(),
-                storageUntil           : "3000-01-01",
-                projectType            : Project.ProjectType.SEQUENCING,
-                forceCopyFiles         : true,
-                fingerPrinting         : true,
-                projectRequestAvailable: false,
+                qcThresholdHandling            : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
+                processingPriority             : processingPriorityService.defaultPriority(),
+                storageUntil                   : "3000-01-01",
+                projectType                    : Project.ProjectType.SEQUENCING,
+                forceCopyFiles                 : true,
+                fingerPrinting                 : true,
+                sendProjectCreationNotification: true,
+                projectRequestAvailable        : false,
         ]
         ProjectCreationCommand projectCreationCmd = flash.cmd as ProjectCreationCommand
         boolean showIgnoreUsersFromBaseObjects = flash.showIgnoreUsersFromBaseObjects as boolean
@@ -131,6 +130,9 @@ class ProjectCreationController {
         } else {
             Project project = projectService.createProject(cmd)
             flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
+            if (cmd.sendProjectCreationNotification) {
+                projectService.sendProjectCreationNotificationEmail(project)
+            }
             redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
         }
     }
@@ -198,6 +200,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     String grantId
     String internalNotes
     boolean ignoreUsersFromBaseObjects
+    boolean sendProjectCreationNotification
     boolean publiclyAvailable
     boolean projectRequestAvailable
 

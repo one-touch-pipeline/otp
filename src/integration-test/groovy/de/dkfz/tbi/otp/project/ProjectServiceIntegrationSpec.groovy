@@ -25,6 +25,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import grails.validation.ValidationException
+import grails.web.mapping.LinkGenerator
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile
@@ -46,6 +47,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -71,6 +73,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     static final String FILE_NAME = "fileName"
     static final byte[] CONTENT = 0..3
+    static final String EMAIL_RECIPIENT = "email-recipient@notification.com"
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -1421,7 +1424,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         "Aceseq"     | AceseqService | OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
         "Indel"      | null          | null
         "Snv"        | null          | null
-        "Sophia"     | SophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "Sophia"     | SophiaService | OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
     @Unroll
@@ -1467,7 +1470,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         "Aceseq"     | AceseqService | OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
         "Indel"      | null          | null
         "Snv"        | null          | null
-        "Sophia"     | SophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "Sophia"     | SophiaService | OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
     void "test configure Snv PipelineProject valid input, old otp snv config exist"() {
@@ -1666,7 +1669,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Map<String, List<Project>> result
 
         when:
-        result = projectService.getAllProjectsWithSharedUnixGroup()
+        result = projectService.allProjectsWithSharedUnixGroup
 
         then:
         result == [:]
@@ -1686,7 +1689,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         createProject(unixGroup: unixGroupC)
 
         when:
-        result = projectService.getAllProjectsWithSharedUnixGroup()
+        result = projectService.allProjectsWithSharedUnixGroup
 
         then:
         result == [
@@ -1717,6 +1720,79 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         "P1,P3"         | "P2"    || "P1,P2,P3"
         "P2,P1,P2"      | "P2"    || "P1,P2"
         ",P1,,P3,P2,P1" | "P4"    || "P1,P2,P3,P4"
+    }
+
+    void "sendProjectCreationNotificationEmail, test if email send to correct recipients"() {
+        given:
+        User userPi = DomainFactory.createUser()
+        User userBioinf = DomainFactory.createUser()
+        User userBioinfNoNotification = DomainFactory.createUser()
+
+        createAllBasicProjectRoles()
+        ProjectRole pi = ProjectRole.findByName(ProjectRole.Basic.PI.name())
+        ProjectRole bioinf = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
+
+        Project project = createProject()
+
+        DomainFactory.createProcessingOptionLazy(
+                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                value: EMAIL_RECIPIENT,
+        )
+
+        DomainFactory.createUserProjectRole(
+                project: project,
+                user: userPi,
+                projectRoles: [pi] as Set<ProjectRole>,
+                receivesNotifications: true,
+        )
+
+        DomainFactory.createUserProjectRole(
+                project: project,
+                user: userBioinf,
+                projectRoles: [bioinf] as Set<ProjectRole>,
+                receivesNotifications: true,
+        )
+
+        DomainFactory.createUserProjectRole(
+                project: project,
+                user: userBioinfNoNotification,
+                projectRoles: [bioinf] as Set<ProjectRole>,
+                receivesNotifications: false,
+        )
+
+        ProjectService projectService = new ProjectService(
+                processingOptionService: processingOptionService,
+                messageSourceService: Stub(MessageSourceService) {
+                    createMessage("notification.projectCreation.subject", [projectName: project.displayName]) >> "subject"
+                    createMessage("notification.projectCreation.message", [
+                            projectName               : project.displayName,
+                            linkProjectConfig         : 'link',
+                            projectFolder             : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
+                            analysisFolder            : project.dirAnalysis,
+                            linkUserManagementConfig  : 'link',
+                            clusterName               : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
+                            clusterAdministrationEmail: processingOptionService.findOptionAsString(OptionName.EMAIL_CLUSTER_ADMINISTRATION),
+                            contactEmail              : processingOptionService.findOptionAsString(OptionName.EMAIL_OTP_MAINTENANCE),
+                            teamSignature             : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                    ]) >> "body"
+                },
+                mailHelperService: Mock(MailHelperService),
+                createNotificationTextService: new CreateNotificationTextService(
+                        linkGenerator: Mock(LinkGenerator) {
+                            (2) * link(_) >> 'link'
+                        },
+                        lsdfFilesService: new LsdfFilesService(),
+                        processingOptionService: processingOptionService,
+                ),
+                userProjectRoleService: new UserProjectRoleService(),
+                configService: configService,
+        )
+
+        when:
+        projectService.sendProjectCreationNotificationEmail(project)
+
+        then:
+        1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort() + [EMAIL_RECIPIENT])
     }
 
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {

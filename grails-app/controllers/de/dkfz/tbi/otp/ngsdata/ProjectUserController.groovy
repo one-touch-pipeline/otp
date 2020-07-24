@@ -166,7 +166,7 @@ class ProjectUserController implements CheckAndCall {
 
     JSON setAccessToFiles(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            userProjectRoleService.setAccessToFiles(cmd.userProjectRole, cmd.value)
+            userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
         }) {
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, ldapUserDetails)

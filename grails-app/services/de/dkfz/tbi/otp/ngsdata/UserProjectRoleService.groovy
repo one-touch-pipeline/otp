@@ -330,9 +330,18 @@ class UserProjectRoleService {
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
         }
         if (userProjectRole.accessToFiles) {
-            sendFileAccessNotifications(userProjectRole)
+            notifyAdministration(userProjectRole, OperatorAction.ADD)
         } else {
             notifyAdministration(userProjectRole, OperatorAction.REMOVE)
+        }
+        return userProjectRole
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    UserProjectRole setAccessToFilesWithUserNotification(UserProjectRole userProjectRole, boolean value) {
+        setAccessToFiles(userProjectRole, value)
+        if (userProjectRole.accessToFiles) {
+            notifyUsersAboutFileAccessChange(userProjectRole)
         }
         return userProjectRole
     }

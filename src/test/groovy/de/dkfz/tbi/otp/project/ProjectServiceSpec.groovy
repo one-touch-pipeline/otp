@@ -28,12 +28,14 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.LocalDate
 
-class ProjectServiceSpec extends Specification implements DataTest {
+class ProjectServiceSpec extends Specification implements DataTest, DomainFactoryCore, UserAndRoles {
 
     @Override
     Class[] getDomainClassesToMock() {

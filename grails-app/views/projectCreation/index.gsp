@@ -365,7 +365,13 @@
             </tr>
             <tr>
                 <td></td>
-                <td><g:submitButton name="submit" value="Submit"/></td>
+                <td>
+                    <g:submitButton name="submit" value="Submit"/>
+                    <label>
+                        <g:checkBox name="sendProjectCreationNotification" checked="${source.getByFieldName("sendProjectCreationNotification")}" value="true"/>
+                        <g:message code="project.notification"/>
+                    </label>
+                </td>
                 <td></td>
                 <td></td>
             </tr>
