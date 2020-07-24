@@ -25,6 +25,7 @@
 <head>
     <meta name="layout" content="main"/>
     <title>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</title>
+    <asset:javascript src="taglib/NoSwitchedUser.js"/>
 </head>
 
 <body>
@@ -34,7 +35,7 @@
     <g:render template="tabMenu"/>
 
     <h1>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</h1>
-    <g:form action="update">
+    <g:form>
     <table class="key-value-table key-input">
         <tr>
             <td>${g.message(code: "projectRequest.requester")}</td>
@@ -139,9 +140,11 @@
         <tr>
             <td></td>
             <td>
-                <g:submitButton name="approve" value="${g.message(code: "projectRequest.view.approve")}" />
-                <g:submitButton name="deny" value="${g.message(code: "projectRequest.view.deny")}" />
-                <g:link class="btn" action="index" params="[id: projectRequest.id]">${g.message(code: "projectRequest.view.edit")}</g:link>
+                <otpsecurity:noSwitchedUser>
+                    <g:actionSubmit action="approve" name="approve" value="${g.message(code: "projectRequest.view.approve")}" />
+                    <g:actionSubmit action="deny" name="deny" value="${g.message(code: "projectRequest.view.deny")}" />
+                    <g:actionSubmit action="edit" name="edit" value="${g.message(code: "projectRequest.view.edit")}" />
+                </otpsecurity:noSwitchedUser>
             </td>
         </tr>
         <g:hiddenField name="request.id" value="${projectRequest.id}"/>

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.util.Pair
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
@@ -31,12 +30,13 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 
 import java.time.LocalDate
@@ -50,37 +50,39 @@ class ProjectRequestService {
     MessageSourceService messageSourceService
     @Autowired
     ProcessingOptionService processingOptionService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
     UserProjectRoleService userProjectRoleService
     UserService userService
 
     List<ProjectRequest> getCreatedByUserAndResolved() {
         ProjectRequest.createCriteria().list {
-            eq("requester", springSecurityService.currentUser)
+            eq("requester", securityService.currentUserAsUser)
             ne("status", ProjectRequest.Status.WAITING_FOR_PI)
         } as List<ProjectRequest>
     }
 
     List<ProjectRequest> getResolvedWithUserAsPi() {
         ProjectRequest.createCriteria().list {
-            eq("pi", springSecurityService.currentUser)
+            eq("pi", securityService.currentUserAsUser)
             ne("status", ProjectRequest.Status.WAITING_FOR_PI)
         } as List<ProjectRequest>
     }
 
     List<ProjectRequest> getWaitingForCurrentUser() {
-        ProjectRequest.findAllByPiAndStatus(springSecurityService.currentUser as User, ProjectRequest.Status.WAITING_FOR_PI)
+        ProjectRequest.findAllByPiAndStatus(securityService.currentUserAsUser, ProjectRequest.Status.WAITING_FOR_PI)
     }
 
     List<ProjectRequest> getUnresolvedRequestsOfUser() {
-        ProjectRequest.findAllByRequesterAndStatus(springSecurityService.currentUser as User, ProjectRequest.Status.WAITING_FOR_PI)
+        ProjectRequest.findAllByRequesterAndStatus(securityService.currentUserAsUser, ProjectRequest.Status.WAITING_FOR_PI)
     }
 
     private List<User> findOrCreateUsers(List<String> usernames) {
         return usernames?.findAll()?.collect { userProjectRoleService.createUserWithLdapData(it) }
     }
 
-    ProjectRequest create(ProjectRequestCreationCommand cmd) {
+    ProjectRequest create(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
+        securityService.ensureNotSwitchedUser()
+
         ProjectRequest req = new ProjectRequest(
                 name                        : cmd.name,
                 description                 : cmd.description,
@@ -102,7 +104,7 @@ class ProjectRequestService {
                 comments                    : cmd.comments,
 
                 pi                          : findOrCreateUsers([cmd.pi]).first(),
-                requester                   : springSecurityService.currentUser as User,
+                requester                   : securityService.currentUserAsUser,
                 leadBioinformaticians       : findOrCreateUsers(cmd.leadBioinformaticians),
                 bioinformaticians           : findOrCreateUsers(cmd.bioinformaticians),
                 submitters                  : findOrCreateUsers(cmd.submitters),
@@ -157,29 +159,46 @@ class ProjectRequestService {
 
     ProjectRequest get(Long l) {
         ProjectRequest req = ProjectRequest.get(l)
-        if (req && (springSecurityService.currentUser as User) in [req.requester, req.pi]) {
+        if (req && securityService.currentUserAsUser in [req.requester, req.pi]) {
             return req
         }
         return null
     }
 
-    Errors update(ProjectRequest request, ProjectRequest.Status status, boolean confirmConsent, boolean confirmRecordOfProcessingActivities) {
+    void assertApprovalEligible(ProjectRequest request) {
+        if (!(securityService.currentUserAsUser == request.pi && request.status == ProjectRequest.Status.WAITING_FOR_PI)) {
+            throw new AccessDeniedException("User '${securityService.currentUserAsUser}' not eligible to approve this request")
+        }
+    }
+
+    void assertTermsAndConditions(boolean confirmConsent, boolean confirmRecordOfProcessingActivities) {
+        if ([confirmConsent, confirmRecordOfProcessingActivities].any { !it }) {
+            throw new OtpRuntimeException("Invalid state, conditions were not accepted")
+        }
+    }
+
+    Errors approveRequest(ProjectRequest request, boolean confirmConsent, boolean confirmRecordOfProcessingActivities) throws SwitchedUserDeniedException {
         try {
-            if (springSecurityService.currentUser == request.pi && request.status == ProjectRequest.Status.WAITING_FOR_PI) {
-                if (confirmConsent && confirmRecordOfProcessingActivities &&
-                        status == ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR) {
-                    request.status = ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR
-                    request.save(flush: true)
-                    sendEmailOnApproval(request)
-                } else if (status == ProjectRequest.Status.DENIED_BY_PI) {
-                    request.status = ProjectRequest.Status.DENIED_BY_PI
-                    request.save(flush: true)
-                } else {
-                    throw new RuntimeException("Requested status is invalid")
-                }
-            } else {
-                throw new AccessDeniedException("No access for this project request")
-            }
+            securityService.assertNotSwitchedUser()
+            assertApprovalEligible(request)
+            assertTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
+
+            request.status = ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR
+            request.save(flush: true)
+            sendEmailOnApproval(request)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
+    Errors denyRequest(ProjectRequest request) throws SwitchedUserDeniedException {
+        try {
+            securityService.assertNotSwitchedUser()
+            assertApprovalEligible(request)
+
+            request.status = ProjectRequest.Status.DENIED_BY_PI
+            request.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }

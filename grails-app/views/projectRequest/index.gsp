@@ -28,6 +28,7 @@
     <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="pages/projectRequest/index.js"/>
+    <asset:javascript src="taglib/NoSwitchedUser.js"/>
 </head>
 
 <body>
@@ -272,19 +273,21 @@
             <td></td>
             <td></td>
             <td>
-                <g:if test="${projectRequestToEdit}">
-                    <div class="element-with-annotation-flex-container">
-                        <div>
-                            <g:submitButton name="${g.message(code: "projectRequest.submit.edit")}"/>
+                <otpsecurity:noSwitchedUser>
+                    <g:if test="${projectRequestToEdit}">
+                        <div class="element-with-annotation-flex-container">
+                            <div>
+                                <g:actionSubmit action="saveEdit" name="saveEdit" value="${g.message(code: "projectRequest.submit.edit")}" />
+                            </div>
+                            <otp:annotation type="warning" variant="inline">
+                                ${g.message(code: "projectRequest.edit.warning.submit")}
+                            </otp:annotation>
                         </div>
-                        <otp:annotation type="warning" variant="inline">
-                            ${g.message(code: "projectRequest.edit.warning.submit")}
-                        </otp:annotation>
-                    </div>
-                </g:if>
-                <g:else>
-                    <g:submitButton name="${g.message(code: "projectRequest.submit")}"/>
-                </g:else>
+                    </g:if>
+                    <g:else>
+                        <g:actionSubmit action="save" name="save" value="${g.message(code: "projectRequest.submit")}" />
+                    </g:else>
+                </otpsecurity:noSwitchedUser>
             </td>
         </tr>
         <tr>

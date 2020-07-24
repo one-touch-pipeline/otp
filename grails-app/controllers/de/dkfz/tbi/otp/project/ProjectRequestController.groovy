@@ -46,8 +46,8 @@ class ProjectRequestController {
             resolved: "GET",
             save    : "POST",
             edit    : "POST",
+            saveEdit: "GET",
             view    : "GET",
-            update  : "POST",
     ]
 
     private static final String ACTION_INDEX = "index"
@@ -144,7 +144,46 @@ class ProjectRequestController {
         redirect(action: ACTION_INDEX)
     }
 
-    def edit(EditProjectRequestCommand cmd) {
+    def approve(ApproveCommand cmd) {
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
+            return
+        }
+        Errors errors = projectRequestService.approveRequest(cmd.request, cmd.confirmConsent, cmd.confirmRecordOfProcessingActivities)
+        if (errors) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
+        } else {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
+            redirect(action: ACTION_OPEN)
+        }
+    }
+
+    def deny(ProjectRequestCommand cmd) {
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
+            return
+        }
+        Errors errors = projectRequestService.denyRequest(cmd.request)
+        if (errors) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
+        } else {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
+            redirect(action: ACTION_OPEN)
+        }
+    }
+
+    /**
+     * Helper action to transform the POST request into a GET
+     */
+    def edit(ProjectRequestCommand cmd) {
+        redirect(action: ACTION_INDEX, id: cmd.request.id)
+    }
+
+    def saveEdit(EditProjectRequestCommand cmd) {
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, cmd.errors)
             flash.cmd = cmd
@@ -175,22 +214,6 @@ class ProjectRequestController {
         return sharedModel + [
                 projectRequest: projectRequest,
         ]
-    }
-
-    def update(ProjectRequestUpdateCommand cmd) {
-        if (!cmd.validate()) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
-            redirect(action: ACTION_VIEW, id: cmd.request.id)
-            return
-        }
-        Errors errors = projectRequestService.update(cmd.request, cmd.status, cmd.confirmConsent, cmd.confirmRecordOfProcessingActivities)
-        if (errors) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
-            redirect(action: ACTION_VIEW, id: cmd.request.id)
-        } else {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
-            redirect(action: ACTION_OPEN)
-        }
     }
 }
 
@@ -317,32 +340,24 @@ class EditProjectRequestCommand extends ProjectRequestCreationCommand {
     ProjectRequest request
 }
 
-class ProjectRequestUpdateCommand {
+class ProjectRequestCommand {
     ProjectRequest request
-    String approve
-    String deny
+}
+
+class ApproveCommand extends ProjectRequestCommand {
     boolean confirmConsent
     boolean confirmRecordOfProcessingActivities
 
-    ProjectRequest.Status getStatus() {
-        if (deny) {
-            return ProjectRequest.Status.DENIED_BY_PI
-        }
-        if (approve) {
-            return ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR
-        }
-        return null
-    }
-
     static constraints = {
-        approve nullable: true, validator: { val, obj ->
-            if (val && !(obj.confirmConsent && obj.confirmRecordOfProcessingActivities)) {
+        confirmConsent validator: { val, obj ->
+            if (!val) {
                 return "confirm"
             }
-            if (val == obj.deny) {
-                return "invalid"
+        }
+        confirmRecordOfProcessingActivities validator: { val, obj ->
+            if (!val) {
+                return "confirm"
             }
         }
-        deny nullable: true
     }
 }

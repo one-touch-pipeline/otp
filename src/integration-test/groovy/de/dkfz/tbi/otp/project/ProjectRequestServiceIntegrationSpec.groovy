@@ -31,12 +31,12 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -48,14 +48,15 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
     ProjectRequestService getServiceWithMockedCurrentUser(User user = DomainFactory.createUser()) {
         return new ProjectRequestService(
-                springSecurityService: Mock(SpringSecurityService) {
-                    getCurrentUser() >> user
+                securityService: Mock(SecurityService) {
+                    getCurrentUserAsUser() >> user
                 },
                 processingOptionService: new ProcessingOptionService(),
         )
     }
 
-    void "test get, when current user is #value, return project request"() {
+    @Unroll
+    void "test get, when current user is #user, return project request"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
 
@@ -221,75 +222,168 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     }
 
     @Unroll
-    void "test update, when PI approves/denies project request, fails"() {
+    void "test approveRequest, when PI approves project request, fails"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(
-                status: currentStatus,
-                project: currentStatus == PROJECT_CREATED ? DomainFactory.createProject() : null,
-        )
+        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
         ProjectRequestService service = Spy(ProjectRequestService) {
-            mail * sendEmailOnApproval(_) >> null
+            0 * sendEmailOnApproval(_) >> null
         }
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> { isPi ? request.pi : DomainFactory.createUser() }
+        service.securityService = Mock(SecurityService) {
+            getCurrentUserAsUser() >> request.pi
         }
 
         when:
-        Errors e = service.update(request, wantedStatus, confirmConsent, confirmRecord)
+        Errors e = service.approveRequest(request, confirmConsent, confirmRecord)
 
         then:
         e == null
-        thrown(exc)
-        request.status == expectedStatus
+        thrown(RuntimeException)
+        request.status == WAITING_FOR_PI
 
         where:
-        currentStatus                       | isPi  | wantedStatus                        | confirmConsent | confirmRecord || mail | expectedStatus     | exc
-        DENIED_BY_PI                        | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | true          || 0    | DENIED_BY_PI       | AccessDeniedException
-        DENIED_BY_OPERATOR                  | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | true          || 0    | DENIED_BY_OPERATOR | AccessDeniedException
-        APPROVED_BY_PI_WAITING_FOR_OPERATOR | true  | DENIED_BY_PI                        | true           | true          || 0    | APPROVED_BY_PI_WAITING_FOR_OPERATOR | AccessDeniedException
-        PROJECT_CREATED                     | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | true          || 0    | PROJECT_CREATED                     | AccessDeniedException
-        PROJECT_CREATED                     | true  | DENIED_BY_PI                        | true           | true          || 0    | PROJECT_CREATED                     | AccessDeniedException
-
-        WAITING_FOR_PI                      | false | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | true          || 0    | WAITING_FOR_PI                      | AccessDeniedException
-        WAITING_FOR_PI                      | false | DENIED_BY_PI                        | true           | true          || 0    | WAITING_FOR_PI                      | AccessDeniedException
-
-        WAITING_FOR_PI                      | true  | WAITING_FOR_PI                      | true           | true          || 0    | WAITING_FOR_PI                      | RuntimeException
-        WAITING_FOR_PI                      | true  | DENIED_BY_OPERATOR                  | true           | true          || 0    | WAITING_FOR_PI                      | RuntimeException
-        WAITING_FOR_PI                      | true  | PROJECT_CREATED                     | true           | true          || 0    | WAITING_FOR_PI                      | RuntimeException
-
-        WAITING_FOR_PI                      | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | false          | false         || 0    | WAITING_FOR_PI                      | RuntimeException
-        WAITING_FOR_PI                      | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | false         || 0    | WAITING_FOR_PI                      | RuntimeException
-        WAITING_FOR_PI                      | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | false          | true          || 0    | WAITING_FOR_PI                      | RuntimeException
+        confirmConsent | confirmRecord
+        false          | false
+        true           | false
+        false          | true
     }
 
-    void "test update, when PI approves/denies project request"() {
+    @Unroll
+    void "test denyRequest, when PI denies project request, fails"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest(
                 status: currentStatus,
                 project: currentStatus == PROJECT_CREATED ? DomainFactory.createProject() : null,
         )
         ProjectRequestService service = Spy(ProjectRequestService) {
-            mail * sendEmailOnApproval(_) >> null
+            0 * sendEmailOnApproval(_) >> null
         }
-        service.springSecurityService = Mock(SpringSecurityService) {
-            getCurrentUser() >> { isPi ? request.pi : DomainFactory.createUser() }
+        service.securityService = Mock(SecurityService) {
+            getCurrentUserAsUser() >> { isPi ? request.pi : DomainFactory.createUser() }
         }
 
         when:
-        Errors e = service.update(request, wantedStatus, confirmConsent, confirmRecord)
+        Errors e = service.denyRequest(request)
+
+        then:
+        e == null
+        thrown(AccessDeniedException)
+        request.status == expectedStatus
+
+        where:
+        currentStatus                       | isPi  || expectedStatus
+        APPROVED_BY_PI_WAITING_FOR_OPERATOR | true  || APPROVED_BY_PI_WAITING_FOR_OPERATOR
+        PROJECT_CREATED                     | true  || PROJECT_CREATED
+        WAITING_FOR_PI                      | false || WAITING_FOR_PI
+    }
+
+    void "test approveRequest, when PI approves project request"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
+        ProjectRequestService service = Spy(ProjectRequestService) {
+            1 * sendEmailOnApproval(_) >> null
+        }
+        service.securityService = Mock(SecurityService) {
+            getCurrentUserAsUser() >> request.pi
+        }
+
+        when:
+        Errors e = service.approveRequest(request, true, true)
 
         then:
         e == null
         noExceptionThrown()
-        request.status == expectedStatus
-
-        where:
-        currentStatus                       | isPi  | wantedStatus                        | confirmConsent | confirmRecord || mail | expectedStatus
-        WAITING_FOR_PI                      | true  | APPROVED_BY_PI_WAITING_FOR_OPERATOR | true           | true          || 1    | APPROVED_BY_PI_WAITING_FOR_OPERATOR
-        WAITING_FOR_PI                      | true  | DENIED_BY_PI                        | true           | true          || 0    | DENIED_BY_PI
+        request.status == APPROVED_BY_PI_WAITING_FOR_OPERATOR
     }
 
-    void "addUserRolesAndPermissions: create correct userProjectRoles"() {
+    void "test denyRequest, when PI denies project request"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
+        ProjectRequestService service = Spy(ProjectRequestService) {
+            0 * sendEmailOnApproval(_) >> null
+        }
+        service.securityService = Mock(SecurityService) {
+            getCurrentUserAsUser() >> request.pi
+        }
+
+        when:
+        Errors e = service.denyRequest(request)
+
+        then:
+        e == null
+        noExceptionThrown()
+        request.status == DENIED_BY_PI
+    }
+
+    void "assertApprovalEligible, all negative cases"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest(status: status)
+        User currentUser = isPi ? request.pi : DomainFactory.createUser()
+        ProjectRequestService service = new ProjectRequestService(
+                securityService: Mock(SecurityService) {
+                    getCurrentUserAsUser() >> currentUser
+                }
+        )
+
+        when:
+        service.assertApprovalEligible(request)
+
+        then:
+        AccessDeniedException e = thrown()
+        e.message ==~ /User '.*${currentUser.username}.*' not eligible to approve this request/
+
+        where:
+        isPi  | status
+        false | DENIED_BY_OPERATOR
+        false | WAITING_FOR_PI
+        true  | DENIED_BY_OPERATOR
+    }
+
+    void "assertApprovalEligible, positive case"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
+        ProjectRequestService service = new ProjectRequestService(
+                securityService: Mock(SecurityService) {
+                    getCurrentUserAsUser() >> request.pi
+                }
+        )
+
+        when:
+        service.assertApprovalEligible(request)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "assertTermsAndConditions, all negative cases"() {
+        given:
+        ProjectRequestService projectRequestService = new ProjectRequestService()
+
+        when:
+        projectRequestService.assertTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
+
+        then:
+        OtpRuntimeException e = thrown()
+        e.message ==~ /Invalid state, conditions were not accepted/
+
+        where:
+        confirmConsent | confirmRecordOfProcessingActivities
+        false          | false
+        false          | true
+        true           | false
+    }
+
+    void "assertTermsAndConditions, positive case"() {
+        given:
+        ProjectRequestService projectRequestService = new ProjectRequestService()
+
+        when:
+        projectRequestService.assertTermsAndConditions(true, true)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "addUserRolesAndPermissions, create correct userProjectRoles"() {
         given:
         ProjectRequestService projectRequestService = new ProjectRequestService(
                 userProjectRoleService: Mock(UserProjectRoleService)
