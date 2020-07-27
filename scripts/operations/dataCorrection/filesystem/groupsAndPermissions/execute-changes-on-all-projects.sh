@@ -45,7 +45,7 @@ do
     bsub \
         -W 360 \
         -R "rusage[mem=100M]" \
-        -J "otp-check-groups-and-permissions-${name}"
+        -J "otp-check-groups-and-permissions-${name}" \
         -o "${LOG_FILE_BASE}-${name}-stdout" \
         -e "${LOG_FILE_BASE}-${name}-stderr" \
         ./correct-unix-group-and-permission.sh "$MODE" "${PROJECT_ROOT}/${dir}/" "$SEARCHED_GROUP" "$group"
