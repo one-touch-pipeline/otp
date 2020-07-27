@@ -26,7 +26,6 @@ import groovy.transform.TupleConstructor
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
 
 class AbstractExecuteClusterPipelineJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -51,14 +50,10 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
     }
 
     private WorkflowStep workflowStep
-    private Realm realm
     private AbstractExecuteClusterPipelineJob job
 
     private void setupData(List<String> scripts) {
         workflowStep = createWorkflowStep()
-        realm = createWorkflowArtefact([
-                producedBy: workflowStep.workflowRun,
-        ]).individual.project.realm
         job = new TestAbstractExecuteClusterPipelineJob(scripts)
     }
 
@@ -89,7 +84,7 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
             0 * _
         }
         job.clusterAccessService = Mock(ClusterAccessService) {
-            1 * executeJobs(realm, workflowStep, scripts, _)
+            1 * executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, _)
         }
 
         when:

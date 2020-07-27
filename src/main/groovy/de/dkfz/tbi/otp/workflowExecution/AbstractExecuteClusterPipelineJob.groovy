@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflowExecution
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecutePipelineJob
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
 
@@ -48,10 +47,6 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
 
     private void submitScripts(WorkflowStep workflowStep, List<String> scripts) {
         Map<JobSubmissionOption, String> jobSubmissionOptions = [:] //TODO otp-681: extract map from WorkflowRun.combinedConfig
-
-        WorkflowArtefact workflowArtefact = workflowStep.workflowRun.outputArtefacts.values().first()
-        Realm realm = workflowArtefact.individual.project.realm
-
-        clusterAccessService.executeJobs(realm, workflowStep, scripts, jobSubmissionOptions)
+        clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, jobSubmissionOptions)
     }
 }
