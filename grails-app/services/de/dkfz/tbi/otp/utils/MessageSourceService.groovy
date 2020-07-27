@@ -26,7 +26,9 @@ import groovy.text.SimpleTemplateEngine
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.MessageSource
+import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder
+import org.springframework.validation.ObjectError
 
 @Transactional
 class MessageSourceService {
@@ -38,9 +40,24 @@ class MessageSourceService {
         return messageSource
     }
 
-    String createMessage(String templateName, Map properties = [:]) {
+    String createMessage(String templateName) {
         assert templateName
-        String template = getMessageSourceInstance().getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
-        return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
+        return messageSourceInstance.getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
+    }
+
+    String createMessage(String templateName, Map properties) {
+        assert templateName
+        return new SimpleTemplateEngine().createTemplate(createMessage(templateName)).make(properties).toString()
+    }
+
+    String createError(ObjectError error) {
+        assert error
+        String text
+        try {
+            text = messageSourceInstance.getMessage(error, LocaleContextHolder.locale)
+        } catch (NoSuchMessageException ignored) {
+            text = error.codes[0]
+        }
+        return text
     }
 }

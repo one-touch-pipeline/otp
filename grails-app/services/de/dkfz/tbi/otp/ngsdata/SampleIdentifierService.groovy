@@ -31,16 +31,16 @@ import org.springframework.validation.ObjectError
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext
-
-import java.text.MessageFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Transactional
 class SampleIdentifierService {
+    MessageSourceService messageSourceService
 
     enum BulkSampleCreationHeader {
         PROJECT,
@@ -114,7 +114,7 @@ class SampleIdentifierService {
                 checkSampleIdentifier(identifier, sampleIdentifier)
             } catch (ValidationException e) {
                 e.errors.allErrors.each { ObjectError err ->
-                    output << "${MessageFormat.format(err.defaultMessage, err.arguments)}: ${err.code}"
+                    output << messageSourceService.createError(err)
                 }
             } catch (RuntimeException e) {
                 output << e.message
