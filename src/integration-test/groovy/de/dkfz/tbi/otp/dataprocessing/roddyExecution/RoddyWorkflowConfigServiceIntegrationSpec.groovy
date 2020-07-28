@@ -43,7 +43,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, String m, Boolean f, Individual g -> },
+                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String e, String f, String g, boolean h, Individual i -> },
                 getMd5sum: { String s -> HelperUtils.randomMd5sum },
         ] as RoddyWorkflowConfigService
 
@@ -75,7 +75,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, String m, Boolean f, Individual g ->
+                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String e, String f, String g, boolean h, Individual i ->
                     throw new OtpException("importProjectConfigFile failed")
                 },
                 getMd5sum: { String s -> HelperUtils.randomMd5sum },
@@ -96,7 +96,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, String m, Boolean f, Individual g -> },
+                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String e, String f, String g, boolean h, Individual i -> },
                 getMd5sum: { String s -> HelperUtils.randomMd5sum },
         ] as RoddyWorkflowConfigService
 

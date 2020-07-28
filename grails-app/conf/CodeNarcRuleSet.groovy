@@ -974,7 +974,8 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ParameterName {
-        priority = MIDDLE
+        priority = CRITICAL
+        ignoreParameterNames = "_"
     }
     PropertyName {
         priority = MIDDLE
