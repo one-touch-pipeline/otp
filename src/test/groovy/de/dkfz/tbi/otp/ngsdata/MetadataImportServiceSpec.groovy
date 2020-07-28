@@ -572,14 +572,14 @@ ${INDEX}                        -             barcode8      barcode8      barcod
 ${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}     ${SC_EXON}
 ${SEQUENCING_READ_TYPE}         ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
 ${READ}                         1             1             2             1             2             1             1             1             1
-${SAMPLE_NAME}                    ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
+${SAMPLE_NAME}                  ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
 ${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true          -
 ${BASE_MATERIAL}                -             -             -             -             -             -             -             -             ${scMaterial}
 """
         if (includeOptional) {
             metadata += """
 ${FRAGMENT_SIZE}                -             -             -             234           234           -             456           -             -
-${FASTQ_GENERATOR}             -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
+${FASTQ_GENERATOR}              -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
 ${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -             ${kit2}
 ${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -             -
 ${ANTIBODY}                     -             -             -             antibody1     antibody1     -             -             -             -
@@ -935,10 +935,10 @@ ${LANE_NO}                      1                                           1
 ${SEQUENCING_TYPE}              ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}
 ${SEQUENCING_READ_TYPE}         ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
 ${READ}                         1                                           2
-${SAMPLE_NAME}                    ${sampleIdentifier.name}                    ${sampleIdentifier.name}
+${SAMPLE_NAME}                  ${sampleIdentifier.name}                    ${sampleIdentifier.name}
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
-${FASTQ_GENERATOR}             ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
 """
 
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()

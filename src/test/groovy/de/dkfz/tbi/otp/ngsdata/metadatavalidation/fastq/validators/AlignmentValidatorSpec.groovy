@@ -72,7 +72,7 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
     }
 
     @Unroll
-    void 'validate, when  all optional columns are missing, return warnings'() {
+    void 'validate, does not check for missing optional columns'() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
@@ -82,18 +82,11 @@ ${SEQUENCING_TYPE},${SEQUENCING_READ_TYPE}
 ${seqType.seqTypeName},${seqType.libraryLayout}
 """.replaceAll(',', '\t'))
 
-        Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${BASE_MATERIAL}' is missing."),
-                new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${PROJECT}' is missing."),
-                new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${SAMPLE_NAME}' is missing."),
-                new Problem(Collections.emptySet(), Level.WARNING, "Optional column '${TAGMENTATION_BASED_LIBRARY}' is missing."),
-        ]
-
         when:
         new AlignmentValidator([metadataImportService: new MetadataImportService([seqTypeService: new SeqTypeService()])]).validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        containSame(context.problems, [])
     }
 
     @Unroll

@@ -54,7 +54,6 @@ class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataVal
 
     @Override
     void checkColumn(MetadataValidationContext context) {
-        addWarningForMissingOptionalColumn(context, TAGMENTATION_BASED_LIBRARY.name())
     }
 
     @Override

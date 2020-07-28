@@ -61,7 +61,11 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [BASE_MATERIAL, PROJECT, SAMPLE_NAME, TAGMENTATION_BASED_LIBRARY,]*.name()
+        return [BASE_MATERIAL, PROJECT, SAMPLE_NAME, TAGMENTATION_BASED_LIBRARY]*.name()
+    }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
     }
 
     @Override
