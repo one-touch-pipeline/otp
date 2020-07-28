@@ -54,7 +54,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
     static final Long MINUTES_TO_MILLIS = MINUTES.toMillis(1)
     static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
 
-    static final Long GiB_TO_KiB = 1024 * 1024
+    static final Long GIB_TO_KIB = 1024 * 1024
 
     ClusterJobService clusterJobService
     ConfigService configService
@@ -996,7 +996,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
-                          usedMemory: GiB_TO_KiB,
+                          usedMemory: GIB_TO_KIB,
                           exitStatus: ClusterJob.Status.COMPLETED,
         ])
 
@@ -1011,21 +1011,21 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : SDATE_DATETIME.plusMinutes(30),
-                          usedMemory: GiB_TO_KiB,
+                          usedMemory: GIB_TO_KIB,
                           exitStatus: ClusterJob.Status.COMPLETED,
         ])
 
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : SDATE_DATETIME.plusMinutes(30),
-                          usedMemory: GiB_TO_KiB,
+                          usedMemory: GIB_TO_KIB,
                           exitStatus: ClusterJob.Status.COMPLETED,
         ])
 
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME.plusHours(1),
                           ended     : SDATE_DATETIME.plusHours(1).plusMinutes(30),
-                          usedMemory: GiB_TO_KiB,
+                          usedMemory: GIB_TO_KIB,
                           exitStatus: ClusterJob.Status.COMPLETED,
         ])
 

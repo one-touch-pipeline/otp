@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Principal
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import static org.junit.Assert.assertNotNull
 
@@ -44,12 +45,12 @@ trait UserAndRoles {
 
     AclUtilService aclUtilService
 
-    final static String ADMIN = "admin"
-    final static String OPERATOR = "operator"
-    final static String TESTUSER = "testuser"
-    final static String USER = "user"
+    static final String ADMIN = "admin"
+    static final String OPERATOR = "operator"
+    static final String TESTUSER = "testuser"
+    static final String USER = "user"
 
-    ProjectRole COORDINATOR, OTHER, PI, LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN, SUBMITTER
+    static ProjectRole coordinator, other, pi, leadBioinformatician, bioinformatician, submitter
 
     /**
      * Creates four users and their roles:
@@ -76,7 +77,7 @@ trait UserAndRoles {
 
     void createAllBasicProjectRoles() {
         ProjectRole.ALL_BASIC_PROJECT_ROLES.each { String name ->
-            this[name] = DomainFactory.createProjectRole(name: name)
+            this[StringUtils.toCamelCase(name)] = DomainFactory.createProjectRole(name: name)
         }
     }
 

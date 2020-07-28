@@ -826,7 +826,7 @@ class DeletionService {
         }
 
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh")
-        bashScriptToMoveFiles << dataSwapService.bashHeader
+        bashScriptToMoveFiles << dataSwapService.BASH_HEADER
 
         (dirsToDelete - externalMergedBamFolders).each {
             bashScriptToMoveFiles << "rm -rf ${it}\n"

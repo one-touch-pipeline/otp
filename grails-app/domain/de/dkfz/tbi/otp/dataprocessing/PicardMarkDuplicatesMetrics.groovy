@@ -26,7 +26,11 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * represents the MarkDuplicatesMetrics file of a BamFile and
  * stores all the information, which were generated while removing duplicates by Picard
+ *
+ * Suppress PropertyName: Unsure if the special naming has any kind of relevance. I am
+ * no going to change it, too risky.
  */
+@SuppressWarnings("PropertyName")
 class PicardMarkDuplicatesMetrics implements Entity {
 
     String metricsClass

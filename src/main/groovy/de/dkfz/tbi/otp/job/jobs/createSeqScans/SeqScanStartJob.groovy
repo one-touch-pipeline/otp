@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 class SeqScanStartJob extends AbstractStartJobImpl  {
 
 
-    final int MAX_RUNNING = 1
+    static final int MAX_RUNNING = 1
     final String name = "seqScanWorkflow"
     final String hql = "FROM SeqTrack as track WHERE track.id not in (SELECT seqTrack.id from MergingAssignment)"
 

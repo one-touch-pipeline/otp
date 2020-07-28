@@ -33,7 +33,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 @Component
 class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
-    final String LIB = "lib"
+    static final String LIB = "lib"
 
     @Override
     Collection<String> getDescriptions() {

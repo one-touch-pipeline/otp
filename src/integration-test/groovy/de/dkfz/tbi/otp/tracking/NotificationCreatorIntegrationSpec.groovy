@@ -49,7 +49,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     RunYapsaService runYapsaService
     CreateNotificationTextService createNotificationTextService
     ProcessingOptionService processingOptionService
-    UserProjectRoleService UserProjectRoleService
+    UserProjectRoleService userProjectRoleService
     OtrsTicketService otrsTicketService
 
     List<ProcessingOption> referenceGenomeProcessingOptions

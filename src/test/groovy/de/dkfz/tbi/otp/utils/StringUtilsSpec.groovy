@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class StringUtilsSpec extends Specification {
 
@@ -108,5 +109,46 @@ class StringUtilsSpec extends Specification {
         ""     || ""
         "  "   || ""
         "x  x" || "x x"
+    }
+
+    @Unroll
+    void 'toCamelCase, basic test cases: #given'() {
+        given:
+        String result
+
+        when: "not capitalized"
+        result = StringUtils.toCamelCase(given)
+
+        then:
+        result == expected
+
+        when: "capitalized"
+        result = StringUtils.toCamelCase(given, true)
+
+        then:
+        result == expected.capitalize()
+
+        where:
+        given         || expected
+        "nochange"    || "nochange"
+        "ALLCAPS"     || "allcaps"
+        "snake_case"  || "snakeCase"
+        "CAPS_SNAKE"  || "capsSnake"
+        "camelCase"   || "camelcase"
+        "white space" || "white space"
+    }
+
+    @Unroll
+    void 'toSnakeCase, basic test cases: #given'() {
+        expect:
+        expected == StringUtils.toSnakeCase(given)
+
+        where:
+        given         || expected
+        "nochange"    || "nochange"
+        "ALLCAPS"     || "a_l_l_c_a_p_s"
+        "snake_case"  || "snake_case"
+        "camelCase"   || "camel_case"
+        "white space" || "white space"
     }
 }

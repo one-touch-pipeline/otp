@@ -91,7 +91,7 @@ class MetadataImportService {
     SeqTrackService seqTrackService
     SeqTypeService seqTypeService
 
-    static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
+    static final int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
     static final String MATE_NUMBER_EXPRESSION = /^(?<index>i|I)?(?<number>[1-9]\d*)$/
 

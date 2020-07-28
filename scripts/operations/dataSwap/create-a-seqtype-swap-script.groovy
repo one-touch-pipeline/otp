@@ -175,7 +175,7 @@ script << """
 script << """
 //scripts to execute
 /*
-${DataSwapService.bashHeader + all_swaps.collect {
+${DataSwapService.BASH_HEADER + all_swaps.collect {
     "bash ${it}.sh"
 }.join('\n')}
 */

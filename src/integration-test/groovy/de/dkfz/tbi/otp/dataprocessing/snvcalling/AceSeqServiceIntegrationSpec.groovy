@@ -35,8 +35,8 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1_1
-    AbstractMergedBamFile bamFile2_1
+    AbstractMergedBamFile bamFile1
+    AbstractMergedBamFile bamFile2
 
     AceseqService aceseqService
 
@@ -44,8 +44,8 @@ class AceSeqServiceIntegrationSpec extends Specification {
         Map map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
-        bamFile1_1 = map.bamFile1
-        bamFile2_1 = map.bamFile2
+        bamFile1 = map.bamFile1
+        bamFile2 = map.bamFile2
         roddyConfig1 = map.roddyConfig
 
         DomainFactory.createAllAnalysableSeqTypes()
@@ -124,8 +124,8 @@ class AceSeqServiceIntegrationSpec extends Specification {
         Map defaultMap = [
                 processingState   : AnalysisProcessingStates.FINISHED,
                 withdrawn         : false,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1,
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2,
         ]
 
         DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia1)

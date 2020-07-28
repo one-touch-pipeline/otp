@@ -62,7 +62,7 @@ class ClusterJobSchedulerService {
 
     static final String CLUSTER_JOBS_STATE_LOG_DIRECTORY = "cluster-jobs-state"
 
-    final DateTimeFormatter PATH_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss'.txt'")
+    static final DateTimeFormatter PATH_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss'.txt'")
 
     SchedulerService schedulerService
 

@@ -66,7 +66,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         ]
     }
 
-    final long PROCESSING_STEP_ID = 1234567
+    static final long PROCESSING_STEP_ID = 1234567
 
     ReplaceSourceWithLinkJob linkingJob
     ProcessingStep step

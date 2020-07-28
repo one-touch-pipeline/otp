@@ -68,7 +68,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
             exitCode: 0,
     )
     // has to be set in setupData because of dependency to AbstractRoddyJob
-    static ProcessOutput OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
+    static ProcessOutput outputNoClusterJobsSubmitted
 
     ClusterJobService clusterJobService
 
@@ -93,7 +93,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
         realm = roddyBamFile.project.realm
         configService = new TestConfigService()
 
-        OUTPUT_NO_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
+        outputNoClusterJobsSubmitted = new ProcessOutput(
                 stderr: "Creating the following execution directory to store information about this process:\n" +
                         "\t${new File(TestCase.uniqueNonExistentPath, RODDY_EXECUTION_STORE_DIRECTORY_NAME)}" +
                         "${AbstractRoddyJob.NO_STARTED_JOBS_MESSAGE}",
@@ -168,7 +168,7 @@ newLine"""
         roddyJob.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String cmd ->
                     executeCommandCounter++
-                    return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
+                    return outputNoClusterJobsSubmitted
                 }
         ]  as RemoteShellHelper
     }
@@ -391,7 +391,7 @@ newLine"""
         setupData()
 
         when:
-        Collection<ClusterJob> result = roddyJob.createClusterJobObjects(roddyBamFile, realm, OUTPUT_NO_CLUSTER_JOBS_SUBMITTED)
+        Collection<ClusterJob> result = roddyJob.createClusterJobObjects(roddyBamFile, realm, outputNoClusterJobsSubmitted)
 
         then:
         result.empty

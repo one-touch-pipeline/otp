@@ -34,7 +34,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
     AbstractMergedBamFileService abstractMergedBamFileService
     ProcessingOptionService processingOptionService
 
-    static final List<AnalysisProcessingStates> processingStatesNotProcessable = [
+    static final List<AnalysisProcessingStates> PROCESSING_STATES_NOT_PROCESSABLE = [
             AnalysisProcessingStates.IN_PROGRESS,
     ]
 
@@ -124,7 +124,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
 
         Map parameters = [
                 needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
-                processingStates: processingStatesNotProcessable,
+                processingStates: PROCESSING_STATES_NOT_PROCESSABLE,
                 minPriority: minPriority,
                 analysis: getAnalysisType(),
                 seqTypes: seqTypes,

@@ -53,8 +53,8 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
     SequencingKitLabel kit2
     SequencingKitLabel kit3
     SequencingKitLabel kit4
-    SeqPlatform platform_1_1_1
-    SeqPlatform platform_3_3_X
+    SeqPlatform platformName1Label1Kit1
+    SeqPlatform platformName3Label3KitX
 
     private void createPlatforms() {
         model1 = DomainFactory.createSeqPlatformModelLabel(name: 'Model1', importAlias: ['Model1ImportAlias'])
@@ -65,12 +65,12 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
         kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', importAlias: ['Kit2ImportAlias'])
         kit3 = DomainFactory.createSequencingKitLabel(name: 'Kit3', importAlias: ['Kit3ImportAlias'])
         kit4 = DomainFactory.createSequencingKitLabel(name: 'Kit4', importAlias: ['Kit4ImportAlias'])
-        platform_1_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+        platformName1Label1Kit1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
                 sequencingKitLabel: kit1,
         )
-        platform_3_3_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+        platformName3Label3KitX = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform3',
                 seqPlatformModelLabel: model3,
                 sequencingKitLabel: null,
@@ -130,16 +130,16 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
         when:
         SeqPlatformValidator validator = new SeqPlatformValidator()
         validator.seqPlatformService = Mock(SeqPlatformService) {
-            1 * findSeqPlatform("Platform1", "Model1", "Kit1") >> platform_1_1_1
-            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1") >> platform_1_1_1
-            1 * findSeqPlatform("Platform1", "Model1", "Kit1ImportAlias") >> platform_1_1_1
-            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1ImportAlias") >> platform_1_1_1
+            1 * findSeqPlatform("Platform1", "Model1", "Kit1") >> platformName1Label1Kit1
+            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1") >> platformName1Label1Kit1
+            1 * findSeqPlatform("Platform1", "Model1", "Kit1ImportAlias") >> platformName1Label1Kit1
+            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1ImportAlias") >> platformName1Label1Kit1
             1 * findSeqPlatform("Platform2", "Model1", "Kit1") >> null
             1 * findSeqPlatform("Platform1", "Model2", "Kit1") >> null
             1 * findSeqPlatform("Platform1", "Model1", "Kit2") >> null
             1 * findSeqPlatform("Platform1", "Model1", null) >> null
-            1 * findSeqPlatform("Platform3", "Model3", null) >> platform_3_3_X
-            1 * findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platform_3_3_X
+            1 * findSeqPlatform("Platform3", "Model3", null) >> platformName3Label3KitX
+            1 * findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platformName3Label3KitX
             1 * findSeqPlatform("Platform4", "Model3", null) >> null
             1 * findSeqPlatform("Platform3", "Model4", null) >> null
             1 * findSeqPlatform("Platform3", "Model3", "Kit1") >> null
@@ -194,8 +194,8 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
             findSeqPlatform("Platform1", "Model1", null) >> null
             findSeqPlatform("Platform2", "Model1", null) >> null
             findSeqPlatform("Platform1", "Model2", null) >> null
-            findSeqPlatform("Platform3", "Model3", null) >> platform_3_3_X
-            findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platform_3_3_X
+            findSeqPlatform("Platform3", "Model3", null) >> platformName3Label3KitX
+            findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platformName3Label3KitX
             findSeqPlatform("Platform4", "Model3", null) >> null
             findSeqPlatform("Platform3", "Model4", null) >> null
             findSeqPlatform("Platform5", "Model3", null) >> null

@@ -56,8 +56,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
     SamplePair samplePair1
 
     ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1_1
-    AbstractMergedBamFile bamFile2_1
+    AbstractMergedBamFile bamFile1
+    AbstractMergedBamFile bamFile2
 
     SnvCallingService snvCallingService
 
@@ -65,8 +65,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         Map map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
-        bamFile1_1 = map.bamFile1
-        bamFile2_1 = map.bamFile2
+        bamFile1 = map.bamFile1
+        bamFile2 = map.bamFile2
         roddyConfig1 = map.roddyConfig
 
         DomainFactory.createAllAnalysableSeqTypes()
@@ -113,8 +113,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2
         )
 
         expect:
@@ -129,8 +129,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1,
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2,
                 processingState: AnalysisProcessingStates.FINISHED
         )
 
@@ -164,9 +164,9 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         if (number == 1) {
-            DomainFactory.createSeqTrackWithDataFiles(bamFile1_1.mergingWorkPackage)
+            DomainFactory.createSeqTrackWithDataFiles(bamFile1.mergingWorkPackage)
         } else {
-            DomainFactory.createSeqTrackWithDataFiles(bamFile2_1.mergingWorkPackage)
+            DomainFactory.createSeqTrackWithDataFiles(bamFile2.mergingWorkPackage)
         }
 
         expect:
@@ -208,7 +208,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile bamFileInProgress = (number == 1) ? bamFile1_1 : bamFile2_1
+        AbstractMergedBamFile bamFileInProgress = (number == 1) ? bamFile1 : bamFile2
 
         bamFileInProgress.md5sum = null
         bamFileInProgress.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
@@ -226,7 +226,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
+        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         problematicBamFile.coverage = COVERAGE_TOO_LOW
         assert problematicBamFile.save(flush: true)
 
@@ -242,7 +242,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
+        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
         thresholds.numberOfLanes = 5
         assert thresholds.save(flush: true)
@@ -271,7 +271,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        [bamFile1_1, bamFile2_1].each {
+        [bamFile1, bamFile2].each {
             it.coverage = COVERAGE_TOO_LOW
             it.save(flush: true)
         }
@@ -286,7 +286,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         Project otherProject = DomainFactory.createProject()
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
+        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
         thresholds.project = otherProject
         assert thresholds.save(flush: true)
@@ -303,7 +303,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile bamFile = (number == 1) ? bamFile1_1 : bamFile2_1
+        AbstractMergedBamFile bamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(bamFile.seqType)
         thresholds[property] = null
         if (property == "coverage") {
@@ -327,7 +327,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
+        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         problematicBamFile.withdrawn = true
         assert problematicBamFile.save(flush: true)
 
@@ -379,8 +379,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2
         )
         snvCallingInstance.save(flush: true)
 
@@ -426,8 +426,8 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1,
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2,
                 processingState: AnalysisProcessingStates.FINISHED,
         )
 

@@ -978,8 +978,7 @@ All the Rules that will be used for OTP
         ignoreParameterNames = "_"
     }
     PropertyName {
-        priority = MIDDLE
-        doNotApplyToFileNames = TEST
+        priority = CRITICAL
     }
     VariableName {
         priority = MIDDLE

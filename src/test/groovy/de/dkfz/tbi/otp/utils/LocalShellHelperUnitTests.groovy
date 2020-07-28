@@ -28,10 +28,10 @@ import de.dkfz.tbi.TestCase
 class LocalShellHelperUnitTests {
 
 
-    final String STDOUT_TEXT = "Stdout\nText"
-    final String STDERR_TEXT = "Stderr\nText"
-    final String COMMAND = "echo '${STDOUT_TEXT}'\n>&2 echo '${STDERR_TEXT}'"
-    final String COMMAND_NO_ERROR = "echo '${STDOUT_TEXT}'"
+    static final String STDOUT_TEXT = "Stdout\nText"
+    static final String STDERR_TEXT = "Stderr\nText"
+    static final String COMMAND = "echo '${STDOUT_TEXT}'\n>&2 echo '${STDERR_TEXT}'"
+    static final String COMMAND_NO_ERROR = "echo '${STDOUT_TEXT}'"
 
     @Test
     void testExecute_InputCommandIsNull_ShouldFail() {

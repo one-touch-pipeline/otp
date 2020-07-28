@@ -76,9 +76,9 @@ class RoddyBamFileUnitTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
-    final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
-    final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
-    final String COMMON_PREFIX = "4_NoIndex_L004"
+    static final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
+    static final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
+    static final String COMMON_PREFIX = "4_NoIndex_L004"
 
     @Before
     void setUp() {

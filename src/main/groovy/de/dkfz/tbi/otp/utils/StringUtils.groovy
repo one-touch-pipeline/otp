@@ -99,4 +99,24 @@ class StringUtils {
     static String trimAndShortenWhitespace(String string) {
         return string?.trim()?.replaceAll(" +", " ")
     }
+
+    /**
+     * Converts snake case String to camel case String
+     *
+     * Credit goes to 'pascal' who published this here: http://www.groovyconsole.appspot.com/script/337001
+     * Code has been fine tuned.
+     */
+    static String toCamelCase(String text, boolean capitalized = false) {
+        String camelCasedText = text.toLowerCase().replaceAll("(_)([A-Za-z0-9])", { List<String> it -> it[2].toUpperCase() })
+        return capitalized ? camelCasedText.capitalize() : camelCasedText
+    }
+
+    /**
+     * Converts camel case String to snake case String
+     *
+     * Credit goes to 'pascal' who published this here: http://www.groovyconsole.appspot.com/script/337001
+     */
+    static String toSnakeCase(String text) {
+        return text.replaceAll(/([A-Z])/, /_$1/ ).toLowerCase().replaceAll( /^_/, '')
+    }
 }

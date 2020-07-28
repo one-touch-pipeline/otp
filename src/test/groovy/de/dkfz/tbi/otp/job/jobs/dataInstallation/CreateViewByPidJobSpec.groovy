@@ -64,7 +64,7 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
         ]
     }
 
-    final long PROCESSING_STEP_ID = 1234567
+    static final long PROCESSING_STEP_ID = 1234567
 
     CreateViewByPidJob createViewByPidJob
     ProcessingStep step

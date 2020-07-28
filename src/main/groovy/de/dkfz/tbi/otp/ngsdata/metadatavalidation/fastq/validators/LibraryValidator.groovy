@@ -36,7 +36,7 @@ import java.util.regex.Matcher
 @Component
 class LibraryValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
-    final String REGEX = /^(?:lib(?:[1-9]\d*|NA)|)$/
+    static final String REGEX = /^(?:lib(?:[1-9]\d*|NA)|)$/
 
     @Override
     Collection<String> getDescriptions() {

@@ -45,8 +45,8 @@ class FastqcDataFilesService {
     LsdfFilesService lsdfFilesService
     FileSystemService fileSystemService
 
-    final String FASTQC_FILE_SUFFIX = "_fastqc"
-    final String FASTQC_ZIP_SUFFIX = ".zip"
+    static final String FASTQC_FILE_SUFFIX = "_fastqc"
+    static final String FASTQC_ZIP_SUFFIX = ".zip"
 
 
     String fastqcOutputDirectory(SeqTrack seqTrack) {

@@ -151,7 +151,7 @@ Closure<ScriptOutput> createSwapScript = { String swapLabel ->
 
 /*
 ${
-    DataSwapService.bashHeader + files.collect {
+    DataSwapService.BASH_HEADER + files.collect {
         "bash ${it}.sh"
     }.join('\n')
 }

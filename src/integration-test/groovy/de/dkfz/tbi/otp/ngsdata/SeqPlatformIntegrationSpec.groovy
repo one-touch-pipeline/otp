@@ -36,13 +36,13 @@ class SeqPlatformIntegrationSpec extends Specification {
     SeqPlatform sp3
     SeqPlatform sp4
 
-    MergingCriteria mergingCriteria_useProject
-    MergingCriteria mergingCriteria_useDefault
+    MergingCriteria mergingCriteriaUseProject
+    MergingCriteria mergingCriteriaUseDefault
 
-    SeqPlatformGroup spg_project1
-    SeqPlatformGroup spg_project2
-    SeqPlatformGroup spg_useDefault1
-    SeqPlatformGroup spg_useDefault2
+    SeqPlatformGroup spgProject1
+    SeqPlatformGroup spgProject2
+    SeqPlatformGroup spgUseDefault1
+    SeqPlatformGroup spgUseDefault2
 
     void setupData() {
         sp1 = new SeqPlatform(name: "sp1")
@@ -58,38 +58,38 @@ class SeqPlatformIntegrationSpec extends Specification {
         sp4.save(flush: true)
 
 
-        mergingCriteria_useProject = DomainFactory.createMergingCriteriaLazy(
+        mergingCriteriaUseProject = DomainFactory.createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
         )
 
-        mergingCriteria_useDefault = DomainFactory.createMergingCriteriaLazy(
+        mergingCriteriaUseDefault = DomainFactory.createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
         )
 
-        spg_project1 = new SeqPlatformGroup()
-        spg_project1.mergingCriteria = mergingCriteria_useProject
-        spg_project1.save(flush: true)
+        spgProject1 = new SeqPlatformGroup()
+        spgProject1.mergingCriteria = mergingCriteriaUseProject
+        spgProject1.save(flush: true)
 
-        spg_project2 = new SeqPlatformGroup()
-        spg_project2.mergingCriteria = mergingCriteria_useProject
-        spg_project2.save(flush: true)
+        spgProject2 = new SeqPlatformGroup()
+        spgProject2.mergingCriteria = mergingCriteriaUseProject
+        spgProject2.save(flush: true)
 
-        spg_useDefault1 = DomainFactory.createSeqPlatformGroup()
+        spgUseDefault1 = DomainFactory.createSeqPlatformGroup()
 
-        spg_useDefault2 = DomainFactory.createSeqPlatformGroup()
+        spgUseDefault2 = DomainFactory.createSeqPlatformGroup()
 
-        sp1.addToSeqPlatformGroups(spg_project1)
-        sp1.addToSeqPlatformGroups(spg_useDefault1)
+        sp1.addToSeqPlatformGroups(spgProject1)
+        sp1.addToSeqPlatformGroups(spgUseDefault1)
         sp1.save(flush: true)
 
-        sp2.addToSeqPlatformGroups(spg_project1)
-        sp2.addToSeqPlatformGroups(spg_useDefault1)
+        sp2.addToSeqPlatformGroups(spgProject1)
+        sp2.addToSeqPlatformGroups(spgUseDefault1)
         sp2.save(flush: true)
 
-        sp3.addToSeqPlatformGroups(spg_useDefault1)
+        sp3.addToSeqPlatformGroups(spgUseDefault1)
         sp3.save(flush: true)
 
-        sp4.addToSeqPlatformGroups(spg_useDefault1)
+        sp4.addToSeqPlatformGroups(spgUseDefault1)
         sp4.save(flush: true)
     }
 
@@ -99,7 +99,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         setupData()
 
         when:
-        sp3.addToSeqPlatformGroups(spg_useDefault2)
+        sp3.addToSeqPlatformGroups(spgUseDefault2)
         sp3.save(flush: true)
 
         then:
@@ -124,7 +124,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         setupData()
 
         when:
-        sp4.addToSeqPlatformGroups(spg_project1)
+        sp4.addToSeqPlatformGroups(spgProject1)
         sp4.save(flush: true)
 
         then:
@@ -136,7 +136,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         setupData()
 
         when:
-        sp4.addToSeqPlatformGroups(spg_project2)
+        sp4.addToSeqPlatformGroups(spgProject2)
         sp4.save(flush: true)
 
         then:
@@ -148,8 +148,8 @@ class SeqPlatformIntegrationSpec extends Specification {
         setupData()
 
         when:
-        spg_project2.addToSeqPlatforms(sp4)
-        spg_project2.save(flush: true)
+        spgProject2.addToSeqPlatforms(sp4)
+        spgProject2.save(flush: true)
 
         then:
         noExceptionThrown()
@@ -176,8 +176,8 @@ class SeqPlatformIntegrationSpec extends Specification {
         setupData()
 
         when:
-        spg_project2.addToSeqPlatforms(sp2)
-        spg_project2.save(flush: true)
+        spgProject2.addToSeqPlatforms(sp2)
+        spgProject2.save(flush: true)
 
         then:
         thrown(ValidationException)
@@ -189,7 +189,7 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         when:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(
-                mergingCriteria: mergingCriteria_useProject,
+                mergingCriteria: mergingCriteriaUseProject,
         )
         seqPlatformGroup.addToSeqPlatforms(sp2)
         seqPlatformGroup.save(flush: true)
@@ -204,11 +204,11 @@ class SeqPlatformIntegrationSpec extends Specification {
         setupData()
 
         expect:
-        spg_project1 == sp1.getSeqPlatformGroupForMergingCriteria(mergingCriteria_useProject.project, mergingCriteria_useProject.seqType)
-        spg_project1 == sp2.getSeqPlatformGroupForMergingCriteria(mergingCriteria_useProject.project, mergingCriteria_useProject.seqType)
-        spg_useDefault1 == sp1.getSeqPlatformGroupForMergingCriteria(mergingCriteria_useDefault.project, mergingCriteria_useDefault.seqType)
-        spg_useDefault1 == sp2.getSeqPlatformGroupForMergingCriteria(mergingCriteria_useDefault.project, mergingCriteria_useDefault.seqType)
-        null == sp3.getSeqPlatformGroupForMergingCriteria(mergingCriteria_useProject.project, mergingCriteria_useProject.seqType)
-        null == sp4.getSeqPlatformGroupForMergingCriteria(mergingCriteria_useProject.project, mergingCriteria_useProject.seqType)
+        spgProject1 == sp1.getSeqPlatformGroupForMergingCriteria(mergingCriteriaUseProject.project, mergingCriteriaUseProject.seqType)
+        spgProject1 == sp2.getSeqPlatformGroupForMergingCriteria(mergingCriteriaUseProject.project, mergingCriteriaUseProject.seqType)
+        spgUseDefault1 == sp1.getSeqPlatformGroupForMergingCriteria(mergingCriteriaUseDefault.project, mergingCriteriaUseDefault.seqType)
+        spgUseDefault1 == sp2.getSeqPlatformGroupForMergingCriteria(mergingCriteriaUseDefault.project, mergingCriteriaUseDefault.seqType)
+        null == sp3.getSeqPlatformGroupForMergingCriteria(mergingCriteriaUseProject.project, mergingCriteriaUseProject.seqType)
+        null == sp4.getSeqPlatformGroupForMergingCriteria(mergingCriteriaUseProject.project, mergingCriteriaUseProject.seqType)
     }
 }

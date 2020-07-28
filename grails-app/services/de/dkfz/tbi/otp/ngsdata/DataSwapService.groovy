@@ -62,7 +62,7 @@ class DataSwapService {
     static final String MISSING_FILES_TEXT = "The following files are expected, but not found:"
     static final String EXCESS_FILES_TEXT = "The following files are found, but not expected:"
 
-    static final String bashHeader = """\
+    static final String BASH_HEADER = """\
             #!/bin/bash
 
             #PLEASE CHECK THE COMMANDS CAREFULLY BEFORE RUNNING THE SCRIPT
@@ -72,7 +72,7 @@ class DataSwapService {
 
             """.stripIndent()
 
-    static final String alignmentScriptHeader = "// ids of seqtracks which should be triggered with 'TriggerAlignment.groovy' for alignment\n\n"
+    static final String ALIGNMENT_SCRIPT_HEADER = "// ids of seqtracks which should be triggered with 'TriggerAlignment.groovy' for alignment\n\n"
 
     /**
      * Adapts the MetaDataFile copy in the database, when the corresponding values, which are stored in other objects, are changed
@@ -464,10 +464,10 @@ ln -s '${newDirectFileName}' \\
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
                 scriptOutputDirectory, "restartAli_${bashScriptName}.groovy"
         )
-        groovyConsoleScriptToRestartAlignments << alignmentScriptHeader
+        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh")
-        bashScriptToMoveFiles << bashHeader
+        bashScriptToMoveFiles << BASH_HEADER
 
         Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh")
         createBashScriptRoddy(seqTracks, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser)
@@ -612,10 +612,10 @@ ln -s '${newDirectFileName}' \\
         // validating ends here, now the changing are started
 
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "restartAli_${bashScriptName}.groovy")
-        groovyConsoleScriptToRestartAlignments << alignmentScriptHeader
+        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh")
-        bashScriptToMoveFiles << bashHeader
+        bashScriptToMoveFiles << BASH_HEADER
 
         Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh")
         createBashScriptRoddy(seqTrackList, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
@@ -719,7 +719,7 @@ ln -s '${newDirectFileName}' \\
         }
 
         if (roddyBamFiles) {
-            bashScriptToMoveFilesAsOtherUser << bashHeader
+            bashScriptToMoveFilesAsOtherUser << BASH_HEADER
 
             bashScriptToMoveFilesAsOtherUser << "\n\n\n ################ delete otherUser files ################ \n"
             roddyBamFiles.each { RoddyBamFile roddyBamFile ->
@@ -881,10 +881,10 @@ ln -s '${newDirectFileName}' \\
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
                 scriptOutputDirectory, "restartAli_${bashScriptName}.groovy"
         )
-        groovyConsoleScriptToRestartAlignments << alignmentScriptHeader
+        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh")
-        bashScriptToMoveFiles << bashHeader
+        bashScriptToMoveFiles << BASH_HEADER
 
         Run run = Run.findByName(inputInformationOTP.runName)
         notNull(run, "The run (${run}) does not exist")

@@ -38,7 +38,7 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
 
     SeqPlatformService service = new SeqPlatformService()
 
-    final String PLATFORM_NAME = "platform_name"
+    static final String PLATFORM_NAME = "platform_name"
 
     void "test createNewSeqPlatform, when seq platform name is null, should fail"() {
         when:
@@ -60,9 +60,7 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
 
     void "test createNewSeqPlatform, when name and seq platform group are provided"() {
         when:
-        SeqPlatform seqPlatform = SeqPlatformService.createNewSeqPlatform(
-                PLATFORM_NAME,
-        )
+        SeqPlatform seqPlatform = SeqPlatformService.createNewSeqPlatform(PLATFORM_NAME)
 
         then:
         seqPlatform.name == PLATFORM_NAME

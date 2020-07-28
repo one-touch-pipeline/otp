@@ -23,11 +23,16 @@ package de.dkfz.tbi.otp.utils
 
 import grails.validation.Validateable
 
+/**
+ * SuppressWarnings PropertyName: Unclear if the property names play a larger role for DataTables, do not change during major violation cleanup.
+ */
 class DataTableCommand implements Validateable {
 
     int iDisplayStart = 0
     int iDisplayLength = 10
+    @SuppressWarnings("PropertyName")
     int iSortCol_0 = 0
+    @SuppressWarnings("PropertyName")
     String sSortDir_0 = "asc"
     String sEcho
     String sSearch = ""

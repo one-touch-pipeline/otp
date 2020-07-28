@@ -33,7 +33,7 @@ import java.nio.file.attribute.PosixFilePermissions
 
 class ChecksumFileServiceSpec extends Specification implements DataTest {
 
-    final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"
+    static final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"
 
     @Rule
     TemporaryFolder tempFolder = new TemporaryFolder()

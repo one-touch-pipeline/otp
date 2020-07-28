@@ -37,8 +37,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1_1
-    AbstractMergedBamFile bamFile2_1
+    AbstractMergedBamFile bamFile1
+    AbstractMergedBamFile bamFile2
 
     @Shared
     SnvCallingService snvCallingService
@@ -55,8 +55,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         Map map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
-        bamFile1_1 = map.bamFile1
-        bamFile2_1 = map.bamFile2
+        bamFile1 = map.bamFile1
+        bamFile2 = map.bamFile2
         roddyConfig1 = map.roddyConfig
 
         DomainFactory.createAllAnalysableSeqTypes()

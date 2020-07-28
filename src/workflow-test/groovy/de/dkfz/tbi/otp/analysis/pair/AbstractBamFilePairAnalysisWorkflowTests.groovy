@@ -34,9 +34,9 @@ import java.time.Duration
 
 abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase implements SeqTypeAndInputBamFiles {
 
-    final Double COVERAGE = 30.0
+    static final Double COVERAGE = 30.0
 
-    final String PID = 'stds' //name have to be the same as in the reference data for OTP snv
+    static final String PID = 'stds' //name have to be the same as in the reference data for OTP snv
 
     AbstractMergedBamFile bamFileControl
     AbstractMergedBamFile bamFileTumor

@@ -39,9 +39,9 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
 
     AbstractMergedBamFileService abstractMergedBamFileService
 
-    final String MERGED_BAM_FILES_PATH = "merged-alignment"
+    static final String MERGED_BAM_FILES_PATH = "merged-alignment"
 
-    static final List<String> processingSteps = [
+    static final List<String> PROCESSING_STEPS = [
             "aceseq",
             "indel",
             "snv",
@@ -56,7 +56,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         }
 
         expect:
-        analysisPipelines.size() == processingSteps.size()
+        analysisPipelines.size() == PROCESSING_STEPS.size()
     }
 
     void "destination directory of ProcessedMergedBamFile"() {
@@ -110,7 +110,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         samplePair."${analysisName}ProcessingStatus" == ProcessingStatus.NEEDS_PROCESSING
 
         where:
-        analysisName << processingSteps
+        analysisName << PROCESSING_STEPS
     }
 
     @Unroll
@@ -127,7 +127,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         samplePair."${analysisName}ProcessingStatus" == ProcessingStatus.NEEDS_PROCESSING
 
         where:
-        analysisName << processingSteps
+        analysisName << PROCESSING_STEPS
     }
 
     @Unroll
@@ -144,7 +144,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         samplePair1."${analysisName}ProcessingStatus" == ProcessingStatus.NO_PROCESSING_NEEDED
 
         where:
-        analysisName << processingSteps
+        analysisName << PROCESSING_STEPS
     }
 
     void "getActiveBlockedBamsContainingSeqTracks, only returns not withdrawn blocked bams"() {

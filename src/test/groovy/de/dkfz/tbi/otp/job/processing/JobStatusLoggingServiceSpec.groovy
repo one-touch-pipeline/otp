@@ -53,7 +53,6 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
-    static String EXPECTED_LOGFILE_PATH
 
     final static Long ARBITRARY_ID = 23
     final static Long ARBITRARY_REALM_ID = 987
@@ -68,13 +67,14 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         ])
     }
 
+    String expectedLogFilePath
     Realm realm
 
     void setup() {
         realm = DomainFactory.createRealm()
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): LOGGING_ROOT_PATH])
         service.configService = configService
-        EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
+        expectedLogFilePath = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
     }
 
     void cleanup() {
@@ -132,7 +132,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         ProcessingStep processingStep = createFakeProcessingStep()
 
         expect:
-        EXPECTED_LOGFILE_PATH == service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
+        expectedLogFilePath == service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
     }
 
     void "test constructMessage, when processing step is null"() {

@@ -32,7 +32,7 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class ChromosomeIdentifierSortingService {
 
-    final int CHROMOSOME_SIZE = Chromosomes.numberOfNumericChromosomes()
+    static final int CHROMOSOME_SIZE = Chromosomes.numberOfNumericChromosomes()
 
     def listComparator = { identifier1, identifier2 ->
         if (identifier1.isInteger() && identifier2.isInteger()) {

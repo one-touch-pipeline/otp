@@ -38,10 +38,10 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 @Transactional
 class RestartActionService {
 
-    static String JOB_NOT_AUTO_RESTARTABLE = 'Could not restart job, because job is not auto-restartable.'
-    static String WORKFLOW_RESTARTED = 'Workflow restarted.'
-    static String WORKFLOW_NOT_AUTO_RESTARTABLE = 'Could not restart workflow, because workflow is not auto-restartable.'
-    static String WORKFLOW_NOT_RESTARTED = 'Could not restart workflow, because workflow is not in failed state or already restarted.'
+    static final String JOB_NOT_AUTO_RESTARTABLE = 'Could not restart job, because job is not auto-restartable.'
+    static final String WORKFLOW_RESTARTED = 'Workflow restarted.'
+    static final String WORKFLOW_NOT_AUTO_RESTARTABLE = 'Could not restart workflow, because workflow is not auto-restartable.'
+    static final String WORKFLOW_NOT_RESTARTED = 'Could not restart workflow, because workflow is not in failed state or already restarted.'
 
     @Autowired
     ApplicationContext context

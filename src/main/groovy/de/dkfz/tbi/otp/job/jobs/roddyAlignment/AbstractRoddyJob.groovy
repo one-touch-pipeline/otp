@@ -50,7 +50,7 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubmitWaitValidateJob {
 
     static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
-    static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+    static final Pattern RODDY_EXECUTION_STORE_DIRECTORY_PATTERN = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired
     ConfigService configService
@@ -64,7 +64,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
 
     // Example:
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
-    static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
+    static final Pattern RODDY_OUTPUT_PATTERN = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
 
     private static final Semaphore RODDY_MEMORY_USAGE = {
         SessionUtils.withNewSession {
@@ -167,7 +167,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             if (it.trim().isEmpty()) {
                 return //skip empty lines
             }
-            Matcher m = it =~ roddyOutputPattern
+            Matcher m = it =~ RODDY_OUTPUT_PATTERN
             if (m.matches()) {
                 String jobName = m.group(1)
                 String jobClass = m.group(2)
@@ -201,7 +201,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     }
 
     File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {
-        Matcher m = roddyOutput =~ roddyExecutionStoreDirectoryPattern
+        Matcher m = roddyOutput =~ RODDY_EXECUTION_STORE_DIRECTORY_PATTERN
         if (m.find()) {
             File directory = new File(m.group(1))
             assert !m.find()

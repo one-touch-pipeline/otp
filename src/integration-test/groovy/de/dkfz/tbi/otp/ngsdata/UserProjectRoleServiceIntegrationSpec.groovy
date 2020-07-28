@@ -286,7 +286,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject(unixGroup: UNIX_GROUP)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
-                projectRoles: [PI],
+                projectRoles: [pi],
                 manageUsers: true
         )
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
@@ -455,7 +455,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject(unixGroup: UNIX_GROUP)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(
                 project     : project,
-                projectRoles: [PI],
+                projectRoles: [pi],
                 manageUsers : true
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -686,13 +686,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole newUserProjectRole = DomainFactory.createUserProjectRole(project: project)
 
         List<String> recipients = [
-                addUserWithProjectRole(PI, true, true),
-                addUserWithProjectRole(PI, false, true),
+                addUserWithProjectRole(pi, true, true),
+                addUserWithProjectRole(pi, false, true),
                 addUserWithProjectRole(otherRole, true, true),
         ]*.user.email.sort()
 
         addUserWithProjectRole(otherRole, false, true)
-        [PI, otherRole].each {
+        [pi, otherRole].each {
             addUserWithProjectRole(it, true, false)
             addUserWithProjectRole(it, false, false)
         }
@@ -719,7 +719,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole uprToBeNotified = DomainFactory.createUserProjectRole(
                 user                 : DomainFactory.createUser(),
                 project              : project,
-                projectRoles         : [PI],
+                projectRoles         : [pi],
                 receivesNotifications: false,
         )
         UserProjectRole newUPR = DomainFactory.createUserProjectRole(project: project)
@@ -750,14 +750,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         if (authoritative) {
             properties += [
                     user        : CollectionUtils.exactlyOneElement(User.findAllByUsername(OPERATOR)),
-                    projectRoles: [PI],
+                    projectRoles: [pi],
             ]
         }
         UserProjectRole executingUPR = DomainFactory.createUserProjectRole(properties)
 
         String expectedSubject = "newProjectMember\n${newUPR.project.name}"
         String expectedContent = "newProjectMember\n${executingUPR.user.realName}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}"
-        if (authoritative && projectRole == SUBMITTER) {
+        if (authoritative && projectRole == submitter) {
             String nameAndSalutation = EMAIL_SENDER_SALUTATION
             expectedContent = "administrativeUserAddedSubmitter\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}\n${nameAndSalutation}\n${nameAndSalutation}"
         }
@@ -795,8 +795,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         List<UserProjectRole> toBeNotified = [
-            DomainFactory.createUserProjectRole(project: project, manageUsers: true),
-            DomainFactory.createUserProjectRole(project: project, projectRoles: [PI]),
+                DomainFactory.createUserProjectRole(project: project, manageUsers: true),
+                DomainFactory.createUserProjectRole(project: project, projectRoles: [pi]),
         ]
 
         String projectName = project.name
@@ -1045,7 +1045,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         List<User> expectedUsers = []
 
-        [BIOINFORMATICIAN, PI, SUBMITTER].each { ProjectRole projectRole ->
+        [bioinformatician, pi, submitter].each { ProjectRole projectRole ->
             expectedUsers << addUserProjectRole(projectRoles: [projectRole], manageUsers: true).user
             addUserProjectRole(projectRoles: [projectRole], manageUsers: false)
         }
@@ -1081,13 +1081,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         List<User> expectedUsers = []
 
         // authoritative
-        [PI].each { ProjectRole projectRole ->
+        [pi].each { ProjectRole projectRole ->
             expectedUsers << addUserProjectRole(projectRoles: [projectRole], enabled: true).user
             addUserProjectRole(projectRoles: [projectRole], enabled: false)
         }
 
         // not authoritative
-        [BIOINFORMATICIAN, SUBMITTER, DomainFactory.createProjectRole()].each { ProjectRole projectRole ->
+        [bioinformatician, submitter, DomainFactory.createProjectRole()].each { ProjectRole projectRole ->
             [true, false].each { boolean enabled ->
                 addUserProjectRole(projectRoles: [projectRole], enabled: enabled)
             }
@@ -1104,7 +1104,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        List<ProjectRole> bioInfProjectRoles = [LEAD_BIOINFORMATICIAN, BIOINFORMATICIAN]
+        List<ProjectRole> bioInfProjectRoles = [leadBioinformatician, bioinformatician]
 
         // valid UserProjectRole of different Projects
         bioInfProjectRoles.each { ProjectRole pr ->
@@ -1127,7 +1127,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         // not bioinformaticians
-        [PI, SUBMITTER, DomainFactory.createProjectRole()].each { ProjectRole projectRole ->
+        [pi, submitter, DomainFactory.createProjectRole()].each { ProjectRole projectRole ->
             [true, false].each { boolean enabled ->
                 addUserProjectRole(projectRoles: [projectRole], enabled: enabled)
             }

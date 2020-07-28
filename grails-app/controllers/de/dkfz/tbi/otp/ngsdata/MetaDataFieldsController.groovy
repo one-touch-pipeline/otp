@@ -461,6 +461,8 @@ class CreateLibraryPreparationKitImportAliasCommand extends CreateImportAliasCom
     }
 }
 
+// SuppressWarnings PropertyName: The variable mate_pair should be refactored to be matePair. Too risky to do during bulk violation removal.
+@SuppressWarnings("PropertyName")
 abstract class CreateWithLayoutCommand implements Validateable {
     SeqTypeService seqTypeService
     boolean single
