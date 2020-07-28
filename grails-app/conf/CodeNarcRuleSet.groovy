@@ -963,7 +963,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     MethodName {
-        priority = MIDDLE
+        priority = CRITICAL
         doNotApplyToFileNames = TEST
     }
     ObjectOverrideMisspelledMethodName {
