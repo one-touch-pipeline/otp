@@ -66,7 +66,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
     static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
 
-    private static final Semaphore roddyMemoryUsage = {
+    private static final Semaphore RODDY_MEMORY_USAGE = {
         SessionUtils.withNewSession {
             new Semaphore((int) ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null), true)
         }
@@ -79,12 +79,12 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             final Realm realm = roddyResult.project.realm
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
-            roddyMemoryUsage.acquire()
+            RODDY_MEMORY_USAGE.acquire()
             ProcessOutput output
             try {
                 output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZero()
             } finally {
-                roddyMemoryUsage.release()
+                RODDY_MEMORY_USAGE.release()
             }
 
             if (output.stderr.contains("java.lang.OutOfMemoryError")) {

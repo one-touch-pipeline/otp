@@ -35,8 +35,8 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 @Integration
 class SampleIdentifierIntegrationSpec extends Specification {
 
-    static private String CORRECT_NAME = 'name'
-    static private String INCORRECT_NAME = 'toolong'
+    private static final String CORRECT_NAME = 'name'
+    private static final String INCORRECT_NAME = 'toolong'
 
     private SampleIdentifier sampleIdentifier
 

@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 @Integration
 class TypeValidatorsIntegrationSpec extends Specification {
 
-    private static String JOB_NAME = CopyFilesJob.class.getSimpleName()
+    private static final String JOB_NAME = CopyFilesJob.class.getSimpleName()
 
     @Unroll
     void "check JOB_NAME for value '#name' should return '#ret'"() {

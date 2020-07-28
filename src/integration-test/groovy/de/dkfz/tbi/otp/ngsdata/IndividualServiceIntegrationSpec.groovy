@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 class IndividualServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     IndividualService individualService
-    private static long ARBITRARY_TIMESTAMP = 1337
+    private static final long ARBITRARY_TIMESTAMP = 1337
 
     void setupData() {
         createUserAndRoles()

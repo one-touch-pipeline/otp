@@ -979,18 +979,18 @@ class DomainFactory {
                 properties)
     }
 
-    private static final Map sampleTypeMap = [
+    private static final Map SAMPLE_TYPE_MAP = [
             project   : { createProject() },
             sampleType: { createSampleType() },
             category  : SampleType.Category.DISEASE,
     ].asImmutable()
 
     static SampleTypePerProject createSampleTypePerProject(Map properties = [:]) {
-        return createDomainObject(SampleTypePerProject, sampleTypeMap, properties)
+        return createDomainObject(SampleTypePerProject, SAMPLE_TYPE_MAP, properties)
     }
 
     static SampleTypePerProject createSampleTypePerProjectLazy(Map properties = [:]) {
-        return findOrCreateDomainObject(SampleTypePerProject, sampleTypeMap, properties)
+        return findOrCreateDomainObject(SampleTypePerProject, SAMPLE_TYPE_MAP, properties)
     }
 
     static SampleTypePerProject createSampleTypePerProjectForMergingWorkPackage(AbstractMergingWorkPackage mergingWorkPackage, SampleType.Category category = SampleType.Category.DISEASE) {

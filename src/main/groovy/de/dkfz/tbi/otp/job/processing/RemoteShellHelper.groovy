@@ -75,7 +75,7 @@ class RemoteShellHelper {
     /**
      * Variable to use for synchronisation
      */
-    private final Object SYNCHRONIZE_VARIABLE = new Object()
+    private final Object synchronizeVariable = new Object()
 
     /**
      * Executes a command on a specified host and logs stdout and stderr
@@ -139,7 +139,7 @@ class RemoteShellHelper {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
         if (!maxSshCalls) {
-            synchronized (SYNCHRONIZE_VARIABLE) {
+            synchronized (synchronizeVariable) {
                 maxSshCalls = maxSshCalls ?: new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS), true)
             }
         }
@@ -164,7 +164,7 @@ class RemoteShellHelper {
             return processOutput
         } catch (Exception e) {
             log.info(e.toString(), e)
-            synchronized (SYNCHRONIZE_VARIABLE) {
+            synchronized (synchronizeVariable) {
                 sessionPerRealm.remove(realm)
             }
             throw new ProcessingException(e)
@@ -255,7 +255,7 @@ class RemoteShellHelper {
                 session.sendKeepAliveMsg()
             } catch (Throwable e) {
                 log.error("Send keep alive failed for ${realm} ${session}", e)
-                synchronized (SYNCHRONIZE_VARIABLE) {
+                synchronized (synchronizeVariable) {
                     sessionPerRealm.remove(realm)
                 }
             }

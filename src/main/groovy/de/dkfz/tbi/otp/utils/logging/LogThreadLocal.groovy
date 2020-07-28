@@ -35,7 +35,7 @@ class LogThreadLocal {
     /**
      * The thread local holder for {@link Logger}
      */
-    private static final ThreadLocal<Logger> jobLogHolder = new ThreadLocal<Logger>()
+    private static final ThreadLocal<Logger> JOB_LOG_HOLDER = new ThreadLocal<Logger>()
 
     /**
      * return the {@link Logger} connected to this {@link Thread}.
@@ -44,7 +44,7 @@ class LogThreadLocal {
      * @return the connected {@link Logger} or null, if no {@link Logger} is connected
      */
     static Logger getThreadLog() {
-        return jobLogHolder.get()
+        return JOB_LOG_HOLDER.get()
     }
 
     /**
@@ -56,14 +56,14 @@ class LogThreadLocal {
      */
     static void setThreadLog(Logger log) {
         notNull(log, "The log may not be null")
-        jobLogHolder.set(log)
+        JOB_LOG_HOLDER.set(log)
     }
 
     /**
      * remove the {@link Logger} connected to this {@link Thread}, if any.
      */
     static void removeThreadLog() {
-        jobLogHolder.remove()
+        JOB_LOG_HOLDER.remove()
     }
 
     static void withThreadLog(Appendable out, Closure code) {

@@ -954,7 +954,7 @@ All the Rules that will be used for OTP
     }
     //FactoryMethodName //we don't do this
     FieldName {
-        priority = HIGH
+        priority = CRITICAL
     }
     InterfaceName {
         priority = DEFAULT

@@ -38,7 +38,7 @@ class SampleIdentifierSpec extends Specification implements DataTest {
     }
 
 
-    static private String CORRECT_NAME = 'name'
+    private static final String CORRECT_NAME = 'name'
 
     private SampleIdentifier sampleIdentifier
 

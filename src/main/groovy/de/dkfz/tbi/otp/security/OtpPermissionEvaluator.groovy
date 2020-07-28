@@ -38,14 +38,14 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
     @Autowired AclPermissionEvaluator aclPermissionEvaluator
 
-    private static final List permissions = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER"]
+    private static final List PERMISSIONS = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER"]
 
     @Override
     boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) throws IllegalArgumentException {
         if (!auth) {
             return false
         }
-        if (permission instanceof String && permission in permissions) {
+        if (permission instanceof String && permission in PERMISSIONS) {
             switch (targetDomainObject?.class) {
                 case Project:
                     return checkProjectRolePermission(auth, (Project) targetDomainObject, permission)
@@ -63,7 +63,7 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
         if (!auth) {
             return false
         }
-        if (permission instanceof String && permission in permissions) {
+        if (permission instanceof String && permission in PERMISSIONS) {
             switch (targetType) {
                 case Project.name:
                     return checkProjectRolePermission(auth, Project.get(targetId), (String) permission)
