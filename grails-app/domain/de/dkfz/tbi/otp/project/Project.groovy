@@ -52,6 +52,12 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     Realm realm
     String dirAnalysis
 
+    /**
+     * Historic flag to signal whether the individualPrefix field has to be unqiue or not.
+     *
+     * Currently we still have projects sharing an individual prefix, so need this flag as a workaround
+     * but new projects should not rely on this and provide a unique individualPrefix.
+     */
     boolean uniqueIndividualPrefix = true
 
     /**
