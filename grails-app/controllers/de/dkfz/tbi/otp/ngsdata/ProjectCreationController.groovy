@@ -202,7 +202,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     static constraints = {
         name(blank: false, validator: { val, obj ->
             if (Project.findByName(val)) {
-                return 'duplicate'
+                return "duplicate"
             }
             if (Project.findByNameInMetadataFiles(val)) {
                 return "duplicate.metadataFilesName"
@@ -215,25 +215,28 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
         })
         dirName(blank: false, validator: { val, obj ->
             if (Project.findByDirName(val)) {
-                return 'default.not.unique.message'
+                return "default.not.unique.message"
+            }
+            if (val && !OtpPath.isValidRelativePath(val)) {
+                return "validator.relative.path"
             }
         })
         dirAnalysis(shared: "absolutePath")
         unixGroup(blank: false, validator: { val, obj ->
             if (val == "") {
-                return 'default.blank.message'
+                return "default.blank.message"
             }
             if (!(OtpPath.isValidPathComponent(val))) {
-                return 'invalid'
+                return "invalid"
             }
         })
         costCenter(nullable: true)
         nameInMetadataFiles(nullable: true, validator: { val, obj ->
             if (val && Project.findByNameInMetadataFiles(val)) {
-                return 'duplicate'
+                return "duplicate"
             }
             if (Project.findByName(val)) {
-                return 'duplicate.name'
+                return "duplicate.name"
             }
         })
         usersToCopyFromBaseProject(nullable: true)
@@ -242,13 +245,11 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
             if (val?.empty) {
                 return "empty"
             }
-
             if (val && !OtpPath.isValidPathComponent(val.originalFilename)) {
                 return "invalid"
             }
-
             if (val?.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                "size"
+                return "size"
             }
         })
         projectInfoToCopy(nullable: true)

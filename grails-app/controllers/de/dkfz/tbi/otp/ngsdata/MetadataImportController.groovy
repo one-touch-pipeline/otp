@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.nio.file.FileSystem
 import java.util.regex.Matcher
@@ -370,6 +371,10 @@ class MetadataImportControllerSubmitCommand implements Serializable {
             }
             return OtrsTicket.ticketNumberConstraint(val) ?: true
         })
+    }
+
+    void setTicketNumber(String name) {
+        this.ticketNumber = StringUtils.trimAndShortenWhitespace(name)
     }
 
     String getTicketNumber() {
