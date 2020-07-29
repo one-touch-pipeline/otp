@@ -30,7 +30,9 @@
 </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
         <g:render template="/templates/projectSelection"/>
+        <h1><g:message code="otp.menu.indel.results"/></h1>
 
         <div class="table">
             <div class="otpDataTables">

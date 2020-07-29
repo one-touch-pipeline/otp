@@ -23,7 +23,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <title><g:message code="alignment.quality.title" args="${[selectedProject, seqType]}"/></title>
+    <title><g:message code="otp.menu.alignmentQuality"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
     <asset:javascript src="pages/alignmentQualityOverview/index/alignmentQualityOverview.js"/>
 </head>
@@ -50,6 +50,8 @@
                 </g:if>
             </div>
         </div>
+
+        <h1><g:message code="otp.menu.alignmentQuality"/></h1>
         <div id="sample" data-sample="${sample?.id}">
             <g:if test="${sample}">
                 <otp:annotation type="info">
