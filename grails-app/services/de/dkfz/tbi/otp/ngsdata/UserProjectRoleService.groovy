@@ -186,7 +186,7 @@ class UserProjectRoleService {
                 username                  : user.realName,
                 requester                 : requester.realName,
                 projectName               : project.name,
-                dirAnalysis               : project.dirAnalysis,
+                dirAnalysis               : project.dirAnalysis ?: "-",
                 clusterName               : clusterName,
                 clusterAdministrationEmail: clusterAdministrationEmail,
                 supportTeamSalutation     : supportTeamName,
