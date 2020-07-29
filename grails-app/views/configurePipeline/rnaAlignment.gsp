@@ -156,16 +156,18 @@
                 <tr>
                     <td class="myKey"><g:message code="${entry.name}"/></td>
                     <td>
-                        <ul>
-                            <g:each in="${entry.values}" var="sampleType">
-                                <li>
-                                    <g:checkBox name="sampleTypeIds" value="${sampleType.id}"
-                                                checked="false"/>${sampleType.name}
-                                </li>
-                            </g:each>
-                        </ul>
+                        <div class="scrollable" style="max-height: 300px">
+                            <ul>
+                                <g:each in="${entry.values}" var="sampleType">
+                                    <li><g:checkBox name="sampleTypeIds" value="${sampleType.id}" checked="false"/>${sampleType.name}</li>
+                                </g:each>
+                            </ul>
+                        </div>
                     <td>&nbsp;</td>
-                    <td><g:message code="${entry.info}"/></td>
+                    <td>
+                        <g:message code="${entry.info}"/><br><br>
+                        <g:message code="configurePipeline.sample.type.info.general"/>
+                    </td>
                 </tr>
             </g:each>
 

@@ -70,7 +70,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         List<String> allBwaMemVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE)
         String defaultBwaMemVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT)
 
-
         assert allSambambaVersions.contains(defaultSambambaVersion)
         assert allBwaMemVersions.contains(defaultBwaMemVersion)
         assert MergeConstants.ALL_MERGE_TOOLS.contains(defaultMergeTool)
@@ -171,8 +170,9 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         redirect(controller: "alignmentConfigurationOverview")
     }
 
-
     def rnaAlignment(BaseConfigurePipelineSubmitCommand cmd) {
+        Closure sampleTypeSort = { SampleType a, SampleType b -> b.dateCreated <=> a.dateCreated }
+
         Pipeline pipeline = Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline
 
         Project project = projectSelectionService.selectedProject
@@ -195,7 +195,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }*.name
 
         List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(
-                project, cmd.seqType)*.sampleType.unique().sort { it.name }
+                project, cmd.seqType)*.sampleType.unique().sort(sampleTypeSort)
+
         List<SampleType> additionalUsedSampleTypes = (SeqTrack.createCriteria().list {
             projections {
                 sample {
@@ -211,11 +212,10 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 }
             }
             eq('seqType', cmd.seqType)
-        }.unique() - configuredSampleTypes).sort {
-            it.name
-        }
+        }.unique() - configuredSampleTypes).sort(sampleTypeSort)
+
         List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(
-                SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort { it.name }
+                SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort(sampleTypeSort)
 
         assert project.getProjectDirectory().exists()
 
@@ -426,7 +426,6 @@ class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitComm
     }
 }
 
-
 @ToString(includeNames = true, includeSuper = true)
 class ConfigureRunYapsaSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     String programVersion
@@ -464,7 +463,6 @@ class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand 
     }
 }
 
-
 @ToString(includeNames = true, includeSuper = true)
 class InvalidateConfigurationCommand extends BaseConfigurePipelineSubmitCommand {
     Pipeline pipeline
@@ -477,7 +475,6 @@ class InvalidateConfigurationCommand extends BaseConfigurePipelineSubmitCommand 
         overviewController(nullable: false)
     }
 }
-
 
 @ToString(includeNames = true)
 class BaseConfigurePipelineSubmitCommand implements Serializable {
