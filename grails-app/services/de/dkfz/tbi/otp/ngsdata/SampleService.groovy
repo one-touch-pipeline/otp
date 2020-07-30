@@ -42,4 +42,12 @@ class SampleService {
             }
         }
     }
+
+    List<Sample> getSamplesOfProject(Project project) {
+        return Sample.withCriteria {
+            individual {
+                eq("project", project)
+            }
+        } as List<Sample>
+    }
 }

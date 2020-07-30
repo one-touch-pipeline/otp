@@ -407,6 +407,7 @@ class ProjectOverviewService {
         }
         return seq
     }
+
     /**
      * @param project the project for filtering the result
      * @return all SeqTypes used in the project
@@ -428,6 +429,7 @@ class ProjectOverviewService {
         }
         return seqTypes
     }
+
     /**
      * @param project the project for filtering the result
      * @return all MockPids used in the project

@@ -27,6 +27,8 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.project.Project
+
 @Rollback
 @Integration
 class SampleServiceIntegrationSpec extends Specification implements DomainFactoryCore {
@@ -54,5 +56,25 @@ class SampleServiceIntegrationSpec extends Specification implements DomainFactor
         2               | 0             || 1
         8               | 2             || 0
         null            | null          || 1
+    }
+
+    void "getSamplesOfProject, returns all samples of given project"() {
+        given:
+        Closure<Sample> createSampleForProject = { Project project ->
+            return createSample(individual: createIndividual(project: project))
+        }
+
+        Project project1 = createProject()
+        createSampleForProject(project1)
+        createSampleForProject(project1)
+
+        Project project2 = createProject()
+        List<Sample> expectedSamples = [
+                createSampleForProject(project2),
+                createSampleForProject(project2),
+        ]
+
+        expect:
+        expectedSamples == sampleService.getSamplesOfProject(project2)
     }
 }

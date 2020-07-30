@@ -37,7 +37,7 @@ class ProjectOverviewController {
     ProjectOverviewService projectOverviewService
     CommentService commentService
     ProjectSelectionService projectSelectionService
-
+    SampleService sampleService
 
     Map index() {
         return [:]
@@ -120,6 +120,10 @@ class ProjectOverviewController {
         projectOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
             InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.individual.mockPid, it.sampleType.name)
             getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.pipeline.id, []).add(it)
+        }
+
+        sampleService.getSamplesOfProject(project).each { Sample sample ->
+            getDataForMockPidAndSampleTypeName(sample.individual.mockPid, sample.sampleType.name)
         }
 
         List data = []
