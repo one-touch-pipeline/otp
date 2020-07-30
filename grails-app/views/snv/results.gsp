@@ -42,11 +42,11 @@
                         'analysis.sampleTypes',
                         'analysis.seqType',
                         'analysis.libPrepKits',
+                        'analysis.plots',
                         'analysis.programVersion',
                         'analysis.processingDate',
                         'analysis.progress',
-                        'analysis.plots',
-                    ] }"
+                    ]}"
                     id="resultsTable" />
             </div>
         </div>

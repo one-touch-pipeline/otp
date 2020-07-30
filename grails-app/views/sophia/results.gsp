@@ -45,13 +45,12 @@
                             'sophia.tumorMassiveInvFilteringLevel',
                             'sophia.rnaContaminatedGenesCount',
                             'sophia.rnaDecontaminationApplied',
+                            'sophia.rnaContaminatedGenesMoreThanTwoIntron',
+                            'analysis.plots',
                             'analysis.programVersion',
                             'analysis.processingDate',
                             'analysis.progress',
-                            'analysis.plots',
-                            'sophia.rnaContaminatedGenesMoreThanTwoIntron',
-                    ] }"
-                    id="resultsTable" />
+                    ]}" id="resultsTable" />
         </div>
     </div>
     <asset:script>

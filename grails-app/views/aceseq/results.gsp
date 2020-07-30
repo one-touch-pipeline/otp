@@ -46,11 +46,11 @@
                             'aceseq.goodnessOfFit',
                             'aceseq.gender',
                             'aceseq.solutionPossible',
+                            'analysis.plots',
                             'analysis.programVersion',
                             'analysis.processingDate',
                             'analysis.progress',
-                            'analysis.plots',
-                    ] }"
+                    ]}"
                     id="resultsTable" />
             </div>
         </div>

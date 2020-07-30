@@ -45,7 +45,7 @@
                         'analysis.programVersion',
                         'analysis.processingDate',
                         'analysis.progress',
-                    ] }"
+                    ]}"
                     id="resultsTable" />
             </div>
         </div>
