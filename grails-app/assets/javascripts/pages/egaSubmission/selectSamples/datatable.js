@@ -55,7 +55,7 @@ $.otp.selectSamplesTable = {
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name: "egaProject",
-                    value: $('#projectName').text()
+                    value: $('#sampleTable').data("project")
                 });
                 $.ajax({
                     "dataType": 'json',

@@ -40,10 +40,13 @@
         <h1><g:message code="egaSubmission.selectSamples.title"/></h1>
         <div class="rounded-page-header-box">
             <table id="searchCriteriaTable" style="display: inline-block">
+                <tr>
+                    <td><g:message code="egaSubmission.SubmissionProject"/>:</td>
+                    <td>${project.displayName}</td>
+                </tr>
                 <tr class="dtf_row">
-                    <td id="projectName">${project.name}</td>
                     <td>
-                        <span>Filter by <g:message code="egaSubmission.seqType"/>:</span>
+                        <span><g:message code="egaSubmission.seqType"/>:</span>
                     </td>
                     <td>
                         <table id="searchCriteriaTableSeqType">
@@ -53,7 +56,7 @@
                                               class="use-select-2"
                                               from="${seqTypes}"
                                               option="${seqTypes}"
-                                              noSelection="${["none": message(code:"otp.filter.seqType")]}"/>
+                                              noSelection="${["none": message(code: "egaSubmission.allSeqTypes")]}"/>
                                 </td>
                             </tr>
                         </table>
@@ -63,13 +66,13 @@
         </div>
 
         <g:form controller="egaSubmission" action="selectSamplesForm">
-            <div class="otpDataTables">
+            <div class="otpDataTables" id="sampleTable" data-project="${project}">
                 <g:set var="dataTableHeaders" value="${[
                         'individual',
                         'seqType',
                         'sampleType'
                 ]}"/>
-                <otp:dataTable codes="${[''] + dataTableHeaders.collect { "egaSubmission.${it}" }}" id="selectSamplesTable" />
+                <otp:dataTable codes="${[''] + dataTableHeaders.collect { "egaSubmission.${it}" }}" id="selectSamplesTable"/>
             </div>
             <g:hiddenField name="submission.id" value="${submissionId}" />
             <g:set var="nextButton" value="next"/>
