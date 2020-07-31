@@ -154,7 +154,7 @@
                                     <label for="samples[${sampleCounter}].sampleIdentifier]"><g:message code="individual.insert.sampleIdentifier"/></label>
                                 </td>
                                 <td class="multi-input-field">
-                                    <g:each in="${sample.sampleIdentifierObjects ?: [""]}" var="sampleIdentifier" status="i">
+                                    <g:each in="${sample.sampleIdentifiers ?: [""]}" var="sampleIdentifier" status="i">
                                         <div class="field">
                                             <g:textField list="sampleIdentifiersList" name="samples[${sampleCounter}].sampleIdentifiers"
                                                          value="${sampleIdentifier}" id="sampleIdentifier"/>

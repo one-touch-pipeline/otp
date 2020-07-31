@@ -116,7 +116,7 @@
                                     ${sample.sampleIdentifierObjects.join(", ")}
                                 </sec:access>
                                 <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
-                                    <g:render template="editorSampleIdentifier" model="[sample: sample]"></g:render>
+                                    <g:render template="editorSampleIdentifier" model="[sample: sample]"/>
                                 </otp:expandable>
                             </td>
                         </tr>
