@@ -62,10 +62,6 @@ class ProjectOverviewController {
         ]
     }
 
-    Map mmmlIdentifierMapping() {
-        return [:]
-    }
-
     class InfoAboutOneSample {
         // Map<SeqType.id, value>>
         Map<Long, String> laneCountRegistered = [:]
@@ -236,15 +232,6 @@ class ProjectOverviewController {
             }
             dataToRender.aaData << line
         }
-        render dataToRender as JSON
-    }
-
-    JSON dataTableMMMLMapping(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        List data = projectOverviewService.tableForMMMLMapping()
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
         render dataToRender as JSON
     }
 }

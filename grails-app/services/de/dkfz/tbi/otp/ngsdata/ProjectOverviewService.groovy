@@ -51,20 +51,6 @@ class ProjectOverviewService {
     ApplicationContext applicationContext
 
 
-    static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
-            "ICGC_MMML",
-            "ICGC_MMML_XP",
-            "ICGC_MMML_RARE_LYMPHOMA_XP",
-            "ICGC_MMML_RARE_LYMPHOMA_EXOMES",
-    ].asImmutable()
-
-    /**
-     * determine, if the column sample identifier should be hidden in the view
-     */
-    static boolean hideSampleIdentifier(Project project) {
-        return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project?.name)
-    }
-
     protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig config) {
         assert config
         ProcessOutput output = getRoddyProcessOutput(config)
@@ -530,21 +516,5 @@ where
 
     List listReferenceGenome(Project project) {
         return ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
-    }
-
-    @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
-    List tableForMMMLMapping() {
-        def seq = Individual.withCriteria {
-            project {
-                'in'("name", PROJECT_TO_HIDE_SAMPLE_IDENTIFIER)
-            }
-            projections {
-                property("id")
-                property("mockFullName")
-                property("internIdentifier")
-            }
-            order("id", "desc")
-        }
-        return seq
     }
 }

@@ -62,7 +62,7 @@ class IndividualController {
                 comment            : individual.comment,
                 typeDropDown       : Individual.Type.values(),
                 sampleTypeDropDown : individualService.getSampleTypeNames(),
-                projectBlacklisted : ProjectOverviewService.hideSampleIdentifier(individual.project),
+                projectBlacklisted : MmmlService.hideSampleIdentifier(individual.project),
                 groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.getSeqTracks()),
         ]
     }

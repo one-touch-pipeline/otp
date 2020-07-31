@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2020 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title><g:message code="projectStatistic.title" /></title>
-    <asset:javascript src="pages/projectOverview/mmmlIdentifierMapping/datatable.js"/>
+    <asset:javascript src="pages/mmml/mmmlIdentifierMapping/datatable.js"/>
 </head>
 
 <body>
@@ -41,10 +41,5 @@
                 id="overviewTableMMMLMappingId"/>
         </div>
     </div>
-    <asset:script>
-        $(function() {
-            $.otp.projectOverviewTable.registerMMMLMappingId();
-        });
-    </asset:script>
 </body>
 </html>

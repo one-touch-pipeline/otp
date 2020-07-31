@@ -23,10 +23,9 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.projectOverviewTable = {
-    registerMMMLMappingId : function () {
+$(function () {
         "use strict";
-        var oTableMMMLMapping = $("#overviewTableMMMLMappingId").dataTable({
+        $("#overviewTableMMMLMappingId").dataTable({
             sDom: '<i> B rt<"clear">',
             buttons: $.otp.tableButtons,
             bFilter : true,
@@ -36,7 +35,7 @@ $.otp.projectOverviewTable = {
             bJQueryUI : false,
             bAutoWidth : false,
             sAjaxSource : $.otp.createLink({
-                controller : 'projectOverview',
+                controller : 'mmml',
                 action : 'dataTableMMMLMapping'
             }),
             bPaginate : false,
@@ -88,6 +87,4 @@ $.otp.projectOverviewTable = {
                 });
             }
         });
-        return oTableMMMLMapping;
-    }
-};
+});
