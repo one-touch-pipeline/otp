@@ -58,7 +58,21 @@
             <div class="menuContainer menuContainerL">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li class="menuContainerItem"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
+                        <sec:ifNotGranted roles="ROLE_ADMIN">
+                            <li class="menuContainerItem"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.sampleOverview"/></g:link></li>
+                        </sec:ifNotGranted>
+                        <sec:ifAnyGranted roles="ROLE_ADMIN">
+                            <li class="navigation menuContainerItem admin">
+                                <ul>
+                                    <li class="allGranted admin_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.sampleOverview"/> &#9661;</a>
+                                        <ul>
+                                            <li><g:link controller="projectOverview" action="laneOverview">old</g:link></li>
+                                            <li><g:link controller="sampleOverview">new</g:link></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </sec:ifAnyGranted>
                         <li class="menuContainerItem"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
                         <li class="menuContainerItem"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
                         <li class="navigation menuContainerItem project">

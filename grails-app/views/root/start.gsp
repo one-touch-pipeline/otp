@@ -62,7 +62,7 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-6 info-box-container">
-            <h2 title="${g.message(code: "projectOverview.mouseOver.lane")}">${g.message(code: "otp.menu.lane")}</h2>
+            <h2 title="${g.message(code: "sampleOverview.registeredLanes.tooltip")}">${g.message(code: "otp.menu.lane")}</h2>
             <hr>
             <div class="info-box clearfix">
                 <img src="${assetPath(src: 'v2/start/lane.png')}" alt="">

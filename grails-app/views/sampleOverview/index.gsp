@@ -19,7 +19,6 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
 <%@ page import="de.dkfz.tbi.otp.ngsdata.SeqTypeNames" contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
@@ -27,7 +26,7 @@
     <meta name="layout" content="main" />
     <title>${g.message(code: "sampleOverview.title")}</title>
     <asset:javascript src="common/DataTableFilter.js"/>
-    <asset:javascript src="pages/projectOverview/laneOverview/datatable.js"/>
+    <asset:javascript src="pages/sampleOverview/index/datatable.js"/>
 </head>
 <body>
     <div class="body">
@@ -37,7 +36,7 @@
             </div>
 
             <div class="grid-element rounded-page-header-box" style="display: table;">
-                <span style="display:table-cell; vertical-align: middle; white-space: nowrap"><g:message code="sampleOverview.filter.sampleType"/>:</span>
+                <span style="display:table-cell; vertical-align: middle"><g:message code="sampleOverview.filter.sampleType"/>:</span>
                 <table id="searchCriteriaTableSampleType" style="display:table-cell;">
                     <tr>
                         <td class="value">
@@ -47,9 +46,9 @@
                         </td>
                     </tr>
                 </table>
-                <div style="width: 20px"></div>
-                <span style="display:table-cell; vertical-align: middle; white-space: nowrap"><g:message code="sampleOverview.filter.seqType"/>:</span>
-                <table id="searchCriteriaTableSeqType" style="display:table-cell">
+
+                <div style="display:table-cell; vertical-align: middle"><g:message code="sampleOverview.filter.seqType"/>:</div>
+                <table id="searchCriteriaTableSeqType" style="display:table-cell;">
                     <tr class="dtf_row">
                         %{-- css class: little hack: the seqType select is actually the "value" of the filter,
                              but should behave like "attribute" (that is: add a new row for the next filter).
@@ -78,7 +77,7 @@
         </otp:annotation>
 
         <div class="otpDataTables">
-            <table id="laneOverviewId"  data-ignore-filter-columns="2" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
+            <table id="laneOverviewId" data-ignore-filter-columns="2" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
                 <thead>
                     <tr>
                         <th></th>
@@ -88,8 +87,8 @@
                         </g:each>
                     </tr>
                     <tr>
-                        <th><g:message code="projectOverview.index.PID"/></th>
-                        <th><g:message code="projectOverview.index.sampleType"/></th>
+                        <th><g:message code="sampleOverview.PID"/></th>
+                        <th><g:message code="sampleOverview.sampleType"/></th>
                         <g:each var="seqType" in="${seqTypes}">
                             <th title="<g:message code="sampleOverview.registeredLanes.tooltip"/>"><span hidden>${seqType.displayNameWithLibraryLayout}: </span><g:message code="sampleOverview.registeredLanes"/></th>
                             <g:if test="${seqType.name == SeqTypeNames.RNA.seqTypeName}">
@@ -110,11 +109,6 @@
                 </tfoot>
             </table>
         </div>
-    <asset:script type="text/javascript">
-        $(function() {
-            $.otp.projectOverviewTable.registerLaneOverviewId();
-        });
-    </asset:script>
     </div>
 </body>
 </html>
