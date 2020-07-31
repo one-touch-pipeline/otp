@@ -48,9 +48,9 @@ class CreateNotificationTextService {
     @Autowired
     LinkGenerator linkGenerator
 
+    AlignmentInfoService alignmentInfoService
     LsdfFilesService lsdfFilesService
     MessageSourceService messageSourceService
-    ProjectOverviewService projectOverviewService
     ProcessingOptionService processingOptionService
 
     /**
@@ -233,7 +233,7 @@ class CreateNotificationTextService {
 
         Collection<AbstractMergedBamFile> allGoodBamFiles = status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
         Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = allGoodBamFiles*.alignmentConfig.unique().collectEntries {
-            [it, projectOverviewService.getAlignmentInformationFromConfig(it)]
+            [it, alignmentInfoService.getAlignmentInformationFromConfig(it)]
         }
 
         String links = createOtpLinks(allGoodBamFiles*.project, 'alignmentQualityOverview', 'index')

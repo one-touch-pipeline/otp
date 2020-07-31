@@ -492,7 +492,7 @@ ${expectedAlign}"""
         int alignmentCount = (multipleProjects || multipleSeqTypes) && secondSampleAligned ? 2 : 1
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
-                projectOverviewService: Mock(ProjectOverviewService) {
+                alignmentInfoService: Mock(AlignmentInfoService) {
                     alignmentCount * getAlignmentInformationFromConfig(_) >> data1.alignmentInfo >> data2.alignmentInfo
                     0 * _
                 },
@@ -623,7 +623,7 @@ pancan alignment infos
 
         int crOffset = (name == "Cell Ranger") ? 1 : 0
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
-                projectOverviewService: Mock(ProjectOverviewService) {
+                alignmentInfoService: Mock(AlignmentInfoService) {
                     1 * getAlignmentInformationFromConfig(_) >> data1.alignmentInfo
                     0 * _
                 },
@@ -689,7 +689,7 @@ pancan alignment infos
         int countRoddy = countPanCan + countRoddyRna
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
-                projectOverviewService: Mock(ProjectOverviewService) {
+                alignmentInfoService: Mock(AlignmentInfoService) {
                     countRoddy * getAlignmentInformationFromConfig(_ as RoddyWorkflowConfig) >> new RoddyAlignmentInfo()
                     countCellRanger * getAlignmentInformationFromConfig(_ as CellRangerConfig) >> new SingleCellAlignmentInfo()
                     0 * _
@@ -752,7 +752,7 @@ pancan alignment infos
         })
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
-                projectOverviewService: Mock(ProjectOverviewService) {
+                alignmentInfoService: Mock(AlignmentInfoService) {
                     2 * getAlignmentInformationFromConfig(_ as RoddyWorkflowConfig) >> new RoddyAlignmentInfo()
                     1 * getAlignmentInformationFromConfig(_ as CellRangerConfig) >> new SingleCellAlignmentInfo()
                     0 * _

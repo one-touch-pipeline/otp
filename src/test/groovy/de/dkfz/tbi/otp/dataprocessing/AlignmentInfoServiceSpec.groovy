@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,19 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
-class ProjectOverviewServiceSpec extends Specification implements DataTest {
+class AlignmentInfoServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -50,7 +50,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
 
     void "getRoddyAlignmentInformation, throws AssertionError when WorkflowConfig is null"() {
         when:
-        new ProjectOverviewService().getRoddyAlignmentInformation(null)
+        new AlignmentInfoService().getRoddyAlignmentInformation(null)
 
         then:
         AssertionError e = thrown()
@@ -61,8 +61,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
     void "getRoddyAlignmentInformation, when useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["programVersion": "programVersion:1.1.0"])
-        ProjectOverviewService service = new ProjectOverviewService([
-                processingOptionService   : new ProcessingOptionService(),
+        AlignmentInfoService service = new AlignmentInfoService([
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
                     0 * roddyGetRuntimeConfigCommand(_, _, _)
@@ -124,8 +123,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
                 seqType: DomainFactory.createRnaPairedSeqType(),
                 adapterTrimmingNeeded: true,
         )
-        ProjectOverviewService service = new ProjectOverviewService([
-                processingOptionService   : new ProcessingOptionService(),
+        AlignmentInfoService service = new AlignmentInfoService([
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
                     0 * roddyGetRuntimeConfigCommand(_, _, _)
@@ -166,8 +164,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
     void "getRoddyAlignmentInformation, when roddy fail for #name, throw Exception"() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        ProjectOverviewService service = new ProjectOverviewService([
-                processingOptionService   : new ProcessingOptionService(),
+        AlignmentInfoService service = new AlignmentInfoService([
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
                     0 * roddyGetRuntimeConfigCommand(_, _, _)
@@ -202,7 +199,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
 
     void "getAlignmentInformationFromConfig, when config is null, throw assert"() {
         when:
-        new ProjectOverviewService().getAlignmentInformationFromConfig(null)
+        new AlignmentInfoService().getAlignmentInformationFromConfig(null)
 
         then:
         AssertionError e = thrown()
@@ -215,12 +212,12 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         AlignmentInfo alignmentInfo = new RoddyAlignmentInfo()
         AlignmentConfig alignmentConfig = new RoddyWorkflowConfig()
 
-        ProjectOverviewService projectOverviewService = Spy(ProjectOverviewService) {
+        AlignmentInfoService service = Spy(AlignmentInfoService) {
             1 * getRoddyAlignmentInformation(_) >> alignmentInfo
         }
 
         expect:
-        alignmentInfo == projectOverviewService.getAlignmentInformationFromConfig(alignmentConfig)
+        alignmentInfo == service.getAlignmentInformationFromConfig(alignmentConfig)
     }
 
     void "listReferenceGenome, when one item, show one item in listing"() {
@@ -228,7 +225,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType()
 
         when:
-        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(rgpst.project)
+        List<ReferenceGenomeProjectSeqType> list = new AlignmentInfoService().listReferenceGenome(rgpst.project)
 
         then:
         CollectionUtils.containSame(list, [rgpst])
@@ -240,7 +237,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         DomainFactory.createReferenceGenomeProjectSeqType()
 
         when:
-        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(otherProject)
+        List<ReferenceGenomeProjectSeqType> list = new AlignmentInfoService().listReferenceGenome(otherProject)
 
         then:
         CollectionUtils.containSame(list, [])
@@ -251,7 +248,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType([deprecatedDate: new Date()])
 
         when:
-        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(rgpst.project)
+        List<ReferenceGenomeProjectSeqType> list = new AlignmentInfoService().listReferenceGenome(rgpst.project)
 
         then:
         CollectionUtils.containSame(list, [])
@@ -265,7 +262,7 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         ReferenceGenomeProjectSeqType rgpst3 = DomainFactory.createReferenceGenomeProjectSeqType([project: theProject])
 
         when:
-        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(theProject)
+        List<ReferenceGenomeProjectSeqType> list = new AlignmentInfoService().listReferenceGenome(theProject)
 
         then:
         CollectionUtils.containSame(list, [rgpst1, rgpst2, rgpst3])
