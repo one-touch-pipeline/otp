@@ -322,6 +322,11 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'qcThresholdHandling', cmd: cmd]"/>
             </tr>
             <tr>
+                <td><g:message code="project.publiclyAvailable"/></td>
+                <td><g:checkBox name="publiclyAvailable" checked="${source.getByFieldName("publiclyAvailable")}" value="true"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'publiclyAvailable', cmd: cmd, type: 'boolean']"/>
+            </tr>
+            <tr>
                 <td><g:message code="project.projectInfo"/></td>
                 <td><input type="file" name="projectInfoFile" id="projectInfoFile" ${projectCreationCmd?.projectInfoFile as boolean ? "required" : ""}/></td>
                 <td></td>
@@ -338,11 +343,6 @@
                 <td><g:message code="project.internalNotes"/></td>
                 <td><g:textArea class="resize-vertical" name="internalNotes" value="${source.getByFieldName("internalNotes")}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'internalNotes', cmd: cmd, type: 'multi-line-string']"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.publiclyAvailable"/></td>
-                <td><g:checkBox name="publiclyAvailable" checked="${source.getByFieldName("publiclyAvailable")}" value="true"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'publiclyAvailable', cmd: cmd, type: 'boolean']"/>
             </tr>
             <tr>
                 <td></td>
