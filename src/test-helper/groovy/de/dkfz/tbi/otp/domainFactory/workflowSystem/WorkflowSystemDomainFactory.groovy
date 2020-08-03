@@ -37,9 +37,10 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         return createDomainObject(WorkflowRun, [
-                workflow: { createWorkflow() },
-                priority: { createProcessingPriority() },
-                project : { createProject() },
+                workflow   : { createWorkflow() },
+                priority   : { createProcessingPriority() },
+                project    : { createProject() },
+                displayName: "displayName_${nextId}",
         ], properties)
     }
 
@@ -57,8 +58,9 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
         return createDomainObject(WorkflowArtefact, [
-                individual: { createIndividual() },
-                seqType: { createSeqType() },
+                individual : { createIndividual() },
+                seqType    : { createSeqType() },
+                displayName: "displayName_${nextId}",
         ], properties)
     }
 

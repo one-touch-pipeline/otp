@@ -34,6 +34,7 @@ class WorkflowService {
                 workflow: step.workflowRun.workflow,
                 priority: step.workflowRun.priority,
                 project:  step.workflowRun.project,
+                displayName: step.workflowRun.displayName
         ).save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
@@ -41,6 +42,7 @@ class WorkflowService {
                     state: WorkflowArtefact.State.PLANNED_OR_RUNNING,
                     producedBy: run,
                     outputRole: oldArtefact.outputRole,
+                    displayName: oldArtefact.displayName
             ).save(flush: true)
 
             WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->

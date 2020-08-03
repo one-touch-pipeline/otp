@@ -63,6 +63,8 @@ class WorkflowRun implements Commentable, Entity {
 
     Workflow workflow
 
+    String displayName
+
     static hasMany = [
         configs: ExternalWorkflowConfigFragment,
         workflowSteps: WorkflowStep,
@@ -74,6 +76,7 @@ class WorkflowRun implements Commentable, Entity {
         restartedFrom nullable: true
         skippedMessage nullable: true
         comment nullable: true
+        displayName blank: false, nullable: false
     }
 
     static mapping = {

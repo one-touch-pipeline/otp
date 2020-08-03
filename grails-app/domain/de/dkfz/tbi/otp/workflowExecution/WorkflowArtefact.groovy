@@ -50,6 +50,8 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     SeqType seqType
 
+    String displayName
+
     static constraints = {
         producedBy nullable: true, validator: { val, obj ->
             if (obj.outputRole && !val) {
@@ -69,6 +71,7 @@ class WorkflowArtefact implements Withdrawable, Entity {
         }
         individual nullable: false
         seqType nullable: false
+        displayName blank: false, nullable: false
     }
 
     static mapping = {
