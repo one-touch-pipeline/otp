@@ -38,6 +38,7 @@ class ProjectOverviewController {
     CommentService commentService
     ProjectSelectionService projectSelectionService
     SampleService sampleService
+    SampleOverviewService sampleOverviewService
 
     Map index() {
         return [:]
@@ -50,8 +51,8 @@ class ProjectOverviewController {
     Map laneOverview() {
         Project project = projectSelectionService.selectedProject
 
-        List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
-        List<String> sampleTypes = projectOverviewService.sampleTypeByProject(project)
+        List<SeqType> seqTypes = sampleOverviewService.seqTypeByProject(project)
+        List<String> sampleTypes = sampleOverviewService.sampleTypeByProject(project)
         String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
 
         return [
@@ -84,7 +85,7 @@ class ProjectOverviewController {
         boolean anythingWithdrawn = false
         Project project = projectSelectionService.requestedProject
 
-        List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
+        List<SeqType> seqTypes = sampleOverviewService.seqTypeByProject(project)
         /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
         Map dataLastMap = [:]
 
@@ -107,13 +108,13 @@ class ProjectOverviewController {
             return informationOfSample
         }
 
-        List lanes = projectOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project)
+        List lanes = sampleOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project)
         lanes.each {
             InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
             informationOfSample.laneCountRegistered.put(it.seqType.id, it.laneCount)
         }
 
-        projectOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
+        sampleOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
             InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.individual.mockPid, it.sampleType.name)
             getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.pipeline.id, []).add(it)
         }

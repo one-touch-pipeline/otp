@@ -34,17 +34,17 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class ProjectOverviewServiceIntegrationSpec extends Specification implements UserAndRoles {
+class SampleOverviewServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     @Autowired
-    ProjectOverviewService projectOverviewService
+    SampleOverviewService sampleLaneService
 
     void "test abstractMergedBamFilesInProjectFolder without MergedBamFiles in Project"() {
         given:
         Project project = DomainFactory.createProject()
 
         expect:
-        projectOverviewService.abstractMergedBamFilesInProjectFolder(project) == []
+        sampleLaneService.abstractMergedBamFilesInProjectFolder(project) == []
     }
 
     @SuppressWarnings("SpaceAfterOpeningBrace")
@@ -53,7 +53,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
 
         when:
-        List result = projectOverviewService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
+        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
 
         then:
         mergedBamFile == CollectionUtils.exactlyOneElement(result)
@@ -71,7 +71,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         abstractMergedBamFile()
 
         when:
-        List result = projectOverviewService.abstractMergedBamFilesInProjectFolder(project)
+        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(project)
 
         then:
         result.isEmpty()
@@ -91,7 +91,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         assert workPackage.save(flush: true)
 
         when:
-        List result = projectOverviewService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
+        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)
 
         then:
         result.isEmpty()
@@ -109,7 +109,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         unfisihedAbstractMergedBamFile(mergedBamFile1.mergingWorkPackage)
 
         when:
-        List result = projectOverviewService.abstractMergedBamFilesInProjectFolder(mergedBamFile1.project)
+        List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile1.project)
 
         then:
         mergedBamFile1 == CollectionUtils.exactlyOneElement(result)
@@ -125,7 +125,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         Project project = DomainFactory.createProject()
 
         expect:
-        projectOverviewService.sampleTypeByProject(project) == []
+        sampleLaneService.sampleTypeByProject(project) == []
     }
 
     void "test sampleTypeByProject with one SampleType in Project"() {
@@ -135,7 +135,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         createAggregateSequences(project, sampleType)
 
         when:
-        List<String> results = projectOverviewService.sampleTypeByProject(project)
+        List<String> results = sampleLaneService.sampleTypeByProject(project)
 
         then:
         sampleType.name == CollectionUtils.exactlyOneElement(results)
@@ -154,7 +154,7 @@ class ProjectOverviewServiceIntegrationSpec extends Specification implements Use
         createAggregateSequences(DomainFactory.createProject(), sampleType4)
 
         when:
-        List<String> results = projectOverviewService.sampleTypeByProject(project)
+        List<String> results = sampleLaneService.sampleTypeByProject(project)
 
         then:
         CollectionUtils.containSame(results, [sampleType1.name, sampleType2.name, sampleType3.name])
