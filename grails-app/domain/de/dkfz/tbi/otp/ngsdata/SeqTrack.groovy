@@ -393,6 +393,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         normalizedLibraryName index: "seq_track_normalized_library_name_idx"
         run index: "seq_track_run_idx"
         sample index: "seq_track_sample_idx"
+        sampleIdentifier index: "seq_track_sample_identifier_idx"
         seqPlatform index: "seq_track_seq_platform_idx"
         seqType index: "seq_track_seq_type_idx"
     }

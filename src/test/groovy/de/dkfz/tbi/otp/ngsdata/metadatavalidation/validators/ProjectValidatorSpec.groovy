@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
@@ -105,7 +104,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
         then:
         context.problems.empty
     }
-
 
     void 'validate concerning metadata, when column exist but project is not registered in OTP, adds problems'() {
         given:
