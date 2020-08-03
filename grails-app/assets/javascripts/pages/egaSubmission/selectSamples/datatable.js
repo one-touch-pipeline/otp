@@ -89,7 +89,7 @@ $.otp.selectSamplesTable = {
      * @param seqTypeColumnIndex index of the column containing the SeqType
      */
     applySeqTypeFilter: function (table, seqTypeColumnIndex) {
-        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), table, false, function () {
+        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), function () {
             var select = $('#searchCriteriaTableSeqType').find('select')[0];
             if (select.selectedIndex !== 0) {
                 table.fnFilter('^' + select.value + '$', seqTypeColumnIndex, true);

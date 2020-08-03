@@ -27,7 +27,9 @@ $.otp.sequence = {
 
     register: function () {
         "use strict";
-        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true);
+        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), function (searchCriteria) {
+            $("#sequenceTable").dataTable().fnDraw()
+        });
         var showRunLinks = document.getElementById("showRunLinks").value;
 
         $("#sequenceTable").dataTable({

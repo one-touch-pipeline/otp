@@ -29,7 +29,9 @@
 $.otp.run = {
     register: function () {
         "use strict";
-        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#runTable"), true);
+        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), function (searchCriteria) {
+            $("#runTable").dataTable().fnDraw()
+        });
 
         $("#runTable").dataTable({
             sDom: '<i> B rt<"clear">',

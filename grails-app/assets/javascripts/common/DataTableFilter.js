@@ -24,12 +24,10 @@ $.otp.dataTableFilter = {
     /**
      * Filter for datatables.
      * @param searchCriteriaTable jQuery object containing the inputs/selectors to filter
-     * @param dataTable jQuery object containing the datatable
-     * @param updateTable boolean deciding whether the datatable should be updated after changes
      * @param onUpdateFunction function that is executed after changes
      * @returns searchCriteria function returning an object containing the currently set filters
      */
-    register : function (searchCriteriaTable, dataTable, updateTable, onUpdateFunction) {
+    register : function (searchCriteriaTable, onUpdateFunction) {
         "use strict";
 
         var searchCriteria = function () {
@@ -51,9 +49,6 @@ $.otp.dataTableFilter = {
         };
 
         var updateSearchCriteria = function () {
-            if (updateTable) {
-                dataTable.dataTable().fnDraw();
-            }
             if (onUpdateFunction !== undefined) {
                 onUpdateFunction(searchCriteria);
             }

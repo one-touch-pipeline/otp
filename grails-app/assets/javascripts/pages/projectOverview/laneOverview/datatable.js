@@ -85,7 +85,7 @@ $.otp.projectOverviewTable = {
             }
         });
 
-        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), oTableLaneOverview, false, function () {
+        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), function () {
             var ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
                 workflowSize = parseInt($('#laneOverviewId').data('workflow-size')),
                 seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size')),
@@ -109,7 +109,7 @@ $.otp.projectOverviewTable = {
             }
         });
 
-        $.otp.dataTableFilter.register($('#searchCriteriaTableSampleType'), oTableLaneOverview, false, function () {
+        $.otp.dataTableFilter.register($('#searchCriteriaTableSampleType'), function () {
             var select = $('#searchCriteriaTableSampleType').find('select')[0],
                 column = 1;
             if (select.selectedIndex !== 0) {
