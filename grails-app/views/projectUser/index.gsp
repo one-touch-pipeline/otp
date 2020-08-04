@@ -84,10 +84,12 @@
                         <td><g:message code="projectUser.addMember.accessToFiles"/></td>
                         <td><g:checkBox name="accessToFiles" class="inputField ldapUser" value="true" checked="false"/></td>
                     </tr>
-                    <tr>
-                        <td><g:message code="projectUser.addMember.manageUsers"/></td>
-                        <td><g:checkBox name="manageUsers" class="inputField ldapUser" value="true" checked="false"/></td>
-                    </tr>
+                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
+                        <tr>
+                            <td><g:message code="projectUser.addMember.manageUsers"/></td>
+                            <td><g:checkBox name="manageUsers" class="inputField ldapUser" value="true" checked="false"/></td>
+                        </tr>
+                    </sec:access>
                     <sec:access expression="hasRole('ROLE_OPERATOR')">
                         <tr>
                             <td><g:message code="projectUser.addMember.manageUsersAndDelegate"/></td>
