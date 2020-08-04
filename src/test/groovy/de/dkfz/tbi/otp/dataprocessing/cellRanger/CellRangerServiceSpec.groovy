@@ -102,8 +102,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Path filePath1 = Paths.get(file1)
         Path filePath2 = Paths.get(file2)
 
-        String sampleIdentifier2 = "as*ÄÜ?°!§%&/()=?`dfg"
-        String sampleIdentifier2DirName = "as_______________dfg"
+        String sampleIdentifier2 = "as *ÄÜ?°!§%&/()=?`dfg"
+        String sampleIdentifier2DirName = "as________________dfg"
         Path mate3 = sampleDirectory.resolve(sampleIdentifier2DirName).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R1_001.fastq.gz")
         Path mate4 = sampleDirectory.resolve(sampleIdentifier2DirName).resolve("${singleCellBamFile.singleCellSampleName}_S1_L001_R2_001.fastq.gz")
 
@@ -252,7 +252,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         final File indexFile = new File(TestCase.uniqueNonExistentPath, 'someIndex')
 
-        String sampleIdentifier = "asdfg"
+        String sampleIdentifier = "abc *ÄÜ?°!§%&/()=?`def"
         CellRangerMergingWorkPackage mwp = createMergingWorkPackage([
                 expectedCells: expectedCells,
                 enforcedCells: enforcedCells,
@@ -277,7 +277,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         then:
         map[CellRangerParameters.ID.parameterName] == singleCellBamFile.singleCellSampleName
-        map[CellRangerParameters.FASTQ.parameterName] == new File(singleCellBamFile.sampleDirectory, "asdfg").absolutePath
+        map[CellRangerParameters.FASTQ.parameterName] == new File(singleCellBamFile.sampleDirectory, "abc________________def").absolutePath
         map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.absolutePath
         map[CellRangerParameters.SAMPLE.parameterName] == singleCellBamFile.singleCellSampleName
         map[CellRangerParameters.LOCAL_CORES.parameterName] ==~ /\d+/
@@ -394,5 +394,21 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         !singleCellBamFile.fileExists
         singleCellBamFile.dateFromFileSystem == null
         singleCellBamFile.mergingWorkPackage.bamFileInProjectFolder == null
+    }
+
+    void "sampleIdentifierForDirectoryStructure, invalid characters are converted to _"() {
+        expect:
+        new CellRangerService().sampleIdentifierForDirectoryStructure("a${input}b") == "a_b"
+
+        where:
+        input << " *ÄÜ?°!§%&/()=?`".split("")
+    }
+
+    void "sampleIdentifierForDirectoryStructure, string without invalid characters, no changes"() {
+        given:
+        String validString = "abcABC123_-"
+
+        expect:
+        new CellRangerService().sampleIdentifierForDirectoryStructure(validString) == validString
     }
 }

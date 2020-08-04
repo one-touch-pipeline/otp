@@ -97,7 +97,7 @@ class CellRangerService {
         fileService.createDirectoryRecursively(sampleDirectory)
 
         singleCellBamFile.containedSeqTracks.groupBy { it.sampleIdentifier }.each { String sampleIdentifier, List<SeqTrack> seqTracks ->
-            String sampleIdentifierDirName = sampleIdentifier.replaceAll(/[^A-Za-z0-9_-]/, "_")
+            String sampleIdentifierDirName = sampleIdentifierForDirectoryStructure(sampleIdentifier)
             Path sampleIdentifierDirectory = sampleDirectory.resolve(sampleIdentifierDirName)
             fileService.createDirectoryRecursively(sampleIdentifierDirectory)
             seqTracks.sort { it.id }.withIndex(1).each { SeqTrack seqTrack, int laneCounter ->
@@ -145,8 +145,8 @@ class CellRangerService {
         String localCores = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT)
         String localMem = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM)
 
-        String fastqDirectories = singleCellBamFile.containedSeqTracks*.sampleIdentifier.unique().collect {
-            new File(singleCellBamFile.sampleDirectory, it).absolutePath
+        String fastqDirectories = singleCellBamFile.containedSeqTracks*.sampleIdentifier.unique().collect { String sampleIdentifier ->
+            new File(singleCellBamFile.sampleDirectory, sampleIdentifierForDirectoryStructure(sampleIdentifier)).absolutePath
         }.join(",")
 
         Map<String, String> parameters = [
@@ -226,6 +226,10 @@ class CellRangerService {
         singleCellBamFile.fileExists = true
         singleCellBamFile.dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFile).toMillis())
         assert singleCellBamFile.save(flush: true)
+    }
+
+    String sampleIdentifierForDirectoryStructure(String sampleIdentifier) {
+        return sampleIdentifier.replaceAll(/[^A-Za-z0-9_-]/, "_")
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
