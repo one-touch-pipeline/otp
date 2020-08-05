@@ -76,4 +76,19 @@ class UserProjectRole implements Serializable, Entity {
     String toString() {
         return "UPR ${id}: ${project} ${user} ${projectRoles}"
     }
+
+    String toStringWithAllProperties() {
+        return [
+                ["user", user],
+                ["project", project],
+                ["projectRoles", projectRoles*.name.join(", ")],
+                ["enabled", enabled],
+                ["accessToOtp", accessToOtp],
+                ["accessToFiles", accessToFiles],
+                ["manageUsers", manageUsers],
+                ["manageUsersAndDelegate", manageUsersAndDelegate],
+                ["receivesNotifications", receivesNotifications],
+                ["fileAccessChangeRequested", fileAccessChangeRequested],
+        ].collect { it.join(": ") }.join("; ")
+    }
 }

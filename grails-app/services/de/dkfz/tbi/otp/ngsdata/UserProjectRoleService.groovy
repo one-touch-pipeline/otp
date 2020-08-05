@@ -76,6 +76,7 @@ class UserProjectRoleService {
             userProjectRole.addToProjectRoles(it)
         }
         userProjectRole.save(flush: true)
+        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER, "Created Project User: ${userProjectRole.toStringWithAllProperties()}")
 
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
         if (flags.enabled && !oldUPR?.enabled) {
@@ -115,7 +116,6 @@ class UserProjectRoleService {
             sendFileAccessNotifications(userProjectRole)
         }
 
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(userProjectRole)
     }
 
@@ -161,7 +161,6 @@ class UserProjectRoleService {
 
         UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
 
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(userProjectRole)
     }
 

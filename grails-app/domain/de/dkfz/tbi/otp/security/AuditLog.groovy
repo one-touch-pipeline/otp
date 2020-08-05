@@ -36,6 +36,7 @@ class AuditLog implements Entity {
         PROJECT_USER_CHANGED_RECEIVES_NOTIFICATION,
         PROJECT_USER_CHANGED_ENABLED,
         PROJECT_USER_SENT_MAIL,
+        PROJECT_USER_CREATED_PROJECT_USER,
         /**
          * In the beginning Some permission was granted via role. Therefore it was logged. Also now no permission granted about it,
          * the value is still needed for the data logged that time. But there should no new entry created with that value.
