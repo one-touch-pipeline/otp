@@ -30,19 +30,12 @@
 
 <body>
 <div class="body">
+    <g:render template="/templates/messages"/>
+
     <h1><g:message code="metadataImport.blackListedIlseNumbers.title"/></h1>
     <h2><g:message code="metadataImport.blackListedIlseNumbers.create.description"/></h2>
-    <g:if test="${command?.addButton}">
-        <ul>
-            <g:each in="${command.errors.fieldErrors}" var="error">
-                <li>
-                    <g:message error="${error}"/>
-                </li>
-            </g:each>
-        </ul>
-    </g:if>
 
-    <g:form action="blacklistedIlseNumbers">
+    <g:form action="addBlacklistedIlseNumbers">
         <g:message code="metadataImport.blackListedIlseNumbers.ilse"/>: <g:textField name="ilse" size="15" value="${command?.ilse}"/>
         <br><br>
         <g:message code="metadataImport.blackListedIlseNumbers.comment"/>:<br>

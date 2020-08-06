@@ -26,7 +26,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import org.apache.commons.lang.WordUtils
-import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
@@ -90,13 +89,9 @@ class ProjectUserController implements CheckAndCall {
     }
 
     def addUserToProject(AddUserToProjectCommand cmd) {
-        String message
-        String errorMessage = null
         Project project = projectSelectionService.requestedProject
         if (cmd.hasErrors()) {
-            FieldError cmdErrors = cmd.errors.fieldError
-            errorMessage = "'${cmdErrors.rejectedValue}' is not a valid value for '${cmdErrors.field}'. Error code: '${cmdErrors.code}'"
-            message = "An error occurred"
+            flash.message = new FlashMessage("An error occurred", cmd.errors)
         } else {
             try {
                 if (cmd.addViaLdap) {
@@ -120,17 +115,11 @@ class ProjectUserController implements CheckAndCall {
                             ProjectRole.findAllByNameInList(cmd.projectRoleNameList) as Set<ProjectRole>,
                     )
                 }
-                message = "Data stored successfully"
+                flash.message = new FlashMessage("Data stored successfully")
             } catch (LdapUserCreationException | AssertionError e) {
-                message = "An error occurred"
-                errorMessage = e.message
+                flash.message = new FlashMessage("An error occurred", e.message)
             }
         }
-        FlashMessage flashMessage = new FlashMessage(message)
-        if (errorMessage) {
-            flashMessage = new FlashMessage(message, [errorMessage])
-        }
-        flash.message = flashMessage
         redirect(controller: "projectUser")
     }
 

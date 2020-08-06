@@ -45,6 +45,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.ValidatorUtil
 
 import java.nio.file.FileSystem
 import java.util.regex.Matcher
@@ -53,11 +54,13 @@ import java.util.regex.Pattern
 class MetadataImportController {
 
     static allowedMethods = [
-            index           : "GET",
-            validateOrImport: "POST",
-            details         : "GET",
-            multiDetails    : "GET",
-            autoImport      : "GET",
+            index                    : "GET",
+            validateOrImport         : "POST",
+            details                  : "GET",
+            multiDetails             : "GET",
+            autoImport               : "GET",
+            blacklistedIlseNumbers   : "GET",
+            addBlacklistedIlseNumbers: "POST",
     ]
 
     MetadataImportService metadataImportService
@@ -273,23 +276,28 @@ class MetadataImportController {
         return text
     }
 
-    def blacklistedIlseNumbers(BlackListedIlseCommand command) {
-        if (command?.addButton) {
-            if (command.validate()) {
-                if (ilseSubmissionService.checkIfIlseNumberDoesNotExist(command.ilse)) {
-                    ilseSubmissionService.createNewIlseSubmission(command.ilse, command.comment)
-                    redirect action: 'blacklistedIlseNumbers'
-                    return
-                } else {
-                    command.errors.rejectValue('ilse', 'code', 'ilse number exists already')
-                }
-            }
-        }
+    def blacklistedIlseNumbers() {
         List<IlseSubmission> ilseSubmissions = ilseSubmissionService.getSortedBlacklistedIlseSubmissions()
         return [
                 ilseSubmissions: ilseSubmissions,
-                command        : command,
+                command        : flash.cmd as BlackListedIlseCommand,
         ]
+    }
+
+    def addBlacklistedIlseNumbers(BlackListedIlseCommand command) {
+        if (command.validate()) {
+            if (ilseSubmissionService.checkIfIlseNumberDoesNotExist(command.ilse)) {
+                ilseSubmissionService.createNewIlseSubmission(command.ilse, command.comment)
+                flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.success") as String)
+            } else {
+                ValidatorUtil.rejectValue('ilse', command, command.ilse, command.errors, 'duplicate')
+                flash.cmd = command
+                flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.failure") as String, command.errors)
+            }
+        } else {
+            flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.failure") as String, command.errors)
+        }
+        redirect action: 'blacklistedIlseNumbers'
     }
 
     JSON updateSeqCenterComment(Long id, String value) {
@@ -315,7 +323,6 @@ class MetadataImportController {
 
 class BlackListedIlseCommand implements Validateable {
 
-    String addButton
     Integer ilse
     String comment
 

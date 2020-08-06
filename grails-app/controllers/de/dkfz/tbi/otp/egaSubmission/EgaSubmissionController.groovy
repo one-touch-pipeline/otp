@@ -23,11 +23,11 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.springframework.validation.FieldError
+import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -254,7 +254,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def sampleInformationUploadForm(UploadFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
+            pushErrors(cmd.errors, cmd.submission)
             return
         }
         Spreadsheet spreadsheet = readFile(cmd)
@@ -266,12 +266,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     SAMPLE_TYPE,
             ])
             if (!validateRows.valid) {
-                pushError(validateRows.error, cmd.submission, true)
+                pushError(validateRows.error, cmd.submission)
             } else if (validateColumns.hasError) {
-                pushError(validateColumns.error, cmd.submission, true)
+                pushError(validateColumns.error, cmd.submission)
             } else if (!egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet)) {
                 pushError("Wrong file type detected. Please use only ${EgaSubmissionService.FileType.collect().join(", ")}",
-                        cmd.submission, true)
+                        cmd.submission)
             } else {
                 flash.message = new FlashMessage("File was uploaded")
                 flash.egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
@@ -284,7 +284,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def sampleInformationForms(SampleInformationFormsSubmitCommand cmd) {
         if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
+            pushErrors(cmd.errors, cmd.submission)
             return
         }
 
@@ -319,7 +319,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def selectFilesDataFilesForm(SelectFilesDataFilesFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
+            pushErrors(cmd.errors, cmd.submission)
             return
         }
 
@@ -338,7 +338,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         if (cmd.saveAliases) {
             if (cmd.egaFileAlias.empty) {
-                pushError("No file aliases are configured.", cmd.submission, true)
+                pushError("No file aliases are configured.", cmd.submission)
             } else {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
@@ -378,7 +378,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             if (selection.size() != fastqSamples.size()) {
                 fastqSamples.each {
                     if (!selection.contains(it.egaAliasName)) {
-                        pushError("For previously selected sample ${it.sample.displayName} no file is selected", cmd.submission)
+                        pushError("For previously selected sample ${it.sample.displayName} no file is selected", cmd.submission, false)
                     }
                 }
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
@@ -387,13 +387,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             }
         } else {
-            pushError("No files selected", cmd.submission, true)
+            pushError("No files selected", cmd.submission)
         }
     }
 
     def dataFilesListFileUploadForm(UploadFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
+            pushErrors(cmd.errors, cmd.submission)
             return
         }
 
@@ -406,9 +406,9 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                         EGA_FILE_ALIAS,
                 ])
                 if (spreadsheet.dataRows.size() != cmd.submission.dataFilesToSubmit.size()) {
-                    pushError("Found and expected number of files are different", cmd.submission, true)
+                    pushError("Found and expected number of files are different", cmd.submission)
                 } else if (validateColumns.hasError) {
-                    pushError(validateColumns.error, cmd.submission, true)
+                    pushError(validateColumns.error, cmd.submission)
                 } else {
                     flash.message = new FlashMessage("File was uploaded")
                     flash.egaFileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, false)
@@ -420,7 +420,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def bamFilesListFileUploadForm(UploadFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
+            pushErrors(cmd.errors, cmd.submission)
             return
         }
 
@@ -433,9 +433,9 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                         EGA_FILE_ALIAS,
                 ])
                 if (spreadsheet.dataRows.size() != egaSubmissionService.getBamFilesAndAlias(cmd.submission).size()) {
-                    pushError("Found and expected number of files are different", cmd.submission, true)
+                    pushError("Found and expected number of files are different", cmd.submission)
                 } else if (validateColumns.hasError) {
-                    pushError(validateColumns.error, cmd.submission, true)
+                    pushError(validateColumns.error, cmd.submission)
                 } else {
                     flash.message = new FlashMessage("File was uploaded")
                     flash.egaFileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, true)
@@ -447,7 +447,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     Spreadsheet readFile(UploadFormSubmitCommand cmd) {
         if (cmd.file.empty) {
-            pushError("No file selected", cmd.submission, true)
+            pushError("No file selected", cmd.submission)
             return
         }
         String content = new String(cmd.file.bytes)
@@ -457,7 +457,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def selectFilesBamFilesForm(SelectFilesBamFilesFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
+            pushErrors(cmd.errors, cmd.submission)
             return
         }
 
@@ -485,7 +485,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }
             } else {
-                pushError("No files selected", cmd.submission, true)
+                pushError("No files selected", cmd.submission)
             }
             return
         }
@@ -498,21 +498,20 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    private void pushError(String message, EgaSubmission submission, boolean redirectFlag = false) {
-        flash.message = new FlashMessage(ERROR_TITLE, [message])
+    private void pushErrors(Errors errors, EgaSubmission submission) {
+        flash.message = new FlashMessage(ERROR_TITLE, errors)
+        redirect(action: "editSubmission", params: ['id': submission.id])
+    }
+
+    private void pushError(String error, EgaSubmission submission, boolean redirectFlag = true) {
+        pushErrors([error], submission, redirectFlag)
+    }
+
+    private void pushErrors(List<CharSequence> errors, EgaSubmission submission, boolean redirectFlag = true) {
+        flash.message = new FlashMessage(ERROR_TITLE, errors as List<String>)
         if (redirectFlag) {
             redirect(action: "editSubmission", params: ['id': submission.id])
         }
-    }
-
-    private void pushError(FieldError errors, EgaSubmission submission) {
-        pushError("'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.code}'",
-                submission, true)
-    }
-
-    private void pushErrors(List errors, EgaSubmission submission) {
-        flash.message = new FlashMessage(ERROR_TITLE, errors)
-        redirect(action: "editSubmission", params: ['id': submission.id])
     }
 
     JSON updateSubmissionState(UpdateSubmissionStateSubmitCommand cmd) {

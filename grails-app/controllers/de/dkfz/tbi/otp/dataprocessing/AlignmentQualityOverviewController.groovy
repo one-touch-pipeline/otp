@@ -22,10 +22,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
-import org.springframework.validation.FieldError
+import grails.validation.Validateable
 
-import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -38,7 +37,7 @@ import java.nio.file.AccessDeniedException
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class AlignmentQualityOverviewController {
+class AlignmentQualityOverviewController implements CheckAndCall {
 
     static final String CHR_X_HG19 = 'chrX'
     static final String CHR_Y_HG19 = 'chrY'
@@ -217,21 +216,13 @@ class AlignmentQualityOverviewController {
     }
 
     JSON changeQcStatus(QcStatusCommand cmd) {
-        Map dataToRender = [:]
-
-        if (cmd.hasErrors()) {
-            FieldError error = cmd.errors.fieldError
-            dataToRender.put("success", false)
-            dataToRender.put("error", "'${error.rejectedValue}' is not a valid value for '${error.field}'. Error code: '${error.code}'")
-        } else {
+        checkErrorAndCallMethod(cmd) {
             qcTrafficLightService.setQcTrafficLightStatusWithComment(
                     cmd.abstractBamFile,
                     cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus,
                     cmd.comment
             )
-            dataToRender.put("success", true)
         }
-        render dataToRender as JSON
     }
 
     @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity', 'MethodSize'])
@@ -512,7 +503,7 @@ class ViewCellRangerSummaryCommand {
 }
 
 @SuppressWarnings('SerializableClassMustDefineSerialVersionUID')
-class QcStatusCommand implements Serializable {
+class QcStatusCommand implements Validateable {
     String comment
     AbstractBamFile abstractBamFile
     String newValue

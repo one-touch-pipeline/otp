@@ -103,7 +103,7 @@ class UserAdministrationController implements CheckAndCall {
 
     def show(SelectUserCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
+            flash.message = new FlashMessage("An error occurred", cmd.errors)
             redirect(action: "index")
             return [:]
         }
@@ -128,7 +128,7 @@ class UserAdministrationController implements CheckAndCall {
 
     def ldapProperties(SelectUserCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
+            flash.message = new FlashMessage("An error occurred", cmd.errors)
             redirect(action: "index")
             return [:]
         }

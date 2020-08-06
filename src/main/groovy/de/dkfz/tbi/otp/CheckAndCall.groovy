@@ -25,20 +25,19 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import org.springframework.validation.Errors
-import org.springframework.validation.FieldError
 
 trait CheckAndCall {
 
-    void checkErrorAndCallMethod(Validateable cmd, Closure method, Closure<Map> additionalSuccessReturnValues = { [:] }) {
+    JSON checkErrorAndCallMethod(Validateable cmd, Closure method, Closure<Map> additionalSuccessReturnValues = { [:] }) {
         Map data
         if (cmd.hasErrors()) {
-            data = getErrorData(cmd.errors.fieldError)
+            data = createErrorMessage(cmd.errors)
         } else {
             try {
                 method()
                 data = [success: true] + additionalSuccessReturnValues()
             } catch (ValidationException e) {
-                data = getErrorData(e.errors.fieldError)
+                data = createErrorMessage(e.errors)
             } catch (AssertionError e) {
                 data = [success: false, error: "An error occurred: ${e.localizedMessage}"]
             } catch (OtpRuntimeException e) {
@@ -51,7 +50,7 @@ trait CheckAndCall {
     void checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure method) {
         withForm {
             if (cmd.hasErrors()) {
-                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, [cmd.errors.fieldError.code])
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, cmd.errors)
             } else {
                 method()
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
@@ -62,7 +61,7 @@ trait CheckAndCall {
     }
 
     @SuppressWarnings('CatchRuntimeException')
-    void checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure method) {
+    JSON checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure method) {
         Map data
         if (cmd.hasErrors()) {
             data = createErrorMessage(cmd.errors)
@@ -107,9 +106,5 @@ trait CheckAndCall {
                 success: false,
                 error  : errorMessages.join('\n    '),
         ]
-    }
-
-    private Map getErrorData(FieldError errors) {
-        return [success: false, error: "'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.code}'"]
     }
 }
