@@ -31,7 +31,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
-import de.dkfz.odcf.audit.impl.enums.DicomCode.OtpPermissionCode
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.*
@@ -63,9 +62,6 @@ class UserProjectRoleService {
 
         String requester = springSecurityService?.principal?.hasProperty("username") ?
                 springSecurityService.principal.username : springSecurityService?.principal
-        UserProjectRole oldUPR = CollectionUtils.atMostOneElement(UserProjectRole.findAllByUserAndProject(user, project))
-        List<OtpPermissionCode> grantedPermissions = getPermissionDiff(true, flags, oldUPR)
-        List<OtpPermissionCode> revokedPermissions = getPermissionDiff(false, flags, oldUPR)
 
         UserProjectRole userProjectRole = new UserProjectRole([
                 user                     : user,
@@ -77,20 +73,9 @@ class UserProjectRoleService {
         }
         userProjectRole.save(flush: true)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER, "Created Project User: ${userProjectRole.toStringWithAllProperties()}")
-
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
-        if (flags.enabled && !oldUPR?.enabled) {
-            DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
-        } else if (!flags.enabled && oldUPR?.enabled) {
-            DicomAuditLogger.logUserDeactivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
-        }
+        DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
 
-        if (grantedPermissions) {
-            DicomAuditLogger.logPermissionGranted(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID, *grantedPermissions)
-        }
-        if (revokedPermissions) {
-            DicomAuditLogger.logPermissionRevoked(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID, *revokedPermissions)
-        }
         return userProjectRole
     }
 
@@ -590,15 +575,6 @@ class UserProjectRoleService {
                 'in'("name", ProjectRole.BIOINFORMATICIAN_PROJECT_ROLES)
             }
         }*.user
-    }
-
-    List<OtpPermissionCode> getPermissionDiff(boolean added, Map flags, UserProjectRole oldUPR) {
-        return [
-                (added == flags.accessToOtp)            && (added == !oldUPR?.accessToOtp) ? [OtpPermissionCode.OTP_ACCESS] : [],
-                (added == flags.accessToFiles)          && (added == !oldUPR?.accessToFiles) ? [OtpPermissionCode.FILE_ACCESS] : [],
-                (added == flags.manageUsers)            && (added == !oldUPR?.manageUsers) ? [OtpPermissionCode.MANAGE_USERS] : [],
-                (added == flags.manageUsersAndDelegate) && (added == !oldUPR?.manageUsersAndDelegate) ? [OtpPermissionCode.DELEGATE_MANAGE_USERS] : [],
-        ].flatten() as List<OtpPermissionCode>
     }
 
     String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
