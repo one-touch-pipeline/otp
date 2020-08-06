@@ -43,6 +43,6 @@ class CellRangerConfig extends ConfigPerProjectAndSeqType implements AlignmentCo
 
     @Override
     AlignmentInfo getAlignmentInformation() {
-        return new SingleCellAlignmentInfo(alignmentProgram: "cellranger", alignmentParameter: "")
+        return new SingleCellAlignmentInfo(alignmentProgram: "cellranger", alignmentParameter: "", programVersion: programVersion)
     }
 }

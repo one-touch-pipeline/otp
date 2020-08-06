@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 abstract class AlignmentInfo {
     String alignmentProgram
     String alignmentParameter
+    String programVersion
 
     abstract Map<String, Object> getAlignmentSpecificMessageAttributes()
 }
@@ -32,7 +33,6 @@ class RoddyAlignmentInfo extends AlignmentInfo {
     String samToolsCommand
     String mergeCommand
     String mergeOptions
-    String programVersion
 
     @Override
     Map<String, Object> getAlignmentSpecificMessageAttributes() {
@@ -42,6 +42,7 @@ class RoddyAlignmentInfo extends AlignmentInfo {
                         mergingProgram  : this.mergeCommand,
                         mergingParameter: this.mergeOptions,
                         samtoolsProgram : this.samToolsCommand,
+                        programVersion  : this.programVersion,
                 ],
         ]
     }
@@ -53,7 +54,9 @@ class SingleCellAlignmentInfo extends AlignmentInfo {
     Map<String, Object> getAlignmentSpecificMessageAttributes() {
         return [
                 code  : "notification.template.alignment.processing.singleCell",
-                params: [:],
+                params: [
+                        programVersion: this.programVersion,
+                ],
         ]
     }
 }
