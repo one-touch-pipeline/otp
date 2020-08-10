@@ -20,23 +20,4 @@
   - SOFTWARE.
   --}%
 
-<div class="edit-switch edit-switch-drop-down">
-    <p class="edit-switch-editor" style="display: none">
-        <input type="hidden" name="target" value="${link}"/>
-        <g:select id="" name="dropdown"
-                  optionKey="${optionKey}"
-                  optionValue="${optionValue}"
-                  noSelection="${noSelection}"
-                  from="${values}"
-                  value="${value}"
-                  class="use-select-2"/>
-        <button class="save" data-confirmation="${confirmation}"><g:message code="default.button.update.label"/></button>
-        <button class="cancel"><g:message code="default.button.cancel.label"/></button>
-    </p>
-    <p class="edit-switch-label">
-        <span class="wordBreak">
-            <otp:getValueWithFallbacks value="${value}" optionValue="${optionValue}" noSelection="${noSelection}"/>
-        </span>
-        <button class="edit js-edit">&nbsp;</button>
-    </p>
-</div>
+<div><span class='wordBreak keep-whitespace'><otp:getValueWithFallbacks value="${value}" optionValue="${optionValue}" noSelection="${noSelection}"/></span></div>

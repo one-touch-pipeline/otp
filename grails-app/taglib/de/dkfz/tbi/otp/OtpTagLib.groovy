@@ -161,10 +161,25 @@ class OtpTagLib {
 
             return render(template: template, model: model)
         } else {
-            // read only
-            String value = model.value != null ? (model.optionValue ? model.value[model.optionValue] : model.value) : ""
-            return "<div><span class='wordBreak keep-whitespace'>${value}</span></div>"
+            return render(template: "/templates/readonly", model: model)
         }
+    }
+
+    /**
+     * Helper function to get the value from the model.
+     */
+    def getValueWithFallbacks = { attrs ->
+        def value = attrs.remove("value")
+        def optionValue = attrs.remove("optionValue")
+        def noSelection = attrs.remove("noSelection")
+        out << (value != null ? (optionValue ? value[optionValue] : value) : getNoSelectionValueWithFallback(noSelection))
+    }
+
+    /**
+     * Helper function to mimic the way g:select extracts the value of the noSelection attribute
+     */
+    private String getNoSelectionValueWithFallback(Object noSelectionValue) {
+        return noSelectionValue?.entrySet()?.iterator()?.next()?.value?.encodeAsHTML() ?: "-"
     }
 
     def modal = { attrs, body ->
