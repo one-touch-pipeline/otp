@@ -126,13 +126,13 @@ $.otp.sequence = {
                                     text: row.projectName,
                                     title: row.projectName
                                 }),
-                                $.otp.createLinkMarkup({
+                                "<div class='trim-text-with-ellipsis-left-based'><bdi>" + $.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',
                                     id: row.individualId,
                                     title: row.mockPid,
                                     text: row.mockPid
-                                }),
+                                }) + "</bdi></div>",
                                 row.sampleTypeName,
                                 row.seqTypeDisplayName,
                                 row.libraryLayout,

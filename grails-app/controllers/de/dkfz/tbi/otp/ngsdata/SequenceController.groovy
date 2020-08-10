@@ -39,7 +39,7 @@ class SequenceController {
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [
-            tableHeader: SequenceColumn.values()*.message,
+            tableHeader: (SequenceColumn.values() - SequenceColumn.WITHDRAWN)*.message,
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
             seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
@@ -140,15 +140,17 @@ class SequenceController {
                     row.name,
                     row.laneId,
                     row.libraryName,
+                    row.singleCellWellLabel,
                     row.ilseId,
                     row.problem?.name() ?: "",
                     row.fileExists,
                     row.dateCreated?.format("yyyy-MM-dd"),
-            ].join(",")
+                    SeqTrack.get(row.seqTrackId).isWithdrawn(),
+            ].collect { it ?: "" }.join(",")
         }.join("\n")
         String contentHeader = (SequenceColumn.values() - SequenceColumn.FASTQC)
                 .collect { g.message(code: it.message) }
-                .join(',').replace("<br/>", " ")
+                .join(',').replaceAll("<br/?>", " ")
         String content = "${contentHeader}\n${contentBody}\n"
         response.setContentType("application/octet-stream")
         response.setHeader("Content-disposition", "filename=sequence_export.csv")
@@ -176,6 +178,7 @@ enum SequenceColumn {
     KNOWN_ISSUES("sequence.list.headers.warning", "problem"),
     FILE_EXISTS("sequence.list.headers.fileExists", "fileExists"),
     DATE("sequence.list.headers.date", "dateCreated"),
+    WITHDRAWN("sequence.list.headers.withdrawn", "withdrawn"),
 
     final String message
     final String columnName

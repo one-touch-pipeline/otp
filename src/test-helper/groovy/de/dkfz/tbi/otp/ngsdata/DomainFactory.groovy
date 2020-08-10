@@ -2623,4 +2623,32 @@ class DomainFactory {
                 approvalState: ProjectRequestUser.ApprovalState.PENDING,
         ], properties)
     }
+
+    static Sequence createSequence(Map properties = [:]) {
+        return createDomainObject(Sequence, [
+                antibodyTarget     : "antibodyTarget_${counter++}",
+                dirName            : "dirName__${counter++}",
+                fastqcState        : SeqTrack.DataProcessingState.UNKNOWN,
+                ilseId             : counter++,
+                laneId             : "laneId_${counter++}",
+                libraryLayout      : "libraryLayout_${counter++}",
+                libraryName        : "libraryName_${counter++}",
+                mockFullName       : "mockFullName_${counter++}",
+                mockPid            : "mockPid_${counter++}",
+                name               : "name_${counter++}",
+                pid                : "pid_${counter++}",
+                projectName        : "projectName_${counter++}",
+                projectDirName     : "projectDirName_${counter++}",
+                qualityEncoding    : SeqTrack.QualityEncoding.UNKNOWN,
+                realmName          : "realmName_${counter++}",
+                sampleTypeName     : "sampleTypeName_${counter++}",
+                seqCenterDirName   : "seqCenterDirName_${counter++}",
+                seqCenterName      : "seqCenterName_${counter++}",
+                seqPlatformName    : "seqPlatformName_${counter++}",
+                seqTypeDisplayName : "seqTypeDisplayName_${counter++}",
+                seqTypeName        : "seqTypeName_${counter++}",
+                singleCellWellLabel: "singleCellWellLabel_${counter++}",
+                type               : Individual.Type.UNDEFINED,
+        ], properties)
+    }
 }
