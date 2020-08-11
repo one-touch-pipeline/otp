@@ -77,12 +77,13 @@ class ProjectCreationController {
             ]
         }
         Map<String, ?> defaults = [
-                qcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
-                processingPriority : processingPriorityService.defaultPriority(),
-                storageUntil       : "3000-01-01",
-                projectType        : Project.ProjectType.SEQUENCING,
-                forceCopyFiles     : true,
-                fingerPrinting     : true,
+                qcThresholdHandling    : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
+                processingPriority     : processingPriorityService.defaultPriority(),
+                storageUntil           : "3000-01-01",
+                projectType            : Project.ProjectType.SEQUENCING,
+                forceCopyFiles         : true,
+                fingerPrinting         : true,
+                projectRequestAvailable: false,
         ]
         ProjectCreationCommand projectCreationCmd = flash.cmd as ProjectCreationCommand
         boolean showIgnoreUsersFromBaseObjects = flash.showIgnoreUsersFromBaseObjects as boolean
@@ -198,6 +199,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     String internalNotes
     boolean ignoreUsersFromBaseObjects
     boolean publiclyAvailable
+    boolean projectRequestAvailable
 
     static constraints = {
         name(blank: false, validator: { val, obj ->

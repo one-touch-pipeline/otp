@@ -70,6 +70,7 @@ class ProjectConfigController implements CheckAndCall {
                 allProjectGroups               : ProjectGroup.list(),
                 publiclyAvailable              : project?.publiclyAvailable,
                 closed                         : project?.closed,
+                projectRequestAvailable        : project?.projectRequestAvailable,
         ]
     }
 
@@ -134,6 +135,12 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON updateClosed(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+        }
+    }
+
+    JSON updateRequestAvailable(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }

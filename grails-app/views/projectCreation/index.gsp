@@ -33,6 +33,7 @@
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="pages/projectCreation/index.js"/>
 </head>
+
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
@@ -51,7 +52,7 @@
                 <td><g:message code="projectCreation.basis.projectRequest"/></td>
                 <td>
                     <g:select id="projectRequest" name="projectRequest.id" class="use-select-2"
-                              value="${projectRequest?.id}" from="${projectRequests}" noSelection="${[null:"No project request selected"]}"
+                              value="${projectRequest?.id}" from="${projectRequests}" noSelection="${[null: "No project request selected"]}"
                               optionKey="id" optionValue="name"/>
                 </td>
             </tr>
@@ -59,7 +60,7 @@
                 <td><g:message code="projectCreation.basis.project"/></td>
                 <td>
                     <g:select id="baseProject" name="baseProject.id" class="use-select-2"
-                              value="${baseProject?.id}" from="${availableProjects}" noSelection="${[null:"No project selected"]}"
+                              value="${baseProject?.id}" from="${availableProjects}" noSelection="${[null: "No project selected"]}"
                               optionKey="id" optionValue="name"/>
                 </td>
             </tr>
@@ -115,16 +116,16 @@
                     <td>${projectRequest.seqTypes?.join(", ")}</td>
                 </tr>
                 <g:if test="${projectRequest.customSpeciesWithStrain}">
-                <tr>
-                    <td><g:message code="projectRequest.customSpeciesWithStrain"/></td>
-                    <td>
-                        <span style="margin-right: 20px">${projectRequest.customSpeciesWithStrain}</span>
-                        <otp:annotation type="warning" variant="inline">
-                            <g:message code="projectRequest.customSpeciesWithStrain.link"/>
-                            <g:link controller="speciesWithStrain" action="index" params="[helper: projectRequest.customSpeciesWithStrain]">here</g:link>
-                        </otp:annotation>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><g:message code="projectRequest.customSpeciesWithStrain"/></td>
+                        <td>
+                            <span style="margin-right: 20px">${projectRequest.customSpeciesWithStrain}</span>
+                            <otp:annotation type="warning" variant="inline">
+                                <g:message code="projectRequest.customSpeciesWithStrain.link"/>
+                                <g:link controller="speciesWithStrain" action="index" params="[helper: projectRequest.customSpeciesWithStrain]">here</g:link>
+                            </otp:annotation>
+                        </td>
+                    </tr>
                 </g:if>
                 <tr>
                     <td><g:message code="projectRequest.comments"/></td>
@@ -139,7 +140,8 @@
                 <tr>
                     <td><g:message code="projectCreation.baseProject.users"/></td>
                     <td>
-                        <g:set var="selectedUsers" value="${(source.getByFieldName("usersToCopyFromBaseProject") as List<UserProjectRole>).sort { it.user.username } ?: []}"/>
+                        <g:set var="selectedUsers"
+                               value="${(source.getByFieldName("usersToCopyFromBaseProject") as List<UserProjectRole>).sort { it.user.username } ?: []}"/>
                         <g:each var="userProjectRole" in="${baseProjectUsers}" status="i">
                             <label class="vertical-align-middle">
                                 <g:checkBox name="usersToCopyFromBaseProject.id"
@@ -184,9 +186,10 @@
             <tr>
                 <td><g:message code="project.keywords"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${(projectCreationCmd?.keywords ?: source.getAllByFieldName("keywords")).flatten().findResults { it ? it.toString() : null }.unique().sort() ?: [""]}" var="keyword" status="i">
+                    <g:each in="${(projectCreationCmd?.keywords ?: source.getAllByFieldName("keywords")).flatten().findResults { it ? it.toString() : null }.unique().sort() ?: [""]}"
+                            var="keyword" status="i">
                         <div class="field">
-                            <g:textField list="keywordList" name="keywordNames" value="${keyword}" />
+                            <g:textField list="keywordList" name="keywordNames" value="${keyword}"/>
                             <g:if test="${i == 0}">
                                 <button class="add-field">+</button>
                             </g:if>
@@ -211,7 +214,8 @@
             <tr>
                 <td><g:message code="project.relatedProjects"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${(projectCreationCmd?.relatedProjects ?: source.getAllByFieldName("relatedProjects").flatten().findAll().join(",")).split(",").toUnique()}" var="relatedProject" status="i">
+                    <g:each in="${(projectCreationCmd?.relatedProjects ?: source.getAllByFieldName("relatedProjects").flatten().findAll().join(",")).split(",").toUnique()}"
+                            var="relatedProject" status="i">
                         <div class="field">
                             <g:textField list="projectList" name="relatedProjectNames" value="${relatedProject}"/>
                             <g:if test="${i == 0}">
@@ -287,7 +291,8 @@
             </tr>
             <tr>
                 <td><g:message code="project.storageUntil"/></td>
-                <td><input type="date" name="storageUntilInput" value="${source.getFieldAsLocalDate("storageUntil")?.format(DateTimeFormatter.ISO_LOCAL_DATE)}" required/></td>
+                <td><input type="date" name="storageUntilInput" value="${source.getFieldAsLocalDate("storageUntil")?.format(DateTimeFormatter.ISO_LOCAL_DATE)}"
+                           required/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'storageUntil', cmd: cmd]"/>
             </tr>
             <tr>
@@ -325,6 +330,20 @@
                 <td><g:message code="project.publiclyAvailable"/></td>
                 <td><g:checkBox name="publiclyAvailable" checked="${source.getByFieldName("publiclyAvailable")}" value="true"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'publiclyAvailable', cmd: cmd, type: 'boolean']"/>
+            </tr>
+            <tr>
+                <g:if test="${projectRequest}">
+                    <td><g:message code="project.requestAvailable"/></td>
+                    <td><g:message code="project.requestAvailable.message"/></td>
+                    <g:hiddenField name="projectRequestAvailable" value="${true}"/>
+                    <td></td>
+                    <td></td>
+                </g:if>
+                <g:else>
+                    <td><g:message code="project.requestAvailable"/></td>
+                    <td><g:checkBox name="projectRequestAvailable" value="${source.getByFieldName("projectRequestAvailable")}"/></td>
+                    <g:render template="baseValueColumns" model="[fieldName: 'projectRequestAvailable', cmd: cmd, type: 'boolean']"/>
+                </g:else>
             </tr>
             <tr>
                 <td><g:message code="project.projectInfo"/></td>

@@ -379,6 +379,18 @@
                                 value="${closed}"/>
                     </td>
                 </tr>
+                <tr>
+                    <td><g:message code="project.requestAvailable"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateRequestAvailable", params: ['fieldName': 'projectRequestAvailable'])}"
+                                values="${["true", "false"]}"
+                                value="${projectRequestAvailable}"/>
+                    </td>
+                </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
                         <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.internalNotes"/></td>

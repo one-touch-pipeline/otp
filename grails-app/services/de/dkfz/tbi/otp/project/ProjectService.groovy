@@ -200,6 +200,7 @@ class ProjectService {
                 fundingBody                   : projectParams.fundingBody,
                 grantId                       : projectParams.grantId,
                 publiclyAvailable             : projectParams.publiclyAvailable,
+                projectRequestAvailable       : projectParams.projectRequestAvailable,
         ])
         assert project.save(flush: true)
 
@@ -233,7 +234,7 @@ class ProjectService {
             projectInfoService.createProjectInfoAndUploadFile(project, projectInfoCmd)
         }
         if (projectParams.projectInfoToCopy) {
-            Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(projectParams.projectInfoToCopy.getPath())
+            Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(projectParams.projectInfoToCopy.path)
             projectInfoService.createProjectInfoByPath(project, path)
         }
 
@@ -313,6 +314,7 @@ class ProjectService {
                 "speciesWithStrain",
                 "publiclyAvailable",
                 "closed",
+                "projectRequestAvailable",
                 "individualPrefix",
                 "projectType",
                 "relatedProjects",

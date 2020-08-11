@@ -104,6 +104,8 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     boolean publiclyAvailable
 
+    boolean projectRequestAvailable = false
+
     AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
 
     /** This attribute is used externally. Please discuss a change in the team */
