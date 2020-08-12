@@ -119,4 +119,16 @@ class StringUtils {
     static String toSnakeCase(String text) {
         return text.replaceAll(/([A-Z])/, /_$1/ ).toLowerCase().replaceAll( /^_/, '')
     }
+
+    /**
+     * Joins the list on the given separator in a semantic way.
+     *
+     * A 'semantic way' being something like this with parameters
+     * joinAsSemanticString(["one", "two", "three"], ", ", " and ")
+     * "one, two and three"
+     */
+    static String joinAsSemanticString(List list, String separator, String finalSeparator) {
+        int s = list.size()
+        return s > 1 ? list[0..(s - 2)].join(separator) + finalSeparator + list.last().toString() : list.join(separator)
+    }
 }

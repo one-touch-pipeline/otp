@@ -151,4 +151,18 @@ class StringUtilsSpec extends Specification {
         "camelCase"   || "camel_case"
         "white space" || "white space"
     }
+
+    @Unroll
+    void 'joinAsSemanticString, test case: #input'() {
+        expect:
+        expected == StringUtils.joinAsSemanticString(input, ", ", " and ")
+
+        where:
+        input                   || expected
+        []                      || ""
+        [""]                    || ""
+        ["one"]                 || "one"
+        ["one", "two"]          || "one and two"
+        ["one", "two", "three"] || "one, two and three"
+    }
 }
