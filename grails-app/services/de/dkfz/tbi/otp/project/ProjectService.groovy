@@ -191,6 +191,12 @@ class ProjectService {
         ])
         assert project.save(flush: true)
 
+        createProjectDirectoryIfNeeded(project)
+
+        if (project.dirAnalysis) {
+            createAnalysisDirectoryIfPossible(project)
+        }
+
         if (projectParams.projectRequest) {
             projectRequestService.update(projectParams.projectRequest, project)
             if (!projectParams.ignoreUsersFromBaseObjects) {
@@ -206,12 +212,6 @@ class ProjectService {
         }
 
         userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, projectParams.unixGroup)
-
-        createProjectDirectoryIfNeeded(project)
-
-        if (project.dirAnalysis) {
-            createAnalysisDirectoryIfPossible(project)
-        }
 
         if (projectParams.projectInfoFile) {
             AddProjectInfoCommand projectInfoCmd = new AddProjectInfoCommand(
