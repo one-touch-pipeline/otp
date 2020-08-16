@@ -32,6 +32,10 @@
             <g:render template="/templates/messages"/>
             <g:render template="detailCommonHeader" model="[user: user, userExistsInLdap: userExistsInLdap]"/>
 
+            <g:form controller="login" action="impersonate" method="POST" params='["username": user.username]'>
+                <g:submitButton name="${g.message(code: "user.administration.show.switch")}"/>
+            </g:form>
+
             <g:form controller="userAdministration" action="editUser" params='["user": user.id]'>
                 <table class="key-value-table key-input">
                     <thead></thead>
