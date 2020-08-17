@@ -32,7 +32,7 @@
     <div class="body">
         <g:render template="/templates/messages"/>
         <g:render template="/templates/projectSelection"/>
-        <h1><g:message code="otp.menu.snv.results"/></h1>
+        <h1><g:message code="snv.results.title"/></h1>
 
         <div class="table">
             <div class="otpDataTables">

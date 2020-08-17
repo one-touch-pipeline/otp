@@ -27,9 +27,9 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MetadataField
 
 /*
- * In the GUI and e-mails sent by OTP this shall be called "Sequencing Type" (or "Seq Type" where little space is
- * available), no matter if the library layout is included in the displayed value or not. (Decided together with the OTP
- * Product Owner on 2016-07-19.)
+ * In the GUI and e-mails sent by OTP this shall be called "Sequencing Type" (or "Seq. Type" where little space is
+ * available), no matter if the library layout is included in the displayed value or not.
+ * Decided by the OTP Product Owner on 2020-08-20.
  */
 /** This table is used externally. Please discuss a change in the team */
 class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {

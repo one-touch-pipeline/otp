@@ -27,8 +27,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 /*
- * In the GUI and e-mails sent by OTP this shall be called "PID".
- * (Decided together with the OTP Product Owner on 2016-07-19.)
+ * In the GUI and e-mails sent by OTP this shall be called "Patient ID".
+ * Decided by the OTP Product Owner on 2020-08-20.
  */
 /** This table is used externally. Please discuss a change in the team */
 class Individual implements CommentableWithProject, Entity {

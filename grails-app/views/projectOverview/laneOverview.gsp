@@ -37,7 +37,7 @@
             </div>
 
             <div class="grid-element rounded-page-header-box" style="display: table;">
-                <span style="display:table-cell; vertical-align: middle"><g:message code="projectOverview.filter.sampleType"/>:</span>
+                <span style="display:table-cell; vertical-align: middle; white-space: nowrap"><g:message code="projectOverview.filter.sampleType"/>:</span>
                 <table id="searchCriteriaTableSampleType" style="display:table-cell;">
                     <tr>
                         <td class="value">
@@ -47,9 +47,9 @@
                         </td>
                     </tr>
                 </table>
-
-                <div style="display:table-cell; vertical-align: middle"><g:message code="projectOverview.filter.seqType"/>:</div>
-                <table id="searchCriteriaTableSeqType" style="display:table-cell;">
+                <div style="width: 20px"></div>
+                <span style="display:table-cell; vertical-align: middle; white-space: nowrap"><g:message code="projectOverview.filter.seqType"/>:</span>
+                <table id="searchCriteriaTableSeqType" style="display:table-cell">
                     <tr class="dtf_row">
                         %{-- css class: little hack: the seqType select is actually the "value" of the filter,
                              but should behave like "attribute" (that is: add a new row for the next filter).

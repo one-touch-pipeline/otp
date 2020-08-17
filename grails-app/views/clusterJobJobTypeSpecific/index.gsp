@@ -37,13 +37,13 @@
 
         <div class="rounded-page-header-box">
             <div>
-                <span>jobclass: <g:select class="use-select-2" name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></span>
-                <span>seqType: <select name="seqTypeSelect" id="seqTypeSelect"></select></span>
+                <span>Job Class: <g:select class="use-select-2" name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></span>
+                <span>Seq. Type: <select name="seqTypeSelect" id="seqTypeSelect"></select></span>
             </div>
             <br/>
             <div>
-                <span>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></span>
-                <span>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></span>
+                <span>From: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></span>
+                <span>To: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></span>
             </div>
             <br/>
 
@@ -54,7 +54,7 @@
                         <option value="0.0350">0.0350 (WES)</option>
                     </select>
                 </span>
-                <span>coverage:
+                <span>Coverage:
                     <select list="coverageList" id="coverageInput" value="30">
                         <option value="15">15x</option>
                         <option value="30" selected="selected">30x</option>
