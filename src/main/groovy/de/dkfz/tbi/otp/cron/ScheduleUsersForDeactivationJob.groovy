@@ -136,19 +136,21 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         String body = """\
         |Dear ${authority?.realName ?: "user"},
         |
-        |OTP has detected users with expired accounts in your projects, please deactivate them from all projects.
-        |You can manage the users of a project here: ${linkGenerator.link(controller: 'projectUser', action: 'index', absolute: true)},
+        |There are users with an expired AD account in your OTP projects.
+        |This usually happens for users that no longer have a valid working contract.
+        |If you think this is wrong please check with the respective HR responsible.
         |
-        |If a user's account stays expired for the next ${deactivationGracePeriod} days, they will be removed automatically. You will not receive a reminder.
+        |If a user's account stays expired for the next ${deactivationGracePeriod} days, it will be removed automatically.
+        |You will not receive a reminder.
         |
         |The expired users are:
         |${getMailBodyWithInvalidUsers(invalidUsers)}
         |
-        |If this is wrong please contact us at: ${linuxGroupAdministrationMail}
         |
         |Best regards,
         |OTP on behalf of ${otpServiceSalutation}
         |""".stripMargin()
+
 
         mailHelperService.sendEmail(subject, body, authority.email, [linuxGroupAdministrationMail])
 
