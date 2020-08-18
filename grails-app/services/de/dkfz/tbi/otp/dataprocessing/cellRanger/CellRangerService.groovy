@@ -233,10 +233,15 @@ class CellRangerService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
-    String getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws FileNotFoundException {
-        File file = singleCellBamFile.webSummaryResultFile
-        if (!file.exists()) {
-            throw new FileNotFoundException(file.path)
+    String getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws NoSuchFileException, AccessDeniedException {
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+
+        Path file = fileSystem.getPath(singleCellBamFile.webSummaryResultFile.path)
+        if (!Files.exists(file)) {
+            throw new NoSuchFileException(file.toAbsolutePath().toString())
+        }
+        if (!Files.isReadable(file)) {
+            throw new AccessDeniedException(file.toAbsolutePath().toString())
         }
         return file.text
     }

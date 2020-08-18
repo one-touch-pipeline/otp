@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.AccessDeniedException
+import java.nio.file.NoSuchFileException
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -443,8 +444,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         String content
         try {
             content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
-        } catch (FileNotFoundException e) {
-            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.fileNotFound") as String, e.message)
+        } catch (NoSuchFileException e) {
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
             redirect(action: "index")
         } catch (AccessDeniedException e) {
             flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.accessDenied") as String, e.message)

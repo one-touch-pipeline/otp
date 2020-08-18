@@ -27,7 +27,6 @@ import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -41,6 +40,9 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+
+import java.nio.file.AccessDeniedException
+import java.nio.file.NoSuchFileException
 
 @Rollback
 @Integration
@@ -140,9 +142,35 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         content == "content"
 
         where:
-        username      | _
-        OPERATOR      | _
-        "projectUser" | _
+        username << [OPERATOR, "projectUser"]
+    }
+
+    void "getWebSummaryResultFileContent, file has to be readable"() {
+        given:
+        setupData()
+        webSummaryFile = CreateFileHelper.createFile(singleCellBamFile.webSummaryResultFile, "content")
+        webSummaryFile.readable = false
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
+        }
+
+        then:
+        thrown(AccessDeniedException)
+    }
+
+    void "getWebSummaryResultFileContent, file has to exist"() {
+        given:
+        setupData()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
+        }
+
+        then:
+        thrown(NoSuchFileException)
     }
 
     void "getWebSummaryResultFileContent, access denied for non project user"() {
@@ -157,7 +185,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         }
 
         then:
-        AccessDeniedException e = thrown()
+        org.springframework.security.access.AccessDeniedException e = thrown()
         e.message.contains("Access is denied")
     }
 }
