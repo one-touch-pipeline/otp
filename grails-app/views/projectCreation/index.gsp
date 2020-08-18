@@ -88,20 +88,12 @@
                     <td>${projectRequest.requester}</td>
                 </tr>
                 <tr>
-                    <td><g:message code="projectRequest.pi"/></td>
-                    <td>${projectRequest.pi}</td>
-                </tr>
-                <tr>
-                    <td><g:message code="projectRequest.leadBioinformatician"/></td>
-                    <td>${projectRequest.leadBioinformaticians?.join(", ")}</td>
-                </tr>
-                <tr>
-                    <td><g:message code="projectRequest.bioinformatician"/></td>
-                    <td>${projectRequest.bioinformaticians?.join(", ")}</td>
-                </tr>
-                <tr>
-                    <td><g:message code="projectRequest.submitter"/></td>
-                    <td>${projectRequest.submitters?.join(", ")}</td>
+                    <td><g:message code="projectRequest.users"/></td>
+                    <td>
+                        <g:each var="user" in="${projectRequest.users}">
+                            <g:render template="/projectRequest/projectRequestUser" model="[user: user]"/>
+                        </g:each>
+                    </td>
                 </tr>
                 <tr>
                     <td><g:message code="projectRequest.sequencingCenter"/></td>

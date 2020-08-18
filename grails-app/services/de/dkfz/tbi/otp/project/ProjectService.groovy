@@ -198,9 +198,9 @@ class ProjectService {
         }
 
         if (projectParams.projectRequest) {
-            projectRequestService.update(projectParams.projectRequest, project)
+            projectRequestService.finish(projectParams.projectRequest, project)
             if (!projectParams.ignoreUsersFromBaseObjects) {
-                projectRequestService.addUserRolesAndPermissions(projectParams.projectRequest)
+                projectRequestService.addProjectRequestUsersToProject(projectParams.projectRequest)
             }
         }
 

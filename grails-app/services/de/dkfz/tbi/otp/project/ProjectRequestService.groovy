@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
-import grails.util.Pair
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,9 +32,9 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.project.ProjectRequestUser.ApprovalState
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 
@@ -43,6 +42,7 @@ import java.time.LocalDate
 
 @Transactional
 class ProjectRequestService {
+
     @Autowired
     LinkGenerator linkGenerator
     LdapService ldapService
@@ -53,95 +53,89 @@ class ProjectRequestService {
     SecurityService securityService
     UserProjectRoleService userProjectRoleService
     UserService userService
+    ProjectRequestUserService projectRequestUserService
 
-    List<ProjectRequest> getCreatedByUserAndResolved() {
-        ProjectRequest.createCriteria().list {
-            eq("requester", securityService.currentUserAsUser)
-            ne("status", ProjectRequest.Status.WAITING_FOR_PI)
-        } as List<ProjectRequest>
-    }
-
-    List<ProjectRequest> getResolvedWithUserAsPi() {
-        ProjectRequest.createCriteria().list {
-            eq("pi", securityService.currentUserAsUser)
-            ne("status", ProjectRequest.Status.WAITING_FOR_PI)
-        } as List<ProjectRequest>
-    }
-
-    List<ProjectRequest> getWaitingForCurrentUser() {
-        ProjectRequest.findAllByPiAndStatus(securityService.currentUserAsUser, ProjectRequest.Status.WAITING_FOR_PI)
+    List<ProjectRequest> getResolvedOfCurrentUser() {
+        return getRequestsHelper(true)
     }
 
     List<ProjectRequest> getUnresolvedRequestsOfUser() {
-        ProjectRequest.findAllByRequesterAndStatus(securityService.currentUserAsUser, ProjectRequest.Status.WAITING_FOR_PI)
+        return getRequestsHelper(false)
     }
 
-    private List<User> findOrCreateUsers(List<String> usernames) {
-        return usernames?.findAll()?.collect { userProjectRoleService.createUserWithLdapData(it) }
+    List<ProjectRequest> getRequestsHelper(boolean requestsAreResolved) {
+        return (ProjectRequest.withCriteria {
+            or {
+                users {
+                    'in'("user", securityService.currentUserAsUser)
+                }
+                eq("requester", securityService.currentUserAsUser)
+            }
+            'in'("status", ProjectRequest.Status.values().findAll { it.resolvedStatus == requestsAreResolved })
+        } as List<ProjectRequest>).unique()
     }
 
     ProjectRequest create(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
         securityService.ensureNotSwitchedUser()
 
         ProjectRequest req = new ProjectRequest(
-                name                        : cmd.name,
-                description                 : cmd.description,
-                keywords                    : cmd.keywords as Set,
-                organizationalUnit          : cmd.organizationalUnit,
-                costCenter                  : cmd.costCenter,
-                grantId                     : cmd.grantId,
-                fundingBody                 : cmd.fundingBody,
-                endDate                     : cmd.endDate,
-                storageUntil                : resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
-                relatedProjects             : cmd.relatedProjects,
-                tumorEntity                 : cmd.tumorEntity,
-                speciesWithStrain           : cmd.speciesWithStrain,
-                customSpeciesWithStrain     : cmd.customSpeciesWithStrain,
-                projectType                 : cmd.projectType,
-                sequencingCenter            : cmd.sequencingCenter,
-                approxNoOfSamples           : cmd.approxNoOfSamples,
-                seqTypes                    : cmd.seqTypes,
-                comments                    : cmd.comments,
+                name                   : cmd.name,
+                description            : cmd.description,
+                keywords               : cmd.keywords as Set,
+                organizationalUnit     : cmd.organizationalUnit,
+                costCenter             : cmd.costCenter,
+                grantId                : cmd.grantId,
+                fundingBody            : cmd.fundingBody,
+                endDate                : cmd.endDate,
+                storageUntil           : resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
+                relatedProjects        : cmd.relatedProjects,
+                tumorEntity            : cmd.tumorEntity,
+                speciesWithStrain      : cmd.speciesWithStrain,
+                customSpeciesWithStrain: cmd.customSpeciesWithStrain,
+                projectType            : cmd.projectType,
+                sequencingCenter       : cmd.sequencingCenter,
+                approxNoOfSamples      : cmd.approxNoOfSamples,
+                seqTypes               : cmd.seqTypes,
+                comments               : cmd.comments,
 
-                pi                          : findOrCreateUsers([cmd.pi]).first(),
-                requester                   : securityService.currentUserAsUser,
-                leadBioinformaticians       : findOrCreateUsers(cmd.leadBioinformaticians),
-                bioinformaticians           : findOrCreateUsers(cmd.bioinformaticians),
-                submitters                  : findOrCreateUsers(cmd.submitters),
+                requester              : securityService.currentUserAsUser,
+                users                  : projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users),
         )
         req.save(flush: true)
         sendEmailOnCreation(req)
         return req
     }
 
-    void edit(EditProjectRequestCommand cmd) {
+    void edit(EditProjectRequestCommand cmd) throws SwitchedUserDeniedException {
+        securityService.ensureNotSwitchedUser()
         ProjectRequest projectRequest = cmd.request
-        projectRequest.with {
-            name                         = cmd.name
-            description                  = cmd.description
-            keywords                     = cmd.keywords as Set
-            organizationalUnit           = cmd.organizationalUnit
-            costCenter                   = cmd.costCenter
-            grantId                      = cmd.grantId
-            fundingBody                  = cmd.fundingBody
-            endDate                      = cmd.endDate
-            storageUntil                 = resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil)
-            relatedProjects              = cmd.relatedProjects
-            tumorEntity                  = cmd.tumorEntity
-            speciesWithStrain            = cmd.speciesWithStrain
-            customSpeciesWithStrain      = cmd.customSpeciesWithStrain
-            projectType                  = cmd.projectType
-            sequencingCenter             = cmd.sequencingCenter
-            approxNoOfSamples            = cmd.approxNoOfSamples
-            seqTypes                     = cmd.seqTypes
-            comments                     = cmd.comments
 
-            pi                           = findOrCreateUsers([cmd.pi]).first()
-            leadBioinformaticians        = findOrCreateUsers(cmd.leadBioinformaticians)
-            bioinformaticians            = findOrCreateUsers(cmd.bioinformaticians)
-            submitters                   = findOrCreateUsers(cmd.submitters)
+        ensureEligibleToEdit(projectRequest)
+
+        projectRequest.with {
+            name                    = cmd.name
+            description             = cmd.description
+            keywords                = cmd.keywords as Set
+            organizationalUnit      = cmd.organizationalUnit
+            costCenter              = cmd.costCenter
+            grantId                 = cmd.grantId
+            fundingBody             = cmd.fundingBody
+            endDate                 = cmd.endDate
+            storageUntil            = resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil)
+            relatedProjects         = cmd.relatedProjects
+            tumorEntity             = cmd.tumorEntity
+            speciesWithStrain       = cmd.speciesWithStrain
+            customSpeciesWithStrain = cmd.customSpeciesWithStrain
+            projectType             = cmd.projectType
+            sequencingCenter        = cmd.sequencingCenter
+            approxNoOfSamples       = cmd.approxNoOfSamples
+            seqTypes                = cmd.seqTypes
+            comments                = cmd.comments
+
+            users                   = projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users)
         }
         projectRequest.save(flush: true)
+        sendEmailOnEdit(projectRequest)
     }
 
     private static LocalDate resolveStoragePeriodToLocalDate(StoragePeriod storagePeriod, LocalDate given) {
@@ -159,33 +153,84 @@ class ProjectRequestService {
 
     ProjectRequest get(Long l) {
         ProjectRequest req = ProjectRequest.get(l)
-        if (req && securityService.currentUserAsUser in [req.requester, req.pi]) {
+        if (req && isUserPartOfRequest(securityService.currentUserAsUser, req)) {
             return req
         }
         return null
     }
 
-    void assertApprovalEligible(ProjectRequest request) {
-        if (!(securityService.currentUserAsUser == request.pi && request.status == ProjectRequest.Status.WAITING_FOR_PI)) {
-            throw new AccessDeniedException("User '${securityService.currentUserAsUser}' not eligible to approve this request")
+    List<ProjectRequestUser> getApproversOfProjectRequest(ProjectRequest request) {
+        return request.users.toList().findAll { it.approver }
+    }
+
+    boolean isUserPartOfRequest(User user, ProjectRequest request) {
+        return request.requester == user || request.users.find { it.user == user }
+    }
+
+    boolean isUserEligibleToClose(User user, ProjectRequest request) {
+        return request.requester == user
+    }
+
+    boolean isCurrentUserEligibleToClose(ProjectRequest request) {
+        return isUserEligibleToClose(securityService.currentUserAsUser, request)
+    }
+
+    void ensureEligibleToClose(ProjectRequest request) {
+        if (!(isCurrentUserEligibleToClose(request) && request.status.editableStatus)) {
+            throw new AccessDeniedException("User '${securityService.currentUserAsUser}' is not eligible to close this request")
         }
     }
 
-    void assertTermsAndConditions(boolean confirmConsent, boolean confirmRecordOfProcessingActivities) {
+    boolean isUserEligibleToEdit(User user, ProjectRequest request) {
+        return request.requester == user
+    }
+
+    boolean isCurrentUserEligibleToEdit(ProjectRequest request) {
+        return isUserEligibleToEdit(securityService.currentUserAsUser, request)
+    }
+
+    void ensureEligibleToEdit(ProjectRequest request) {
+        if (!(isCurrentUserEligibleToEdit(request) && request.status.editableStatus)) {
+            throw new AccessDeniedException("User '${securityService.currentUserAsUser}' is not eligible to edit this request")
+        }
+    }
+
+    boolean isUserEligibleApproverForRequest(User user, ProjectRequest request) {
+        return request.users.find { it.user == user && it.approver }
+    }
+
+    boolean isCurrentUserEligibleApproverForRequest(ProjectRequest request) {
+        return isUserEligibleApproverForRequest(securityService.currentUserAsUser, request)
+    }
+
+    void ensureApprovalEligible(ProjectRequest request) {
+        if (!(isCurrentUserEligibleApproverForRequest(request) && request.status.editableStatus)) {
+            throw new AccessDeniedException("User '${securityService.currentUserAsUser}' is not eligible to approve this request")
+        }
+    }
+
+    void ensureTermsAndConditions(boolean confirmConsent, boolean confirmRecordOfProcessingActivities) {
         if ([confirmConsent, confirmRecordOfProcessingActivities].any { !it }) {
             throw new OtpRuntimeException("Invalid state, conditions were not accepted")
         }
     }
 
+    boolean allProjectRequestUsersInState(final ProjectRequest projectRequest, final ApprovalState state) {
+        return projectRequest.users.findAll { it.approver }.every { it.approvalState == state }
+    }
+
     Errors approveRequest(ProjectRequest request, boolean confirmConsent, boolean confirmRecordOfProcessingActivities) throws SwitchedUserDeniedException {
         try {
-            securityService.assertNotSwitchedUser()
-            assertApprovalEligible(request)
-            assertTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
+            securityService.ensureNotSwitchedUser()
+            ensureApprovalEligible(request)
+            ensureTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
 
-            request.status = ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR
-            request.save(flush: true)
-            sendEmailOnApproval(request)
+            projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.APPROVED)
+
+            if (allProjectRequestUsersInState(request, ApprovalState.APPROVED)) {
+                setStatus(request, ProjectRequest.Status.WAITING_FOR_OPERATOR)
+                sendEmailOnCompleteApproval(request)
+            }
         } catch (ValidationException e) {
             return e.errors
         }
@@ -194,62 +239,54 @@ class ProjectRequestService {
 
     Errors denyRequest(ProjectRequest request) throws SwitchedUserDeniedException {
         try {
-            securityService.assertNotSwitchedUser()
-            assertApprovalEligible(request)
+            securityService.ensureNotSwitchedUser()
+            ensureApprovalEligible(request)
 
-            request.status = ProjectRequest.Status.DENIED_BY_PI
-            request.save(flush: true)
+            projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.DENIED)
+
+            if (allProjectRequestUsersInState(request, ApprovalState.DENIED)) {
+                setStatus(request, ProjectRequest.Status.DENIED_BY_APPROVER)
+            }
         } catch (ValidationException e) {
             return e.errors
         }
         return null
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void update(ProjectRequest request, Project project) {
-        request.status = ProjectRequest.Status.PROJECT_CREATED
-        request.project = project
+    Errors closeRequest(ProjectRequest request) throws SwitchedUserDeniedException {
+        try {
+            securityService.ensureNotSwitchedUser()
+            ensureEligibleToClose(request)
+
+            setStatus(request, ProjectRequest.Status.CLOSED)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
+    ProjectRequest setStatus(ProjectRequest request, ProjectRequest.Status status, Project project = null) {
+        if (status == ProjectRequest.Status.PROJECT_CREATED) {
+            assert project: "Status expects a project, but none is given"
+            request.project = project
+        }
+        request.status = status
         request.save(flush: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void finish(ProjectRequest request, Project project) {
+        setStatus(request, ProjectRequest.Status.PROJECT_CREATED, project)
+    }
+
     boolean requesterIsEligibleToAccept(ProjectRequest projectRequest) {
-        return projectRequest.requester == projectRequest.pi
+        return isUserEligibleApproverForRequest(projectRequest.requester, projectRequest)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void addUserRolesAndPermissions(ProjectRequest projectRequest) {
-        Map<ProjectRequestRole, Set<User>> usersByRole = [
-                (ProjectRequestRole.PI)                   : [projectRequest.pi] as Set<User>,
-                (ProjectRequestRole.LEAD_BIOINFORMATICIAN): projectRequest.leadBioinformaticians,
-                (ProjectRequestRole.BIOINFORMATICIAN)     : projectRequest.bioinformaticians,
-                (ProjectRequestRole.SUBMITTER)            : projectRequest.submitters,
-        ]
-
-        Set<Pair<User, ProjectRequestRole>> pairSet = usersByRole.collectMany { ProjectRequestRole projectRequestRole, Set<User> users ->
-            users.collect {
-                return new Pair<User, ProjectRequestRole>(it, projectRequestRole)
-            }
-        }
-
-        addUserAndRolesFromProjectRequest(pairSet, projectRequest.project)
-    }
-
-    private void addUserAndRolesFromProjectRequest(Set<Pair<User, ProjectRequestRole>> pairSet, Project project) {
-        pairSet.groupBy { it.aValue }.each { User user, List<Pair<User, ProjectRequestRole>> projectRequestRoleList ->
-            UserProjectRole upr = userProjectRoleService.createUserProjectRole(
-                    user,
-                    project,
-                    ProjectRole.findAllByNameInList(projectRequestRoleList.collect { it.bValue.name() }) as Set<ProjectRole>,
-            )
-
-            List<ProjectRequestRole> permissionValueList = projectRequestRoleList*.bValue
-            userProjectRoleService.with {
-                setAccessToOtp(upr, permissionValueList*.accessToOtp.any())
-                setAccessToFiles(upr, permissionValueList*.accessToFiles.any())
-                setManageUsers(upr, permissionValueList*.manageUsers.any())
-                setManageUsersAndDelegate(upr, permissionValueList*.manageUsersAndDelegate.any())
-                setReceivesNotifications(upr, permissionValueList*.receivesNotifications.any())
-            }
+    void addProjectRequestUsersToProject(ProjectRequest projectRequest) {
+        projectRequest.users.each { ProjectRequestUser projectRequestUser ->
+            projectRequestUserService.toUserProjectRole(projectRequest.project, projectRequestUser)
         }
     }
 
@@ -258,44 +295,64 @@ class ProjectRequestService {
         return CollectionUtils.atMostOneElement(ProjectRequest.findAllByProject(project))
     }
 
-    private void sendEmailOnCreation(ProjectRequest request) {
+    void sendEmailOnCreation(ProjectRequest request) {
         String link = linkGenerator.link(
                 controller: "projectRequest",
-                action: "view",
-                absolute: true,
-                id: request.id,
+                action    : "view",
+                absolute  : true,
+                id        : request.id,
         )
-        String message = messageSourceService.createMessage("notification.template.projectRequest1", [
+        String message = messageSourceService.createMessage("notification.template.projectRequest.new.body", [
                 requester  : request.requester.realName,
                 projectName: request.name,
-                pi         : request.pi.realName,
                 link       : link,
         ])
-        String title = messageSourceService.createMessage("notification.template.projectRequest.title", [
+        String subject = messageSourceService.createMessage("notification.template.projectRequest.new.subject", [
                 projectName: request.name,
         ])
-        List<String> ccs = [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)]
-        mailHelperService.sendEmail(title, message, request.pi.email, ccs)
+        List<String> recipients = getApproversOfProjectRequest(request)*.user*.email
+        List<String> ccs = [mailHelperService.emailRecipientNotification]
+        mailHelperService.sendEmail(subject, message, recipients, ccs)
     }
 
-    protected void sendEmailOnApproval(ProjectRequest request) {
+    void sendEmailOnCompleteApproval(ProjectRequest request) {
         String link = linkGenerator.link(
                 controller: "projectCreation",
-                action: "index",
-                absolute: true,
-                params: [
+                action    : "index",
+                absolute  : true,
+                params    : [
                         'projectRequest.id': request.id,
                 ]
         )
-        String message = messageSourceService.createMessage("notification.template.projectRequest2", [
+        String message = messageSourceService.createMessage("notification.template.projectRequest.create.body", [
                 requester  : request.requester.realName,
                 projectName: request.name,
-                pi         : request.pi.realName,
+                approvers  : getApproversOfProjectRequest(request)*.user.join("\n"),
                 link       : link,
         ])
-        String title = messageSourceService.createMessage("notification.template.projectRequest.title", [
+        String subject = messageSourceService.createMessage("notification.template.projectRequest.create.subject", [
                 projectName: request.name,
         ])
-        mailHelperService.sendEmail(title, message, processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION))
+        mailHelperService.sendEmail(subject, message, mailHelperService.emailRecipientNotification)
+    }
+
+    void sendEmailOnEdit(ProjectRequest request) {
+        String link = linkGenerator.link(
+                controller: "projectRequest",
+                action    : "view",
+                absolute  : true,
+                id        : request.id,
+        )
+        String message = messageSourceService.createMessage("notification.template.projectRequest.edit.body", [
+                requester  : request.requester.realName,
+                projectName: request.name,
+                link       : link,
+        ])
+        String subject = messageSourceService.createMessage("notification.template.projectRequest.edit.subject", [
+                projectName: request.name,
+        ])
+        List<String> recipients = getApproversOfProjectRequest(request)*.user*.email
+        List<String> ccs = [mailHelperService.emailRecipientNotification]
+        mailHelperService.sendEmail(subject, message, recipients, ccs)
     }
 }

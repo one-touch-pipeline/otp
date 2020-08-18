@@ -103,4 +103,8 @@ class MailHelperService {
     String getDefaultReplyToAddress() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO)
     }
+
+    String getEmailRecipientNotification() {
+        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
+    }
 }

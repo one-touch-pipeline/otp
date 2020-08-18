@@ -48,8 +48,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
@@ -57,6 +56,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+import static de.dkfz.tbi.otp.project.ProjectRequest.Status.PROJECT_CREATED
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @SuppressWarnings('EmptyClass')
@@ -1523,7 +1523,7 @@ class DomainFactory {
         return proxyCore.createProject(projectProperties, saveAndValidate)
     }
 
-    static UserProjectRole createUserProjectRole(Map userProjectRoleProperties = [:]) {
+    static UserProjectRole createUserProjectRole(Map properties = [:]) {
         return createDomainObject(UserProjectRole, [
                 user                  : { createUser() },
                 project               : { createProject() },
@@ -1533,13 +1533,20 @@ class DomainFactory {
                 manageUsers           : false,
                 manageUsersAndDelegate: false,
                 receivesNotifications : true,
-        ], userProjectRoleProperties)
+        ], properties)
     }
 
-    static ProjectRole createProjectRole(Map projectRoleProperties = [:]) {
+    static ProjectRole createProjectRole(Map properties = [:]) {
         return createDomainObject(ProjectRole, [
                 name: 'roleName_' + (counter++),
-        ], projectRoleProperties)
+        ], properties)
+    }
+
+    static ProjectRole createOrGetAuthorityProjectRole(Map properties = [:]) {
+        String projectRoleName = ProjectRole.AUTHORITY_PROJECT_ROLES.first()
+        return ProjectRole.findByName(projectRoleName) ?: createDomainObject(ProjectRole, [
+                name: projectRoleName,
+        ], properties)
     }
 
     @Deprecated
@@ -2572,7 +2579,7 @@ class DomainFactory {
                 sum_N_BasePairs        : counter++,
                 sum_N_BasePairsGb      : counter++,
                 seqPlatformName        : "seqPlatformName${counter++}",
-                seqTypeName            : "{seqTypeName${counter++}",
+                seqTypeName            : "seqTypeName${counter++}",
                 seqTypeDisplayName     : "seqTypeDisplayName${counter}",
                 dirName                : "dirName${counter++}",
                 libraryLayout          : LibraryLayout.PAIRED,
@@ -2589,14 +2596,31 @@ class DomainFactory {
         ], properties)
     }
 
-    static ProjectRequest createProjectRequest(Map properties = [:]) {
+    static ProjectRequest createProjectRequest(Map properties = [:], Map userProperties = [:]) {
         return createDomainObject(ProjectRequest, [
-                name: "name_${counter++}",
-                description: "description_${counter++}",
+                name              : "name_${counter++}",
+                description       : "description_${counter++}",
                 organizationalUnit: "ou_${counter++}",
-                projectType: Project.ProjectType.SEQUENCING,
-                requester: createUser(),
-                pi: createUser(),
+                projectType       : Project.ProjectType.SEQUENCING,
+                requester         : { createUser() },
+                users             : {
+                    [
+                            createProjectRequestUser([
+                                projectRoles: [createOrGetAuthorityProjectRole()] as Set<ProjectRole>,
+                            ] + userProperties),
+                    ]
+                },
+                project           : properties["status"] == PROJECT_CREATED ? { createProject() } : null,
+        ], properties)
+    }
+
+    static ProjectRequestUser createProjectRequestUser(Map properties = [:]) {
+        return createDomainObject(ProjectRequestUser, [
+                user         : { createUser() },
+                projectRoles : { [createProjectRole()] },
+                accessToFiles: true,
+                manageUsers  : true,
+                approvalState: ProjectRequestUser.ApprovalState.PENDING,
         ], properties)
     }
 }

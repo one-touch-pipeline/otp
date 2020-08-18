@@ -19,20 +19,17 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<html>
-<head>
-    <meta name="layout" content="main"/>
-    <title>${g.message(code: "projectRequest.title")}</title>
-</head>
 
-<body>
-<div class="body">
-    <g:render template="/templates/messages"/>
-
-    <g:render template="tabMenu"/>
-
-    <h2>${g.message(code: "projectRequest.resolved.header")}:</h2>
-    <g:render template="projectRequestTable" model="[projectRequests: resolved]"/>
-</div>
-</body>
-</html>
+<h2><g:message code="projectRequest.approver.overview.header"/></h2>
+<table class="dataTable">
+    <g:each var="projectRequestUser" in="${projectRequestUsers}">
+        <tr>
+            <td>${projectRequestUser.user}</td>
+            <td>
+                <span style="color: ${projectRequestUser.approvalState.color}">
+                    ${projectRequestUser.approvalState.text}
+                </span>
+            </td>
+        </tr>
+    </g:each>
+</table>

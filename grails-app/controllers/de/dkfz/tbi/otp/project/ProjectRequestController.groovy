@@ -46,7 +46,7 @@ class ProjectRequestController {
             resolved: "GET",
             save    : "POST",
             edit    : "POST",
-            saveEdit: "GET",
+            saveEdit: "POST",
             view    : "GET",
     ]
 
@@ -57,40 +57,29 @@ class ProjectRequestController {
     ProjectRequestService projectRequestService
 
     private Map getSharedModel() {
-        List<ProjectRequest> waitingForUser = projectRequestService.waitingForCurrentUser
-        List<ProjectRequest> waitingForPi = projectRequestService.unresolvedRequestsOfUser
-        List<ProjectRequest> approvedByUser = projectRequestService.createdByUserAndResolved
-        List<ProjectRequest> finishedByUser = projectRequestService.resolvedWithUserAsPi
+        List<ProjectRequest> unresolved = projectRequestService.unresolvedRequestsOfUser
+        List<ProjectRequest> resolved = projectRequestService.resolvedOfCurrentUser
 
         return [
-                actionHighlight      : waitingForUser ? "work-and-todo" : (waitingForPi ? "work-but-nothing-todo" : "no-work-and-nothing-todo"),
-                waitingForUser       : waitingForUser,
-                waitingForPi         : waitingForPi,
-                approvedByUser       : approvedByUser,
-                finishedByUser       : finishedByUser,
-                openRequestsCount    : (waitingForUser + waitingForPi).unique().size(),
-                resolvedRequestsCount: (approvedByUser + finishedByUser).unique().size(),
+                actionHighlight: unresolved ? "work-but-nothing-todo" : "no-work-and-nothing-todo",
+                unresolved     : unresolved,
+                resolved       : resolved,
         ]
     }
 
     def index(Long id) {
         ProjectRequest projectRequest = projectRequestService.get(id)
         Map<String, ?> defaults = [
-                keywords             : [""],
-                seqTypes             : [null],
-                leadBioinformaticians: [""],
-                bioinformaticians    : [""],
-                submitters           : [""],
-                speciesWithStrain    : [id: null],
+                keywords         : [""],
+                seqTypes         : [null],
+                users            : [],
+                speciesWithStrain: [id: null],
         ]
         Map<String, ?> projectRequestHelper = [:]
         if (projectRequest) {
             projectRequestHelper << [
-                pi                   : projectRequest.pi.username,
-                leadBioinformaticians: projectRequest.leadBioinformaticians*.username ?: null,
-                bioinformaticians    : projectRequest.bioinformaticians*.username ?: null,
-                submitters           : projectRequest.submitters*.username ?: null,
-                storagePeriod        : projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
+                users        : projectRequest.users ?: [],
+                storagePeriod: projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
             ]
         }
 
@@ -104,6 +93,7 @@ class ProjectRequestController {
                 species             : SpeciesWithStrain.all.sort { it.displayString } + [id: "other", displayString: "Other(s)"],
                 keywords            : Keyword.listOrderByName(),
                 seqTypes            : SeqType.all.sort { it.displayNameWithLibraryLayout },
+                availableRoles      : ProjectRole.findAll(),
                 source              : multiObjectValueSource,
         ]
     }
@@ -153,11 +143,10 @@ class ProjectRequestController {
         Errors errors = projectRequestService.approveRequest(cmd.request, cmd.confirmConsent, cmd.confirmRecordOfProcessingActivities)
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
-            redirect(action: ACTION_VIEW, id: cmd.request.id)
         } else {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
-            redirect(action: ACTION_OPEN)
         }
+        redirect(action: ACTION_VIEW, id: cmd.request.id)
     }
 
     def deny(ProjectRequestCommand cmd) {
@@ -169,11 +158,10 @@ class ProjectRequestController {
         Errors errors = projectRequestService.denyRequest(cmd.request)
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
-            redirect(action: ACTION_VIEW, id: cmd.request.id)
         } else {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
-            redirect(action: ACTION_OPEN)
         }
+        redirect(action: ACTION_VIEW, id: cmd.request.id)
     }
 
     /**
@@ -205,6 +193,21 @@ class ProjectRequestController {
         redirect(action: action, id: cmd.request.id)
     }
 
+    def close(ProjectRequestCommand cmd) {
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.close.failure") as String, cmd.errors)
+            redirect(action: ACTION_VIEW, id: cmd.request.id)
+            return
+        }
+        Errors errors = projectRequestService.closeRequest(cmd.request)
+        if (errors) {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.close.failure") as String, errors)
+        } else {
+            flash.message = new FlashMessage(g.message(code: "projectRequest.close.success") as String)
+        }
+        redirect(action: ACTION_VIEW, id: cmd.request.id)
+    }
+
     def view(Long id) {
         ProjectRequest projectRequest = projectRequestService.get(id)
         if (!projectRequest) {
@@ -212,7 +215,10 @@ class ProjectRequestController {
             return
         }
         return sharedModel + [
-                projectRequest: projectRequest,
+                projectRequest  : projectRequest,
+                eligibleToAccept: projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
+                eligibleToEdit  : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
+                eligibleToClose : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
         ]
     }
 }
@@ -265,10 +271,7 @@ class ProjectRequestCreationCommand {
     List<SeqType> seqTypes = []
     String comments
 
-    String pi
-    List<String> leadBioinformaticians
-    List<String> bioinformaticians
-    List<String> submitters
+    List<ProjectRequestUserCommand> users
 
     static constraints = {
         name blank: false
@@ -296,7 +299,18 @@ class ProjectRequestCreationCommand {
         approxNoOfSamples nullable: true
         seqTypes nullable: true
         comments nullable: true, blank: false
-        pi nullable: false, blank: false
+
+        users validator: { val, obj ->
+            List<ProjectRequestUser> value = val?.toList()?.findAll() ?: []
+            if (!value.any { ProjectRequestUserCommand cmd ->
+                ProjectRoleService.projectRolesContainAuthoritativeRole(cmd.projectRoles)
+            }) {
+                return "projectRequest.users.no.authority"
+            }
+            if (value*.username.size() != value*.username.unique().size()) {
+                return "projectRequest.users.unique"
+            }
+        }
     }
 
     void setCostCenter(String s) {
@@ -333,6 +347,22 @@ class ProjectRequestCreationCommand {
 
     void setComments(String s) {
         comments = StringUtils.blankToNull(s)
+    }
+}
+
+class ProjectRequestUserCommand {
+    String username
+
+    Set<ProjectRole> projectRoles
+    boolean accessToFiles
+    boolean manageUsers
+
+    static constraints = {
+        projectRoles validator: { val, obj ->
+            if (!val) {
+                return "empty"
+            }
+        }
     }
 }
 

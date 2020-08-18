@@ -35,121 +35,148 @@
     <g:render template="tabMenu"/>
 
     <h1>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</h1>
-    <g:form>
-    <table class="key-value-table key-input">
-        <tr>
-            <td>${g.message(code: "projectRequest.requester")}</td>
-            <td>${projectRequest.requester}</td>
-        </tr>
+    <div class="basic-flex-box">
+        <g:form class="item basic-right-padding">
+            <g:if test="${!projectRequest.status.editableStatus}">
+                <otp:annotation type="info">
+                    <g:message code="projectRequest.view.completed"/>:
+                    <strong><span style="color: ${projectRequest.status.color}">${projectRequest.formattedStatus}</span></strong>
+                </otp:annotation>
+            </g:if>
 
-        <tr>
-            <td>${g.message(code: "project.name")}</td>
-            <td>${projectRequest.name}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.description")}</td>
-            <td><div class="project-multiline-wrapper">${projectRequest.description}</div></td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.keywords")}</td>
-            <td>${projectRequest.keywords?.join(", ")}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.organizationalUnit")}</td>
-            <td>${projectRequest.organizationalUnit}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.costCenter")}</td>
-            <td>${projectRequest.costCenter}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.fundingBody")}</td>
-            <td>${projectRequest.fundingBody}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.grantId")}</td>
-            <td>${projectRequest.grantId}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.endDate")}</td>
-            <td>${projectRequest.endDate}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.storageUntil")}</td>
-            <td>${projectRequest.storageUntil ?: StoragePeriod.INFINITELY.description}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.relatedProjects")}</td>
-            <td>${projectRequest.relatedProjects}</td>
-        </tr>
-        %{--
-        <tr>
-            <td>${g.message(code: "project.tumorEntity")}</td>
-            <td>${projectRequest.tumorEntity}</td>
-        </tr>
-        --}%
-        <tr>
-            <td>${g.message(code: "project.speciesWithStrain")}</td>
-            <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "project.projectType")}</td>
-            <td>${projectRequest.projectType}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.sequencingCenter")}</td>
-            <td>${projectRequest.sequencingCenter}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.approxNoOfSamples")}</td>
-            <td>${projectRequest.approxNoOfSamples}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.seqTypes")}</td>
-            <td>${projectRequest.seqTypes?.join(", ")}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.comments")}</td>
-            <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.pi")}</td>
-            <td>${projectRequest.pi}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.leadBioinformatician")}</td>
-            <td>${projectRequest.leadBioinformaticians?.join(", ")}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.bioinformatician")}</td>
-            <td>${projectRequest.bioinformaticians?.join(", ")}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.submitter")}</td>
-            <td>${projectRequest.submitters?.join(", ")}</td>
-        </tr>
+            <table class="key-value-table key-input">
+                <tr>
+                    <td>${g.message(code: "projectRequest.requester")}</td>
+                    <td>${projectRequest.requester}</td>
+                </tr>
 
-        <tr>
-            <td></td>
-            <td><g:checkBox name="confirmConsent" id="confirmConsent"/><label for="confirmConsent">${g.message(code: "projectRequest.view.confirmConsent")}</label></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><g:checkBox name="confirmRecordOfProcessingActivities" id="confirmRecordOfProcessingActivities"/><label for="confirmRecordOfProcessingActivities">${g.message(code: "projectRequest.view.confirmRecordOfProcessingActivities")}</label></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
-                <otpsecurity:noSwitchedUser>
-                    <g:actionSubmit action="approve" name="approve" value="${g.message(code: "projectRequest.view.approve")}" />
-                    <g:actionSubmit action="deny" name="deny" value="${g.message(code: "projectRequest.view.deny")}" />
-                    <g:actionSubmit action="edit" name="edit" value="${g.message(code: "projectRequest.view.edit")}" />
-                </otpsecurity:noSwitchedUser>
-            </td>
-        </tr>
-        <g:hiddenField name="request.id" value="${projectRequest.id}"/>
-    </table>
-    </g:form>
+                <tr>
+                    <td>${g.message(code: "project.name")}</td>
+                    <td>${projectRequest.name}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.description")}</td>
+                    <td><div class="project-multiline-wrapper">${projectRequest.description}</div></td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.keywords")}</td>
+                    <td>
+                        <g:each var="keyword" in="${projectRequest.keywords}">
+                            ${keyword}<br>
+                        </g:each>
+                    </td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.organizationalUnit")}</td>
+                    <td>${projectRequest.organizationalUnit}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.costCenter")}</td>
+                    <td>${projectRequest.costCenter}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.fundingBody")}</td>
+                    <td>${projectRequest.fundingBody}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.grantId")}</td>
+                    <td>${projectRequest.grantId}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.endDate")}</td>
+                    <td>${projectRequest.endDate}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.storageUntil")}</td>
+                    <td>${projectRequest.storageUntil ?: StoragePeriod.INFINITELY.description}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.relatedProjects")}</td>
+                    <td>${projectRequest.relatedProjects}</td>
+                </tr>
+                %{--
+                <tr>
+                    <td>${g.message(code: "project.tumorEntity")}</td>
+                    <td>${projectRequest.tumorEntity}</td>
+                </tr>
+                --}%
+                <tr>
+                    <td>${g.message(code: "project.speciesWithStrain")}</td>
+                    <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.projectType")}</td>
+                    <td>${projectRequest.projectType}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.sequencingCenter")}</td>
+                    <td>${projectRequest.sequencingCenter}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.approxNoOfSamples")}</td>
+                    <td>${projectRequest.approxNoOfSamples}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.seqTypes")}</td>
+                    <td>${projectRequest.seqTypes?.join(", ")}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.comments")}</td>
+                    <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.users")}</td>
+                    <td>
+                        <g:each var="user" in="${projectRequest.users}">
+                            <g:render template="projectRequestUser" model="[user: user]"/>
+                        </g:each>
+                    </td>
+                </tr>
+
+                <g:if test="${projectRequest.status.editableStatus}">
+                    <g:if test="${eligibleToAccept}">
+                        <tr>
+                            <td></td>
+                            <td>
+                                <label>
+                                    <g:checkBox name="confirmConsent" id="confirmConsent"/>
+                                    ${g.message(code: "projectRequest.view.confirmConsent")}
+                                </label>
+                                <br>
+                                <label>
+                                    <g:checkBox name="confirmRecordOfProcessingActivities" id="confirmRecordOfProcessingActivities"/>
+                                    ${g.message(code: "projectRequest.view.confirmRecordOfProcessingActivities")}
+                                </label>
+                            </td>
+                        </tr>
+                    </g:if>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <otpsecurity:noSwitchedUser>
+                                <div class="project-request-actions">
+                                    <g:if test="${eligibleToAccept}">
+                                        <g:actionSubmit action="approve" name="approve" value="${g.message(code: "projectRequest.view.approve")}" />
+                                        <g:actionSubmit action="deny" name="deny" value="${g.message(code: "projectRequest.view.deny")}" />
+                                    </g:if>
+                                    <g:if test="${eligibleToEdit}">
+                                        <g:actionSubmit action="edit" name="edit" value="${g.message(code: "projectRequest.view.edit")}" />
+                                    </g:if>
+                                    <g:if test="${eligibleToClose}">
+                                        <g:actionSubmit action="close" name="close" value="${g.message(code: "projectRequest.view.close")}" />
+                                    </g:if>
+                                </div>
+                            </otpsecurity:noSwitchedUser>
+                        </td>
+                    </tr>
+                </g:if>
+                <g:hiddenField name="request.id" value="${projectRequest.id}"/>
+            </table>
+        </g:form>
+        <div class="item basic-right-padding">
+            <g:render template="approverOverview" model="[projectRequestUsers: projectRequest.users.findAll { it.approver }]"/>
+        </div>
+    </div>
 </div>
 </body>
 </html>

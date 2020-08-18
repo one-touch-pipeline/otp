@@ -19,20 +19,8 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<html>
-<head>
-    <meta name="layout" content="main"/>
-    <title>${g.message(code: "projectRequest.title")}</title>
-</head>
 
-<body>
-<div class="body">
-    <g:render template="/templates/messages"/>
-
-    <g:render template="tabMenu"/>
-
-    <h2>${g.message(code: "projectRequest.resolved.header")}:</h2>
-    <g:render template="projectRequestTable" model="[projectRequests: resolved]"/>
+<div style="margin-bottom: 5px; margin-top: 5px">
+    <strong>${user.user}</strong> as ${user.projectRolesAsSemanticString}<br>
+    File access: ${user.accessToFiles ? "Yes" : "No"}, User manager: ${user.manageUsers ? "Yes" : "No"}
 </div>
-</body>
-</html>

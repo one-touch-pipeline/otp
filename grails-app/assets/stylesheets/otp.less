@@ -2107,9 +2107,7 @@ div.log {
         }
         li {
             padding-bottom: 5px;
-            .no-wrap {
-                white-space: nowrap;
-            }
+            .no-wrap;
         }
     }
 }
@@ -2554,6 +2552,81 @@ table.key-value-table {
             }
         }
     }
+}
+
+.project-request-user-wrapper {
+    .basic-flex-box;
+    margin-bottom: 15px;
+}
+
+table.project-request-user-table {
+    width: 600px;
+    margin-right: 20px;
+
+    td:first-of-type {
+        .no-wrap;
+        text-align: right;
+        font-weight: bold;
+        color:  #43619C;
+        padding-right: 0;
+    }
+
+    td:nth-of-type(2) {
+        padding-left: 1em;
+        input:not([type='checkbox']):not([type='radio']):not([type='button']):not([type='submit']), textarea, select {
+            width: 500px;
+        }
+    }
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.project-request-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+            "name status"
+            "created updated";
+    grid-gap: 8px;
+
+    max-width: 1000px;
+
+    border-bottom: 1px solid #F0F0F0;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+
+    .name {
+        grid-area: name;
+        font-weight: bold;
+    }
+    .status {
+        grid-area: status;
+        justify-self: end;
+        font-weight: bold;
+    }
+    .created {
+        grid-area: created;
+    }
+    .updated {
+        grid-area: updated;
+        justify-self: end;
+    }
+}
+
+.project-request-actions {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    input[type="submit"] {
+        margin-right: 20px;
+        width: 70px;
+    }
+}
+
+.add-field, .remove-field, .clone-add, .clone-remove {
+    width: 25px;
 }
 
 .user-account-control-table {

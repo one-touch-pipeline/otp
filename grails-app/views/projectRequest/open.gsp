@@ -31,11 +31,8 @@
 
     <g:render template="tabMenu"/>
 
-    <h2>${g.message(code: "projectRequest.open.header.waitingForApproval")}:</h2>
-    <g:render template="projectRequestTable" model="[projectRequests: waitingForUser, mode: 'APPROVABLE']"/>
-
-    <h2>${g.message(code: "projectRequest.open.header.createdAndPending")}:</h2>
-    <g:render template="projectRequestTable" model="[projectRequests: waitingForPi, mode: 'VIEWABLE']"/>
+    <h2>${g.message(code: "projectRequest.open.header")}:</h2>
+    <g:render template="projectRequestTable" model="[projectRequests: unresolved]"/>
 </div>
 </body>
 </html>

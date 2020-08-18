@@ -20,39 +20,23 @@
   - SOFTWARE.
   --}%
 
-<g:set var="VIEWABLE" value="VIEWABLE"/>
-<g:set var="APPROVABLE" value="APPROVABLE"/>
 <g:if test="${projectRequests}">
-    <table>
-        <tr>
-            <th>${g.message(code: "project.name")}</th>
-            <th>${g.message(code: "projectRequest.dateCreated")}</th>
-            <th>${g.message(code: "projectRequest.lastUpdated")}</th>
-            <th>${g.message(code: "projectRequest.status")}</th>
-            <th>${g.message(code: "projectRequest.requester")}</th>
-            <g:if test="${mode == "${VIEWABLE}"}">
-                <th>${g.message(code: "projectRequest.pi")}</th>
-            </g:if>
-            <g:elseif test="${mode == "${APPROVABLE}"}">
-                <th>${g.message(code: "projectRequest.viewApproveEdit")}</th>
-            </g:elseif>
-        </tr>
-        <g:each var="request" in="${projectRequests}">
-            <tr>
-                <td>${request.name}</td>
-                <td>${request.dateCreated.format("yyyy-MM-dd HH:mm")}</td>
-                <td>${request.lastUpdated.format("yyyy-MM-dd HH:mm")}</td>
-                <td>${request.status}</td>
-                <td>${request.requester}</td>
-                <g:if test="${mode == "${VIEWABLE}"}">
-                    <td>${request.pi}</td>
-                </g:if>
-                <g:elseif test="${mode == "${APPROVABLE}"}">
-                    <td><g:link action="view" id="${request.id}">${g.message(code: "projectRequest.viewApproveEdit")}</g:link></td>
-                </g:elseif>
-            </tr>
-        </g:each>
-    </table>
+    <g:each var="projectRequest" in="${projectRequests}">
+        <div class="project-request-container">
+            <div class="name">
+                <g:link action="view" id="${projectRequest.id}">${projectRequest.name}</g:link>
+            </div>
+            <div class="status">
+                <span style="color: ${projectRequest.status.color}">${projectRequest.formattedStatus}</span>
+            </div>
+            <div class="created">
+                opened on ${projectRequest.dateCreated.format("yyyy-MM-dd HH:mm")} by ${projectRequest.requester}
+            </div>
+            <div class="updated">
+                last updated on ${projectRequest.lastUpdated.format("yyyy-MM-dd HH:mm")}
+            </div>
+        </div>
+    </g:each>
 </g:if>
 <g:else>
     <ul>

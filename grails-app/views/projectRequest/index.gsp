@@ -27,6 +27,7 @@
     <title>${g.message(code: "projectRequest.title")}</title>
     <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
+    <asset:javascript src="common/CloneField.js"/>
     <asset:javascript src="pages/projectRequest/index.js"/>
     <asset:javascript src="taglib/NoSwitchedUser.js"/>
 </head>
@@ -53,7 +54,12 @@
         </otp:annotation>
     </g:if>
     <br>
-    <g:form action="${projectRequestToEdit ? "edit" : "save"}">
+
+    <div class="clone-template hidden">
+        <g:render template="projectRequestUserForm" model="[i: 'template-index', availableRoles: availableRoles]"/>
+    </div>
+
+    <g:form>
     <table class="key-value-table key-help-input">
         <g:hiddenField name="request.id" value="${projectRequestToEdit?.id}"/>
         <tr>
@@ -194,76 +200,23 @@
             <td></td>
             <td><textarea class="resize-vertical" name="comments" id="comments">${source.getByFieldName("comments")}</textarea></td>
         </tr>
+    </table>
 
-        <tr class="user-auto-complete">
-            <td><label for="pi">${g.message(code: "projectRequest.pi")}*</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.pi.detail")}"></td>
-            <td>
-                <g:if test="${projectRequestToEdit}">
-                    <g:hiddenField name="pi" value="${source.getByFieldName("pi")}"/>
-                    ${source.getByFieldName("pi")}
-                </g:if>
-                <g:else>
-                    <input name="pi" id="pi" type="text" autocomplete="off"
-                           placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${source.getByFieldName("pi")}" required>
-                </g:else>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="leadBioinformatician">${g.message(code: "projectRequest.leadBioinformatician")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.leadBioinformatician.detail")}"></td>
-            <td class="multi-input-field user-auto-complete">
-                <g:each in="${source.getByFieldName("leadBioinformaticians") ?: [""]}" var="leadBioinformatician" status="i">
-                    <div class="field">
-                        <input name="leadBioinformaticians" id="leadBioinformatician" type="text" autocomplete="off"
-                               placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${leadBioinformatician}">
-                        <g:if test="${i == 0}">
-                            <button class="add-field">+</button>
-                        </g:if>
-                        <g:else>
-                            <button class="remove-field">-</button>
-                        </g:else>
-                    </div>
-                </g:each>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="bioinformatician">${g.message(code: "projectRequest.bioinformatician")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.bioinformatician.detail")}"></td>
-            <td class="multi-input-field user-auto-complete">
-                <g:each in="${source.getByFieldName("bioinformaticians") ?: [""]}" var="bioinformatician" status="i">
-                    <div class="field">
-                        <input name="bioinformaticians" id="bioinformatician" type="text" autocomplete="off"
-                               placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${bioinformatician}">
-                        <g:if test="${i == 0}">
-                            <button class="add-field">+</button>
-                        </g:if>
-                        <g:else>
-                            <button class="remove-field">-</button>
-                        </g:else>
-                    </div>
-                </g:each>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="submitter">${g.message(code: "projectRequest.submitter")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.submitter.detail")}"></td>
-            <td class="multi-input-field user-auto-complete">
-                <g:each in="${source.getByFieldName("submitters") ?: [""]}" var="submitter" status="i">
-                    <div class="field">
-                        <input name="submitters" id="submitter" type="text" autocomplete="off"
-                               placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${submitter}">
-                        <g:if test="${i == 0}">
-                            <button class="add-field">+</button>
-                        </g:if>
-                        <g:else>
-                            <button class="remove-field">-</button>
-                        </g:else>
-                    </div>
-                </g:each>
-            </td>
-        </tr>
+    <h3>${g.message(code: "projectRequest.users")}</h3>
+    ${g.message(code: "projectRequest.users.detail")}
+    <br><br>
 
+    <g:set var="users" value="${source.getByFieldName('users').findAll() ?: []}"/>
+    <div class="clone-target" data-highest-index="${users.size()}">
+        <g:each in="${users}" var="user" status="i">
+            <g:render template="projectRequestUserForm" model="[i: i, user: user, availableRoles: availableRoles]"/>
+        </g:each>
+    </div>
+    <button class="clone-add"><g:message code="projectRequest.users.add"/></button>
+
+    <br><br>
+
+    <table class="key-value-table key-help-input">
         <tr>
             <td></td>
             <td></td>

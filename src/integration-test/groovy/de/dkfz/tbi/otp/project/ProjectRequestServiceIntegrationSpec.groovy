@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.project
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.integration.Integration
 import grails.transaction.Rollback
 import grails.web.mapping.LinkGenerator
@@ -34,7 +33,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.MailHelperService
@@ -44,32 +43,40 @@ import static de.dkfz.tbi.otp.project.ProjectRequest.Status.*
 
 @Rollback
 @Integration
-class ProjectRequestServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class ProjectRequestServiceIntegrationSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
     ProjectRequestService getServiceWithMockedCurrentUser(User user = DomainFactory.createUser()) {
+        SecurityService mockedSecurityService = Mock(SecurityService) {
+            getCurrentUserAsUser() >> user
+        }
         return new ProjectRequestService(
-                securityService: Mock(SecurityService) {
-                    getCurrentUserAsUser() >> user
-                },
+                securityService: mockedSecurityService,
+                projectRequestUserService: new ProjectRequestUserService(
+                        securityService: mockedSecurityService
+                ),
                 processingOptionService: new ProcessingOptionService(),
         )
     }
 
-    @Unroll
-    void "test get, when current user is #user, return project request"() {
+    void "get, when current user is requester, return project request"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
-
-        ProjectRequestService service = getServiceWithMockedCurrentUser((user == "pi") ? request.pi : request.requester)
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
 
         expect:
         request == service.get(request.id)
-
-        where:
-        user << ["pi", "requester"]
     }
 
-    void "test get, when current user is neither PI nor requester, return null"() {
+    void "get, when current user is related project request user, return project request"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest()
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.users.first().user)
+
+        expect:
+        request == service.get(request.id)
+    }
+
+    void "get, when current user is not part of request, return null"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
         ProjectRequestService service = serviceWithMockedCurrentUser
@@ -78,81 +85,116 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         !service.get(request.id)
     }
 
-    private static List<ProjectRequest> getProjectRequestsForStatus(List<ProjectRequest.Status> status, Map properties = [:]) {
-        return status.collect { ProjectRequest.Status stat ->
-            Map situational = (stat == PROJECT_CREATED) ? [project: DomainFactory.createProject()] : [:]
-            return DomainFactory.createProjectRequest([status: stat] + situational + properties)
-        }
+    void "getApproversOfProjectRequest, request with users in all states"() {
+        given:
+        ProjectRequest request = createProjectRequestWithUsersInState(ProjectRequestUser.ApprovalState.values() as List<ProjectRequestUser.ApprovalState>)
+
+        ProjectRequestService service = new ProjectRequestService()
+
+        when:
+        List<ProjectRequestUser> result = service.getApproversOfProjectRequest(request)
+
+        then:
+        TestCase.assertContainSame(result, request.users.findAll { it.approvalState != ProjectRequestUser.ApprovalState.NOT_APPLICABLE })
     }
 
-    private static Map<String, List<ProjectRequest>> setupRequestsOfEachType(User user) {
-        List<ProjectRequest.Status> open = [WAITING_FOR_PI]
-        List<ProjectRequest.Status> resolved = [APPROVED_BY_PI_WAITING_FOR_OPERATOR, DENIED_BY_PI, DENIED_BY_OPERATOR, PROJECT_CREATED]
-        getProjectRequestsForStatus(open + resolved)
-        return [
-                waitingForCurrentUser   : getProjectRequestsForStatus(open, [pi: user]),
-                unresolvedRequestsOfUser: getProjectRequestsForStatus(open, [requester: user]),
-                createdByUserAndResolved: getProjectRequestsForStatus(resolved, [requester: user]),
-                resolvedWithUserAsPi    : getProjectRequestsForStatus(resolved, [pi: user]),
-        ]
-    }
-
-    void "test getWaitingForCurrentUser"() {
+    void "isUserPartOfRequest, all cases"() {
         given:
         User user = DomainFactory.createUser()
-        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
-        List<ProjectRequest> expected = setupRequestsOfEachType(user)["waitingForCurrentUser"]
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                requester: asRequester ? user : DomainFactory.createUser(),
+        ], [
+                user     : asApprover ? user : DomainFactory.createUser(),
+        ])
+        ProjectRequestService service = new ProjectRequestService()
 
         expect:
-        TestCase.assertContainSame(service.waitingForCurrentUser, expected)
+        service.isUserPartOfRequest(user, request) == expected
+
+        where:
+        asRequester | asApprover || expected
+        false       | false      || false
+        false       | true       || true
+        true        | false      || true
+        true        | true       || true
     }
 
-    void "test getUnresolvedRequestsOfUser"() {
+    private static ProjectRequest createProjectRequestHelper(User requester, User requestUser, ProjectRequest.Status status) {
+        return DomainFactory.createProjectRequest([
+                requester: requester,
+                status   : status,
+        ], [
+                user     : requestUser,
+        ])
+    }
+
+    private static Map<String, List<ProjectRequest>> setupRequestsOfEachType(User currentUser) {
+        User otherUser = DomainFactory.createUser()
+
+        Map<String, List<ProjectRequest>> resultMap = [:].withDefault { [] }
+        ProjectRequest.Status.values().each { ProjectRequest.Status status ->
+            resultMap[(status.resolvedStatus ? "resolved" : "unresolved")].addAll([
+                    createProjectRequestHelper(currentUser, otherUser, status),
+                    createProjectRequestHelper(otherUser, currentUser, status),
+            ])
+            createProjectRequestHelper(otherUser, otherUser, status)
+        }
+
+        return resultMap
+    }
+
+    void "getUnresolvedRequestsOfUser"() {
         given:
         User user = DomainFactory.createUser()
         ProjectRequestService service = getServiceWithMockedCurrentUser(user)
-        List<ProjectRequest> expected = setupRequestsOfEachType(user)["unresolvedRequestsOfUser"]
+        List<ProjectRequest> expected = setupRequestsOfEachType(user)["unresolved"]
 
         expect:
         TestCase.assertContainSame(service.unresolvedRequestsOfUser, expected)
     }
 
-    void "test getCreatedByUserAndResolved"() {
+    void "getResolvedOfCurrentUser"() {
         given:
         User user = DomainFactory.createUser()
         ProjectRequestService service = getServiceWithMockedCurrentUser(user)
-        List<ProjectRequest> expected = setupRequestsOfEachType(user)["createdByUserAndResolved"]
+        List<ProjectRequest> expected = setupRequestsOfEachType(user)["resolved"]
 
         expect:
-        TestCase.assertContainSame(service.createdByUserAndResolved, expected)
+        TestCase.assertContainSame(service.resolvedOfCurrentUser, expected)
     }
 
-    void "test getResolvedWithUserAsPi"() {
+    void "create, typical usecase"() {
         given:
-        User user = DomainFactory.createUser()
-        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
-        List<ProjectRequest> expected = setupRequestsOfEachType(user)["resolvedWithUserAsPi"]
+        createAllBasicProjectRoles()
 
-        expect:
-        TestCase.assertContainSame(service.resolvedWithUserAsPi, expected)
-    }
-
-    void "test create"() {
-        given:
-        User pi = DomainFactory.createUser()
-        User bioinformatician = DomainFactory.createUser()
+        User user1 = DomainFactory.createUser()
+        User user2 = DomainFactory.createUser()
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 value: "service@mail.com",
         ])
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand(
-                name: "name",
-                description: "description",
+                name              : "name",
+                description       : "description",
                 organizationalUnit: "ou",
-                projectType: Project.ProjectType.SEQUENCING,
-                pi: pi.username,
-                bioinformaticians: [bioinformatician.username],
+                projectType       : Project.ProjectType.SEQUENCING,
+                users             : [
+                        null, // null objects should be disregarded
+                        new ProjectRequestUserCommand(
+                                username     : user1.username,
+                                projectRoles : [pi],
+                                accessToFiles: true,
+                                manageUsers  : true,
+                        ),
+                        new ProjectRequestUserCommand(
+                                username     : user2.username,
+                                projectRoles : [other],
+                                accessToFiles: false,
+                                manageUsers  : false,
+                        ),
+                ],
         )
+
         ProjectRequestService service = serviceWithMockedCurrentUser
         service.linkGenerator = Mock(LinkGenerator) {
             1 * link(_) >> 'link'
@@ -163,10 +205,12 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         service.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(_, _, _, _) >> null
         }
-        service.userProjectRoleService = Mock(UserProjectRoleService) {
-            1 * createUserWithLdapData(pi.username) >> pi
-            1 * createUserWithLdapData(bioinformatician.username) >> bioinformatician
-        }
+        service.projectRequestUserService = new ProjectRequestUserService(
+                userProjectRoleService: Mock(UserProjectRoleService) {
+                    1 * createUserWithLdapData(user1.username) >> user1
+                    1 * createUserWithLdapData(user2.username) >> user2
+                }
+        )
 
         when:
         service.create(cmd)
@@ -175,15 +219,23 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         noExceptionThrown()
     }
 
-    void "test create, fails if user does not exist"() {
+    void "create, fails if user does not exist"() {
         given:
+        createAllBasicProjectRoles()
+
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand(
-                name: "name",
-                description: "description",
+                name              : "name",
+                description       : "description",
                 organizationalUnit: "ou",
-                projectType: Project.ProjectType.SEQUENCING,
-                pi: DomainFactory.createUser().username,
-                bioinformaticians: ["non-existent"],
+                projectType       : Project.ProjectType.SEQUENCING,
+                users             : [
+                        new ProjectRequestUserCommand(
+                                username     : "does-not-exist",
+                                projectRoles : [pi],
+                                accessToFiles: true,
+                                manageUsers  : true,
+                        ),
+                ],
         )
         ProjectRequestService service = serviceWithMockedCurrentUser
         service.linkGenerator = Mock(LinkGenerator) {
@@ -195,9 +247,11 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         service.mailHelperService = Mock(MailHelperService) {
             0 * sendEmail(_, _, _) >> null
         }
-        service.userProjectRoleService = Mock(UserProjectRoleService) {
-            1 * createUserWithLdapData(_) >> { throw new LdapUserCreationException("") }
-        }
+        service.projectRequestUserService = new ProjectRequestUserService(
+            userProjectRoleService: Mock(UserProjectRoleService) {
+                1 * createUserWithLdapData(_) >> { throw new LdapUserCreationException("") }
+            }
+        )
 
         when:
         service.create(cmd)
@@ -207,14 +261,60 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest.all.empty
     }
 
-    void "test update, when project is created"() {
+    void "setStatus, sets the status of the request and saves it"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest()
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
+
+        when:
+        service.setStatus(request, status)
+
+        then:
+        request.status ==  status
+        !request.project
+
+        where:
+        status << ProjectRequest.Status.values() - PROJECT_CREATED
+    }
+
+    void "setStatus, for project expecting states"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest()
+        Project project = createProject()
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
+
+        when:
+        service.setStatus(request, PROJECT_CREATED, project)
+
+        then:
+        request.status == PROJECT_CREATED
+        request.project == project
+    }
+
+    void "setStatus, for project expecting states, without project, causes validation error"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest()
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
+
+        when:
+        service.setStatus(request, PROJECT_CREATED)
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ "Status expects a project, but none is given"
+    }
+
+    void "finish, when project is created"() {
         given:
         ProjectRequestService service = new ProjectRequestService()
         ProjectRequest request = DomainFactory.createProjectRequest()
         Project project = DomainFactory.createProject()
 
         when:
-        service.update(request, project)
+        service.finish(request, project)
 
         then:
         request.project == project
@@ -222,14 +322,45 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     }
 
     @Unroll
-    void "test approveRequest, when PI approves project request, fails"() {
+    void "allProjectRequestUsersInState, #testCase"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
-        ProjectRequestService service = Spy(ProjectRequestService) {
-            0 * sendEmailOnApproval(_) >> null
-        }
-        service.securityService = Mock(SecurityService) {
-            getCurrentUserAsUser() >> request.pi
+        ProjectRequest request = createProjectRequestWithUsersInState(states + ProjectRequestUser.ApprovalState.NOT_APPLICABLE)
+
+        ProjectRequestService service = new ProjectRequestService()
+
+        expect:
+        service.allProjectRequestUsersInState(request, ProjectRequestUser.ApprovalState.APPROVED) == expected
+
+        where:
+        states                                                                                 ||  expected | testCase
+        [ProjectRequestUser.ApprovalState.PENDING, ProjectRequestUser.ApprovalState.APPROVED]  ||  false    | "some in expected state"
+        [ProjectRequestUser.ApprovalState.DENIED, ProjectRequestUser.ApprovalState.DENIED]     ||  false    | "all in common state but not expected state"
+        [ProjectRequestUser.ApprovalState.APPROVED, ProjectRequestUser.ApprovalState.APPROVED] ||  true     | "all in expected state"
+    }
+
+    ProjectRequest createProjectRequestWithUsersInState(List<ProjectRequestUser.ApprovalState> states) {
+        createAllBasicProjectRoles()
+        return DomainFactory.createProjectRequest([
+                users: states.collect { ProjectRequestUser.ApprovalState state ->
+                    DomainFactory.createProjectRequestUser(
+                            approvalState: state,
+                            projectRoles : [pi],
+                    )
+                }
+        ])
+    }
+
+    @Unroll
+    void "approveRequest, fails without confirmed checkboxes"() {
+        given:
+        ProjectRequest request = createProjectRequestWithUsersInState([
+                ProjectRequestUser.ApprovalState.PENDING,
+        ])
+        ProjectRequestUser user = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user.user)
+        service.mailHelperService = Mock(MailHelperService) {
+            0 * sendEmail(_, _, _) >> null
         }
 
         when:
@@ -238,7 +369,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         e == null
         thrown(RuntimeException)
-        request.status == WAITING_FOR_PI
+        user.approvalState == ProjectRequestUser.ApprovalState.PENDING
+        request.status == WAITING_FOR_APPROVER
 
         where:
         confirmConsent | confirmRecord
@@ -247,119 +379,251 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         false          | true
     }
 
-    @Unroll
-    void "test denyRequest, when PI denies project request, fails"() {
+    void "approveRequest, user approves -> all approved, request is approved"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(
-                status: currentStatus,
-                project: currentStatus == PROJECT_CREATED ? DomainFactory.createProject() : null,
-        )
-        ProjectRequestService service = Spy(ProjectRequestService) {
-            0 * sendEmailOnApproval(_) >> null
+        ProjectRequest request = createProjectRequestWithUsersInState([
+                ProjectRequestUser.ApprovalState.PENDING,
+                ProjectRequestUser.ApprovalState.APPROVED,
+                ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
+        ])
+        ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
+        service.linkGenerator = Mock(LinkGenerator) {
+            1 * link(_) >> 'link'
         }
-        service.securityService = Mock(SecurityService) {
-            getCurrentUserAsUser() >> { isPi ? request.pi : DomainFactory.createUser() }
+        service.messageSourceService = Mock(MessageSourceService) {
+            2 * createMessage(_, _) >> "message"
+        }
+        service.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(_, _, _) >> null
         }
 
         when:
-        Errors e = service.denyRequest(request)
+        service.approveRequest(request, true, true)
 
         then:
-        e == null
-        thrown(AccessDeniedException)
-        request.status == expectedStatus
-
-        where:
-        currentStatus                       | isPi  || expectedStatus
-        APPROVED_BY_PI_WAITING_FOR_OPERATOR | true  || APPROVED_BY_PI_WAITING_FOR_OPERATOR
-        PROJECT_CREATED                     | true  || PROJECT_CREATED
-        WAITING_FOR_PI                      | false || WAITING_FOR_PI
+        request.status == WAITING_FOR_OPERATOR
+        pendingUser.approvalState == ProjectRequestUser.ApprovalState.APPROVED
     }
 
-    void "test approveRequest, when PI approves project request"() {
+    void "denyRequest, user denies -> all denied, request is denied"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
-        ProjectRequestService service = Spy(ProjectRequestService) {
-            1 * sendEmailOnApproval(_) >> null
-        }
-        service.securityService = Mock(SecurityService) {
-            getCurrentUserAsUser() >> request.pi
-        }
+        ProjectRequest request = createProjectRequestWithUsersInState([
+                ProjectRequestUser.ApprovalState.PENDING,
+                ProjectRequestUser.ApprovalState.DENIED,
+                ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
+        ])
+        ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
 
         when:
-        Errors e = service.approveRequest(request, true, true)
+        service.denyRequest(request)
 
         then:
-        e == null
-        noExceptionThrown()
-        request.status == APPROVED_BY_PI_WAITING_FOR_OPERATOR
+        request.status == DENIED_BY_APPROVER
+        pendingUser.approvalState == ProjectRequestUser.ApprovalState.DENIED
     }
 
-    void "test denyRequest, when PI denies project request"() {
+    void "approveRequest and denyRequest, user approves and denies while other approvals are still pending, request unchanged"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
-        ProjectRequestService service = Spy(ProjectRequestService) {
-            0 * sendEmailOnApproval(_) >> null
-        }
-        service.securityService = Mock(SecurityService) {
-            getCurrentUserAsUser() >> request.pi
-        }
+        ProjectRequest request = createProjectRequestWithUsersInState([
+                ProjectRequestUser.ApprovalState.PENDING,
+                ProjectRequestUser.ApprovalState.PENDING,
+                ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
+        ])
+        ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
 
-        when:
-        Errors e = service.denyRequest(request)
+        ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
+
+        when: "test approve"
+        service.approveRequest(request, true, true)
 
         then:
-        e == null
-        noExceptionThrown()
-        request.status == DENIED_BY_PI
+        request.status == WAITING_FOR_APPROVER
+        pendingUser.approvalState == ProjectRequestUser.ApprovalState.APPROVED
+
+        when: "test deny"
+        service.denyRequest(request)
+
+        then:
+        request.status == WAITING_FOR_APPROVER
+        pendingUser.approvalState == ProjectRequestUser.ApprovalState.DENIED
     }
 
-    void "assertApprovalEligible, all negative cases"() {
+    void "closeRequest, sets status to closed and nothing more"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(status: status)
-        User currentUser = isPi ? request.pi : DomainFactory.createUser()
-        ProjectRequestService service = new ProjectRequestService(
-                securityService: Mock(SecurityService) {
-                    getCurrentUserAsUser() >> currentUser
-                }
-        )
+        ProjectRequest request = DomainFactory.createProjectRequest()
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
 
         when:
-        service.assertApprovalEligible(request)
+        service.closeRequest(request)
+
+        then:
+        request.status == CLOSED
+    }
+
+    void "closeRequest, not allowed if the user is not the requester"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest()
+
+        User approver = request.users.first().user
+        ProjectRequestService service = getServiceWithMockedCurrentUser(approver)
+
+        when:
+        service.closeRequest(request)
 
         then:
         AccessDeniedException e = thrown()
-        e.message ==~ /User '.*${currentUser.username}.*' not eligible to approve this request/
-
-        where:
-        isPi  | status
-        false | DENIED_BY_OPERATOR
-        false | WAITING_FOR_PI
-        true  | DENIED_BY_OPERATOR
+        e.message ==~ /User '.*${approver.username}.*' is not eligible to close this request/
     }
 
-    void "assertApprovalEligible, positive case"() {
+    void "isUserEligibleToClose, test for multiple kinds of users"() {
         given:
-        ProjectRequest request = DomainFactory.createProjectRequest(status: WAITING_FOR_PI)
-        ProjectRequestService service = new ProjectRequestService(
-                securityService: Mock(SecurityService) {
-                    getCurrentUserAsUser() >> request.pi
-                }
-        )
+        ProjectRequest projectRequest = DomainFactory.createProjectRequest()
+        User unrelatedUser = DomainFactory.createUser()
+
+        ProjectRequestService service = new ProjectRequestService()
+
+        expect:
+        service.isUserEligibleToClose(projectRequest.requester, projectRequest)
+        !service.isUserEligibleToClose(projectRequest.users.first().user, projectRequest)
+        !service.isUserEligibleToClose(unrelatedUser, projectRequest)
+    }
+
+    void "ensureEligibleToClose, all uneditable states"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                requester: user,
+                status   : status,
+        ])
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
 
         when:
-        service.assertApprovalEligible(request)
+        service.ensureEligibleToClose(request)
+
+        then:
+        AccessDeniedException e = thrown()
+        e.message ==~ /User '.*${user.username}.*' is not eligible to close this request/
+
+        where:
+        status << [WAITING_FOR_OPERATOR, PROJECT_CREATED, CLOSED]
+    }
+
+    void "ensureEligibleToClose, positive case"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                status   : WAITING_FOR_APPROVER,
+        ])
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
+
+        when:
+        service.ensureEligibleToClose(request)
 
         then:
         noExceptionThrown()
     }
 
-    void "assertTermsAndConditions, all negative cases"() {
+
+    void "isUserEligibleApproverForRequest, all states"() {
+        given:
+        ProjectRequest projectRequest = DomainFactory.createProjectRequest()
+        ProjectRequestUser projectRequestUser = DomainFactory.createProjectRequestUser(approvalState: state)
+        projectRequest.addToUsers(projectRequestUser)
+
+        ProjectRequestService service = new ProjectRequestService()
+
+        expect:
+        service.isUserEligibleApproverForRequest(projectRequestUser.user, projectRequest) == expected
+
+        where:
+        state                                           || expected
+        ProjectRequestUser.ApprovalState.APPROVED       || true
+        ProjectRequestUser.ApprovalState.DENIED         || true
+        ProjectRequestUser.ApprovalState.PENDING        || true
+        ProjectRequestUser.ApprovalState.NOT_APPLICABLE || false
+    }
+
+    void "ensureApprovalEligible, all uneditable states"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                requester: user,
+                status   : status,
+                project  : status == PROJECT_CREATED ? createProject() : null,
+        ], [
+                user     : user,
+        ])
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+
+        when:
+        service.ensureApprovalEligible(request)
+
+        then:
+        AccessDeniedException e = thrown()
+        e.message ==~ /User '.*${user.username}.*' is not eligible to approve this request/
+
+        where:
+        status << [WAITING_FOR_OPERATOR, PROJECT_CREATED, CLOSED]
+    }
+
+    void "ensureApprovalEligible, unrelated user"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequest request = DomainFactory.createProjectRequest(
+                status   : WAITING_FOR_APPROVER,
+                requester: isRequester ? user : DomainFactory.createUser()
+        )
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+
+        when:
+        service.ensureApprovalEligible(request)
+
+        then:
+        AccessDeniedException e = thrown()
+        e.message ==~ /User '.*${user.username}.*' is not eligible to approve this request/
+
+        where:
+        isRequester << [false, true]
+    }
+
+    void "ensureApprovalEligible, positive case"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                requester: isRequester ? user : DomainFactory.createUser(),
+                status   : WAITING_FOR_APPROVER,
+        ], [
+                user     : isApprover ? user : DomainFactory.createUser(),
+        ])
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+
+        when:
+        service.ensureApprovalEligible(request)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        isRequester | isApprover
+        false       | true
+        true        | true
+    }
+
+    void "ensureTermsAndConditions, all negative cases"() {
         given:
         ProjectRequestService projectRequestService = new ProjectRequestService()
 
         when:
-        projectRequestService.assertTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
+        projectRequestService.ensureTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
 
         then:
         OtpRuntimeException e = thrown()
@@ -372,60 +636,118 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         true           | false
     }
 
-    void "assertTermsAndConditions, positive case"() {
+    void "ensureTermsAndConditions, positive case"() {
         given:
         ProjectRequestService projectRequestService = new ProjectRequestService()
 
         when:
-        projectRequestService.assertTermsAndConditions(true, true)
+        projectRequestService.ensureTermsAndConditions(true, true)
 
         then:
         noExceptionThrown()
     }
 
-    void "addUserRolesAndPermissions, create correct userProjectRoles"() {
+    void "addProjectRequestUsersToProject, create correct userProjectRoles"() {
         given:
+        UserProjectRoleService userProjectRoleService = Mock(UserProjectRoleService)
         ProjectRequestService projectRequestService = new ProjectRequestService(
-                userProjectRoleService: Mock(UserProjectRoleService)
+                userProjectRoleService   : userProjectRoleService,
+                projectRequestUserService: new ProjectRequestUserService(
+                        userProjectRoleService: userProjectRoleService,
+                )
         )
 
         createAllBasicProjectRoles()
 
         Project project = createProject()
 
-        User userPi = DomainFactory.createUser()
-        User userSubmitterAndBioinf = DomainFactory.createUser()
-        User userSubmitter2 = DomainFactory.createUser()
+        User user1 = DomainFactory.createUser()
+        User user2 = DomainFactory.createUser()
+        User user3 = DomainFactory.createUser()
 
         ProjectRequest request = DomainFactory.createProjectRequest([
-                pi: userPi,
-                bioinformaticians: [userSubmitterAndBioinf],
-                submitters: [userSubmitterAndBioinf, userSubmitter2],
-                status: PROJECT_CREATED,
-                project: project,
+                status           : PROJECT_CREATED,
+                project          : project,
+                users            : [
+                        DomainFactory.createProjectRequestUser([
+                                user        : user1,
+                                projectRoles: [pi],
+                        ]),
+                        DomainFactory.createProjectRequestUser([
+                                user        : user2,
+                                projectRoles: [coordinator],
+                        ]),
+                        DomainFactory.createProjectRequestUser([
+                                user        : user3,
+                                projectRoles: [bioinformatician, other],
+                        ]),
+                ],
         ])
 
-        Set<ProjectRole> pi = ProjectRole.findAllByNameInList([ProjectRole.Basic.PI]) as Set<ProjectRole>
-        Set<ProjectRole> submitter_bioinformatician = ProjectRole.findAllByNameInList([
-                ProjectRole.Basic.BIOINFORMATICIAN, ProjectRole.Basic.SUBMITTER,
-        ]) as Set<ProjectRole>
-        Set<ProjectRole> submitter = ProjectRole.findAllByNameInList([ProjectRole.Basic.SUBMITTER]) as Set<ProjectRole>
-
         when:
-        projectRequestService.addUserRolesAndPermissions(request)
+        projectRequestService.addProjectRequestUsersToProject(request)
 
         then:
-        1 * projectRequestService.userProjectRoleService.createUserProjectRole(userPi,
-                project,
-                pi,
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(user1, project, request.users[0].projectRoles)
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(user2, project, request.users[1].projectRoles)
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(user3, project, request.users[2].projectRoles)
+    }
+
+    void "findProjectRequestByProject, project is set"() {
+        given:
+        ProjectRequestService service = new ProjectRequestService()
+        Project project = createProject()
+        ProjectRequest projectRequest = DomainFactory.createProjectRequest(
+                status : PROJECT_CREATED,
+                project: project,
         )
-        1 * projectRequestService.userProjectRoleService.createUserProjectRole(userSubmitterAndBioinf,
-                project,
-                submitter_bioinformatician,
-        )
-        1 * projectRequestService.userProjectRoleService.createUserProjectRole(userSubmitter2,
-                project,
-                submitter,
-        )
+
+        expect:
+        service.findProjectRequestByProject(project) == projectRequest
+    }
+
+    void "findProjectRequestByProject, project without request, return null"() {
+        given:
+        ProjectRequestService service = new ProjectRequestService()
+        Project project = createProject()
+
+        expect:
+        service.findProjectRequestByProject(project) == null
+    }
+
+    void "findProjectRequestByProject, more than one request, throws exception"() {
+        given:
+        ProjectRequestService service = new ProjectRequestService()
+        Project project = createProject()
+        2.times {
+            DomainFactory.createProjectRequest(
+                    status : PROJECT_CREATED,
+                    project: project,
+            )
+        }
+
+        when:
+        service.findProjectRequestByProject(project)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains("Collection contains 2 elements. Expected 1")
+    }
+
+    void "requesterIsEligibleToAccept"() {
+        given:
+        User user = DomainFactory.createUser()
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                requester: expected ? user : DomainFactory.createUser(),
+        ], [
+                user     : expected ? user : DomainFactory.createUser(),
+        ])
+        ProjectRequestService service = getServiceWithMockedCurrentUser(user)
+
+        expect:
+        service.requesterIsEligibleToAccept(request) == expected
+
+        where:
+        expected << [true, false]
     }
 }

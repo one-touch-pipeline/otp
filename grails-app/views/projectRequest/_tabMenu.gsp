@@ -21,7 +21,7 @@
   --}%
 
 <div class="tab-menu">
-    <g:link action="index" class="${actionName=="index" ? "active" : ""}"><g:message code="projectRequest.new.tab"/></g:link>
-    <g:link action="open" class="${actionName in ["open", "view"] ? "active" : ""}"><g:message code="projectRequest.open.tab"/> <span class="counter ${actionHighlight}">${openRequestsCount}</span></g:link>
-    <g:link action="resolved" class="${actionName=="resolved" ? "active" : ""}"><g:message code="projectRequest.resolved.tab"/> <span class="counter no-work-and-nothing-todo">${resolvedRequestsCount}</span></g:link>
+    <g:link action="index" class="${actionName == "index" ? "active" : ""}"><g:message code="projectRequest.new.tab"/></g:link>
+    <g:link action="open" class="${actionName == "open" ? "active" : ""}"><g:message code="projectRequest.open.tab"/> <span class="counter ${actionHighlight}">${unresolved.size()}</span></g:link>
+    <g:link action="resolved" class="${actionName == "resolved" ? "active" : ""}"><g:message code="projectRequest.resolved.tab"/> <span class="counter no-work-and-nothing-todo">${resolved.size()}</span></g:link>
 </div>

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.security.User
@@ -32,16 +33,23 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     User requester
-    User pi
 
+    Set<ProjectRequestUser> users
+
+    @TupleConstructor
     enum Status {
-        WAITING_FOR_PI,
-        APPROVED_BY_PI_WAITING_FOR_OPERATOR,
-        DENIED_BY_PI,
-        DENIED_BY_OPERATOR,
-        PROJECT_CREATED,
+        WAITING_FOR_APPROVER({ Map m -> "${m.left} of ${m.total} left" }, "#000000", true, false),
+        DENIED_BY_APPROVER({ Map m -> "Denied" }, "#DD2B0E", true, true),
+        WAITING_FOR_OPERATOR({ Map m -> "Approved" }, "#108548", false, true),
+        PROJECT_CREATED({ Map m -> "Project created" }, "#108548", false, true),
+        CLOSED({ Map m -> "Closed" }, "#DD2B0E", false, true),
+
+        final Closure<String> formatter
+        final String color
+        final boolean editableStatus
+        final boolean resolvedStatus
     }
-    Status status = Status.WAITING_FOR_PI
+    Status status = Status.WAITING_FOR_APPROVER
     Project project
 
     Set<String> keywords
@@ -50,10 +58,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     Integer approxNoOfSamples
     Set<SeqType> seqTypes
     String comments
-
-    Set<User> leadBioinformaticians
-    Set<User> bioinformaticians
-    Set<User> submitters
 
     static constraints = {
         project nullable: true, validator: { Project val, ProjectRequest obj ->
@@ -67,7 +71,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         name blank: false, unique: true, validator: { String val, ProjectRequest obj ->
             Project project = atMostOneElement(Project.findAllByName(val))
             if (project && project != obj.project) {
-                return 'duplicate.project'
+                return "duplicate.project"
             }
         }
         description blank: false
@@ -85,46 +89,38 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         comments nullable: true
         fundingBody nullable: true
         grantId nullable: true
+
+        users validator: { val, obj ->
+            List<ProjectRequestUser> value = val?.toList()?.findAll() ?: []
+            if (!value.findAll().any { ProjectRequestUser user ->
+                ProjectRoleService.projectRolesContainAuthoritativeRole(user.projectRoles)
+            }) {
+                return "projectRequest.users.no.authority"
+            }
+            if (value*.username.size() != value*.username.unique().size()) {
+                return "projectRequest.users.unique"
+            }
+        }
     }
 
     static hasMany = [
-            seqTypes             : SeqType,
-            leadBioinformaticians: User,
-            bioinformaticians    : User,
-            submitters           : User,
-            projectFields        : AbstractFieldValue,
+            seqTypes     : SeqType,
+            users        : ProjectRequestUser,
+            projectFields: AbstractFieldValue,
     ]
 
     static mapping = {
         description type: "text"
-        leadBioinformaticians joinTable: [
-                name: "project_request_lead_bioinformatician",
-                key: "project_request_id",
-                column: "lead_bioinformatician_id",
-        ]
-        bioinformaticians joinTable: [
-                name: "project_request_bioinformatician",
-                key: "project_request_id",
-                column: "bioinformatician_id",
-        ]
-        submitters joinTable: [
-                name: "project_request_submitter",
-                key: "project_request_id",
-                column: "submitter_id",
-        ]
+        requester index: "project_request_requester_idx"
+        users index: "project_request_users_idx"
+        keywords index: "project_request_keywords_idx"
+        seqTypes index: "project_request_seqTypes_idx"
     }
-}
 
-@TupleConstructor
-enum ProjectRequestRole {
-    PI(true, true, true, true, true),
-    LEAD_BIOINFORMATICIAN(true, true, false, false, true),
-    BIOINFORMATICIAN(true, true, false, false, true),
-    SUBMITTER(true, false, false, false, true),
-
-    final boolean accessToOtp
-    final boolean accessToFiles
-    final boolean manageUsers
-    final boolean manageUsersAndDelegate
-    final boolean receivesNotifications
+    String getFormattedStatus() {
+        return this.status.formatter([
+                left : users.count { it.approver && !it.voted },
+                total: users.count { it.approver },
+        ])
+    }
 }

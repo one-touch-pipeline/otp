@@ -55,7 +55,7 @@ class ProjectCreationController {
     ProcessingPriorityService processingPriorityService
 
     def index(ProjectCreationBasisCommand cmd) {
-        List<ProjectRequest> projectRequests = ProjectRequest.findAllByStatus(ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR)
+        List<ProjectRequest> projectRequests = ProjectRequest.findAllByStatus(ProjectRequest.Status.WAITING_FOR_OPERATOR)
 
         List<UserProjectRole> usersToCopyFromBaseProject = []
         Map<String, ?> baseProjectOverride = [:]

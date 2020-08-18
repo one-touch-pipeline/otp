@@ -42,4 +42,17 @@ $(function () {
             customSpecies.prop("disabled", true);
         }
     }).trigger("change");
+
+    // if the PI role is selected, manage users should be checked
+    $(".project-role-select").on("change", function () {
+        $(".project-role-select option:selected").each(function () {
+            var manageUsersBox = $(this).closest(".project-request-user-table").find(".set-for-authority");
+            if (this.text === "PI") {
+                manageUsersBox.prop('checked', true);
+                manageUsersBox.prop('disabled', true);
+            } else {
+                manageUsersBox.prop('disabled', false);
+            }
+        })
+    }).trigger("change");
 });
