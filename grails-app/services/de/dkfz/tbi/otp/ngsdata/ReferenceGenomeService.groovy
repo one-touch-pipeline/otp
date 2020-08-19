@@ -28,7 +28,12 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
 
@@ -36,6 +41,8 @@ import static org.springframework.util.Assert.notNull
 class ReferenceGenomeService {
 
     ConfigService configService
+    FileService fileService
+    FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
 
     final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
@@ -189,7 +196,6 @@ class ReferenceGenomeService {
         referenceGenome.fingerPrintingFileName = fingerPrintingFileName
         referenceGenome.save(flush: true)
 
-
         fastaEntries.each { entry ->
             new ReferenceGenomeEntry(
                     name: entry.name,
@@ -207,6 +213,31 @@ class ReferenceGenomeService {
                     referenceGenome: referenceGenome
             ).save(flush: true)
         }
+
+        createReferenceGenomeMetafile(referenceGenome)
+    }
+
+    /**
+     * Method to create a tsv file including the reference genome meta information:
+     * reference genome entry names
+     * length of reference genome entry
+     * lengthWithoutN of reference genome entry
+     *
+     * The create tsv file is required by qa.jar
+     */
+    void createReferenceGenomeMetafile(ReferenceGenome referenceGenome) {
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        Path path = fileSystem.getPath(referenceGenomeMetaInformationPath(referenceGenome).absolutePath)
+
+        String content = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome).collect { ReferenceGenomeEntry referenceGenomeEntry ->
+            return [
+                    referenceGenomeEntry.name,
+                    referenceGenomeEntry.length,
+                    referenceGenomeEntry.lengthWithoutN,
+            ].join("\t")
+        }.join("\n")
+
+        fileService.createFileWithContent(path, content)
     }
 
     void checkReferenceGenomeFilesAvailability(AbstractMergingWorkPackage mergingWorkPackage) {

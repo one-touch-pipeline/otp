@@ -7,7 +7,4 @@ Reference genomes with Phix or Lambda should mention it in its name
 2. Create groovy script (LoadReferenceGenome_${name}.groovy); use an exiting file as template.
    Insert the output from getReferenceGenomeInfo.py, adjust if necessary.
    Execute the script.
-3. Run WriteReferenceGenomeMetafile.groovy for reference genome ${name} which will
-   create a simple tsv file holding the reference sequence names and the length
-   values. This file is required by qa.jar
-4. create bwa index files
+3. create bwa index files

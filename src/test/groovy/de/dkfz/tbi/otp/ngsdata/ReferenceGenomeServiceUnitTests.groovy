@@ -31,6 +31,8 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -70,9 +72,12 @@ class ReferenceGenomeServiceUnitTests {
         referenceGenomeService = new ReferenceGenomeService()
         referenceGenomeService.configService = new ConfigService()
         referenceGenomeService.processingOptionService = new ProcessingOptionService()
+        referenceGenomeService.fileSystemService = new TestFileSystemService()
+        referenceGenomeService.fileService = new FileService()
 
-        directory = temporaryFolder.newFolder('reference_genomes', 'referenceGenome')
+        directory = temporaryFolder.newFolder("reference_genomes", "referenceGenome")
         DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent)
+
 
         file = new File(directory, "prefixName.fa")
         assert file.createNewFile()
@@ -82,27 +87,27 @@ class ReferenceGenomeServiceUnitTests {
         project.save(flush: true)
 
         referenceGenome = DomainFactory.createReferenceGenome(
-                name: "hg19_1_24",
-                path: "referenceGenome",
-                fileNamePrefix: "prefixName",
+                name                  : "hg19_1_24",
+                path                  : "referenceGenome",
+                fileNamePrefix        : "prefixName",
                 cytosinePositionsIndex: "cytosine_idx.pos.gz",
                 fingerPrintingFileName: 'fingerPrinting.bed',
         )
 
         referenceGenomeEntry = new ReferenceGenomeEntry(
-                        name: "chr1",
-                        alias: "1",
-                        classification: Classification.CHROMOSOME,
-                        referenceGenome: referenceGenome
-                        )
+                name           : "chr1",
+                alias          : "1",
+                classification : Classification.CHROMOSOME,
+                referenceGenome: referenceGenome,
+        )
         referenceGenomeEntry.save(flush: true)
 
         ReferenceGenomeEntry referenceGenomeEntryTwo = new ReferenceGenomeEntry(
-                        name: "chr2",
-                        alias: "2",
-                        classification: Classification.UNDEFINED,
-                        referenceGenome: referenceGenome
-                        )
+                name           : "chr2",
+                alias          : "2",
+                classification : Classification.UNDEFINED,
+                referenceGenome: referenceGenome,
+        )
         referenceGenomeEntryTwo.save(flush: true)
     }
 
@@ -256,8 +261,10 @@ class ReferenceGenomeServiceUnitTests {
         String cytosinePositionsIndex = null
         String fingerPrintingFileName = "my_fingerprint.bed"
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
-        String chromosomePrefix = ''
-        String chromosomeSuffix = ''
+        String chromosomePrefix = ""
+        String chromosomeSuffix = ""
+
+        temporaryFolder.newFolder("reference_genomes", path)
 
         String fastaName = "chr21"
         String fastaAlias = "21"
