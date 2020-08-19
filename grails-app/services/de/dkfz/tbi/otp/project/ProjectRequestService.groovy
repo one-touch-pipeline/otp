@@ -43,6 +43,7 @@ import java.time.LocalDate
 @Transactional
 class ProjectRequestService {
 
+    AuditLogService auditLogService
     @Autowired
     LinkGenerator linkGenerator
     LdapService ldapService
@@ -103,6 +104,7 @@ class ProjectRequestService {
         )
         req.save(flush: true)
         sendEmailOnCreation(req)
+        logAction(req, "request created")
         return req
     }
 
@@ -136,6 +138,7 @@ class ProjectRequestService {
         }
         projectRequest.save(flush: true)
         sendEmailOnEdit(projectRequest)
+        logAction(projectRequest, "request edited")
     }
 
     private static LocalDate resolveStoragePeriodToLocalDate(StoragePeriod storagePeriod, LocalDate given) {
@@ -226,10 +229,12 @@ class ProjectRequestService {
             ensureTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
 
             projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.APPROVED)
+            logAction(request, "user approves request")
 
             if (allProjectRequestUsersInState(request, ApprovalState.APPROVED)) {
                 setStatus(request, ProjectRequest.Status.WAITING_FOR_OPERATOR)
                 sendEmailOnCompleteApproval(request)
+                logAction(request, "request approved")
             }
         } catch (ValidationException e) {
             return e.errors
@@ -243,9 +248,11 @@ class ProjectRequestService {
             ensureApprovalEligible(request)
 
             projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.DENIED)
+            logAction(request, "user denies request")
 
             if (allProjectRequestUsersInState(request, ApprovalState.DENIED)) {
                 setStatus(request, ProjectRequest.Status.DENIED_BY_APPROVER)
+                logAction(request, "request denied")
             }
         } catch (ValidationException e) {
             return e.errors
@@ -259,6 +266,7 @@ class ProjectRequestService {
             ensureEligibleToClose(request)
 
             setStatus(request, ProjectRequest.Status.CLOSED)
+            logAction(request, "request closed")
         } catch (ValidationException e) {
             return e.errors
         }
@@ -354,5 +362,10 @@ class ProjectRequestService {
         List<String> recipients = getApproversOfProjectRequest(request)*.user*.email
         List<String> ccs = [mailHelperService.emailRecipientNotification]
         mailHelperService.sendEmail(subject, message, recipients, ccs)
+    }
+
+    AuditLog logAction(ProjectRequest request, String description) {
+        String staticLogPrefix = "[Request ${request.id}: ${request.name}]"
+        return auditLogService.logAction(AuditLog.Action.PROJECT_REQUEST, "${staticLogPrefix} ${description}")
     }
 }

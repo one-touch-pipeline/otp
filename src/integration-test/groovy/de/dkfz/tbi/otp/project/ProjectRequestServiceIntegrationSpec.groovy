@@ -50,11 +50,12 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             getCurrentUserAsUser() >> user
         }
         return new ProjectRequestService(
-                securityService: mockedSecurityService,
+                auditLogService          : Mock(AuditLogService),
+                securityService          : mockedSecurityService,
                 projectRequestUserService: new ProjectRequestUserService(
                         securityService: mockedSecurityService
                 ),
-                processingOptionService: new ProcessingOptionService(),
+                processingOptionService  : new ProcessingOptionService(),
         )
     }
 

@@ -27,6 +27,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PseudoEnvironment
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class SecurityService {
@@ -36,6 +37,14 @@ class SecurityService {
 
     User getCurrentUserAsUser() {
         return springSecurityService.currentUser as User
+    }
+
+    /**
+     * Returns the true current user, so if the user is switched it returns not the switched user but
+     * the user that switched to the current user.
+     */
+    User getTrueCurrentUserAsUser() {
+        return isSwitched() ? CollectionUtils.exactlyOneElement(User.findAllByUsername(SpringSecurityUtils.getSwitchedUserOriginalUsername())) : currentUserAsUser
     }
 
     boolean isSwitched() {

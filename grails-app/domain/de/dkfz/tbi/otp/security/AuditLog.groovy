@@ -37,9 +37,11 @@ class AuditLog implements Entity {
         PROJECT_USER_CHANGED_ENABLED,
         PROJECT_USER_SENT_MAIL,
         PROJECT_USER_CREATED_PROJECT_USER,
+        PROJECT_REQUEST,
         /**
-         * In the beginning Some permission was granted via role. Therefore it was logged. Also now no permission granted about it,
-         * the value is still needed for the data logged that time. But there should no new entry created with that value.
+         * In the beginning permissions were granted via roles. Therefore it was logged. Now the permissions are no longer
+         * connected to a role but defined per user. The value is still needed for the data logged before this time. But
+         * no new entries with this Action should be created.
          */
         @Deprecated
         PROJECT_USER_CHANGED_PROJECT_ROLE,

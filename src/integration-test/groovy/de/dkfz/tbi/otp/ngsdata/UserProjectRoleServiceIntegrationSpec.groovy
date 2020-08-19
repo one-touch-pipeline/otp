@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
@@ -28,6 +29,7 @@ import grails.transaction.Rollback
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -59,24 +61,31 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     private final static String EMAIL_LINUX_GROUP_ADMINISTRATION = HelperUtils.randomEmail
     private final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
 
+    @Autowired
+    GrailsApplication grailsApplication
+
     UserProjectRoleService userProjectRoleService
 
     @Rule
     public TemporaryFolder temporaryFolder
 
     void setupData() {
-        SpringSecurityService springSecurityService = new SpringSecurityService()
-        springSecurityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
-            isAnonymous(_) >> false
-        }
         createUserAndRoles()
         createAllBasicProjectRoles()
+
+        SpringSecurityService springSecurityService = new SpringSecurityService(
+                grailsApplication          : grailsApplication,
+                authenticationTrustResolver: Mock(AuthenticationTrustResolver) {
+                    isAnonymous(_) >> false
+                }
+        )
 
         userProjectRoleService = new UserProjectRoleService()
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
         userProjectRoleService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService = new AuditLogService()
-        userProjectRoleService.auditLogService.springSecurityService = springSecurityService
+        userProjectRoleService.auditLogService.securityService = new SecurityService()
+        userProjectRoleService.auditLogService.securityService.springSecurityService = springSecurityService
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])

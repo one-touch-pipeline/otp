@@ -21,23 +21,34 @@
  */
 package de.dkfz.tbi.otp.security
 
+import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 
 @Rollback
 @Integration
 class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles {
 
+    @Autowired
+    GrailsApplication grailsApplication
+
     AuditLogService auditLogService
 
     void setupData() {
         createUserAndRoles()
         auditLogService = new AuditLogService()
-        auditLogService.springSecurityService = new SpringSecurityService()
+        auditLogService.securityService = new SecurityService()
+        auditLogService.securityService.springSecurityService = new SpringSecurityService()
+        auditLogService.securityService.springSecurityService.grailsApplication = grailsApplication
+        auditLogService.securityService.springSecurityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
+            isAnonymous(_) >> false
+        }
     }
 
     void "new ActionLogs only get a date and lose their time"() {
