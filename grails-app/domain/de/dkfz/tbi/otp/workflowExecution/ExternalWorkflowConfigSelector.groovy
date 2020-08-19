@@ -37,6 +37,7 @@ class ExternalWorkflowConfigSelector implements Entity {
     Set<SeqType> seqTypes
     Set<Project> projects
     ExternalWorkflowConfigFragment externalWorkflowConfigFragment
+    SelectorType selectorType
     int basePriority
     int fineTuningPriority
 
@@ -48,4 +49,8 @@ class ExternalWorkflowConfigSelector implements Entity {
             seqTypes              : SeqType,
             projects              : Project,
     ]
+
+    static constraints = {
+        name unique: true
+    }
 }

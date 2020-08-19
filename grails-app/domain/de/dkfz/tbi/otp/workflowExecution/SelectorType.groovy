@@ -21,19 +21,30 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.utils.Deprecateable
-import de.dkfz.tbi.otp.utils.Entity
+/**
+ * This enum defines different types of configuration to help with filtering.
+ *
+ * It should not be used to switch any hard logic and only for loose filtering in the GUI.
+ * This is because every config should be written with a common structured specification,
+ * and theoretically be interchangeable between these types - disregarding unhandled
+ * parameters.
+ *
+ * There are no expected formats or parameters for a type.
+ */
+enum SelectorType {
 
-class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
+    /** Generic workflow configurations and parameters */
+    GENERIC,
 
-    String name
-    String configValues
-    ExternalWorkflowConfigFragment previous
+    /** Resource configuration for workflow jobs */
+    RESOURCE,
 
-    static mapping = {
-        configValues type: "text"
-        previous nullable: true
-        comment cascade: "all-delete-orphan"
-    }
+    /** Bed file specific configuration */
+    BED_FILE,
+
+    /** Adapter file specific configurations */
+    ADAPTER_FILE,
+
+    /** Reverse sequence specific configuration */
+    REVERSE_SEQUENCE,
 }
