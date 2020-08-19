@@ -73,11 +73,14 @@
                     <tr>
                         <td><g:message code="projectUser.addMember.role"/></td>
                         <td>
-                            <select multiple name="projectRoleNames" class="inputField ldapUser use-select-2">
-                                <g:each in="${availableRoles}" var="role">
-                                    <option value="${role.name}">${role.name}</option>
-                                </g:each>
-                            </select>
+                            <div class="loader"></div>
+                            <div class="loaded-content" hidden>
+                                <select multiple name="projectRoleNames" class="inputField ldapUser use-select-2">
+                                    <g:each in="${availableRoles}" var="role">
+                                        <option value="${role.name}">${role.name}</option>
+                                    </g:each>
+                                </select>
+                            </div>
                         </td>
                     </tr>
                     <tr>
@@ -116,11 +119,14 @@
                         <tr>
                             <td><g:message code="projectUser.addMember.role"/></td>
                             <td>
-                                <select multiple name="projectRoleNames" class="inputField nonLdapUser use-select-2">
-                                    <g:each in="${availableRoles}" var="role">
-                                        <option value="${role.name}">${role.name}</option>
-                                    </g:each>
-                                </select>
+                                <div class="loader"></div>
+                                <div class="loaded-content" hidden>
+                                    <select multiple name="projectRoleNames" class="inputField nonLdapUser use-select-2">
+                                        <g:each in="${availableRoles}" var="role">
+                                            <option value="${role.name}">${role.name}</option>
+                                        </g:each>
+                                    </select>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -182,25 +188,28 @@
                                 value="${userEntry.user.email}"/>
                     </td>
                     <td>
-                        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-                            <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
-                                <otp:editorSwitch
-                                        template="remove"
-                                        link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName] )}"
-                                        value="${projectRoleName}"
-                                        confirmation="${confirmationText}"
-                                        name="${projectRoleName}"/>
-                            </g:each>
-                            <div class="submit-container" name="submit-container">
-                                <select multiple name="newRoles" class="use-select-2" style="min-width: 120px">
-                                    <g:each in="${userEntry.availableRoles}" var="role">
-                                        <option value="${role}">${role}</option>
-                                    </g:each>
-                                </select>
-                                <input type="hidden" name="targetAddRole" value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null] )}"/>
-                                <button class="addRole js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.addRoleToUserProjectRole"/></button>
-                            </div>
-                        </sec:access>
+                        <div class="loader"></div>
+                        <div class="loaded-content" hidden>
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                                <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
+                                    <otp:editorSwitch
+                                            template="remove"
+                                            link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName] )}"
+                                            value="${projectRoleName}"
+                                            confirmation="${confirmationText}"
+                                            name="${projectRoleName}"/>
+                                </g:each>
+                                <div class="submit-container">
+                                    <select multiple name="newRoles" class="use-select-2" style="width: 200px">
+                                        <g:each in="${userEntry.availableRoles}" var="role">
+                                            <option value="${role}">${role}</option>
+                                        </g:each>
+                                    </select>
+                                    <input type="hidden" name="targetAddRole" value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null] )}"/>
+                                    <button class="addRole js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.addRoleToUserProjectRole"/></button>
+                                </div>
+                            </sec:access>
+                        </div>
                         <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                             <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
                                     ${projectRoleName} <br />

@@ -58,3 +58,8 @@ $(function() {
         return true
     });
 });
+
+$(document).ready(function(){
+    $('.loaded-content').show();
+    $('.loader').hide();
+});
