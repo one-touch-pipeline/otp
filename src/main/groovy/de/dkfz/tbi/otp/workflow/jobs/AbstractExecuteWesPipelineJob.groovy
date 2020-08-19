@@ -19,16 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
-/**
- * Parses and loads QA files
- */
-abstract class AbstractParseJob implements Job {
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob {
     @Override
     void execute(WorkflowStep workflowStep) {
     }
 
-    abstract Map<String, String> parseFile(WorkflowStep workflowStep)
-    abstract Class getQcDomain(WorkflowStep workflowStep)
+    abstract void createWesRequest(WorkflowStep workflowStep)
 }

@@ -19,7 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
+
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**
  * Base interface for all jobs

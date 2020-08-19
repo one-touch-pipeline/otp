@@ -28,6 +28,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.jobs.Job
 
 import static grails.async.Promises.task
 

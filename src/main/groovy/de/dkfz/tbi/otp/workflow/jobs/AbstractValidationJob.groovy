@@ -19,12 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
-abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJob {
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.Path
+
+/**
+ * Checks whether the expected files and directories were created
+ */
+abstract class AbstractValidationJob implements Job {
     @Override
     void execute(WorkflowStep workflowStep) {
     }
 
-    abstract void createRoddyRequest(WorkflowStep workflowStep)
+    abstract List<Path> getExpectedFiles(WorkflowStep workflowStep)
+    abstract List<Path> getExpectedDirectories(WorkflowStep workflowStep)
 }

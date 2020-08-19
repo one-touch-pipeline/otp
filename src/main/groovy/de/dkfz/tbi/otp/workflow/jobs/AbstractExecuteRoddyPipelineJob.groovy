@@ -19,15 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
-import java.nio.file.Path
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-abstract class AbstractJsonParseJob extends AbstractParseJob {
+abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJob {
     @Override
-    @SuppressWarnings("UnusedMethodParameter")
-    Map< String, String> parseFile(WorkflowStep workflowStep) {
+    void execute(WorkflowStep workflowStep) {
     }
 
-    abstract Path getJsonFileToParse(WorkflowStep workflowStep)
+    abstract void createRoddyRequest(WorkflowStep workflowStep)
 }

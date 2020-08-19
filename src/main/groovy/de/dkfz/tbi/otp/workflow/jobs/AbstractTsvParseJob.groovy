@@ -19,19 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * Links result files
- */
-abstract class AbstractLinkJob implements Job {
+import java.nio.file.Path
+
+abstract class AbstractTsvParseJob extends AbstractParseJob {
     @Override
-    void execute(WorkflowStep workflowStep) {
+    @SuppressWarnings("UnusedMethodParameter")
+    Map< String, String> parseFile(WorkflowStep workflowStep) {
     }
 
-    @SuppressWarnings("UnusedMethodParameter")
-    List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
-    }
+    abstract Path getTsvFileToParse(WorkflowStep workflowStep)
 }

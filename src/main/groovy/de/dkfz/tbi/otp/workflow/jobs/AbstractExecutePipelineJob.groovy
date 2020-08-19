@@ -19,15 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
 /**
- * Check requirements
+ * Prepares the request, writes configuration to the file system, and executes the pipeline
  */
-abstract class AbstractCheckRequirementsJob implements Job {
-    @Override
-    void execute(WorkflowStep workflowStep) {
-    }
-
-    abstract void checkRequirements(WorkflowStep workflowStep)
+abstract class AbstractExecutePipelineJob implements Job {
 }

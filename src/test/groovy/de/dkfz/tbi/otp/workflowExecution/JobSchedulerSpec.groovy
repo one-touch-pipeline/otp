@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {

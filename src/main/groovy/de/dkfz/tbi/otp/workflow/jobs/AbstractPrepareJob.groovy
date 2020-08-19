@@ -19,18 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
+
+import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
 /**
- * Deletes files, directories that should not be kept
+ * Prepares the file system
+ *  - creates a working directory
+ *  - set permissions so that users can't access the work directory while the job is running
+ *  - link input files, if the job requires a certain file structure
+ *  - create configuration files, if required
  */
-abstract class AbstractCleanUpJob implements Job {
+abstract class AbstractPrepareJob implements Job {
     @Override
     void execute(WorkflowStep workflowStep) {
     }
 
-    abstract List<Path> getFilesToDelete(WorkflowStep workflowStep)
-    abstract List<Path> getDirectoriesToDelete(WorkflowStep workflowStep)
+    abstract Path buildWorkDirectoryPath(WorkflowStep workflowStep)
+    abstract Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep)
 }

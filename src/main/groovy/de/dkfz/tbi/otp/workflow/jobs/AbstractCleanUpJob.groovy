@@ -19,16 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
+
+
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.Path
 
 /**
- * Parses QA from (multiple) files and combines it into one file, combines multiple plots, converts plots to PDF
- * This job is executed synchronously and should therefore return quickly
+ * Deletes files, directories that should not be kept
  */
-abstract class AbstractOutputUnificationJob implements Job {
+abstract class AbstractCleanUpJob implements Job {
     @Override
     void execute(WorkflowStep workflowStep) {
     }
 
-    abstract void generateBashScript(WorkflowStep workflowStep)
+    abstract List<Path> getFilesToDelete(WorkflowStep workflowStep)
+    abstract List<Path> getDirectoriesToDelete(WorkflowStep workflowStep)
 }

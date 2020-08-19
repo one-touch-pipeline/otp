@@ -19,18 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
-import java.nio.file.Path
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**
- * Checks whether the expected files and directories were created
+ * Parses QA from (multiple) files and combines it into one file, combines multiple plots, converts plots to PDF
+ * This job is executed synchronously and should therefore return quickly
  */
-abstract class AbstractValidationJob implements Job {
+abstract class AbstractOutputUnificationJob implements Job {
     @Override
     void execute(WorkflowStep workflowStep) {
     }
 
-    abstract List<Path> getExpectedFiles(WorkflowStep workflowStep)
-    abstract List<Path> getExpectedDirectories(WorkflowStep workflowStep)
+    abstract void generateBashScript(WorkflowStep workflowStep)
 }

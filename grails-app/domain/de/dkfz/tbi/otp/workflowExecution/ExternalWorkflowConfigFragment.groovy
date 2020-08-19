@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
