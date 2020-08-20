@@ -36,9 +36,11 @@ UNIX_GROUP_SHOULD="$4"
 
 CMD_CHGRP="chgrp -vh "$UNIX_GROUP_SHOULD" {}"
 CMD_CHMOD_2750="chmod -v 2750 {}"
+CMD_CHMOD_2700="chmod -v 2700 {}"
 CMD_CHMOD_400="chmod -v 400 {}"
 CMD_CHMOD_440="chmod -v 440 {}"
 CMD_CHMOD_444="chmod -v 444 {}"
+CMD_CHMOD_600="chmod -v 600 {}"
 CMD_CHMOD_640="chmod -v 640 {}"
 
 interceptor=""
@@ -74,7 +76,7 @@ if [ -d "$PROJECT_INFO_DIRECTORY" ]
 then
     find "$PROJECT_INFO_DIRECTORY" \
         \( -group "$UNIX_GROUP_IS" -exec $interceptor $CMD_CHGRP \; \) , \
-        \( -type d -not -perm 2750 -exec $interceptor $CMD_CHMOD_2750 \; \) , \
+        \( -type d -not -perm 2700 -exec $interceptor $CMD_CHMOD_2700 \; \) , \
         \( -type f -not -perm 400  -exec $interceptor $CMD_CHMOD_400 \; \);
 else
     echo "# No project info directory found: $PROJECT_INFO_DIRECTORY"
@@ -97,4 +99,15 @@ then
         \( -type f -not -perm 640 -name "*_mapping.tsv" -path "*/0_all/*"  -exec $interceptor $CMD_CHMOD_640 \; \);
 else
     echo "# No sequencing directory found: $SEQUENCING_DIRECTORY"
+fi
+
+SUBMISSION_DIRECTORY="$PROJECT_DIRECTORY/submission"
+if [ -d "$SUBMISSION_DIRECTORY" ]
+then
+    find "$SUBMISSION_DIRECTORY" \
+        \( -group "$UNIX_GROUP_IS"  -exec $interceptor $CMD_CHGRP \; \) , \
+        \( -type d -not -perm 2700  -exec $interceptor $CMD_CHMOD_2700 \; \) , \
+        \( -type f -not -perm 600   -exec $interceptor $CMD_CHMOD_600 \; \);
+else
+    echo "# No submission directory found: $SUBMISSION_DIRECTORY"
 fi

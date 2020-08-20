@@ -89,23 +89,28 @@ The script support multiple modes.
 ## What and how do these scripts clean?
 
 The scripts consist of multiple find commands with each having multiple -exec parameters for different types of files.
-The PID specific script is just a specialized version of what we do to the sequencing directory in the Projet script.
+The PID specific script is just a specialized version of what we do to the sequencing directory in the Project script.
 Because of this I will not list it separately here.
 
-The script cleans a project in three steps, but each step sets the group first and directories are always set to 2750.
-Step specialties:
+The script cleans a project in four steps, one for each subdirectory. Each step sets the group and adapts directory and
+file permission based on where they are located and what type of file they are:
 
   - **config directory:**
+    - directories are set to 2750
     - config files should have the permission 440
   - **project info directory:**
+    - directories are set to 2700
     - project infos should have the permission 400
   - **sequencing directory:**
+    - directories are set to 2750
     - all files are set to 440
     - an exception to this rule are the following files:
       - `*.bam` and `*.bai` which are set to 444
       - single cell mapping files `0_all/*_mapping.tsv` are set to 640
       - `.roddyExecCache.txt` and `zippedAnalysesMD5.txt` which are ignored
-
+  - **submission directory:**
+    - directories are set to 2700
+    - all submission files should be 600
 
 ## Input File Structure
 
