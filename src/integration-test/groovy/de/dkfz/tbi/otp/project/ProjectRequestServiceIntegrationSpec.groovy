@@ -56,6 +56,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                         securityService: mockedSecurityService
                 ),
                 processingOptionService  : new ProcessingOptionService(),
+                rolesService             : new RolesService(),
         )
     }
 
@@ -77,7 +78,17 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         request == service.get(request.id)
     }
 
-    void "get, when current user is not part of request, return null"() {
+    void "get, when current user is not part of request but is an admin, return project request"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest()
+        createUserAndRoles()
+        ProjectRequestService service = getServiceWithMockedCurrentUser(getUser(ADMIN))
+
+        expect:
+        request == service.get(request.id)
+    }
+
+    void "get, when current user is not part of request and not an admin, return null"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
         ProjectRequestService service = serviceWithMockedCurrentUser

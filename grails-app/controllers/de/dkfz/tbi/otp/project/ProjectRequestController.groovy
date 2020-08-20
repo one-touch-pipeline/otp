@@ -106,6 +106,12 @@ class ProjectRequestController {
         return sharedModel
     }
 
+    def all() {
+        return sharedModel + [
+                all: projectRequestService.allProjectRequests.sort { it.dateCreated }.reverse(),
+        ]
+    }
+
     def save(ProjectRequestCreationCommand cmd) {
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)

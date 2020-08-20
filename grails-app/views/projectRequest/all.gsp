@@ -19,12 +19,20 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+<html>
+<head>
+    <meta name="layout" content="main"/>
+    <title>${g.message(code: "projectRequest.title")}</title>
+</head>
 
-<div class="tab-menu">
-    <g:link action="index" class="${actionName == "index" ? "active" : ""}"><g:message code="projectRequest.new.tab"/></g:link>
-    <g:link action="open" class="${actionName == "open" ? "active" : ""}"><g:message code="projectRequest.open.tab"/> <span class="counter ${actionHighlight}">${unresolved.size()}</span></g:link>
-    <g:link action="resolved" class="${actionName == "resolved" ? "active" : ""}"><g:message code="projectRequest.resolved.tab"/> <span class="counter no-work-and-nothing-todo">${resolved.size()}</span></g:link>
-    <sec:ifAnyGranted roles="ROLE_OPERATOR">
-        <g:link action="all" class="${actionName == "all" ? "active" : ""}"><g:message code="projectRequest.all.tab"/></g:link>
-    </sec:ifAnyGranted>
+<body>
+<div class="body">
+    <g:render template="/templates/messages"/>
+
+    <g:render template="tabMenu"/>
+
+    <h2>${g.message(code: "projectRequest.all.header")}:</h2>
+    <g:render template="projectRequestTable" model="[projectRequests: all]"/>
 </div>
+</body>
+</html>

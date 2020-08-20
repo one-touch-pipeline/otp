@@ -54,7 +54,12 @@ class ProjectRequestService {
     SecurityService securityService
     UserProjectRoleService userProjectRoleService
     UserService userService
+    RolesService rolesService
     ProjectRequestUserService projectRequestUserService
+
+    List<ProjectRequest> getAllProjectRequests() {
+        return ProjectRequest.list()
+    }
 
     List<ProjectRequest> getResolvedOfCurrentUser() {
         return getRequestsHelper(true)
@@ -156,7 +161,8 @@ class ProjectRequestService {
 
     ProjectRequest get(Long l) {
         ProjectRequest req = ProjectRequest.get(l)
-        if (req && isUserPartOfRequest(securityService.currentUserAsUser, req)) {
+        User currentUser = securityService.currentUserAsUser
+        if (req && (rolesService.isAdministrativeUser(currentUser) || isUserPartOfRequest(currentUser, req))) {
             return req
         }
         return null

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -31,9 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
+import de.dkfz.tbi.otp.security.*
 
 class ProcessingThresholdController {
 
@@ -48,14 +45,13 @@ class ProcessingThresholdController {
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
     UserService userService
-    SpringSecurityService springSecurityService
+    SecurityService securityService
+    RolesService roleService
 
     Map index(ProcThresholdsEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
 
-        boolean isAdmin = UserRole.findAllByUser(springSecurityService.currentUser as User)*.role.any {
-            it.authority in Role.ADMINISTRATIVE_ROLES
-        }
+        boolean isAdmin = roleService.isAdministrativeUser(securityService.currentUserAsUser)
         boolean edit = isAdmin ? cmd.edit : false
 
         List<SampleTypePerProject> sampleTypePerProjects = sampleTypePerProjectService.findByProject(project)
