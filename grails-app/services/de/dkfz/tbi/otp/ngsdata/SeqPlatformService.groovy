@@ -25,8 +25,6 @@ import grails.gorm.transactions.Transactional
 import org.springframework.context.annotation.Scope
 import org.springframework.security.access.prepost.PreAuthorize
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-
 @Scope("prototype")
 @Transactional
 class SeqPlatformService {
@@ -110,10 +108,10 @@ class SeqPlatformService {
                 return null
             }
         }
-        return atMostOneElement(SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
+        return findForNameAndModelAndSequencingKit(
                 seqPlatformName,
                 seqPlatformModelLabel,
-                sequencingKitLabel)
+                sequencingKitLabel
         )
     }
 
