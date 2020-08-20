@@ -83,6 +83,10 @@ String input = """
 
 """
 
+/**
+ * delimiter for the input matrix. default value is '\t' for a tab
+ */
+String inputFieldDelimiter = '\t'
 
 /**
  * Name of the file to generate. The name must be absolute. Its only to create the bam import file.
@@ -97,6 +101,8 @@ boolean overwriteExisting = false
 
 //=============================================
 // work area
+
+String outputFieldDelimiter = '\t'
 
 class BamExportImport {
 
@@ -127,7 +133,7 @@ class BamExportImport {
     }
 
     private InputData parseInputLine(String inputLine) {
-        List<String> values = inputLine.split('\t')*.trim()
+        List<String> values = inputLine.split(inputFieldDelimiter)*.trim()
         assert values.size() == 5: "The input needs exact 5 parts"
         InputData data = new InputData([
                 newProject   : values[0],
@@ -206,13 +212,13 @@ class BamExportImport {
     private String createFileContent(List<InputData> inputDataList) {
         List<String> content = []
         List<BamMetadataColumn> columns = inputDataList*.metadata*.keySet().flatten().unique()
-        content << columns*.toString().join('\t')
+        content << columns*.toString().join(outputFieldDelimiter)
 
         inputDataList.each { InputData inputData ->
             Map<String, String> metadata = inputData.metadata
             content << columns.collect { column ->
                 metadata[column] ?: '' //ensure that null is replaced by empty string
-            }.join('\t')
+            }.join(outputFieldDelimiter)
         }
         return content.join('\n')
     }
@@ -272,7 +278,7 @@ class DisplaySamples {
     ].asImmutable()
 
     private InputData parseInputLine(String inputLine) {
-        List<String> values = inputLine.split('\t')*.trim()
+        List<String> values = inputLine.split(inputFieldDelimiter)*.trim()
         assert values.size() == 3: "The input needs exact 3 parts"
         InputData data = new InputData([
                 newProject   : values[0],
@@ -337,7 +343,7 @@ class DisplaySamples {
                         roddyBamFile.individual.pid,
                         roddyBamFile.sampleType.name,
                         seqTypeMap[roddyBamFile.seqType],
-                ].join('\t')
+                ].join(outputFieldDelimiter)
             }
         }.join('\n')
     }
@@ -367,7 +373,7 @@ class HandleInputTypes {
         if (!cleanInput) {
             return 0
         }
-        return cleanInput[0].split('\t').size()
+        return cleanInput[0].split(inputFieldDelimiter).size()
     }
 
     private void handleSampleListing(Collection<String> input) {
