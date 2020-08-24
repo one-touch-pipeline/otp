@@ -2773,6 +2773,17 @@ input[type=submit].submitting {
     }
 }
 
+.tooltipIcon {
+    &[title]:after {
+        content: "";
+        display: inline-block;
+        background: url("help.png") no-repeat center;
+        width: 16px;
+        height: 16px;
+        background-size: 16px; //show round icon
+    }
+}
+
 .scroll-screen-width {
     width: 100%;
     min-width: unset;
@@ -2784,13 +2795,8 @@ input[type=submit].submitting {
 #otp .additionalFields {
     .scroll-screen-width;
     th {
-        *[title]:after {
-            content: "";
-            display: inline-block;
-            background: url("help.png") no-repeat center;
-            width: 16px;
-            height: 16px;
-            background-size: 16px; //show round icon
+        * {
+            .tooltipIcon;
         }
         white-space: unset;
         min-width: 22ch;
