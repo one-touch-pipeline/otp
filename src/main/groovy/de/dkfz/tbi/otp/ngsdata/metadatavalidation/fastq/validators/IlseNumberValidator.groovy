@@ -34,6 +34,8 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 @Component
 class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    final static String ILSE_RANGE = "[${IlseSubmission.MIN_ILSE_VALUE}..${IlseSubmission.MAX_ILSE_NUMBER}]"
+
     @Override
     Collection<String> getDescriptions() {
         return ["The ILSe number is valid.",
@@ -63,8 +65,8 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
                 if (ilseNo != "") {
                     if (!ilseNo.isInteger()) {
                         context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is not an integer.", "At least one ILSe number is not an integer.")
-                    } else if ((ilseNo as int) <= 1 || (ilseNo as int) >= 999999) {
-                        context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is out of range [1..999999].", "At least one ILSe number is out of range [1..999999].")
+                    } else if ((ilseNo as int) < IlseSubmission.MIN_ILSE_VALUE || (ilseNo as int) > IlseSubmission.MAX_ILSE_NUMBER) {
+                        context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is out of range ${ILSE_RANGE}.", "At least one ILSe number is out of range ${ILSE_RANGE}.")
                     } else if (IlseSubmission.findByIlseNumber(ilseNo as int)) {
                         context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' already exists.", "At least one ILSe number already exists.")
                     }

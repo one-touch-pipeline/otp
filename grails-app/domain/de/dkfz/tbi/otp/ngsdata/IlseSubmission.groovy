@@ -26,12 +26,16 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class IlseSubmission implements Commentable, Entity {
 
+    static final int MIN_ILSE_VALUE = 1
+
+    static final int MAX_ILSE_NUMBER = 999999
+
     int ilseNumber
 
     boolean warning = false
 
     static constraints = {
-        ilseNumber unique: true, min: 1, max: 999999
+        ilseNumber unique: true, min: MIN_ILSE_VALUE, max: MAX_ILSE_NUMBER
         comment nullable: true, validator: { comment, ilseSubmission ->
             if (ilseSubmission.warning) {
                 if (!comment?.comment) {
