@@ -31,6 +31,7 @@
     <asset:javascript src="pages/individual/show/functions.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="taglib/Expandable.js"/>
+    <asset:javascript src="taglib/ExpandableText.js"/>
 </head>
 <body>
     <div class="body">
@@ -167,7 +168,11 @@
                                 <td><strong>${sampleType}</strong></td>
                                 <td>
                                     <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                        ${seqTrackSet.seqTracks*.sampleIdentifier.join(", ")}
+                                        <g:set var="sampleIdentifiers" value="${(seqTrackSet.seqTracks*.sampleIdentifier).unique().sort()}"/>
+                                        <otp:expandableText shortened="${"${sampleIdentifiers.take(3).join("<br>")}<br>"}"
+                                                            full="${"${sampleIdentifiers.join("<br>")}<br>"}"
+                                                            expandable="${sampleIdentifiers.size() > 3}"/>
+
                                     </sec:access>
                                 </td>
 

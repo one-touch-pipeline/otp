@@ -42,7 +42,11 @@
                     </g:else>
                 </td>
                 <td>${project.pis?.join(", ") ?: "-"}</td>
-                <td><otp:expandableText shortened="${project.shortDescription ?: "-"}" full="${project.description ?: "-"}"/></td>
+                <td>
+                    <otp:expandableText shortened="${project.shortDescription ?: "-"}"
+                                        full="${project.description ?: "-"}"
+                                        expandable="${project.shortDescription != project.description}"/>
+                </td>
                 <td>
                     ${project.st.collect { "${it.seqType} (${it.numberOfSamples})" }.join(", ") ?: g.message(code: "home.data.none")}
                     <g:if test="${project.projectType == de.dkfz.tbi.otp.project.Project.ProjectType.USER_MANAGEMENT}">

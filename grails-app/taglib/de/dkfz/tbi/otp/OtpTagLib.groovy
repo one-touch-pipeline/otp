@@ -274,25 +274,24 @@ class OtpTagLib {
     /**
      * A simple wrapper for expandable text with show more/less collapsing
      *
-     * The expand-buttons will not be added if the shortened and full version of the text
-     * are equal.
-     *
      * To be used in conjunction with: taglib/ExpandableText.js
      *
      * @attr shortened REQUIRED the shortened version of the text to be expanded
      * @attr full REQUIRED the full text to be shown after expanding
+     * @attr expandable REQUIRED should the expand-buttons be added
      */
     def expandableText = { attrs, body ->
         String shortened = attrs.shortened ?: ""
         String full = attrs.full ?: ""
-        if (shortened == full) {
-            out << full
-        } else {
+        String expandable = attrs.expandable
+        if (expandable.toBoolean()) {
             out << """\
             |<span>
             |<span class='expandable-shortened'>${shortened} <a class='expandable-more' href='#'>[show more]</a></span>
             |<span class='expandable-full keep-whitespace' style='display: none'>${full} <a class='expandable-less' href='#'>[show less]</a></span>
             |</span>""".stripMargin()
+        } else {
+            out << full
         }
     }
 
