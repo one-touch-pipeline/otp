@@ -23,13 +23,13 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -56,7 +56,7 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
 
     @Override
     void validateValue(AbstractMetadataValidationContext context, String projectName, Set<Cell> cells) {
-        if (!CollectionUtils.atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))) {
+        if (!Project.getByNameOrNameInMetadataFiles(projectName)) {
             def level
             if (context instanceof BamMetadataValidationContext) {
                 level = Level.ERROR

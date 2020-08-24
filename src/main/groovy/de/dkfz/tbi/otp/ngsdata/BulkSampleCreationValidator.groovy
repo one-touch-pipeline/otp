@@ -48,7 +48,7 @@ class BulkSampleCreationValidator extends ValueTuplesValidator<ValidationContext
     void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String projectName = it.getValue(PROJECT.name())?.trim()
-            if (projectName && !Project.findByName(projectName)) {
+            if (projectName && !Project.getByNameOrNameInMetadataFiles(projectName)) {
                 context.addProblem(it.cells, Level.ERROR, "Could not find Project '${projectName}'")
             }
         }

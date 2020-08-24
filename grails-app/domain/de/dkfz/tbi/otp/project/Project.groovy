@@ -25,10 +25,7 @@ import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.ProjectGroup
-import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.searchability.Keyword
@@ -214,7 +211,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     static Project getByNameOrNameInMetadataFiles(String name) {
         if (name) {
-            return findByNameOrNameInMetadataFiles(name, name)
+            return atMostOneElement(findAllByNameOrNameInMetadataFiles(name, name))
         }
         return null
     }

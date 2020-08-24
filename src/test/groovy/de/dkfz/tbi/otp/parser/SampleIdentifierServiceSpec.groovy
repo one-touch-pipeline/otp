@@ -511,6 +511,28 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         containSame(output, ["Could not find Project 'invalidProject'"])
     }
 
+    void "createBulkSamples, when given name in metadata file of project"() {
+        given:
+        SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()
+        List<String> output
+        Project project = createProject(nameInMetadataFiles: "metadata_name")
+
+        when:
+        output = sampleIdentifierService.createBulkSamples(
+                "${HEADER}\n${project.nameInMetadataFiles},pid,type,identifier",
+                DEFAULT_DELIMITER,
+                project,
+                DEFAULT_SPECIFIC_REF_GEN,
+        )
+
+        then:
+        output == []
+        SampleIdentifier identifier = SampleIdentifier.findByName("identifier")
+        identifier.sample.individual.pid == "pid"
+        identifier.sample.individual.project == project
+        identifier.sample.sampleType.name == "type"
+    }
+
     void "test createBulkSamples when given unknown HEADER"() {
         given:
         SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()

@@ -635,7 +635,7 @@ class MetadataImportService {
         if (sampleIdentifier) {
             return sampleIdentifier.project
         } else {
-            Project projectFromProjectColumn = atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))
+            Project projectFromProjectColumn = Project.getByNameOrNameInMetadataFiles(projectName)
             if (projectFromProjectColumn) {
                 return projectFromProjectColumn
             }

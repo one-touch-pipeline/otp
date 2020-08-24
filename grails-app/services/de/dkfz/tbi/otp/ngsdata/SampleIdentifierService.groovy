@@ -104,10 +104,10 @@ class SampleIdentifierService {
             }
             try {
                 DefaultParsedSampleIdentifier identifier = new DefaultParsedSampleIdentifier(
-                        projectName: getCell(BulkSampleCreationHeader.PROJECT) ?: project.name,
-                        pid: getCell(BulkSampleCreationHeader.PID),
-                        sampleTypeDbName: getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
-                        fullSampleName: getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
+                        projectName               : Project.getByNameOrNameInMetadataFiles(getCell(BulkSampleCreationHeader.PROJECT))?.name ?: project.name,
+                        pid                       : getCell(BulkSampleCreationHeader.PID),
+                        sampleTypeDbName          : getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
+                        fullSampleName            : getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
                         useSpecificReferenceGenome: specificReferenceGenome,
                 )
                 SampleIdentifier sampleIdentifier = findOrSaveSampleIdentifier(identifier)
@@ -156,7 +156,7 @@ class SampleIdentifierService {
         Sample sample = findOrSaveSample(identifier)
         return new SampleIdentifier(
                 sample: sample,
-                name: identifier.fullSampleName,
+                name  : identifier.fullSampleName,
         ).save(flush: true)
     }
 
@@ -205,11 +205,11 @@ class SampleIdentifierService {
             }
         } else {
             individual = new Individual(
-                    pid: identifier.pid,
-                    mockPid: identifier.pid,
+                    pid         : identifier.pid,
+                    mockPid     : identifier.pid,
                     mockFullName: identifier.pid,
-                    project: findProject(identifier),
-                    type: Individual.Type.REAL
+                    project     : findProject(identifier),
+                    type        : Individual.Type.REAL
             )
             assert individual.save(flush: true)
         }
@@ -217,7 +217,7 @@ class SampleIdentifierService {
     }
 
     Project findProject(ParsedSampleIdentifier identifier) {
-        Project result = atMostOneElement(Project.findAllByName(identifier.projectName))
+        Project result = Project.getByNameOrNameInMetadataFiles(identifier.projectName)
         if (result) {
             return result
         }
