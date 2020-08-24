@@ -45,7 +45,6 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.StringUtils
-import de.dkfz.tbi.otp.utils.ValidatorUtil
 
 import java.nio.file.FileSystem
 import java.util.regex.Matcher
@@ -286,16 +285,12 @@ class MetadataImportController {
 
     def addBlacklistedIlseNumbers(BlackListedIlseCommand command) {
         if (command.validate()) {
-            if (ilseSubmissionService.checkIfIlseNumberDoesNotExist(command.ilse)) {
-                ilseSubmissionService.createNewIlseSubmission(command.ilse, command.comment)
-                flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.success") as String)
-            } else {
-                ValidatorUtil.rejectValue('ilse', command, command.ilse, command.errors, 'duplicate')
-                flash.cmd = command
-                flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.failure") as String, command.errors)
-            }
+            List<Integer> ilseNumbers = command.splitToIlseNumbers()
+            ilseSubmissionService.createNewIlseSubmissions(ilseNumbers, command.comment)
+            flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.success") as String)
         } else {
             flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.failure") as String, command.errors)
+            flash.cmd = command
         }
         redirect action: 'blacklistedIlseNumbers'
     }
@@ -323,12 +318,47 @@ class MetadataImportController {
 
 class BlackListedIlseCommand implements Validateable {
 
-    Integer ilse
+    static final String SEPARATOR = /[,; \t]/
+
+    String ilse
     String comment
 
     static constraints = {
-        ilse nullable: false, min: 1, max: 999999
+        ilse nullable: false, blank: false, validator: { val, obj, errors ->
+            if (!val) {
+                return
+            }
+            List<Integer> ilseToAdd = []
+            val.split(SEPARATOR).each {
+                if (it.isInteger()) {
+                    Integer integer = it.toInteger()
+                    if (integer < IlseSubmission.MIN_ILSE_VALUE) {
+                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.tooSmall',
+                                [it, IlseSubmission.MIN_ILSE_VALUE].toArray(), 'Ilse is to small')
+                    } else if (integer > IlseSubmission.MAX_ILSE_NUMBER) {
+                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.tooBig',
+                                [it, IlseSubmission.MAX_ILSE_NUMBER].toArray(), 'Ilse is to big')
+                    } else if (IlseSubmission.findAllByIlseNumber(integer)) {
+                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.alreadyExists',
+                                [it].toArray(), 'Ilse already exist')
+                    } else if (ilseToAdd.contains(integer)) {
+                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.duplicate',
+                                [it].toArray(), 'Ilse is twice in list')
+                    } else {
+                        ilseToAdd << integer
+                    }
+                } else {
+                    errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.notANumber',
+                            [it].toArray(), 'Ilse is not a number')
+                }
+            }
+            return
+        }
         comment nullable: false, blank: false
+    }
+
+    List<Integer> splitToIlseNumbers() {
+        return ilse.split(SEPARATOR)*.toInteger()
     }
 }
 

@@ -33,10 +33,13 @@
     <g:render template="/templates/messages"/>
 
     <h1><g:message code="metadataImport.blackListedIlseNumbers.title"/></h1>
+
     <h2><g:message code="metadataImport.blackListedIlseNumbers.create.description"/></h2>
 
-    <g:form action="addBlacklistedIlseNumbers">
-        <g:message code="metadataImport.blackListedIlseNumbers.ilse"/>: <g:textField name="ilse" size="15" value="${command?.ilse}"/>
+    <g:form action="addBlacklistedIlseNumbers" method="POST">
+        <span class="tooltipIcon" title="${g.message(code: "metadataImport.blackListedIlseNumbers.ilses.info")}">
+            <g:message code="metadataImport.blackListedIlseNumbers.ilses"/>
+        </span>: <g:textField name="ilse" size="15" value="${command?.ilse}"/>
         <br><br>
         <g:message code="metadataImport.blackListedIlseNumbers.comment"/>:<br>
         <g:textArea name="comment" rows="5" cols="80" value="${command?.comment}"/>

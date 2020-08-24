@@ -128,34 +128,42 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
         2345 || true
     }
 
-    void "test createNewIlseSubmission valid"() {
+    void "test createNewIlseSubmissions valid"() {
         given:
         IlseSubmissionService service = createIlseSubmissionServiceHelper()
 
         expect:
-        IlseSubmission ilseSubmission = service.createNewIlseSubmission(1234, HelperUtils.uniqueString)
-        ilseSubmission.id
+        List<IlseSubmission> ilseSubmission = service.createNewIlseSubmissions([1234, 567, 89,], HelperUtils.uniqueString)
+        ilseSubmission
+        ilseSubmission.size() == 3
+        ilseSubmission[0].id
+        ilseSubmission[0].ilseNumber == 1234
+        ilseSubmission[1].id
+        ilseSubmission[1].ilseNumber == 567
+        ilseSubmission[2].id
+        ilseSubmission[2].ilseNumber == 89
     }
 
     @Unroll
-    void "test createNewIlseSubmission invalid"() {
+    void "test createNewIlseSubmissions invalid (#ilse, #expectedErrorPart)"() {
         given:
         IlseSubmissionService service = createIlseSubmissionServiceHelper()
 
         when:
-        service.createNewIlseSubmission(ilse, comment)
+        service.createNewIlseSubmissions([ilse], comment)
 
         then:
         ValidationException e = thrown()
         e.message.contains(expectedErrorPart)
 
         where:
-        ilse | comment                  || expectedErrorPart
-        0    | HelperUtils.uniqueString || 'ilse'
-        1234 | null                     || 'comment'
+        ilse                               | comment                  || expectedErrorPart
+        IlseSubmission.MIN_ILSE_VALUE - 1  | HelperUtils.uniqueString || 'ilse'
+        IlseSubmission.MAX_ILSE_NUMBER + 1 | HelperUtils.uniqueString || 'ilse'
+        1234                               | null                     || 'comment'
     }
 
-    SeqTrack createSeqTrackWithIlseNumber(Integer ilseNumber) {
+    private SeqTrack createSeqTrackWithIlseNumber(Integer ilseNumber) {
         IlseSubmission ilseSubmission = ilseNumber ? (IlseSubmission.findByIlseNumber(ilseNumber) ?: createIlseSubmission(ilseNumber: ilseNumber)) : null
         return createSeqTrack(ilseSubmission: ilseSubmission)
     }

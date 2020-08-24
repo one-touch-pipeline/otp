@@ -42,14 +42,15 @@ class IlseSubmissionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    IlseSubmission createNewIlseSubmission(int ilse, String comment) {
-        IlseSubmission ilseSubmission = new IlseSubmission(
-                ilseNumber: ilse,
-                warning: true,
-        )
-
-        commentService.saveComment(ilseSubmission, comment)
-        return  ilseSubmission
+    List<IlseSubmission> createNewIlseSubmissions(List<Integer> ilseNumbers, String comment) {
+        return ilseNumbers.collect {
+            IlseSubmission ilseSubmission = new IlseSubmission(
+                    ilseNumber: it,
+                    warning: true,
+            )
+            commentService.saveComment(ilseSubmission, comment)
+            return ilseSubmission
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
