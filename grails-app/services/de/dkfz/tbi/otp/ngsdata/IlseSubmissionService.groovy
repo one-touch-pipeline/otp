@@ -54,6 +54,12 @@ class IlseSubmissionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void unBlacklistIlseSubmissions(IlseSubmission ilseSubmission) {
+        ilseSubmission.warning = false
+        ilseSubmission.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     String buildIlseIdentifierFromSeqTracks(List<SeqTrack> seqTracks) {
         List<Integer> ilseNumbers = seqTracks.collect { it?.ilseSubmission?.ilseNumber }
         return buildIlseIdentifier(ilseNumbers)

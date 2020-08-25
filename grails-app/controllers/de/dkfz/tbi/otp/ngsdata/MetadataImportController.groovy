@@ -33,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 
+import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -50,16 +51,17 @@ import java.nio.file.FileSystem
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class MetadataImportController {
+class MetadataImportController implements CheckAndCall {
 
     static allowedMethods = [
-            index                    : "GET",
-            validateOrImport         : "POST",
-            details                  : "GET",
-            multiDetails             : "GET",
-            autoImport               : "GET",
-            blacklistedIlseNumbers   : "GET",
-            addBlacklistedIlseNumbers: "POST",
+            index                     : "GET",
+            validateOrImport          : "POST",
+            details                   : "GET",
+            multiDetails              : "GET",
+            autoImport                : "GET",
+            blacklistedIlseNumbers    : "GET",
+            addBlacklistedIlseNumbers : "POST",
+            unBlacklistIlseSubmissions: "POST",
     ]
 
     MetadataImportService metadataImportService
@@ -295,6 +297,13 @@ class MetadataImportController {
         redirect action: 'blacklistedIlseNumbers'
     }
 
+    def unBlacklistIlseSubmissions(RemoveBlackListedIlseCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, 'metadataImport.blackListedIlseNumbers.unBlacklist') {
+            ilseSubmissionService.unBlacklistIlseSubmissions(cmd.ilseSubmission)
+        }
+        redirect action: 'blacklistedIlseNumbers'
+    }
+
     JSON updateSeqCenterComment(Long id, String value) {
         OtrsTicket otrsTicket = OtrsTicket.get(id)
         otrsTicket.seqCenterComment = value
@@ -360,6 +369,10 @@ class BlackListedIlseCommand implements Validateable {
     List<Integer> splitToIlseNumbers() {
         return ilse.split(SEPARATOR)*.toInteger()
     }
+}
+
+class RemoveBlackListedIlseCommand {
+    IlseSubmission ilseSubmission
 }
 
 @Immutable

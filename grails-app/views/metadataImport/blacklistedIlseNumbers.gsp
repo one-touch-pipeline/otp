@@ -51,12 +51,27 @@
     <table class="table">
         <tr>
             <th><g:message code="metadataImport.blackListedIlseNumbers.ilse"/></th>
+            <th>
+                <span class="tooltipIcon" title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}">
+                    <g:message code="metadataImport.blackListedIlseNumbers.remove"/>
+                </span>
+            </th>
             <th><g:message code="metadataImport.blackListedIlseNumbers.comment"/></th>
         </tr>
 
         <g:each in="${ilseSubmissions}" var="ilseSubmission">
             <tr>
-                <td>${ilseSubmission.ilseNumber}</td>
+                <td>
+                    ${ilseSubmission.ilseNumber}
+                </td>
+                <td>
+                    <span title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}">
+                        <g:form action="unBlacklistIlseSubmissions" method="POST" useToken="true" style="display:inline">
+                            <g:hiddenField name="ilseSubmission.id" value="${ilseSubmission.id}"/>
+                            <g:submitButton name="unBlacklist" value="-"/>
+                        </g:form>
+                    </span>
+                </td>
                 <td><pre>${ilseSubmission.comment.displayString()}</pre></td>
             </tr>
         </g:each>
