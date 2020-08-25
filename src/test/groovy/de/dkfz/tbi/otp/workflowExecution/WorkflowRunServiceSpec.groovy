@@ -59,9 +59,10 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         SeqTrack seqTrack = createSeqTrack()
         Project project = createProject()
         String dir = "/tmp/baseDir${nextId}"
+        String name = "asdf"
 
         when:
-        WorkflowRun run = service.createWorkflowRun(workflow, seqTrack.processingPriority, dir, project)
+        WorkflowRun run = service.createWorkflowRun(workflow, seqTrack.processingPriority, dir, project, name)
 
         then:
         run
@@ -73,5 +74,6 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run.restartedFrom == null
         run.skippedMessage == null
         run.workflowSteps == []
+        run.displayName == name
     }
 }

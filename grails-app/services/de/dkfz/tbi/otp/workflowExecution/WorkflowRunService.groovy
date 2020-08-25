@@ -66,7 +66,7 @@ class WorkflowRunService {
         ])
     }
 
-    WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<ExternalWorkflowConfigFragment> configs = []) {
+    WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, String name, List<ExternalWorkflowConfigFragment> configs = []) {
         return new WorkflowRun([
                 workDirectory : workDirectory,
                 state         : WorkflowRun.State.PENDING,
@@ -78,6 +78,7 @@ class WorkflowRunService {
                 skippedMessage: null,
                 workflowSteps : [],
                 workflow      : workflow,
+                displayName   : name,
         ]).save(flush: false)
     }
 }

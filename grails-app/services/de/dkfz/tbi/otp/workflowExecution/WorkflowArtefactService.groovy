@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class WorkflowArtefactService {
 
-    WorkflowArtefact createWorkflowArtefact(WorkflowRun run, String role, Individual individual, SeqType seqType) {
+    WorkflowArtefact createWorkflowArtefact(WorkflowRun run, String role, Individual individual, SeqType seqType, String name) {
         new WorkflowArtefact([
                 producedBy      : run,
                 outputRole      : role,
@@ -35,6 +35,7 @@ class WorkflowArtefactService {
                 state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
                 individual      : individual,
                 seqType         : seqType,
+                displayName     : name,
         ]).save(flush: false)
     }
 }

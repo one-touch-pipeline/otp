@@ -44,9 +44,10 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         String role = "role ${nextId}"
         Individual individual = createIndividual()
         SeqType seqType = createSeqType()
+        String name = "asdf"
 
         when:
-        WorkflowArtefact artefact = service.createWorkflowArtefact(run, role, individual, seqType)
+        WorkflowArtefact artefact = service.createWorkflowArtefact(run, role, individual, seqType, name)
 
         then:
         artefact
@@ -57,5 +58,6 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         artefact.seqType == seqType
         artefact.withdrawnDate == null
         artefact.withdrawnComment == null
+        artefact.displayName == name
     }
 }

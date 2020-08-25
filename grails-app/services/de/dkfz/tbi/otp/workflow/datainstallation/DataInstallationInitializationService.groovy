@@ -61,8 +61,10 @@ class DataInstallationInitializationService {
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
         String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
-        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project)
-        WorkflowArtefact artefact = workflowArtefactService.createWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType)
+        String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}" +
+                "lane ${seqTrack.laneId} run ${seqTrack.run.name}"
+        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}")
+        WorkflowArtefact artefact = workflowArtefactService.createWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType, name)
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
         return run
@@ -76,12 +78,12 @@ class DataInstallationInitializationService {
         WorkflowArtefact artefact = run.outputArtefacts[DataInstallationInitializationService.OUTPUT_ROLE]
         if (!artefact) {
             throw new NoArtefactOfRoleException("The WorkflowRun ${run} has no output artefact of role " +
-                    "${DataInstallationInitializationService.OUTPUT_ROLE}, only ${run.outputArtefacts.keySet().sort()}")
+                    "${OUTPUT_ROLE}, only ${run.outputArtefacts.keySet().sort()}")
         }
         Optional<Artefact> optionalArtefact = artefact.artefact
         if (!optionalArtefact.isPresent()) {
             throw new NoConcreteArtefactException("The WorkflowArtefact ${artefact} of WorkflowRun ${run} has no concreate artefact yet")
         }
-        return optionalArtefact.get()
+        return optionalArtefact.get() as SeqTrack
     }
 }
