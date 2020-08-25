@@ -52,6 +52,7 @@ class Workflow implements Commentable, Entity {
     Set<SeqType> supportedSeqTypes
 
     static constraints = {
+        name unique: true
         beanName nullable: true
         deprecatedDate nullable: true
         wesServer nullable: true
