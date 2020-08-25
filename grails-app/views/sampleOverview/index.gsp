@@ -36,7 +36,7 @@
             </div>
 
             <div class="grid-element rounded-page-header-box" style="display: table;">
-                <span style="display:table-cell; vertical-align: middle"><g:message code="sampleOverview.filter.sampleType"/>:</span>
+                <span style="display:table-cell; vertical-align: middle; white-space: nowrap;"><g:message code="sampleOverview.filter.sampleType"/>:</span>
                 <table id="searchCriteriaTableSampleType" style="display:table-cell;">
                     <tr>
                         <td class="value">
@@ -46,8 +46,8 @@
                         </td>
                     </tr>
                 </table>
-
-                <div style="display:table-cell; vertical-align: middle"><g:message code="sampleOverview.filter.seqType"/>:</div>
+                <div style="width: 20px"></div>
+                <span style="display:table-cell; vertical-align: middle; white-space: nowrap;"><g:message code="sampleOverview.filter.seqType"/>:</span>
                 <table id="searchCriteriaTableSeqType" style="display:table-cell;">
                     <tr class="dtf_row">
                         %{-- css class: little hack: the seqType select is actually the "value" of the filter,

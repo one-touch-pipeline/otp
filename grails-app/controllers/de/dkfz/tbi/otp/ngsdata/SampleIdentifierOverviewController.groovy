@@ -29,31 +29,34 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SampleIdentifierOverviewController {
 
-    ProjectOverviewService projectOverviewService
+    static allowedMethods = [
+            index                                  : "GET",
+            dataTableSourceSampleIdentifierOverview: "POST",
+    ]
+
+    MmmlService mmmlService
+    SampleIdentifierOverviewService sampleIdentifierOverviewService
     ProjectSelectionService projectSelectionService
 
     Map index() {
-        return [:]
+        return [
+                hideSampleIdentifier: MmmlService.hideSampleIdentifier(projectSelectionService.selectedProject),
+        ]
     }
 
-    JSON dataTableSourceListSampleIdentifierByProject(DataTableCommand cmd) {
+    JSON dataTableSourceSampleIdentifierOverview(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject
-        Map<List<String>, List<String>> data = projectOverviewService.listSampleIdentifierByProject(project)
+        boolean hideSampleIdentifier = mmmlService.hideSampleIdentifiersForCurrentUser(projectSelectionService.selectedProject)
+
+        Map<List, List<DataFile>> data = sampleIdentifierOverviewService.dataFilesOfProjectBySampleAndSeqType(project)
 
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = []
-
-        data.each { key, ids ->
-            List<String> line = [
-                    key[0], // mockpid
-                    key[1], // sampleType
-                    key[2], // seqType
-                    ids.join(", "), // the different sample identifiers
-            ]
-            dataToRender.aaData << line
+        dataToRender.aaData = data.collect { Map.Entry entry ->
+            sampleIdentifierOverviewService.handleSampleIdentifierEntry(entry, hideSampleIdentifier)
         }
+
         render dataToRender as JSON
     }
 }

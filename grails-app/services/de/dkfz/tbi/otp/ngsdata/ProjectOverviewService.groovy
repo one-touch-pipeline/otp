@@ -70,52 +70,6 @@ class ProjectOverviewService {
         return queryList
     }
 
-    /**
-     * Returns the sampleIdentifier strings in a project, in a map keyed by Individual+SampleType+SeqType.
-     * <p>
-     * Key is the three-item list <pre>[ 'Individual.mockFullName', 'sampleType.name', 'SeqType layout single/bulk']</pre>
-     * Value is a combined list of sample identifiers for this combination, taken from the SeqTracks.</p>
-     * <p>
-     * Example result:
-     * <pre>
-     * [
-     *   [ 'indivA', 'tumor',   'WGS Paired bulk' ] : [ 'sampleIdA1', 'sampleIdA2', 'sampleIdA3' ]
-     *   [ 'indivA', 'control', 'WGS Paired bulk' ] : [ 'sampleIdA4', 'sampleIdA5', 'sampleIdA6' ]
-     *   [ 'indivB', 'tumor',   'WGS Paired bulk' ] : [ 'sampleIdB1', 'sampleIdB2', 'sampleIdB3' ]
-     *   [ 'indivB', 'control', 'WGS Paired bulk' ] : [ 'sampleIdB4', 'sampleIdB5', 'sampleIdB6' ]
-     * ]
-     * </pre>
-     * </p>
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<List<String>, List<String>> listSampleIdentifierByProject(Project project) {
-        return SeqTrack.createCriteria().list {
-            projections {
-                sample {
-                    individual {
-                        eq('project', project)
-                        property('mockFullName')
-                    }
-                    sampleType {
-                        property('name')
-                    }
-                }
-                property('seqType')
-                property('sampleIdentifier')
-            }
-        }
-        .groupBy { it[0..2] } // group by Individual, SampleType, SeqType
-        .collectEntries { k, v ->
-            // replace SeqType-object with desired display string
-            List<String> newKey = [k[0], k[1], k[2].getDisplayNameWithLibraryLayout()]
-
-            // keep only SampleId (last element) in the value; project+SampleType+SeqType are already in the key.
-            List<String> newVal = v.collect { it[-1] }.sort().unique()
-
-            [ (newKey): newVal]
-        }
-    }
-
     List patientsAndSamplesGBCountPerProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)

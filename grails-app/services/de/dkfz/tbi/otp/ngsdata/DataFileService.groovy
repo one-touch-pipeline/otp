@@ -25,49 +25,20 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.security.RolesService
-import de.dkfz.tbi.otp.security.SecurityService
 
 @Transactional
-class MmmlService {
+class DataFileService {
 
-    RolesService rolesService
-    SecurityService securityService
-
-    static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
-            "ICGC_MMML",
-            "ICGC_MMML_XP",
-            "ICGC_MMML_RARE_LYMPHOMA_XP",
-            "ICGC_MMML_RARE_LYMPHOMA_EXOMES",
-    ].asImmutable()
-
-    /**
-     * determine, if the column sample identifier should be hidden in the view
-     */
-    static boolean hideSampleIdentifier(Project project) {
-        return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project?.name)
-    }
-
-    boolean hideSampleIdentifiersForCurrentUser(Project project) {
-        if (rolesService.isAdministrativeUser(securityService.currentUserAsUser)) {
-            return false
-        }
-        return hideSampleIdentifier(project)
-    }
-
-    @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
-    List tableForMMMLMapping() {
-        def seq = Individual.withCriteria {
-            project {
-                'in'("name", PROJECT_TO_HIDE_SAMPLE_IDENTIFIER)
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    List<DataFile> getAllDataFilesOfProject(Project project) {
+        return DataFile.withCriteria {
+            seqTrack {
+                sample {
+                    individual {
+                        eq("project", project)
+                    }
+                }
             }
-            projections {
-                property("id")
-                property("mockFullName")
-                property("internIdentifier")
-            }
-            order("id", "desc")
-        }
-        return seq
+        } as List<DataFile>
     }
 }

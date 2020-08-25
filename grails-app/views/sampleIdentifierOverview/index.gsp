@@ -32,6 +32,16 @@
     <div class="body">
         <g:render template="/templates/projectSelection"/>
         <h1>${g.message(code: "sampleIdentifierOverview.index.title")}</h1>
+
+        <g:if test="${hideSampleIdentifier}">
+            <otp:annotation type="warning">
+                <g:message code="sampleIdentifierOverview.index.sampleIdentifiersHidden"/>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <g:message code="sampleIdentifierOverview.index.sampleIdentifiersHidden.authorized"/>
+                </sec:ifAllGranted>
+            </otp:annotation>
+        </g:if>
+
         <div class="otpDataTables">
             <otp:dataTable codes="${[
                     'sampleIdentifierOverview.index.pid',
@@ -40,11 +50,6 @@
                     'sampleIdentifierOverview.index.sampleIdentifier',
             ]}" id="sampleIdentifierOverviewTable" />
         </div>
-    <asset:script>
-        $(function() {
-            $.otp.sampleIdentifierOverviewTable.register();
-        });
-    </asset:script>
     </div>
 </body>
 </html>

@@ -83,6 +83,7 @@
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
                                         <li><g:link controller="alignmentConfigurationOverview" action="index"><g:message code="otp.menu.alignmenAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
+                                        <li><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message code="projectOverview.projectInfos" /></g:link></li>
                                             <li class="allGranted"><g:link controller="projectRequest" action="index"><g:message code="otp.menu.projectRequest"/></g:link></li>
@@ -130,7 +131,6 @@
                                         <ul>
                                             <li><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
                                             <li><g:link controller="bamMetadataImport" action="index"><g:message code="otp.menu.bamMetadataImport"/></g:link></li>
-                                            <li><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
                                             <li><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
                                             <li><g:link controller="projectCreation" action="index"><g:message code="otp.menu.projectCreation"/></g:link></li>
                                             <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>

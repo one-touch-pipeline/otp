@@ -20,6 +20,17 @@
  * SOFTWARE.
  */
 
+$(function() {
+    "use strict";
+    $.otp.sampleIdentifierOverviewTable.registerDataTable(
+        '#sampleIdentifierOverviewTable',
+        $.otp.createLink({
+            controller: 'sampleIdentifierOverview',
+            action    : 'dataTableSourceSampleIdentifierOverview'
+        })
+    );
+});
+
 $.otp.sampleIdentifierOverviewTable = {
 
     registerDataTable: function (selector, url) {
@@ -50,8 +61,33 @@ $.otp.sampleIdentifierOverviewTable = {
                         oTable.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success": function (json) {
-                        fnCallback(json);
                         oTable.fnSettings().oFeatures.bServerSide = false;
+                        var i, rowData, row;
+                        for (i = 0; i < json.aaData.length; i += 1) {
+                            row = json.aaData[i];
+                            rowData = [
+                                $.otp.createLinkMarkup({
+                                    controller: "individual",
+                                    action    : "show",
+                                    id        : row.individual.id,
+                                    text      : row.individual.name
+                                }),
+                                $.otp.createLinkMarkup({
+                                    controller: "seqTrack",
+                                    action    : "seqTrackSet",
+                                    parameters: {
+                                        "individual": row.individual.id,
+                                        "sampleType": row.sampleType.id,
+                                        "seqType"   : row.seqType.id
+                                    },
+                                    text      : row.sampleType.name
+                                }),
+                                row.seqType.displayText,
+                                $.otp.sampleIdentifierOverviewTable.formatSampleIdentifier(row.sampleIdentifier)
+                            ];
+                            json.aaData[i] = rowData;
+                        }
+                        fnCallback(json);
                     }
                 });
             }
@@ -59,14 +95,9 @@ $.otp.sampleIdentifierOverviewTable = {
         return oTable;
     },
 
-    register: function () {
-        "use strict";
-        var oTable = $.otp.sampleIdentifierOverviewTable.registerDataTable(
-            '#sampleIdentifierOverviewTable',
-            $.otp.createLink({
-                controller: 'sampleIdentifierOverview',
-                action: 'dataTableSourceListSampleIdentifierByProject'
-            })
-        );
+    formatSampleIdentifier: function (data) {
+        return $.map(data, function (it) {
+            return "<span class=\"" + (it.withdrawn ? "withdrawn" : "") + "\" title=\"" + it.comments + "\">" + it.text + "</span>";
+        }).join(", ");
     },
 };
