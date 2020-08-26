@@ -45,10 +45,8 @@ def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile
     def md5 = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
     String md5summe = md5.text.split(" ")[0]
     Long size = orginialPathResolved.size().toLong()
-    script << "rm ${finalPath}*"
-    script << "cp ${orginialPathResolved}* ${finalPath.parent}"
-    script << "chgrp ${df.project.unixGroup} ${finalPath.parent}/*"
-    script << "chmod 640 ${finalPath.parent}/*"
+    script << "cp ${orginialPathResolved} ${finalPath}.tmp && mv ${finalPath}.tmp ${finalPath} && chgrp ${df.project.unixGroup} ${finalPath} && chmod 440 ${finalPath}"
+    script << "cp ${orginialPathResolved}.md5sum ${finalPath}.md5sum.tmp && mv ${finalPath}.md5sum.tmp ${finalPath}.md5sum && chgrp ${df.project.unixGroup} ${finalPath}.md5sum && chmod 440 ${finalPath}.md5sum"
     script << ""
     df.md5sum = md5summe
     df.fileSize = size
@@ -134,6 +132,7 @@ SeqTrack.withTransaction {
 
     if (script) {
         println "#!/bin/bash"
+        println "umask 027"
         println "set -v"
         println "set -e"
         println "\n\n"
