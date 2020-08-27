@@ -127,6 +127,12 @@ $(function() {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("textarea", container).val());
+                    if (data.updateMap) {
+                        for (var key in data.updateMap) {
+                            var el = $("." + key, outerContainer);
+                            el.text(data.updateMap[key]);
+                        }
+                    }
                 } else {
                     $.otp.warningMessage(data.error);
                     $("textarea", container).val($("p.edit-switch-label span", outerContainer).text());

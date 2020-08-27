@@ -21,6 +21,7 @@
   --}%
 
 <div class="edit-switch edit-switch-text-area">
+    ${ raw(bodyContent()) }
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
         <button class="buttons save"><g:message code="default.button.update.label"/></button>

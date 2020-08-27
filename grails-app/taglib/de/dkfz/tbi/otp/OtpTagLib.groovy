@@ -53,9 +53,10 @@ class OtpTagLib {
      * @attr roles optional comma delimited String of role names to check the users role against
      * @attr template optional The template to be used, if null the default one is taken
      */
-    def editorSwitch = { attrs ->
+    def editorSwitch = { attrs, body ->
         String template = editorSwitchTemplate(attrs.template)
         String roles = attrs.remove("roles")
+        attrs.bodyContent = body
         out << editorSwitchRender(roles, template, attrs)
     }
 
