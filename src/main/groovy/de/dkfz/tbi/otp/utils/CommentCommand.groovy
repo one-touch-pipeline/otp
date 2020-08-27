@@ -26,4 +26,11 @@ import grails.validation.Validateable
 class CommentCommand implements Validateable {
     long id
     String comment
+
+    /**
+     * needed for textarea editor switch used in blacklisted ilse
+     */
+    void setValue(String value) {
+        comment = value
+    }
 }

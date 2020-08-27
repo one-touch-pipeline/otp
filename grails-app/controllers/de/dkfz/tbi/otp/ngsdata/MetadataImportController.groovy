@@ -33,8 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 
-import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -45,6 +44,7 @@ import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.nio.file.FileSystem
@@ -62,6 +62,7 @@ class MetadataImportController implements CheckAndCall {
             blacklistedIlseNumbers    : "GET",
             addBlacklistedIlseNumbers : "POST",
             unBlacklistIlseSubmissions: "POST",
+            saveComment               : "POST",
     ]
 
     MetadataImportService metadataImportService
@@ -73,6 +74,8 @@ class MetadataImportController implements CheckAndCall {
     FileSystemService fileSystemService
 
     ConfigService configService
+
+    CommentService commentService
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         boolean isValidated = false
@@ -295,6 +298,22 @@ class MetadataImportController implements CheckAndCall {
             flash.cmd = command
         }
         redirect action: 'blacklistedIlseNumbers'
+    }
+
+    JSON saveComment(CommentCommand cmd) {
+        Map retMap = [:]
+        checkErrorAndCallMethod(cmd, {
+            IlseSubmission ilseSubmission = IlseSubmission.get(cmd.id)
+            commentService.saveComment(ilseSubmission, cmd.comment)
+            retMap << [
+                    updateMap: [
+                            author          : ilseSubmission.comment.author,
+                            modificationDate: ilseSubmission.comment.modificationDate.format('yyyy-MM-dd'),
+                    ],
+            ]
+        }) {
+            retMap
+        }
     }
 
     def unBlacklistIlseSubmissions(RemoveBlackListedIlseCommand cmd) {

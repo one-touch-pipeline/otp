@@ -25,7 +25,8 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="metadataImport.blackListedIlseNumbers.title"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="common/CommentBox.js"/>
 </head>
 
 <body>
@@ -72,7 +73,24 @@
                         </g:form>
                     </span>
                 </td>
-                <td><pre>${ilseSubmission.comment.displayString()}</pre></td>
+                <td>
+                    <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="textArea"
+                            link="${g.createLink(controller: 'metadataImport', action: 'saveComment', params: ['id': "${ilseSubmission.id}"])}"
+                            value="${ilseSubmission.comment.comment}">
+                        <g:message code="comment.author"/>
+                        <span class="author">${ilseSubmission.comment.author}</span>
+                        <br/>
+                        <g:message code="comment.created"/>
+                        <span class="dateCreated">${ilseSubmission.comment.dateCreated.format('yyyy-MM-dd')}</span>
+                        <br/>
+                        <g:message code="comment.lastModified"/>
+                        <span class="modificationDate">${ilseSubmission.comment.modificationDate.format('yyyy-MM-dd')}</span>
+                        <br/>
+                        <g:message code="comment.comment"/>
+                    </otp:editorSwitch>
+                </td>
             </tr>
         </g:each>
     </table>
