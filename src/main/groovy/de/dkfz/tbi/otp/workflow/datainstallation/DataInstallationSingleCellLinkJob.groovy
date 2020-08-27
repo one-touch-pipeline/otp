@@ -22,8 +22,10 @@
 package de.dkfz.tbi.otp.workflow.datainstallation
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.LinkEntry
@@ -35,33 +37,37 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstallationShared {
+class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataInstallationShared {
+
+    @Autowired
+    SingleCellMappingFileService singleCellMappingFileService
 
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         FileSystem fs = fileSystemService.getRemoteFileSystem(seqTrack.project.realm)
 
-        seqTrack.dataFiles.collect { DataFile dataFile ->
-            Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile, fs)
-            Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fs)
-            return new LinkEntry(target: target, link: link)
+        if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
+            return seqTrack.dataFiles.collect { DataFile dataFile ->
+                Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile, fs)
+                Path link = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile, fs)
+                return new LinkEntry(target: target, link: link)
+            }
         }
+        return []
     }
 
     @Override
-    protected void doFurtherWork(WorkflowStep workflowStep) { }
-
-    @Override
-    protected void saveResult(WorkflowStep workflowStep) {
+    protected void doFurtherWork(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        seqTrack.dataFiles.each { DataFile dataFile ->
-            dataFile.fileLinked = true
-            dataFile.dateLastChecked = new Date()
-            dataFile.save(flush: true)
+
+        if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
+            seqTrack.dataFiles.each { DataFile dataFile ->
+                singleCellMappingFileService.addMappingFileEntryIfMissing(dataFile)
+            }
         }
-        seqTrack.dataInstallationState = SeqTrack.DataProcessingState.FINISHED
-        seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-        assert seqTrack.save(flush: true)
     }
+
+    @Override
+    protected void saveResult(WorkflowStep workflowStep) { }
 }

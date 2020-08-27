@@ -60,6 +60,7 @@ class AbstractLinkJobSpec extends Specification implements DataTest, WorkflowSys
         1 * job.getLinkMap(workflowStep) >> { [new LinkEntry(target: target1, link: link1), new LinkEntry(target: target2, link: link2)] }
         1 * job.fileService.createLink(target1, link1, workflowStep.workflowRun.project.realm)
         1 * job.fileService.createLink(target2, link2, workflowStep.workflowRun.project.realm)
+        1 * job.doFurtherWork(workflowStep) >> null
         1 * job.saveResult(workflowStep) >> null
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }

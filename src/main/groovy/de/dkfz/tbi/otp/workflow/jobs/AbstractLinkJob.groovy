@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -36,6 +37,8 @@ abstract class AbstractLinkJob implements Job {
     @Autowired
     FileService fileService
     @Autowired
+    FileSystemService fileSystemService
+    @Autowired
     WorkflowStateChangeService workflowStateChangeService
 
     @Override
@@ -47,6 +50,7 @@ abstract class AbstractLinkJob implements Job {
                     workflowStep.workflowRun.project.realm,
             )
         }
+        doFurtherWork(workflowStep)
         saveResult(workflowStep)
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
@@ -57,5 +61,6 @@ abstract class AbstractLinkJob implements Job {
     }
 
     abstract protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep)
+    abstract protected void doFurtherWork(WorkflowStep workflowStep)
     abstract protected void saveResult(WorkflowStep workflowStep)
 }

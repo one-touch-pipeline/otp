@@ -174,6 +174,10 @@ class LsdfFilesService {
         return createFinalPathHelper(file, true)
     }
 
+    Path getWellAllFileViewByPidPathAsPath(DataFile file, FileSystem fileSystem) {
+        return fileSystem.getPath(getWellAllFileViewByPidPath(file))
+    }
+
     private OtpPath createViewByPidPath(DataFile dataFile) {
         return dataFile.individual.getViewByPidPath(dataFile.seqType)
     }
