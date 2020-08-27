@@ -26,11 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.LinkEntry
-import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
+import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystem
@@ -38,28 +37,33 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInstallationShared {
+class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstallationShared {
 
-    @Autowired FileSystemService fileSystemService
-    @Autowired NotificationCreator notificationCreator
+    @Autowired
+    FileSystemService fileSystemService
 
     @Override
-    protected void doFurtherPreparation(WorkflowStep workflowStep) {
+    protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
-        seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
+        FileSystem fs = fileSystemService.getRemoteFileSystem(seqTrack.project.realm)
+
+        seqTrack.dataFiles.collect { DataFile dataFile ->
+            Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile, fs)
+            Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fs)
+            return new LinkEntry(target: target, link: link)
+        }
+    }
+
+    @Override
+    protected void saveResult(WorkflowStep workflowStep) {
+        SeqTrack seqTrack = getSeqTrack(workflowStep)
+        seqTrack.dataFiles.each { DataFile dataFile ->
+            dataFile.fileLinked = true
+            dataFile.dateLastChecked = new Date()
+            dataFile.save(flush: true)
+        }
+        seqTrack.dataInstallationState = SeqTrack.DataProcessingState.FINISHED
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
         assert seqTrack.save(flush: true)
-    }
-
-    @Override
-    protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
-        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first(), fs)
-    }
-
-    @Override
-    protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep) {
-        return []
     }
 }

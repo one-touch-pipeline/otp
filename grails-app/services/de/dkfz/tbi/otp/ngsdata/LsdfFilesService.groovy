@@ -162,6 +162,10 @@ class LsdfFilesService {
         return createFinalPathHelper(file, false)
     }
 
+    Path getFileViewByPidPathAsPath(DataFile file, FileSystem fileSystem) {
+        return fileSystem.getPath(getFileViewByPidPath(file))
+    }
+
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
      * For all other data the same as {@link #getFileViewByPidPath} is returned

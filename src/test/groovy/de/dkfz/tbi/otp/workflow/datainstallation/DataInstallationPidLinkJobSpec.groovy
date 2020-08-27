@@ -27,58 +27,63 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystems
-import java.nio.file.Paths
+import java.nio.file.*
 
-class DataInstallationPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class DataInstallationPidLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
-                DataFile,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 WorkflowStep,
         ]
     }
 
-    void "test doFurtherPreparation"() {
+    void "test getLinkMap"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
-        }
-        job.notificationCreator = Mock(NotificationCreator)
+        Path target1 = Paths.get("target1")
+        Path target2 = Paths.get("target2")
+        Path link1 = Paths.get("link1")
+        Path link2 = Paths.get("link2")
 
-        when:
-        job.doFurtherPreparation(workflowStep)
-
-        then:
-        1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
-        seqTrack.dataInstallationState == SeqTrack.DataProcessingState.IN_PROGRESS
-    }
-
-    void "test buildWorkDirectoryPath"() {
-        given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        String workDirectory = "/adsf"
-        DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
+        DataInstallationPidLinkJob job = Spy(DataInstallationPidLinkJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
         job.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystem(_) >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileViewByPidPathAsPath(_, _) >> Paths.get(workDirectory)
+            2 * getFileFinalPathAsPath(_, _) >>> [target1, target2]
+            2 * getFileViewByPidPathAsPath(_, _) >>> [link1, link2]
         }
 
         expect:
-        workDirectory == job.buildWorkDirectoryPath(workflowStep).toString()
+        [new LinkEntry(target: target1, link: link1), new LinkEntry(target: target2, link: link2)] == job.getLinkMap(workflowStep)
+    }
+
+    void "test saveResult"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+
+        DataInstallationPidLinkJob job = Spy(DataInstallationPidLinkJob) {
+            1 * getSeqTrack(workflowStep) >> seqTrack
+        }
+
+        when:
+        job.saveResult(workflowStep)
+
+        then:
+        seqTrack.dataFiles.every { it.fileLinked }
+        seqTrack.dataFiles.every { it.dateLastChecked }
+        seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
+        seqTrack.fastqcState == SeqTrack.DataProcessingState.NOT_STARTED
     }
 }

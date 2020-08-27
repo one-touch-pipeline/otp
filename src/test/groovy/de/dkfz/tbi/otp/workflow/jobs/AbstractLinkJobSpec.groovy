@@ -21,41 +21,46 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import org.springframework.beans.factory.annotation.Autowired
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * Links result files
- */
-abstract class AbstractLinkJob implements Job {
+import java.nio.file.Path
+import java.nio.file.Paths
 
-    @Autowired
-    FileService fileService
-    @Autowired
-    WorkflowStateChangeService workflowStateChangeService
+class AbstractLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
-    final void execute(WorkflowStep workflowStep) {
-        getLinkMap(workflowStep).each { LinkEntry entry ->
-            fileService.createLink(
-                    entry.target,
-                    entry.link,
-                    workflowStep.workflowRun.project.realm,
-            )
-        }
-        saveResult(workflowStep)
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
+    Class[] getDomainClassesToMock() {
+        [
+                WorkflowStep,
+        ]
     }
 
-    @Override
-    final JobStage getJobStage() {
-        return JobStage.LINK
-    }
+    void "test execute"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        Path target1 = Paths.get("target1")
+        Path target2 = Paths.get("target2")
+        Path link1 = Paths.get("link1")
+        Path link2 = Paths.get("link2")
+        AbstractLinkJob job = Spy(AbstractLinkJob)
+        job.fileService = Mock(FileService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
-    abstract protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep)
-    abstract protected void saveResult(WorkflowStep workflowStep)
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.getLinkMap(workflowStep) >> { [new LinkEntry(target: target1, link: link1), new LinkEntry(target: target2, link: link2)] }
+        1 * job.fileService.createLink(target1, link1, workflowStep.workflowRun.project.realm)
+        1 * job.fileService.createLink(target2, link2, workflowStep.workflowRun.project.realm)
+        1 * job.saveResult(workflowStep) >> null
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+    }
 }
