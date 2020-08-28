@@ -20,25 +20,6 @@
   ~ SOFTWARE.
   -->
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>One Touch Platform</title>
-    <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="css/default.css">
-</head>
-<body>
+# Developer Documentation
 
-<h1>One Touch Platform (OTP) Documentation</h1>
-
-<ul>
-    <li>
-        <a href="users/index.html">User Documentation</a>
-    </li>
-    <li>
-        <a href="devel/index.html">Devel Documentation</a>
-    </li>
-</ul>
-
-</body>
-</html>
+  * [Commit Messages](commitMessages.md)
