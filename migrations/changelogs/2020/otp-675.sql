@@ -19,12 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.utils.Entity
+ALTER TABLE workflow_version RENAME COLUMN version TO workflow_version;
 
-class WorkflowVersion implements Entity {
-
-    Workflow workflow
-    String workflowVersion
-}
+ALTER TABLE workflow_version ADD COLUMN version int8;
+UPDATE workflow_version SET version = 0 WHERE version IS NULL;
+ALTER TABLE workflow_version ALTER COLUMN version SET NOT NULL;

@@ -21,6 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import grails.converters.JSON
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.json.JSONException
+
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
@@ -35,10 +40,27 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         comment nullable: true
         previous nullable: true
         deprecationDate nullable: true
+        configValues validator: {
+            validateJsonString(it)
+        }
     }
 
     static mapping = {
         configValues type: "text"
         comment cascade: "all-delete-orphan"
+    }
+
+    Map configValuesToMap() {
+        ObjectMapper mapper = new ObjectMapper()
+        return mapper.readValue(configValues, HashMap)
+    }
+
+    static boolean validateJsonString(String s) {
+        try {
+            JSON.parse(s)
+            return true
+        } catch (JSONException | ConverterException ignored) {
+            return false
+        }
     }
 }

@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-class ExternalWorkflowConfigSelector implements Entity {
+class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfigSelector>, Entity {
 
     String name
     Set<WorkflowVersion> workflowVersions
@@ -52,5 +52,11 @@ class ExternalWorkflowConfigSelector implements Entity {
 
     static constraints = {
         name unique: true
+    }
+
+    @Override
+    int compareTo(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
+        return externalWorkflowConfigSelector.basePriority <=> basePriority ?:
+                externalWorkflowConfigSelector.fineTuningPriority <=> fineTuningPriority
     }
 }

@@ -112,6 +112,38 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 queued        : new DateTime(),
         ], properties)
     }
+
+    WorkflowVersion createWorkflowVersion(Map properties = [:]) {
+        return createDomainObject(WorkflowVersion, [
+                workflow: { createWorkflow() },
+                workflowVersion: "${nextId}.0",
+        ], properties)
+    }
+
+    ExternalWorkflowConfigSelector createExternalWorkflowConfigSelector(Map properties = [:]) {
+        return createDomainObject(ExternalWorkflowConfigSelector, [
+                name: "externalWorkflowConfigSelectorName_${nextId}",
+                workflowVersions: { [createWorkflowVersion()] },
+                workflows: { [createWorkflow()] },
+                referenceGenomes: { [createReferenceGenome()] },
+                libraryPreparationKits: { [createLibraryPreparationKit()] },
+                seqTypes: { [createSeqType()] },
+                projects: { [createProject()] },
+                externalWorkflowConfigFragment: { createExternalWorkflowConfigFragment() },
+                selectorType: { SelectorType.GENERIC },
+                basePriority: nextId,
+                fineTuningPriority: nextId,
+        ], properties)
+    }
+
+    ExternalWorkflowConfigFragment createExternalWorkflowConfigFragment(Map properties = [:]) {
+        return createDomainObject(ExternalWorkflowConfigFragment, [
+                name: "externalWorkflowConfigFragmentName_${nextId}",
+                configValues: '{ "TestConfigKey": "TestConfigValue" }',
+                previous: null,
+        ], properties)
+    }
+
 }
 
 class WorkflowSystemDomainFactoryInstance implements WorkflowSystemDomainFactory {
