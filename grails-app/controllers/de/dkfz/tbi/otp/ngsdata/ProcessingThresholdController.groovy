@@ -46,12 +46,12 @@ class ProcessingThresholdController {
     SampleTypeService sampleTypeService
     UserService userService
     SecurityService securityService
-    RolesService roleService
+    RolesService rolesService
 
     Map index(ProcThresholdsEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
 
-        boolean isAdmin = roleService.isAdministrativeUser(securityService.currentUserAsUser)
+        boolean isAdmin = rolesService.isAdministrativeUser(securityService.currentUserAsUser)
         boolean edit = isAdmin ? cmd.edit : false
 
         List<SampleTypePerProject> sampleTypePerProjects = sampleTypePerProjectService.findByProject(project)
