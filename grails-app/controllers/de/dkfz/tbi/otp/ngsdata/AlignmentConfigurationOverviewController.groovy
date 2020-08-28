@@ -37,7 +37,7 @@ class AlignmentConfigurationOverviewController {
             dataTableSourceReferenceGenome: "GET",
     ]
 
-    ProjectOverviewService projectOverviewService
+    AlignmentInfoService alignmentInfoService
     ProjectSelectionService projectSelectionService
 
     Map index() {
@@ -63,7 +63,7 @@ class AlignmentConfigurationOverviewController {
         Map<String, AlignmentInfo> alignmentInfo = null
         String alignmentError = null
         try {
-            alignmentInfo = projectOverviewService.getAlignmentInformation(project)
+            alignmentInfo = alignmentInfoService.getAlignmentInformation(project)
         } catch (Throwable e) {
             alignmentError = e.message
             log.error(e.message, e)
@@ -76,7 +76,7 @@ class AlignmentConfigurationOverviewController {
     JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
         Project project = projectSelectionService.requestedProject
         Map dataToRender = cmd.dataToRender()
-        List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
+        List data = alignmentInfoService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
             String adapterTrimming = ""
             if (!it.sampleType) {
                 adapterTrimming = it.seqType.wgbs ?:
