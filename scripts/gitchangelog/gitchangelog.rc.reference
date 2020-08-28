@@ -2,50 +2,12 @@
 ##
 ## Format
 ##
-##   ACTION: [AUDIENCE:] COMMIT_MSG [!TAG ...]
+##   ACTION: COMMIT_MSG [!TAG ...]
 ##
 ## Description
 ##
-##   ACTION is one of 'chg', 'fix', 'new'
+##   see docs/md/devel/commitMessages.md or https://one-touch-pipeline.gitlab.io/otp/devel/commitMessages.html
 ##
-##       Is WHAT the change is about.
-##
-##       'chg' or 'change' is for refactor, small improvement, cosmetic changes...
-##       'fix' or 'bugfix' is for bug fixes
-##       'new' or 'add' is for new features, big improvement
-##       'refactor' is for new refactoring
-##       'minor' is for small changes
-##       'codenarc' is for codenarc fixes
-##
-##   AUDIENCE is optional and one of 'dev', 'usr', 'pkg', 'test', 'doc'
-##
-##       Is WHO is concerned by the change.
-##
-##       'dev'  is for developpers (API changes, refactors...)
-##       'usr'  is for final users (UI changes)
-##       'pkg'  is for packagers   (packaging changes)
-##       'test' is for testers     (test only related changes)
-##       'doc'  is for doc guys    (doc only changes)
-##
-##
-##   COMMIT_MSG is ... well ... the commit message itself.
-##
-##   TAGs are additionnal adjective as 'refactor' 'minor' 'cosmetic'
-##
-##       They are preceded with a '!' or a '@' (prefer the former, as the
-##       latter is wrongly interpreted in github.) Commonly used tags are:
-##
-##       'wip' is for partial functionality but complete subfunctionality.
-##       'ignore' is commits wich should be ignored.
-##
-## Example:
-##
-##   new: usr: support of bazaar implemented
-##   chg: re-indentend some lines !cosmetic
-##   new: dev: updated code to be compatible with last version of killer lib.
-##   fix: pkg: updated year of licence coverage.
-##   new: test: added a bunch of test around user usability of feature X.
-##   fix: typo in spelling my name in comment. !minor
 ##
 ##   Please note that multi-line commit message are supported, and only the
 ##   first line will be considered as the "summary" of the commit message. So
@@ -60,8 +22,9 @@
 ## will be ignored and won't be reported in the changelog.
 ##
 ignore_regexps = [
-    r'@wip', r'!wip',
-    r'@ignore', r'!ignore',
+    r'^(!?[wW][iI][pP])',
+    r'^(!?[iI][gG][nN][oO][rR][eE])',
+    r'^(!?[rR][eE][vV][iI][eE][wW])',
 ]
 
 
@@ -78,25 +41,28 @@ ignore_regexps = [
 ## whenever you are tweaking this variable.
 ##
 section_regexps = [
-    ('New Features', [
-        r'^([nN][eE][wW])|([aA][dD][dD])\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Changes and Improvements', [
-        r'^([cC][hH](([aA][nN][gG][eE])|([gG])))\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+    ('New Features, Changes and Improvements', [
+        r'^( *[nN][eE][wW])\s*:\s*([^\n]*)$',
+        r'^( *[aA][dD][dD])\s*:\s*([^\n]*)$',
+        r'^( *[cC][hH][aA][nN][gG][eE])\s*:\s*([^\n]*)$',
+        r'^( *[cC][hH][gG])\s*:\s*([^\n]*)$',
      ]),
     ('Bugfixes', [
-        r'^([bB][uU][gG])?[fF][iI][xX]\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+        r'^( *[bB][uU][gG])\s*:\s*([^\n]*)$',
+        r'^( *[bB][uU][gG][fF][iI][xX])\s*:\s*([^\n]*)$',
+        r'^( *[fF][iI][xX])\s*:\s*([^\n]*)$',
      ]),
     ('Refactor', [
-        r'^([@!]?[rR][eE][fF][aA][cC][tT][oO][rR])\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+        r'^( *[rR][eE][fF][aA][cC][tT][oO][rR])\s*:\s*([^\n]*)$',
      ]),
     ('Minor', [
-        r'^([@!]?[mM][iI][nN][oO][rR])\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-        r'@refactor', r'!refactor',
+        r'^( *[mM][iI][nN][oO][rR])\s*:\s*([^\n]*)$',
      ]),
     ('Codenarc', [
-        r'^([@!]?[cC][oO][dD][eE][nN][aA][rR][cC])\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-        r'@refactor', r'!refactor',
+        r'^( *[cC][oO][dD][eE][nN][aA][rR][cC])\s*:\s*([^\n]*)$',
+     ]),
+    ('Scripts', [
+        r'^( *[sS][cC][rR][iI][pP][tT][sS])\s*:\s*([^\n]*)$',
      ]),
     ('Others', None ## Match all lines
      ),
@@ -147,7 +113,7 @@ body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | ReSub(r'
 ##
 ## Available constructs are those listed in ``body_process`` doc.
 subject_process = (strip |
-    ReSub(r'^(([nN][eE][wW])|([aA][dD][dD])|([cC][hH](([aA][nN][gG][eE])|([gG])))|(([bB][uU][gG])?[fF][iI][xX])|([@!]?[rR][eE][fF][aA][cC][tT][oO][rR])|([@!]?[mM][iI][nN][oO][rR])|([@!]?[cC][oO][dD][nN][eE][aA][rR][cC]))\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\15') |
+    ReSub(r'^(?:(?:[nN][eE][wW])|(?:[aA][dD][dD])|(?:[cC][hH][aA][nN][gG][eE])|(?:[cC][hH][gG])|(?:[bB][uU][gG])|(?:[bB][uU][gG][fF][iI][xX])|(?:[fF][iI][xX])|(?:[rR][eE][fF][aA][cC][tT][oO][rR])|(?:[mM][iI][nN][oO][rR])|(?:[cC][oO][dD][eE][nN][aA][rR][cC])|(?:[sS][cC][rR][iI][pP][tT][sS]))\s*:\s*([^\n@]*)(@[a-z]+\s+)*$', r'\1') |
     SetIfEmpty("No commit message.") | ucfirst | final_dot)
 
 
