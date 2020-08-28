@@ -20,15 +20,26 @@
  * SOFTWARE.
  */
 
+
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.Path
 
 /**
  * Script to delete a FastqImportInstance if it was loaded twice.
  */
 
 long fastqImportInstanceId = 0
+
+
+DeletionService deletionService = ctx.deletionService
+
+Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
+
 
 FastqImportInstance.withTransaction {
     FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
@@ -38,21 +49,16 @@ FastqImportInstance.withTransaction {
             entry.delete(flush: true)
         }
         assert MetaDataEntry.countByDataFile(dataFile) == 0
-        CollectionUtils.exactlyOneElement(FastqcProcessedFile.findAllByDataFile(dataFile)).delete()
+        CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.delete()
         SeqTrack seqTrack = dataFile.seqTrack
+        deletionService.deleteProcessingFilesOfProject(seqTrack.individual.project.name, baseOutputDir, false, false, [seqTrack])
+
+        ConsistencyStatus.findAllByDataFile(dataFile)*.delete(flush: true)
+
         dataFile.delete(flush: true)
         if (!seqTrack.dataFiles) {
-            RoddyBamFile roddyBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.createCriteria().list {
-                seqTracks {
-                    eq('id', seqTrack.id)
-                }
-            })
-            if (roddyBamFile) {
-                assert roddyBamFile.seqTracks.remove(seqTrack)
-                roddyBamFile.numberOfMergedLanes--
-                assert roddyBamFile.save(flush: true)
-            }
-            MergingAssignment.findBySeqTrack(seqTrack)*.delete()
+            MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
+
             seqTrack.delete(flush: true)
         }
     }
