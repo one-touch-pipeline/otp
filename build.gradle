@@ -359,8 +359,8 @@ generateHtml {
     recursiveInput = true
     inputEncoding = ext.encoding
     outputEncoding = ext.encoding
-    inputDirectory = new File("docs/users")
-    outputDirectory = new File(buildDir, "docs/users")
+    inputDirectory = new File("docs/md")
+    outputDirectory = new File(buildDir, "docs")
 
     transformRelativeMarkdownLinks = true
     headerHtmlFile = new File("docs/support/header.html")
