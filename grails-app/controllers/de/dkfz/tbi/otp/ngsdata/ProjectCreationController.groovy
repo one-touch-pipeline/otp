@@ -85,6 +85,7 @@ class ProjectCreationController {
                 projectRequestAvailable        : false,
         ]
         ProjectCreationCommand projectCreationCmd = flash.cmd as ProjectCreationCommand
+        boolean showSharedUnixGroupAlert = flash.showSharedUnixGroupAlert as boolean
         boolean showIgnoreUsersFromBaseObjects = flash.showIgnoreUsersFromBaseObjects as boolean
 
         MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(projectCreationCmd, cmd.projectRequest, baseProjectOverride, cmd.baseProject, defaults)
@@ -108,6 +109,7 @@ class ProjectCreationController {
                 projectTypes                   : Project.ProjectType.values(),
                 allSpeciesWithStrains          : SpeciesWithStrain.list().sort { it.toString() },
                 keywords                       : Keyword.listOrderByName() ?: [],
+                showSharedUnixGroupAlert       : showSharedUnixGroupAlert,
                 showIgnoreUsersFromBaseObjects : showIgnoreUsersFromBaseObjects,
                 source                         : multiObjectValueSource,
         ]
@@ -118,14 +120,26 @@ class ProjectCreationController {
                 "projectRequest.id": cmd.projectRequest?.id,
                 "baseProject.id"   : cmd.baseProject?.id,
         ]
+        List<Project> projects = Project.findAllByUnixGroup(cmd.unixGroup)
+
         if (cmd.hasErrors()) {
             flash.cmd = cmd
             flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, cmd.errors)
             redirect(action: "index", params: basisCommandProperties)
-        } else if (((cmd.projectRequest || cmd.baseProject) && Project.findAllByUnixGroup(cmd.unixGroup)) && !cmd.ignoreUsersFromBaseObjects) {
+        } else if (projects && !cmd.ignoreUsersFromBaseObjects) {
             flash.cmd = cmd
-            flash.showIgnoreUsersFromBaseObjects = true
-            flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, [g.message(code: "projectCreation.store.error.sharedUnixGroup") as String])
+            flash.showSharedUnixGroupAlert = true
+            String baseText
+            if (cmd.projectRequest || cmd.baseProject) {
+                baseText = g.message(code: "projectCreation.store.error.sharedUnixGroup.base")
+                flash.showIgnoreUsersFromBaseObjects = true
+            } else {
+                baseText = g.message(code: "projectCreation.store.error.sharedUnixGroup.new", args: [cmd.unixGroup, projects.join(' and ')])
+            }
+            flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, [
+                    baseText,
+                    g.message(code: "projectCreation.store.error.sharedUnixGroup.force") as String,
+            ])
             redirect(action: "index", params: basisCommandProperties)
         } else {
             Project project = projectService.createProject(cmd)

@@ -69,13 +69,16 @@
 
     <h2><g:message code="projectCreation.form.header"/></h2>
     <g:uploadForm controller="projectCreation" action="save">
-        <g:if test="${showIgnoreUsersFromBaseObjects}">
+        <g:if test="${showSharedUnixGroupAlert}">
             <otp:annotation type="warning">
                 <label class="vertical-align-middle">
                     <strong><g:message code="projectCreation.ignoreUsersFromBaseObjects"/>:</strong>
                     <g:checkBox name="ignoreUsersFromBaseObjects" checked="false" value="true"/>
                 </label>
                 <br>
+                <g:if test="${showIgnoreUsersFromBaseObjects}">
+                    <span class="keep-whitespace"><g:message code="projectCreation.ignoreUsersFromBaseObjects.information.base"/></span>
+                </g:if>
                 <span class="keep-whitespace"><g:message code="projectCreation.ignoreUsersFromBaseObjects.information"/></span>
             </otp:annotation>
         </g:if>
