@@ -21,18 +21,72 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
  * Checks whether the expected files and directories were created
  */
 abstract class AbstractValidationJob implements Job {
+
+    @Autowired
+    FileSystemService fileSystemService
+    @Autowired
+    WorkflowStateChangeService workflowStateChangeService
+
     @Override
-    void execute(WorkflowStep workflowStep) {
+    final void execute(WorkflowStep workflowStep) {
+        List<String> errors = []
+        errors.addAll(getExpectedFiles(workflowStep).collect {
+            try {
+                FileService.ensureFileIsReadableAndNotEmpty(it)
+            } catch (Throwable t) {
+                return "Expected file not found, ${t.message}"
+            }
+        })
+        errors.addAll(getExpectedDirectories(workflowStep).collect {
+            try {
+                FileService.ensureDirIsReadable(it)
+            } catch (Throwable t) {
+                return "Expected directory not found, ${t.message}"
+            }
+        })
+
+        try {
+            doFurtherValidation(workflowStep)
+        } catch (Throwable t) {
+            errors.add("Further validation failed, ${t.message}")
+        }
+
+        errors = errors.findAll()
+        if (errors) {
+            throw new WorkflowException(errors.join(","))
+        }
+        saveResult(workflowStep)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
-    abstract List<Path> getExpectedFiles(WorkflowStep workflowStep)
-    abstract List<Path> getExpectedDirectories(WorkflowStep workflowStep)
+
+    @Override
+    final JobStage getJobStage() {
+        return JobStage.VALIDATION
+    }
+
+    abstract protected List<Path> getExpectedFiles(WorkflowStep workflowStep)
+    abstract protected List<Path> getExpectedDirectories(WorkflowStep workflowStep)
+    @SuppressWarnings("UnusedMethodParameter")
+    protected void doFurtherValidation(WorkflowStep workflowStep) { }
+    abstract protected void saveResult(WorkflowStep workflowStep)
+
+    protected FileSystem getFileSystem(WorkflowStep workflowStep) {
+        return fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
+    }
 }
