@@ -274,7 +274,7 @@ class MetaDataExport {
     String getMetadata(Collection<DataFile> dataFiles) {
         MetaDataKey.list()
         Collection<Map<String, String>> allProperties = dataFiles.collect { getMetadata(it) }
-        List<String> headers = allProperties*.keySet().sum() as List<String>
+        List<String> headers = (MetaDataColumn.values()*.name() + (allProperties*.keySet().sum() as List<String>).sort()).unique()
         StringBuilder s = new StringBuilder(headers.join('\t')).append('\n')
         for (Map<String, String> properties : allProperties) {
             s << headers.collect { String header ->
