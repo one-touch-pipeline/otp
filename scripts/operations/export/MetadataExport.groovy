@@ -259,10 +259,10 @@ class MetaDataExport {
         List<String> headers = allProperties*.keySet().sum() as List<String>
         StringBuilder s = new StringBuilder(headers.join('\t')).append('\n')
         for (Map<String, String> properties : allProperties) {
-            for (String header : headers) {
-                s.append(properties.get(header) ?: '').append('\t')
-            }
-            s.append('\n')
+            s << headers.collect { String header ->
+                properties.get(header) ?: ''
+            }.join('\t')
+            s << '\n'
         }
         return s.toString()
     }
