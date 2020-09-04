@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
@@ -45,6 +46,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
@@ -144,13 +146,15 @@ class MetadataImportService {
             return results
         } catch (Exception e) {
             if (!e.message.startsWith('Copying of metadata file')) {
-                String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
-                if (recipientsString) {
-                    mailHelperService.sendEmail("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}" +
-                            "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
+                TransactionUtils.withNewTransaction {
+                    String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
+                    if (recipientsString) {
+                        mailHelperService.sendEmail("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}\n" +
+                                "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
+                    }
                 }
             }
-            throw new RuntimeException("Error while importing metadata file with paths: ${metadataPaths*.path.join('\n')}", e)
+            throw new OtpRuntimeException("Error while importing metadata file with paths: ${metadataPaths*.path.join('\n')}", e)
         }
     }
 
