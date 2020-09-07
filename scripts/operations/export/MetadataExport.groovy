@@ -282,7 +282,7 @@ class MetaDataExport {
 
         put(FASTQ_FILE, lsdfFilesService.getFileViewByPidPath(dataFile).replaceAll('//+', '/'))
         put(MD5, dataFile.md5sum)
-        put(READ, dataFile.mateNumber?.toString())
+        put(READ, (dataFile.indexFile ? 'I' : '') + dataFile.mateNumber?.toString())
         put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
         put(WITHDRAWN_DATE, dataFile.withdrawnDate?.format("yyyy-MM-dd"))
 
