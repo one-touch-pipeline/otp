@@ -108,7 +108,7 @@ String filterBySeqTypeName = """
 
 /**
  * Name of the file without extension. The extension '.tsv' is automatically added.
- * The file is created in $PATH_SCRIPTS_OUTPUT/export.
+ * The file is created in $PATH_SCRIPTS_OUTPUT/metadata-export.
  */
 String fileName = ''
 
