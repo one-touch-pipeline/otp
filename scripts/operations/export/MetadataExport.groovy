@@ -285,6 +285,7 @@ class MetaDataExport {
         put(READ, (dataFile.indexFile ? 'I' : '') + dataFile.mateNumber?.toString())
         put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
         put(WITHDRAWN_DATE, dataFile.withdrawnDate?.format("yyyy-MM-dd"))
+        put(WITHDRAWN_COMMENT, dataFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
 
         //export, if the fastq file is available or is a dead link. It use the cached flag in the database.
         put(FILE_EXISTS, dataFile.fileExists.toString())
@@ -313,7 +314,6 @@ class MetaDataExport {
         properties.put('OTP_PID_ALIAS', seqTrack.individual.mockPid)
         properties.put('OTP_PID_DISPLAYED_IDENTIFIER', seqTrack.individual.mockFullName)
         properties.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
-        properties.put('OTP_WITHDRAWN_COMMENT', dataFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
         put(SAMPLE_NAME, seqTrack.sampleIdentifier)
         put(FASTQ_GENERATOR, preferredOrLongest(
                 properties.get(FASTQ_GENERATOR.toString()), SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name))
