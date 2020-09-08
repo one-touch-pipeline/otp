@@ -31,9 +31,14 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     String configValues
     ExternalWorkflowConfigFragment previous
 
+    static constraints = {
+        comment nullable: true
+        previous nullable: true
+        deprecationDate nullable: true
+    }
+
     static mapping = {
         configValues type: "text"
-        previous nullable: true
         comment cascade: "all-delete-orphan"
     }
 }

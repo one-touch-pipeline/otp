@@ -33,4 +33,9 @@ class ActiveProjectWorkflow implements Deprecateable<ActiveProjectWorkflow>, Ent
     WorkflowVersion workflowVersion
     boolean active = true
     ActiveProjectWorkflow previous
+
+    static constraints = {
+        previous nullable: true
+        deprecationDate nullable: true
+    }
 }
