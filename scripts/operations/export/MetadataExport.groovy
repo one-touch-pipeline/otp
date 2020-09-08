@@ -286,6 +286,9 @@ class MetaDataExport {
         put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
         put(WITHDRAWN_DATE, dataFile.withdrawnDate?.format("yyyy-MM-dd"))
 
+        //export, if the fastq file is available or is a dead link. It use the cached flag in the database.
+        put(FILE_EXISTS, dataFile.fileExists.toString())
+
         Run run = dataFile.run
         put(RUN_ID, run.name)
         put(RUN_DATE, run.dateExecuted?.format("yyyy-MM-dd"))

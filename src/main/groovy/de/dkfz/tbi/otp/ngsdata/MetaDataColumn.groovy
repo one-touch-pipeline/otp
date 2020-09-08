@@ -60,6 +60,7 @@ enum MetaDataColumn {
     PATIENT_ID,
     BIOMATERIAL_ID,
     SINGLE_CELL_WELL_LABEL,
+    FILE_EXISTS, //For export, indicates, if a physically file is available or if it is a dead link
 
     final List<String> importAliases = []
 
