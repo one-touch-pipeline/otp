@@ -82,9 +82,9 @@ String selectByIlse = """
 """
 
 
-String selectBySampleIdentifier = """
-#sampleIdentifier1
-#sampleIdentifier2
+String selectBySampleName = """
+#sampleName1
+#sampleName2
 
 """
 
@@ -142,7 +142,7 @@ List<IlseSubmission> ilseSubmissions = parseHelper(selectByIlse, 'IlseNumber') {
     IlseSubmission.findAllByIlseNumber(it as long)
 }
 
-List<SeqTrack> seqTracks = parseHelper(selectBySampleIdentifier, 'SampleIdentifier') {
+List<SeqTrack> seqTracks = parseHelper(selectBySampleName, 'SampleName') {
     SeqTrack.findAllBySampleIdentifier(it)
 }
 
