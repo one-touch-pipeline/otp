@@ -39,16 +39,16 @@
  *
  *
  * Please provide one value per line. Spaces around the values are trimmed away. Empty lines and lines starting with # are ignored.
- * *
- * The files are saved in a .tsv file with permission 660 and a .tsv.org file with permission 440.
  *
- * If you do not define a file name, the name is build from the input.
+ * The file is generated in the provided file with permission 660. Missing parent directories are created, if necessary.
+ * A copy of the file with permission 440 is created using the file name and adding the suffix '.org'
  *
  * The flag 'overwriteExisting' indicate, if an existing file should be replaced.
  */
 
-import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -57,6 +57,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.REALM_DEFAULT_VALUE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 //=============================================
@@ -116,8 +117,7 @@ String filterBySeqTypeName = """
 """
 
 /**
- * Name of the file without extension. The extension '.tsv' is automatically added.
- * The file is created in $PATH_SCRIPTS_OUTPUT/metadata-export.
+ * Name of the file to generate. The name must be absolute.
  */
 String fileName = ''
 
@@ -195,19 +195,6 @@ List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
     return seqType
 }
 
-
-if (!fileName) {
-    fileName = [
-            'export',
-            projects*.name,
-            individuals*.pid,
-            ilseSubmissions*.ilseNumber,
-            seqTracks*.sampleIdentifier.unique(),
-            sampleTypes*.name,
-            seqTypes*.toString(),
-    ].findAll().flatten().join('_').replaceAll(' ', '_')
-}
-
 if (!projects && !individuals && !ilseSubmissions && !seqTracks && !seqTracksPerMd5sum) {
     println "no selection defined, stopped"
     return
@@ -274,6 +261,7 @@ class MetaDataExport {
 
     LsdfFilesService lsdfFilesService
     FileService fileService
+    FileSystemService fileSystemService
 
     /**
      * Creates a TSV file containing the metadata of the specified {@linkplain DataFile}s.
@@ -366,16 +354,33 @@ class MetaDataExport {
     }
 
     Path handleCreationOfMetadataFile(Collection<DataFile> dataFiles, String fileName, boolean overwriteExisting) {
-        Path outputDir = new File(ConfigService.getInstance().getScriptOutputPath(), "metadata-export").toPath()
-        Path outputFile = outputDir.resolve("${fileName}.tsv")
-        Path outputFileOrg = outputDir.resolve("${fileName}.tsv.org")
+        assert fileName: 'No file name given, but this is required'
+        assert !fileName.contains(' '): 'File name contains spaces, which is not allowed'
+
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        Path outputFile = fileSystem.getPath(fileName)
+
+        assert outputFile.absolute: '"The file name is not absolute, but that is required'
+
+        if (Files.exists(outputFile)) {
+            if (overwriteExisting) {
+                Files.delete(outputFile)
+            } else {
+                throw new OtpRuntimeException("The file ${outputFile} already exist and overwrite is set to false")
+            }
+        }
+
+        Path outputFileOrg = fileSystem.getPath(fileName + '.org')
 
         if (!overwriteExisting) {
             assert !Files.exists(outputFile): "Outputfile ${outputFile} already exists"
             assert !Files.exists(outputFile): "Original outputfile ${outputFileOrg} already exists"
         }
 
-        fileService.createDirectoryRecursively(outputDir)
+        String realmName = fileSystemService.processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
+        Realm realm = Realm.findByName(realmName)
+
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
 
         writeMetadata(dataFiles, outputFile)
         fileService.setPermission(outputFile, [
@@ -392,8 +397,9 @@ class MetaDataExport {
 }
 
 MetaDataExport metaDataExport = new MetaDataExport([
-        lsdfFilesService: ctx.lsdfFilesService,
-        fileService     : ctx.fileService,
+        lsdfFilesService : ctx.lsdfFilesService,
+        fileService      : ctx.fileService,
+        fileSystemService: ctx.fileSystemService,
 ])
 
 
