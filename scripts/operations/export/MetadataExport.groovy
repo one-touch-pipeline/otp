@@ -151,8 +151,15 @@ List<IlseSubmission> ilseSubmissions = parseHelper(selectByIlse, 'IlseNumber') {
     IlseSubmission.findAllByIlseNumber(it as long)
 }
 
-List<SeqTrack> seqTracks = parseHelper(selectBySampleName, 'SampleName') {
-    SeqTrack.findAllBySampleIdentifier(it)
+List<SeqTrack> seqTracks = selectBySampleName.split('\n')*.trim().findAll {
+    it && !it.startsWith('#')
+}.collectMany {
+    List<SeqTrack> seqTracks = SeqTrack.findAllBySampleIdentifier(it)
+
+    if (!seqTracks) {
+        throw new AssertionError("Could not find any Otp lane with the sample name ${it}")
+    }
+    return seqTracks
 }
 
 List<SeqTrack> seqTracksPerMd5sum = selectByMd5Sum.split('\n')*.trim().findAll {
