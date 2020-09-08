@@ -31,6 +31,7 @@
  * - pid
  * - ilseNumber
  * - sampleIds (select full sample)
+ * - md5Sum of datafile (select complete otp lane, for paired also the other read)
  *
  * Additional a filter can be done about:
  * - sampleType
@@ -85,6 +86,14 @@ String selectByIlse = """
 String selectBySampleName = """
 #sampleName1
 #sampleName2
+
+"""
+
+
+//select complete otp lane, for paired also the other read (fastq file)
+String selectByMd5Sum = """
+#Md5Sum1
+#Md5Sum2
 
 """
 
@@ -146,6 +155,17 @@ List<SeqTrack> seqTracks = parseHelper(selectBySampleName, 'SampleName') {
     SeqTrack.findAllBySampleIdentifier(it)
 }
 
+List<SeqTrack> seqTracksPerMd5sum = selectByMd5Sum.split('\n')*.trim().findAll {
+    it && !it.startsWith('#')
+}.collectMany {
+    List<DataFile> dataFiles = DataFile.findAllByMd5sum(it)
+
+    if (!dataFiles) {
+        throw new AssertionError("Could not find any datafile with the md5sum ${it}")
+    }
+    return dataFiles*.seqTrack
+}
+
 List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'SampleTYpe') {
     SampleType.findAllByNameIlike(it)
 }
@@ -181,7 +201,7 @@ if (!fileName) {
     ].findAll().flatten().join('_').replaceAll(' ', '_')
 }
 
-if (!projects && !individuals && !ilseSubmissions && !seqTracks) {
+if (!projects && !individuals && !ilseSubmissions && !seqTracks && !seqTracksPerMd5sum) {
     println "no selection defined, stopped"
     return
 }
@@ -206,6 +226,9 @@ Collection<DataFile> dataFiles = DataFile.createCriteria().list {
             }
             if (seqTracks) {
                 'in'('id', seqTracks*.id)
+            }
+            if (seqTracksPerMd5sum) {
+                'in'('id', seqTracksPerMd5sum*.id)
             }
             if (ilseSubmissions) {
                 'in'('ilseSubmission', ilseSubmissions)
