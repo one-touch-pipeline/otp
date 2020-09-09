@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.importExternallyMergedBam
 import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -230,7 +231,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                     Path source = baseDirSource.resolve(it)
                     Path target = baseDirTarget.resolve(it)
                     assert Files.isSymbolicLink(source)
-                    assert Files.exists(target)
+                    FileService.ensureFileIsReadableAndNotEmpty(target)
                     assert source.toRealPath() == target
                 }
             }
@@ -318,14 +319,12 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     }
 
     protected static void checkThatDirectoryExistAndIsNotLink(Path path) {
-        assert Files.exists(path, LinkOption.NOFOLLOW_LINKS)
-        assert Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)
+        FileService.ensureDirIsReadable(path)
     }
 
     protected static void checkThatFileExistAndIsNotLink(Path path) {
-        assert Files.exists(path, LinkOption.NOFOLLOW_LINKS)
-        assert Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)
-        assert Files.size(path) > 0
+        FileService.ensureFileIsReadableAndNotEmpty(path)
+        assert !Files.isSymbolicLink(path)
     }
 
     @Override
