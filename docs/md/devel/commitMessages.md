@@ -29,6 +29,7 @@ The commit messages are used for creating the changelog and to prepare sprint re
 
 To allow this automatically, the format of the commit header is fixed.
 Since sometimes a commit should not be shown, therefor two structures exists:
+
 - used commits: 'category keyword: otp reference: text'.
 - ignored commits: 'ignore keyword: text'.
 
@@ -56,6 +57,7 @@ Ignore keywords
 ---------------
 
 The keywords to ignore a commit are:
+
 - WIP
 - ignore
 - review
