@@ -74,6 +74,7 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
  */
 
 
+
 //=============================================
 // input area
 
@@ -102,6 +103,7 @@ boolean overwriteExisting = false
 //=============================================
 // work area
 
+
 String outputFieldDelimiter = '\t'
 
 class BamExportImport {
@@ -120,6 +122,10 @@ class BamExportImport {
     FileService fileService
 
     FileSystemService fileSystemService
+
+    String inputFieldDelimiter
+
+    String outputFieldDelimiter
 
     private SeqType getSeqTypeForIdentifier(String seqTypeIdentifier) {
         switch (seqTypeIdentifier) {
@@ -272,6 +278,10 @@ class DisplaySamples {
         List<RoddyBamFile> bamFiles
     }
 
+    String inputFieldDelimiter
+    
+    String outputFieldDelimiter
+
     private final Map<SeqType, String> seqTypeMap = [
             (SeqTypeService.wholeGenomePairedSeqType): 'WGS',
             (SeqTypeService.exomePairedSeqType)      : 'WES',
@@ -363,6 +373,10 @@ class HandleInputTypes {
 
     FileSystemService fileSystemService
 
+    String inputFieldDelimiter
+    
+    String outputFieldDelimiter
+
     private List<String> readInput(String input) {
         return input.split('\n')*.trim().findAll {
             it && !it.startsWith('#')
@@ -377,14 +391,19 @@ class HandleInputTypes {
     }
 
     private void handleSampleListing(Collection<String> input) {
-        DisplaySamples displaySamples = new DisplaySamples()
+        DisplaySamples displaySamples = new DisplaySamples([
+                inputFieldDelimiter  : inputFieldDelimiter,
+                outputFieldDelimiter : outputFieldDelimiter,
+        ])
         displaySamples.showSamples(input)
     }
 
     private void handleExport(List<String> input, String fileName, boolean overwriteExisting) {
         BamExportImport export = new BamExportImport([
-                fileService      : fileService,
-                fileSystemService: fileSystemService,
+                fileService          : fileService,
+                fileSystemService    : fileSystemService,
+                inputFieldDelimiter  : inputFieldDelimiter,
+                outputFieldDelimiter : outputFieldDelimiter,
         ])
         Path file = export.handleInput(input, fileName, overwriteExisting)
         println "Metadata exported to ${file}\n"
@@ -412,8 +431,10 @@ class HandleInputTypes {
 }
 
 HandleInputTypes export = new HandleInputTypes([
-        fileService      : ctx.fileService,
-        fileSystemService: ctx.fileSystemService,
+        fileService          : ctx.fileService,
+        fileSystemService    : ctx.fileSystemService,
+        inputFieldDelimiter  : inputFieldDelimiter,
+        outputFieldDelimiter : outputFieldDelimiter,
 ]).handleInput(input, fileName, overwriteExisting)
 
 println ''
