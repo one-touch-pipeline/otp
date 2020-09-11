@@ -129,17 +129,27 @@ class ClusterJobHandlingService {
         logService.addSimpleLogEntry(workflowStep, "Started cluster jobs: ${jobToString(beJobs)}")
     }
 
-    void collectJobStatistics(Realm realm, WorkflowStep workflowStep, List<BEJob> beJobs) {
+    List<ClusterJob> collectJobStatistics(Realm realm, WorkflowStep workflowStep, List<BEJob> beJobs) {
         String sshUser = configService.sshUser
-        beJobs.each { BEJob job ->
+        List<ClusterJob> clusterJobs = beJobs.collect { BEJob job ->
             ClusterJob clusterJob = clusterJobService.createClusterJob(
                     realm, job.jobID.shortID, sshUser, workflowStep, job.jobName
             )
             clusterStatisticService.retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
 
             logService.addSimpleLogEntry(workflowStep, "LogFile: ${clusterJob.jobLog}")
+            return clusterJob
         }
         logService.addSimpleLogEntry(workflowStep, "Collected cluster job statistic: ${jobToString(beJobs)}")
+        return clusterJobs
+    }
+
+    void startMonitorClusterJob(WorkflowStep workflowStep, List<ClusterJob> clusterJobs) {
+        clusterJobs.each { ClusterJob clusterJob ->
+            clusterJob.checkStatus = ClusterJob.CheckStatus.CHECKING
+            clusterJob.save(flush: true)
+        }
+        logService.addSimpleLogEntry(workflowStep, "Start checking of cluster jobs: ${clusterJobs*.clusterJobId.join(', ')}")
     }
 
     private String jobToString(List<BEJob> jobs) {

@@ -66,7 +66,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 individual : { createIndividual() },
                 seqType    : { createSeqType() },
                 displayName: "displayName_${nextId}",
-                outputRole: { properties.producedBy ? "role ${nextId}" : null },
+                outputRole : { properties.producedBy ? "role ${nextId}" : null },
         ], properties)
     }
 
@@ -103,7 +103,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 validated     : false,
                 oldSystem     : oldSystem,
                 checkStatus   : ClusterJob.CheckStatus.CREATED,
-                realm         : { DomainFactory.createRealm() },
+                realm         : { createRealm() },
                 clusterJobId  : "clusterJobId_${nextId}",
                 userName      : "userName_${nextId}",
                 clusterJobName: "clusterJobName_${nextId}_jobClass",
@@ -144,7 +144,6 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 previous: null,
         ], properties)
     }
-
 }
 
 class WorkflowSystemDomainFactoryInstance implements WorkflowSystemDomainFactory {

@@ -29,6 +29,7 @@ import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.io.ExecutionResult
 import de.dkfz.roddy.execution.jobs.*
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -286,7 +287,10 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             1 * getSshUser() >> sshUser
         }
         service.clusterJobService = Mock(ClusterJobService) {
-            2 * createClusterJob(realm, _, sshUser, workflowStep, _) >> new ClusterJob()
+            2 * createClusterJob(realm, _, sshUser, workflowStep, _) >> { Realm realm2, String clusterJobId, String userName,
+                                                                          WorkflowStep workflowStep, String clusterJobName ->
+                new ClusterJob([clusterJobId: clusterJobId])
+            }
         }
         service.clusterStatisticService = Mock(ClusterStatisticService) {
             2 * retrieveAndSaveJobInformationAfterJobStarted(_)
@@ -297,10 +301,34 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         when:
-        service.collectJobStatistics(realm, workflowStep, jobs)
+        List<ClusterJob> clusterJobs = service.collectJobStatistics(realm, workflowStep, jobs)
 
         then:
-        true
+        TestCase.assertContainSame(clusterJobs*.clusterJobId, jobs*.jobID*.shortID)
+    }
+
+    void "startMonitorClusterJob, when all fine, then all jobs have the checkState CHECKING"() {
+        given:
+        workflowStep = createWorkflowStep()
+        List<ClusterJob> clusterJobs = (1..3).collect {
+            createClusterJob([
+                    workflowStep: workflowStep,
+                    checkStatus : ClusterJob.CheckStatus.CREATED,
+            ])
+        }
+
+        service.logService = Mock(LogService) {
+            1 * addSimpleLogEntry(workflowStep, _)
+            0 * _
+        }
+
+        when:
+        service.startMonitorClusterJob(workflowStep, clusterJobs)
+
+        then:
+        clusterJobs.each {
+            assert it.checkStatus == ClusterJob.CheckStatus.CHECKING
+        }
     }
 
     private BEJob createBeJobs() {

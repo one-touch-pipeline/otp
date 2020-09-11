@@ -26,7 +26,9 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.roddy.execution.jobs.BEJob
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
+import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -59,7 +61,9 @@ class ClusterAccessService {
 
         clusterJobHandlingService.startJob(jobManager, workflowStep, beJobs)
 
-        clusterJobHandlingService.collectJobStatistics(realm, workflowStep, beJobs)
+        List<ClusterJob> clusterJobs = clusterJobHandlingService.collectJobStatistics(realm, workflowStep, beJobs)
+
+        clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
 
         List<String> ids = beJobs*.jobID*.shortID
         logService.addSimpleLogEntry(workflowStep, "Executed jobs and got job IDs: ${ids.join(', ')}")

@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactoryInstance
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -384,16 +385,11 @@ class DomainFactory {
         ], properties)
     }
 
+    @Deprecated
     static ClusterJob createClusterJob(Map properties = [:]) {
-        return createDomainObject(ClusterJob, [
-                processingStep: { createProcessingStep() },
-                realm         : { createRealm() },
-                clusterJobId  : "clusterJobId_${counter++}",
-                userName      : "userName_${counter++}",
-                clusterJobName: "clusterJobName_${counter++}_jobClass",
-                jobClass      : "jobClass",
-                queued        : new DateTime(),
-        ], properties)
+        return WorkflowSystemDomainFactoryInstance.INSTANCE.createClusterJob([
+                oldSystem: true,
+        ] + properties)
     }
 
     static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {

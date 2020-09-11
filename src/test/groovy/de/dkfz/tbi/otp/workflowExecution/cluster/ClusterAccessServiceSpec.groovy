@@ -54,6 +54,12 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
         List<String> scripts = (1..5).collect { "script ${nextId}" }
         List<BEJob> beJobs = scripts.collect { new BEJob(new BEJobID("${nextId}"), batchEuphoriaJobManager) }
         List<String> ids = beJobs*.jobID*.shortID
+        List<ClusterJob> clusterJobs = ids.collect {
+            createClusterJob([
+                    clusterJobId: it,
+                    workflowStep: workflowStep,
+            ])
+        }
 
         service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
             1 * getJobManager(realm) >> batchEuphoriaJobManager
@@ -63,7 +69,8 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
             1 * createBeJobsToSend(batchEuphoriaJobManager, realm, workflowStep, scripts, [:]) >> beJobs
             1 * sendJobs(batchEuphoriaJobManager, workflowStep, beJobs)
             1 * startJob(batchEuphoriaJobManager, workflowStep, beJobs)
-            1 * collectJobStatistics(realm, workflowStep, beJobs)
+            1 * collectJobStatistics(realm, workflowStep, beJobs) >> clusterJobs
+            1 * startMonitorClusterJob(workflowStep, clusterJobs)
             0 * _
         }
         service.logService = Mock(LogService) {
