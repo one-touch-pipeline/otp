@@ -45,7 +45,6 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         ]
     }
 
-
     void "test getExpectedFiles"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithOneDataFile()

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
@@ -54,7 +55,7 @@ class WorkflowStep implements Commentable, Entity {
 
     boolean obsolete = false
 
-    Set<ClusterJob> clusterJobs
+    Set<ClusterJob> clusterJobs = [] as Set
 
     static hasMany = [
             clusterJobs: ClusterJob,
@@ -110,5 +111,9 @@ class WorkflowStep implements Commentable, Entity {
         WorkflowLog.findAllByWorkflowStep(this).sort {
             it.dateCreated
         }
+    }
+
+    Realm getRealm() {
+        return workflowRun.realm
     }
 }

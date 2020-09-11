@@ -26,8 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
 
@@ -51,15 +50,21 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         job.execute(workflowStep)
 
         then:
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
+
+        then:
         1 * job.getExpectedFiles(workflowStep) >> []
         1 * job.getExpectedDirectories(workflowStep) >> []
         1 * job.doFurtherValidation(workflowStep) >> null
 
+        then:
         1 * job.saveResult(workflowStep) >> null
+
+        then:
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
-    void "test execute, fails"() {
+    void "test execute, fails in ensureExternalJobsRunThrough, no further check done"() {
         given:
         AbstractValidationJob job = Spy(AbstractValidationJob)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
@@ -69,6 +74,29 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         job.execute(workflowStep)
 
         then:
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { throw new WorkflowException("pipeline check fail") }
+        0 * job.getExpectedFiles(workflowStep)
+        0 * job.getExpectedDirectories(workflowStep)
+        0 * job.doFurtherValidation(workflowStep)
+        0 * job.saveResult(workflowStep) >> null
+        0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+
+        WorkflowException e = thrown(WorkflowException)
+        e.message.contains("pipeline check fail")
+    }
+
+    void "test execute, ensureExternalJobsRunThrough fine, but other checks fails"() {
+        given:
+        AbstractValidationJob job = Spy(AbstractValidationJob)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        WorkflowStep workflowStep = createWorkflowStep()
+        job.logService = Mock(LogService)
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
         1 * job.getExpectedFiles(workflowStep) >> [Paths.get("file-not-found")]
         1 * job.getExpectedDirectories(workflowStep) >> [Paths.get("dir-not-found")]
         1 * job.doFurtherValidation(workflowStep) >> { throw new WorkflowException("further-error") }

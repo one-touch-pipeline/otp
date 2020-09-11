@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -114,5 +115,9 @@ class WorkflowRun implements Commentable, Entity {
             count++
         }
         return count
+    }
+
+    Realm getRealm() {
+        return project.realm
     }
 }

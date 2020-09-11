@@ -26,14 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflow.jobs.AbstractValidationJob
+import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
 
 @Slf4j
 @Component
-class DataInstallationValidationJob extends AbstractValidationJob implements DataInstallationShared {
+class DataInstallationValidationJob extends AbstractOtpClusterValidationJob implements DataInstallationShared {
 
     @Autowired
     ChecksumFileService checksumFileService

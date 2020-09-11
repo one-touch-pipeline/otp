@@ -25,65 +25,112 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.workflow.shared.WorkflowException
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
- * Checks whether the expected files and directories were created
+ * Base job that does validation after an external pipeline {@link AbstractExecutePipelineJob} ran.
+ *
+ * Class provides an interface for the typicall checks to do after running an external pipeline:
+ * - did the pipeline finish (using the callback {@link #ensureExternalJobsRunThrough})
+ * - have all expected directories been created (Directories are fetched via callback {@link #getExpectedDirectories})
+ * - have all expected files been created (Files are fetched via callback {@link #getExpectedDirectories})
+ * - allows to do any further checking using using the callback {@link #doFurtherValidation}
+ *
+ * Moreover, it allows to do updates of {@link #saveResult}.
+ *
+ * Currently there exist three types of pipelines, for each a subclass exists with an implementation of {@link #ensureExternalJobsRunThrough}:
+ * - Otp pipeline: {@link AbstractOtpClusterValidationJob}
+ * - Roddy pipeline: {@link AbstractRoddyClusterValidationJob}
+ * - Wes pipeline: {@link AbstractWesValidationJob}
+ *
+ * Usually, this base job should not be used directly, but instead one of its subclasses which provide an implementation of {@link #ensureExternalJobsRunThrough}.
  */
 abstract class AbstractValidationJob implements Job {
 
     @Autowired
     FileSystemService fileSystemService
+
+    @Autowired
+    JobStatusLoggingFileService jobStatusLoggingFileService
+
+    @Autowired
+    LogService logService
+
     @Autowired
     WorkflowStateChangeService workflowStateChangeService
 
     @Override
     final void execute(WorkflowStep workflowStep) {
+        ensureExternalJobsRunThrough(workflowStep)
+
         List<String> errors = []
-        errors.addAll(getExpectedFiles(workflowStep).collect {
+
+        getExpectedFiles(workflowStep).each {
             try {
                 FileService.ensureFileIsReadableAndNotEmpty(it)
             } catch (Throwable t) {
-                return "Expected file not found, ${t.message}"
+                errors << "Expected file ${it} not found, ${t.message}"
             }
-        })
-        errors.addAll(getExpectedDirectories(workflowStep).collect {
+        }
+
+        getExpectedDirectories(workflowStep).each {
             try {
                 FileService.ensureDirIsReadable(it)
             } catch (Throwable t) {
-                return "Expected directory not found, ${t.message}"
+                errors << "Expected directory ${it} not found, ${t.message}"
             }
-        })
+        }
 
         try {
             doFurtherValidation(workflowStep)
         } catch (Throwable t) {
-            errors.add("Further validation failed, ${t.message}")
+            errors << "Further validation failed, ${t.message}"
         }
 
-        errors = errors.findAll()
         if (errors) {
-            throw new WorkflowException(errors.join(","))
+            String message = "${errors.size()} errors occured:\n${errors.join("\n")}"
+            logService.addSimpleLogEntry(workflowStep, message)
+            throw new ValidationJobFailedException(message)
         }
         saveResult(workflowStep)
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
-
 
     @Override
     final JobStage getJobStage() {
         return JobStage.VALIDATION
     }
 
+    /**
+     * callback to do pipeline system depending checks of finishing the jobs. It should be exist one implementation per pipeline type.
+     */
+    abstract protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep)
+
+    /**
+     * returns the files, which should be check for existence and not be empty
+     */
     abstract protected List<Path> getExpectedFiles(WorkflowStep workflowStep)
+
+    /**
+     * returns the directory, which should be check for existence
+     */
     abstract protected List<Path> getExpectedDirectories(WorkflowStep workflowStep)
+
+    /**
+     * callback to do further checks. Through an Exception in case the validation fails
+     */
     @SuppressWarnings("UnusedMethodParameter")
-    protected void doFurtherValidation(WorkflowStep workflowStep) { }
+    protected void doFurtherValidation(WorkflowStep workflowStep) {
+    }
+
+    /**
+     * callback to do database updates, if needed.
+     */
     abstract protected void saveResult(WorkflowStep workflowStep)
 
     protected FileSystem getFileSystem(WorkflowStep workflowStep) {
