@@ -19,13 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
 import groovy.transform.TupleConstructor
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
 
 class AbstractExecuteClusterPipelineJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {

@@ -19,34 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
-import org.springframework.beans.factory.annotation.Autowired
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.workflow.jobs.AbstractExecutePipelineJob
-import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipelineJob {
-
-    @Autowired
-    ClusterAccessService clusterAccessService
+/**
+ * Sets the permission and groups of result files
+ */
+@Component
+@Slf4j
+class SetCorrectPermissionJob implements Job {
 
     @Override
     void execute(WorkflowStep workflowStep) {
-        List<String> scripts = createScripts(workflowStep)
-        if (scripts) {
-            submitScripts(workflowStep, scripts)
-            workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)
-            return
-        }
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
-    protected abstract List<String> createScripts(WorkflowStep workflowStep)
+    @Override
+    final JobStage getJobStage() {
+        return JobStage.CORRECT_PERMISSION
+    }
 
-    private void submitScripts(WorkflowStep workflowStep, List<String> scripts) {
-        Map<JobSubmissionOption, String> jobSubmissionOptions = [:] //TODO otp-681: extract map from WorkflowRun.combinedConfig
-        clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, jobSubmissionOptions)
+    @SuppressWarnings("UnusedMethodParameter")
+    void correctPermission(WorkflowStep workflowStep) {
     }
 }

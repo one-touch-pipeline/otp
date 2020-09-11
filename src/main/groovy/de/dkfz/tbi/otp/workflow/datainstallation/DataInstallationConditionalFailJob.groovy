@@ -30,8 +30,8 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
-import de.dkfz.tbi.otp.workflowExecution.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystem

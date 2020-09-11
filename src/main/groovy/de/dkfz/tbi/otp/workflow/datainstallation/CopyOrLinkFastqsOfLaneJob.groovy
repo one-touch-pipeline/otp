@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflowExecution.AbstractExecuteClusterPipelineJob
+import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystem

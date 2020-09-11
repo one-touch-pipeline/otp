@@ -19,16 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.workflow.jobs.Job
-import de.dkfz.tbi.otp.workflow.jobs.JobStage
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 abstract class AbstractConditionalFailJob implements Job {
 
-    @Autowired WorkflowStateChangeService workflowStateChangeService
+    @Autowired
+    WorkflowStateChangeService workflowStateChangeService
 
     @Override
     final void execute(WorkflowStep workflowStep) throws Throwable {
