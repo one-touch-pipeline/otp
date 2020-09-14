@@ -89,18 +89,19 @@ $.otp.projectOverviewTable = {
             var ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
                 workflowSize = parseInt($('#laneOverviewId').data('workflow-size')),
                 seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size')),
-                tableSize = seqTypeSize * (workflowSize + 1) + ignoredColumns,
+                step = workflowSize + 1,
+                tableSize = seqTypeSize * step + ignoredColumns,
                 result = [],
                 i;
 
             $('#searchCriteriaTableSeqType').find('tr').each(function (index, element) {
                 var idx = $('td.attribute select', element)[0].selectedIndex;
                 if (idx !== 0) {
-                    result.push((idx-1) * (workflowSize + 1) + ignoredColumns);
+                    result.push((idx-1) * step + ignoredColumns);
                 }
             });
 
-            for (i = ignoredColumns; i < tableSize; i += 1) {
+            for (i = ignoredColumns; i < tableSize; i += step) {
                 if (result.indexOf(i) !== -1) {
                     oTableLaneOverview.fnFilter('.+', i, true);
                 } else {
