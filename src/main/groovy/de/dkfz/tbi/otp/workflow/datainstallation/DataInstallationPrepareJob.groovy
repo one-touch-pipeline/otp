@@ -25,7 +25,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -40,8 +39,8 @@ import java.nio.file.Path
 @Slf4j
 class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInstallationShared {
 
-    @Autowired FileSystemService fileSystemService
-    @Autowired NotificationCreator notificationCreator
+    @Autowired
+    NotificationCreator notificationCreator
 
     @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
@@ -54,8 +53,8 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
-        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first(), fs)
+        FileSystem fileSystem = getFileSystem(workflowStep)
+        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first(), fileSystem)
     }
 
     @Override

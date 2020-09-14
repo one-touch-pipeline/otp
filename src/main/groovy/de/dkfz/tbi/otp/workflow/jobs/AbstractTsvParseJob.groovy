@@ -28,7 +28,7 @@ import java.nio.file.Path
 abstract class AbstractTsvParseJob extends AbstractParseJob {
     @Override
     @SuppressWarnings("UnusedMethodParameter")
-    Map< String, String> parseFile(WorkflowStep workflowStep) {
+    Map<String, String> parseFile(WorkflowStep workflowStep) {
     }
 
     abstract Path getTsvFileToParse(WorkflowStep workflowStep)

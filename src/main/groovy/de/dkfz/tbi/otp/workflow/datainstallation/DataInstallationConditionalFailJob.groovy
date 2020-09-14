@@ -23,11 +23,9 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
@@ -42,8 +40,6 @@ import java.nio.file.Path
 @CompileStatic
 class DataInstallationConditionalFailJob extends AbstractConditionalFailJob implements DataInstallationShared {
 
-    @Autowired FileSystemService fileSystemService
-
     @Override
     protected void check(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
@@ -52,7 +48,8 @@ class DataInstallationConditionalFailJob extends AbstractConditionalFailJob impl
             throw new WorkflowException("SeqTrack '${seqTrack}' has no dataFiles")
         }
 
-        FileSystem fs = fileSystemService.filesystemForFastqImport
+        FileSystem fs = getFileSystem(workflowStep)
+
         final Collection<Path> missingPaths = dataFiles.collect { DataFile file ->
             lsdfFilesService.getFileInitialPathAsPath(file, fs)
         }.findAll { Path path ->

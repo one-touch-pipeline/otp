@@ -21,15 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-abstract class AbstractConditionalFailJob implements Job {
-
-    @Autowired
-    WorkflowStateChangeService workflowStateChangeService
+abstract class AbstractConditionalFailJob extends AbstractJob {
 
     @Override
     final void execute(WorkflowStep workflowStep) throws Throwable {

@@ -45,7 +45,7 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = fileSystemService.getRemoteFileSystem(seqTrack.project.realm)
+        FileSystem fs = getFileSystem(workflowStep)
 
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
             return seqTrack.dataFiles.collect { DataFile dataFile ->

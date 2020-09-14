@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
  * This job is executed synchronously and should therefore return quickly
  */
 abstract class AbstractOutputUnificationJob implements Job {
+
     @Override
     void execute(WorkflowStep workflowStep) {
     }

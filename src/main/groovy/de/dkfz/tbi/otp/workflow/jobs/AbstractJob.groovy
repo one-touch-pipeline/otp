@@ -21,20 +21,28 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.nio.file.Path
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.nio.file.FileSystem
 
 /**
- * Deletes files, directories that should not be kept
+ * Base job, providing services needed almost always.
  */
-abstract class AbstractCleanUpJob extends AbstractJob {
+abstract class AbstractJob implements Job {
 
-    @Override
-    void execute(WorkflowStep workflowStep) {
+    @Autowired
+    FileSystemService fileSystemService
+
+    @Autowired
+    LogService logService
+
+    @Autowired
+    WorkflowStateChangeService workflowStateChangeService
+
+    protected FileSystem getFileSystem(WorkflowStep workflowStep) {
+        return fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
     }
-
-    abstract List<Path> getFilesToDelete(WorkflowStep workflowStep)
-
-    abstract List<Path> getDirectoriesToDelete(WorkflowStep workflowStep)
 }

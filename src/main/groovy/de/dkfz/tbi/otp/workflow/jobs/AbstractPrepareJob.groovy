@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -37,10 +36,10 @@ import java.nio.file.Path
  *  - link input files, if the job requires a certain file structure
  *  - create configuration files, if required
  */
-abstract class AbstractPrepareJob implements Job {
+abstract class AbstractPrepareJob extends AbstractJob {
 
-    @Autowired FileService fileService
-    @Autowired WorkflowStateChangeService workflowStateChangeService
+    @Autowired
+    FileService fileService
 
     @Override
     final void execute(WorkflowStep workflowStep) {
@@ -71,6 +70,8 @@ abstract class AbstractPrepareJob implements Job {
     }
 
     abstract protected Path buildWorkDirectoryPath(WorkflowStep workflowStep)
+
     abstract protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep)
+
     abstract protected void doFurtherPreparation(WorkflowStep workflowStep)
 }

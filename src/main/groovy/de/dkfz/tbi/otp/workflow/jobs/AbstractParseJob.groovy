@@ -26,11 +26,13 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 /**
  * Parses and loads QA files
  */
-abstract class AbstractParseJob implements Job {
+abstract class AbstractParseJob extends AbstractJob {
+
     @Override
     void execute(WorkflowStep workflowStep) {
     }
 
     abstract Map<String, String> parseFile(WorkflowStep workflowStep)
+
     abstract Class getQcDomain(WorkflowStep workflowStep)
 }

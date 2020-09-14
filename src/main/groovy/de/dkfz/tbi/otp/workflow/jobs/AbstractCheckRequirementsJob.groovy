@@ -26,7 +26,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 /**
  * Check requirements
  */
-abstract class AbstractCheckRequirementsJob implements Job {
+abstract class AbstractCheckRequirementsJob extends AbstractJob {
+
     @Override
     void execute(WorkflowStep workflowStep) {
     }

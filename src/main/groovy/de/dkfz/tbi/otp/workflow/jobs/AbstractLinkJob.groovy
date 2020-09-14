@@ -24,22 +24,16 @@ package de.dkfz.tbi.otp.workflow.jobs
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.LinkEntry
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**
  * Links result files
  */
-abstract class AbstractLinkJob implements Job {
+abstract class AbstractLinkJob extends AbstractJob {
 
     @Autowired
     FileService fileService
-    @Autowired
-    FileSystemService fileSystemService
-    @Autowired
-    WorkflowStateChangeService workflowStateChangeService
 
     @Override
     final void execute(WorkflowStep workflowStep) {

@@ -40,7 +40,7 @@ class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstalla
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = fileSystemService.getRemoteFileSystem(seqTrack.project.realm)
+        FileSystem fs = getFileSystem(workflowStep)
 
         seqTrack.dataFiles.collect { DataFile dataFile ->
             Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile, fs)

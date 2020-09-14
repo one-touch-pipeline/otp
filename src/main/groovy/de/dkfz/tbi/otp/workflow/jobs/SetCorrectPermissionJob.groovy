@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
  */
 @Component
 @Slf4j
-class SetCorrectPermissionJob implements Job {
+class SetCorrectPermissionJob extends AbstractJob {
 
     @Override
     void execute(WorkflowStep workflowStep) {

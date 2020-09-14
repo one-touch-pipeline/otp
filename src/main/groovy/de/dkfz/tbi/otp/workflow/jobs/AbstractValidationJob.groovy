@@ -25,12 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileService
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -51,19 +49,10 @@ import java.nio.file.Path
  *
  * Usually, this base job should not be used directly, but instead one of its subclasses which provide an implementation of {@link #ensureExternalJobsRunThrough}.
  */
-abstract class AbstractValidationJob implements Job {
-
-    @Autowired
-    FileSystemService fileSystemService
+abstract class AbstractValidationJob extends AbstractJob {
 
     @Autowired
     JobStatusLoggingFileService jobStatusLoggingFileService
-
-    @Autowired
-    LogService logService
-
-    @Autowired
-    WorkflowStateChangeService workflowStateChangeService
 
     @Override
     final void execute(WorkflowStep workflowStep) {
@@ -133,8 +122,4 @@ abstract class AbstractValidationJob implements Job {
      * callback to do database updates, if needed.
      */
     abstract protected void saveResult(WorkflowStep workflowStep)
-
-    protected FileSystem getFileSystem(WorkflowStep workflowStep) {
-        return fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
-    }
 }

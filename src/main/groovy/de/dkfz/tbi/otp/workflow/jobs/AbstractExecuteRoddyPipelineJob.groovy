@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJob {
+
     @Override
     void execute(WorkflowStep workflowStep) {
     }

@@ -26,9 +26,10 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Path
 
 abstract class AbstractJsonParseJob extends AbstractParseJob {
+
     @Override
     @SuppressWarnings("UnusedMethodParameter")
-    Map< String, String> parseFile(WorkflowStep workflowStep) {
+    Map<String, String> parseFile(WorkflowStep workflowStep) {
     }
 
     abstract Path getJsonFileToParse(WorkflowStep workflowStep)

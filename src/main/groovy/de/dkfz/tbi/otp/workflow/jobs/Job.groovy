@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
  */
 interface Job {
     void execute(WorkflowStep workflowStep) throws Throwable
+
     JobStage getJobStage()
 }
 
