@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -75,7 +76,8 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         [] == job.getExpectedDirectories(workflowStep)
     }
 
-    void "test doFurtherValidation"() {
+    @Unroll
+    void "test doFurtherValidation, md5Sum is correct and file link is #isLinked"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
         seqTrack.linkedExternally = isLinked
@@ -87,14 +89,40 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         job.checksumFileService = Mock(ChecksumFileService)
 
         when:
-        job.doFurtherValidation(workflowStep)
+        List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
 
         then:
         (isLinked ? 0 : 1) * job.checksumFileService.compareMd5(seqTrack.dataFiles.first()) >> true
         (isLinked ? 0 : 1) * job.checksumFileService.compareMd5(seqTrack.dataFiles.last()) >> true
 
+        result == []
+
         where:
         isLinked << [true, false]
+    }
+
+    void "test doFurtherValidation, md5Sum is not equals"() {
+        given:
+        SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        seqTrack.linkedExternally = false
+        seqTrack.save(flush: true)
+        WorkflowStep workflowStep = createWorkflowStep()
+        DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
+            _ * getSeqTrack(workflowStep) >> seqTrack
+        }
+        job.checksumFileService = Mock(ChecksumFileService)
+
+        when:
+        List<String> result = job.doFurtherValidationAndReturnProblems(workflowStep)
+
+        then:
+        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.first()) >> false
+        1 * job.checksumFileService.compareMd5(seqTrack.dataFiles.last()) >> false
+
+        result.size() == 2
+        result.each {
+            assert it ==~ ("The md5sum of file .* is not the expected .*")
+        }
     }
 
     void "test saveResult"() {

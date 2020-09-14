@@ -54,13 +54,15 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
     }
 
     @Override
-    protected void doFurtherValidation(WorkflowStep workflowStep) {
+    protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
+        List<String> problems = []
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         seqTrack.dataFiles.each { DataFile dataFile ->
-            if (!seqTrack.linkedExternally) {
-                assert checksumFileService.compareMd5(dataFile)
+            if (!seqTrack.linkedExternally && !checksumFileService.compareMd5(dataFile)) {
+                problems.add("The md5sum of file ${dataFile.fileName} is not the expected ${dataFile.md5sum}")
             }
         }
+        return problems
     }
 
     @Override

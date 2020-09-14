@@ -55,7 +55,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         then:
         1 * job.getExpectedFiles(workflowStep) >> []
         1 * job.getExpectedDirectories(workflowStep) >> []
-        1 * job.doFurtherValidation(workflowStep) >> null
+        1 * job.doFurtherValidationAndReturnProblems(workflowStep) >> []
 
         then:
         1 * job.saveResult(workflowStep) >> null
@@ -77,7 +77,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         1 * job.ensureExternalJobsRunThrough(workflowStep) >> { throw new WorkflowException("pipeline check fail") }
         0 * job.getExpectedFiles(workflowStep)
         0 * job.getExpectedDirectories(workflowStep)
-        0 * job.doFurtherValidation(workflowStep)
+        0 * job.doFurtherValidationAndReturnProblems(workflowStep)
         0 * job.saveResult(workflowStep) >> null
         0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
 
@@ -99,7 +99,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         1 * job.ensureExternalJobsRunThrough(workflowStep) >> { }
         1 * job.getExpectedFiles(workflowStep) >> [Paths.get("file-not-found")]
         1 * job.getExpectedDirectories(workflowStep) >> [Paths.get("dir-not-found")]
-        1 * job.doFurtherValidation(workflowStep) >> { throw new WorkflowException("further-error") }
+        1 * job.doFurtherValidationAndReturnProblems(workflowStep) >> ["further-error1", "further-error2",]
 
         0 * job.saveResult(workflowStep) >> null
         0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
@@ -107,6 +107,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         WorkflowException e = thrown(WorkflowException)
         e.message.contains("file-not-found")
         e.message.contains("dir-not-found")
-        e.message.contains("further-error")
+        e.message.contains("further-error1")
+        e.message.contains("further-error2")
     }
 }

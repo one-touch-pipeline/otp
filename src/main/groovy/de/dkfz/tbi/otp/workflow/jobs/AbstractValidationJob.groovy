@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
@@ -87,9 +88,9 @@ abstract class AbstractValidationJob implements Job {
         }
 
         try {
-            doFurtherValidation(workflowStep)
-        } catch (Throwable t) {
-            errors << "Further validation failed, ${t.message}"
+            errors.addAll(doFurtherValidationAndReturnProblems(workflowStep))
+        } catch (OtpRuntimeException e) {
+            errors << "Further validation failed with exception, ${e.message}"
         }
 
         if (errors) {
@@ -122,10 +123,10 @@ abstract class AbstractValidationJob implements Job {
     abstract protected List<Path> getExpectedDirectories(WorkflowStep workflowStep)
 
     /**
-     * callback to do further checks. Through an Exception in case the validation fails
+     * callback to do further checks. It should collect problems and return them as List of Strings
      */
     @SuppressWarnings("UnusedMethodParameter")
-    protected void doFurtherValidation(WorkflowStep workflowStep) {
+    protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
     }
 
     /**
