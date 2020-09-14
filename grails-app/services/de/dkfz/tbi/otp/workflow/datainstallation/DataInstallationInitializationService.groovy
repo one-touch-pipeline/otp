@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflow.shared.NoArtefactOfRoleException
-import de.dkfz.tbi.otp.workflow.shared.NoConcreteArtefactException
-import de.dkfz.tbi.otp.workflow.shared.WrongWorkflowException
+import de.dkfz.tbi.otp.workflow.shared.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -61,8 +59,8 @@ class DataInstallationInitializationService {
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
         String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
-        String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}" +
-                "lane ${seqTrack.laneId} run ${seqTrack.run.name}"
+        String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} " +
+                "${seqTrack.seqType.displayNameWithLibraryLayout} lane ${seqTrack.laneId} run ${seqTrack.run.name}"
         WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}")
         WorkflowArtefact artefact = workflowArtefactService.createWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType, name)
         seqTrack.workflowArtefact = artefact

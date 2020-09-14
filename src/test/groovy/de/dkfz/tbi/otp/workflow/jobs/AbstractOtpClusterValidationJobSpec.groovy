@@ -119,7 +119,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
     void "ensureExternalJobsRunThrough, when the job status log file is not readable, then fail"() {
         given:
         File file = temporaryFolder.newFile()
-        file.setReadable(false)
+        file.readable = false
 
         setupDataWithClusterJob()
         1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path

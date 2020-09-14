@@ -39,7 +39,6 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         ]
     }
 
-
     void "test execute, is successful"() {
         given:
         AbstractValidationJob job = Spy(AbstractValidationJob)

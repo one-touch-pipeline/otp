@@ -63,16 +63,16 @@ abstract class AbstractValidationJob extends AbstractJob {
         getExpectedFiles(workflowStep).each {
             try {
                 FileService.ensureFileIsReadableAndNotEmpty(it)
-            } catch (Throwable t) {
-                errors << "Expected file ${it} not found, ${t.message}"
+            } catch (AssertionError e) {
+                errors << "Expected file ${it} not found, ${e.message}"
             }
         }
 
         getExpectedDirectories(workflowStep).each {
             try {
                 FileService.ensureDirIsReadable(it)
-            } catch (Throwable t) {
-                errors << "Expected directory ${it} not found, ${t.message}"
+            } catch (AssertionError e) {
+                errors << "Expected directory ${it} not found, ${e.message}"
             }
         }
 

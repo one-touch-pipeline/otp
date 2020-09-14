@@ -77,9 +77,7 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
 
         String expectedLogMessage = jobStatusLoggingFileService.constructMessage(realm, workflowStep, clusterJob.clusterJobId)
         String logFileText = logFile.text
-        if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
-            return "Did not find \"${expectedLogMessage}\" in ${logFile}."
-        }
-        return null
+        return (logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/) ? null :
+            "Did not find \"${expectedLogMessage}\" in ${logFile}."
     }
 }
