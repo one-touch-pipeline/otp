@@ -833,7 +833,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 'fileAccessChange\n' + projectName,
                 expectedBody,
                 userProjectRole.user.email,
-                toBeNotified*.user.email,
+                toBeNotified*.user*.email.sort(),
         )
     }
 
