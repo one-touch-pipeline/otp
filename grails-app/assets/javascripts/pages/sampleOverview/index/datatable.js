@@ -101,7 +101,7 @@ $(function () {
             }
         });
 
-        for (i = ignoredColumns - 1; i < tableSize; i += 1) {
+        for (i = ignoredColumns; i < tableSize; i += 1) {
             if (result.indexOf(i) !== -1) {
                 oTableLaneOverview.fnFilter('.+', i, true);
             } else {
