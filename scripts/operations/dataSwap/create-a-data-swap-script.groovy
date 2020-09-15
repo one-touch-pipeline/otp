@@ -51,12 +51,24 @@ import de.dkfz.tbi.otp.utils.*
 
 swapLabel = 'OTRS-________________-something-descriptive'
 
-def swapMap = [
-        ('oldPid')              : 'newPid',
-        ('pid oldSampleType')   : 'pid newSampleType',
-        ('oldPid oldSampleType'): 'newPid newSampleType',
-        ('oldPid sampleType')   : 'newPid sampleType',
-]
+def swapMapDelimitor = " "
+def swapMap = """
+#oldPid newPid
+#pid oldSampleType pid newSampleType
+#oldPid oldSampleType newPid newSampleType
+#oldPid sampleType newPid sampleType
+
+
+""".split("\n")*.trim().findAll {
+    it && !it.startsWith('#')
+}.collectEntries {
+    def entries = it.split(swapMapDelimitor)
+    if (entries.size() == 4) {
+    	return ["${entries[0]} ${entries[1]}", "${entries[2]} ${entries[3]}"]
+    } else {
+        return ["${entries[0]}", "${entries[1]}"]
+    }
+}
 
 //Only need, if the project should be changed. If the new Individual already exist, it have to belong to this project.
 String newProjectName = ''
