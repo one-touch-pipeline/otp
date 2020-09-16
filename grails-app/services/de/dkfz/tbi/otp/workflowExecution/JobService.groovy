@@ -47,7 +47,7 @@ class JobService {
         workflowRun.save(flush: true)
     }
 
-    void createRestartedJob(WorkflowStep stepToRestart) {
+    private void createRestartedJob(WorkflowStep stepToRestart) {
         assert stepToRestart
         WorkflowStep workflowStep = new WorkflowStep(
                 beanName: stepToRestart.beanName,
@@ -65,10 +65,16 @@ class JobService {
         stepToRestart.workflowRun.save(flush: true)
     }
 
-    void createRestartedJobAfterJobFailure(WorkflowStep failedStep) {
-        assert failedStep
-        assert failedStep.state == WorkflowStep.State.FAILED && failedStep.workflowRun.state == WorkflowRun.State.FAILED
-        createRestartedJob(failedStep)
+    void createRestartedJobAfterJobFailure(WorkflowStep stepToRestart) {
+        assert stepToRestart
+
+        WorkflowRun workflowRun = stepToRestart.workflowRun
+        assert workflowRun.state == WorkflowRun.State.FAILED
+
+        WorkflowStep failedStep = workflowRun.workflowSteps.last()
+        assert failedStep.state == WorkflowStep.State.FAILED
+
+        createRestartedJob(stepToRestart)
     }
 
     void createRestartedJobAfterSystemRestart(WorkflowStep workflowStep) {

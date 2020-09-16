@@ -103,12 +103,38 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         thrown(AssertionError)
     }
 
-    void "test createRestartedJob"() {
-        given:
-        WorkflowRun workflowRun = createWorkflowRun()
+    void "test createRestartedJobAfterJobFailure, last job should restarted"() {
+        WorkflowRun workflowRun = createWorkflowRun([
+                state: WorkflowRun.State.FAILED,
+        ])
         WorkflowStep step1 = createWorkflowStep(workflowRun: workflowRun)
         WorkflowStep stepToRestart = createWorkflowStep(workflowRun: workflowRun)
-        WorkflowStep step2 = createWorkflowStep(workflowRun: workflowRun)
+        workflowRun.save(flush: true)
+
+        when:
+        service.createRestartedJob(stepToRestart)
+
+        then:
+        !step1.obsolete
+        stepToRestart.obsolete
+        !workflowRun.workflowSteps.last().obsolete
+        workflowRun.workflowSteps.last().beanName == stepToRestart.beanName
+        workflowRun.workflowSteps.last().state == WorkflowStep.State.CREATED
+        workflowRun.workflowSteps.last().previous == stepToRestart
+        workflowRun.workflowSteps.last().restartedFrom == stepToRestart
+    }
+
+    void "test createRestartedJobAfterJobFailure, job in the middle should restarted"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun([
+                state: WorkflowRun.State.FAILED,
+        ])
+        WorkflowStep step1 = createWorkflowStep(workflowRun: workflowRun)
+        WorkflowStep stepToRestart = createWorkflowStep(workflowRun: workflowRun)
+        WorkflowStep step2 = createWorkflowStep([
+                workflowRun: workflowRun,
+                state      : WorkflowStep.State.FAILED,
+        ])
         workflowRun.save(flush: true)
 
         when:
@@ -124,24 +150,8 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         workflowRun.workflowSteps.last().restartedFrom == stepToRestart
     }
 
-    void "test createRestartedJobAfterJobFailure"() {
-        given:
-        WorkflowStep failedStep = createWorkflowStep(state: WorkflowStep.State.FAILED)
-        failedStep.workflowRun.state = WorkflowRun.State.FAILED
-        failedStep.workflowRun.save(flush: true)
-        JobService service = Spy(JobService) {
-            1 * createRestartedJob(failedStep) >> { }
-        }
-
-        when:
-        service.createRestartedJobAfterJobFailure(failedStep)
-
-        then:
-        notThrown()
-    }
-
     @Unroll
-    void "test createRestartedJobAfterJobFailure, not failed"() {
+    void "test createRestartedJobAfterJobFailure, when stepState is #stepState and runState is #runState, then throw assert"() {
         given:
         WorkflowStep failedStep = createWorkflowStep(state: stepState)
         failedStep.workflowRun.state = runState
@@ -154,20 +164,22 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         thrown(AssertionError)
 
         where:
-        stepState                  | runState                  || _
-        WorkflowStep.State.FAILED  | WorkflowRun.State.SUCCESS || _
-        WorkflowStep.State.SUCCESS | WorkflowRun.State.FAILED  || _
-        WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS || _
+        stepState                  | runState
+        WorkflowStep.State.FAILED  | WorkflowRun.State.SUCCESS
+        WorkflowStep.State.SUCCESS | WorkflowRun.State.FAILED
+        WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS
     }
 
     void "test createRestartedJobAfterSystemRestart"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.RUNNING)
-        workflowStep.workflowRun.state = WorkflowRun.State.RUNNING
-        workflowStep.workflowRun.save(flush: true)
-        JobService service = Spy(JobService) {
-            1 * createRestartedJob(workflowStep) >> { }
-        }
+        WorkflowRun workflowRun = createWorkflowRun([
+                state: WorkflowRun.State.RUNNING,
+        ])
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: workflowRun,
+                state      : WorkflowStep.State.RUNNING,
+        ])
+
         service.logService = Mock(LogService) {
             1 * addSimpleLogEntry(_, _)
         }
@@ -177,10 +189,15 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
         then:
         workflowStep.state == WorkflowStep.State.FAILED
+        workflowRun.workflowSteps.last().beanName == workflowStep.beanName
+        workflowRun.workflowSteps.last().state == WorkflowStep.State.CREATED
+        workflowRun.workflowSteps.last().previous == workflowStep
+        workflowRun.workflowSteps.last().restartedFrom == workflowStep
+
     }
 
     @Unroll
-    void "test createRestartedJobAfterSystemRestart, not running"() {
+    void "test createRestartedJobAfterSystemRestart, when workflow system not running, then throw assertion"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(state: stepState)
         workflowStep.workflowRun.state = runState
@@ -193,9 +210,9 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         thrown(AssertionError)
 
         where:
-        stepState                  | runState                  || _
-        WorkflowStep.State.RUNNING | WorkflowRun.State.SUCCESS || _
-        WorkflowStep.State.SUCCESS | WorkflowRun.State.RUNNING || _
-        WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS || _
+        stepState                  | runState
+        WorkflowStep.State.RUNNING | WorkflowRun.State.SUCCESS
+        WorkflowStep.State.SUCCESS | WorkflowRun.State.RUNNING
+        WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS
     }
 }
