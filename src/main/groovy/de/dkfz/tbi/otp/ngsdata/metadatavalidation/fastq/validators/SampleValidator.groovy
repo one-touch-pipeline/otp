@@ -57,7 +57,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [PROJECT, PATIENT_ID, BIOMATERIAL_ID]*.name()
+        return [PROJECT, PATIENT_ID, SAMPLE_TYPE]*.name()
     }
 
     @Override
@@ -72,7 +72,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             String sampleName = it.getValue(SAMPLE_NAME.name())
             String projectName = it.getValue(PROJECT.name()) ?: ''
             String pid = it.getValue(PATIENT_ID.name()) ?: ''
-            String sampleType = it.getValue(BIOMATERIAL_ID.name()) ?: ''
+            String sampleType = it.getValue(SAMPLE_TYPE.name()) ?: ''
 
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
