@@ -29,7 +29,9 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.jobs.Job
+import de.dkfz.tbi.otp.workflow.restartHandler.AutoRestartHandlerService
 import de.dkfz.tbi.otp.workflow.restartHandler.ErrorNotificationService
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -129,7 +131,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         1 * jobScheduler.notifyUsers(workflowStep) >> { }
     }
 
-    void "test executeAndCheckJob, when job fails, notify maintainers"() {
+    void "test executeAndCheckJob, when job fails, trigger RestartHandler"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.CREATED)
         jobScheduler = Spy(JobScheduler)
@@ -144,16 +146,16 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                     }] as Job }
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        jobScheduler.errorNotificationService = Mock(ErrorNotificationService)
+        jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
 
         then:
-        1 * jobScheduler.errorNotificationService.send(workflowStep) >> { }
+        1 * jobScheduler.autoRestartHandlerService.handleRestarts(workflowStep) >> { }
     }
 
-    void "test executeAndCheckJob, when job fails incorrectly, notify maintainers"() {
+    void "test executeAndCheckJob, when job fails incorrectly, trigger RestartHandler"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.CREATED)
         jobScheduler = Spy(JobScheduler)
@@ -166,17 +168,17 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                     }] as Job }
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        jobScheduler.errorNotificationService = Mock(ErrorNotificationService)
+        jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
 
         then:
         1 * jobScheduler.workflowStateChangeService.changeStateToFailed(workflowStep, _ as JobSchedulerException) >> { }
-        1 * jobScheduler.errorNotificationService.send(workflowStep) >> { }
+        1 * jobScheduler.autoRestartHandlerService.handleRestarts(workflowStep) >> { }
     }
 
-    void "test executeAndCheckJob, when job state does not change, notify maintainers"() {
+    void "test executeAndCheckJob, when job state does not change, trigger RestartHandler"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.CREATED)
         jobScheduler = Spy(JobScheduler)
@@ -188,17 +190,17 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                     }] as Job }
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        jobScheduler.errorNotificationService = Mock(ErrorNotificationService)
+        jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
 
         when:
         jobScheduler.executeAndCheckJob(workflowStep)
 
         then:
         1 * jobScheduler.workflowStateChangeService.changeStateToFailed(workflowStep, _ as JobSchedulerException) >> { }
-        1 * jobScheduler.errorNotificationService.send(workflowStep) >> { }
+        1 * jobScheduler.autoRestartHandlerService.handleRestarts(workflowStep) >> { }
     }
 
-    void "test executeAndCheckJob, when job throws exception, notify maintainers"() {
+    void "test executeAndCheckJob, when job throws exception, trigger RestartHandler"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.CREATED)
         jobScheduler = Spy(JobScheduler)
@@ -209,6 +211,28 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                     }] as Job }
         ] as ApplicationContext
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
+
+        when:
+        jobScheduler.executeAndCheckJob(workflowStep)
+
+        then:
+        1 * jobScheduler.workflowStateChangeService.changeStateToFailed(workflowStep, _ as FileNotFoundException) >> { }
+        1 * jobScheduler.autoRestartHandlerService.handleRestarts(workflowStep) >> { }
+    }
+
+    void "test executeAndCheckJob, when job throws exception and restartHandler also throw exception, send simple error message"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.CREATED)
+        jobScheduler = Spy(JobScheduler)
+        jobScheduler.applicationContext = [
+                getBean: { name, cl ->
+                    [execute: { WorkflowStep st ->
+                        throw new FileNotFoundException()
+                    }] as Job }
+        ] as ApplicationContext
+        jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        jobScheduler.autoRestartHandlerService = Mock(AutoRestartHandlerService)
         jobScheduler.errorNotificationService = Mock(ErrorNotificationService)
 
         when:
@@ -216,6 +240,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
 
         then:
         1 * jobScheduler.workflowStateChangeService.changeStateToFailed(workflowStep, _ as FileNotFoundException) >> { }
-        1 * jobScheduler.errorNotificationService.send(workflowStep) >> { }
+        1 * jobScheduler.autoRestartHandlerService.handleRestarts(workflowStep) >> { throw new WorkflowException() }
+        1 * jobScheduler.errorNotificationService.sendMaintainer(workflowStep, _) >> { }
     }
 }

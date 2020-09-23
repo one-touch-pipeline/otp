@@ -25,21 +25,38 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 
-import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.otp.workflow.jobs.Job
+import de.dkfz.tbi.otp.workflow.restartHandler.AutoRestartHandlerService
 import de.dkfz.tbi.otp.workflow.restartHandler.ErrorNotificationService
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 
 import static grails.async.Promises.task
 
 class JobScheduler {
-    @Autowired ApplicationContext applicationContext
-    @Autowired ErrorNotificationService errorNotificationService
-    @Autowired JobService jobService
-    @Autowired NotificationCreator notificationCreator
-    @Autowired WorkflowStateChangeService workflowStateChangeService
-    @Autowired WorkflowSystemService workflowSystemService
+
+    @Autowired
+    ApplicationContext applicationContext
+
+    @Autowired
+    ErrorNotificationService errorNotificationService
+
+    @Autowired
+    JobService jobService
+
+    @Autowired
+    NotificationCreator notificationCreator
+
+    @Autowired
+    AutoRestartHandlerService autoRestartHandlerService
+
+    @Autowired
+    WorkflowStateChangeService workflowStateChangeService
+
+    @Autowired
+    WorkflowSystemService workflowSystemService
 
     @Scheduled(fixedDelay = 1000L)
     void scheduleJob() {
@@ -61,7 +78,9 @@ class JobScheduler {
         assert workflowStep
         try {
             Job job = applicationContext.getBean(workflowStep.beanName, Job)
-            job.execute(workflowStep)
+            TransactionUtils.withNewTransaction {
+                job.execute(workflowStep)
+            }
             if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING) {
                 jobService.createNextJob(workflowStep.workflowRun)
             } else if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.SUCCESS) {
@@ -71,11 +90,15 @@ class JobScheduler {
             } else if (workflowStep.state == WorkflowStep.State.RUNNING) {
                 throw new JobSchedulerException("Workflow step is still in state `RUNNING` after the job finished")
             } else if (workflowStep.state == WorkflowStep.State.FAILED) {
-                errorNotificationService.send(workflowStep)
+                autoRestartHandlerService.handleRestarts(workflowStep)
             }
         } catch (Throwable t) {
-            workflowStateChangeService.changeStateToFailed(workflowStep, t)
-            errorNotificationService.send(workflowStep)
+            try {
+                workflowStateChangeService.changeStateToFailed(workflowStep, t)
+                autoRestartHandlerService.handleRestarts(workflowStep)
+            } catch (Throwable t2) {
+                errorNotificationService.sendMaintainer(workflowStep, t2)
+            }
         }
     }
 
@@ -85,7 +108,7 @@ class JobScheduler {
     }
 }
 
-class JobSchedulerException extends OtpRuntimeException {
+class JobSchedulerException extends WorkflowException {
     JobSchedulerException(String message) {
         super(message)
     }
