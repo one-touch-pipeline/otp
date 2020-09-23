@@ -36,38 +36,111 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 
 @Transactional
 class ErrorNotificationService {
+
     MailHelperService mailHelperService
+
     OtrsTicketService otrsTicketService
+
     ProcessingOptionService processingOptionService
 
-    void send(WorkflowStep workflowStep) {
+    void sendMaintainer(WorkflowStep workflowStep, Throwable t) {
+        String subject = [
+                workflowStep.workflowRun.priority.errorMailPrefix,
+                ": Exception in RestartHandler for: ",
+                workflowStep.workflowRun.workflow,
+                ' in ',
+                workflowStep.beanName,
+        ].join('')
+
+        StringWriter sw = new StringWriter()
+        t.printStackTrace(new PrintWriter(sw))
+        String body = [
+                "Run id: ${workflowStep.workflowRun.id}",
+                "Step id: ${workflowStep.id}",
+                "Time: ${LocalDateTime.now()}",
+                '\nStacktrace:',
+                sw,
+        ].join('\n')
+
+        mailHelperService.sendEmail(subject, body, recipients)
+    }
+
+    void send(WorkflowStep workflowStep, WorkflowJobErrorDefinition.Action action, String checkText, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
         assert workflowStep
+        assert action
+        assert checkText
 
-        Collection<SeqTrack> seqTracks = getSeqTracks(workflowStep)
-
-        String subjectPrefix = workflowStep.workflowRun.priority.errorMailPrefix ?: "ERROR"
-        List<String> recipients = processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
         if (recipients) {
-            String subject = "${subjectPrefix}: ${workflowStep.workflowRun.workflow.name} ${seqTracks*.individual.unique()*.displayName.join(",")} " +
-                    "${seqTracks*.project.unique()*.name.join(",")}"
-            mailHelperService.sendEmail(subject, getInformation(workflowStep), recipients)
+            String subject = createSubject(workflowStep, action)
+            String body = [
+                    getRestartInformation(action, checkText, matches),
+                    createWorkflowInformation(workflowStep),
+                    createArtefactsInformation(workflowStep),
+                    createWorkflowStepInformation(workflowStep),
+                    createLogInformation(workflowStep),
+            ].join('\n')
+            mailHelperService.sendEmail(subject, body, recipients)
         }
     }
 
-    @SuppressWarnings("AbcMetric")
-    protected String getInformation(WorkflowStep workflowStep) {
+    private List<String> getRecipients() {
+        return processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
+    }
+
+    protected String createSubject(WorkflowStep workflowStep, WorkflowJobErrorDefinition.Action action) {
+        String prefix = "${workflowStep.workflowRun.priority.errorMailPrefix}: ${action}:"
+        Collection<SeqTrack> seqTracks = getSeqTracks(workflowStep)
+
+        return [
+                prefix,
+                workflowStep.workflowRun.workflow.name,
+                workflowStep.beanName,
+                seqTracks*.individual*.displayName.unique().join(","),
+                workflowStep.workflowRun.project.name,
+        ].join(' ')
+    }
+
+    protected String getRestartInformation(WorkflowJobErrorDefinition.Action action, String checkText, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
+        List<String> message = []
+        message << header("Action")
+        message << "final action: ${action}"
+        message << "info to action: ${checkText}"
+
+        message << header("Error definitions")
+        message << "matching expression count: ${matches.size()}"
+        matches.each { JobErrorDefinitionWithLogWithIdentifier definition ->
+            message << "log identifier: ${definition.logWithIdentifier.identifier}"
+            message << "definition name: ${definition.errorDefinition.name}"
+            message << "type: ${definition.errorDefinition.sourceType}"
+            message << "action: ${definition.errorDefinition.action}"
+            if (definition.errorDefinition.beanToRestart) {
+                message << "bean to restart: ${definition.errorDefinition.beanToRestart}"
+            }
+            message << "expression: ${definition.errorDefinition.errorExpression}"
+            if (definition.errorDefinition.mailText) {
+                message << "mail info: ${definition.errorDefinition.mailText}"
+            }
+            message << ''
+        }
+        return message.join("\n")
+    }
+
+    protected String createWorkflowInformation(WorkflowStep workflowStep) {
         assert workflowStep
 
         Collection<SeqTrack> seqTracks = getSeqTracks(workflowStep)
 
         List<String> message = []
 
-        message << header("Workflow run")
+        message << header("Workflow")
         message << "Name: ${workflowStep.workflowRun.workflow.name}"
         message << "Bean name: ${workflowStep.workflowRun.workflow.beanName}"
+
+        message << header("Workflow run")
         message << "ID: ${workflowStep.workflowRun.id}, started at: ${dateString(workflowStep.workflowRun.dateCreated)}"
         message << "Restart count: ${workflowStep.workflowRun.restartCount}"
         if (workflowStep.workflowRun.restartCount > 0) {
@@ -81,10 +154,18 @@ class ErrorNotificationService {
         message << "Submission IDs (Ilse): ${getSubmissionIds(seqTracks) ?: "None"}"
         message << "Tickets: ${getTicketUrls(seqTracks).join(', ') ?: "None"}"
 
+        return message.join("\n")
+    }
+
+    protected String createArtefactsInformation(WorkflowStep workflowStep) {
+        assert workflowStep
+
+        List<String> message = []
+
         message << header("Input artefacts")
         if (workflowStep.workflowRun.inputArtefacts) {
             workflowStep.workflowRun.inputArtefacts.sort { it.key }.each { k, v ->
-                message << "${k}: ${v}"
+                message << "${k}: ${v.displayName}"
             }
         } else {
             message << "None"
@@ -93,11 +174,19 @@ class ErrorNotificationService {
         message << header("Output artefacts")
         if (workflowStep.workflowRun.outputArtefacts) {
             workflowStep.workflowRun.outputArtefacts.sort { it.key }.each { k, v ->
-                message << "${k}: ${v}"
+                message << "${k}: ${v.displayName}"
             }
         } else {
             message << "None"
         }
+
+        return message.join("\n")
+    }
+
+    protected String createWorkflowStepInformation(WorkflowStep workflowStep) {
+        assert workflowStep
+
+        List<String> message = []
 
         message << header("Workflow step")
         message << "Bean name: ${workflowStep.beanName}"
@@ -111,8 +200,16 @@ class ErrorNotificationService {
             message << "Original ID: ${originalStep.id}, started at: ${dateString(originalStep.dateCreated)}"
         }
 
-        message << header("Stacktrace")
-        message << workflowStep.workflowError.stacktrace ?: "None"
+        return message.join("\n")
+    }
+
+    protected String createLogInformation(WorkflowStep workflowStep) {
+        assert workflowStep
+
+        List<String> message = []
+
+        message << header("OTP message")
+        message << workflowStep.workflowError.message ?: "None"
 
         message << header("Logs")
         //TODO: add link to logs
