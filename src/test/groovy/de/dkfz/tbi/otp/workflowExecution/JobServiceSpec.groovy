@@ -28,6 +28,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class JobServiceSpec extends Specification implements ServiceUnitTest<JobService>, DataTest, WorkflowSystemDomainFactory {
@@ -193,7 +194,6 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         workflowRun.workflowSteps.last().state == WorkflowStep.State.CREATED
         workflowRun.workflowSteps.last().previous == workflowStep
         workflowRun.workflowSteps.last().restartedFrom == workflowStep
-
     }
 
     @Unroll
@@ -214,5 +214,94 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         WorkflowStep.State.RUNNING | WorkflowRun.State.SUCCESS
         WorkflowStep.State.SUCCESS | WorkflowRun.State.RUNNING
         WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS
+    }
+
+    @Unroll
+    void "searchForJobToRestart, when bean is #beanToRestart, then return step on index #index"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+        List<WorkflowStep> workflowSteps = (0..5).collect {
+            createWorkflowStep([
+                    workflowRun: workflowRun,
+                    beanName   : "bean_${it}",
+            ])
+        }
+
+        when:
+        WorkflowStep result = service.searchForJobToRestart(workflowSteps.last(), beanToRestart)
+
+        then:
+        result == workflowSteps[index]
+
+        where:
+        beanToRestart | index
+        'bean_5'      | 5
+        'bean_3'      | 3
+        'bean_1'      | 1
+    }
+
+    void "searchForJobToRestart, when bean is unknown, then throw BeanToRestartNotFoundInWorkflowRunException"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        when:
+        service.searchForJobToRestart(workflowStep, "unknown")
+
+        then:
+        thrown(BeanToRestartNotFoundInWorkflowRunException)
+    }
+
+    @Unroll
+    void "searchForJobToRestart, when bean is #beanToRestart, then ignore obolate and return step on index #index"() {
+        given:
+        List<WorkflowStep> workflowSteps = createPartlyObsoleteSteps()
+
+        when:
+        WorkflowStep result = service.searchForJobToRestart(workflowSteps.last(), beanToRestart)
+
+        then:
+        result == workflowSteps[index]
+
+        where:
+        beanToRestart | index
+        'bean_4'      | 9
+        'bean_3'      | 6
+        'bean_1'      | 0
+    }
+
+    void "searchForJobToRestart, when bean is only obsolete in list, then throw BeanToRestartNotFoundInWorkflowRunException"() {
+        given:
+        WorkflowStep workflowStep = createPartlyObsoleteSteps().last()
+
+        when:
+        service.searchForJobToRestart(workflowStep, "bean_5")
+
+        then:
+        thrown(BeanToRestartNotFoundInWorkflowRunException)
+    }
+
+    /**
+     * Helper to create a run with partly obsolete steps to simulate some restarts
+     */
+    private List<WorkflowStep> createPartlyObsoleteSteps() {
+        WorkflowRun workflowRun = createWorkflowRun()
+        return [
+                [1, false,],
+                [2, false,],
+                [3, true,],
+                [4, true,],
+                [5, true,],
+                [4, true,],
+                [3, false,],
+                [4, true,],
+                [5, true],
+                [4, false,],
+        ].collect {
+            createWorkflowStep([
+                    workflowRun: workflowRun,
+                    beanName   : "bean_${it[0]}",
+                    obsolete   : it[1],
+            ])
+        }
     }
 }

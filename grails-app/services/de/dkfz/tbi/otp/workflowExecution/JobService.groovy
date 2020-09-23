@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
+
 @Transactional
 class JobService {
 
@@ -34,8 +36,8 @@ class JobService {
 
         OtpWorkflow otpWorkflow = applicationContext.getBean(workflowRun.workflow.beanName, OtpWorkflow)
         String beanName = workflowRun.workflowSteps ?
-                    otpWorkflow.jobBeanNames[otpWorkflow.jobBeanNames.indexOf(workflowRun.workflowSteps.last().beanName) + 1] :
-                    otpWorkflow.jobBeanNames.first()
+                otpWorkflow.jobBeanNames[otpWorkflow.jobBeanNames.indexOf(workflowRun.workflowSteps.last().beanName) + 1] :
+                otpWorkflow.jobBeanNames.first()
 
         new WorkflowStep(
                 workflowRun: workflowRun,
@@ -56,7 +58,8 @@ class JobService {
                 restartedFrom: stepToRestart,
         ).save(flush: true)
 
-        stepToRestart.workflowRun.workflowSteps[stepToRestart.workflowRun.workflowSteps.indexOf(stepToRestart)..(stepToRestart.workflowRun.workflowSteps.size() - 1)].each { WorkflowStep step ->
+        List<WorkflowStep> workflowSteps = stepToRestart.workflowRun.workflowSteps
+        workflowSteps[workflowSteps.indexOf(stepToRestart)..(workflowSteps.size() - 1)].each { WorkflowStep step ->
             step.obsolete = true
             step.save(flush: true)
         }
@@ -75,6 +78,20 @@ class JobService {
         assert failedStep.state == WorkflowStep.State.FAILED
 
         createRestartedJob(stepToRestart)
+    }
+
+    WorkflowStep searchForJobToRestart(WorkflowStep failedStep, String beanToRestart) {
+        List<WorkflowStep> nonObsoleteReverseSteps = failedStep.workflowRun.workflowSteps.findAll {
+            !it.obsolete
+        }.reverse()
+        WorkflowStep stepToRestart = nonObsoleteReverseSteps.find {
+            it.beanName == beanToRestart
+        }
+        if (stepToRestart) {
+            return stepToRestart
+        }
+        throw new BeanToRestartNotFoundInWorkflowRunException(
+                "Could not find bean ${beanToRestart} in non obsolete running jobs, available are: ${nonObsoleteReverseSteps*.beanName.join(', ')}")
     }
 
     void createRestartedJobAfterSystemRestart(WorkflowStep workflowStep) {
