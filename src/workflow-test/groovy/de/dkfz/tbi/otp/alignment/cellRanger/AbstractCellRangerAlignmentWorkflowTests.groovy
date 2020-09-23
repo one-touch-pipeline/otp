@@ -85,7 +85,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
             ConfigPerProjectAndSeqType conf = createConfig(
                     seqType         : seqType,
                     project         : project,
-                    programVersion  : "cellranger/3.0.1",
+                    programVersion  : "cellranger/4.0.0",
             )
 
             mwp = createMergingWorkPackage(

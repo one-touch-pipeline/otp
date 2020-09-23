@@ -68,6 +68,8 @@ class Globals {
 
                     // CellRanger
                     "cellranger/3.0.1",
+                    "cellranger/3.1.0",
+                    "cellranger/4.0.0",
 
                     // ACEseq
                     "ACEseqWorkflow:1.2.8-1",

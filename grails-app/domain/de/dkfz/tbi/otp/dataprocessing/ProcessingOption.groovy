@@ -99,11 +99,11 @@ class ProcessingOption implements Entity {
 
         PIPELINE_CELLRANGER_DEFAULT_VERSION(
                 "Default Cell Ranger version, used when configuring the pipeline",
-                Necessity.OPTIONAL, "cellranger/3.0.1", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "cellranger/4.0.0", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_CELLRANGER_AVAILABLE_VERSIONS(
                 "Cell Ranger versions, comma-separated",
-                Necessity.OPTIONAL, "cellranger/3.0.1", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+                Necessity.OPTIONAL, "cellranger/3.0.1, cellranger/3.1.0, cellranger/4.0.0", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
         PIPELINE_CELLRANGER_CORE_COUNT(
                 "Count of cores to use by cell ranger, used for parameter '--localcores'",
