@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.jobs.Job
+import de.dkfz.tbi.otp.workflow.restartHandler.ErrorNotificationService
 
 import static grails.async.Promises.task
 

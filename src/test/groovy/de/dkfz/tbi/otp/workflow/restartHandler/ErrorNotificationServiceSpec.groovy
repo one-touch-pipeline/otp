@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 class ErrorNotificationServiceSpec extends Specification implements ServiceUnitTest<ErrorNotificationService>, DataTest, DomainFactoryProcessingPriority, WorkflowSystemDomainFactory {
