@@ -53,16 +53,20 @@ class BamMetadataImportController {
 
     def validateOrImport(BamMetadataControllerSubmitCommand cmd) {
         BamMetadataValidationContext bamMetadataValidationContext
-        if (cmd.hasErrors()) {
-            flash.message = new FlashMessage("Error", cmd.errors)
-        } else if (cmd.submit == "Import") {
-            Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
-                    cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths)
-            bamMetadataValidationContext = results.context
-            if (results.project != null) {
-                redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
-                return
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage("Error", cmd.errors)
+            } else if (cmd.submit == "Import") {
+                Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
+                        cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths)
+                bamMetadataValidationContext = results.context
+                if (results.project != null) {
+                    redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
+                    return
+                }
             }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.message.error") as String, g.message(code: "default.invalid.session") as String)
         }
         flash.mvc = bamMetadataValidationContext
         redirect(action: "index", params: [

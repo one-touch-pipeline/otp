@@ -108,34 +108,38 @@ class MetadataImportController implements CheckAndCall {
 
     def validateOrImport(MetadataImportControllerSubmitCommand cmd) {
         List<MetadataValidationContext> metadataValidationContexts = []
-        if (cmd.hasErrors()) {
-            flash.message = new FlashMessage("Error", cmd.errors)
-        } else if (cmd.submit == "Import") {
-            FileSystem fs = fileSystemService.filesystemForFastqImport
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage("Error", cmd.errors)
+            } else if (cmd.submit == "Import") {
+                FileSystem fs = fileSystemService.filesystemForFastqImport
 
-            List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = cmd.paths.withIndex().collect {
-                return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))
-            }
-            List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(
-                    pathWithMd5sums, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
-                    cmd.seqCenterComment, cmd.automaticNotification
-            )
-            metadataValidationContexts = validateAndImportResults*.context
-            boolean allValid = validateAndImportResults.every {
-                it.metadataFile
-            }
-            if (allValid) {
-                log.debug("No problem")
-                if (validateAndImportResults.size() == 1) {
-                    log.debug("This should be the id to the details page: ${validateAndImportResults.first().metadataFile.fastqImportInstance.id}")
-                    redirect(action: "details", id: validateAndImportResults.first().metadataFile.fastqImportInstance.id)
-                } else {
-                    redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
+                List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = cmd.paths.withIndex().collect {
+                    return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))
                 }
-                return
-            } else {
-                log.debug("There was a problem")
+                List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(
+                        pathWithMd5sums, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
+                        cmd.seqCenterComment, cmd.automaticNotification
+                )
+                metadataValidationContexts = validateAndImportResults*.context
+                boolean allValid = validateAndImportResults.every {
+                    it.metadataFile
+                }
+                if (allValid) {
+                    log.debug("No problem")
+                    if (validateAndImportResults.size() == 1) {
+                        log.debug("This should be the id to the details page: ${validateAndImportResults.first().metadataFile.fastqImportInstance.id}")
+                        redirect(action: "details", id: validateAndImportResults.first().metadataFile.fastqImportInstance.id)
+                    } else {
+                        redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
+                    }
+                    return
+                } else {
+                    log.debug("There was a problem")
+                }
             }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.message.error") as String, g.message(code: "default.invalid.session") as String)
         }
         flash.mvc = metadataValidationContexts
         redirect(action: "index", params: [

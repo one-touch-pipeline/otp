@@ -34,6 +34,7 @@
     </title>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
+    <asset:javascript src="common/DisableOnSubmit.js"/>
 </head>
 
 <body>
@@ -105,7 +106,7 @@
 </g:if>
 <g:render template="/templates/messages"/>
 <div>
-    <g:form controller="bamMetadataImport" action="validateOrImport">
+    <g:form useToken="true" controller="bamMetadataImport" action="validateOrImport">
         <table class="options">
             <tr>
                 <td><g:message code="bamMetadataImport.path"/></td>

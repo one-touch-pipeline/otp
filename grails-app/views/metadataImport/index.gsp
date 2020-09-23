@@ -34,6 +34,7 @@
     </title>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
+    <asset:javascript src="common/DisableOnSubmit.js"/>
 </head>
 <body>
 <g:if test="${contexts}">
@@ -114,7 +115,7 @@
 </g:if>
     <g:render template="/templates/messages"/>
     <div>
-    <g:form controller="metadataImport" action="validateOrImport">
+    <g:form useToken="true" controller="metadataImport" action="validateOrImport">
         <table class="options">
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <tr>
