@@ -21,11 +21,18 @@
  */
 package de.dkfz.tbi.otp.workflow.restartHandler
 
+import groovy.transform.TupleConstructor
+
 /**
  * DTO class needed for the results of the AbstractRestartHandlerLogService class.
  */
-
+@TupleConstructor
 class LogWithIdentifier {
     String identifier
     String log
+
+    @Override
+    String toString() {
+        return "Log for identifier ${identifier}"
+    }
 }

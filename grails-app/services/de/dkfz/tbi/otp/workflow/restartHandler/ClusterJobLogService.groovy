@@ -21,14 +21,18 @@
  */
 package de.dkfz.tbi.otp.workflow.restartHandler
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.*
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
+@Transactional
 class ClusterJobLogService extends AbstractRestartHandlerLogService {
 
     LogService logService

@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
+import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
@@ -31,14 +34,15 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     Workflow createWorkflow(Map properties = [:]) {
         return createDomainObject(Workflow, [
-                name   : "name_${nextId}",
-                enabled: true,
+                name    : "name_${nextId}",
+                beanName: "beanName_${nextId}",
+                enabled : true,
         ], properties)
     }
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         return createDomainObject(WorkflowRun, [
-                workflow   : { createWorkflow() },
+                workflow   : { properties.restartedFrom?.workflow ?: createWorkflow() },
                 priority   : { createProcessingPriority() },
                 project    : { createProject() },
                 displayName: "displayName_${nextId}",
@@ -47,7 +51,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowStep createWorkflowStep(Map properties = [:]) {
         WorkflowStep step = createDomainObject(WorkflowStep, [
-                workflowRun: { createWorkflowRun() },
+                workflowRun: { properties.restartedFrom?.workflowRun ?: createWorkflowRun() },
                 beanName   : "beanName_${nextId}",
                 state      : WorkflowStep.State.CREATED,
         ], properties, false)
@@ -76,12 +80,12 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
     WorkflowJobErrorDefinition createWorkflowJobErrorDefinition(Map properties = [:]) {
         return createDomainObject(WorkflowJobErrorDefinition, [
                 sourceType          : WorkflowJobErrorDefinition.SourceType.MESSAGE,
-                action              : WorkflowJobErrorDefinition.Action.RESTART_JOB,
+                action              : WorkflowJobErrorDefinition.Action.STOP,
                 errorExpression     : "error_${nextId}",
                 allowRestartingCount: nextId,
                 jobBeanName         : "jobBeanName_${nextId}",
                 name                : "name_${nextId}",
-                beanToRestart       : "beanToRestart_${nextId}",
+                beanToRestart       : { properties.action == WorkflowJobErrorDefinition.Action.RESTART_JOB ? "beanToRestart_${nextId}" : null },
         ], properties)
     }
 
@@ -92,6 +96,22 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
         ], properties)
     }
 
+    ClusterJob createClusterJob(Map properties = [:]) {
+        boolean oldSystem = properties.containsKey('oldSystem') ? properties.oldSystem : properties.containsKey('processingStep')
+        return createDomainObject(ClusterJob, [
+                validated     : false,
+                oldSystem     : oldSystem,
+                checkStatus   : ClusterJob.CheckStatus.CREATED,
+                realm         : { DomainFactory.createRealm() },
+                clusterJobId  : "clusterJobId_${nextId}",
+                userName      : "userName_${nextId}",
+                clusterJobName: "clusterJobName_${nextId}_jobClass",
+                jobClass      : "jobClass",
+                processingStep: { oldSystem ? DomainFactory.createProcessingStep() : null },
+                workflowStep  : { oldSystem ? null : createWorkflowStep() },
+                queued        : new DateTime(),
+        ], properties)
+    }
 }
 
 class WorkflowSystemDomainFactoryInstance implements WorkflowSystemDomainFactory {

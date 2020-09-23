@@ -21,8 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflow.restartHandler
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+@Transactional
 class MessageLogService extends AbstractRestartHandlerLogService {
 
     @Override
