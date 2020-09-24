@@ -508,10 +508,11 @@ class FileService {
      * @param linkPath the path of the link
      * @param existingPath the exiting path the link point to
      * @param realm the realm to use for remote access
+     * @param groupString the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
     @SuppressWarnings('Instanceof')
-    void createLink(Path linkPath, Path existingPath, Realm realm, CreateLinkOption... options) {
+    void createLink(Path linkPath, Path existingPath, Realm realm, String groupString = '', CreateLinkOption... options) {
         assert linkPath
         assert existingPath
         assert linkPath.absolute
@@ -539,7 +540,7 @@ class FileService {
                 existingPath :
                 linkPath.parent.relativize(existingPath)
 
-        createDirectoryRecursively(linkPath.parent)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(linkPath.parent, realm, groupString)
 
         // SFTP does not support creating symbolic links
         if (linkPath.fileSystem.provider() instanceof SFTPFileSystemProvider) {

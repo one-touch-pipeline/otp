@@ -34,7 +34,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
@@ -59,13 +61,19 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
-                sophiaService: Mock(SophiaService) {
-                    1 * validateInputBamFiles(_) >> { }
+                sophiaService    : Mock(SophiaService) {
+                    1 * validateInputBamFiles(_)
                 },
                 fileSystemService: Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
                 },
-                fileService: new FileService(),
+                fileService      : new FileService([
+                        remoteShellHelper: Mock(RemoteShellHelper) {
+                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                                return new ProcessOutput(command, '', 0)
+                            }
+                        }
+                ]),
         ])
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
@@ -136,10 +144,10 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_, _)
                 },
                 sophiaService             : Mock(SophiaService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_)
                 },
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
@@ -200,7 +208,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_, _)
                 },
         ])
 

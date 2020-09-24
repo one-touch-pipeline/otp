@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
@@ -100,16 +101,22 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 indelCallingService   : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_)
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
                     0 * _
                 },
-                fileSystemService: Mock(FileSystemService) {
+                fileSystemService     : Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
                 },
-                fileService: new FileService(),
+                fileService           : new FileService([
+                        remoteShellHelper: Mock(RemoteShellHelper) {
+                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                                return new ProcessOutput(command, '', 0)
+                            }
+                        }
+                ]),
         ])
 
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -171,7 +178,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 indelCallingService   : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_)
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
@@ -180,10 +187,16 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 bedFileService        : Mock(BedFileService) {
                     1 * filePath(_) >> bedFile
                 },
-                fileSystemService: Mock(FileSystemService) {
+                fileSystemService     : Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
                 },
-                fileService: new FileService(),
+                fileService           : new FileService([
+                        remoteShellHelper: Mock(RemoteShellHelper) {
+                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                                return new ProcessOutput(command, '', 0)
+                            }
+                        }
+                ]),
         ])
         new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
@@ -275,10 +288,10 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_, _)
                 },
                 indelCallingService       : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_)
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
@@ -331,7 +344,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_, _)
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
