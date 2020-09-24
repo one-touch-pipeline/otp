@@ -68,7 +68,7 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
 
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
         String runId = valueTuple.getValue(RUN_ID.name())
-        String fileName = valueTuple.getValue(FASTQ_FILE.name())
+        String fileName = new File(valueTuple.getValue(FASTQ_FILE.name())).name
         String projectName = valueTuple.getValue(PROJECT.name())
         Project project = Project.getByNameOrNameInMetadataFiles(projectName)
 

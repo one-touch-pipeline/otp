@@ -42,6 +42,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     static final String RUN_ID = "runName"
     static final String SAMPLE_NAME = "sampleIdentifierName"
     static final String DATAFILE = "DataFileFileName.gz"
+    static final String DATAFILE_PATH = "/tmp/DataFileFileName.gz"
     static final String DATAFILE_NEW = "DataFileFileNameNew.gz"
 
     static DataFile dataFile
@@ -106,6 +107,27 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA
+        )
+
+        when:
+        ProjectRunNameFileNameValidator validator = new ProjectRunNameFileNameValidator()
+
+        validator.validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set,
+                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
+        ]
+        assertContainSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when file name already exists for specified run and project while using absolute path'() {
+        given:
+        setupData()
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
+                        "${DATAFILE_PATH}\t${RUN_ID}\t${PROJECT}\n"
         )
 
         when:
