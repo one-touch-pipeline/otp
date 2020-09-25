@@ -113,6 +113,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Path filePath3 = Paths.get(file3)
         Path filePath4 = Paths.get(file4)
 
+        Path sampleIdentifierPath = sampleDirectory.resolve(singleCellBamFile.seqTracks.first().sampleIdentifier)
+
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(CellRangerMergingWorkPackage.all.find(),
                 [ sampleIdentifier: sampleIdentifier2, ]
         )
@@ -135,27 +137,27 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.deleteDirectoryRecursively(sampleDirectory)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursively(sampleDirectory)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, _, _)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursively(sampleDirectory.resolve(singleCellBamFile.seqTracks.first().sampleIdentifier))
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierPath, _, _)
 
         2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
                 file1,
                 file2,
         ]
-        1 * cellRangerService.fileService.createLink(mate1, filePath1, singleCellBamFile.realm)
-        1 * cellRangerService.fileService.createLink(mate2, filePath2, singleCellBamFile.realm)
+        1 * cellRangerService.fileService.createLink(mate1, filePath1, singleCellBamFile.realm, _)
+        1 * cellRangerService.fileService.createLink(mate2, filePath2, singleCellBamFile.realm, _)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursively(sampleDirectory.resolve(sampleIdentifier2DirName))
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory.resolve(sampleIdentifier2DirName), _, _)
 
         2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
                 file3,
                 file4,
         ]
-        1 * cellRangerService.fileService.createLink(mate3, filePath3, singleCellBamFile.realm)
-        1 * cellRangerService.fileService.createLink(mate4, filePath4, singleCellBamFile.realm)
+        1 * cellRangerService.fileService.createLink(mate3, filePath3, singleCellBamFile.realm, _)
+        1 * cellRangerService.fileService.createLink(mate4, filePath4, singleCellBamFile.realm, _)
     }
 
     void "deleteOutputDirectoryStructureIfExists, if singleCellBamFile given, then delete the output directory"() {

@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 
@@ -36,9 +35,6 @@ import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 @Scope("prototype")
 @Slf4j
 class LinkCellRangerResultFilesJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
-
-    @Autowired
-    FileService fileService
 
     @Autowired
     CellRangerService cellRangerService

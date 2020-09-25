@@ -90,23 +90,24 @@ class CellRangerService {
         String sampleName = singleCellBamFile.singleCellSampleName
 
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        String unixGroup = singleCellBamFile.project.unixGroup
 
         Path sampleDirectory = fileSystem.getPath(singleCellBamFile.sampleDirectory.path)
 
         fileService.deleteDirectoryRecursively(sampleDirectory) //delete dir if exist from previous run
-        fileService.createDirectoryRecursively(sampleDirectory)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, realm, unixGroup)
 
         singleCellBamFile.containedSeqTracks.groupBy { it.sampleIdentifier }.each { String sampleIdentifier, List<SeqTrack> seqTracks ->
             String sampleIdentifierDirName = sampleIdentifierForDirectoryStructure(sampleIdentifier)
             Path sampleIdentifierDirectory = sampleDirectory.resolve(sampleIdentifierDirName)
-            fileService.createDirectoryRecursively(sampleIdentifierDirectory)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierDirectory, realm, unixGroup)
             seqTracks.sort { it.id }.withIndex(1).each { SeqTrack seqTrack, int laneCounter ->
                 seqTrack.dataFilesWhereIndexFileIsFalse.sort { it.id }.each { DataFile dataFile ->
                     String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
                     String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${dataFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
                     Path link = sampleIdentifierDirectory.resolve(fileName)
                     Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(dataFile))
-                    fileService.createLink(link, target, realm)
+                    fileService.createLink(link, target, realm, unixGroup)
                 }
             }
         }
