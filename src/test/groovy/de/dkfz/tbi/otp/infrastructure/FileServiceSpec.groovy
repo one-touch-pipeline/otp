@@ -26,10 +26,16 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
+import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.PosixFilePermission
 
 class FileServiceSpec extends Specification implements DataTest {
@@ -44,21 +50,70 @@ class FileServiceSpec extends Specification implements DataTest {
     @Rule
     TemporaryFolder temporaryFolder
 
-    void "setPermission, if directory does not exist, but the parent directory exists, then create directory"() {
+    private void mockRemoteShellHelper() {
+        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
+                return LocalShellHelper.executeAndWait(command)
+            }
+        }
+    }
+
+    @Unroll
+    void "setPermission, if permission is set to #permission, then path has expected permission"() {
         given:
+        Path basePath = temporaryFolder.newFile().toPath()
+        Set<PosixFilePermission> permissions = [permission] as Set
+
+        when:
+        fileService.setPermission(basePath, permissions)
+
+        then:
+        Files.getPosixFilePermissions(basePath) == permissions
+
+        where:
+        permission << PosixFilePermission.values()
+    }
+
+    @Unroll
+    void "setPermissionViaBash, if permission set to #permissionString, then path has expected permissionPosix"() {
+        given:
+        mockRemoteShellHelper()
         Path basePath = temporaryFolder.newFolder().toPath()
+        Realm realm = new Realm()
 
         when:
-        fileService.setPermission(basePath, FileService.OWNER_DIRECTORY_PERMISSION)
+        fileService.setPermissionViaBash(basePath, realm, permissionString)
 
         then:
-        Files.getPosixFilePermissions(basePath) == FileService.OWNER_DIRECTORY_PERMISSION
+        //sticky bit can't be checked via PosixFilePermission, so only posix part is checked
+        TestCase.assertContainSame(Files.getPosixFilePermissions(basePath), permissionPosix)
+
+        where:
+        permissionString || permissionPosix
+        '500'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE]
+        '550'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE]
+        '700'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE]
+        '2700'           || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE]
+    }
+
+    @Unroll
+    void "setGroupViaBash, if group is set to #group, then path has expected group"() {
+        given:
+        mockRemoteShellHelper()
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Realm realm = new Realm()
 
         when:
-        fileService.setPermission(basePath, FileService.DEFAULT_DIRECTORY_PERMISSION)
+        fileService.setGroupViaBash(basePath, realm, group)
 
         then:
-        Files.getPosixFilePermissions(basePath) == FileService.DEFAULT_DIRECTORY_PERMISSION
+        Files.getFileAttributeView(basePath, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group
+
+        where:
+        group << [
+                new TestConfigService().testingGroup,
+                new TestConfigService().workflowProjectUnixGroup,
+        ]
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -526,9 +581,9 @@ class FileServiceSpec extends Specification implements DataTest {
         link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
 
         where:
-        name            | callback
-        'file'          | { Path p -> p.text = 'File' }
-        'link'          | { Path p -> Files.createSymbolicLink(p, Paths.get('test')) }
+        name   | callback
+        'file' | { Path p -> p.text = 'File' }
+        'link' | { Path p -> Files.createSymbolicLink(p, Paths.get('test')) }
     }
 
     @Unroll
@@ -624,7 +679,9 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "correctPathPermissionRecursive, correct permission of output folder"() {
         given:
+        mockRemoteShellHelper()
         Path filePath = temporaryFolder.newFolder().toPath()
+        String group = new TestConfigService().testingGroup
         Path dir1 = filePath.resolve('dir1')
         Path subDir = dir1.resolve('subDir')
 
@@ -632,18 +689,18 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = dir2.resolve('file')
         Path bamFile = dir2.resolve('file.bam')
         Path baiFile = dir2.resolve('file.bam.bai')
+        Realm realm = new Realm()
 
         Path link = dir2.resolve('link')
 
-        [
+        List<Path> paths = [
                 dir1,
                 dir2,
                 subDir,
         ].each {
             Files.createDirectory(it)
             Files.setPosixFilePermissions(it, FileService.OWNER_DIRECTORY_PERMISSION)
-        }
-        [
+        } + [
                 file,
                 bamFile,
                 baiFile,
@@ -655,7 +712,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createSymbolicLink(link, file)
 
         when:
-        fileService.correctPathPermissionRecursive(filePath)
+        fileService.correctPathPermissionAndGroupRecursive(filePath, realm, group)
 
         then:
         Files.getPosixFilePermissions(filePath) == FileService.DEFAULT_DIRECTORY_PERMISSION
@@ -665,6 +722,10 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.getPosixFilePermissions(file) == FileService.DEFAULT_FILE_PERMISSION
         Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_BAM_FILE_PERMISSION
         Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_BAM_FILE_PERMISSION
+
+        paths.each {
+            assert Files.getFileAttributeView(it, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group
+        }
     }
 
     void "findFileInPath, file can be found with regular expression"() {

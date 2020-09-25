@@ -82,6 +82,6 @@ class CellRangerWorkflowService {
     void correctFilePermissions(SingleCellBamFile singleCellBamFile) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
         Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)
-        fileService.correctPathPermissionRecursive(workDirectory)
+        fileService.correctPathPermissionAndGroupRecursive(workDirectory, singleCellBamFile.realm, singleCellBamFile.project.unixGroup)
     }
 }

@@ -218,7 +218,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
                     0 * _
                 },
                 fileService      : Mock(FileService) {
-                    1 * correctPathPermissionRecursive(workDirectory)
+                    1 * correctPathPermissionAndGroupRecursive(workDirectory, _, _)
                     0 * _
                 },
         ])

@@ -63,8 +63,23 @@ class FileService {
     static final int MILLIS_BETWEEN_RETRIES = 50
 
     /**
-     * The default directory permissions (750)
+     * The default directory permissions (2750) with setgid bit
      */
+    static final String DEFAULT_DIRECTORY_PERMISSION_STRING = "2750"
+
+    /**
+     * The directory permissions only accessible for owner (2700) with setgid bit
+     */
+    static final String OWNER_DIRECTORY_PERMISSION_STRING = "2700"
+
+    /**
+     * The old default directory permissions (750).
+     *
+     * Please use now {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}, which has also the setgid bit
+     *
+     * @Deprecated The directory permission should be 2740, which can not be done via {@link PosixFilePermission}
+     */
+    @Deprecated
     static final Set<PosixFilePermission> DEFAULT_DIRECTORY_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.OWNER_WRITE,
@@ -116,7 +131,7 @@ class FileService {
      *
      * Some tools require read access for others to work.
      *
-     * The extension to use is defind in {@link #BAM_FILE_EXTENSIONS}
+     * The extension to use is defined in {@link #BAM_FILE_EXTENSIONS}
      */
     static final Set<PosixFilePermission> DEFAULT_BAM_FILE_PERMISSION = [
             PosixFilePermission.OWNER_READ,
@@ -186,7 +201,7 @@ class FileService {
             } finally {
                 stream?.close()
             }
-        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES) : "Cannot find any file with the filename matching '${fileRegex}'"
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "Cannot find any file with the filename matching '${fileRegex}'"
         return match
     }
 
@@ -206,7 +221,7 @@ class FileService {
             } finally {
                 stream?.close()
             }
-        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES) : "Cannot find any files with their filenames matching '${fileRegex}'"
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "Cannot find any files with their filenames matching '${fileRegex}'"
         return matches
     }
 
@@ -330,6 +345,9 @@ class FileService {
      * Set the permission of the path to the given permission.
      *
      * The path have to be absolute and have to exist,
+     *
+     * For directories with setgid bit you need to use {@link #setPermissionViaBash(Path, Realm, String)},
+     * since that is not possible with {@link PosixFilePermission}
      */
     void setPermission(Path path, Set<PosixFilePermission> permissions) {
         assert path
@@ -345,7 +363,8 @@ class FileService {
      *
      * It won't fail if the directory already exist, but then the group and permissions are not changed.
      */
-    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, Realm realm, String groupString = '', String permissions = '2750') {
+    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, Realm realm, String groupString = '',
+                                                            String permissions = DEFAULT_DIRECTORY_PERMISSION_STRING) {
         assert path
         assert path.absolute
 
@@ -362,17 +381,32 @@ class FileService {
 
             // chgrp needs to be done before chmod, as chgrp resets setgid and setuid
             if (groupString) {
-                remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+                setGroupViaBash(path, realm, groupString)
             }
-            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+            setPermissionViaBash(path, realm, permissions)
         }
+    }
+
+    void setDefaultDirectoryPermissionViaBash(Path path, Realm realm) {
+        setPermissionViaBash(path, realm, DEFAULT_DIRECTORY_PERMISSION_STRING)
+    }
+
+    void setPermissionViaBash(Path path, Realm realm, String permissions) {
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+    }
+
+    void setGroupViaBash(Path path, Realm realm, String groupString) {
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
     }
 
     /**
      * Create the requested directory (absolute path) and all missing parent directories with the permission defined in {@link #DEFAULT_DIRECTORY_PERMISSION}.
      *
      * It won't fail if the directory already exist, but then the permissions are not changed.
+     *
+     * @Deprecated use{@link #createDirectoryRecursivelyAndSetPermissionsViaBash} instead since this method do not set the setgid bit
      */
+    @Deprecated
     void createDirectoryRecursively(Path path) {
         assert path
         assert path.absolute
@@ -380,6 +414,7 @@ class FileService {
         createDirectoryRecursivelyInternal(path)
     }
 
+    @Deprecated
     private void createDirectoryRecursivelyInternal(Path path) {
         if (Files.exists(path)) {
             assert Files.isDirectory(path): "The path ${path} already exist, but is not a directory"
@@ -573,38 +608,41 @@ class FileService {
     }
 
     /**
-     * Correct the permission recursive for the directory structure.
+     * Correct the group and permission recursive for the directory structure.
      *
      * The permissions are set:
-     * - directories are set to: {@link #DEFAULT_DIRECTORY_PERMISSION}
+     * - directories are set to: {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}
      * - bam/bai files to: {@link #DEFAULT_BAM_FILE_PERMISSION}
      * - other files to: {@link #DEFAULT_FILE_PERMISSION}
      */
-    void correctPathPermissionRecursive(Path path) {
+    void correctPathPermissionAndGroupRecursive(Path path, Realm realm, String group) {
         assert path
         assert path.absolute
         assert Files.exists(path)
+        assert realm
+        assert group
 
-        correctPathPermissionRecursiveInternal(path)
+        correctPathAndGroupPermissionRecursiveInternal(path, realm, group)
     }
 
     @SuppressWarnings('ThrowRuntimeException')
-    private void correctPathPermissionRecursiveInternal(Path path) {
+    private void correctPathAndGroupPermissionRecursiveInternal(Path path, Realm realm, String group) {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
             Stream<Path> stream = null
             try {
                 stream = Files.list(path)
                 stream.each {
-                    correctPathPermissionRecursiveInternal(it)
+                    correctPathAndGroupPermissionRecursiveInternal(it, realm, group)
                 }
-                setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
+                setGroupViaBash(path, realm, group)
+                setDefaultDirectoryPermissionViaBash(path, realm)
             } finally {
                 stream?.close()
             }
         } else if (Files.isSymbolicLink(path)) {
-            //since a link itself has no permission, nothing is to do
-            return
+            setGroupViaBash(path, realm, group)
         } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            setGroupViaBash(path, realm, group)
             if (useBamFilePermission(path)) {
                 setPermission(path, DEFAULT_BAM_FILE_PERMISSION)
             } else {
