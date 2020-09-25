@@ -54,7 +54,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
         if (context instanceof BamMetadataValidationContext) {
             return []
         } else {
-            return [BASE_MATERIAL, TAGMENTATION_BASED_LIBRARY]*.name()
+            return [BASE_MATERIAL, TAGMENTATION]*.name()
         }
     }
 

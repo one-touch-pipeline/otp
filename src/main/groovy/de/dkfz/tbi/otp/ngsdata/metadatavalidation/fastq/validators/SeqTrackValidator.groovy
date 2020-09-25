@@ -50,7 +50,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             FRAGMENT_SIZE,
             FASTQ_GENERATOR,
             ILSE_NO,
-            CUSTOMER_LIBRARY,
+            TAGMENTATION_LIBRARY,
     ].asImmutable()
 
     @Override

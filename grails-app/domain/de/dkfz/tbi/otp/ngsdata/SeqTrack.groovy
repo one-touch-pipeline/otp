@@ -132,7 +132,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     LibraryPreparationKit libraryPreparationKit
 
     /**
-     * null for all SeqTracks created before the metadata import parsed the CUSTOMER_LIBRARY column
+     * null for all SeqTracks created before the metadata import parsed the TAGMENTATION_LIBRARY column
      * empty for SeqTracks where the metadata import found the column to be missing or empty.
      */
     String libraryName

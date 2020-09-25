@@ -31,11 +31,11 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 
 @Component
-class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService
@@ -43,7 +43,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The library names which match the same normalized library should be' +
+        return ['The tagmentation library names which match the same normalized tagmentation library should be' +
                         ' the same within the metadata file and the same as the one already registered in OTP.']
     }
 
@@ -54,7 +54,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [CUSTOMER_LIBRARY, PROJECT]*.name()
+        return [TAGMENTATION_LIBRARY, PROJECT]*.name()
     }
 
     @Override
@@ -73,7 +73,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
                 return
             }
 
-            String libraryName = valueTuple.getValue(CUSTOMER_LIBRARY.name())
+            String libraryName = valueTuple.getValue(TAGMENTATION_LIBRARY.name())
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
             extractedValuesList.add(new ExtractedValues(project: project, libraryName: libraryName, normalizedLibraryName: normalizedLibraryName, cells: valueTuple.cells))
         }
@@ -84,7 +84,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
                 Set<Cell> cells = rows*.cells.sum() as Set<Cell>
 
                 if (rows*.libraryName.unique().size() > 1) {
-                    context.addProblem(cells, Level.WARNING, "All rows for project '${currentProject.name}' which look similar to '${normalizedLibraryName}' should have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows for one project which have a similar customer library should have the same value in column '${CUSTOMER_LIBRARY}'.")
+                    context.addProblem(cells, Level.WARNING, "All rows for project '${currentProject.name}' which look similar to '${normalizedLibraryName}' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column '${TAGMENTATION_LIBRARY}'.")
                 }
 
                 List<String> result = SeqTrack.createCriteria().list {
@@ -104,7 +104,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
                         cells = rows.findAll { it.libraryName != result[0] }*.cells.sum() as Set<Cell>
                     }
                     if (cells) {
-                        context.addProblem(cells, Level.WARNING, "In project '${currentProject.name}' the following library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.", "For at least one project library names which look similar to entries in the metadata file are already registered.")
+                        context.addProblem(cells, Level.WARNING, "In project '${currentProject.name}' the following tagmentation library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered.")
                     }
                 }
             }

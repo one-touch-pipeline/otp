@@ -434,7 +434,7 @@ class MetadataImportService {
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
-            String tagmentationRaw = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
+            String tagmentationRaw = uniqueColumnValue(rows, TAGMENTATION)?.toLowerCase()
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
             LibraryLayout libLayout = LibraryLayout.findByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
@@ -458,7 +458,7 @@ class MetadataImportService {
                 libraryPreparationKit = Objects.requireNonNull(
                         libraryPreparationKitService.findByNameOrImportAlias(libPrepKitString))
             }
-            String libraryName = uniqueColumnValue(rows, CUSTOMER_LIBRARY) ?: ""
+            String libraryName = uniqueColumnValue(rows, TAGMENTATION_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
             IlseSubmission ilseSubmission
             if (ilseNumber) {
@@ -627,7 +627,7 @@ class MetadataImportService {
     }
 
     static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
-        String tagmentation = tuple.getValue(TAGMENTATION_BASED_LIBRARY.name())?.toLowerCase()
+        String tagmentation = tuple.getValue(TAGMENTATION.name())?.toLowerCase()
         String seqType = tuple.getValue(SEQUENCING_TYPE.name())
         return seqTypeMaybeTagmentationName(seqType, tagmentation)
     }

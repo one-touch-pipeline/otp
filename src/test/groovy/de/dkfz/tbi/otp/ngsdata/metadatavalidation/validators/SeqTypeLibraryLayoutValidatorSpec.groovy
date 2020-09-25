@@ -59,7 +59,7 @@ class SeqTypeLibraryLayoutValidatorSpec extends Specification {
         List<String> columns = validator.getRequiredColumnTitles(context) + validator.getOptionalColumnTitles(context)
 
         then:
-        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.SEQUENCING_READ_TYPE.name(), MetaDataColumn.BASE_MATERIAL.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name()]
+        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.SEQUENCING_READ_TYPE.name(), MetaDataColumn.BASE_MATERIAL.name(), MetaDataColumn.TAGMENTATION.name()]
     }
 
     void 'validate, when column(s) is/are missing, adds error(s)'() {
@@ -86,7 +86,7 @@ value1\tvalue2
     void 'validate, when combinations are in database, adds no problem'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.BASE_MATERIAL}
 SeqType1\t${LibraryLayout.SINGLE}\t
 SeqType1\t${LibraryLayout.PAIRED}\t
 SeqType2\t${LibraryLayout.SINGLE}\t
@@ -137,7 +137,7 @@ SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_DNA}
     void 'validate, when precondition are not valid, add no problems'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.BASE_MATERIAL}
 SeqTypeUnknown\t${LibraryLayout.SINGLE}\t\twer
 SeqType1\tLibraryLayoutUnknown\t\twer
 \t${LibraryLayout.SINGLE}\t\twer
@@ -167,7 +167,7 @@ SeqType1\t${LibraryLayout.SINGLE}\t\twer
     void 'validate, when combinations are not in database, adds expected errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.BASE_MATERIAL}
 SeqType1\t${LibraryLayout.SINGLE}\t\twer
 SeqType1\t${LibraryLayout.PAIRED}\t\twer
 SeqType1\t${LibraryLayout.MATE_PAIR}\t\twer

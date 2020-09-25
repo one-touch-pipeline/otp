@@ -573,7 +573,7 @@ ${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP
 ${SEQUENCING_READ_TYPE}         ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
 ${READ}                         1             1             2             1             2             1             1             1             1
 ${SAMPLE_NAME}                  ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
-${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true          -
+${TAGMENTATION}   -             -             -             -             -             -             -             true          -
 ${BASE_MATERIAL}                -             -             -             -             -             -             -             -             ${scMaterial}
 """
         if (includeOptional) {

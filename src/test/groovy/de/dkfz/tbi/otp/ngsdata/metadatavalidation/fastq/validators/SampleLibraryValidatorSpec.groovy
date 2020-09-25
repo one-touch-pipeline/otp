@@ -29,7 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 class SampleLibraryValidatorSpec extends Specification {
@@ -62,7 +62,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the CUSTOMER_LIBRARY column.")
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${TAGMENTATION_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -70,7 +70,7 @@ class SampleLibraryValidatorSpec extends Specification {
     void 'validate, when SAMPLE_NAME is missing, add error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\n" +
+                "${TAGMENTATION_LIBRARY}\n" +
                         "lib"
         )
 
@@ -88,7 +88,7 @@ class SampleLibraryValidatorSpec extends Specification {
     void 'validate, valid SAMPLE_NAME and CUSTOMER_LIBRARY combinations, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${CUSTOMER_LIBRARY}\n" +
+                "${SAMPLE_NAME}\t${TAGMENTATION_LIBRARY}\n" +
                         "testSampleLib\tlib\n" +
                         "testSample\tlib\n" +
                         "testSample\n" +
@@ -105,7 +105,7 @@ class SampleLibraryValidatorSpec extends Specification {
     void 'validate, when SAMPLE_NAME does contain "lib" and CUSTOMER_LIBRARY is empty, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_NAME}\t${CUSTOMER_LIBRARY}\n" +
+                "${SAMPLE_NAME}\t${TAGMENTATION_LIBRARY}\n" +
                         "testSampleLib\n"
         )
 
@@ -114,7 +114,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the CUSTOMER_LIBRARY column.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${TAGMENTATION_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

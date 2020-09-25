@@ -28,16 +28,16 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class LibraryValidatorSpec extends Specification {
+class TagmentationLibraryValidatorSpec extends Specification {
 
     void 'validate, add expected custom libraries, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\n" +
+                "${TAGMENTATION_LIBRARY}\n" +
                         "lib1\n" +
                         "lib23\n" +
                         "lib50\n" +
@@ -45,7 +45,7 @@ class LibraryValidatorSpec extends Specification {
         )
 
         when:
-        new LibraryValidator().validate(context)
+        new TagmentationLibraryValidator().validate(context)
 
         then:
         context.problems.empty
@@ -57,7 +57,7 @@ class LibraryValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         when:
-        new LibraryValidator().validate(context)
+        new TagmentationLibraryValidator().validate(context)
 
         then:
         context.problems.empty
@@ -67,12 +67,12 @@ class LibraryValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\n" +
+                "${TAGMENTATION_LIBRARY}\n" +
                         ""
         )
 
         when:
-        new LibraryValidator().validate(context)
+        new TagmentationLibraryValidator().validate(context)
 
         then:
         context.problems.empty
@@ -81,34 +81,34 @@ class LibraryValidatorSpec extends Specification {
     void 'validate, when CUSTOMER_LIBRARY entry is not a valid path component, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\n" +
-                        "CUSTOMER_LIBRARY!"
+                "${TAGMENTATION_LIBRARY}\n" +
+                        "TAGMENTATION_LIBRARY!"
         )
 
         when:
-        new LibraryValidator().validate(context)
+        new TagmentationLibraryValidator().validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("Library 'CUSTOMER_LIBRARY!' contains invalid characters.")
+        problem.message.contains("Tagmentation library 'TAGMENTATION_LIBRARY!' contains invalid characters.")
     }
 
     void 'validate, when CUSTOMER_LIBRARY entry does not match regular expression, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\n" +
-                        "CUSTOMER_LIBRARY"
+                "${TAGMENTATION_LIBRARY}\n" +
+                        "TAGMENTATION_LIBRARY"
         )
 
         when:
-        new LibraryValidator().validate(context)
+        new TagmentationLibraryValidator().validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
         containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("Library 'CUSTOMER_LIBRARY' does not match regular expression '^(?:lib(?:[1-9]\\d*|NA)|)\$'.")
+        problem.message.contains("Tagmentation library 'TAGMENTATION_LIBRARY' does not match regular expression '^(?:lib(?:[1-9]\\d*|NA)|)\$'.")
     }
 }

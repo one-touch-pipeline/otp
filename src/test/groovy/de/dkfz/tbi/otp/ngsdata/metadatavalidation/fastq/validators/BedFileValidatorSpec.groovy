@@ -65,7 +65,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
             MetaDataColumn.SEQUENCING_READ_TYPE,
             MetaDataColumn.LIB_PREP_KIT,
             MetaDataColumn.SAMPLE_NAME,
-            MetaDataColumn.TAGMENTATION_BASED_LIBRARY,
+            MetaDataColumn.TAGMENTATION,
             MetaDataColumn.PROJECT,
     ]*.name().asImmutable()
 
@@ -112,7 +112,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
         }
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext([
-                [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.SEQUENCING_READ_TYPE, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_NAME, MetaDataColumn.TAGMENTATION_BASED_LIBRARY, MetaDataColumn.PROJECT]*.name(),
+                [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.SEQUENCING_READ_TYPE, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_NAME, MetaDataColumn.TAGMENTATION, MetaDataColumn.PROJECT]*.name(),
                 [seqTypeName, libraryLayout, libPrepKitName, sampleName, tagmentationBasedLibrary, sampleName == PARSE_SAMPLE_NAME_NEW_PROJECT ? 'noProject' : project.name],
         ].collect { row ->
             row.join('\t')

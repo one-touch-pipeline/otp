@@ -323,7 +323,7 @@ class MetaDataExport {
         String seqType = seqTrack.seqType.name
         if (seqType.endsWith(SeqType.TAGMENTATION_SUFFIX)) {
             put(SEQUENCING_TYPE, seqType.substring(0, seqType.length() - SeqType.TAGMENTATION_SUFFIX.length()))
-            put(TAGMENTATION_BASED_LIBRARY, '1')
+            put(TAGMENTATION, '1')
         } else {
             put(SEQUENCING_TYPE, seqType)
         }
@@ -339,7 +339,7 @@ class MetaDataExport {
         put(LIB_PREP_KIT, seqTrack.libraryPreparationKit?.name)
         put(ILSE_NO, seqTrack.ilseSubmission?.ilseNumber?.toString())
         put(PROJECT, seqTrack.project.name)
-        put(CUSTOMER_LIBRARY, seqTrack.libraryName)
+        put(TAGMENTATION_LIBRARY, seqTrack.libraryName)
 
         if (seqTrack.seqType.hasAntibodyTarget) {
             put(ANTIBODY_TARGET, seqTrack.antibodyTarget.name)

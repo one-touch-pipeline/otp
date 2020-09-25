@@ -33,18 +33,18 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 
 @Rollback
 @Integration
-class LibraryProjectValidatorIntegrationSpec extends Specification {
+class TagmentationLibraryProjectValidatorIntegrationSpec extends Specification {
 
     void 'validate, adds expected warnings,succeeds'() {
         given:
         setUpSeqTracks()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\t${PROJECT}\n" +
+                "${TAGMENTATION_LIBRARY}\t${PROJECT}\n" +
                         "lib1\tproject01\n" +
                         "lib1\tproject02\n" +
                         "library1\tproject02\n" +
@@ -58,18 +58,18 @@ class LibraryProjectValidatorIntegrationSpec extends Specification {
         )
 
         when:
-        new LibraryProjectValidator().validate(context)
+        new TagmentationLibraryProjectValidator().validate(context)
 
         then:
         Collection<Problem> expectedProblems = [
                 new Problem((context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[8].cells) as Set, Level.WARNING,
-                        "In project 'project01' the following library names which look similar to '1' are already registered: 'lib1', 'library1'.", "For at least one project library names which look similar to entries in the metadata file are already registered."),
+                        "In project 'project01' the following tagmentation library names which look similar to '1' are already registered: 'lib1', 'library1'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
-                        "In project 'project02' the following library names which look similar to '1' are already registered: 'lib1'.", "For at least one project library names which look similar to entries in the metadata file are already registered."),
+                        "In project 'project02' the following tagmentation library names which look similar to '1' are already registered: 'lib1'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered."),
                 new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[2].cells) as Set, Level.WARNING,
-                        "All rows for project 'project02' which look similar to '1' should have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows for one project which have a similar customer library should have the same value in column 'CUSTOMER_LIBRARY'."),
+                        "All rows for project 'project02' which look similar to '1' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column 'TAGMENTATION_LIBRARY'."),
                 new Problem((context.spreadsheet.dataRows[3].cells + context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
-                        "All rows for project 'project01' which look similar to '5' should have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows for one project which have a similar customer library should have the same value in column 'CUSTOMER_LIBRARY'."),
+                        "All rows for project 'project01' which look similar to '5' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column 'TAGMENTATION_LIBRARY'."),
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -77,12 +77,12 @@ class LibraryProjectValidatorIntegrationSpec extends Specification {
     void 'validate, missing column PROJECT, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\n" +
+                "${TAGMENTATION_LIBRARY}\n" +
                         "lib1\n"
         )
 
         when:
-        new LibraryProjectValidator().validate(context)
+        new TagmentationLibraryProjectValidator().validate(context)
 
         then:
         context.problems.empty
@@ -96,7 +96,7 @@ class LibraryProjectValidatorIntegrationSpec extends Specification {
         )
 
         when:
-        new LibraryProjectValidator().validate(context)
+        new TagmentationLibraryProjectValidator().validate(context)
 
         then:
         context.problems.empty
@@ -107,7 +107,7 @@ class LibraryProjectValidatorIntegrationSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         when:
-        new LibraryProjectValidator().validate(context)
+        new TagmentationLibraryProjectValidator().validate(context)
 
         then:
         context.problems.empty

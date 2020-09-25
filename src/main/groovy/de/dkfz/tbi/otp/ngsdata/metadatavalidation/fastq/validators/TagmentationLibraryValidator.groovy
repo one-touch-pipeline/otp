@@ -23,45 +23,43 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
+import java.util.regex.Matcher
 
 @Component
-class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class TagmentationLibraryValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
-    static final List<String> ALLOWED_VALUES = [
-            '',
-            '0',
-            '1',
-            'true',
-            'false',
-    ].asImmutable()
+    static final String REGEX = /^(?:lib(?:[1-9]\d*|NA)|)$/
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The tagmentation based library value must be from the list: '${ALLOWED_VALUES.join("', '")}'."]
+        return ['The tagmentation library number contains only valid characters.']
     }
 
     @Override
     String getColumnTitle(MetadataValidationContext context) {
-        return TAGMENTATION_BASED_LIBRARY.name()
+        return MetaDataColumn.TAGMENTATION_LIBRARY.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
-    }
+    void checkColumn(MetadataValidationContext context) { }
 
     @Override
-    void validateValue(MetadataValidationContext context, String tagmentationBasedLibrary, Set<Cell> cells) {
-        if (!(tagmentationBasedLibrary.toLowerCase() in ALLOWED_VALUES)) {
-            context.addProblem(cells, Level.ERROR,
-                    "The tagmentation based library column value should be '${ALLOWED_VALUES.join("', '")}' instead of '${tagmentationBasedLibrary}'.",
-                    "The tagmentation based library column value should be '${ALLOWED_VALUES.join("', '")}'.")
+    void validateValue(MetadataValidationContext context, String library, Set<Cell> cells) {
+        if (library) {
+            Matcher matcher = library =~ REGEX
+            if (!OtpPath.isValidPathComponent(library)) {
+                context.addProblem(cells, Level.ERROR, "Tagmentation library '${library}' contains invalid characters.", "At least one tagmentation library contains invalid characters.")
+            } else if (!matcher) {
+                context.addProblem(cells, Level.WARNING, "Tagmentation library '${library}' does not match regular expression '${REGEX}'.", "At least one tagmentation library does not match regular expression '${REGEX}'.")
+            }
         }
     }
 }

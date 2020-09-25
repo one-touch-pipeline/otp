@@ -489,4 +489,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/deprecatable.groovy'
+
+    changeSet(author: "", id: "otp-758") {
+        sqlFile(path: 'changelogs/2020/otp-758.sql')
+    }
 }

@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION
 
 @Component
 class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
@@ -51,7 +51,7 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [TAGMENTATION_BASED_LIBRARY]*.name()
+        return [TAGMENTATION]*.name()
     }
 
     @Override

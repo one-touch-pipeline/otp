@@ -97,7 +97,7 @@ class SeqTypeValidatorSpec extends Specification {
     void 'validate, when column TAGMENTATION_BASED_LIBRARY exists, adds expected error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
+                "${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION}\n" +
                         "SeqType1\t\n" +
                         "SeqType1\ttrue\n" +
                         "SeqType2\t\n" +

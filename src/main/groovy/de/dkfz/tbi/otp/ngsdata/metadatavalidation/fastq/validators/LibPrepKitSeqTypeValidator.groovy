@@ -50,7 +50,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [LIB_PREP_KIT, TAGMENTATION_BASED_LIBRARY, BASE_MATERIAL]*.name()
+        return [LIB_PREP_KIT, TAGMENTATION, BASE_MATERIAL]*.name()
     }
 
     @Override

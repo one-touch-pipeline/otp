@@ -31,12 +31,12 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 
-class TagmentationBasedLibraryValidatorSpec extends Specification {
+class TagmentationValidatorSpec extends Specification {
 
     void 'validate adds expected error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
+                "${MetaDataColumn.TAGMENTATION}\n" +
                         "0\n" +
                         "1\n" +
                         "2\n" +
@@ -49,17 +49,17 @@ class TagmentationBasedLibraryValidatorSpec extends Specification {
                         "\n")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}' " +
+                        "The tagmentation column value should be '${TagmentationValidator.ALLOWED_VALUES.join("', '")}' " +
                                 "instead of '2'.",
-                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}'."),
+                        "The tagmentation column value should be '${TagmentationValidator.ALLOWED_VALUES.join("', '")}'."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
-                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}' " +
+                        "The tagmentation column value should be '${TagmentationValidator.ALLOWED_VALUES.join("', '")}' " +
                                 "instead of 'test'.",
-                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}'."),
+                        "The tagmentation column value should be '${TagmentationValidator.ALLOWED_VALUES.join("', '")}'."),
         ]
 
         when:
-        new TagmentationBasedLibraryValidator().validate(context)
+        new TagmentationValidator().validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)

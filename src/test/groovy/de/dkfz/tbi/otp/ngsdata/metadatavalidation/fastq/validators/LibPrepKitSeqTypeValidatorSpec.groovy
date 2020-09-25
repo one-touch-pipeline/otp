@@ -45,7 +45,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     }
 
     static final String VALID_METADATA =
-            "${LIB_PREP_KIT}\t${SEQUENCING_READ_TYPE}\t${SEQUENCING_TYPE}\t${TAGMENTATION_BASED_LIBRARY}\n" +
+            "${LIB_PREP_KIT}\t${SEQUENCING_READ_TYPE}\t${SEQUENCING_TYPE}\t${TAGMENTATION}\n" +
                     "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
                     "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
                     "lib_prep_kit\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
