@@ -22,16 +22,25 @@
 package de.dkfz.tbi.otp.alignment.cellRanger
 
 import groovy.json.JsonOutput
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -44,6 +53,8 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     Sample sample
     SeqType seqType
     CellRangerMergingWorkPackage mwp
+
+    CellRangerConfigurationService cellRangerConfigurationService
 
     List<String> fastqFiles = [
             "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L001_R1_001.fastq.gz",
@@ -149,6 +160,29 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
 
         then:
         checkResults()
+
+        when: //check also setting mwp as final
+        SessionUtils.withNewSession {
+            Authentication authentication = SecurityContextHolder.context.authentication
+            try {
+                List<GrantedAuthority> authorities = [
+                        new SimpleGrantedAuthority(Role.ROLE_ADMIN),
+                ]
+                UserDetails userDetails = new User('OTP', "", authorities)
+                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+                cellRangerConfigurationService.selectMwpAsFinal(CellRangerMergingWorkPackage.get(mwp.id))
+            } finally {
+                SecurityContextHolder.context.authentication = authentication
+            }
+        }
+
+        then:
+        SessionUtils.withNewSession {
+            SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
+
+            assert singleCellBamFile.mergingWorkPackage.status == CellRangerMergingWorkPackage.Status.FINAL
+            true
+        }
 
         where:
         p << [testParameters]
