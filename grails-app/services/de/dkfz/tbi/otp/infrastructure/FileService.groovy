@@ -591,9 +591,9 @@ class FileService {
      *
      * Both have to be absolute, the source have to be exist, the destination may not be exist.
      *
-     * Needed parent directories of the destination will be created automatically
+     * Needed parent directories of the destination will be created automatically with {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void moveFile(Path source, Path destination) {
+    void moveFile(Path source, Path destination, Realm realm) {
         assert source
         assert destination
         assert source.absolute
@@ -602,7 +602,7 @@ class FileService {
         assert Files.exists(source)
         assert !Files.exists(destination)
 
-        createDirectoryRecursively(destination.parent)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(destination.parent, realm)
         Files.move(source, destination)
         assert Files.exists(destination)
     }

@@ -644,7 +644,7 @@ class FileServiceSpec extends Specification implements DataTest {
         oldFile.text = 'text'
 
         when:
-        fileService.moveFile(oldFile, newFile)
+        fileService.moveFile(oldFile, newFile, new Realm())
 
         then:
         Files.exists(newFile)
@@ -658,7 +658,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = newFileName ? Paths.get(newFileName) : null
 
         when:
-        fileService.moveFile(oldFile, newFile)
+        fileService.moveFile(oldFile, newFile, new Realm())
 
         then:
         AssertionError e = thrown()
