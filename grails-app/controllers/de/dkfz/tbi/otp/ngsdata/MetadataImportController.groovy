@@ -350,7 +350,7 @@ class MetadataImportController implements CheckAndCall {
 
 class BlackListedIlseCommand implements Validateable {
 
-    static final String SEPARATOR = /[,; \t]/
+    static final String SEPARATOR = /[,; \t]+/
 
     String ilse
     String comment
