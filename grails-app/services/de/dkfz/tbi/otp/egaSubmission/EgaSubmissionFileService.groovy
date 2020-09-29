@@ -240,7 +240,7 @@ class EgaSubmissionFileService {
         filesToCreate.each {
             Path path = basePath.resolve(it.key)
             Files.deleteIfExists(path)
-            fileService.createFileWithContent(path, it.value)
+            fileService.createFileWithContent(path, it.value, submission.project.realm)
         }
     }
 

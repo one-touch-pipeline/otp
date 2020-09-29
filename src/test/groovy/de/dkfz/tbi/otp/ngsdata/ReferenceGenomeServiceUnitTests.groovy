@@ -73,7 +73,10 @@ class ReferenceGenomeServiceUnitTests {
         referenceGenomeService.configService = new ConfigService()
         referenceGenomeService.processingOptionService = new ProcessingOptionService()
         referenceGenomeService.fileSystemService = new TestFileSystemService()
-        referenceGenomeService.fileService = new FileService()
+        referenceGenomeService.fileService = new FileService([
+                configService: referenceGenomeService.configService,
+        ])
+        referenceGenomeService.configService.processingOptionService = referenceGenomeService.processingOptionService
 
         directory = temporaryFolder.newFolder("reference_genomes", "referenceGenome")
         DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent)
@@ -263,6 +266,8 @@ class ReferenceGenomeServiceUnitTests {
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
         String chromosomePrefix = ""
         String chromosomeSuffix = ""
+
+        DomainFactory.createDefaultRealmWithProcessingOption()
 
         temporaryFolder.newFolder("reference_genomes", path)
 

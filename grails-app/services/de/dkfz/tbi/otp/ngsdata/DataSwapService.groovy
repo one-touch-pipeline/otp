@@ -887,44 +887,46 @@ ln -s '${newDirectFileName}' \\
         bashScriptToMoveFiles << BASH_HEADER
 
         Run run = Run.findByName(inputInformationOTP.runName)
-        notNull(run, "The run (${run}) does not exist")
+        notNull(run, "The run (${inputInformationOTP.runName}) does not exist")
 
         Project oldProject = Project.findByName(inputInformationOTP.oldProjectName)
-        notNull(oldProject, "The old project (${oldProject}) does not exist")
+        notNull(oldProject, "The old project (${inputInformationOTP.oldProjectName}) does not exist")
         Project newProject = Project.findByName(inputInformationOTP.newProjectName)
-        notNull(newProject, "The new project (${newProject}) does not exist")
+        notNull(newProject, "The new project (${inputInformationOTP.newProjectName}) does not exist")
 
         boolean sameLsdf = oldProject.realm == newProject.realm
 
         Individual oldIndividual = Individual.findByPid(inputInformationOTP.oldPid)
-        notNull(oldIndividual, "The old Individual (${oldIndividual}) does not exist")
+        notNull(oldIndividual, "The old Individual (${inputInformationOTP.oldPid}) does not exist")
         Individual newIndividual = Individual.findByPid(inputInformationOTP.newPid)
-        notNull(newIndividual, "The new Individual (${newIndividual}) does not exist")
+        notNull(newIndividual, "The new Individual (${inputInformationOTP.newPid}) does not exist")
 
         isTrue(oldIndividual.project == oldProject, "The old individual does not exist in the old project")
         isTrue(newIndividual.project == newProject, "The new individual does not exist in the new project")
 
         SampleType oldSampleType = SampleType.findByName(inputInformationOTP.oldSampleTypeName)
-        notNull(oldSampleType, "The old SampleType (${oldSampleType}) does not exist")
+        notNull(oldSampleType, "The old SampleType (${inputInformationOTP.oldSampleTypeName}) does not exist")
         SampleType newSampleType = SampleType.findByName(inputInformationOTP.newSampleTypeName)
-        notNull(newSampleType, "The new SampleType (${newSampleType}) does not exist")
+        notNull(newSampleType, "The new SampleType (${inputInformationOTP.newSampleTypeName}) does not exist")
 
         Sample oldSample = Sample.findByIndividualAndSampleType(oldIndividual, oldSampleType)
-        notNull(oldSample, "The old Sample (${oldSample}) does not exist")
+        notNull(oldSample, "The old Sample (${oldIndividual} ${oldSampleType}) does not exist")
         Sample newSample = Sample.findByIndividualAndSampleType(newIndividual, newSampleType)
         if (!inputInformationOTP["sampleNeedsToBeCreated"]) {
             notNull(newSample, "The new Sample (${newIndividual} ${newSampleType}) does not exist")
         } else {
-            isNull(newSample, "The new Sample (${newSample}) does exist, but should not")
+            isNull(newSample, "The new Sample (${newIndividual} ${newSampleType}) does exist, but should not")
             newSample = new Sample(individual: newIndividual, sampleType: newSampleType).save(flush: true)
         }
 
         SeqType oldSeqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(
                 inputInformationOTP.oldSeqTypeName, inputInformationOTP.oldLibraryLayout, inputInformationOTP.oldSingleCell)
-        notNull(oldSeqType, "The old seqtype ${inputInformationOTP.oldSeqTypeName} ${inputInformationOTP.oldLibraryLayout} does not exist")
+        notNull(oldSeqType, "The old seqtype ${inputInformationOTP.oldSeqTypeName} ${inputInformationOTP.oldLibraryLayout} " +
+                "${inputInformationOTP.oldSingleCell} does not exist")
         SeqType newSeqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(
                 inputInformationOTP.newSeqTypeName, inputInformationOTP.newLibraryLayout, inputInformationOTP.newSingleCell)
-        notNull(newSeqType, "The new seqtype ${inputInformationOTP.newSeqTypeName} ${inputInformationOTP.oldLibraryLayout} does not exist")
+        notNull(newSeqType, "The new seqtype ${inputInformationOTP.newSeqTypeName} ${inputInformationOTP.oldLibraryLayout} " +
+                "${inputInformationOTP.newSingleCell} does not exist")
 
         List<SeqTrack> seqTracks = SeqTrack.findAllBySampleAndRunAndLaneIdInList(oldSample, run, inputInformationOTP.lane)
         log << "\n${seqTracks.size()} seqTracks found\n"

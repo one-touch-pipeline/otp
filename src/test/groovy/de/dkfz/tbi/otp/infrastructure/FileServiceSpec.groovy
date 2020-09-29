@@ -55,6 +55,7 @@ class FileServiceSpec extends Specification implements DataTest {
             _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
                 return LocalShellHelper.executeAndWait(command)
             }
+            0 * _
         }
     }
 
@@ -323,7 +324,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = basePath.resolve('newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
 
         then:
         assertFile(newFile)
@@ -332,11 +333,12 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent, if parent directory and file do not exist, then create directory and file"() {
         given:
+        mockRemoteShellHelper()
         Path basePath = temporaryFolder.newFolder().toPath()
         Path newFile = basePath.resolve('newFolder/newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
 
         then:
         assertDirectory(newFile.parent)
@@ -347,7 +349,8 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "createFileWithContent, if parameter is #cases, throw assertion"() {
         when:
-        fileService.createFileWithContent(path, SOME_CONTENT)
+        mockRemoteShellHelper()
+        fileService.createFileWithContent(path, SOME_CONTENT, new Realm())
 
         then:
         thrown(AssertionError)
@@ -361,12 +364,13 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent, if file already exists, then throw assertion"() {
         given:
+        mockRemoteShellHelper()
         Path path = temporaryFolder.newFile().toPath()
         assert Files.exists(path)
         assert Files.isRegularFile(path)
 
         when:
-        fileService.createFileWithContent(path, SOME_CONTENT)
+        fileService.createFileWithContent(path, SOME_CONTENT, new Realm())
 
         then:
         thrown(AssertionError)
@@ -374,13 +378,14 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent, if a parent of path is a file, then throw assertion"() {
         given:
+        mockRemoteShellHelper()
         Path filePath = temporaryFolder.newFile().toPath()
         assert Files.exists(filePath)
         assert Files.isRegularFile(filePath)
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
 
         then:
         thrown(AssertionError)
@@ -410,12 +415,12 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent (byte), if file does not exist, then create file with given context"() {
         given:
-
+        mockRemoteShellHelper()
         Path basePath = temporaryFolder.newFolder().toPath()
         Path newFile = basePath.resolve('newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
 
         then:
         assertFile(newFile)
@@ -424,11 +429,12 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent (byte), if parent directory and file do not exist, then create directory and file"() {
         given:
+        mockRemoteShellHelper()
         Path basePath = temporaryFolder.newFolder().toPath()
         Path newFile = basePath.resolve('newFolder/newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
 
         then:
         assertDirectory(newFile.parent)
@@ -439,7 +445,8 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "createFileWithContent (byte), if parameter is #cases, throw assertion"() {
         when:
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
+        mockRemoteShellHelper()
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, new Realm())
 
         then:
         thrown(AssertionError)
@@ -453,12 +460,13 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent (byte), if file already exists, then throw assertion"() {
         given:
+        mockRemoteShellHelper()
         Path path = temporaryFolder.newFile().toPath()
         assert Files.exists(path)
         assert Files.isRegularFile(path)
 
         when:
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, new Realm())
 
         then:
         thrown(AssertionError)
@@ -466,13 +474,14 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createFileWithContent (byte), if a parent of path is a file, then throw assertion"() {
         given:
+        mockRemoteShellHelper()
         Path filePath = temporaryFolder.newFile().toPath()
         assert Files.exists(filePath)
         assert Files.isRegularFile(filePath)
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
 
         then:
         thrown(AssertionError)

@@ -475,14 +475,14 @@ class FileService {
      * Create the requested file with the given content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
-     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path, String content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+    void createFileWithContent(Path path, String content, Realm realm, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
         assert path
         assert path.absolute
         assert !Files.exists(path)
 
-        createDirectoryRecursively(path.parent)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm)
 
         path.text = content
         setPermission(path, filePermission)
@@ -492,14 +492,14 @@ class FileService {
      * Create the requested file with the given byte content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
-     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path, byte[] content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+    void createFileWithContent(Path path, byte[] content, Realm realm, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
         assert path
         assert path.absolute
         assert !Files.exists(path)
 
-        createDirectoryRecursively(path.parent)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm)
 
         path.bytes = content
         setPermission(path, filePermission)

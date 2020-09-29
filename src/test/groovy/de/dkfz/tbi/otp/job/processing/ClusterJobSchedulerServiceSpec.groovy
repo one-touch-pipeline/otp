@@ -102,7 +102,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
             1 * getLoggingRootPath() >> logFolder
         }
         service.fileService = Mock(FileService) {
-            1 * createFileWithContent(_, _)
+            1 * createFileWithContentOnDefaultRealm(_, _)
         }
         service.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
@@ -139,7 +139,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
             1 * getLoggingRootPath() >> logFolder
         }
         service.fileService = Mock(FileService) {
-            1 * createFileWithContent(_, _)
+            1 * createFileWithContentOnDefaultRealm(_, _)
         }
         service.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default

@@ -170,6 +170,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
         File testDirectory = TestCase.createEmptyTestDirectory()
         File runDirectory = new File(testDirectory, 'run')
         assert runDirectory.mkdir()
@@ -184,6 +186,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             1 * importMetadataFile(_, align, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
             1 * copyMetadataFileIfRequested(_)
         }
+        service.configService = new TestConfigService()
+        service.configService.processingOptionService = new ProcessingOptionService()
         service.applicationContext = Mock(ApplicationContext) {
             getBeansOfType(MetadataValidator) >> [:]
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
@@ -238,6 +242,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import2_meta.tsv")])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
         List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = [
                 new MetadataImportService.PathWithMd5sum(context1.metadataFile, HelperUtils.randomMd5sum),
                 new MetadataImportService.PathWithMd5sum(context2.metadataFile, HelperUtils.randomMd5sum),
@@ -262,6 +268,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
         service.fileSystemService = new TestFileSystemService()
+        service.configService = new TestConfigService()
+        service.configService.processingOptionService = new ProcessingOptionService()
 
         when:
         List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportWithAuth(
@@ -283,6 +291,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/002222/data/2222_meta.tsv")])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
         MetadataImportService service = Spy(MetadataImportService) {
             1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
             1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
@@ -290,6 +300,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
         }
         service.fileSystemService = new TestFileSystemService()
+        service.configService = new TestConfigService()
+        service.configService.processingOptionService = new ProcessingOptionService()
 
         expect:
         List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportMultiple(TICKET_NUMBER, '1111+2222')
@@ -301,6 +313,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "validateAndImportMultiple when some are invalid, throws AutoImportFailedException"() {
         given:
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
         Problems problems = new Problems()
         problems.addProblem([] as Set, Level.ERROR, "An Error occurred")
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext(
@@ -318,7 +332,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
 
         service.fileSystemService = new TestFileSystemService()
-
+        service.configService = new TestConfigService()
+        service.configService.processingOptionService = new ProcessingOptionService()
 
         when:
         service.validateAndImportMultiple(TICKET_NUMBER, '1111+2222+3333')
@@ -1434,17 +1449,20 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
 
     void "copyMetaDataFileIfRequested, if data not on midterm, do nothing"() {
         given:
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
         MetadataImportService service = new MetadataImportService(
                 lsdfFilesService: Mock(LsdfFilesService) {
                     0 * _
                 }
         )
+        service.configService = new TestConfigService()
+        service.configService.processingOptionService = new ProcessingOptionService()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         expect:
         service.copyMetadataFileIfRequested(context)
     }
-
 
     private Map setupForCopyMetaDataFileIfRequested(String contextContent, boolean returnValidPath = true) {
         String ilseId = '1234'
@@ -1468,6 +1486,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         service.fileSystemService = new TestFileSystemService()
         service.configService.processingOptionService = processingOptionService
         service.processingOptionService = processingOptionService
+        service.fileService.configService = service.configService
 
         service.processingOptionService.createOrUpdate(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS, "error@recipient.com")
 
@@ -1494,7 +1513,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
             1 * sendEmail(_, _, _)
         }
         data.service.fileService = Mock(FileService) {
-            1 * createFileWithContent(_, _)
+            1 * createFileWithContentOnDefaultRealm(_, _)
         }
 
         when:

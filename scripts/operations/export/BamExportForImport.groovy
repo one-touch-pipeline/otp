@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -74,7 +75,6 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
  */
 
 
-
 //=============================================
 // input area
 
@@ -118,6 +118,8 @@ class BamExportImport {
         RoddyBamFile bamFile
         Map<String, String> metadata
     }
+
+    ConfigService configService
 
     FileService fileService
 
@@ -248,7 +250,8 @@ class BamExportImport {
     }
 
     void writeFile(Path path, String content) {
-        fileService.createFileWithContent(path, content, [
+        Realm realm = configService.getDefaultRealm()
+        fileService.createFileWithContent(path, content, realm, [
                 PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE,
                 PosixFilePermission.GROUP_READ,
@@ -279,7 +282,7 @@ class DisplaySamples {
     }
 
     String inputFieldDelimiter
-    
+
     String outputFieldDelimiter
 
     private final Map<SeqType, String> seqTypeMap = [
@@ -369,12 +372,14 @@ class DisplaySamples {
 
 class HandleInputTypes {
 
+    ConfigService configService
+
     FileService fileService
 
     FileSystemService fileSystemService
 
     String inputFieldDelimiter
-    
+
     String outputFieldDelimiter
 
     private List<String> readInput(String input) {
@@ -392,18 +397,19 @@ class HandleInputTypes {
 
     private void handleSampleListing(Collection<String> input) {
         DisplaySamples displaySamples = new DisplaySamples([
-                inputFieldDelimiter  : inputFieldDelimiter,
-                outputFieldDelimiter : outputFieldDelimiter,
+                inputFieldDelimiter : inputFieldDelimiter,
+                outputFieldDelimiter: outputFieldDelimiter,
         ])
         displaySamples.showSamples(input)
     }
 
     private void handleExport(List<String> input, String fileName, boolean overwriteExisting) {
         BamExportImport export = new BamExportImport([
-                fileService          : fileService,
-                fileSystemService    : fileSystemService,
-                inputFieldDelimiter  : inputFieldDelimiter,
-                outputFieldDelimiter : outputFieldDelimiter,
+                configService       : configService,
+                fileService         : fileService,
+                fileSystemService   : fileSystemService,
+                inputFieldDelimiter : inputFieldDelimiter,
+                outputFieldDelimiter: outputFieldDelimiter,
         ])
         Path file = export.handleInput(input, fileName, overwriteExisting)
         println "Metadata exported to ${file}\n"
@@ -431,10 +437,11 @@ class HandleInputTypes {
 }
 
 HandleInputTypes export = new HandleInputTypes([
-        fileService          : ctx.fileService,
-        fileSystemService    : ctx.fileSystemService,
-        inputFieldDelimiter  : inputFieldDelimiter,
-        outputFieldDelimiter : outputFieldDelimiter,
+        configService       : ctx.configService,
+        fileService         : ctx.fileService,
+        fileSystemService   : ctx.fileSystemService,
+        inputFieldDelimiter : inputFieldDelimiter,
+        outputFieldDelimiter: outputFieldDelimiter,
 ]).handleInput(input, fileName, overwriteExisting)
 
 println ''

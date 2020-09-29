@@ -54,7 +54,7 @@ class SingleCellMappingFileService {
         String value = singleCellService.mappingEntry(dataFile)
 
         if (!Files.exists(mappingFile)) {
-            fileService.createFileWithContent(mappingFile, "", FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
+            fileService.createFileWithContent(mappingFile, "", dataFile.project.realm, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
         }
 
         if (!mappingFile.text.contains(value)) {

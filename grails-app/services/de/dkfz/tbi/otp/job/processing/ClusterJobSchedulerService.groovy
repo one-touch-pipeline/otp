@@ -210,7 +210,7 @@ class ClusterJobSchedulerService {
 
         Path logFile = pathForLogging()
 
-        fileService.createFileWithContent(logFile, logStringBuilder.toString())
+        fileService.createFileWithContentOnDefaultRealm(logFile, logStringBuilder.toString())
 
         return jobStates
     }

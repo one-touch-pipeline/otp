@@ -119,7 +119,7 @@ class ProjectInfoService {
         String absoluteFilePath = "${projectInfo.project.projectDirectory.absolutePath}/${ProjectService.PROJECT_INFO}/${projectInfo.fileName}"
         Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(absoluteFilePath)
 
-        fileService.createFileWithContent(file, content, [PosixFilePermission.OWNER_READ] as Set)
+        fileService.createFileWithContent(file, content, projectInfo.project.realm, [PosixFilePermission.OWNER_READ] as Set)
         executionHelperService.setGroup(projectInfo.project.realm, new File(absoluteFilePath), projectInfo.project.unixGroup)
 
         return file

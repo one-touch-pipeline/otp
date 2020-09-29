@@ -190,7 +190,7 @@ class MetadataImportService {
                 Path targetDirectory = getIlseFolder(ilse, seqCenter)
                 Path targetFile = targetDirectory.resolve(source.fileName.toString())
                 if (!Files.exists(targetFile)) {
-                    fileService.createFileWithContent(targetFile, context.content)
+                    fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
                 }
 
                 assert Files.readAllBytes(targetFile) == context.content
