@@ -93,6 +93,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
@@ -100,19 +102,27 @@ import java.nio.file.attribute.PosixFilePermissions
 
 import static org.springframework.util.Assert.*
 
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 DataSwapService dataSwapService = ctx.dataSwapService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 StringBuilder log = new StringBuilder()
 
 // create a container dir for all output of this swap;
 // group-editable so non-server users can also work with it
 String swapLabel = "${swapLabel}"
-final Path SCRIPT_OUTPUT_DIRECTORY = ctx.configService.getScriptOutputPath().toPath().resolve('sample_swap').resolve(swapLabel)
-ctx.fileService.createDirectoryRecursively(SCRIPT_OUTPUT_DIRECTORY)
-ctx.fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
+fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
+/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
 boolean linkedFilesVerified = false
 
+/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
 boolean failOnMissingFiles = true
 
 

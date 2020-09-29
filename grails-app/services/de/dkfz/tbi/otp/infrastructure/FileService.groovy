@@ -127,6 +127,16 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
+     * User read write group read write file permission (660)
+     */
+    static final Set<PosixFilePermission> OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_WRITE,
+    ].toSet().asImmutable()
+
+    /**
      * The default file permissions for bam/bai (444).
      *
      * Some tools require read access for others to work.
@@ -400,33 +410,6 @@ class FileService {
     }
 
     /**
-     * Create the requested directory (absolute path) and all missing parent directories with the permission defined in {@link #DEFAULT_DIRECTORY_PERMISSION}.
-     *
-     * It won't fail if the directory already exist, but then the permissions are not changed.
-     *
-     * @Deprecated use{@link #createDirectoryRecursivelyAndSetPermissionsViaBash} instead since this method do not set the setgid bit
-     */
-    @Deprecated
-    void createDirectoryRecursively(Path path) {
-        assert path
-        assert path.absolute
-
-        createDirectoryRecursivelyInternal(path)
-    }
-
-    @Deprecated
-    private void createDirectoryRecursivelyInternal(Path path) {
-        if (Files.exists(path)) {
-            assert Files.isDirectory(path): "The path ${path} already exist, but is not a directory"
-        } else {
-            createDirectoryRecursivelyInternal(path.parent)
-
-            createDirectoryHandlingParallelCreationOfSameDirectory(path)
-            setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
-        }
-    }
-
-    /**
      * Helper to create a directory and handle case, were multiple threads try to create directory parallel.
      */
     private void createDirectoryHandlingParallelCreationOfSameDirectory(Path path) {
@@ -517,9 +500,8 @@ class FileService {
             Files.delete(p)
         }
 
-        Files.createFile(p, PosixFilePermissions.asFileAttribute(FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION))
-        // system default umasks prevent 'dangerous' group permissions like group-writable directly upon file creation,
-        // set permissions AGAIN to teach 'umask' a lesson who is boss!
+        //sftp do not support setting permission on creation, so it needs to be done afterwards
+        Files.createFile(p)
         Files.setPosixFilePermissions(p, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         return p
     }
@@ -529,7 +511,7 @@ class FileService {
      *
      * The destination has to exist, the link may only exist if option {@link CreateLinkOption#DELETE_EXISTING_FILE} is given.
      * Both parameters have to be absolute.
-     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      *
      * By default a relative link is created, by passing {@link CreateLinkOption#ABSOLUTE} an absolute link is created.
      *

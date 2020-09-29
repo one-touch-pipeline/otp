@@ -670,7 +670,7 @@ class ProjectService {
 
         Path targetConfigDirectory = fileService.toPath(RoddyWorkflowConfig.getStandardConfigDirectory(targetProject, pipeline.name), remoteFileSystem)
 
-        fileService.createDirectoryRecursively(targetConfigDirectory)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetConfigDirectory, targetProject.realm)
 
         String nextConfigVersion = workflowConfigService.getNextConfigVersion(targetProjectConfig?.configVersion)
         String programVersion = parseVersionFromPluginVersionString(baseProjectRoddyConfig.programVersion)

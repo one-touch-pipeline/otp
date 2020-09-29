@@ -64,7 +64,7 @@ def swapMap = """
 }.collectEntries {
     def entries = it.split(swapMapDelimitor)
     if (entries.size() == 4) {
-    	return ["${entries[0]} ${entries[1]}", "${entries[2]} ${entries[3]}"]
+        return ["${entries[0]} ${entries[1]}", "${entries[2]} ${entries[3]}"]
     } else {
         return ["${entries[0]}", "${entries[1]}"]
     }
@@ -154,7 +154,7 @@ Closure<String> createScript = { String swapLabel ->
  *
  * What will change?
  ****************************************************************/"""
-
+    println "/*"
 
     script << Snippets.databaseFixingHeader(swapLabel)
 
@@ -202,6 +202,7 @@ Closure<String> createScript = { String swapLabel ->
             }
         }
     }
+    println "*/\n"
     script << """
 \t\tassert false : "DEBUG: transaction intentionally failed to rollback changes"
 \t}
@@ -255,7 +256,7 @@ private Tuple parseSwapMapEntry(String from, String to) {
     }
 
     Individual oldIndividual = Individual.findByPid(oldIndividualName)
-    assert oldIndividual: "probable error in input: couldn't find Individual \"${oldIndividual.pid}\" in database"
+    assert oldIndividual: "probable error in input: couldn't find Individual \"${oldIndividualName}\" in database"
 
     SampleType oldSampleType
     if (oldSampleTypeName) {
@@ -384,21 +385,31 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
 
 import static org.springframework.util.Assert.*
 
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 DataSwapService dataSwapService = ctx.dataSwapService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
 StringBuilder log = new StringBuilder()
 
 // create a container dir for all output of this swap;
 // group-editable so non-server users can also work with it
 String swapLabel = "${swapLabel}"
-final Path SCRIPT_OUTPUT_DIRECTORY = ctx.configService.getScriptOutputPath().toPath().resolve('sample_swap').resolve(swapLabel)
-ctx.fileService.createDirectoryRecursively(SCRIPT_OUTPUT_DIRECTORY)
-ctx.fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
+fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 /** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
 boolean verifiedLinkedFiles = false

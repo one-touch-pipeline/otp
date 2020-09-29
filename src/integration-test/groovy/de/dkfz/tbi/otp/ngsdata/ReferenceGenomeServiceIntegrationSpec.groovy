@@ -27,6 +27,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -46,14 +47,18 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
     void setupData() {
         referenceGenomeService = new ReferenceGenomeService(
+                configService          : new TestConfigService(),
                 fileService            : new FileService(),
                 fileSystemService      : new TestFileSystemService(),
                 processingOptionService: new ProcessingOptionService(),
         )
+        referenceGenomeService.configService.processingOptionService = referenceGenomeService.processingOptionService
+        referenceGenomeService.fileService.configService = referenceGenomeService.configService
         referenceGenome = createReferenceGenome()
 
         File referenceGenomeDirectory = temporaryFolder.newFolder("reference_genomes", referenceGenome.path)
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.parent)
+        DomainFactory.createDefaultRealmWithProcessingOption()
     }
 
     void "createReferenceGenomeMetafile, file is created with expected content"() {

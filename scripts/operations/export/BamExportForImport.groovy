@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 import de.dkfz.tbi.otp.OtpRuntimeException
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -28,7 +27,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
-import java.nio.file.attribute.PosixFilePermission
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 
@@ -118,8 +116,6 @@ class BamExportImport {
         RoddyBamFile bamFile
         Map<String, String> metadata
     }
-
-    ConfigService configService
 
     FileService fileService
 
@@ -250,13 +246,7 @@ class BamExportImport {
     }
 
     void writeFile(Path path, String content) {
-        Realm realm = configService.getDefaultRealm()
-        fileService.createFileWithContent(path, content, realm, [
-                PosixFilePermission.OWNER_READ,
-                PosixFilePermission.OWNER_WRITE,
-                PosixFilePermission.GROUP_READ,
-                PosixFilePermission.GROUP_WRITE,
-        ].toSet().asImmutable())
+        fileService.createFileWithContentOnDefaultRealm(path, content, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
     }
 
     Path handleInput(List<String> input, String filename, boolean overwriteExisting) {
@@ -372,8 +362,6 @@ class DisplaySamples {
 
 class HandleInputTypes {
 
-    ConfigService configService
-
     FileService fileService
 
     FileSystemService fileSystemService
@@ -405,7 +393,6 @@ class HandleInputTypes {
 
     private void handleExport(List<String> input, String fileName, boolean overwriteExisting) {
         BamExportImport export = new BamExportImport([
-                configService       : configService,
                 fileService         : fileService,
                 fileSystemService   : fileSystemService,
                 inputFieldDelimiter : inputFieldDelimiter,
@@ -437,7 +424,6 @@ class HandleInputTypes {
 }
 
 HandleInputTypes export = new HandleInputTypes([
-        configService       : ctx.configService,
         fileService         : ctx.fileService,
         fileSystemService   : ctx.fileSystemService,
         inputFieldDelimiter : inputFieldDelimiter,

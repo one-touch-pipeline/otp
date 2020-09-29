@@ -44,8 +44,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
@@ -67,6 +66,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     ProcessingOptionService processingOptionService
     ProjectService projectService
     FileService fileService
+    FileSystemService fileSystemService
     ReferenceGenomeService referenceGenomeService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     TestConfigService configService
@@ -116,6 +116,13 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
             }
         }
+        projectService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
+                return new ProcessOutput(command, '', 0)
+            }
+        }
+
+        projectService.fileSystemService = new TestFileSystemService()
         projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
         projectService.roddyWorkflowConfigService.fileSystemService = new TestFileSystemService()
         projectService.roddyWorkflowConfigService.workflowConfigService = new WorkflowConfigService()
@@ -146,6 +153,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.remoteShellHelper = remoteShellHelper
         projectService.roddyWorkflowConfigService = roddyWorkflowConfigService
         projectService.fileService = fileService
+        projectService.fileSystemService = fileSystemService
+        fileService.remoteShellHelper = remoteShellHelper
         configService.clean()
     }
 

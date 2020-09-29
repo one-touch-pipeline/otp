@@ -24,9 +24,12 @@ package operations.dataCorrection
 
 import org.hibernate.sql.JoinType
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -92,10 +95,17 @@ Collection<SeqTrack> seqTracks = SeqTrack.withCriteria {
 }
 
 // WORK
-final Path SCRIPT_OUTPUT = ctx.configService.getScriptOutputPath().toPath().resolve('sample_swap').resolve("${swapLabel}.sh")
-ctx.fileService.createDirectoryRecursively(SCRIPT_OUTPUT.parent)
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+final Path SCRIPT_OUTPUT = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve("${swapLabel}.sh")
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT.parent, realm)
 SCRIPT_OUTPUT.text = ""
-ctx.fileService.setPermission(SCRIPT_OUTPUT, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+fileService.setPermission(SCRIPT_OUTPUT, fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 void assertSeqTracks(List<SeqTrack> seqTracks) {
     seqTracks.each { SeqTrack seqTrack ->

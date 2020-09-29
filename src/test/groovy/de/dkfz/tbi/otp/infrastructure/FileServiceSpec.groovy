@@ -44,6 +44,14 @@ class FileServiceSpec extends Specification implements DataTest {
 
     static final byte[] SOME_BYTE_CONTENT = "SomeByteContent".bytes
 
+    static private final Set<PosixFilePermission> POSIX_DIRECTORY_PERMISSION_PART = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_EXECUTE,
+    ].toSet().asImmutable()
+
     @Shared
     FileService fileService = new FileService()
 
@@ -115,88 +123,6 @@ class FileServiceSpec extends Specification implements DataTest {
                 new TestConfigService().testingGroup,
                 new TestConfigService().workflowProjectUnixGroup,
         ]
-    }
-
-    //----------------------------------------------------------------------------------------------------
-    // test for createDirectoryRecursively
-
-    void "createDirectoryRecursively, if directory does not exist, but the parent directory exists, then create directory"() {
-        given:
-        Path basePath = temporaryFolder.newFolder().toPath()
-        Path newPath = basePath.resolve('newFolder')
-
-        when:
-        fileService.createDirectoryRecursively(newPath)
-
-        then:
-        assertDirectory(newPath)
-    }
-
-    void "createDirectoryRecursively, if directory and parent directory do not exist, then create directory recursively"() {
-        given:
-        Path basePath = temporaryFolder.newFolder().toPath()
-        Path newPath = basePath.resolve('newFolder/newSubFolder')
-
-        when:
-        fileService.createDirectoryRecursively(newPath)
-
-        then:
-        assertDirectory(newPath.parent)
-        assertDirectory(newPath)
-    }
-
-    void "createDirectoryRecursively, if directory already exists, then do not fail"() {
-        given:
-        Path path = temporaryFolder.newFolder().toPath()
-        assert Files.exists(path)
-
-        when:
-        fileService.createDirectoryRecursively(path)
-
-        then:
-        noExceptionThrown()
-    }
-
-    @Unroll
-    void "createDirectoryRecursively, if parameter is #cases, throw assertion"() {
-        when:
-        fileService.createDirectoryRecursively(path)
-
-        then:
-        thrown(AssertionError)
-
-        where:
-        cases                | path
-        'null'               | null
-        'only one component' | new File('path').toPath()
-        'relative path'      | new File('relative/path').toPath()
-    }
-
-    void "createDirectoryRecursively, if path is a file, then throw assertion"() {
-        given:
-        Path filePath = temporaryFolder.newFile().toPath()
-        assert Files.exists(filePath)
-        assert Files.isRegularFile(filePath)
-
-        when:
-        fileService.createDirectoryRecursively(filePath)
-
-        then:
-        thrown(AssertionError)
-    }
-
-    void "createDirectoryRecursively, if a parent of path is a file, then throw assertion"() {
-        given:
-        Path filePath = temporaryFolder.newFile().toPath()
-        assert Files.exists(filePath)
-        assert Files.isRegularFile(filePath)
-        Path newDirectory = filePath.resolve('newDirectory')
-
-        when:
-        fileService.createDirectoryRecursively(newDirectory)
-
-        then:
-        thrown(AssertionError)
     }
 
     private void assertDirectory(Path path) {
@@ -724,9 +650,9 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.correctPathPermissionAndGroupRecursive(filePath, realm, group)
 
         then:
-        Files.getPosixFilePermissions(filePath) == FileService.DEFAULT_DIRECTORY_PERMISSION
-        Files.getPosixFilePermissions(dir1) == FileService.DEFAULT_DIRECTORY_PERMISSION
-        Files.getPosixFilePermissions(dir2) == FileService.DEFAULT_DIRECTORY_PERMISSION
+        Files.getPosixFilePermissions(filePath) == POSIX_DIRECTORY_PERMISSION_PART
+        Files.getPosixFilePermissions(dir1) == POSIX_DIRECTORY_PERMISSION_PART
+        Files.getPosixFilePermissions(dir2) == POSIX_DIRECTORY_PERMISSION_PART
 
         Files.getPosixFilePermissions(file) == FileService.DEFAULT_FILE_PERMISSION
         Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_BAM_FILE_PERMISSION

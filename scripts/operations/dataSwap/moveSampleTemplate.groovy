@@ -21,9 +21,13 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataSwapService
 import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Realm
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -44,16 +48,24 @@ import java.nio.file.Path
  * You can use multiple 'dataSwapService.moveSample' calls in the script, duplicate therefore the call.
  */
 
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 DataSwapService dataSwapService = ctx.dataSwapService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
-final Path scriptOutputDirectory = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
-ctx.fileService.createDirectoryRecursively(scriptOutputDirectory)
-ctx.fileService.setPermission(scriptOutputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+final Path scriptOutputDirectory = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, realm)
+fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
+/** have we manually checked yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
 boolean linkedFilesVerified = false
 
+/** are missing fastq files an error? (usually yes, since we must repeat most analyses steps after a swap) */
 boolean failOnMissingFiles = true
 
 try {

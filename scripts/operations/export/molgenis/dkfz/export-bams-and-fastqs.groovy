@@ -117,7 +117,7 @@ enum DataFileColumns {
         return dataFile.seqTrack.run.seqPlatform.seqPlatformModelLabel.name
     }),
     SEQ_KIT_LABEL("Seq Kit Label", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.run.seqPlatform.sequencingKitLabel.name
+        return dataFile.seqTrack.run.seqPlatform.sequencingKitLabel?.name
     }),
     SEQ_TYPE_ID("Sequencing Type Id", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.seqType.id
@@ -281,6 +281,7 @@ class MolgenisExporter {
 }
 
 String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date())
+Realm realm = ctx.configService.defaultRealm
 
 projects.each { Project project ->
     List<DataFile> dataFiles = DataFile.withCriteria {
@@ -303,8 +304,8 @@ projects.each { Project project ->
         }
     } as List<AbstractMergedBamFile>
 
-    final Path outputDirectory = ctx.configService.getScriptOutputPath().toPath().resolve("export").resolve("molgenis").resolve("${timestamp}-${project.name}")
-    ctx.fileService.createDirectoryRecursively(outputDirectory)
+    final Path outputDirectory = ctx.fileService.toPath(ctx.configService.getScriptOutputPath(), ctx.fileSystemService.getRemoteFileSystemOnDefaultRealm()).resolve("export").resolve("molgenis").resolve("${timestamp}-${project.name}")
+    ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
     ctx.fileService.setPermission(outputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
     MolgenisExporter exporter = new MolgenisExporter(ctx: ctx)

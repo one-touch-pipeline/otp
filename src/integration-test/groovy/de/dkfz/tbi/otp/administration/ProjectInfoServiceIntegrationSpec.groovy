@@ -38,11 +38,14 @@ import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
@@ -64,8 +67,15 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
                 executionHelperService: Mock(ExecutionHelperService),
                 fileSystemService     : Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
+                    0 * _
                 },
-                fileService           : new FileService(),
+                fileService           : new FileService([
+                        remoteShellHelper: Mock(RemoteShellHelper) {
+                            _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                                return new ProcessOutput(command, '', 0)
+                            }
+                        }
+                ]),
                 springSecurityService : Mock(SpringSecurityService) {
                     _ * getCurrentUser() >> getUser(ADMIN)
                 },
