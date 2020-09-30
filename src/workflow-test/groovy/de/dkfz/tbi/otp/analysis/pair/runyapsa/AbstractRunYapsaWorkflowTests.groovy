@@ -39,8 +39,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     LsdfFilesService lsdfFilesService
 
-    ProcessingOptionService processingOptionService
-
     @Override
     void setupData() {
         SessionUtils.withNewSession {

@@ -25,7 +25,6 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
@@ -38,7 +37,6 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
     LsdfFilesService lsdfFilesService
     ProjectService projectService
-    ProcessingOptionService processingOptionService
 
     void "testWholeWorkflowWithProcessedMergedBamFile"() {
         given:

@@ -43,8 +43,6 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     ProjectService projectService
 
-    ProcessingOptionService processingOptionService
-
     @Override
     void setupData() {
         SessionUtils.withNewSession {

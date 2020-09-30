@@ -40,9 +40,6 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
     ProjectService projectService
 
-    ProcessingOptionService processingOptionService
-
-
     @Override
     ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createIndelPipelineLazy()

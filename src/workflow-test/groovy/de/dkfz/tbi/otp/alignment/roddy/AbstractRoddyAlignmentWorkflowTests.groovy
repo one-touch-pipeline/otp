@@ -97,8 +97,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     File fingerPrintingFile
 
-    ProcessingOptionService processingOptionService
-
     AbstractBamFileService abstractBamFileService
 
     ProjectService projectService
