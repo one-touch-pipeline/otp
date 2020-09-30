@@ -38,8 +38,8 @@ interface Job {
  * Name of the different steps
  */
 enum JobStage {
+    CONDITIONAL_SKIP,
     CONDITIONAL_FAIL,
-    CHECK_PREREQUIREMENTS,
     PREPARE,
     EXECUTE_PIPELINE,
     VALIDATION,
