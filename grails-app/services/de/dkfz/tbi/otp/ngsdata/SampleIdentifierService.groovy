@@ -78,14 +78,14 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParse(sampleIdentifier)
     }
 
-    String parseCellPosition(String sampleIdentifier, Project project) {
+    String parseSingleCellWellLabel(String sampleIdentifier, Project project) {
         if (!project || project.sampleIdentifierParserBeanName == SampleIdentifierParserBeanName.NO_PARSER) {
             return null
         }
 
         SampleIdentifierParser sampleIdentifierParser = getSampleIdentifierParser(project.sampleIdentifierParserBeanName)
 
-        return sampleIdentifierParser.tryParseCellPosition(sampleIdentifier)
+        return sampleIdentifierParser.tryParseSingleCellWellLabel(sampleIdentifier)
     }
 
     List<String> createBulkSamples(String sampleText, Delimiter delimiter, Project project, SampleType.SpecificReferenceGenome specificReferenceGenome) {

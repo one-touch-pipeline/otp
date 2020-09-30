@@ -54,7 +54,7 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
     }
 
     @Override
-    String tryParseCellPosition(String sampleIdentifier) {
+    String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
     }
 

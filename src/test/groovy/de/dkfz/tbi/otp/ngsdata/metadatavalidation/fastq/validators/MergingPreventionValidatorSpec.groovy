@@ -187,7 +187,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
             }
 
             @Override
-            String tryParseCellPosition(String sampleIdentifier) {
+            String tryParseSingleCellWellLabel(String sampleIdentifier) {
                 return null
             }
         }

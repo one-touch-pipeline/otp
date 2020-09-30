@@ -27,5 +27,5 @@ interface SampleIdentifierParser {
 
     boolean tryParsePid(String pid)
 
-    String tryParseCellPosition(String sampleIdentifier)
+    String tryParseSingleCellWellLabel(String sampleIdentifier)
 }

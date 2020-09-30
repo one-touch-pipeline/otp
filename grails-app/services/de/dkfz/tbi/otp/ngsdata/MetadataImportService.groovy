@@ -496,7 +496,7 @@ class MetadataImportService {
 
             if (isSingleCell) {
                 properties['singleCellWellLabel'] = uniqueColumnValue(rows, SINGLE_CELL_WELL_LABEL) ?:
-                        sampleIdentifierService.parseCellPosition(sampleIdString, project)
+                        sampleIdentifierService.parseSingleCellWellLabel(sampleIdString, project)
             }
 
             SeqTrack seqTrack = new SeqTrack(properties)

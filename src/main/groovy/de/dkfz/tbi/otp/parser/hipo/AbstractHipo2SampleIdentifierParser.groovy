@@ -112,7 +112,7 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
     }
 
     @Override
-    String tryParseCellPosition(String sampleIdentifier) {
+    String tryParseSingleCellWellLabel(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
         if (matcher.matches() && matcher.group('analyteSingleCellDemultiplex')) {
             return matcher.group('analyte')

@@ -118,12 +118,12 @@ class DeepSampleIdentifierParserSpec extends Specification {
     }
 
     @Unroll
-    void "test tryParseCellPosition is not implemented and always returns null"() {
+    void "test tryParseSingleCellWellLabel is not implemented and always returns null"() {
         given:
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = deepSampleIdentifierParser.tryParseCellPosition(identifier)
+        singleCellWellLabel = deepSampleIdentifierParser.tryParseSingleCellWellLabel(identifier)
 
         then:
         singleCellWellLabel == null

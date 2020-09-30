@@ -156,12 +156,12 @@ class PedionParserSpec extends Specification {
     }
 
     @Unroll
-    void "test tryParseCellPosition is not implemented and always returns null (#identifier)"() {
+    void "test tryParseSingleCellWellLabel is not implemented and always returns null (#identifier)"() {
         given:
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = parser.tryParseCellPosition(identifier)
+        singleCellWellLabel = parser.tryParseSingleCellWellLabel(identifier)
 
         then:
         singleCellWellLabel == null

@@ -83,6 +83,6 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
         String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
-        return sampleName && projectName && sampleIdentifierService.parseCellPosition(sampleName, Project.getByNameOrNameInMetadataFiles(projectName))
+        return sampleName && projectName && sampleIdentifierService.parseSingleCellWellLabel(sampleName, Project.getByNameOrNameInMetadataFiles(projectName))
     }
 }

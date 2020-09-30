@@ -55,7 +55,7 @@ class Covid19SampleIdentifierParser implements SampleIdentifierParser {
     }
 
     @Override
-    String tryParseCellPosition(String sampleIdentifier) {
+    String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
     }
 

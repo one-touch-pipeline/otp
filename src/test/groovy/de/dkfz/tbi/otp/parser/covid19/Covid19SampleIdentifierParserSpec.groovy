@@ -97,12 +97,12 @@ class Covid19SampleIdentifierParserSpec extends Specification implements DomainF
     }
 
     @Unroll
-    void "test tryParseCellPosition is not implemented and always returns null (#identifier)"() {
+    void "test tryParseSingleCellWellLabel is not implemented and always returns null (#identifier)"() {
         given:
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = covid19SampleIdentifierParser.tryParseCellPosition(identifier)
+        singleCellWellLabel = covid19SampleIdentifierParser.tryParseSingleCellWellLabel(identifier)
 
         then:
         singleCellWellLabel == null

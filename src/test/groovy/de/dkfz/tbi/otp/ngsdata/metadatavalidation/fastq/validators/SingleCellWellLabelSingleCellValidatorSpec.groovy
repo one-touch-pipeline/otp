@@ -109,7 +109,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
         when:
         new SingleCellWellLabelSingleCellValidator([
                 sampleIdentifierService: Mock(SampleIdentifierService) {
-                    1 * parseCellPosition(_, _) >> {
+                    1 * parseSingleCellWellLabel(_, _) >> {
                         'WELL'
                     }
                 }
@@ -153,7 +153,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
         when:
         new SingleCellWellLabelSingleCellValidator([
                 sampleIdentifierService: Mock(SampleIdentifierService) {
-                    _ * parseCellPosition(_, _) >> {
+                    _ * parseSingleCellWellLabel(_, _) >> {
                         null
                     }
                 }

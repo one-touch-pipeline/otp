@@ -514,7 +514,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             parseAndFindOrSaveSampleIdentifier(parse, _) >> createSampleIdentifierForSample2(parse)
             parseAndFindOrSaveSampleIdentifier(scParse, _) >> createSampleIdentifierForSample2(scParse)
-            parseCellPosition(scParse, _) >> { return scParse }
+            parseSingleCellWellLabel(scParse, _) >> { return scParse }
         }
 
         service.seqTrackService = Mock(SeqTrackService)

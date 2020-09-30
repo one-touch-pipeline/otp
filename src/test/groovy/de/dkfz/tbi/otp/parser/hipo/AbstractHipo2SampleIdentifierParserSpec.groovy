@@ -214,19 +214,19 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
     }
 
     @Unroll
-    void "test tryParseCellPosition valid input #identifier"() {
+    void "test tryParseSingleCellWellLabel valid input #identifier"() {
         given:
         String fullIdentifier = "${validProjectPart}-${identifier}"
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = parser.tryParseCellPosition(fullIdentifier)
+        singleCellWellLabel = parser.tryParseSingleCellWellLabel(fullIdentifier)
 
         then:
-        singleCellWellLabel == expectedCellPosition
+        singleCellWellLabel == expectedSingleCellWellLabel
 
         where:
-        identifier          || expectedCellPosition
+        identifier          || expectedSingleCellWellLabel
         "123ABC-T0-1G1"     || "1G1"
         "123ABC-T0-1H1"     || "1H1"
         "123ABC-T0-1J1"     || "1J1"
@@ -237,13 +237,13 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
     }
 
     @Unroll
-    void "test tryParseCellPosition invalid input #identifier"() {
+    void "test tryParseSingleCellWellLabel invalid input #identifier"() {
         given:
         String fullIdentifier = identifier ? "${validProjectPart}-${identifier}" : identifier
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = parser.tryParseCellPosition(fullIdentifier)
+        singleCellWellLabel = parser.tryParseSingleCellWellLabel(fullIdentifier)
 
         then:
         singleCellWellLabel == null

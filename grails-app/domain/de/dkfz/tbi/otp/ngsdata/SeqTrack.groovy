@@ -142,6 +142,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     /**
      * For SingleCell data this contains a label for the position. This can be provide via parser
      * (as it is done for Hipo2) or by {@link MetaDataColumn#SINGLE_CELL_WELL_LABEL}.
+     * currently only "well label" data used (other technologies might use different naming schema)
      */
     String singleCellWellLabel
 
@@ -164,7 +165,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     static constraints = {
         laneId blank: false, validator: { String val, SeqTrack obj ->
-            // custom unique constraint on laneId, run, cellPosition and project
+            // custom unique constraint on laneId, run, singleCellWellLabel and project
             List<SeqTrack> seqTracks = findAllWhere([
                     "laneId"             : obj.laneId,
                     "run"                : obj.run,

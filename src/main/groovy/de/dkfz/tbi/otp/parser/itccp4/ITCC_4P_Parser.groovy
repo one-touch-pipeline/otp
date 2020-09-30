@@ -110,7 +110,7 @@ class ITCC_4P_Parser implements SampleIdentifierParser {
     }
 
     @Override
-    String tryParseCellPosition(String sampleIdentifier) {
+    String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
     }
 }
