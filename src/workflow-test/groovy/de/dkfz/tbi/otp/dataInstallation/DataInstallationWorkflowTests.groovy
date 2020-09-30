@@ -67,7 +67,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
         File softLinkFastqR2Filepath = new File("${ftpDir}/${fastqR2Filename}")
 
         SessionUtils.withNewSession {
-            createDirectoriesString([ftpDir])
+            createDirectories([new File(ftpDir)])
             linkFileUtils.createAndValidateLinks(
                     [
                             (new File(fastqR1Filepath)): softLinkFastqR1Filepath,

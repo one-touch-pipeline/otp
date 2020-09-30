@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -29,9 +28,14 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
@@ -56,15 +60,14 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
     ProcessingStepUpdate processingStepUpdate
     ClusterJobLoggingService service
 
-
     void setup() {
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
         realm = DomainFactory.createRealm()
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()
-        service.lsdfFilesService = Stub(LsdfFilesService) {
-            createDirectory(_, _) >> { File dir, Realm _ ->
-                assert dir.mkdirs()
+        service.fileService = Stub(FileService) {
+            createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, Realm _ ->
+                Files.createDirectories(dir)
             }
         }
     }
@@ -91,6 +94,14 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
     }
 
     void "test createAndGetLogDirectory, when all fine the log directory is created"() {
+        given:
+        service.fileSystemService = new TestFileSystemService()
+        service.fileService = Mock(FileService) {
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, Realm _ ->
+                Files.createDirectories(dir)
+            }
+        }
+
         when:
         File logDir = service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)
 
@@ -99,6 +110,12 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
     }
 
     void "test createAndGetLogDirectory can called multiple times for same directory without error"() {
+        given:
+        service.fileSystemService = new TestFileSystemService()
+        service.fileService = Mock(FileService) {
+            3 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
+        }
+
         when:
         service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)
         service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)

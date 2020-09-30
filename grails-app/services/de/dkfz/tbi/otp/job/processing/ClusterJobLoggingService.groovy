@@ -24,15 +24,19 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
+
+import java.nio.file.FileSystem
 
 @Transactional
 class ClusterJobLoggingService {
 
     final static CLUSTER_LOG_BASE_DIR = 'clusterLog'
 
-    LsdfFilesService lsdfFilesService
+    FileService fileService
+
+    FileSystemService fileSystemService
 
     static File logDirectory(ProcessingStep processingStep) {
         assert processingStep: 'No processing step specified.'
@@ -46,9 +50,9 @@ class ClusterJobLoggingService {
         assert realm: 'No realm specified.'
         File logDirectory = logDirectory(processingStep)
         if (!logDirectory.exists()) {
-            //race condition between threads and within NFS can be ignored, since the command 'mkdir --parent' does not fail if the directory already exists.
-            lsdfFilesService.createDirectory(logDirectory, realm)
-            LsdfFilesService.ensureDirIsReadable(logDirectory)
+            //race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
+            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()), realm)
         }
         return logDirectory
     }

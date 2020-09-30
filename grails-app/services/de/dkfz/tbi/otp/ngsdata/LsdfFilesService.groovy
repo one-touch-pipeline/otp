@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -45,6 +46,9 @@ class LsdfFilesService {
     RemoteShellHelper remoteShellHelper
     CreateClusterScriptService createClusterScriptService
 
+    FileService fileService
+
+    FileSystemService fileSystemService
 
     /**
      * Similar to {@link java.nio.file.Paths#get(String, String ...)} from Java 7.
@@ -271,11 +275,6 @@ class LsdfFilesService {
             return pathWithRunName
         }
         return path
-    }
-
-    void createDirectory(File dir, Realm realm) {
-        String cmd = createClusterScriptService.makeDirs([dir], "2770")
-        assert remoteShellHelper.executeCommand(realm, cmd) ==~ /^0\s*$/
     }
 
     void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {

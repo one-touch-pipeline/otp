@@ -23,29 +23,13 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
 
-/**
- * This Service provides helper-methods to create short cluster scripts.
- * These methods should be written in a generic way so that it is easy to reuse them.
- */
+import de.dkfz.tbi.otp.infrastructure.FileService
+
+import java.nio.file.Path
+
+@Deprecated
 @Transactional
 class CreateClusterScriptService {
-
-    final static String DIRECTORY_PERMISSION = "2750"
-
-    /**
-     * Create a string to make a directory
-     * @param mode the access mode of the directory to be created. If used it must be given as a string
-     */
-
-    String makeDirs(Collection<File> dirs, String mode=null) {
-        String m = mode ? "--mode ${mode}" : ""
-        String umask = mode ? "umask ${extractMatchingUmaskFromMode(mode)};" : ""
-        return "${umask} mkdir --parents ${m} ${dirs.join(' ')} &>/dev/null; echo \$?"
-    }
-
-    String extractMatchingUmaskFromMode(String mode) {
-        return mode[-3..-1].toCharArray().collect({ 7 - Integer.parseInt(it.toString()) }).join("")
-    }
 
     enum RemoveOption {
         RECURSIVE_FORCE("rm -rf"),
@@ -62,6 +46,10 @@ class CreateClusterScriptService {
         }
     }
 
+    /**
+     * @Deprecated use {@link FileService#deleteDirectoryRecursively(Path)} instead
+     */
+    @Deprecated
     String removeDirs(Collection<File> dirs, RemoveOption option) {
         StringBuilder script = new StringBuilder()
         script.append(option.command)

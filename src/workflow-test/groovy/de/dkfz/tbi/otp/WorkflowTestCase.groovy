@@ -45,7 +45,6 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import javax.sql.DataSource
@@ -78,6 +77,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     ReferenceGenomeService referenceGenomeService
 
     LinkFileUtils linkFileUtils
+    FileService fileService
 
     // permissions to be applied to the source test data
     protected final static String TEST_DATA_MODE_DIR = "2750"
@@ -301,19 +301,11 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     void createDirectories(List<File> files) {
-        createDirectories(files, "2770")
-    }
-
-    void createDirectories(List<File> files, String mode) {
-        String mkDirs = createClusterScriptService.makeDirs(files, mode)
-        assert remoteShellHelper.executeCommand(realm, mkDirs).toInteger() == 0
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
         files.each {
-            FileService.waitUntilExists(it.toPath())
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(it.toString()), realm, '',
+                    FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
         }
-    }
-
-    void createDirectoriesString(List<String> fileNames) {
-        createDirectories(fileNames.collect { new File(it) })
     }
 
     void createFilesWithContent(Map<File, String> files) {

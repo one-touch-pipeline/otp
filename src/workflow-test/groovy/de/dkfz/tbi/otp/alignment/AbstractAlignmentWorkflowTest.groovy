@@ -43,7 +43,7 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
             File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
             sourceLinkMap.put(linkFastqFile, linkViewByPidFastqFile)
         }
-        createDirectories(sourceLinkMap.values()*.parentFile.unique(), TEST_DATA_MODE_DIR)
+        createDirectories(sourceLinkMap.values()*.parentFile.unique())
         linkFileUtils.createAndValidateLinks(sourceLinkMap, realm)
     }
 

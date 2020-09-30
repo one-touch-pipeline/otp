@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -191,7 +192,7 @@ class ExecuteRoddyCommandService {
         correctGroups(roddyResult, realm)
 
         correctPermissions(roddyResult, realm)
-        executionHelperService.setPermission(realm, roddyResult.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
+        executionHelperService.setPermission(realm, roddyResult.workDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
     }
 
     @SuppressWarnings('LineLength')

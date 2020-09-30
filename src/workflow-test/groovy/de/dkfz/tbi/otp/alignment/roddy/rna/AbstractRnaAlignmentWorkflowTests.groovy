@@ -155,7 +155,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) { }
 
     void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
-        lsdfFilesService.createDirectory(workPackage.project.projectSequencingDirectory, realm)
+        createDirectories([workPackage.project.projectSequencingDirectory])
 
         GeneModel geneModel = DomainFactory.createGeneModel(
                 referenceGenome: workPackage.referenceGenome,
