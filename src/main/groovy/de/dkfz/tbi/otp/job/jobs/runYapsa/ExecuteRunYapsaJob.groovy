@@ -98,7 +98,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
             ${rActivation}
             ${runYapsaActivationPrefix} ${CONFIG.programVersion}
 
-            mkdir -p -m 2755 ${outputDirectory.absolutePath}
+            mkdir -p -m 2750 ${outputDirectory.absolutePath}
 
             ${runYapsaCall.join(" ")}
 
