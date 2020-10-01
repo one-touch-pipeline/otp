@@ -32,7 +32,7 @@ class QcTrafficLightCheckService {
     QcTrafficLightNotificationService qcTrafficLightNotificationService
 
     void handleQcCheck(AbstractMergedBamFile bamFile, Closure callbackIfAllFine) {
-        switch (bamFile.qcTrafficLightStatus?.jobLinkCase) {
+        switch (bamFile.qcTrafficLightStatus.jobLinkCase) {
             case null:
             case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_LINKS:
                 callbackIfAllFine()
@@ -44,10 +44,10 @@ class QcTrafficLightCheckService {
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
-                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus?.jobLinkCase}")
+                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus.jobLinkCase}")
         }
 
-        switch (bamFile.qcTrafficLightStatus?.jobNotifyCase) {
+        switch (bamFile.qcTrafficLightStatus.jobNotifyCase) {
             case null:
             case AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.NO_NOTIFY:
                 //no email sending, so nothing to do
@@ -59,7 +59,7 @@ class QcTrafficLightCheckService {
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
-                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus?.jobNotifyCase}")
+                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus.jobNotifyCase}")
         }
     }
 }

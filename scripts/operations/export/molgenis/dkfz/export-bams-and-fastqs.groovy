@@ -163,7 +163,7 @@ enum BamColumns {
         return bamFile.dateCreated
     }),
     QC_STATUS("QC Status", { AbstractMergedBamFile bamFile, Map properties = [:] ->
-        return bamFile.qcTrafficLightStatus?.name()
+        return bamFile.qcTrafficLightStatus.name()
     }),
     WITHDRAWN("withdrawn", { AbstractMergedBamFile bamFile, Map properties = [:] ->
         return bamFile.withdrawn

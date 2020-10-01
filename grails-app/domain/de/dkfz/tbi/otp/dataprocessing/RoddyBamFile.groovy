@@ -204,7 +204,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     String toString() {
         String latest = isMostRecentBamFile() ? ' (latest)' : ''
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
-        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus ?: 'ACCEPTED'} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
+        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }
 
     // Example: blood_somePid_merged.mdup.bam

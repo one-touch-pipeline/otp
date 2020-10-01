@@ -302,8 +302,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                                     "${abstractMergedBamFile.comment?.comment?.take(10)}" :
                                     "",
                             null, null,
-                            "Status: ${(abstractMergedBamFile.qcTrafficLightStatus ?: "").toString()} ${comment}",
-                            icon, (abstractMergedBamFile.qcTrafficLightStatus ?: "").toString(), abstractMergedBamFile.id
+                            "Status: ${(abstractMergedBamFile.qcTrafficLightStatus).toString()} ${comment}",
+                            icon, (abstractMergedBamFile.qcTrafficLightStatus).toString(), abstractMergedBamFile.id
                     ),
                     kit               : new TableCellValue(
                             kit*.shortDisplayName.join(", ") ?: "-", null, null,

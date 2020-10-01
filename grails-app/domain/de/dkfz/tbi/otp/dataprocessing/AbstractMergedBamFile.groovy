@@ -24,10 +24,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import groovy.transform.TupleConstructor
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.project.Project
-
-import static org.springframework.util.Assert.notNull
 
 /**
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
@@ -52,10 +51,12 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
      */
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
 
-    QcTrafficLightStatus qcTrafficLightStatus
+    QcTrafficLightStatus qcTrafficLightStatus = QcTrafficLightStatus.NOT_RUN_YET
 
     @TupleConstructor
     static enum QcTrafficLightStatus {
+        // status is set by OTP when the file is still in processing
+        NOT_RUN_YET(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC thresholds were met
         QC_PASSED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
         // status is set by bioinformaticians when they decide to keep the file although QC thresholds were not met
@@ -135,8 +136,8 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
             }
         }
         md5sum nullable: true
-        qcTrafficLightStatus nullable: true, validator: { status, obj ->
-            if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
+        qcTrafficLightStatus validator: { status, obj ->
+            if (status in [QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED] && !obj.comment) {
                 return "comment.missing"
             }
         }
@@ -171,11 +172,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         PROCESSED
     }
 
-    void updateFileOperationStatus(FileOperationStatus status) {
-        notNull(status, "the input status for the method updateFileOperationStatus is null")
-        this.fileOperationStatus = status
-    }
-
     @Override
     ReferenceGenome getReferenceGenome() {
         return workPackage.referenceGenome
@@ -205,7 +201,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     }
 
     File getPathForFurtherProcessing() {
-        if ([QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(this.qcTrafficLightStatus)) {
+        if (this.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
             return null
         }
         mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value

@@ -95,7 +95,6 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
 
         where:
         status                                                   || callCallback | callNotify
-        null                                                     || true         | false
         AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED     || true         | false
         AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED       || false        | true
         AbstractMergedBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true         | true

@@ -58,6 +58,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile.md5sum = null
         roddyBamFile.fileSize = -1
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
+        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
         assert roddyBamFile.save(flush: true)
 

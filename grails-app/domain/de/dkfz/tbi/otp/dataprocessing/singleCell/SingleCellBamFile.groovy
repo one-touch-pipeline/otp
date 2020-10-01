@@ -258,6 +258,6 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     String toString() {
         String latest = mostRecentBamFile ? ' (latest)' : ''
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
-        return "SCBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus ?: 'ACCEPTED'} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
+        return "SCBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }
 }

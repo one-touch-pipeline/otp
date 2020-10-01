@@ -156,7 +156,10 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
     void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #QC_PASSED"() {
         given:
         setupData()
-        roddyBamFile = createBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING])
+        roddyBamFile = createBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
+        ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy {
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
