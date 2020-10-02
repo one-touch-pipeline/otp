@@ -26,7 +26,7 @@ $(function () {
     "use strict";
     $('form').each(function (idx, form) {
         form.addEventListener("submit", function () {
-            $(':submit').prop("disabled", true);
+            $(':submit').prop("hidden", true);
         });
     });
 });
