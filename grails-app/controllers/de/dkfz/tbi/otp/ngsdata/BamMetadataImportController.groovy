@@ -52,6 +52,7 @@ class BamMetadataImportController {
     }
 
     def validateOrImport(BamMetadataControllerSubmitCommand cmd) {
+        boolean hasRedirected = false
         BamMetadataValidationContext bamMetadataValidationContext
         withForm {
             if (cmd.hasErrors()) {
@@ -62,19 +63,22 @@ class BamMetadataImportController {
                 bamMetadataValidationContext = results.context
                 if (results.project != null) {
                     redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
+                    hasRedirected = true
                     return
                 }
             }
         }.invalidToken {
             flash.message = new FlashMessage(g.message(code: "default.message.error") as String, g.message(code: "default.invalid.session") as String)
         }
-        flash.mvc = bamMetadataValidationContext
-        redirect(action: "index", params: [
-                path            : cmd.path,
-                furtherFilePaths: cmd.furtherFilePaths,
-                linkOperation   : cmd.linkOperation,
-                triggerAnalysis : cmd.triggerAnalysis,
-        ])
+        if (!hasRedirected) {
+            flash.mvc = bamMetadataValidationContext
+            redirect(action: "index", params: [
+                    path            : cmd.path,
+                    furtherFilePaths: cmd.furtherFilePaths,
+                    linkOperation   : cmd.linkOperation,
+                    triggerAnalysis : cmd.triggerAnalysis,
+            ])
+        }
     }
 }
 

@@ -108,6 +108,7 @@ class MetadataImportController implements CheckAndCall {
 
     def validateOrImport(MetadataImportControllerSubmitCommand cmd) {
         List<MetadataValidationContext> metadataValidationContexts = []
+        boolean hasRedirected = false
         withForm {
             if (cmd.hasErrors()) {
                 flash.message = new FlashMessage("Error", cmd.errors)
@@ -133,7 +134,7 @@ class MetadataImportController implements CheckAndCall {
                     } else {
                         redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
                     }
-                    return
+                    hasRedirected = true
                 } else {
                     log.debug("There was a problem")
                 }
@@ -141,15 +142,17 @@ class MetadataImportController implements CheckAndCall {
         }.invalidToken {
             flash.message = new FlashMessage(g.message(code: "default.message.error") as String, g.message(code: "default.invalid.session") as String)
         }
-        flash.mvc = metadataValidationContexts
-        redirect(action: "index", params: [
-                paths                : cmd.paths,
-                directoryStructure   : cmd.directoryStructure,
-                ticketNumber         : cmd.ticketNumber,
-                seqCenterComment     : cmd.seqCenterComment,
-                align                : cmd.align,
-                automaticNotification: cmd.automaticNotification,
-        ])
+        if (!hasRedirected) {
+            flash.mvc = metadataValidationContexts
+            redirect(action: "index", params: [
+                    paths                : cmd.paths,
+                    directoryStructure   : cmd.directoryStructure,
+                    ticketNumber         : cmd.ticketNumber,
+                    seqCenterComment     : cmd.seqCenterComment,
+                    align                : cmd.align,
+                    automaticNotification: cmd.automaticNotification,
+            ])
+        }
     }
 
     def details() {
