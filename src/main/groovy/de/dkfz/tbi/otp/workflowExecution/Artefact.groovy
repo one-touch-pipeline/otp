@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Withdrawable
-
-trait Artefact implements Withdrawable {
+trait Artefact {
     WorkflowArtefact workflowArtefact
 }
