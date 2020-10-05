@@ -44,16 +44,29 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
 
     static constraints = {
         sample(validator: { val, obj ->
-            Map properties = [
-                sample               : val,
-                seqType              : obj.seqType,
-                expectedCells        : obj.expectedCells,
-                enforcedCells        : obj.enforcedCells,
-                referenceGenomeIndex : obj.referenceGenomeIndex,
-            ]
-            List<CellRangerMergingWorkPackage> workPackages = findAllWhere(properties)
-            if (workPackages.size() > 1 || workPackages && workPackages.first().id != obj.id) {
-                return ["unique.combination", properties.collect { k, v -> "${k}: ${v}" }.join(", ")]
+            if (obj.status != CellRangerMergingWorkPackage.Status.DELETED) {
+                List<CellRangerMergingWorkPackage> workPackages = createCriteria().list {
+                    eq('sample', val)
+                    eq('seqType', obj.seqType)
+                    if (obj.expectedCells) {
+                        eq('expectedCells', obj.expectedCells)
+                    } else {
+                        isNull('expectedCells')
+                    }
+                    if (obj.enforcedCells) {
+                        eq('enforcedCells', obj.expectedCells)
+                    } else {
+                        isNull('enforcedCells')
+                    }
+                    config {
+                        eq('programVersion', obj.config.programVersion)
+                    }
+                    eq('referenceGenomeIndex', obj.referenceGenomeIndex)
+                    'in'('status', [CellRangerMergingWorkPackage.Status.UNSET, CellRangerMergingWorkPackage.Status.FINAL])
+                } as List<CellRangerMergingWorkPackage>
+                if (workPackages.size() > 1 || workPackages && workPackages.first().id != obj.id) {
+                    return ["unique.combination", "Sample, SeqType, ExpectedCells, EnforcedCells, ProgramVersion and ReferenceGenomeIndex"]
+                }
             }
         })
         expectedCells(nullable: true, validator: { val, obj ->
@@ -86,7 +99,8 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                 if (crmwp && crmwp != obj) {
                     return [
                             "unique.combination",
-                            "sample: ${obj.sample}, seq type: ${obj.seqType}, config: ${obj.config}, referenceGenomeIndex: ${obj.referenceGenomeIndex}, status: ${CellRangerMergingWorkPackage.Status.FINAL}"
+                            "sample: ${obj.sample}, seq type: ${obj.seqType}, config: ${obj.config}, " +
+                                    "referenceGenomeIndex: ${obj.referenceGenomeIndex}, status: ${CellRangerMergingWorkPackage.Status.FINAL}"
                     ]
                 }
             }

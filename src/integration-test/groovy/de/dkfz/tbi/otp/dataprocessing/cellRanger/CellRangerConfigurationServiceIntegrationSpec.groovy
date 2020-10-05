@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import grails.validation.ValidationException
 import org.springframework.validation.Errors
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -274,7 +275,6 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
     }
 
-    @Unroll
     void "test createMergingWorkPackagesForSamples creates MWPs for multiple samples"() {
         given:
         setupData()
@@ -315,6 +315,45 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         5000          | null
         null          | 5000
         null          | null
+    }
+
+    void "test createMergingWorkPackagesForSample creates MWP where DELETED MWP exists"() {
+        given:
+        setupData()
+        CellRangerMergingWorkPackage oldMWP = createMergingWorkPackage(status: CellRangerMergingWorkPackage.Status.DELETED, needsProcessing: false, sample: sampleA)
+        CellRangerMwpParameter parameter = new CellRangerMwpParameter(
+                seqType              : oldMWP.seqType,
+                expectedCells        : oldMWP.expectedCells,
+                enforcedCells        : oldMWP.enforcedCells,
+                referenceGenomeIndex : oldMWP.referenceGenomeIndex,
+        )
+
+        expect:
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(oldMWP.sample, parameter, requester)
+    }
+
+    @Unroll
+    void "test createMergingWorkPackagesForSample creates MWP where #status MWP exists, fails"() {
+        given:
+        setupData()
+        CellRangerMergingWorkPackage oldMWP = createMergingWorkPackage(status: status, needsProcessing: false, sample: sampleA)
+        CellRangerMwpParameter parameter = new CellRangerMwpParameter(
+                seqType              : oldMWP.seqType,
+                expectedCells        : oldMWP.expectedCells,
+                enforcedCells        : oldMWP.enforcedCells,
+                referenceGenomeIndex : oldMWP.referenceGenomeIndex,
+        )
+
+        when:
+        cellRangerConfigurationService.createMergingWorkPackagesForSample(oldMWP.sample, parameter, requester)
+
+        then:
+        thrown(ValidationException)
+
+        where:
+        status                                      | _
+        CellRangerMergingWorkPackage.Status.UNSET   | _
+        CellRangerMergingWorkPackage.Status.FINAL   | _
     }
 
     void "test createMergingWorkPackagesForSample, creates an mwp for each LibPrepKit-SeqPlatformGroup combination of the SeqTracks"() {

@@ -36,7 +36,7 @@ class CellRangerConfig extends ConfigPerProjectAndSeqType implements AlignmentCo
                         pipeline: obj.pipeline,
                         obsoleteDate: null,
                 ))
-                !cellRangerConfig || cellRangerConfig == obj
+                return !cellRangerConfig || cellRangerConfig == obj
             }
         }
     }
