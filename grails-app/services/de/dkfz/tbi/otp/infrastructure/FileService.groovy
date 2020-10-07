@@ -27,6 +27,7 @@ import grails.util.Environment
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -53,6 +54,8 @@ class FileService {
     static final Logger WAIT_LOG = LoggerFactory.getLogger("${FileService.name}.WAITING")
 
     RemoteShellHelper remoteShellHelper
+
+    ConfigService configService
 
     /**
      * Time in milliseconds between checks.
@@ -455,36 +458,63 @@ class FileService {
     }
 
     /**
-     * Create the requested file with the given content and permission.
+     * Create the requested file with the given content and permission over the default realm.
+     *
+     * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
+     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     */
+    void createFileWithContentOnDefaultRealm(Path path, String content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+        createFileWithContent(path, content, configService.defaultRealm, filePermission)
+    }
+
+    /**
+     * Create the requested file with the given content and permission over the given realm.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
     void createFileWithContent(Path path, String content, Realm realm, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
-        assert path
-        assert path.absolute
-        assert !Files.exists(path)
-
-        createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm)
-
-        path.text = content
-        setPermission(path, filePermission)
+        createFileWithContentCommonPartHelper(path, realm, filePermission) {
+            path.text = content
+        }
     }
 
     /**
-     * Create the requested file with the given byte content and permission.
+     * Create the requested file with the given byte content and permission over the default realm.
+     *
+     * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
+     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     */
+    void createFileWithContentOnDefaultRealm(Path path, byte[] content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+        createFileWithContent(path, content, configService.defaultRealm, filePermission)
+    }
+
+    /**
+     * Create the requested file with the given byte content and permission over the given realm.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
     void createFileWithContent(Path path, byte[] content, Realm realm, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+        createFileWithContentCommonPartHelper(path, realm, filePermission) {
+            path.bytes = content
+        }
+    }
+
+    private void createFileWithContentCommonPartHelper(Path path, Realm realm, Set<PosixFileAttributes> filePermission, Closure closure) {
         assert path
         assert path.absolute
         assert !Files.exists(path)
 
         createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm)
 
-        path.bytes = content
+        try {
+            closure()
+        } catch (IOException e) {
+            //IOExceptions are not RuntimeExceptions. Thus, together with Java which requires to declare them properly, they make problems.
+            //Otherwise the are replaced by java.lang.reflect.UndeclaredThrowableException without the origin exception
+            throw new CreateFileException("Creating of file ${path} failed", e)
+        }
         setPermission(path, filePermission)
     }
 
@@ -500,7 +530,7 @@ class FileService {
             Files.delete(p)
         }
 
-        //sftp do not support setting permission on creation, so it needs to be done afterwards
+        //sftp does not support setting permission during creation, so it needs to be done afterwards.
         Files.createFile(p)
         Files.setPosixFilePermissions(p, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         return p
