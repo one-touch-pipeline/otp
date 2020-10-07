@@ -127,26 +127,30 @@ User.findAll().each { User user ->
         List<UserProjectRole> allUserProjectRolesForUserAndUnixGroup = projects ? UserProjectRole.findAllByUserAndProjectInList(user, projects) : []
         if (allUserProjectRolesForUserAndUnixGroup*.accessToFiles.unique().size() > 1) {
             output << "Conflict detected for User ${user.username} with the unix Group ${unixGroup}. Affected projects:\n"+
-                       allUserProjectRolesForUserAndUnixGroup*.project.name.join(", ")+"\n"
+                    allUserProjectRolesForUserAndUnixGroup*.project.name.join(", ")+"\n"
         }
     }
 }
 
 
 // Check 3
-String format = "%-10s | %-6s | %-10s | %s (%s)"
-output << sprintf(format, ["in Unx-Grp", "Access", "User", "Project", "Unix Group"])
-UserProjectRole.findAll().each { UserProjectRole userProjectRole ->
+String format = "%-10s | %-6s | %-6s | %-7s | %-7s | %-10s | %s (%s)"
+output << sprintf(format, ["in Unx-Grp", "Access", "ldap", "planned", "enabled", "User", "Project", "Unix Group"])
+output << sprintf(format, ["", "", "deact.", "deact.", "in OTP", "", "", "", ""])
+UserProjectRole.findAll().sort{
+    [it.project.name, it.user.username,].join(',')
+}.each { UserProjectRole userProjectRole ->
     if (!userProjectRole.user.username) {
         return
     }
     boolean fileAccessInOtp = userProjectRole.accessToFiles
     boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUser(userProjectRole.user)
+    boolean ldapDeactivited = ldapService.isUserDeactivated(userProjectRole.user)
     if (fileAccessInOtp != fileAccessInLdap) {
         output << sprintf(
                 format,
-                [fileAccessInLdap, fileAccessInOtp, userProjectRole.user.username,
-                 userProjectRole.project.name, userProjectRole.project.unixGroup]
+                [fileAccessInLdap, fileAccessInOtp, ldapDeactivited, userProjectRole.user.plannedDeactivationDate as boolean,  userProjectRole.enabled,
+                 userProjectRole.user.username, userProjectRole.project.name, userProjectRole.project.unixGroup]
         )
     }
 }
