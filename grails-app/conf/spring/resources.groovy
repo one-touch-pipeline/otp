@@ -25,6 +25,7 @@ import grails.util.Environment
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
+import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
 import de.dkfz.tbi.otp.security.*
@@ -101,4 +102,7 @@ beans = {
     grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.grails.serverURL) { bean ->
         bean.autowire = true
     }
+
+    // only use English (prevents translations included in plugins being used)
+    localeResolver(FixedLocaleResolver, Locale.ENGLISH)
 }
