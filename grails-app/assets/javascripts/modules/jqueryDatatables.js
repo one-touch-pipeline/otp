@@ -25,4 +25,5 @@
 //=require /webjars/datatables-fixedheader/2.1.2/js/dataTables.fixedHeader.js
 //=require /webjars/datatables-buttons/1.3.1-1/js/dataTables.buttons.js
 //=require /webjars/datatables-buttons/1.3.1-1/js/buttons.html5.js
+//= require /webjars/datatables-plugins/1.10.20/pagination/select.js
 //=require dataTable/dataTables.scroller.js

@@ -26,7 +26,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="processes.plan.title" args="${ [state ?: "all", name] }" /></title>
-    <asset:javascript src="modules/workflows"/>
+    <asset:javascript src="pages/processes/common.js"/>
+    <asset:javascript src="pages/processes/plan/plan.js"/>
 </head>
 <body>
     <div class="body">

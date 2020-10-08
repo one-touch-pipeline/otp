@@ -26,7 +26,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></title>
-    <asset:javascript src="modules/workflows"/>
+    <asset:javascript src="pages/processes/common.js"/>
+    <asset:javascript src="pages/processes/processingStep/processingStep.js"/>
 </head>
 <body>
     <div class="body">

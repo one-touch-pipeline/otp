@@ -27,7 +27,8 @@
     <meta name="layout" content="main"/>
     <title><g:message code="processes.process.title.listOfProcessingSteps" args="${[id]}"/> <g:message code="processes.process.title.workflow" args="${[name]}"/></title>
     <asset:javascript src="common/CommentBox.js"/>
-    <asset:javascript src="modules/workflows"/>
+    <asset:javascript src="pages/processes/common.js"/>
+    <asset:javascript src="pages/processes/process/process.js"/>
 </head>
 <body>
     <div class="body">
