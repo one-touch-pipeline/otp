@@ -25,8 +25,8 @@
 <head>
     <title><g:layoutTitle default="OTP"/></title>
     <g:layoutHead/>
-    <asset:javascript src="modules/info.js"/>
     <asset:stylesheet src="modules/info.css"/>
+    <asset:javascript src="common/FocusLogin.js"/>
 </head>
 
 <body>
