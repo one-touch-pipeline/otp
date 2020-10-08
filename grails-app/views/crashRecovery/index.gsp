@@ -28,7 +28,7 @@
     <title>Crash Recovery</title>
     <asset:javascript src="modules/jqueryDatatables"/>
     <asset:stylesheet src="modules/jqueryDatatables"/>
-    <asset:javascript src="modules/crashRecovery"/>
+    <asset:javascript src="pages/crashRecovery/index/crashRecovery.js"/>
 </head>
 <body>
     <div class="body">
