@@ -21,7 +21,7 @@
  */
 
 /*
-*= require jqueryUI
+*= require /webjars/jquery-ui/1.10.4/themes/base/jquery-ui.css
 *= require /webjars/datatables/1.10.7/css/jquery.dataTables.css
 *= require /webjars/datatables/1.10.7/css/jquery.dataTables_themeroller.css
 *= require /webjars/datatables-fixedcolumns/3.0.2/css/dataTables.fixedColumns.css
