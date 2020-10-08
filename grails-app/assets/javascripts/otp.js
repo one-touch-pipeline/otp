@@ -23,8 +23,6 @@
 /*jslint browser: true */
 /*global $ */
 
-//= require modules/jqueryDatatables.js
-
 $.otp = {
     contextPath:      $("head meta[name=contextPath]").attr("content"),
     projectName:      $("head meta[name=projectName]").attr("content"),

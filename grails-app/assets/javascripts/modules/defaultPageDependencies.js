@@ -22,6 +22,12 @@
 
 //= require /webjars/jquery/1.11.1/jquery.js
 //= require /webjars/jquery-ui/1.10.4/ui/jquery-ui.js
-//= require jqueryDatatables
+//= require /webjars/datatables/1.10.7/js/jquery.dataTables.js
+//= require /webjars/datatables-fixedcolumns/3.0.2/js/dataTables.fixedColumns.js
+//= require /webjars/datatables-fixedheader/2.1.2/js/dataTables.fixedHeader.js
+//= require /webjars/datatables-buttons/1.3.1-1/js/dataTables.buttons.js
+//= require /webjars/datatables-buttons/1.3.1-1/js/buttons.html5.js
+//= require /webjars/datatables-plugins/1.10.20/pagination/select.js
+//= require dataTable/dataTables.scroller.js
 //= require /webjars/select2/4.0.12/js/select2.full.js
 //= require ../otp

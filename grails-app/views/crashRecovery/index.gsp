@@ -26,8 +26,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title>Crash Recovery</title>
-    <asset:javascript src="modules/jqueryDatatables"/>
-    <asset:stylesheet src="modules/jqueryDatatables"/>
     <asset:javascript src="pages/crashRecovery/index/crashRecovery.js"/>
 </head>
 <body>
