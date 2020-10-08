@@ -25,7 +25,7 @@
 <head>
     <title><g:message code="user.administration.index.title"/></title>
     <meta name="layout" content="main" />
-    <asset:javascript src="modules/userAdministration.js"/>
+    <asset:javascript src="pages/userAdministration/index/index.js"/>
     <asset:javascript src="modules/jqueryDatatables.js"/>
     <asset:stylesheet src="modules/jqueryDatatables.css"/>
 </head>

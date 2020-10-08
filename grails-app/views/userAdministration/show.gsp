@@ -25,7 +25,7 @@
     <head>
         <title><g:message code="user.administration.show.title"/></title>
         <meta name="layout" content="main" />
-        <asset:javascript src="modules/userAdministration.js"/>
+        <asset:javascript src="pages/userAdministration/show/show.js"/>
     </head>
     <body>
         <div class="body">
@@ -159,9 +159,4 @@
             </g:each>
         </div>
     </body>
-    <asset:script type="text/javascript">
-        $(function() {
-            $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
-        });
-    </asset:script>
 </html>
