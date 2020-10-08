@@ -24,7 +24,7 @@
 <head>
     <meta name="layout" content="main"/>
     <title>${g.message(code: "systemStatus.title")}</title>
-    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="pages/systemStatus/index/index.js"/>
 </head>
 

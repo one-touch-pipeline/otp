@@ -26,7 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="job.error.definition.header"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
 <div class="body">

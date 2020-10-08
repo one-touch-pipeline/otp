@@ -26,7 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
-    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="pages/metaDataFields/datatable.js"/>
     <asset:javascript src="pages/metaDataFields/libraryPreparationKits/datatable.js"/>
 </head>

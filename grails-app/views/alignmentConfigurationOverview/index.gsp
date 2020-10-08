@@ -28,7 +28,7 @@
     <title>${g.message(code: 'projectOverview.alignmentInformation.title', args: [selectedProject?.name])}</title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/alignmentConfigurationOverview/index/functions.js"/>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
     <div class="body">

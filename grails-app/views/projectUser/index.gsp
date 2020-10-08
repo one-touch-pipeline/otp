@@ -28,7 +28,7 @@
     <title><g:message code="projectUser.title" args="[selectedProject?.name]"/></title>
     <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="pages/projectUser/index/functions.js"/>
-    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
 <div class="body">

@@ -27,7 +27,7 @@
     <meta name="layout" content="main"/>
     <title><g:message code="projectFields.overview.title"/></title>
     <asset:javascript src="common/CommentBox.js"/>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
 </head>
 

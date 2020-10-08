@@ -27,7 +27,7 @@
     <meta name="layout" content="main"/>
     <title><g:message code="projectInfo.title" args="[selectedProject?.name]"/></title>
     <asset:javascript src="pages/projectInfo/list/functions.js"/>
-    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="taglib/Expandable.js"/>
 </head>
 <body>

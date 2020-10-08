@@ -27,7 +27,7 @@
     <meta name="layout" content="main"/>
     <title>${individual.mockFullName}</title>
     <asset:javascript src="common/CommentBox.js"/>
-    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="pages/individual/show/functions.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="taglib/Expandable.js"/>

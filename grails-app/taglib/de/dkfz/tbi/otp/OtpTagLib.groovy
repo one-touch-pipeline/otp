@@ -45,7 +45,7 @@ class OtpTagLib {
      *
      * In order to use this tag, you need to require the resource "editorSwitch".
      * <code>
-     * <asset:javascript src="modules/editorSwitch"/>
+     * <asset:javascript src="taglib/EditorSwitch.js"/>
      * </code>
      *
      * @attr link REQUIRED The link to update the data

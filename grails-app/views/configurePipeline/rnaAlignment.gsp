@@ -28,7 +28,7 @@
     <title><g:message code="configurePipeline.rnaAlignment.title" args="[selectedProject.name, seqType.displayName]"/></title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/configurePipeline/alignment/configureAlignment.js"/>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
 <div class="body">

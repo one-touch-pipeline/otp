@@ -25,7 +25,7 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="metadataImport.blackListedIlseNumbers.title"/></title>
-    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="common/CommentBox.js"/>
 </head>
 

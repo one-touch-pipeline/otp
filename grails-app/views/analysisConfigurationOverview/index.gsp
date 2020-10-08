@@ -27,7 +27,7 @@
     <meta name="layout" content="main"/>
     <title>${g.message(code: 'projectOverview.analysis.title', args: [selectedProject?.name])}</title>
     <asset:javascript src="common/CommentBox.js"/>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
     <div class="body">
