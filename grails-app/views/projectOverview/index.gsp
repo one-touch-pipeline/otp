@@ -23,10 +23,11 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title>${g.message(code: "projectOverview.index.title")}</title>
-    <asset:javascript src="modules/graph"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <title>${g.message(code: "projectOverview.index.title")}</title>
+    <asset:javascript src="modules/rGraph.js"/>
+    <asset:javascript src="graph.js"/>
     <asset:javascript src="pages/projectOverview/index/datatable.js"/>
 </head>
 <body>

@@ -24,7 +24,8 @@
 <head>
     <meta name="layout" content="info"/>
     <title><g:message code="info.numbers.title" /></title>
-    <asset:javascript src="modules/graph"/>
+    <asset:javascript src="modules/rGraph.js"/>
+    <asset:javascript src="graph.js"/>
 </head>
 
 <body>

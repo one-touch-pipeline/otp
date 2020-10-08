@@ -25,7 +25,8 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="otp.welcome.title"/></title>
-    <asset:javascript src="modules/graph"/>
+    <asset:javascript src="modules/rGraph.js"/>
+    <asset:javascript src="graph.js"/>
     <asset:javascript src="pages/home/index/projectOverview.js"/>
     <asset:javascript src="taglib/ExpandableText.js"/>
 </head>
