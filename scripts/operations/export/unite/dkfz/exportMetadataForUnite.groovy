@@ -1,10 +1,16 @@
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.GroupedMwp
-import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 /*
  * Copyright 2011-2020 The OTP authors
@@ -41,18 +47,8 @@ def projectNames = [
 Script area
  */
 
-File createFile(File file, String folderName) {
-    File f = new File(file, folderName)
-    f.delete()
-    f.createNewFile()
-    assert f.exists()
-    assert f.size() == 0
-    return f
-}
 
-
-
-def alignmentQualityOverview(Project p, File file, SeqType seqType) {
+def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
     def header = []
     header << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tBAM_FILE\tCOVERAGE"
     boolean first = true
@@ -79,40 +75,40 @@ def alignmentQualityOverview(Project p, File file, SeqType seqType) {
     }
 }
 
-def wgsAlignmentQualityOverview(Project p, File file) {
-    File f = createFile(file, "${p.name}_WGS_alignmentQualityOverview.tsv")
+def wgsAlignmentQualityOverview(Project p, Path folder) {
+    Path f = folder.resolve("${p.name}_WGS_alignmentQualityOverview.tsv")
     alignmentQualityOverview(p, f, ctx.seqTypeService.getWholeGenomePairedSeqType())
 }
 
-def wesAlignmentQualityOverview(Project p, File file) {
-    File f = createFile(file, "${p.name}_WES_alignmentQualityOverview.tsv")
+def wesAlignmentQualityOverview(Project p, Path folder) {
+    Path f = folder.resolve("${p.name}_WES_alignmentQualityOverview.tsv")
     alignmentQualityOverview(p, f, ctx.seqTypeService.getExomePairedSeqType())
 }
 
-def wgbsAlignmentQualityOverview(Project p, File file) {
-    File f = createFile(file, "${p.name}_WGBS_alignmentQualityOverview.tsv")
+def wgbsAlignmentQualityOverview(Project p, Path folder) {
+    Path f = folder.resolve("${p.name}_WGBS_alignmentQualityOverview.tsv")
     alignmentQualityOverview(p, f, ctx.seqTypeService.getWholeGenomeBisulfitePairedSeqType())
 }
 
-def wgbsTagmentationAlignmentQualityOverview(Project p, File file) {
-    File f = createFile(file, "${p.name}_WGBS_tagmentation_alignmentQualityOverview.tsv")
+def wgbsTagmentationAlignmentQualityOverview(Project p, Path folder) {
+    Path f = folder.resolve("${p.name}_WGBS_tagmentation_alignmentQualityOverview.tsv")
     alignmentQualityOverview(p, f, ctx.seqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType())
 }
 
-def rnaPairedAlignmentQualityOverview(Project p, File file) {
-    File f = createFile(file, "${p.name}_RNA_PAIRED_alignmentQualityOverview.tsv")
+def rnaPairedAlignmentQualityOverview(Project p, Path folder) {
+    Path f = folder.resolve("${p.name}_RNA_PAIRED_alignmentQualityOverview.tsv")
     alignmentQualityOverview(p, f, ctx.seqTypeService.getRnaPairedSeqType())
 }
 
-def rnaSingleAlignmentQualityOverview(Project p, File file) {
-    File f = createFile(file, "${p.name}_RNA_SINGLE_alignmentQualityOverview.tsv")
+def rnaSingleAlignmentQualityOverview(Project p, Path file) {
+    Path f = file.resolve("${p.name}_RNA_SINGLE_alignmentQualityOverview.tsv")
     alignmentQualityOverview(p, f, ctx.seqTypeService.getRnaSingleSeqType())
 }
 
 
-def cellRangerFinalSelection(Project p, File file) {
+def cellRangerFinalSelection(Project p, Path folder) {
 
-    File f = createFile(file, "${p.name}_cellRangerFinalSelection.tsv")
+    Path f = folder.resolve("${p.name}_cellRangerFinalSelection.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tCELL_RANGER_VERSION\tREFERENCE\tRUNS\n"
 
     List<CellRangerMergingWorkPackage> mwps = CellRangerMergingWorkPackage.createCriteria().list {
@@ -145,9 +141,9 @@ def cellRangerFinalSelection(Project p, File file) {
 }
 
 
-def snvResults(Project p, File file) {
+def snvResults(Project p, Path folder) {
 
-    File f = createFile(file, "${p.name}_snvResults.tsv")
+    Path f = folder.resolve("${p.name}_snvResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tLIBRARY_PREPARATION_KIT(S)\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
     ctx.snvResultsService.getCallingInstancesForProject(p.name).each { snvResult ->
@@ -156,9 +152,9 @@ def snvResults(Project p, File file) {
 }
 
 
-def indelResults(Project p, File file) {
+def indelResults(Project p, Path folder) {
 
-    File f = createFile(file, "${p.name}_indelResults.tsv")
+    Path f = folder.resolve("${p.name}_indelResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tLIBRARY_PREPARATION_KIT(S)\t#INDELS\t#INSERTION\t#DELETIONS\t#SIZE_1_3\t#SIZE_4_10\t" +
             "ALL_SOMATIC_VARIANTS (T)\tALL_SOMATIC_VARIANTS (C)\tSOMATIC_COMMON_IN_gnomAD (T)\tSOMATIC_COMMON_IN_gnomAD (C)\tSOMATIC_PASS (T)\t" +
             "SOMATIC_PASS (C)\t#GERMLINE_VARIANTS\tSOMATIC_RESCUE\tCONTROL_VAF (MEDIAN)\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
@@ -174,9 +170,9 @@ def indelResults(Project p, File file) {
 }
 
 
-def aceseqResults(Project p, File file) {
+def aceseqResults(Project p, Path folder) {
 
-    File f = createFile(file, "${p.name}_aceseqResults.tsv")
+    Path f = folder.resolve("${p.name}_aceseqResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tTUMOR CELL CONTENT\tPLOIDY\tGENDER\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
     ctx.aceseqResultsService.getCallingInstancesForProject(p.name).each { aceseqResult ->
@@ -187,9 +183,9 @@ def aceseqResults(Project p, File file) {
 
 
 
-def sophiaResults(Project p, File file) {
+def sophiaResults(Project p, Path folder) {
 
-    File f = createFile(file, "${p.name}_sophiaResults.tsv")
+    Path f = folder.resolve("${p.name}_sophiaResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE}\tCONTROL_MASSIVE_INV_PREFILTERING_LEVEL\tTUMOR_MASSIVE_INV_PREFILTERING_LEVEL\t" +
             "RNA_CONTAMINATED_GENES_COUNT\tRNA_DECONTAMINATION_APPLIED\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
@@ -203,9 +199,9 @@ def sophiaResults(Project p, File file) {
 
 
 
-def runYapsaResults(Project p, File file) {
+def runYapsaResults(Project p, Path folder) {
 
-    File f = createFile(file, "${p.name}_runYapsaResults.tsv")
+    Path f = folder.resolve("${p.name}_runYapsaResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tLIBRARY_PREPARATION_KIT(S)\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
     ctx.runYapsaResultsService.getCallingInstancesForProject(p.name).each { runYapsaResult ->
@@ -214,77 +210,81 @@ def runYapsaResults(Project p, File file) {
     }
 }
 
-File outputFolder = new File(ctx.configService.getScriptOutputPath(), "export/UNITE/output")
-assert outputFolder.exists() : "the output folder ${outputFolder} does not exist"
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 
-File f = createFile(outputFolder, "status.tsv")
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-f << new Date()
+
+Path outputFolder = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("export").resolve("UNITE").resolve("output")
+Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv", realm)
+
+file << new Date()
 
 projectNames.each { projectName ->
 
-    File outputFolderPerProject = new File(outputFolder, projectName)
-    outputFolderPerProject.mkdir()
-    assert outputFolderPerProject.exists() : "the output folder ${outputFolderPerProject} does not exist"
-
+    Path outputFolderPerProject = outputFolder.resolve(projectName)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject, realm)
 
     Project project = Project.findByName(projectName)
     assert project : "There is not project with the name ${projectName}"
 
-    f << "\n${projectName}\n"
+    file << "\n${projectName}\n"
 
-    f << "cell ranger selection started\n"
+    file << "cell ranger selection started\n"
     cellRangerFinalSelection(project, outputFolderPerProject)
-    f << "cell ranger selection done\n"
+    file << "cell ranger selection done\n"
 
-    f << "snv results started\n"
+    file << "snv results started\n"
     snvResults(project, outputFolderPerProject)
-    f << "snv results done\n"
+    file << "snv results done\n"
 
-    f << "indel results started\n"
+    file << "indel results started\n"
     indelResults(project, outputFolderPerProject)
-    f << "indel results done\n"
+    file << "indel results done\n"
 
-    f << "aceseq results started\n"
+    file << "aceseq results started\n"
     aceseqResults(project, outputFolderPerProject)
-    f << "aceseq results done\n"
+    file << "aceseq results done\n"
 
-    f << "sophia results started\n"
+    file << "sophia results started\n"
     sophiaResults(project, outputFolderPerProject)
-    f << "sophia results done\n"
+    file << "sophia results done\n"
 
-    f << "runYAPSA results started\n"
+    file << "runYAPSA results started\n"
     runYapsaResults(project, outputFolderPerProject)
-    f << "runYAPSA results done\n"
+    file << "runYAPSA results done\n"
 
-    f << "wgsAlignmentQualityOverview started\n"
+    file << "wgsAlignmentQualityOverview started\n"
     wgsAlignmentQualityOverview(project, outputFolderPerProject)
-    f << "wgsAlignmentQualityOverview done\n"
+    file << "wgsAlignmentQualityOverview done\n"
 
-    f << "wesAlignmentQualityOverview started\n"
+    file << "wesAlignmentQualityOverview started\n"
     wesAlignmentQualityOverview(project, outputFolderPerProject)
-    f << "wesAlignmentQualityOverview done\n"
+    file << "wesAlignmentQualityOverview done\n"
 
-    f << "wgbsAlignmentQualityOverview started\n"
+    file << "wgbsAlignmentQualityOverview started\n"
     wgbsAlignmentQualityOverview(project, outputFolderPerProject)
-    f << "wgbsAlignmentQualityOverview done\n"
+    file << "wgbsAlignmentQualityOverview done\n"
 
-    f << "rnaPairedAlignmentQualityOverview started\n"
+    file << "rnaPairedAlignmentQualityOverview started\n"
     rnaPairedAlignmentQualityOverview(project, outputFolderPerProject)
-    f << "rnaPairedAlignmentQualityOverview done\n"
+    file << "rnaPairedAlignmentQualityOverview done\n"
 
-    f << "rnaSingleAlignmentQualityOverview started\n"
+    file << "rnaSingleAlignmentQualityOverview started\n"
     rnaSingleAlignmentQualityOverview(project, outputFolderPerProject)
-    f << "rnaSingleAlignmentQualityOverview done\n"
+    file << "rnaSingleAlignmentQualityOverview done\n"
 
-    f << "wgbsTagmentationAlignmentQualityOverview started\n"
+    file << "wgbsTagmentationAlignmentQualityOverview started\n"
     wgbsTagmentationAlignmentQualityOverview(project, outputFolderPerProject)
-    f << "wgbsTagmentationAlignmentQualityOverview done\n"
+    file << "wgbsTagmentationAlignmentQualityOverview done\n"
 
 
 }
 
-f << new Date()
-f << "\neverything executed"
+file << new Date()
+file << "\neverything executed"
 
 println ""

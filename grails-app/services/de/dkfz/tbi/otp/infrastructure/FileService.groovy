@@ -522,9 +522,14 @@ class FileService {
      * Creates a new, group-writable, group-executable file to hold generated console and/or bash scripts.
      *
      * pre-existing files of the same name will be overwritten without asking.
+     *
+     * When outputFolder not exist yet, it is created automatically including missing parent directories with the
+     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName) {
+    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, Realm realm) {
         Path p = outputFolder.resolve(fileName)
+
+        createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolder, realm)
 
         if (Files.exists(p)) {
             Files.delete(p)

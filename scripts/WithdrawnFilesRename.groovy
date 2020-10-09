@@ -20,8 +20,14 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.Realm
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 /**
  * rename existing withdrawn result files in the project folder
@@ -32,8 +38,15 @@ import de.dkfz.tbi.otp.dataprocessing.*
  * for analysis instances complete directories are renamed.
  */
 
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 
-File generated_script_to_run_manually = new File(ConfigService.getInstance().getScriptOutputPath(), "/withdraw/renameWithdrawnFiles.sh")
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+Path generated_script_to_run_manually = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("withdraw").resolve("renameWithdrawnFiles.sh")
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_to_run_manually.parent, realm)
 List<File> renameFiles = []
 
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
@@ -69,3 +82,5 @@ List<BamFilePairAnalysis> findAnalysisInstanceForBamFile(AbstractMergedBamFile b
         }
     }
 }
+
+println "create file: ${generated_script_to_run_manually}"

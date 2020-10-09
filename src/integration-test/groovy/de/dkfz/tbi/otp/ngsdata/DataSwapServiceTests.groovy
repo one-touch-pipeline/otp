@@ -67,6 +67,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void test_moveSample() {
         setupData()
+        DomainFactory.createDefaultRealmWithProcessingOption()
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
@@ -137,6 +138,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void test_moveIndividual() {
         setupData()
+        DomainFactory.createDefaultRealmWithProcessingOption()
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],

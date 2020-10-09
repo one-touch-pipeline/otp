@@ -1209,7 +1209,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !Files.exists(newFile)
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
+        fileService.createOrOverwriteScriptOutputFile(newFolder, newName, new Realm())
 
         then:
         Files.exists(newFile)
@@ -1224,7 +1224,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert newFile.text == SOME_CONTENT
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
+        fileService.createOrOverwriteScriptOutputFile(newFolder, newName, new Realm())
 
         then:
         newFile.text.empty
@@ -1237,7 +1237,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = newFolder.resolve(newName)
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
+        fileService.createOrOverwriteScriptOutputFile(newFolder, newName, new Realm())
 
         then:
         Files.getPosixFilePermissions(newFile).containsAll([

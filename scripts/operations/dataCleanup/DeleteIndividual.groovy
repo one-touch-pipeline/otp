@@ -21,10 +21,13 @@
  */
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.DeletionService
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -76,8 +79,13 @@ String fileName = "Delete_${combinedPids.size() < 110 ? combinedPids : combinedP
 
 DeletionService deletionService = ctx.deletionService
 FileService fileService = ctx.fileService
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
 
-Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+Path baseOutputDir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
 
 Individual.withTransaction {
     List<String> allFilesToRemove = [
@@ -92,7 +100,7 @@ Individual.withTransaction {
         allFilesToRemove << deletionService.deleteIndividual(it, check)[0]
     }
 
-    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName)
+    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName, realm)
 
     deleteFileCmd << allFilesToRemove.join('\n')
 

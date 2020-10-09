@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.administration.ProjectInfo
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
@@ -57,6 +58,7 @@ class DeletionService {
     FileService fileService
     DataSwapService dataSwapService
     RunService runService
+    ConfigService configService
 
     void assertNoEgaSubmissionsForProject(Project project) {
         assert !EgaSubmission.findAllByProject(project): "There are Ega Submissions connected to this Project, thus it can not be deleted"
@@ -824,14 +826,15 @@ class DeletionService {
             }
         }
 
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh")
+        Realm realm = configService.defaultRealm
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", realm)
         bashScriptToMoveFiles << dataSwapService.BASH_HEADER
 
         (dirsToDelete - externalMergedBamFolders).each {
             bashScriptToMoveFiles << "rm -rf ${it}\n"
         }
 
-        output << "bash script to remove files on file system created\n\n"
+        output << "bash script to remove files on file system created:\n${bashScriptToMoveFiles}\n\n"
 
         println output
 

@@ -24,9 +24,12 @@
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -37,8 +40,14 @@ long fastqImportInstanceId = 0
 
 
 DeletionService deletionService = ctx.deletionService
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
 
-Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+Path baseOutputDir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
 
 
 FastqImportInstance.withTransaction {

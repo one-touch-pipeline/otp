@@ -61,6 +61,7 @@ class DeletionServiceTests implements UserAndRoles {
                 (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.toString(),
                 (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.toString(),
         ])
+        DomainFactory.createDefaultRealmWithProcessingOption()
     }
 
     @After

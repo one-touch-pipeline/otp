@@ -461,15 +461,16 @@ ln -s '${newDirectFileName}' \\
             log << "\n -->     found alignments for seqtracks (${AlignmentPass.findAllBySeqTrackInList(seqTracks)*.seqTrack.unique()}): "
         }
 
+        Realm realm = configService.defaultRealm
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy"
+                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm
         )
         groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh")
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
         bashScriptToMoveFiles << BASH_HEADER
 
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh")
+        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
         createBashScriptRoddy(seqTracks, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser)
 
         seqTracks.each { SeqTrack seqTrack ->
@@ -609,15 +610,16 @@ ln -s '${newDirectFileName}' \\
         List<String> oldFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
         List<File> dirsToDelete = []
 
-        // validating ends here, now the changing are started
-
-        Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "restartAli_${bashScriptName}.groovy")
+        // validation ends here, now the changing is started
+        Realm realm = configService.defaultRealm
+        Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
+                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm)
         groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh")
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
         bashScriptToMoveFiles << BASH_HEADER
 
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh")
+        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
         createBashScriptRoddy(seqTrackList, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
 
         seqTrackList.each { SeqTrack seqTrack ->
@@ -878,12 +880,13 @@ ln -s '${newDirectFileName}' \\
 
         completeOmittedNewValuesAndLog(dataFileMap, 'datafiles', log)
 
+        Realm realm = configService.defaultRealm
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy"
+                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm
         )
         groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh")
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
         bashScriptToMoveFiles << BASH_HEADER
 
         Run run = Run.findByName(inputInformationOTP.runName)
@@ -978,7 +981,7 @@ ln -s '${newDirectFileName}' \\
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
 
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh")
+        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
         createBashScriptRoddy(seqTracksOfOldSample, dirsToDelete, log, bashScriptToMoveFiles,
                 bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
 

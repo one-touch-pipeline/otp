@@ -20,11 +20,14 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DeletionService
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 // input area
@@ -78,7 +81,14 @@ if (seqTracks) {
     |""".stripMargin()
 }
 
-Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+Path baseOutputDir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
 
 DeletionService deletionService = ctx.deletionService
 

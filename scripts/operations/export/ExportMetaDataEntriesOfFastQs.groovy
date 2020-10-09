@@ -20,9 +20,16 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.ngsdata.*
+
 import org.hibernate.sql.JoinType
+
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.*
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 /**
  * This script exports the Fastq metadata entries for a selection of fastq files.
@@ -71,11 +78,18 @@ List<DataFile> fastq_to_export = DataFile.createCriteria().listDistinct {
 ////////////////////////////////////////////////////////////
 // (but see DEBUG limit below)
 
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 // where to put output
-File output_dir = new File(ConfigService.getInstance().getScriptOutputPath(), "export")
-File output =    new File(output_dir, "${output_name}.csv")
-File done_flag = new File(output_dir, "${output_name}.done")
+Path output_dir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("export")
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(output_dir, realm)
+Path output =    output_dir.resolve("${output_name}.csv")
+Path done_flag = output_dir.resolve("${output_name}.done")
 
 println("going to write output to ${output}")
 
