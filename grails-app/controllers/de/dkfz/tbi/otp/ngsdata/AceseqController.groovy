@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import java.nio.file.Path
 
 class AceseqController extends AbstractAnalysisController {
 
@@ -65,14 +66,14 @@ class AceseqController extends AbstractAnalysisController {
 
         return [
                 bamFilePairAnalysis: cmd.bamFilePairAnalysis,
-                plotType: [
+                plotType           : [
                         PlotType.ACESEQ_WG_COVERAGE,
                         PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR,
                         PlotType.ACESEQ_QC_GC_CORRECTED,
                         PlotType.ACESEQ_GC_CORRECTED,
                 ],
-                plotNumber: plotNumber,
-                error: null,
+                plotNumber         : plotNumber,
+                error              : null,
         ]
     }
 
@@ -81,19 +82,15 @@ class AceseqController extends AbstractAnalysisController {
             render status: 404
             return
         }
-        List<File> files = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
-
-        if (files) {
+        List<Path> files = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
+        if (!files.isEmpty()) {
             if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
-                render file: files[cmd.index], contentType: "image/png"
+                render file: files[cmd.index].bytes, contentType: "image/png"
             } else {
-                render file: files.first(), contentType: "image/png"
+                render file: files.first().bytes, contentType: "image/png"
             }
+        } else {
+            render status: 404
         }
-
-        return [
-                error: "File not found",
-                pid: "no File",
-        ]
     }
 }

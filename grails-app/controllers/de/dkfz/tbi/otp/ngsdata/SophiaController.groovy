@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import java.nio.file.Path
 
 class SophiaController extends AbstractAnalysisController {
 
@@ -51,15 +52,15 @@ class SophiaController extends AbstractAnalysisController {
         }
         if (sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
             return [
-                    id: cmd.bamFilePairAnalysis.id,
-                    pid: cmd.bamFilePairAnalysis.individual.pid,
+                    id      : cmd.bamFilePairAnalysis.id,
+                    pid     : cmd.bamFilePairAnalysis.individual.pid,
                     plotType: cmd.plotType,
-                    error: null,
+                    error   : null,
             ]
         }
         return [
                 error: "File not found",
-                pid: "no File",
+                pid  : "no File",
         ]
     }
 
@@ -68,11 +69,8 @@ class SophiaController extends AbstractAnalysisController {
             response.sendError(404)
             return
         }
-        List<File> stream = sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
-        if (stream) {
-            render file: stream.first(), contentType: "application/pdf"
-        } else {
-            render status: 404
-        }
+        List<Path> filePaths = sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
+        Path file = filePaths.first()
+        render file: file.bytes, contentType: "application/pdf"
     }
 }

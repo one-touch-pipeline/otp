@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import java.nio.file.Path
 
 class IndelController extends AbstractAnalysisController {
 
@@ -40,15 +41,15 @@ class IndelController extends AbstractAnalysisController {
         }
         if (indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
             return [
-                    id: cmd.bamFilePairAnalysis.id,
-                    pid: cmd.bamFilePairAnalysis.individual.pid,
+                    id      : cmd.bamFilePairAnalysis.id,
+                    pid     : cmd.bamFilePairAnalysis.individual.pid,
                     plotType: cmd.plotType,
-                    error: null,
+                    error   : null,
             ]
         }
         return [
                 error: "File not found",
-                pid: "no File",
+                pid  : "no File",
         ]
     }
 
@@ -57,15 +58,12 @@ class IndelController extends AbstractAnalysisController {
             response.sendError(404)
             return
         }
-        List<File> stream = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
-        if (stream) {
-            if (cmd.plotType == PlotType.INDEL) {
-                render file: stream.first(), contentType: "application/pdf"
-            } else {
-                render file: stream.first(), contentType: "image/png"
-            }
+        List<Path> filePaths = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
+        Path file = filePaths.first()
+        if (cmd.plotType == PlotType.INDEL) {
+            render file: file.bytes, contentType: "application/pdf"
         } else {
-            render status: 404
+            render file: file.bytes, contentType: "image/png"
         }
     }
 

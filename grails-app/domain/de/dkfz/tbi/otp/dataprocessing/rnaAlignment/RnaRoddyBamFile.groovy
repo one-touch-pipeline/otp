@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-
 import java.nio.file.Paths
 
 class RnaRoddyBamFile extends RoddyBamFile {
@@ -45,9 +44,9 @@ class RnaRoddyBamFile extends RoddyBamFile {
         return new File(workDirectory, "${sampleType.dirName}_${individual.pid}_${CHIMERIC_BAM_SUFFIX}")
     }
 
-    File getWorkArribaFusionPlotPdf() {
-       File file =  Paths.get(workDirectory as String, ARRIBA_FOLDER,
-                "${sampleType.dirName}_${individual.pid}${ARRIBA_PLOT_SUFFIX}").toFile()
+    String getWorkArribaFusionPlotPdf() {
+        String file = Paths.get(workDirectory as String, ARRIBA_FOLDER,
+                "${sampleType.dirName}_${individual.pid}${ARRIBA_PLOT_SUFFIX}")
         return file
     }
 }

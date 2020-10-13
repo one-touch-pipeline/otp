@@ -112,7 +112,6 @@ class ProjectInfoService {
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
         Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(projectInfo.path)
-
         return Files.exists(file) ? file.bytes : [] as byte[]
     }
 

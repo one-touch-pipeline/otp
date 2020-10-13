@@ -27,15 +27,20 @@ import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
+import java.nio.file.Path
+import java.nio.file.FileSystem
 import java.text.SimpleDateFormat
+import java.nio.file.Files
 
 @Transactional
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     ProjectService projectService
+    FileSystemService fileSystemService
 
     List getCallingInstancesForProject(String projectName) {
         Project proj = projectService.getProjectByName(projectName)
@@ -129,49 +134,41 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
-    List<File> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
+    List<Path> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
         if (!callingInstance) {
             return null
         }
 
-        List<File> files = []
+        List<Path> filePaths = []
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(callingInstance.realm)
 
         switch (plotType) {
             case PlotType.ACESEQ_GC_CORRECTED:
             case PlotType.ACESEQ_QC_GC_CORRECTED:
             case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR:
             case PlotType.ACESEQ_WG_COVERAGE:
-                if ((callingInstance as AceseqInstance).getPlot(plotType).exists()) {
-                    files.add((callingInstance as AceseqInstance).getPlot(plotType))
-                }
+                filePaths.add(fileSystem.getPath((callingInstance as AceseqInstance).getPlot(plotType).toString()))
                 break
             case PlotType.ACESEQ_ALL:
             case PlotType.ACESEQ_EXTRA:
-                if ((callingInstance as AceseqInstance).getPlots(plotType)) {
-                    files = (callingInstance as AceseqInstance).getPlots(plotType)
+                (callingInstance as AceseqInstance).getPlots(plotType).each { File f ->
+                    filePaths << fileSystem.getPath(f.toString())
                 }
                 break
             case PlotType.SOPHIA:
             case PlotType.SNV:
             case PlotType.INDEL:
-                if (callingInstance.getCombinedPlotPath().exists()) {
-                    files.add(callingInstance.getCombinedPlotPath())
-                }
+                filePaths.add(fileSystem.getPath(callingInstance.getCombinedPlotPath().toString()))
                 break
             case PlotType.INDEL_TINDA:
-                if ((callingInstance as IndelCallingInstance).getCombinedPlotPathTiNDA().exists()) {
-                    files.add((callingInstance as IndelCallingInstance).getCombinedPlotPathTiNDA())
-                }
+                filePaths.add(fileSystem.getPath((callingInstance as IndelCallingInstance).getCombinedPlotPathTiNDA().toString()))
                 break
             default:
                 throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")
         }
-
-        if (files.isEmpty()) {
-            return null
+        return filePaths.findAll { Path file ->
+            Files.exists(file) && Files.isReadable(file)
         }
-
-        return files
     }
 }
 

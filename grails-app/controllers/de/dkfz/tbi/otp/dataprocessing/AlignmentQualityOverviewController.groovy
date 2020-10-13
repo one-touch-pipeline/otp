@@ -28,13 +28,17 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.AccessDeniedException
+import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.NoSuchFileException
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -159,6 +163,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     SeqTypeService seqTypeService
 
     CellRangerService cellRangerService
+
+    FileSystemService fileSystemService
 
     ProjectSelectionService projectSelectionService
     QcThresholdService qcThresholdService
@@ -287,7 +293,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             Map<String, TableCellValue> map = [
                     pid               : new TableCellValue(
                             value: abstractMergedBamFile.individual.displayName,
-                            link : g.createLink(
+                            link: g.createLink(
                                     controller: 'individual',
                                     action: 'show',
                                     id: abstractMergedBamFile.individual.id,
@@ -359,10 +365,10 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
                 case SeqTypeNames.RNA.seqTypeName:
                     map << [
-                            arribaPlots               : new TableCellValue(
+                            arribaPlots: new TableCellValue(
                                     value: "PDF",
-                                    linkTarget        : "_blank",
-                                    link : g.createLink(
+                                    linkTarget: "_blank",
+                                    link: g.createLink(
                                             action: "renderPDF",
                                             params: ["abstractMergedBamFile.id": abstractMergedBamFile.id])
                             ),
@@ -394,17 +400,17 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
                 case SeqTypeNames._10X_SCRNA.seqTypeName:
                     map << [
-                            summary: new TableCellValue(
-                                value     : "summary",
-                                linkTarget: "_blank",
-                                link      : g.createLink(
-                                        action: "viewCellRangerSummary",
-                                        params: [
-                                                "singleCellBamFile.id": ((SingleCellBamFile) abstractMergedBamFile).id,
-                                        ],
-                                ).toString()
+                            summary          : new TableCellValue(
+                                    value: "summary",
+                                    linkTarget: "_blank",
+                                    link: g.createLink(
+                                            action: "viewCellRangerSummary",
+                                            params: [
+                                                    "singleCellBamFile.id": ((SingleCellBamFile) abstractMergedBamFile).id,
+                                            ],
+                                    ).toString()
                             ),
-                            referenceGenome: abstractMergedBamFile.workPackage.referenceGenome.name,
+                            referenceGenome  : abstractMergedBamFile.workPackage.referenceGenome.name,
                             cellRangerVersion: abstractMergedBamFile.workPackage.referenceGenomeIndex.indexToolVersion,
                     ]
                     qcKeys += [
@@ -469,9 +475,10 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         // This link is only generated for seqType RNA, so this cast is probably safe.
         if (cmd.abstractMergedBamFile instanceof RnaRoddyBamFile) {
             RnaRoddyBamFile rrbf = cmd.abstractMergedBamFile as RnaRoddyBamFile
-            File file = rrbf.workArribaFusionPlotPdf
-            if (file.exists()) {
-                render file: file, contentType: "application/pdf"
+            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractMergedBamFile.realm)
+            Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
+            if (Files.isReadable(file)) {
+                render file: file.bytes, contentType: "application/pdf"
             } else {
                 render text: "no plot available", contentType: "text/plain"
             }

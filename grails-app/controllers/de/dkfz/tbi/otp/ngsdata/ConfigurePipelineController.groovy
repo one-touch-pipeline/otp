@@ -83,8 +83,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
 
-        assert project.projectDirectory.exists()
-
         result << [
                 projects                : projects,
 
@@ -217,8 +215,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(
                 SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort(sampleTypeSort)
-
-        assert project.projectDirectory.exists()
 
         result << [
                 projects                : projects,
