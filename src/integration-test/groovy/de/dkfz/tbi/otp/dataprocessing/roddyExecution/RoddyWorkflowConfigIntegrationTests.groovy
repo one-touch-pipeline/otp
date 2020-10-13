@@ -84,7 +84,6 @@ class RoddyWorkflowConfigIntegrationTests {
         assert !RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
     }
 
-
     @Test
     void testGetLatestForProject_OneRoddyWorkflowConfigExists() {
         setupData()
@@ -98,7 +97,6 @@ class RoddyWorkflowConfigIntegrationTests {
         ])
         assert RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig
     }
-
 
     @Test
     void testGetLatestForProject_OneActiveAndOneObsoleteRoddyWorkflowConfigExists() {
@@ -120,7 +118,6 @@ class RoddyWorkflowConfigIntegrationTests {
         )
         assert RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig2
     }
-
 
     @Test
     void testGetLatest_ConfigForIndividualAndDefaultConfigExists() {
@@ -194,7 +191,6 @@ class RoddyWorkflowConfigIntegrationTests {
         assert RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
     }
 
-
     @Test
     void testGetLatestForIndividual_ConfigForIndividualExists() {
         setupData()
@@ -252,7 +248,6 @@ class RoddyWorkflowConfigIntegrationTests {
         assert RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfig
     }
 
-
     @Test
     void testCreateConfigPerProject_PreviousConfigExists() {
         setupData()
@@ -280,7 +275,6 @@ class RoddyWorkflowConfigIntegrationTests {
         assert firstConfigPerProject.obsoleteDate
     }
 
-
     @Test
     void testCreateConfigPerProject_PreviousConfigDoesNotExist() {
         setupData()
@@ -291,7 +285,6 @@ class RoddyWorkflowConfigIntegrationTests {
         service.createConfigPerProjectAndSeqType(configPerProject)
         assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 1
     }
-
 
     @Test
     void testMakeObsolete() {

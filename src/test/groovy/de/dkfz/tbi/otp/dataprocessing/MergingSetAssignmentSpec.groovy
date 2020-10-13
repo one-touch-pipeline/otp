@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
@@ -57,7 +56,6 @@ class MergingSetAssignmentSpec extends Specification implements DataTest {
         ])
     }
 
-
     void testSave() {
         given:
         createData()
@@ -72,7 +70,6 @@ class MergingSetAssignmentSpec extends Specification implements DataTest {
         mtm.validate()
         mtm.save(flush: true)
     }
-
 
     void "testConstraints, when mergingSet is null, then validation should fail"() {
         given:
@@ -99,7 +96,6 @@ class MergingSetAssignmentSpec extends Specification implements DataTest {
         then:
         TestCase.assertValidateError(mtm, 'bamFile', 'nullable', null)
     }
-
 
     void "testConstraints, when mergingWorkPackage of mergingSet and processedBamFile differ, then validation should fail"() {
         given:

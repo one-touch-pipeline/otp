@@ -44,7 +44,9 @@ class SecurityService {
      * the user that switched to the current user.
      */
     User getTrueCurrentUserAsUser() {
-        return isSwitched() ? CollectionUtils.exactlyOneElement(User.findAllByUsername(SpringSecurityUtils.getSwitchedUserOriginalUsername())) : currentUserAsUser
+        return isSwitched() ? CollectionUtils.exactlyOneElement(
+                User.findAllByUsername(SpringSecurityUtils.switchedUserOriginalUsername)
+        ) : currentUserAsUser
     }
 
     boolean isSwitched() {

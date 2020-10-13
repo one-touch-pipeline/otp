@@ -86,7 +86,8 @@ class SamplePair implements Entity {
     }
 
     static constraints = {
-        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: ValidatorUtil.messageArgs("mergingWorkPackage2") { AbstractMergingWorkPackage val, SamplePair obj ->
+        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: ValidatorUtil.messageArgs("mergingWorkPackage2") {
+            AbstractMergingWorkPackage val, SamplePair obj ->
             if (val == obj.mergingWorkPackage1) {
                 reject("equal")
             }

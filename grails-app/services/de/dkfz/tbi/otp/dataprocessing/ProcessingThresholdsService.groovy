@@ -41,7 +41,9 @@ class ProcessingThresholdsService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingThresholds createUpdateOrDelete(Project project, SampleType sampleType, SeqType seqType, Integer numberOfLanes, Double coverage) {
-        ProcessingThresholds processingThresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType))
+        ProcessingThresholds processingThresholds = CollectionUtils.atMostOneElement(
+                ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
+        )
         if (!numberOfLanes && !coverage) {
             if (processingThresholds) {
                 processingThresholds.delete(flush: true)

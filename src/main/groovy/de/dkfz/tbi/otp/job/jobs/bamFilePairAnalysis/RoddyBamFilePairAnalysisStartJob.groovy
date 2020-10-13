@@ -34,7 +34,8 @@ trait RoddyBamFilePairAnalysisStartJob implements BamFilePairAnalysisStartJobTra
 
     @Override
     String getInstanceName(ConfigPerProjectAndSeqType config) {
-        assert RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(config)): "Roddy startjobs should only ever be started with a RoddyWorkFlow, not something else; got ${ config.class }"
+        assert RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(config)):
+                "Roddy startjobs should only ever be started with a RoddyWorkFlow, not something else; got ${ config.class }"
         return "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${ getFormattedDate() }"
     }
 

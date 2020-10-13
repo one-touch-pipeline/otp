@@ -79,8 +79,6 @@ class CheckedLogger extends MarkerIgnoringBase implements Logger {
         }
     }
 
-
-
     /**
      * Holds th remaing expected messages.
      */
@@ -92,8 +90,6 @@ class CheckedLogger extends MarkerIgnoringBase implements Logger {
      * Also the check {@link #assertAllMessagesConsumed()} is then disabled.
      */
     private boolean hasAlreadyThrownAnException = false
-
-
 
     /**
      * Add a message expected on the error level
@@ -135,8 +131,6 @@ class CheckedLogger extends MarkerIgnoringBase implements Logger {
         return this
     }
 
-
-
     /**
      * ensures that all expected messages were used for checks.
      * If a check has thrown an exception, no further check is done.
@@ -147,8 +141,6 @@ class CheckedLogger extends MarkerIgnoringBase implements Logger {
         }
         assert expectedMessages.empty
     }
-
-
 
     private void checkConsumedMessage(Level level, Object message) {
         if (hasAlreadyThrownAnException) {
@@ -174,8 +166,6 @@ class CheckedLogger extends MarkerIgnoringBase implements Logger {
             }
         }
     }
-
-
 
     @Override
     void error(String msg) {

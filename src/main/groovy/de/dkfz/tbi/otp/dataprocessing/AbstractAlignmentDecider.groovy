@@ -131,7 +131,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                             pipeline        : pipeline,
                     ])
             workPackage.save(flush: true)
-            workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
+            workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect {
+                ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
                 new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
             } as Set
         }

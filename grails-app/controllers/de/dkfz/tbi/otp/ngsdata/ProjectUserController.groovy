@@ -56,7 +56,9 @@ class ProjectUserController implements CheckAndCall {
 
         List<User> ldapGroupMemberUsers = ldapGroupMemberUsernames ? User.findAllByUsernameInList(ldapGroupMemberUsernames) : []
         projectUsers.addAll(ldapGroupMemberUsers)
-        List<String> nonDatabaseUsers = ldapGroupMemberUsernames - ldapGroupMemberUsers*.username - processingOptionService.findOptionAsList(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND)
+        List<String> nonDatabaseUsers = ldapGroupMemberUsernames - ldapGroupMemberUsers*.username - processingOptionService.findOptionAsList(
+                ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND
+        )
 
         projectUsers.unique()
         projectUsers.sort { it.username }
@@ -134,7 +136,11 @@ class ProjectUserController implements CheckAndCall {
             cmd.newRoles.each { String newUserRole ->
                 newProjectRolesNodes.add(otp.editorSwitch([
                         template    : "remove",
-                        link        : g.createLink([controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': currentUserProjectRole.id, 'currentRole': newUserRole]]),
+                        link        : g.createLink([
+                                controller: "projectUser",
+                                action: "deleteProjectRole",
+                                params: ['userProjectRole.id': currentUserProjectRole.id, 'currentRole': newUserRole]
+                        ]),
                         value       : newUserRole,
                         name        : newUserRole,
                         confirmation: projectsOfUnixGroup.size() > 1 ? g.message(

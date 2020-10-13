@@ -43,7 +43,6 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
         when:
         new TagmentationLibrarySeqTypeValidator().validate(context)
 
-
         then:
         context.problems.empty
     }
@@ -57,7 +56,6 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
 
         when:
         new TagmentationLibrarySeqTypeValidator().validate(context)
-
 
         then:
         context.problems.empty
@@ -112,7 +110,6 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
         "seqtype${SeqType.TAGMENTATION_SUFFIX}" | "true"       | ""      | Level.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${TAGMENTATION_LIBRARY} column."      || TagmentationLibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
     }
 
-
     void 'validate, when CUSTOMER_LIBRARY is missing and SEQUENCING_TYPE has TAGMENTATION, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -123,7 +120,6 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
 
         when:
         new TagmentationLibrarySeqTypeValidator().validate(context)
-
 
         then:
         Collection<Problem> expectedProblems = [

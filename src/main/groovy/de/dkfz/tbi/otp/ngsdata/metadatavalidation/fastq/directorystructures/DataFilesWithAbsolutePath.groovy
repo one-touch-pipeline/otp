@@ -47,7 +47,11 @@ class DataFilesWithAbsolutePath implements DirectoryStructure {
         if (OtpPath.isValidAbsolutePath(fileName)) {
             return fileSystem.getPath(fileName)
         } else {
-            context.addProblem(valueTuple.cells, Level.ERROR, "'${fileName}' is not a valid absolute path.", "At least one file path is not a valid absolute path.")
+            context.addProblem(
+                    valueTuple.cells,
+                    Level.ERROR,
+                    "'${fileName}' is not a valid absolute path.", "At least one file path is not a valid absolute path."
+            )
             return null
         }
     }

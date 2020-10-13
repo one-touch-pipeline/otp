@@ -43,7 +43,8 @@ class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
 
         cValues.add("fastq_list:${filesToMerge.join(";")}")
 
-        String adapterSequence = CollectionUtils.exactlyOneElement(roddyBamFile.containedSeqTracks*.libraryPreparationKit*.reverseComplementAdapterSequence.unique().findAll(),
+        String adapterSequence = CollectionUtils.exactlyOneElement(
+                roddyBamFile.containedSeqTracks*.libraryPreparationKit*.reverseComplementAdapterSequence.unique().findAll(),
                 "There is not exactly one reverse complement adapter sequence available for BAM file ${roddyBamFile}")
         assert adapterSequence : "There is exactly one reverse complement adapter sequence available for BAM file ${roddyBamFile}, but it is null"
 

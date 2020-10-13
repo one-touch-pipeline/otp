@@ -43,7 +43,13 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
      */
     final Set<SampleIdentifier> usedSampleIdentifiers
 
-    private MetadataValidationContext(Path metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure, String directoryStructureDescription, byte[] content) {
+    private MetadataValidationContext(Path metadataFile,
+                                      String metadataFileMd5sum,
+                                      Spreadsheet spreadsheet,
+                                      Problems problems,
+                                      DirectoryStructure directoryStructure,
+                                      String directoryStructureDescription,
+                                      byte[] content) {
         super(metadataFile, metadataFileMd5sum, spreadsheet, problems, content)
         this.directoryStructure = directoryStructure
         this.directoryStructureDescription = directoryStructureDescription

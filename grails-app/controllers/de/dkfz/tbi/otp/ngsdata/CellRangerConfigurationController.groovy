@@ -88,7 +88,10 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
 
     def updateVersion(ConfigureCellRangerSubmitCommand cmd) {
         updatePipeline(
-                projectService.createOrUpdateCellRangerConfig(projectSelectionService.requestedProject, cmd.seqType, cmd.programVersion, cmd.referenceGenomeIndex),
+                projectService.createOrUpdateCellRangerConfig(projectSelectionService.requestedProject,
+                        cmd.seqType,
+                        cmd.programVersion,
+                        cmd.referenceGenomeIndex),
                 cmd.seqType,
                 cmd.overviewController,
         )

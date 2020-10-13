@@ -100,7 +100,9 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
             List mergingWorkPackageNeedsProcessing = mergingWorkPackagesByNeedsProcessing[true] ?: []
 
-            List<AbstractMergedBamFile> alreadyRunningBamFiles = getBamFileForMergingWorkPackage(mergingWorkPackageNeedsProcessing, false, false)
+            List<AbstractMergedBamFile> alreadyRunningBamFiles = getBamFileForMergingWorkPackage(
+                    mergingWorkPackageNeedsProcessing, false, false
+            )
             output.showList(HEADER_OLD_INSTANCE_RUNNING, alreadyRunningBamFiles)
 
             List<MergingWorkPackage> waiting = mergingWorkPackageNeedsProcessing - alreadyRunningBamFiles*.mergingWorkPackage
@@ -124,9 +126,15 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                     notWithdrawnBamFiles.groupBy { it.fileOperationStatus }
 
             String workflowName = getWorkflowName()
-            output.showRunningWithHeader(HEADER_RUNNING_DECLARED, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.DECLARED])
-            output.showRunningWithHeader(HEADER_RUNNING_NEEDS_PROCESSING, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING])
-            output.showRunningWithHeader(HEADER_RUNNING_IN_PROGRESS, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.INPROGRESS])
+            output.showRunningWithHeader(
+                    HEADER_RUNNING_DECLARED, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.DECLARED]
+            )
+            output.showRunningWithHeader(
+                    HEADER_RUNNING_NEEDS_PROCESSING, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING]
+            )
+            output.showRunningWithHeader(
+                    HEADER_RUNNING_IN_PROGRESS, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.INPROGRESS]
+            )
 
             output.showFinished(bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.PROCESSED])
 

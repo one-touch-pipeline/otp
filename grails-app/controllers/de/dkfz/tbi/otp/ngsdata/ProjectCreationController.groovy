@@ -88,7 +88,9 @@ class ProjectCreationController {
         boolean showSharedUnixGroupAlert = flash.showSharedUnixGroupAlert as boolean
         boolean showIgnoreUsersFromBaseObjects = flash.showIgnoreUsersFromBaseObjects as boolean
 
-        MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(projectCreationCmd, cmd.projectRequest, baseProjectOverride, cmd.baseProject, defaults)
+        MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(
+                projectCreationCmd, cmd.projectRequest, baseProjectOverride, cmd.baseProject, defaults
+        )
 
         Set<ProjectInfo> baseProjectInfos = projectService.getSelectableBaseProjectInfos(cmd.baseProject)
 

@@ -34,7 +34,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 class BarcodeFilenameValidatorSpec extends Specification {
 
-
     void 'validate, when column barcode does not exist in the metadata file and barcode can not be parsed from filename, succeeds'() {
         given:
 
@@ -50,7 +49,6 @@ class BarcodeFilenameValidatorSpec extends Specification {
         context.problems.empty
     }
 
-
     void 'validate, when column barcode does not exist in the metadata file and barcode can be parsed from filename, adds warning'() {
         given:
 
@@ -61,7 +59,6 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         when:
         new BarcodeFilenameValidator().validate(context)
-
 
         then:
         Collection<Problem> expectedProblems = [
@@ -95,7 +92,6 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         when:
         new BarcodeFilenameValidator().validate(context)
-
 
         then:
         Collection<Problem> expectedProblems = [
@@ -145,7 +141,6 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         when:
         new BarcodeFilenameValidator().validate(context)
-
 
         then:
         Collection<Problem> expectedProblems = [

@@ -166,7 +166,9 @@ class OtrsTicketService {
         // assigning a fastqImportInstance that belongs to an otrsTicket which consists of several other fastqImportInstances is not allowed,
         // because it is not possible to calculate the right "Started"/"Finished" dates
         if (oldOtrsTicket && oldOtrsTicket.fastqImportInstances.size() != 1) {
-            throw new UserException("Assigning a fastqImportInstance that belongs to an OTRS-Ticket which consists of several other fastqImportInstances is not allowed.")
+            throw new UserException(
+                    "Assigning a fastqImportInstance that belongs to an OTRS-Ticket which consists of several other fastqImportInstances is not allowed."
+            )
         }
 
         OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber)) ?:

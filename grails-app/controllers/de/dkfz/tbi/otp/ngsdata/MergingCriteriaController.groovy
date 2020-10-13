@@ -71,7 +71,9 @@ class MergingCriteriaController {
             return
         }
 
-        Errors errors = mergingCriteriaService.createOrUpdateMergingCriteria(projectSelectionService.requestedProject, cmd.seqType, cmd.useLibPrepKit, cmd.useSeqPlatformGroup)
+        Errors errors = mergingCriteriaService.createOrUpdateMergingCriteria(
+                projectSelectionService.requestedProject, cmd.seqType, cmd.useLibPrepKit, cmd.useSeqPlatformGroup
+        )
         if (errors) {
             flash.message = new FlashMessage("An error occurred", errors)
         } else {

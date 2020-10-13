@@ -32,7 +32,6 @@ class MergingSetSpec extends Specification implements DataTest {
 
     MergingWorkPackage workPackage = null
 
-
     @Override
     Class[] getDomainClassesToMock() {
         [
@@ -44,7 +43,6 @@ class MergingSetSpec extends Specification implements DataTest {
                 ProcessedBamFile,
         ]
     }
-
 
     void "save, if all are fine, should save"() {
         given:
@@ -84,7 +82,6 @@ class MergingSetSpec extends Specification implements DataTest {
         'mergingWorkPackage' | 'nullable' | null
     }
 
-
     void testIsLatestSet() {
         given:
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
@@ -117,7 +114,6 @@ class MergingSetSpec extends Specification implements DataTest {
         !mergingSet.isLatestSet()
     }
 
-
     void "getContainedSeqTracks, when seqtrack is only added once in a hierarrchy, then return expected seqTracks"() {
         given:
         SeqTrack seqTrack1 = DomainFactory.createSeqTrack()
@@ -148,7 +144,6 @@ class MergingSetSpec extends Specification implements DataTest {
         then:
         mergingSet.containedSeqTracks == allSeqTracks
     }
-
 
     void "getContainedSeqTracks, when a seqTrack is contained twiced, then fail"() {
         given:

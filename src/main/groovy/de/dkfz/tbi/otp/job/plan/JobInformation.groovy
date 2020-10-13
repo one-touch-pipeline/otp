@@ -74,7 +74,9 @@ class JobInformation implements Serializable {
             ret.outputParameters << new ParameterInformation(type: new ParameterTypeInformation(it))
         }
         ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.PASSTHROUGH).each {
-            ret.passthroughParameters << new ParameterInformation(type: new ParameterTypeInformation(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id)
+            ret.passthroughParameters << new ParameterInformation(
+                    type: new ParameterTypeInformation(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id
+            )
         }
         return ret
     }

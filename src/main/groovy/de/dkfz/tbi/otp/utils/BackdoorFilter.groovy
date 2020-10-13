@@ -101,11 +101,11 @@ class BackdoorFilter extends GenericFilterBean {
         try {
             Authentication authentication = SecurityContextHolder.context.authentication
             if (Environment.current == Environment.TEST) {
-                    Principal userDetails = new Principal(configService.backdoorUser, "OTP TEST", authorities)
-                    SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+                Principal userDetails = new Principal(configService.backdoorUser, "OTP TEST", authorities)
+                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             } else if (!authentication || !authentication.authenticated) {
-                    Principal userDetails = new Principal(configService.backdoorUser, "OTP Developer", authorities)
-                    SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+                Principal userDetails = new Principal(configService.backdoorUser, "OTP Developer", authorities)
+                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             }
             chain.doFilter(holder.request, holder.response)
         } finally {

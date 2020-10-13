@@ -86,9 +86,9 @@ trait UserAndRoles {
     }
 
     static Object doWithAnonymousAuth(final Closure closure) {
-        Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication()
+        Authentication previousAuth = SecurityContextHolder.getContext().authentication
         AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal(username: "Anonymous"), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
-        SecurityContextHolder.getContext().setAuthentication(auth)
+        SecurityContextHolder.getContext().authentication = auth
 
         try {
             return closure.call()
@@ -98,22 +98,22 @@ trait UserAndRoles {
                 SecurityContextHolder.clearContext()
             }
             else {
-                SecurityContextHolder.getContext().setAuthentication(previousAuth)
+                SecurityContextHolder.getContext().authentication = previousAuth
             }
         }
     }
 
     static Object doAsSwitchedToUser(final String username, final Closure closure) {
-        Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication()
+        Authentication previousAuth = SecurityContextHolder.getContext().authentication
         Authentication primaryAuth = previousAuth
         if (primaryAuth == null) {
             primaryAuth = new UsernamePasswordAuthenticationToken(new Principal(username: DomainFactory.createUser().username), null, [])
-            SecurityContextHolder.getContext().setAuthentication(primaryAuth)
+            SecurityContextHolder.context.authentication = primaryAuth
         }
 
         List<GrantedAuthority> authorities = [new SwitchUserGrantedAuthority(SwitchUserFilter.ROLE_PREVIOUS_ADMINISTRATOR, primaryAuth)]
         Authentication switchedAuth = new UsernamePasswordAuthenticationToken(new Principal(username: username), null, authorities)
-        SecurityContextHolder.getContext().setAuthentication(switchedAuth)
+        SecurityContextHolder.context.authentication = switchedAuth
 
         try {
             return closure.call()
@@ -123,7 +123,7 @@ trait UserAndRoles {
                 SecurityContextHolder.clearContext()
             }
             else {
-                SecurityContextHolder.getContext().setAuthentication(previousAuth)
+                SecurityContextHolder.context.authentication = previousAuth
             }
         }
     }

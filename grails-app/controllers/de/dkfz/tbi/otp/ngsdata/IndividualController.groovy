@@ -184,7 +184,9 @@ class IndividualController {
                         if (editedSampleIdentifierCommand.delete) {
                             sampleIdentifierService.deleteSampleIdentifier(editedSampleIdentifierCommand.sampleIdentifier)
                         } else {
-                            sampleIdentifierService.updateSampleIdentifierName(editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name)
+                            sampleIdentifierService.updateSampleIdentifierName(
+                                    editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name
+                            )
                         }
                     }
                     cmd.newIdentifiersNames.findAll().each { String name ->

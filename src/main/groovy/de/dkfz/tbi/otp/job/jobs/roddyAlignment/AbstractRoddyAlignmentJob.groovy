@@ -57,7 +57,10 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
         if (!roddyBamFile.seqType.isRna() && roddyBamFile.config.adapterTrimmingNeeded) {
             cValues.add("useAdaptorTrimming:true")
-            String adapterFile = exactlyOneElement(roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterFile.unique(), "There is not exactly one adapter available for BAM file ${roddyBamFile}")
+            String adapterFile = exactlyOneElement(
+                    roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterFile.unique(),
+                    "There is not exactly one adapter available for BAM file ${roddyBamFile}"
+            )
             assert adapterFile : "There is exactly one adapter available for BAM file ${roddyBamFile}, but it is null"
             cValues.add("CLIP_INDEX:${adapterFile}")
         }
@@ -106,11 +109,11 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
             }
         }
 
-        assert [AbstractMergedBamFile.FileOperationStatus.DECLARED, AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
+        assert [AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
         assert roddyBamFile.save(flush: true)
     }
-
 
     void validateReadGroups(RoddyBamFile bamFile) {
         File bamFilePath = bamFile.workBamFile

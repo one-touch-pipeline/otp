@@ -86,7 +86,8 @@ class DataFileConsistencyChecker {
                 SessionUtils.withNewSession {
                     String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
                     if (recipientsString) {
-                        mailHelperService.sendEmail("Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
+                        mailHelperService.sendEmail("Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
+                                "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
                     }
                 }
             }

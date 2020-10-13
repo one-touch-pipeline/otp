@@ -52,7 +52,12 @@ class DataFilesInGpcfSpecificStructure implements DirectoryStructure {
         String runId = valueTuple.getValue(RUN_ID.name())
         Matcher matcher = fileName =~ /^(.*)_((R[12])|([Ii]\d+))\.fastq\.gz$/
         if (!OtpPath.isValidPathComponent(fileName) || !OtpPath.isValidPathComponent(runId) || !matcher || !OtpPath.isValidPathComponent(matcher.group(1))) {
-            context.addProblem(valueTuple.cells, Level.ERROR, "Cannot construct a valid GPCF midterm storage path from run name '${runId}' and filename '${fileName}'.", "Cannot construct a valid GPCF midterm storage path for all rows.")
+            context.addProblem(
+                    valueTuple.cells,
+                    Level.ERROR,
+                    "Cannot construct a valid GPCF midterm storage path from run name '${runId}' and filename '${fileName}'.",
+                    "Cannot construct a valid GPCF midterm storage path for all rows."
+            )
             return null
         } else {
             String dir = matcher.group(1)

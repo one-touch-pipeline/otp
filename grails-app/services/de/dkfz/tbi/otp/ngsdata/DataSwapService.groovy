@@ -87,7 +87,11 @@ class DataSwapService {
         List<DataFile> dataFiles = seqtracks ? DataFile.findAllBySeqTrackInList(seqtracks) : []
         List<MetaDataKey> sampleIdentifierKeys = MetaDataKey.findAllByName(metaDataKey)
         assert sampleIdentifierKeys.unique().size() == 1
-        List<MetaDataEntry> metaDataEntries = dataFiles ? MetaDataEntry.findAllByValueAndDataFileInListAndKey(oldValue, dataFiles, sampleIdentifierKeys.first()) : []
+        List<MetaDataEntry> metaDataEntries = dataFiles ? MetaDataEntry.findAllByValueAndDataFileInListAndKey(
+                oldValue,
+                dataFiles,
+                sampleIdentifierKeys.first()
+        ) : []
         metaDataEntries.each {
             it.value = newValue
             it.save(flush: true)
@@ -727,16 +731,16 @@ ln -s '${newDirectFileName}' \\
             roddyBamFiles.each { RoddyBamFile roddyBamFile ->
                 if (roddyBamFile.isOldStructureUsed()) {
                     bashScriptToMoveFilesAsOtherUser <<
-                            "#rm -rf ${roddyBamFile.getFinalExecutionDirectories()*.absolutePath.join("\n#rm -rf ")}\n" +
-                            "#rm -rf ${roddyBamFile.getFinalSingleLaneQADirectories().values()*.listFiles().flatten()*.absolutePath.join("\n#rm -rf ")}\n"
+                            "#rm -rf ${roddyBamFile.finalExecutionDirectories*.absolutePath.join("\n#rm -rf ")}\n" +
+                            "#rm -rf ${roddyBamFile.finalSingleLaneQADirectories.values()*.listFiles().flatten()*.absolutePath.join("\n#rm -rf ")}\n"
                     if (roddyBamFile.isMostRecentBamFile()) {
-                        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${roddyBamFile.getFinalMergedQADirectory().listFiles()*.absolutePath.join("\n#rm -rf ")}\n"
+                        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${roddyBamFile.finalMergedQADirectory.listFiles()*.absolutePath.join("\n#rm -rf ")}\n"
                     }
                 } else {
                     bashScriptToMoveFilesAsOtherUser <<
-                            "#rm -rf ${roddyBamFile.getWorkExecutionDirectories()*.absolutePath.join("\n#rm -rf ")}\n" +
-                            "#rm -rf ${roddyBamFile.getWorkMergedQADirectory().absolutePath}\n" +
-                            "#rm -rf ${roddyBamFile.getWorkSingleLaneQADirectories().values()*.absolutePath.join("\n#rm -rf ")}\n"
+                            "#rm -rf ${roddyBamFile.workExecutionDirectories*.absolutePath.join("\n#rm -rf ")}\n" +
+                            "#rm -rf ${roddyBamFile.workMergedQADirectory.absolutePath}\n" +
+                            "#rm -rf ${roddyBamFile.workSingleLaneQADirectories.values()*.absolutePath.join("\n#rm -rf ")}\n"
                 }
             }
 
@@ -828,7 +832,7 @@ ln -s '${newDirectFileName}' \\
             }
         } catch (Throwable t) {
             log << "\n\n${t}"
-            t.getStackTrace().each { log << "\n    ${it}" }
+            t.stackTrace.each { log << "\n    ${it}" }
             println log
         }
     }
@@ -838,14 +842,13 @@ ln -s '${newDirectFileName}' \\
      */
     void createCommentForSwappedDatafiles(List<DataFile> datafiles) {
         datafiles.each { DataFile dataFile ->
-            if (dataFile.getComment()?.comment) {
-                commentService.saveComment(dataFile, dataFile.getComment().comment + "\nAttention: Datafile swapped!")
+            if (dataFile.comment?.comment) {
+                commentService.saveComment(dataFile, dataFile.comment.comment + "\nAttention: Datafile swapped!")
             } else {
                 commentService.saveComment(dataFile, "Attention: Datafile swapped!")
             }
         }
     }
-
 
     /**
      * function for a lane swap: Allow to move to another sample (defined by Individual & SampleType),
@@ -973,8 +976,6 @@ ln -s '${newDirectFileName}' \\
                 "run: ${run.name}\nlane: ${inputInformationOTP.lane}"
         )
 
-
-
         List<SeqTrack> seqTracksOfOldSample = SeqTrack.findAllBySampleAndSeqType(oldSample, oldSeqType)
 
         seqTracksOfOldSample.each { SeqTrack seqTrack ->
@@ -1003,7 +1004,7 @@ ln -s '${newDirectFileName}' \\
                 String mergingResultDir = dataProcessingFilesService.getOutputDirectory(oldIndividual, mergingDirType)
                 bashScriptToMoveFiles << "# rm -rf '${mergingResultDir}/${oldSampleType.name}/${oldSeqType.name}/${oldSeqType.libraryLayout}'\n"
 
-                String projectDir = configService.getRootPath()
+                String projectDir = configService.rootPath
                 String mergedAlignmentDir = mergedAlignmentDataFileService.buildRelativePath(oldSeqType, oldSample)
                 bashScriptToMoveFiles << "# rm -rf '${projectDir}/${mergedAlignmentDir}'\n"
             }
@@ -1057,7 +1058,7 @@ ln -s '${newDirectFileName}' \\
 
         if (SeqTrack.findAllBySampleAndSeqType(oldSample, oldSeqType).empty) {
             bashScriptToMoveFiles << "\n #There are no seqTracks belonging to the sample ${oldSample} -> delete it on the filesystem\n\n"
-            File basePath = oldProject.getProjectSequencingDirectory()
+            File basePath = oldProject.projectSequencingDirectory
             bashScriptToMoveFiles << "#rm -rf '${basePath}/${oldSeqType.dirName}/view-by-pid/${oldIndividual.pid}/${oldSampleType.dirName}/" +
                     "${oldSeqType.libraryLayoutDirName}'\n"
         }

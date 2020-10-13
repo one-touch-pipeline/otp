@@ -311,11 +311,11 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         newOtrsTicket = OtrsTicket.get(newOtrsTicket.id)
 
         then:
-        minDate.getTime() == newOtrsTicket.installationStarted.getTime()
-        maxDate.getTime() == newOtrsTicket.installationFinished.getTime()
-        minDate.getTime() == newOtrsTicket.fastqcStarted.getTime()
-        maxDate.getTime() == newOtrsTicket.fastqcFinished.getTime()
-        minDate.getTime() == newOtrsTicket.alignmentStarted.getTime()
+        minDate.time == newOtrsTicket.installationStarted.time
+        maxDate.time == newOtrsTicket.installationFinished.time
+        minDate.time == newOtrsTicket.fastqcStarted.time
+        maxDate.time == newOtrsTicket.fastqcFinished.time
+        minDate.time == newOtrsTicket.alignmentStarted.time
         null == newOtrsTicket.alignmentFinished
         null == newOtrsTicket.snvStarted
         null == newOtrsTicket.snvFinished

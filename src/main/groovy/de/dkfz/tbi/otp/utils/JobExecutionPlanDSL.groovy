@@ -51,7 +51,12 @@ class JobExecutionPlanDSL {
         type.save(flush: true)
     }
 
-    private static Closure inputParameterClosure = { JobDefinition jobDefinition, JobDefinition previous, JobExecutionPlan jep, String typeName, String fromJob, String fromParameter ->
+    private static Closure inputParameterClosure = { JobDefinition jobDefinition,
+                                                     JobDefinition previous,
+                                                     JobExecutionPlan jep,
+                                                     String typeName,
+                                                     String fromJob,
+                                                     String fromParameter ->
         ParameterType inputType = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         inputType.save(flush: true)
         if (!previous) {
@@ -78,7 +83,10 @@ class JobExecutionPlanDSL {
             while (mappingJob.next != jobDefinition) {
                 ParameterType passThroughType = ParameterType.findByJobDefinitionAndName(mappingJob.next, fromParameter + "Passthrough")
                 if (!passThroughType) {
-                    passThroughType = new ParameterType(name: fromParameter + "Passthrough", jobDefinition: mappingJob.next ? mappingJob.next : firstJob, parameterUsage: ParameterUsage.PASSTHROUGH)
+                    passThroughType = new ParameterType(
+                            name: fromParameter + "Passthrough",
+                            jobDefinition: mappingJob.next ? mappingJob.next : firstJob,
+                            parameterUsage: ParameterUsage.PASSTHROUGH)
                     passThroughType.save(flush: true)
                 }
                 ParameterMapping mapping = ParameterMapping.findByFromAndTo(outputType, passThroughType)
@@ -117,15 +125,31 @@ class JobExecutionPlanDSL {
     }
 
     private static Closure watchdogClosure = { JobDefinition jobDefinition, JobExecutionPlan jep, Helper helper, String watchdogBean ->
-        ParameterType type = new ParameterType(name: JobParameterKeys.JOB_ID_LIST, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType type = new ParameterType(
+                name: JobParameterKeys.JOB_ID_LIST, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT
+        )
         type.save(flush: true)
-        ParameterType realmOutputType = new ParameterType(name: JobParameterKeys.REALM, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+        ParameterType realmOutputType = new ParameterType(
+                name: JobParameterKeys.REALM,
+                jobDefinition: jobDefinition,
+                parameterUsage: ParameterUsage.OUTPUT,
+                className: "de.dkfz.tbi.otp.ngsdata.Realm"
+        )
         realmOutputType.save(flush: true)
-        JobDefinition watchdogJobDefinition = new JobDefinition(name: "__WatchdogFor__" + jobDefinition.name, bean: watchdogBean, plan: jep, previous: jobDefinition)
+        JobDefinition watchdogJobDefinition = new JobDefinition(
+                name: "__WatchdogFor__" + jobDefinition.name, bean: watchdogBean, plan: jep, previous: jobDefinition
+        )
         watchdogJobDefinition.save(flush: true)
-        ParameterType inputType = new ParameterType(name: JobParameterKeys.JOB_ID_LIST, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType inputType = new ParameterType(
+                name: JobParameterKeys.JOB_ID_LIST, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT
+        )
         inputType.save(flush: true)
-        ParameterType realmInputType = new ParameterType(name: JobParameterKeys.REALM, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+        ParameterType realmInputType = new ParameterType(
+                name: JobParameterKeys.REALM,
+                jobDefinition: watchdogJobDefinition,
+                parameterUsage: ParameterUsage.INPUT,
+                className: "de.dkfz.tbi.otp.ngsdata.Realm"
+        )
         realmInputType.save(flush: true)
         ParameterMapping mapping = new ParameterMapping(from: type, to: inputType, job: watchdogJobDefinition)
         mapping.save(flush: true)
@@ -164,10 +188,17 @@ class JobExecutionPlanDSL {
         helper.previous = jobDefinition
     }
 
-    private static Closure validatingJobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, String validatorForName, closure = null ->
+    private static Closure validatingJobClosure = { JobExecutionPlan jep,
+                                                    Helper helper,
+                                                    String jobName,
+                                                    String bean,
+                                                    String validatorForName,
+                                                    closure = null ->
         JobDefinition validatorFor = JobDefinition.findByNameAndPlan(validatorForName, jep)
         assert(validatorFor)
-        ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous, validatorFor: validatorFor)
+        ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(
+                name: jobName, bean: bean, plan: jep, previous: helper.previous, validatorFor: validatorFor
+        )
         jobDefinition.save(flush: true)
         helper.firstJob = helper.firstJob ?: jobDefinition
         if (helper.previous) {

@@ -137,7 +137,8 @@ class SampleIdentifierService {
                     "and not '${identifier.projectName}'")
         }
         String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(identifier.sampleTypeDbName)
-        if (!sampleIdentifier.sampleType.name.equalsIgnoreCase(identifier.sampleTypeDbName) && !sampleIdentifier.sampleType.name.equalsIgnoreCase(sanitizedSampleTypeDbName)) {
+        if (!sampleIdentifier.sampleType.name.equalsIgnoreCase(identifier.sampleTypeDbName) &&
+                !sampleIdentifier.sampleType.name.equalsIgnoreCase(sanitizedSampleTypeDbName)) {
             throw new OtpRuntimeException("The sample identifier already exist, but is connected to sample type '${sampleIdentifier.sampleType}' " +
                     "and not '${identifier.sampleTypeDbName}'")
         }

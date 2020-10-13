@@ -69,7 +69,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         List<SamplePair> samplePairsWithSupportedSeqTypes = samplePairSupportedSeqType[true] ?: []
 
         List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairsWithSupportedSeqTypes)
-        output.showUniqueList(HEADER_NO_CONFIG, noConfig, { SamplePair samplePair -> "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}" })
+        output.showUniqueList(HEADER_NO_CONFIG, noConfig, { SamplePair samplePair ->
+            "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}"
+        })
 
         List<SamplePair> samplePairsWithConfig = samplePairsWithSupportedSeqTypes - noConfig
 

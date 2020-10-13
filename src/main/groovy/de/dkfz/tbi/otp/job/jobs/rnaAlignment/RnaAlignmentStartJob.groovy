@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
     @Override
     List<SeqType> getSeqTypes() {
-        return SeqTypeService.getRnaAlignableSeqTypes()
+        return SeqTypeService.rnaAlignableSeqTypes
     }
 
     /**
@@ -48,7 +48,13 @@ class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
     }
 
     @Override
-    AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile = null) {
+    AbstractMergedBamFile reallyCreateBamFile(
+            MergingWorkPackage mergingWorkPackage,
+            int identifier,
+            Set<SeqTrack> seqTracks,
+            ConfigPerProjectAndSeqType config,
+            AbstractMergedBamFile baseBamFile = null
+    ) {
         new RnaRoddyBamFile (
                 workPackage: mergingWorkPackage,
                 identifier: identifier,

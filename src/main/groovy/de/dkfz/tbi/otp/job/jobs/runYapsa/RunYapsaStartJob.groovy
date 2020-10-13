@@ -59,14 +59,17 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
 
     @Override
     String getInstanceName(ConfigPerProjectAndSeqType config) {
-        assert RunYapsaConfig.isAssignableFrom(Hibernate.getClass(config)): "RunYapsa startjob should only ever be started with a YAPSA config, not something else; got ${ config.class }"
+        assert RunYapsaConfig.isAssignableFrom(Hibernate.getClass(config)):
+                "RunYapsa startjob should only ever be started with a YAPSA config, not something else; got ${ config.class }"
         return "runYapsa_${ config.programVersion.replace("/", "-") }_${ getFormattedDate() }"
     }
 
     @Override
     ConfigPerProjectAndSeqType getConfig(SamplePair samplePair) {
         Pipeline pipeline = getBamFileAnalysisService().getPipeline()
-        RunYapsaConfig config = CollectionUtils.<RunYapsaConfig> atMostOneElement(RunYapsaConfig.findAllByProjectAndPipelineAndSeqTypeAndObsoleteDate(samplePair.project, pipeline, samplePair.seqType, null))
+        RunYapsaConfig config = CollectionUtils.<RunYapsaConfig> atMostOneElement(
+                RunYapsaConfig.findAllByProjectAndPipelineAndSeqTypeAndObsoleteDate(samplePair.project, pipeline, samplePair.seqType, null)
+        )
 
         if (config == null) {
             throw new RuntimeException("No ${RunYapsaConfig.simpleName} found for ${Pipeline.simpleName} ${pipeline}, ${Individual.simpleName} ${samplePair.individual} (${Project.simpleName} ${samplePair.project}), ${SeqType.simpleName} ${samplePair.seqType}")

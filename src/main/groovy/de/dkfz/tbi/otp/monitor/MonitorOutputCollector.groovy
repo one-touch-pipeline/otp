@@ -83,7 +83,9 @@ class MonitorOutputCollector {
             List<JobExecutionPlan> jobExecutionPlans = JobExecutionPlan.findAllByName(workflowName)
             long occupiedSlots = Process.countByFinishedAndJobExecutionPlanInList(false, jobExecutionPlans)
             long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null)
-            long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null)
+            long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(
+                    ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null
+            )
             long normalSlots = totalSlots - fastTrackSlots
             output << "${INDENT}Used Slots: ${occupiedSlots}, Normal priority slots: ${normalSlots}, additional fasttrack slots: ${fastTrackSlots}"
         }
@@ -176,7 +178,9 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
         output << ''
     }
 
-    private boolean checkProcessesForObject(String workflow, List noProcess, List processWithError, Object object, Closure valueToShow, Closure extractObjectToCheck) {
+    private boolean checkProcessesForObject(
+            String workflow, List noProcess, List processWithError, Object object, Closure valueToShow, Closure extractObjectToCheck
+    ) {
         Object objectToCheck = extractObjectToCheck(object)
 
         def processes = ProcessParameter.findAllByValue(objectToCheck.id, [sort: "id"])*.process.findAll {

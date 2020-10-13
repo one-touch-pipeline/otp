@@ -106,7 +106,9 @@ class ProjectConfigController implements CheckAndCall {
 
     JSON updateProjectGroup(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, projectSelectionService.requestedProject)
+            projectService.updateProjectField(
+                    CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, projectSelectionService.requestedProject
+            )
         }
     }
 

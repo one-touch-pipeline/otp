@@ -35,12 +35,12 @@ class MergingSetIntegrationTests {
     void testGetBamFiles_oneProcessedBamFiles() {
         MergingSet mergingSet = DomainFactory.createMergingSet()
         ProcessedBamFile processedBamFile = DomainFactory.assignNewProcessedBamFile(mergingSet)
-        assert [processedBamFile] == mergingSet.getBamFiles()
+        assert [processedBamFile] == mergingSet.bamFiles
     }
 
     @Test
     void testGetBamFiles_noProcessedBamFiles() {
         MergingSet mergingSet = DomainFactory.createMergingSet()
-        assert mergingSet.getBamFiles().empty
+        assert mergingSet.bamFiles.empty
     }
 }

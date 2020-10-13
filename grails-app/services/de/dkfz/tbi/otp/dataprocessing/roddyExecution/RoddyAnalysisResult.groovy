@@ -32,6 +32,6 @@ trait RoddyAnalysisResult extends RoddyResult {
 
     @Override
     File getBaseDirectory() {
-        return getWorkDirectory().parentFile
+        return workDirectory.parentFile
     }
 }

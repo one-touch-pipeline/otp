@@ -504,7 +504,9 @@ class SchedulerService {
                     validatedUpdate.save(flush: true)
                     if (!succeeded) {
                         // create error
-                        ProcessingError validatedError = new ProcessingError(errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate)
+                        ProcessingError validatedError = new ProcessingError(
+                                errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate
+                        )
                         validatedError.save(flush: true)
                         validatedUpdate.error = validatedError
                     }

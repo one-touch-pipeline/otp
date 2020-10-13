@@ -38,7 +38,7 @@ class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAn
 
     @Override
     Class<RoddySnvCallingInstance> getAnalysisClass() {
-        return RoddySnvCallingInstance.class
+        return RoddySnvCallingInstance
     }
 
     @Override
@@ -53,8 +53,8 @@ class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAn
 
     Path getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(BamFilePairAnalysis bamFilePairAnalysis, FileSystem fileSystem) {
         final File WORK_DIRECTORY = bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance().workDirectory
-        final String MIN_CONFIDENCE_SCORE = /[0-9]/
-        final String MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA = ".*snvs_${bamFilePairAnalysis.individual.pid}_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf"
+        final String MIN_CONF_SCORE = /[0-9]/
+        final String MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA = ".*snvs_${bamFilePairAnalysis.individual.pid}_somatic_snvs_conf_${MIN_CONF_SCORE}_to_10.vcf"
         return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(WORK_DIRECTORY, MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA, fileSystem)
     }
 }

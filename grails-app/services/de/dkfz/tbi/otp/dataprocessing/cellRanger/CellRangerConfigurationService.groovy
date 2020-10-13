@@ -138,14 +138,22 @@ class CellRangerConfigurationService {
 
     /**
      * Currently it is not supported to have SeqTracks of differing SeqPlatformGroups and LibPrepKits within one
-     * Sample. For SingleCell data the import validator already throws an Error, see {@link de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.MergingPreventionValidator}.
+     * Sample. For SingleCell data the import validator already throws an Error, see {@link MergingPreventionValidator}.
      */
     static void constrainSeqTracksGroupedByPlatformGroupAndKit(Map<PlatformGroupAndKit, List<SeqTrack>> map) {
         assert map.size() <= 1: "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits"
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Errors prepareCellRangerExecution(Integer expectedCells, Integer enforcedCells, ReferenceGenomeIndex referenceGenomeIndex, Project project, Individual individual, SampleType sampleType, SeqType seqType) {
+    Errors prepareCellRangerExecution(
+            Integer expectedCells,
+            Integer enforcedCells,
+            ReferenceGenomeIndex referenceGenomeIndex,
+            Project project,
+            Individual individual,
+            SampleType sampleType,
+            SeqType seqType
+    ) {
         List<Sample> samples = new ArrayList(getSamples(project, individual, sampleType).selectedSamples).unique()
         CellRangerMwpParameter parameter = new CellRangerMwpParameter(expectedCells, enforcedCells, referenceGenomeIndex, seqType)
 
@@ -203,7 +211,9 @@ class CellRangerConfigurationService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#mwpToKeep.project, 'OTP_READ_ACCESS')")
     void selectMwpAsFinal(CellRangerMergingWorkPackage mwpToKeep) {
-        List<CellRangerMergingWorkPackage> allMwps = getAllMwps(mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex)
+        List<CellRangerMergingWorkPackage> allMwps = getAllMwps(
+                mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex
+        )
         deleteMwps(allMwps - mwpToKeep)
 
         mwpToKeep.status = CellRangerMergingWorkPackage.Status.FINAL

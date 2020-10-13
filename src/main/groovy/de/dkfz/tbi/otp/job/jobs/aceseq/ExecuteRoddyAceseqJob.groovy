@@ -79,7 +79,9 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         assert aceseqInputFile : "Path to the ACEseq input file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(aceseqInputFile)
 
-        linkFileUtils.createAndValidateLinks([(aceseqInputFile): new File(aceseqInstance.workDirectory, aceseqInputFile.name)], realm, aceseqInstance.project.unixGroup)
+        linkFileUtils.createAndValidateLinks([(aceseqInputFile): new File(
+                aceseqInstance.workDirectory, aceseqInputFile.name)], realm, aceseqInstance.project.unixGroup
+        )
 
         List<String> cValues = []
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")

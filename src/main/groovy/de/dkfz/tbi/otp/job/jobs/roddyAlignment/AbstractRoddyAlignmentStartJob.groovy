@@ -31,7 +31,13 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 @Slf4j
 abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob {
     @Override
-    AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile) {
+    AbstractMergedBamFile reallyCreateBamFile(
+            MergingWorkPackage mergingWorkPackage,
+            int identifier,
+            Set<SeqTrack> seqTracks,
+            ConfigPerProjectAndSeqType config,
+            AbstractMergedBamFile baseBamFile
+    ) {
         new RoddyBamFile (
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
@@ -44,7 +50,9 @@ abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob 
 
     @Override
     ConfigPerProjectAndSeqType getConfig(MergingWorkPackage mergingWorkPackage) {
-        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForIndividual(mergingWorkPackage.individual, mergingWorkPackage.seqType, mergingWorkPackage.pipeline)
+        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForIndividual(
+                mergingWorkPackage.individual, mergingWorkPackage.seqType, mergingWorkPackage.pipeline
+        )
         assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and ${mergingWorkPackage.pipeline}"
         return config
     }

@@ -44,7 +44,6 @@ import java.nio.file.Paths
 @Slf4j
 class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob {
 
-
     @Autowired
     CellRangerService cellRangerService
 
@@ -59,7 +58,6 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
     @Autowired
     ProcessingOptionService processingOptionService
-
 
     @Override
     protected NextAction maybeSubmit() throws Throwable {
@@ -87,14 +85,12 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
         cellRangerService.createInputDirectoryStructure(singleCellBamFile)
     }
 
-
     @Override
     protected void validate() throws Throwable {
         final SingleCellBamFile singleCellBamFile = getProcessParameterObject()
 
         cellRangerService.validateFilesExistsInResultDirectory(singleCellBamFile)
     }
-
 
     private String createScript(SingleCellBamFile singleCellBamFile) {
         String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
@@ -115,7 +111,6 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
         return script
     }
-
 
     private String createCommand(SingleCellBamFile singleCellBamFile) {
         Map<String, String> parameters = cellRangerService.createCellRangerParameters(singleCellBamFile)

@@ -72,7 +72,10 @@ class UserProjectRoleService {
             userProjectRole.addToProjectRoles(it)
         }
         userProjectRole.save(flush: true)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER, "Created Project User: ${userProjectRole.toStringWithAllProperties()}")
+        auditLogService.logAction(
+                AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER,
+                "Created Project User: ${userProjectRole.toStringWithAllProperties()}"
+        )
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
         DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
 

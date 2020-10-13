@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode

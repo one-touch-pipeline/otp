@@ -35,7 +35,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
     Map index(BaseConfigurePipelineSubmitCommand cmd) {
         Project project = projectSelectionService.selectedProject
         Map result = [:]
-        result << getValues(project, cmd.seqType, getPipeline())
+        result << getValues(project, cmd.seqType, pipeline)
 
         String pluginName = getDefaultPluginName(cmd.seqType.roddyName)
         String programVersion = getDefaultProgramVersion(cmd.seqType.roddyName)
@@ -63,7 +63,8 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         }
 
         if (!validateUniqueness(cmd, project, pipeline)) {
-            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,  [g.message(code: "configurePipeline.store.failure.duplicate") as String])
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,
+                    [g.message(code: "configurePipeline.store.failure.duplicate") as String])
             flash.cmd = cmd
             redirect(action: "index", params: ["seqType.id": cmd.seqType.id])
             return

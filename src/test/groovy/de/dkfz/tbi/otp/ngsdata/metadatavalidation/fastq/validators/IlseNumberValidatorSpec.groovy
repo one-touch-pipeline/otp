@@ -63,7 +63,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         context.problems.empty
     }
 
-
     void 'validate, when metadata does not contain a column ILSE_NO, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
@@ -74,7 +73,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         then:
         context.problems.empty
     }
-
 
     void 'validate, when column ILSE_NO is empty, succeeds'() {
         given:
@@ -89,7 +87,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         then:
         context.problems.empty
     }
-
 
     void 'validate, when metadata fields contain more than one ILSe number, adds warnings'() {
         given:
@@ -156,7 +153,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         containSame(context.problems, expectedProblems)
     }
 
-
     void 'validate, when file path does not contain the ILSe number, adds warnings'() {
         given:
         int ILSE_NO = 5464
@@ -176,7 +172,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         ]
         containSame(context.problems, expectedProblems)
     }
-
 
     void 'validate, when file path contains the ILSe number, succeeds'() {
         given:

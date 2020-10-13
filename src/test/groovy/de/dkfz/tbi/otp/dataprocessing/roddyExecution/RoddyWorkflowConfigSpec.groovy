@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -202,7 +201,6 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         error.message.contains('pipeline')
     }
 
-
     void "test getConfigFileName all fine should return correct file name"() {
         given:
         Pipeline.Name workflowName = Pipeline.Name.PANCAN_ALIGNMENT
@@ -304,7 +302,6 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null            | CONFIG_VERSION || 'pluginNameAndVersion'
         Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PROGRAM_VERSION | null           || 'configVersion'
     }
-
 
     void "test pipeline constraint when pipeline not valid"() {
         given:

@@ -37,7 +37,7 @@ class ExplicitFlushForSaveVisitor extends AbstractAstVisitor {
 
     @Override
     void visitMethodCallExpression(MethodCallExpression call) {
-        if (call.getMethodAsString() == 'save') {
+        if (call.methodAsString == 'save') {
             String parameter = call.arguments.text
             if (!parameter.contains('flush')) {
                 addViolation(call, "${parameter} does not contain 'flush'")

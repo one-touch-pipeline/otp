@@ -405,7 +405,8 @@ LIMIT 1
      */
     static Map<SeqType, Map<SampleType, SeqTrackSet>> getSeqTrackSetsGroupedBySeqTypeAndSampleType(List<SeqTrack> inputSeqTracks) {
         Map<SeqType, Map<SampleType, SeqTrackSet>> fullyGroupedAsSets = [:]
-        inputSeqTracks.groupBy({ it.seqType }, { it.sampleType }).collectEntries(fullyGroupedAsSets) { SeqType seqType, Map<SampleType, List<SeqTrack>> seqTracksPerSampleType ->
+        inputSeqTracks.groupBy({ it.seqType }, { it.sampleType }).collectEntries(fullyGroupedAsSets) { SeqType seqType,
+                                                                                                       Map<SampleType, List<SeqTrack>> seqTracksPerSampleType ->
             Map<SampleType, SeqTrackSet> setsPerSampleType = [:]
             seqTracksPerSampleType.collectEntries(setsPerSampleType) { SampleType sampleType, List<SeqTrack> seqTracks ->
                 return [(sampleType): new SeqTrackSet(seqTracks)]

@@ -83,7 +83,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                 project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
 
-        assert project.getProjectDirectory().exists()
+        assert project.projectDirectory.exists()
 
         result << [
                 projects                : projects,
@@ -130,7 +130,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }
 
         if (!validateUniqueness(cmd, project, Pipeline.Name.PANCAN_ALIGNMENT.pipeline)) {
-            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, [g.message(code: "configurePipeline.store.failure.duplicate") as String])
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,
+                    [g.message(code: "configurePipeline.store.failure.duplicate") as String])
             flash.cmd = cmd
             redirect(action: "alignment", params: ["seqType.id": cmd.seqType.id])
             return
@@ -217,11 +218,11 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(
                 SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort(sampleTypeSort)
 
-        assert project.getProjectDirectory().exists()
+        assert project.projectDirectory.exists()
 
         result << [
                 projects                : projects,
-                toolNames               : getToolNames(),
+                toolNames               : toolNames,
 
                 referenceGenome         : referenceGenome,
                 referenceGenomes        : referenceGenomes,
@@ -272,7 +273,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }
 
         if (!validateUniqueness(cmd, project, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)) {
-            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,  [g.message(code: "configurePipeline.store.failure.duplicate") as String])
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String,
+                    [g.message(code: "configurePipeline.store.failure.duplicate") as String])
             flash.cmd = cmd
             redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
             return
@@ -320,7 +322,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     JSON getStatSizeFileNames(String referenceGenome) {
         Map data = [
-                data: ReferenceGenome.findByName(referenceGenome)?.getStatSizeFileNames()*.name,
+                data: ReferenceGenome.findByName(referenceGenome)?.statSizeFileNames*.name,
         ]
         render data as JSON
     }
@@ -365,7 +367,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         toolNames.add(ProjectService.GENOME_STAR_INDEX)
         return toolNames.sort()
     }
-
 
     private String getOption(OptionName name, String type = null) {
         processingOptionService.findOptionAsString(name, type)
