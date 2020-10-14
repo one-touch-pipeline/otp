@@ -45,8 +45,9 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
     private final static String ANALYTE_CHARS_NO_DIGIT_BEFORE = ANALYTE_CHARS_OTHER + ANALYTE_CHARS_SINGLE_CELL
 
     //no chip seq or single cell demultiplex
+    //adapt HIPO2 Parser to parse char 'P' in SampleID and append '-p' suffix to the SampleType
     private final static String ANALYTE_PATTERN_NO_DIGIT_BEFORE =
-            "(?<analyteCharOnlyNumber>[${ANALYTE_CHARS_NO_DIGIT_BEFORE}])(?<analyteDigit>[0-9]{1,2})"
+            "(?<analyteChar>P?)(?<analyteCharOnlyNumber>[${ANALYTE_CHARS_NO_DIGIT_BEFORE}])(?<analyteDigit>[0-9]{1,2})"
 
     private final static String ANALYTE_PATTERN_SKIP_ANALYTE =
             "[0-9]*(?<analyteSkip>[${ANALYTE_CHAR_CHIP_SEQ}])[0-9]{1,2}"
@@ -81,12 +82,18 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
             String analyteSkip = matcher.group('analyteSkip')
             String analyteSingleCellDemultiplex = matcher.group('analyteSingleCellDemultiplex')
             String analyteDigit = matcher.group('analyteDigit')
+            String analyteChar = matcher.group('analyteChar')
 
             String realSampleTypeName
             if (analyteCharOnlyNumber && ANALYTE_CHARS_NO_DIGIT_BEFORE.contains(analyteCharOnlyNumber)) {
                 NumberFormat numberFormat = NumberFormat.integerInstance
                 numberFormat.minimumIntegerDigits = 2
                 realSampleTypeName = "${baseSampleTypeName}-${numberFormat.format(analyteDigit.toLong())}"
+                if (analyteChar && analyteCharOnlyNumber ==~ /[RD]/) {
+                    realSampleTypeName += "-p"
+                } else if (analyteChar) {
+                    return null
+                }
             } else if (analyteSkip && ANALYTE_CHAR_CHIP_SEQ.contains(analyteSkip) ||
                     analyteSingleCellDemultiplex && ANALYTE_CHARS_SINGLE_CELL.contains(analyteSingleCellDemultiplex)) {
                 realSampleTypeName = baseSampleTypeName
