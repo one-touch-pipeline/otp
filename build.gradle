@@ -21,6 +21,7 @@
  */
 
 import com.gradle.scan.plugin.BuildScanPlugin
+import com.gradle.scan.plugin.PublishedBuildScan
 import grails.util.Environment
 
 buildscript {
@@ -49,6 +50,13 @@ buildScan {
     termsOfServiceAgree = 'yes'
     if (System.getenv('PUBLISH_SCAN') == '1') {
         publishAlways()
+        String commitId = 'git rev-parse --verify HEAD'.execute().text.trim()
+        String gitlabUrl = "https://gitlab.com/one-touch-pipeline/otp"
+        value 'Git Commit ID', commitId
+        buildScan.link 'Source', "$gitlabUrl/-/commit/$commitId"
+        buildScanPublished { PublishedBuildScan scan ->
+                file("$buildDir/scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
+        }
     }
 }
 
