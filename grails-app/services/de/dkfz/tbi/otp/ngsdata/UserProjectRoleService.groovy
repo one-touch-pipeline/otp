@@ -79,7 +79,13 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
-    void synchedBetweenRelatedProjects(String unixGroup, Closure action) {
+    /**
+     * Applies a function for each Project of related Projects.
+     *
+     * @param unixGroup a String, search target for the related projects
+     * @param action closure to be called on each Project
+     */
+    void applyToRelatedProjects(String unixGroup, Closure action) {
         Project.withTransaction {
             Project.findAllByUnixGroup(unixGroup).each { Project project ->
                 action(project)
@@ -92,7 +98,7 @@ class UserProjectRoleService {
         assert project: "project must not be null"
         User user = createUserWithLdapData(username)
 
-        synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
+        applyToRelatedProjects(project.unixGroup) { Project p ->
             createUserProjectRole(user, p, projectRolesSet, flags)
         }
 
@@ -140,7 +146,7 @@ class UserProjectRoleService {
             user = userService.createUser(null, email, realName)
         }
 
-        synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
+        applyToRelatedProjects(project.unixGroup) { Project p ->
             createUserProjectRole(user, p, projectRoles)
         }
 
@@ -230,13 +236,6 @@ class UserProjectRoleService {
                         "at the request of ${requester.username + switchedUserAnnotation}")
     }
 
-    @TupleConstructor
-    enum OperatorAction {
-        ADD(ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET),
-        REMOVE(ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET),
-
-        final ProcessingOption.OptionName commandTemplateOptionName
-    }
 
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
         User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
@@ -283,12 +282,24 @@ class UserProjectRoleService {
         return "${flagName} ${newStatus ? "en" : "dis"}abled for ${username} in ${projectName}"
     }
 
+    /**
+     * Get all UserProjectRoles by given UserProjectRole where the same unix group was used.
+     *
+     * @param userProjectRole an UserProjectRole with target unix group
+     * @return all related UserProjectRole with same unix group
+     */
     List<UserProjectRole> getRelatedUserProjectRoles(UserProjectRole userProjectRole) {
         List<Project> projectsWithSharedUnixGroup = Project.findAllByUnixGroup(userProjectRole.project.unixGroup)
         return UserProjectRole.findAllByUserAndProjectInList(userProjectRole.user, projectsWithSharedUnixGroup)
     }
 
-    void synchedBetweenRelatedUserProjectRoles(UserProjectRole userProjectRole, Closure action) {
+    /**
+     * Applies a function for each UserProjectRole of related UserProjectRoles.
+     *
+     * @param userProjectRole an UserProjectRole for that related UserProjectRoles are searched
+     * @param action Closure to be called on each UserProjectRole
+     */
+    void applyToRelatedUserProjectRoles(UserProjectRole userProjectRole, Closure action) {
         UserProjectRole.withTransaction {
             getRelatedUserProjectRoles(userProjectRole).each { UserProjectRole relatedUpr ->
                 action(relatedUpr)
@@ -297,18 +308,21 @@ class UserProjectRoleService {
     }
 
     /**
-     * Helper function to check if there would be any changes to the flags
+     * Checks if all UserProjectRole match the applied predicate closure.
+     *
+     * @param userProjectRole
+     * @param consistencyCheck Closure to be called on each UserProjectRole
      */
-    boolean nothingToChange(UserProjectRole userProjectRole, Closure consistencyCheck) {
+    boolean checkRelatedUserProjectRolesFor(UserProjectRole userProjectRole, Closure consistencyCheck) {
         return getRelatedUserProjectRoles(userProjectRole).every(consistencyCheck)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToOtp(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == value }) {
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == value }) {
             return userProjectRole
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToOtp = value
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
@@ -319,10 +333,10 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == value }) {
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == value }) {
             return userProjectRole
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = value
             upr.fileAccessChangeRequested = true
             assert upr.save(flush: true)
@@ -348,10 +362,10 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
     UserProjectRole setManageUsers(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.manageUsers == value }) {
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.manageUsers == value }) {
             return userProjectRole
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsers = value
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Manage Users", upr.manageUsers, upr.user.username, upr.project.name)
@@ -362,10 +376,10 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     UserProjectRole setManageUsersAndDelegate(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.manageUsersAndDelegate == value }) {
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.manageUsersAndDelegate == value }) {
             return userProjectRole
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsersAndDelegate = value
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Delegate Manage Users", upr.manageUsersAndDelegate, upr.user.username, upr.project.name)
@@ -376,10 +390,10 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #userProjectRole.user.username == principal.username")
     UserProjectRole setReceivesNotifications(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.receivesNotifications == value }) {
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.receivesNotifications == value }) {
             return userProjectRole
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.receivesNotifications = value
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Receives Notification", upr.receivesNotifications, upr.user.username, upr.project.name)
@@ -388,25 +402,34 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    /**
+     * Sets the activated flag of UserProjectRole and informs responsible persons about the change. If a User gets disabled all
+     * permissions are set to false. If a User gets enabled the permissions are not granted automatically.
+     *
+     * @param userProjectRole the UserProjectRole to change
+     * @param value which will be set
+     * @return updated UserProjectRole
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
-        if (nothingToChange(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {
+        boolean hadFileAccess = userProjectRole.accessToFiles
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {
             return userProjectRole
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.enabled = value
-            if (upr.accessToFiles) {
-                upr.fileAccessChangeRequested = true
-            }
+            // users should be reactivated without any further permissions
+            upr.accessToOtp = false
+            upr.accessToFiles = false
+            upr.manageUsers = false
+            upr.manageUsersAndDelegate = false
+            upr.receivesNotifications = false
             assert upr.save(flush: true)
         }
         if (value) {
             notifyProjectAuthoritiesAndUser(userProjectRole)
-        }
-        if (userProjectRole.accessToFiles) {
-            if (value) {
-                sendFileAccessNotifications(userProjectRole)
-            } else {
+        } else {
+            if (hadFileAccess) {
                 notifyAdministration(userProjectRole, OperatorAction.REMOVE)
             }
         }
@@ -418,10 +441,10 @@ class UserProjectRoleService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole addProjectRolesToProjectUserRole(UserProjectRole userProjectRole, List<ProjectRole> newProjectRoles) {
         newProjectRoles.each { ProjectRole newProjectRole ->
-            if (nothingToChange(userProjectRole) { UserProjectRole upr -> newProjectRole in upr.projectRoles }) {
+            if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> newProjectRole in upr.projectRoles }) {
                 return
             }
-            synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
                 upr.projectRoles.add(newProjectRole)
                 assert upr.save(flush: true)
             }
@@ -435,7 +458,7 @@ class UserProjectRoleService {
         if (userProjectRole.projectRoles.size() <= 1) {
             throw new OtpRuntimeException("A user must have at least one role!")
         }
-        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.projectRoles.remove(currentProjectRole)
             assert upr.save(flush: true)
         }
@@ -595,6 +618,14 @@ class UserProjectRoleService {
                 .createTemplate(processingOptionService.findOptionAsString(action.commandTemplateOptionName))
                 .make([unixGroup: unixGroup, username: username])
                 .toString()
+    }
+
+    @TupleConstructor
+    enum OperatorAction {
+        ADD(ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET),
+        REMOVE(ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET),
+
+        final ProcessingOption.OptionName commandTemplateOptionName
     }
 }
 
