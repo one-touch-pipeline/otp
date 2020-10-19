@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Paths
 import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
@@ -166,21 +167,25 @@ class LsdfFilesService {
         return new OtpPath(vbpPath, sampleTypeDir).absoluteDataManagementPath.path
     }
 
-
     private String createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
         OtpPath vbpPath = createViewByPidPath(file)
+        return new OtpPath(
+                vbpPath,
+                getFilePathInViewByPid(file, useAllWellDirectory)
+        ).absoluteDataManagementPath.path
+    }
+
+    String getFilePathInViewByPid(DataFile file, boolean useAllWellDirectory = false) {
         String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, useAllWellDirectory)
 
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-
-        return new OtpPath(
-                vbpPath,
+        return Paths.get(
                 sampleTypeDir,
                 seqTrack.seqType.libraryLayoutDirName,
                 "run${seqTrack.run.name}",
                 file.fileType.vbpPath,
                 file.vbpFileName
-        ).absoluteDataManagementPath.path
+        )
     }
 
     File getFileViewByPidDirectory(SeqTrack seqTrack) {
