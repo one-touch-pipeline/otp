@@ -67,6 +67,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Transactional
 class MetadataImportService {
 
+    /**
+     * flag that disable the connection to the new workflow system.
+     * If change to use new one, delete this flag and disable the start job of the old workflow system.
+     */
+    static final boolean DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM = true
+
     @TupleConstructor
     @ToString
     static class PathWithMd5sum {
@@ -333,14 +339,16 @@ class MetadataImportService {
 
         fastqImportInstance.refresh()
 
-        Long timeCreateWorkflowRuns = System.currentTimeMillis()
-        log.debug("create workflow runs started")
-        List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-        log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
-        Long timeDecider = System.currentTimeMillis()
-        log.debug("decider started")
-        allDecider.decide(runs, false)
-        log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
+        if (!DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM) {
+            Long timeCreateWorkflowRuns = System.currentTimeMillis()
+            log.debug("create workflow runs started")
+            List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
+            log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
+            Long timeDecider = System.currentTimeMillis()
+            log.debug("decider started")
+            allDecider.decide(runs, false)
+            log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
+        }
 
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName           : context.metadataFile.fileName.toString(),
