@@ -40,7 +40,7 @@ class DataInstallationWorkflow implements OtpWorkflow {
                 CopyOrLinkFastqsOfLaneJob.simpleName.uncapitalize(),
                 DataInstallationValidationJob.simpleName.uncapitalize(),
                 DataInstallationSingleCellLinkJob.simpleName.uncapitalize(),
-                DataInstallationPidLinkJob.simpleName.uncapitalize(),                
+                DataInstallationPidLinkJob.simpleName.uncapitalize(),
         ]
     }
 }

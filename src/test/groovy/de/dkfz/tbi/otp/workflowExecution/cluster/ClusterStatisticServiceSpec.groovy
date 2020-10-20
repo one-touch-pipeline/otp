@@ -60,7 +60,7 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
             }
         }
         service.fileService = Mock(FileService) {
-            1 * createFileWithContent(_, _)
+            1 * createFileWithContentOnDefaultRealm(_, _)
         }
         service.clusterLogQueryResultFileService = Mock(ClusterLogQueryResultFileService) {
             1 * logFileWithCreatingDirectory()

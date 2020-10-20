@@ -47,7 +47,8 @@ import java.nio.file.Path
  * - Roddy pipeline: {@link AbstractRoddyClusterValidationJob}
  * - Wes pipeline: {@link AbstractWesValidationJob}
  *
- * Usually, this base job should not be used directly, but instead one of its subclasses which provide an implementation of {@link #ensureExternalJobsRunThrough}.
+ * Usually, this base job should not be used directly, but instead one of its subclasses which provide an implementation of
+ * {@link #ensureExternalJobsRunThrough}.
  */
 abstract class AbstractValidationJob extends AbstractJob {
 

@@ -66,7 +66,9 @@ class WorkflowRunService {
         ])
     }
 
-    WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, String name, List<ExternalWorkflowConfigFragment> configs = []) {
+    @SuppressWarnings('ParameterCount')
+    WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, String name,
+                                  List<ExternalWorkflowConfigFragment> configs = []) {
         return new WorkflowRun([
                 workDirectory : workDirectory,
                 state         : WorkflowRun.State.PENDING,

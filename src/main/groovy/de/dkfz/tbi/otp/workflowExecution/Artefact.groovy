@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.Withdrawable
-
 /**
  * Trait for concrete artefact.
  *

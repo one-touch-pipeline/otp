@@ -36,7 +36,8 @@ import de.dkfz.tbi.otp.utils.ThreadUtils
 
 import java.nio.charset.Charset
 import java.nio.file.*
-import java.nio.file.attribute.*
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 import java.time.Duration
 import java.util.stream.Stream
 
@@ -74,22 +75,6 @@ class FileService {
      * The directory permissions only accessible for owner (2700) with setgid bit
      */
     static final String OWNER_DIRECTORY_PERMISSION_STRING = "2700"
-
-    /**
-     * The old default directory permissions (750).
-     *
-     * Please use now {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}, which has also the setgid bit
-     *
-     * @Deprecated The directory permission should be 2740, which can not be done via {@link PosixFilePermission}
-     */
-    @Deprecated
-    static final Set<PosixFilePermission> DEFAULT_DIRECTORY_PERMISSION = [
-            PosixFilePermission.OWNER_READ,
-            PosixFilePermission.OWNER_WRITE,
-            PosixFilePermission.OWNER_EXECUTE,
-            PosixFilePermission.GROUP_READ,
-            PosixFilePermission.GROUP_EXECUTE,
-    ].toSet().asImmutable()
 
     /**
      * Owner and Group read/write (770)
@@ -429,7 +414,7 @@ class FileService {
     }
 
     String convertPermissionsToOctalString(Set<PosixFilePermission> permissions) {
-        LinkedHashMap<PosixFilePermission, Integer> mapping = [
+        Map<PosixFilePermission, Integer> mapping = [
                 (PosixFilePermission.OWNER_READ)    : 400,
                 (PosixFilePermission.OWNER_WRITE)   : 200,
                 (PosixFilePermission.OWNER_EXECUTE) : 100,

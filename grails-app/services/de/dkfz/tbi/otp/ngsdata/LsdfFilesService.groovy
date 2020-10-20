@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist

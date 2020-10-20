@@ -216,12 +216,6 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
         antibodyTarget nullable: true, validator: { AntibodyTarget val, SeqTrack obj ->
             return !obj.seqType?.hasAntibodyTarget == !val
         }
-        withdrawnDate nullable: true
-        withdrawnComment nullable: true, validator: { val, obj ->
-            if (obj.withdrawnDate && !val) {
-                return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
-            }
-        }
         workflowArtefact nullable: true
     }
 

@@ -21,18 +21,6 @@
  */
 databaseChangeLog = {
 
-    changeSet(author: "borufka (generated)", id: "1593436283687-1") {
-        addColumn(tableName: "seq_track") {
-            column(name: "withdrawn_comment", type: "varchar(255)")
-        }
-    }
-
-    changeSet(author: "borufka (generated)", id: "1593436283687-2") {
-        addColumn(tableName: "seq_track") {
-            column(name: "withdrawn_date", type: "date")
-        }
-    }
-
     changeSet(author: "borufka (generated)", id: "1593436283687-3") {
         addColumn(tableName: "seq_track") {
             column(name: "workflow_artefact_id", type: "int8")

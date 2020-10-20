@@ -58,11 +58,6 @@ class Workflow implements Commentable, Entity {
         deprecatedDate nullable: true
         wesServer nullable: true
         comment nullable: true
-        name validator: { val, obj ->
-            if (val && !obj.deprecatedDate && Workflow.findAllByNameAndDeprecatedDateIsNullAndIdNotEqual(val, obj.id)) {
-                return "validator.not.unique.deprecate.message"
-            }
-        }
     }
 
     static mapping = {

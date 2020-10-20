@@ -32,7 +32,7 @@ class ClusterLogDirectoryServiceSpec extends AbstractLogDirectoryServiceSpec imp
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        super.domainClassesToMock + [
                 WorkflowStep,
         ]
     }

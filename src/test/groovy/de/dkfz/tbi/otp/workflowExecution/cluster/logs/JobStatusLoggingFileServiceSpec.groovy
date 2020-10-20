@@ -35,21 +35,17 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
 
     static final String CLUSTER_JOB_ID_VARIABLE = "JOB_ID"
 
-    private Realm realm
-
     private WorkflowStep workflowStep
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
-                Realm,
+        super.domainClassesToMock + [
                 WorkflowStep,
         ]
     }
 
     @Override
     void setup() {
-        realm = createRealm()
         workflowStep = createWorkflowStep()
     }
 

@@ -50,7 +50,7 @@ abstract class AbstractLogDirectoryService {
         if (!Files.exists(logPath)) {
             FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
             Path remoteLogPath = fileService.changeFileSystem(logPath, fileSystem)
-            fileService.createDirectoryRecursively(remoteLogPath)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(remoteLogPath, configService.defaultRealm)
         }
         return logPath
     }

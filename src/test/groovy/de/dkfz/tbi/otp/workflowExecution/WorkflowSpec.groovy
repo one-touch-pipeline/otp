@@ -43,10 +43,6 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
     void "getExactlyOneWorkflow, when a non deprecated workflow of the name exist, then return that workflow"() {
         given:
         createWorkflow()
-        createWorkflow([
-                name          : WORKFLOW_NAME,
-                deprecatedDate: LocalDate.now(),
-        ])
         Workflow workflow = createWorkflow([
                 name: WORKFLOW_NAME,
         ])
@@ -68,11 +64,7 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
         thrown(AssertionError)
     }
 
-    void "getExactlyOneWorkflow, when all workflows of the name are deprecated, then throw an exception"() {
-        createWorkflow([
-                name          : WORKFLOW_NAME,
-                deprecatedDate: LocalDate.now(),
-        ])
+    void "getExactlyOneWorkflow, when the only workflow with this name is deprecated, then throw an exception"() {
         createWorkflow([
                 name          : WORKFLOW_NAME,
                 deprecatedDate: LocalDate.now(),
@@ -97,23 +89,7 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
         workflow.errors.errorCount == 0
     }
 
-    void "validate, when only deprecated workflows of the name exist, then object is valid"() {
-        createWorkflow([
-                name          : WORKFLOW_NAME,
-                deprecatedDate: LocalDate.now(),
-        ])
-        Workflow workflow = createWorkflow([
-                name: WORKFLOW_NAME,
-        ], false)
-
-        when:
-        workflow.validate()
-
-        then:
-        workflow.errors.errorCount == 0
-    }
-
-    void "validate, when already a non deprecate workflow exist, then object is invalid"() {
+    void "validate, when already a workflow with the name exist, then object is invalid"() {
         createWorkflow([
                 name: WORKFLOW_NAME,
         ])
@@ -122,7 +98,7 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
         ], false)
 
         expect:
-        TestCase.assertValidateError(workflow, 'name', 'validator.not.unique.deprecate.message', WORKFLOW_NAME)
+        TestCase.assertValidateError(workflow, 'name', 'unique', WORKFLOW_NAME)
     }
 
     void "validate, when saved object is validate again, then the object is still valid"() {
