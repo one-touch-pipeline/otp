@@ -33,7 +33,7 @@ class WorkflowService {
         WorkflowRun run = new WorkflowRun(
                 workflow: step.workflowRun.workflow,
                 priority: step.workflowRun.priority,
-                project:  step.workflowRun.project,
+                project: step.workflowRun.project,
                 displayName: step.workflowRun.displayName
         ).save(flush: true)
 
@@ -60,5 +60,23 @@ class WorkflowService {
         if (startDirectly) {
             jobService.createNextJob(run)
         }
+    }
+
+    void enableWorkflow(Workflow workflow) {
+        assert workflow
+        workflow.enabled = true
+        workflow.save(flush: true)
+    }
+
+    void disableWorkflow(Workflow workflow) {
+        assert workflow
+        workflow.enabled = false
+        workflow.save(flush: true)
+    }
+
+    void changePriority(Workflow workflow, short priority) {
+        assert workflow
+        workflow.priority = priority
+        workflow.save(flush: true)
     }
 }

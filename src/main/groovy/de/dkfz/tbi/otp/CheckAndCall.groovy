@@ -49,11 +49,19 @@ trait CheckAndCall {
 
     void checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure method) {
         withForm {
-            if (cmd.hasErrors()) {
+            if (cmd && cmd.hasErrors()) {
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, cmd.errors)
             } else {
-                method()
-                flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
+                try {
+                    method()
+                    flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
+                } catch (ValidationException e) {
+                    flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.errors)
+                } catch (AssertionError e) {
+                    flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
+                } catch (OtpRuntimeException e) {
+                    flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
+                }
             }
         }.invalidToken {
             flash.message = new FlashMessage(g.message(code: "default.expired.session") as String)
