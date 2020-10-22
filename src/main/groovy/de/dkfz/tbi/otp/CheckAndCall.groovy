@@ -47,25 +47,32 @@ trait CheckAndCall {
         render data as JSON
     }
 
-    void checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure method) {
+    def <T> T checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure<T> method) {
+        T result = null
         withForm {
             if (cmd && cmd.hasErrors()) {
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, cmd.errors)
+                flash.cmd = cmd
             } else {
                 try {
-                    method()
+                    result = method()
                     flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
                 } catch (ValidationException e) {
                     flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.errors)
+                    flash.cmd = cmd
                 } catch (AssertionError e) {
                     flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
+                    flash.cmd = cmd
                 } catch (OtpRuntimeException e) {
                     flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
+                    flash.cmd = cmd
                 }
             }
         }.invalidToken {
             flash.message = new FlashMessage(g.message(code: "default.expired.session") as String)
+            flash.cmd = cmd
         }
+        return result
     }
 
     @SuppressWarnings('CatchRuntimeException')

@@ -296,13 +296,9 @@ class MetadataImportController implements CheckAndCall {
     }
 
     def addBlacklistedIlseNumbers(BlackListedIlseCommand command) {
-        if (command.validate()) {
+        checkErrorAndCallMethodWithFlashMessage(command, "metadataImport.blackListedIlseNumbers.store") {
             List<Integer> ilseNumbers = command.splitToIlseNumbers()
             ilseSubmissionService.createNewIlseSubmissions(ilseNumbers, command.comment)
-            flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.success") as String)
-        } else {
-            flash.message = new FlashMessage(g.message(code: "metadataImport.blackListedIlseNumbers.store.failure") as String, command.errors)
-            flash.cmd = command
         }
         redirect action: 'blacklistedIlseNumbers'
     }
