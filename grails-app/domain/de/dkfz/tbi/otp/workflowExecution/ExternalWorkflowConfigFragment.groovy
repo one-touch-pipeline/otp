@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.converters.JSON
 import org.grails.web.converters.exceptions.ConverterException
-import org.grails.web.json.JSONException
+import org.grails.web.json.*
 
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Deprecateable
@@ -55,12 +55,18 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         return mapper.readValue(configValues, HashMap)
     }
 
-    static boolean validateJsonString(String s) {
+
+    @SuppressWarnings("Instanceof")
+    static Object validateJsonString(String s) {
+        JSONElement jsonElement
         try {
-            JSON.parse(s)
-            return true
+            jsonElement = JSON.parse(s)
         } catch (JSONException | ConverterException ignored) {
-            return false
+            return "json"
         }
+        if (!(jsonElement instanceof JSONObject)) {
+            return "map"
+        }
+        return jsonElement.isEmpty() ? "empty" : true
     }
 }

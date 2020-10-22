@@ -21,11 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
+import grails.util.Holders
+
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.Entity
 
 class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfigSelector>, Entity {
 
@@ -53,12 +53,31 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
     ]
 
     static constraints = {
-        name unique: true
+        name unique: true, blank: false
+        workflowVersions validator: { val, obj ->
+            if (!validateIsUnique(obj)) {
+                return "unique"
+            }
+        }
     }
 
     @Override
     int compareTo(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
         return externalWorkflowConfigSelector.basePriority <=> basePriority ?:
                 externalWorkflowConfigSelector.fineTuningPriority <=> fineTuningPriority
+    }
+
+    static boolean validateIsUnique(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
+        ExternalWorkflowConfigSelector other = Holders.applicationContext.getBean(ConfigSelectorService).findExactSelector(
+                new MultiSelectSelectorExtendedCriteria(
+                        externalWorkflowConfigSelector.workflows,
+                        externalWorkflowConfigSelector.workflowVersions,
+                        externalWorkflowConfigSelector.projects,
+                        externalWorkflowConfigSelector.seqTypes,
+                        externalWorkflowConfigSelector.referenceGenomes,
+                        externalWorkflowConfigSelector.libraryPreparationKits,
+                )
+        )
+        return !(other && other.id != externalWorkflowConfigSelector.id)
     }
 }

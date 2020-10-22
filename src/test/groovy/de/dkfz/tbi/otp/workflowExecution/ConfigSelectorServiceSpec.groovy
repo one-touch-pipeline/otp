@@ -24,11 +24,9 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ConfigSelectorServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, ServiceUnitTest<ConfigSelectorService> {
 
@@ -37,32 +35,6 @@ class ConfigSelectorServiceSpec extends Specification implements DataTest, Workf
         [
                 ExternalWorkflowConfigSelector,
         ]
-    }
-
-    ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name, int basePriority) {
-        return createExternalWorkflowConfigSelector([
-                name              : name,
-                basePriority      : basePriority,
-        ])
-    }
-
-    @Unroll
-    void "test findRelatedSelectorsByName #x"() {
-        given:
-        createEWCSHelperBaseCriteria("ewcs1", 0)
-        createEWCSHelperBaseCriteria("ewcs2", 3)
-        createEWCSHelperBaseCriteria("ewcs3", 1)
-        createEWCSHelperBaseCriteria("ewcs4", 7)
-
-        expect:
-        CollectionUtils.containSame(result, service.findRelatedSelectorsByName(name())*.name)
-
-        where:
-        x | name        | result
-        1 | { "ewcs1" } | ["ewcs1"]
-        2 | { "wcs" }   | ["ewcs1", "ewcs2", "ewcs3", "ewcs4"]
-        3 | { "" }      | []
-        4 | { null }    | []
     }
 
     void "test SingleSelectSelectorExtendedCriteria, anyValueSet"() {

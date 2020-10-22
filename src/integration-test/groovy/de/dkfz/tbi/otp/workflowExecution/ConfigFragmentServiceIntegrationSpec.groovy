@@ -22,29 +22,19 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import grails.testing.gorm.DataTest
-import grails.testing.services.ServiceUnitTest
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.project.Project
 
-class ConfigFragmentServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, ServiceUnitTest<ConfigFragmentService> {
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        [
-                ProcessingPriority,
-                Project,
-                Workflow,
-                WorkflowVersion,
-                ExternalWorkflowConfigSelector,
-                ExternalWorkflowConfigFragment,
-        ]
-    }
+@Rollback
+@Integration
+class ConfigFragmentServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
     void "test parseExternalWorkflowConfigFragmentString"() {
         given:
+        ConfigFragmentService service = new ConfigFragmentService()
         ExternalWorkflowConfigSelector ewcs1 = createExternalWorkflowConfigSelector([
                 externalWorkflowConfigFragment: createExternalWorkflowConfigFragment([
                         configValues: '{ "A": "A_ThisNotSinceLowerPrio", "B": { "C": "C_ThisNotSinceLowerPrio", "D": "D_ThisNotSinceLowerPrio" } }'

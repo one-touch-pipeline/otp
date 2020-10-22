@@ -238,4 +238,31 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 new SingleSelectSelectorExtendedCriteria(seqType: SeqType.findAllByName("s1").first())
         )*.name == [ewcs3.name, ewcs5.name, ewcs1.name, ewcs4.name]
     }
+
+    ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name, int basePriority) {
+        return createExternalWorkflowConfigSelector([
+                name        : name,
+                basePriority: basePriority,
+        ])
+    }
+
+    @Unroll
+    void "test findRelatedSelectorsByName #x"() {
+        given:
+        ConfigSelectorService service = new ConfigSelectorService()
+        createEWCSHelperBaseCriteria("ewcs1", 0)
+        createEWCSHelperBaseCriteria("ewcs2", 3)
+        createEWCSHelperBaseCriteria("ewcs3", 1)
+        createEWCSHelperBaseCriteria("ewcs4", 7)
+
+        expect:
+        CollectionUtils.containSame(result, service.findRelatedSelectorsByName(name())*.name)
+
+        where:
+        x | name        | result
+        1 | { "ewcs1" } | ["ewcs1"]
+        2 | { "wcs" }   | ["ewcs1", "ewcs2", "ewcs3", "ewcs4"]
+        3 | { "" }      | []
+        4 | { null }    | []
+    }
 }
