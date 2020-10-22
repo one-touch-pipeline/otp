@@ -30,24 +30,26 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfigSelector>, Entity {
 
     String name
-    Set<WorkflowVersion> workflowVersions
+
     Set<Workflow> workflows
+    Set<WorkflowVersion> workflowVersions
+    Set<Project> projects
+    Set<SeqType> seqTypes
     Set<ReferenceGenome> referenceGenomes
     Set<LibraryPreparationKit> libraryPreparationKits
-    Set<SeqType> seqTypes
-    Set<Project> projects
+
     ExternalWorkflowConfigFragment externalWorkflowConfigFragment
     SelectorType selectorType
     int basePriority
     int fineTuningPriority
 
     static hasMany = [
-            workflowVersions      : WorkflowVersion,
             workflows             : Workflow,
+            workflowVersions      : WorkflowVersion,
+            projects              : Project,
+            seqTypes              : SeqType,
             referenceGenomes      : ReferenceGenome,
             libraryPreparationKits: LibraryPreparationKit,
-            seqTypes              : SeqType,
-            projects              : Project,
     ]
 
     static constraints = {

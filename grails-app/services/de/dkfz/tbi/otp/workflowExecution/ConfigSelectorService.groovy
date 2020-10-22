@@ -59,14 +59,14 @@ class ConfigSelectorService {
                         'in'('id', relatedSelectorExtendedCriteria.workflows*.id)
                     }
                 }
-                if (relatedSelectorExtendedCriteria.projects) {
-                    projects {
-                        'in'('id', relatedSelectorExtendedCriteria.projects*.id)
-                    }
-                }
                 if (relatedSelectorExtendedCriteria.workflowVersions) {
                     workflowVersions {
                         'in'('id', relatedSelectorExtendedCriteria.workflowVersions*.id)
+                    }
+                }
+                if (relatedSelectorExtendedCriteria.projects) {
+                    projects {
+                        'in'('id', relatedSelectorExtendedCriteria.projects*.id)
                     }
                 }
                 if (relatedSelectorExtendedCriteria.seqTypes) {
@@ -140,9 +140,9 @@ class ConfigSelectorService {
 
         Map parameters = [:]
 
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "projects", parameters, true)
-        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflowVersions", parameters, true)
         hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflows", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "workflowVersions", parameters, true)
+        hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "projects", parameters, true)
         hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "seqTypes", parameters, true)
         hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "referenceGenomes", parameters, true)
         hql += findExactSelectorQueryHelper(multiSelectSelectorExtendedCriteria, "libraryPreparationKits", parameters, false)
@@ -172,19 +172,19 @@ class ConfigSelectorService {
                     }
                 }
             }
-            if (singleSelectSelectorExtendedCriteria.project) {
-                criteria | {
-                    criteria.isEmpty('projects')
-                    criteria.projects(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
-                        criteria.'in'('id', singleSelectSelectorExtendedCriteria.project.id)
-                    }
-                }
-            }
             if (singleSelectSelectorExtendedCriteria.workflowVersion) {
                 criteria | {
                     criteria.isEmpty('workflowVersions')
                     criteria.workflowVersions(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         criteria.'in'('id', singleSelectSelectorExtendedCriteria.workflowVersion.id)
+                    }
+                }
+            }
+            if (singleSelectSelectorExtendedCriteria.project) {
+                criteria | {
+                    criteria.isEmpty('projects')
+                    criteria.projects(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+                        criteria.'in'('id', singleSelectSelectorExtendedCriteria.project.id)
                     }
                 }
             }
@@ -225,9 +225,9 @@ class ConfigSelectorService {
 
 @TupleConstructor
 class MultiSelectSelectorExtendedCriteria {
-    Set<Project> projects
-    Set<WorkflowVersion> workflowVersions
     Set<Workflow> workflows
+    Set<WorkflowVersion> workflowVersions
+    Set<Project> projects
     Set<SeqType> seqTypes
     Set<ReferenceGenome> referenceGenomes
     Set<LibraryPreparationKit> libraryPreparationKits
@@ -241,9 +241,9 @@ class MultiSelectSelectorExtendedCriteria {
 
 @TupleConstructor
 class SingleSelectSelectorExtendedCriteria {
-    Project project
-    WorkflowVersion workflowVersion
     Workflow workflow
+    WorkflowVersion workflowVersion
+    Project project
     SeqType seqType
     ReferenceGenome referenceGenome
     LibraryPreparationKit libraryPreparationKit
