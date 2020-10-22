@@ -33,7 +33,7 @@ class ConfigFragmentService {
         return new JSONObject(mergeSortedFragments(ewcs.collect { it.externalWorkflowConfigFragment.configValuesToMap() }))
     }
 
-    Map mergeSortedFragments(List<Map> prioritySortedHashMaps) {
+    private Map mergeSortedFragments(List<Map> prioritySortedHashMaps) {
         if (prioritySortedHashMaps) {
             Map combinedConfiguration = prioritySortedHashMaps.remove(0)
             return mergeSortedFragmentsRec(combinedConfiguration, prioritySortedHashMaps)
@@ -42,7 +42,7 @@ class ConfigFragmentService {
     }
 
     @SuppressWarnings("Instanceof")
-    Map mergeSortedFragmentsRec(Map combinedConfigurationPart, List<Map> maps) {
+    private Map mergeSortedFragmentsRec(Map combinedConfigurationPart, List<Map> maps) {
         maps.each { Map map ->
             map.entrySet().each { Map.Entry entry ->
                 if (entry.value instanceof Map) {  // case internal node
