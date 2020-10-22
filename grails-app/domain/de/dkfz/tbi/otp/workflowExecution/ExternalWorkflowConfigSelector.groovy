@@ -67,6 +67,16 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 externalWorkflowConfigSelector.fineTuningPriority <=> fineTuningPriority
     }
 
+    List<ExternalWorkflowConfigFragment> getFragments() {
+        List<ExternalWorkflowConfigFragment> result = []
+        ExternalWorkflowConfigFragment f = externalWorkflowConfigFragment
+        while (f) {
+            result.add(f)
+            f = f.previous
+        }
+        return result
+    }
+
     static boolean validateIsUnique(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
         ExternalWorkflowConfigSelector other = Holders.applicationContext.getBean(ConfigSelectorService).findExactSelector(
                 new MultiSelectSelectorExtendedCriteria(

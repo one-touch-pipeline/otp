@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 
     String name
@@ -55,6 +57,18 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         return mapper.readValue(configValues, HashMap)
     }
 
+    Optional<ExternalWorkflowConfigSelector> getSelector() {
+        ExternalWorkflowConfigFragment f = this
+        while (true) {
+            ExternalWorkflowConfigFragment previous = atMostOneElement(ExternalWorkflowConfigFragment.findAllByPrevious(f))
+            if (previous) {
+                f = previous
+            } else {
+                break
+            }
+        }
+        return Optional.ofNullable(atMostOneElement(ExternalWorkflowConfigSelector.findAllByExternalWorkflowConfigFragment(f)))
+    }
 
     @SuppressWarnings("Instanceof")
     static Object validateJsonString(String s) {
