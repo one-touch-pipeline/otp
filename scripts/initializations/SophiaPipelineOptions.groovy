@@ -35,7 +35,7 @@ processingOptionService.createOrUpdate(
 SeqTypeService.sophiaPipelineSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
-            '2.2.2',
+            '2.2.3',
             seqType.roddyName,
     )
 
