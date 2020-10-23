@@ -64,9 +64,13 @@ class Workflow implements Commentable, Entity {
         comment cascade: "all-delete-orphan"
     }
 
+    String getDisplayName() {
+        return "${name}${deprecatedDate ? " (deprecated)" : ""}"
+    }
+
     @Override
     String toString() {
-        "${name}${deprecatedDate ? " (deprecated)" : ""}"
+        return displayName
     }
 
     static hasMany = [

@@ -54,6 +54,9 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
 
     Map configValuesToMap() {
         ObjectMapper mapper = new ObjectMapper()
+        if (deprecationDate) {
+            return [:]
+        }
         return mapper.readValue(configValues, HashMap)
     }
 

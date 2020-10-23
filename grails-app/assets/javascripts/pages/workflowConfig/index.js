@@ -19,16 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.utils.Entity
-
-class WorkflowVersion implements Entity {
-
-    Workflow workflow
-    String workflowVersion
-
-    String getDisplayName() {
-        return "${workflow.name} ${workflowVersion}"
+$(function () {
+    var update = function (e) {
+        $(e.target).parents("form").submit();
     }
-}
+    var form = $("form.selector");
+    form.on("change", "select", update);
+    form.on("change", "input", update);
+    form.on("keyup", "input[type=text]", update);
+
+
+    $(".format").on("click", function (e) {
+        e.preventDefault();
+        var value = $("#configValue");
+        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
+    });
+
+
+    $("#relatedSelectorType").on("change", function (e) {
+        var types = $(e.target).val();
+        $("#relatedSelectors").children("div").each(function () {
+            if (types.indexOf($(this).data("type")) === -1) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+        });
+    });
+});

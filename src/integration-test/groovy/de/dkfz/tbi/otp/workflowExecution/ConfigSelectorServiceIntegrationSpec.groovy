@@ -265,4 +265,109 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         3 | { "" }      | []
         4 | { null }    | []
     }
+
+    void "test create"() {
+        given:
+        ConfigSelectorService service = new ConfigSelectorService()
+        CreateCommand cmd = new CreateCommand(
+                workflows: [],
+                workflowVersions: [],
+                projects: [],
+                seqTypes: [],
+                referenceGenomes: [],
+                libraryPreparationKits: [],
+
+                selectorName: "selectorName",
+                type: SelectorType.GENERIC,
+                fragmentName: "fragmentName",
+                priority: 0,
+                value: '{"config": 123}',
+        )
+
+        when:
+        service.create(cmd)
+
+        then:
+        ExternalWorkflowConfigFragment.all.size() == 1
+        ExternalWorkflowConfigFragment fragment = ExternalWorkflowConfigFragment.all.first()
+        fragment.name == "fragmentName"
+
+        ExternalWorkflowConfigSelector.all.size() == 1
+        ExternalWorkflowConfigSelector selector = ExternalWorkflowConfigSelector.all.first()
+        selector.name == "selectorName"
+        selector.externalWorkflowConfigFragment == fragment
+        fragment.selector.get() == selector
+    }
+
+    private UpdateCommand getUpdateCommand() {
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector()
+        return new UpdateCommand(
+                selector: selector,
+                fragment: selector.externalWorkflowConfigFragment,
+
+                workflows: selector.workflows.toList(),
+                workflowVersions: selector.workflowVersions.toList(),
+                projects: selector.projects.toList(),
+                seqTypes: selector.seqTypes.toList(),
+                referenceGenomes: selector.referenceGenomes.toList(),
+                libraryPreparationKits: selector.libraryPreparationKits.toList(),
+
+                selectorName: selector.name,
+                type: selector.selectorType,
+                fragmentName: selector.externalWorkflowConfigFragment.name,
+                priority: selector.basePriority,
+                value: selector.externalWorkflowConfigFragment.configValues,
+        )
+    }
+
+    void "test update selector"() {
+        given:
+        ConfigSelectorService service = new ConfigSelectorService()
+        UpdateCommand cmd = updateCommand
+        ExternalWorkflowConfigSelector selector = cmd.selector
+        ExternalWorkflowConfigFragment fragment = cmd.selector.externalWorkflowConfigFragment
+        cmd.selectorName = "new name"
+
+        when:
+        service.update(cmd)
+
+        then:
+        ExternalWorkflowConfigSelector.all.size() == 1
+        selector.name == "new name"
+        ExternalWorkflowConfigFragment.all.size() == 1
+        selector.externalWorkflowConfigFragment == fragment
+    }
+
+    void "test update fragment"() {
+        given:
+        ConfigSelectorService service = new ConfigSelectorService()
+        UpdateCommand cmd = updateCommand
+        ExternalWorkflowConfigSelector selector = cmd.selector
+        ExternalWorkflowConfigFragment fragment = cmd.selector.externalWorkflowConfigFragment
+        cmd.fragmentName = "new name"
+
+        when:
+        service.update(cmd)
+
+        then:
+        ExternalWorkflowConfigSelector.all.size() == 1
+        ExternalWorkflowConfigFragment.all.size() == 2
+        fragment.deprecationDate != null
+        selector.externalWorkflowConfigFragment != fragment
+        selector.externalWorkflowConfigFragment.name == "new name"
+    }
+
+    void "test deprecate"() {
+        given:
+        ConfigSelectorService service = new ConfigSelectorService()
+        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment()
+        createExternalWorkflowConfigSelector(externalWorkflowConfigFragment: fragment)
+
+        when:
+        service.deprecate(fragment)
+
+        then:
+        fragment.deprecationDate != null
+        ExternalWorkflowConfigSelector.all.empty
+    }
 }

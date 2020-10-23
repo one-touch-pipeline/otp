@@ -25,9 +25,12 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
 import org.grails.datastore.mapping.query.api.BuildableCriteria
 import org.hibernate.sql.JoinType
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+
+import java.time.LocalDate
 
 @Transactional
 class ConfigSelectorService {
@@ -220,6 +223,68 @@ class ConfigSelectorService {
             return findAllSelectors(singleSelectSelectorExtendedCriteria).sort()
         }
         return []
+    }
+
+    List<ExternalWorkflowConfigSelector> getAll() {
+        ExternalWorkflowConfigSelector.all.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    ExternalWorkflowConfigSelector create(CreateCommand cmd) {
+        ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
+                name: cmd.fragmentName,
+                configValues: cmd.value,
+        ).save(flush: true)
+
+        ExternalWorkflowConfigSelector selector = new ExternalWorkflowConfigSelector(
+                name: cmd.selectorName,
+                workflows: cmd.workflows as Set,
+                workflowVersions: cmd.workflowVersions as Set,
+                projects: cmd.projects as Set,
+                seqTypes: cmd.seqTypes as Set,
+                referenceGenomes: cmd.referenceGenomes as Set,
+                libraryPreparationKits: cmd.libraryPreparationKits as Set,
+                externalWorkflowConfigFragment: fragment,
+                selectorType: cmd.type,
+                basePriority: cmd.priority,
+                fineTuningPriority: 0,
+        ).save(flush: true)
+        return selector
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    ExternalWorkflowConfigSelector update(UpdateCommand cmd) {
+        cmd.selector.workflows = cmd.workflows as Set
+        cmd.selector.workflowVersions = cmd.workflowVersions as Set
+        cmd.selector.projects = cmd.projects as Set
+        cmd.selector.seqTypes = cmd.seqTypes as Set
+        cmd.selector.referenceGenomes = cmd.referenceGenomes as Set
+        cmd.selector.libraryPreparationKits = cmd.libraryPreparationKits as Set
+
+        cmd.selector.name = cmd.selectorName
+        cmd.selector.basePriority = cmd.priority
+        cmd.selector.selectorType = cmd.type
+
+        if (cmd.fragment.name != cmd.fragmentName ||
+                cmd.fragment.configValues != cmd.value) {
+            cmd.fragment.deprecationDate = LocalDate.now()
+            ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
+                    name: cmd.fragmentName,
+                    configValues: cmd.value,
+                    previous: cmd.fragment,
+            ).save(flush: true)
+            cmd.selector.externalWorkflowConfigFragment = fragment
+        }
+
+        cmd.selector.save(flush: true)
+        return cmd.selector
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    void deprecate(ExternalWorkflowConfigFragment fragment) {
+        fragment.deprecationDate = LocalDate.now()
+        fragment.save(flush: true)
+        fragment.selector.ifPresent { it.delete(flush: true) }
     }
 }
 
