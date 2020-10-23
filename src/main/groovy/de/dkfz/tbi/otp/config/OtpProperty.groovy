@@ -48,7 +48,7 @@ enum OtpProperty {
     PATH_STACK_TRACES('otp.errorLogging.stacktraces', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "${System.getProperty("user.dir")}/logs/stacktraces/"),
     PATH_JOB_LOGS('otp.logging.jobLogDir', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "${System.getProperty("user.dir")}/logs/jobs/"),
     PATH_PROCESSING_ROOT('otp.processing.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
-    PATH_PROJECT_ROOT('otp.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
+    PATH_PROJECT_ROOT('otp.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     PATH_CLUSTER_LOGS_OTP('otp.logging.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     PATH_TOOLS('otp.path.tools', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
     PATH_RODDY('otp.path.tools.roddy', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
