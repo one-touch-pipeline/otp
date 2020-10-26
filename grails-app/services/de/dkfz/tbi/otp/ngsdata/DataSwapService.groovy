@@ -408,10 +408,12 @@ ln -s '${newDirectFileName}' \\
      *                      by Object. The Map have to map all sample types used for this individual. It is allwed to map a
      *                      sample type to itself. The sample type have to be found in the database.
      * @param dataFileMap A map of old file name and new file name. The map have to contain the file name of all datafiles of the individual
+     * @param linkedFilesVerified when the source-fastq files have been linked from the sequencing facility, this flag
+     *                            asserts that a human has checked that the symlinks still work (i.e. files still exist at the sequencing facility)
      */
     void moveIndividual(String oldProjectName, String newProjectName, String oldPid, String newPid, Map<String, String> sampleTypeMap,
                         Map<String, String> dataFileMap, String bashScriptName, StringBuilder log, boolean failOnMissingFiles,
-                        Path scriptOutputDirectory) {
+                        Path scriptOutputDirectory, boolean linkedFilesVerified = false) {
         log << "\n\nmove ${oldPid} of ${oldProjectName} to ${newPid} of ${newProjectName} "
 
         completeOmittedNewValuesAndLog(sampleTypeMap, 'samples', log)
@@ -458,7 +460,9 @@ ln -s '${newDirectFileName}' \\
         List<File> dirsToDelete = []
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
-        throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
+        if (!linkedFilesVerified) {
+            throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
+        }
 
         // now the changing process(procedure) starts
         if (seqTracks && AlignmentPass.findBySeqTrackInList(seqTracks)) {
@@ -475,10 +479,10 @@ ln -s '${newDirectFileName}' \\
         bashScriptToMoveFiles << BASH_HEADER
 
         Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
-        createBashScriptRoddy(seqTracks, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser)
+        createBashScriptRoddy(seqTracks, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
 
         seqTracks.each { SeqTrack seqTrack ->
-            Map<String, List<File>> dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            Map<String, List<File>> dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
             dirsToDelete.addAll(dirs.get("dirsToDelete"))
             bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)

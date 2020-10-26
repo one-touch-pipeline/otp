@@ -85,7 +85,8 @@ try {
                 'uniqueScriptName',
                 log,
                 failOnMissingFiles,
-                scriptOutputDirectory
+                scriptOutputDirectory,
+                linkedFilesVerified,
         )
 
         assert false: "DEBUG: intentionally failed transaction"

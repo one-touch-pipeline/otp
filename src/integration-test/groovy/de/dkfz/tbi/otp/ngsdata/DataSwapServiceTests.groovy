@@ -181,6 +181,7 @@ class DataSwapServiceTests implements UserAndRoles {
                     outputLog,
                     false,
                     scriptFolder,
+                    false
             )
         }
         String output = outputLog

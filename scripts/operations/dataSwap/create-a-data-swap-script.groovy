@@ -364,7 +364,7 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
         }
     }
     script << "\t\t],\n"
-    script << "\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY)\n"
+    script << "\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles)\n"
     files << fileName
 
     return counter
