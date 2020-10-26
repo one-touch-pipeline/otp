@@ -27,12 +27,10 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -59,76 +57,96 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
 
     void 'validate, all is fine'() {
         given:
-        Project project = createProject()
-        SampleType sampleType = createSampleType()
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        Project project = sampleIdentifier.project
+        SampleType sampleType = sampleIdentifier.sampleType
         setupDataFileHelper(project, sampleType, HelperUtils.randomMd5sum)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-        ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_TYPE}\t${MetaDataColumn.PROJECT}
-        ${HelperUtils.randomMd5sum}\t${sampleType.name}\t${project.name}
-        ${HelperUtils.randomMd5sum}\t${sampleType.name}\t${project.name}\
+        ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}
+        ${HelperUtils.randomMd5sum}\t${sampleIdentifier.name}\t${project.name}
+        ${HelperUtils.randomMd5sum}\t${sampleIdentifier.name}\t${project.name}\
         """)
 
         when:
-        new MultiImportValidator().validate(context)
+        createMultipleImportValidator().validate(context)
 
         then:
         context.problems.empty
     }
 
-    void 'validate metadata, adds expected errors'() {
+    void 'validate, when md5sum already exist for project and sampleType using sampleIdentifier, adds expected errors'() {
         given:
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
 
-        Project project = createProject()
-        SampleType sampleType = createSampleType()
-
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        Project project = sampleIdentifier.project
+        SampleType sampleType = sampleIdentifier.sampleType
         setupDataFileHelper(project, sampleType, md5sum1)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-        ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_TYPE}\t${MetaDataColumn.PROJECT}
-        ${md5sum1}\t${sampleType.name}\t${project.name}
-        ${md5sum2}\t${sampleType.name}\t${project.name}\
+        ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}
+        ${md5sum1}\t${sampleIdentifier.name}\t${project.name}
+        ${md5sum2}\t${sampleIdentifier.name}\t${project.name}\
         """)
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set<Cell>, Level.ERROR,
-                        "A file with the md5sum '${md5sum1}' and sample type '${sampleType.name}' already exists for project '${project.name}'.", "At least one file with the md5sum and sample type combination exists in the corresponding project."),
+                        "A file with the md5sum '${md5sum1}' and sample type '${sampleType.name}' already exists for project '${project.name}'.",
+                        "At least one file with the md5sum and sample type combination exists in the corresponding project."),
         ]
 
         when:
-        new MultiImportValidator().validate(context)
+        createMultipleImportValidator().validate(context)
 
         then:
         TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate bam metadata, adds expected errors'() {
+    void 'validate, when md5sum already exist for project and sampleType using parser, adds expected errors'() {
         given:
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
 
-        Project project = createProject()
-        SampleType sampleType = createSampleType()
-
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        Project project = sampleIdentifier.project
+        SampleType sampleType = sampleIdentifier.sampleType
         setupDataFileHelper(project, sampleType, md5sum1)
 
-        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
-        ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_TYPE}\t${MetaDataColumn.PROJECT}
-        ${md5sum1}\t${sampleType.name}\t${project.name}
-        ${md5sum2}\t${sampleType.name}\t${project.name}\
+        String idToParse = "${project.name};someIndividual;${sampleType.name};anyId"
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+        ${MetaDataColumn.MD5}\t${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}
+        ${md5sum1}\t${idToParse}\t${project.name}
+        ${md5sum2}\t${idToParse}\t${project.name}\
         """)
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set<Cell>, Level.ERROR,
-                        "A file with the md5sum '${md5sum1}' and sample type '${sampleType.name}' already exists for project '${project.name}'.", "At least one file with the md5sum and sample type combination exists in the corresponding project."),
+                        "A file with the md5sum '${md5sum1}' and sample type '${sampleType.name}' already exists for project '${project.name}'.",
+                        "At least one file with the md5sum and sample type combination exists in the corresponding project."),
         ]
 
         when:
-        new MultiImportValidator().validate(context)
+        createMultipleImportValidator().validate(context)
 
         then:
         TestCase.assertContainSame(context.problems, expectedProblems)
     }
+
+    private MultiImportValidator createMultipleImportValidator() {
+        return new MultiImportValidator([
+                sampleIdentifierService: Mock(SampleIdentifierService) {
+                    _ * parseSampleIdentifier(_, _) >> { String sampleIdentifier, Project project ->
+                        String[] split = sampleIdentifier.split(';')
+                        if (split.length == 4) {
+                            return new DefaultParsedSampleIdentifier(split[0], split[1], split[2], split[3], SampleType.SpecificReferenceGenome.UNKNOWN)
+                        }
+                        return null
+                    }
+                }
+        ])
+    }
+
 }

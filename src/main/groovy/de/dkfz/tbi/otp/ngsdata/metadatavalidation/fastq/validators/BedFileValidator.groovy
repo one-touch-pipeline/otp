@@ -26,25 +26,21 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSampleType
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
-
-    @Autowired
-    SampleIdentifierService sampleIdentifierService
-
 
     @Override
     Collection<String> getDescriptions() {
@@ -62,10 +58,12 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
@@ -74,6 +72,8 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
         }
     }
 
+    //LibraryLayout.findByName is not a gorm find, so no findAll available
+    @SuppressWarnings("AvoidFindWithoutAll")
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
         String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
 
@@ -94,31 +94,14 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
             return
         }
 
-        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
-        String projectName = valueTuple.getValue(PROJECT.name())
-
-        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
-        SampleType sampleType
-
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
-        if (sampleIdentifier) {
-            project = sampleIdentifier.project
-            sampleType = sampleIdentifier.sampleType
-        } else {
-            if (!project) {
-                return
-            }
-
-            ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
-            if (!parsedSampleIdentifier) {
-                return
-            }
-
-            sampleType = SampleType.findSampleTypeByName(parsedSampleIdentifier.sampleTypeDbName)
-            if (!sampleType) {
-                return
-            }
+        ProjectSampleType projectSampleType = getProjectAndSampleTypeFromMetadata(valueTuple)
+        if (!projectSampleType) {
+            return
         }
+
+        Project project = projectSampleType.project
+        SampleType sampleType = projectSampleType.sampleType
+
         if (project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT) {
             return
         }
@@ -139,7 +122,10 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 )
         )
         if (!bedFile) {
-            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleName}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.", "No BED file is configured for at least on sample.")
+            String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
+            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleName}' " +
+                    "(reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.",
+                    "No BED file is configured for at least on sample.")
         }
     }
 }

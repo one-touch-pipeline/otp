@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -40,7 +41,7 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.NO_ALIGNMENT
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.OTP_ALIGNMENT
 
-class BedFileValidatorSpec extends Specification implements DataTest {
+class BedFileValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -80,23 +81,22 @@ class BedFileValidatorSpec extends Specification implements DataTest {
     static final String PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE = "${PARSE_PREFIX}_${PARSE_PROJECT}_${PARSE_INDIVIDUAL}_new"
     static final String LIB_PREP_KIT_NAME = 'libPrepKitName'
 
-
     @Unroll
     void 'validate with seqType = #seqTypeName, libraryLayout = #libraryLayout, liPrepKit = #libPrepKitName, sampleName = #sampleName, createSample = #createSample, decider = #alignmentDeciderBeanName, connectProjectReferenceGenome = #connectProjectToReferenceGenome, createBedFile = #createBedFile, tagmentationBasedLibrary = #tagmentationBasedLibrary expect error: #expectError'() {
         SeqType seqType = DomainFactory.createExomeSeqType()
-        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: LIB_PREP_KIT_NAME)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit(name: LIB_PREP_KIT_NAME)
         Project project
         if (createSample) {
             project = DomainFactory.createSampleIdentifier(name: sampleName).project
         } else {
-            project = DomainFactory.createProject(name: PARSE_PROJECT)
-            DomainFactory.createSampleType(name: PARSE_SAMPLE_TYPE)
+            project = createProject(name: PARSE_PROJECT)
+            createSampleType(name: PARSE_SAMPLE_TYPE)
         }
         project.alignmentDeciderBeanName = alignmentDeciderBeanName
         project.sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.DEEP
         project.save(flush: true)
 
-        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        ReferenceGenome referenceGenome = createReferenceGenome()
         if (connectProjectToReferenceGenome) {
             DomainFactory.createReferenceGenomeProjectSeqType([
                     referenceGenome: referenceGenome,
@@ -114,15 +114,12 @@ class BedFileValidatorSpec extends Specification implements DataTest {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext([
                 [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.SEQUENCING_READ_TYPE, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_NAME, MetaDataColumn.TAGMENTATION, MetaDataColumn.PROJECT]*.name(),
                 [seqTypeName, libraryLayout, libPrepKitName, sampleName, tagmentationBasedLibrary, sampleName == PARSE_SAMPLE_NAME_NEW_PROJECT ? 'noProject' : project.name],
-        ].collect { row ->
-            row.join('\t')
-        }.join('\n'))
+        ]*.join('\t').join('\n'))
 
         Collection<Problem> expectedProblems = expectError ? [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
                         "No BED file is configured for sample '${sampleName}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKit.name}'.", "No BED file is configured for at least on sample."),
         ] : []
-
 
         when:
         new BedFileValidator(
@@ -130,22 +127,26 @@ class BedFileValidatorSpec extends Specification implements DataTest {
                 sampleIdentifierService: [
                         getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                             new SampleIdentifierParser() {
+                                //codenarc would expect it at column 13 :-(
+                                @SuppressWarnings("Indentation")
                                 @Override
                                 ParsedSampleIdentifier tryParse(String sampleIdentifier) {
                                     Matcher match = sampleIdentifier =~ /${PARSE_PREFIX}_(.*)_(.*)_(.*)/
                                     if (match.matches()) {
                                         return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
-                                    } else {
-                                        return null
                                     }
+                                    return null
                                 }
 
-                                @SuppressWarnings("UnusedMethodParameter")
+                                //codenarc would expect it at column 13 :-(
+                                @SuppressWarnings(["UnusedMethodParameter", "Indentation"])
                                 @Override
                                 boolean tryParsePid(String pid) {
                                     return true
                                 }
 
+                                //codenarc would expect it at column 13 :-(
+                                @SuppressWarnings("Indentation")
                                 @Override
                                 String tryParseSingleCellWellLabel(String sampleIdentifier) {
                                     return null
@@ -195,9 +196,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext([
                 HEADER - missingHeader,
                 ['?', '?', '?'],
-        ].collect { row ->
-            row.join('\t')
-        }.join('\n'))
+        ]*.join('\t').join('\n'))
 
         when:
         new BedFileValidator().validate(context)

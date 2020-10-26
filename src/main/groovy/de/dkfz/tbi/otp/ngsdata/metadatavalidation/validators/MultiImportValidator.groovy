@@ -25,15 +25,15 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSampleType
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
 
     @Override
     Collection<String> getDescriptions() {
@@ -42,7 +42,17 @@ class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidati
 
     @Override
     List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
-        return [MD5, SAMPLE_TYPE, PROJECT]*.name()
+        return [MD5, SAMPLE_NAME, PROJECT]*.name()
+    }
+
+    @Override
+    void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
+        //should not create the missing required column, that are part of another validators
+    }
+
+    @Override
+    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
+        //should not create the missing optional column, that are part of another validators
     }
 
     @Override
@@ -53,13 +63,10 @@ class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidati
     }
 
     void validateValueTuple(AbstractMetadataValidationContext context, ValueTuple valueTuple) {
-        String projectName = valueTuple.getValue(PROJECT.name())
-        String sampleTypeName = valueTuple.getValue(SAMPLE_TYPE.name())
         String md5sum = valueTuple.getValue(MD5.name())
 
-        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
-
-        if (!project) {
+        ProjectSampleType projectSampleType = getProjectAndSampleTypeFromMetadata(valueTuple)
+        if (!projectSampleType || !md5sum) {
             return
         }
 
@@ -68,18 +75,18 @@ class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidati
             seqTrack {
                 sample {
                     individual {
-                        eq("project", project)
+                        eq("project", projectSampleType.project)
                     }
-                    sampleType {
-                        eq("name", sampleTypeName.toLowerCase(Locale.ENGLISH))
-                    }
+                    eq('sampleType', projectSampleType.sampleType)
                 }
             }
         }
 
         if (result > 0) {
             context.addProblem(valueTuple.cells,
-                    Level.ERROR, "A file with the md5sum '${md5sum}' and sample type '${sampleTypeName}' already exists for project '${project.name}'.", "At least one file with the md5sum and sample type combination exists in the corresponding project.")
+                    Level.ERROR, "A file with the md5sum '${md5sum}' and sample type '${projectSampleType.sampleType.name}' already exists " +
+                    "for project '${projectSampleType.project.name}'.",
+                    "At least one file with the md5sum and sample type combination exists in the corresponding project.")
         }
     }
 }
