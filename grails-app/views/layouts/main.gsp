@@ -76,9 +76,13 @@
                                                 code="otp.menu.sampleIdentifierOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message
-                                                    code="projectOverview.projectInfos"/></g:link></li>
-                                            <li class="allGranted"><g:link controller="projectRequest" action="index"><g:message
+                                                    code="projectOverview.projectInfos" /></g:link></li>
+                                        </sec:ifAnyGranted>
+                                        <sec:ifAnyGranted roles="ROLE_TEST_PI">
+                                            <li class="testGranted"><g:link controller="projectRequest" action="index"><g:message
                                                     code="otp.menu.projectRequest"/></g:link></li>
+                                        </sec:ifAnyGranted>
+                                        <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectFields" action="index"><g:message
                                                     code="otp.menu.configureProjectInformation"/></g:link></li>
                                         </sec:ifAnyGranted>

@@ -31,6 +31,9 @@ class Role implements Entity {
     static final String ROLE_ADMIN = 'ROLE_ADMIN'
     static final String ROLE_OPERATOR = 'ROLE_OPERATOR'
     static final String ROLE_SWITCH_USER = 'ROLE_SWITCH_USER'
+    static final String ROLE_TEST_BIOINFORMATICAN = 'ROLE_TEST_BIOINFORMATICAN'
+    static final String ROLE_TEST_SUBMITTER = 'ROLE_TEST_SUBMITTER'
+    static final String ROLE_TEST_PI = 'ROLE_TEST_PI'
 
     static final List<String> REQUIRED_ROLES = [
             ROLE_ADMIN,
@@ -44,6 +47,12 @@ class Role implements Entity {
     static final List<String> ADMINISTRATIVE_ROLES = [
             ROLE_ADMIN,
             ROLE_OPERATOR,
+    ].asImmutable()
+
+    static final List<String> TEST_ROLES = [
+            ROLE_TEST_BIOINFORMATICAN,
+            ROLE_TEST_SUBMITTER,
+            ROLE_TEST_PI,
     ].asImmutable()
 
     String authority

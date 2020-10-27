@@ -37,7 +37,7 @@ import de.dkfz.tbi.util.MultiObjectValueSource
 
 import java.time.LocalDate
 
-@Secured('ROLE_OPERATOR')
+@Secured(['ROLE_OPERATOR', 'ROLE_TEST_PI'])
 class ProjectRequestController {
 
     static allowedMethods = [

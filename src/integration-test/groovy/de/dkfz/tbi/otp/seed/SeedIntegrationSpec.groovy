@@ -30,7 +30,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
@@ -59,17 +58,6 @@ class SeedIntegrationSpec extends Specification {
 
         then:
         SeqTypeService.allAlignableSeqTypes
-    }
-
-    void "seed, ensure that all needed acl Roles are created"() {
-        when:
-        seedService.installSeedData('application.seed-Role')
-        List<String> unknownRoles = Role.IMPORTANT_ROLES.findAll {
-            CollectionUtils.atMostOneElement(Role.findAllByAuthority(it)) == null
-        }
-
-        then:
-        unknownRoles.empty
     }
 
     void "seed, ensure that all needed FileTypes are created"() {

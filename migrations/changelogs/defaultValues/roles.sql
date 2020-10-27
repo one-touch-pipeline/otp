@@ -20,20 +20,28 @@
  * SOFTWARE.
  */
 
-databaseChangeLog = {
-    changeSet(author: "", id: "workflows", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/workflow.sql')
-    }
+-- basic roles
+INSERT INTO role (id, version, authority, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, 'ROLE_ADMIN', now(), now())
+ON CONFLICT DO NOTHING;
 
-    changeSet(author: "", id: "project-roles", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/project-roles.sql')
-    }
+INSERT INTO role (id, version, authority, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, 'ROLE_OPERATOR', now(), now())
+ON CONFLICT DO NOTHING;
 
-    include file: 'changelogs/defaultValues/createSpeciesAndStrains.groovy'
+INSERT INTO role (id, version, authority, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, 'ROLE_SWITCH_USER', now(), now())
+ON CONFLICT DO NOTHING;
 
-    include file: 'changelogs/defaultValues/tool-names-of-reference-genome-indexes.sql'
+-- additional roles
+INSERT INTO role (id, version, authority, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, 'ROLE_TEST_PI', now(), now())
+ON CONFLICT DO NOTHING;
 
-    changeSet(author: "albrecjp", id: "otp-796", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/roles.sql')
-    }
-}
+INSERT INTO role (id, version, authority, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, 'ROLE_TEST_BIOINFORMATICAN', now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO role (id, version, authority, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, 'ROLE_TEST_SUBMITTER', now(), now())
+ON CONFLICT DO NOTHING;
