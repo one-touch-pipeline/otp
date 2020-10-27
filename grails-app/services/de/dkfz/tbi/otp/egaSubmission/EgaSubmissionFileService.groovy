@@ -37,6 +37,8 @@ import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 import java.nio.file.*
+import java.nio.file.attribute.PosixFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
@@ -240,7 +242,10 @@ class EgaSubmissionFileService {
         filesToCreate.each {
             Path path = basePath.resolve(it.key)
             Files.deleteIfExists(path)
-            fileService.createFileWithContent(path, it.value, submission.project.realm)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, submission.project.realm,
+                    "", FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+            fileService.createFileWithContent(path, it.value, submission.project.realm,
+                    [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE] as Set<PosixFileAttributes>)
         }
     }
 

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 
 import java.nio.file.*
+import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 
 @Transactional
@@ -119,7 +120,10 @@ class ProjectInfoService {
         String absoluteFilePath = "${projectInfo.project.projectDirectory.absolutePath}/${ProjectService.PROJECT_INFO}/${projectInfo.fileName}"
         Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(absoluteFilePath)
 
-        fileService.createFileWithContent(file, content, projectInfo.project.realm, [PosixFilePermission.OWNER_READ] as Set)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(file.parent, projectInfo.project.realm,
+                '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createFileWithContent(file, content, projectInfo.project.realm,
+                [PosixFilePermission.OWNER_READ] as Set<PosixFileAttributes>)
         executionHelperService.setGroup(projectInfo.project.realm, new File(absoluteFilePath), projectInfo.project.unixGroup)
 
         return file
