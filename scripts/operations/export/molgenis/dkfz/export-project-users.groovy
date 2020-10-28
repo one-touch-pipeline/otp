@@ -61,7 +61,9 @@ class ExportHelper {
     }
 
     static String csvJoin(List<String> columns) {
-        return columns.collect { "\"${(it as String)?.replaceAll("\"", "\"\"")}\"" }.join(MolgenisGlobal.SEPARATOR_COLUMN)
+        return columns.collect {
+            "\"${(it as String)?.replaceAll("\"", "'")?.replaceAll("[\n\r\t]", " ")}\""
+        }.join(MolgenisGlobal.SEPARATOR_COLUMN)
     }
 
     String buildHeader() {
