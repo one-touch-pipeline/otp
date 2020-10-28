@@ -356,15 +356,27 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
     void "deleteProcessParameters"() {
         given:
-        ProcessParameter processParameter = DomainFactory.createProcessParameter(className: SeqTrack.name)
-        processParameter.process.finished = true
-        processParameter.process.save(flush: true)
+        ProcessParameter processParameter1 = DomainFactory.createProcessParameter(className: SeqTrack.name)
+        ProcessParameter processParameter2 = DomainFactory.createProcessParameter(className: SeqTrack.name)
+        ProcessParameter processParameter3 = DomainFactory.createProcessParameter(className: SeqTrack.name)
+        DomainFactory.createProcessParameter(className: SeqTrack.name)
+
+        processParameter1.process.finished = true
+        processParameter1.process.save(flush: true)
+
+        processParameter2.process.restarted = processParameter1.process
+        processParameter2.process.finished = true
+        processParameter2.process.save(flush: true)
+
+        processParameter3.process.restarted = processParameter2.process
+        processParameter3.process.finished = true
+        processParameter3.process.save(flush: true)
 
         when:
-        deletionService.deleteProcessParameters([processParameter])
+        deletionService.deleteProcessParameters([processParameter1])
 
         then:
-        ProcessParameter.count() == 0
-        Process.count() == 0
+        ProcessParameter.count() == 1
+        Process.count() == 1
     }
 }

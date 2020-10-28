@@ -157,25 +157,41 @@ class DeletionService {
         return [deletionScript.toString(), deletionScriptOtherUser.toString()]
     }
 
-    void deleteProcessParameters(List<ProcessParameter> processParameters) {
+    Set<ProcessParameter>collectProcessParametersRecursively(
+            Set<ProcessParameter> processParametersRecursionSet,
+            List<ProcessParameter> processParameters
+    ) {
+        processParametersRecursionSet.addAll(processParameters)
         processParameters.each {
-            deleteProcessParameter(it)
+            Process.findAllByRestarted(it.process).each {
+                collectProcessParametersRecursively(processParametersRecursionSet, ProcessParameter.findAllByProcess(it)).each {
+                    processParametersRecursionSet << it
+                }
+            }
         }
+        return processParametersRecursionSet
     }
 
-    private void deleteProcessParameter(ProcessParameter processParameter) {
-        if (processParameter) {
-            Process process = processParameter.process
-            processParameter.delete(flush: true)
-            deleteProcess(process)
+    void deleteProcessParameters(List<ProcessParameter> processParameters) {
+        Set<ProcessParameter> processParametersSet = collectProcessParametersRecursively([] as Set<ProcessParameter>, processParameters)
+        Set<Process> processSet = processParametersSet.collect { it.process }
+        processParametersSet.each {
+            it.delete(flush: true)
+        }
+        // delete all associations between processes
+        // processes can only be safely deleted if no associations between them left
+        processSet.each {
+            it.restarted = null
+            it.save(flush: true)
+        }.each {
+            deleteProcess(it)
         }
     }
 
     private void deleteProcess(Process process) {
         assert process.finished : "process with id ${process.id} not finished"
-        Process.findAllByRestarted(process).each {
-            deleteProcess(it)
-        }
+        assert !ProcessParameter.findAllByProcess(process) : "process with id ${process.id} has ProcessParameter attached to it. Delete association first."
+
         deleteProcessingSteps(ProcessingStep.findAllByProcess(process))
         process.delete(flush: true)
     }
