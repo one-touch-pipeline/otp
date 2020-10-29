@@ -245,7 +245,6 @@ class NotificationCreator {
     private List<String> getPathsToDelete(OtrsTicket otrsTicket) {
         List<String> allPaths = []
         otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).each { MetaDataFile metaDataFile ->
-            allPaths << metaDataFile.fullPath
             List<String> dataFilePaths = metaDataFile.fastqImportInstance.dataFiles*.fullInitialPath
             allPaths.addAll(dataFilePaths)
         }

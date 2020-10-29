@@ -1670,12 +1670,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             DataFile dataFile = createDataFile()
             FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: [dataFile])
 
-            MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
 
             String expectedHeader = "Import source ready for deletion [${otrsTicket.prefixedTicketNumber}]"
 
             String expectedEnd = [
-                    metaDataFile.fullPath,
                     dataFile.fullInitialPath,
             ].collect { "rm ${it}" }.join("\n")
 
@@ -1723,7 +1722,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
     }
 
-    void "getPathsToDelete returns the paths of all MetaDataFiles and DataFiles associated with the ticket"() {
+    void "getPathsToDelete returns the paths of all DataFiles associated with the ticket"() {
         given:
         OtrsTicket otrsTicket
         List<String> expected = []
@@ -1737,12 +1736,9 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             List<DataFile> dataFilesB = [createDataFile(), createDataFile(), createDataFile()]
             FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesB)
 
-            List<MetaDataFile> metaDataFiles = [
-                    DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA),
-                    DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB),
-            ]
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA)
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
 
-            expected.addAll(metaDataFiles*.fullPath)
             expected.addAll(dataFilesA*.fullInitialPath)
             expected.addAll(dataFilesB*.fullInitialPath)
         }
@@ -1775,9 +1771,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             FastqImportInstance fastqImportInstanceB = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFilesB + dataFilesBBlacklisted)
 
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePath: "${blacklisted}/path/metaDataFile")
-            MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
 
-            expected.addAll(metaDataFile.fullPath)
             expected.addAll(dataFilesA*.fullInitialPath)
             expected.addAll(dataFilesB*.fullInitialPath)
         }
