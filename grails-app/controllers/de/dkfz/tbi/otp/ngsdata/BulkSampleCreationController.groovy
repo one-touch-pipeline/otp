@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.util.spreadsheet.Delimiter
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class BulkSampleCreationController {
 
     static allowedMethods = [

@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ConfigureAceseqPipelineController extends AbstractConfigureRoddyPipelineController {
 
     @Override

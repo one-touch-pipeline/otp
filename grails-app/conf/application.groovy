@@ -108,26 +108,16 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
         [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
         [pattern: "/plugins/**"                                          , access: ["denyAll"]],
-        [pattern: "/projectOverview/mmmlIdentifierMapping/**"            , access: ["hasRole('ROLE_MMML_MAPPING')"]],
         [pattern: "/login/impersonate"                                   , access: ["hasRole('ROLE_SWITCH_USER')"]],
-
-        // restricted access to general pages
-        [pattern: "/projectInfo/list"                                    , access: ["hasRole('ROLE_OPERATOR')"]],
 
         // publicly available pages
         [pattern: "/assets/**"                                           , access: ["permitAll"]],
         [pattern: "/grails-errorhandler/**"                              , access: ["permitAll"]],
-        [pattern: "/login/**"                                            , access: ["permitAll"]],
-        [pattern: "/logout/**"                                           , access: ["permitAll"]],
-        [pattern: "/document/download/**"                                , access: ["permitAll"]],
-        [pattern: "/info/**"                                             , access: ["permitAll"]],
-        [pattern: "/privacyPolicy/index"                                 , access: ["permitAll"]],
-        [pattern: "/root/intro*"                                         , access: ["permitAll"]],
         [pattern: "/"                                                    , access: ["permitAll"]],
-        [pattern: "/metadataImport/autoImport"                           , access: ["permitAll"]],
 
         // regular pages with access for logged-in users, protected by annotations in services
-        [pattern: "/**"                                                  , access:  ["isFullyAuthenticated()"]],
+        // Hence, default behavior is to denyAll and explicitly allow access in the services
+        [pattern: "/**"                                                  , access:  ["denyAll"]],
 ]
 
 // hierarchy of roles

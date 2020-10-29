@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationException
 import groovy.transform.Canonical
 
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+@Secured('isFullyAuthenticated()')
 class CellRangerController {
     CellRangerConfigurationService cellRangerConfigurationService
     ProjectSelectionService projectSelectionService

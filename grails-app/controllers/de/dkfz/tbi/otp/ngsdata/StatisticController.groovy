@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
+@Secured('isFullyAuthenticated()')
 class StatisticController {
 
     static final String ALL_PROJECTS = "All projects"

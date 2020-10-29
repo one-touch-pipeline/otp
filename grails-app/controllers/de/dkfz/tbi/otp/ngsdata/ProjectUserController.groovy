@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import org.apache.commons.lang.WordUtils
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@Secured('isFullyAuthenticated()')
 class ProjectUserController implements CheckAndCall {
 
     ProjectSelectionService projectSelectionService

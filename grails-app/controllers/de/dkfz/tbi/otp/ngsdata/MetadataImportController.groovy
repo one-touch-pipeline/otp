@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.Immutable
 import groovy.transform.TupleConstructor
@@ -51,6 +52,7 @@ import java.nio.file.FileSystem
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class MetadataImportController implements CheckAndCall {
 
     static allowedMethods = [
@@ -226,6 +228,7 @@ class MetadataImportController implements CheckAndCall {
         render dataToRender as JSON
     }
 
+    @Secured('permitAll')
     def autoImport(String secret) {
         String expectedSecret = configService.autoImportSecret
         if (!secret || !expectedSecret || secret != expectedSecret) {

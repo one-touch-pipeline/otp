@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.project.Project
@@ -28,6 +30,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 
 import java.text.SimpleDateFormat
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class StatisticsController {
     ProjectService projectService
     UserProjectRoleService userProjectRoleService

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import java.nio.file.Path
 
+@Secured('isFullyAuthenticated()')
 class SnvController extends AbstractAnalysisController {
 
     SnvResultsService snvResultsService

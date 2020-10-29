@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormat
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobDetailController {
 
     ClusterJobService clusterJobService

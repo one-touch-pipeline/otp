@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.NotificationDigestService
 import de.dkfz.tbi.otp.project.Project
 
-@Secured('ROLE_OPERATOR')
+@Secured("hasRole('ROLE_OPERATOR')")
 class NotificationController implements CheckAndCall {
 
     OtrsTicketService otrsTicketService

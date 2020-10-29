@@ -26,7 +26,7 @@ import grails.util.Pair
 
 import java.sql.Timestamp
 
-@Secured('ROLE_ADMIN')
+@Secured("hasRole('ROLE_ADMIN')")
 class WorkflowRunOverviewController {
 
     static allowedMethods = [

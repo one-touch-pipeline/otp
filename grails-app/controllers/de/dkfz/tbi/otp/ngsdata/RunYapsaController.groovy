@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+@Secured('isFullyAuthenticated()')
 class RunYapsaController extends AbstractAnalysisController {
 
     RunYapsaResultsService runYapsaResultsService

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
@@ -39,6 +40,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ProjectConfigController implements CheckAndCall {
 
     CommentService commentService
@@ -50,6 +52,7 @@ class ProjectConfigController implements CheckAndCall {
 
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
 
+    @Secured('isFullyAuthenticated()')
     Map index() {
         Project project = projectSelectionService.selectedProject
         String projectRequestComments = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
@@ -148,6 +151,7 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
+    @Secured('isFullyAuthenticated()')
     JSON saveProjectComment(CommentCommand cmd) {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)

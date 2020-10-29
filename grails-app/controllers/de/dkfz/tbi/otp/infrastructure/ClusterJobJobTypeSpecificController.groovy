@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import org.joda.time.LocalDate
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormat
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobJobTypeSpecificController {
 
     static final int GIGABASES_TO_BASES = 1000000000

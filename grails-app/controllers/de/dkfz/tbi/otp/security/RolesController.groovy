@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.security
 
+import grails.plugin.springsecurity.annotation.Secured
+
+@Secured("hasRole('ROLE_ADMIN')")
 class RolesController {
 
     RolesService rolesService

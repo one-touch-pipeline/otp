@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.TupleConstructor
 import org.joda.time.LocalDate
 
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobGeneralController {
 
     @TupleConstructor

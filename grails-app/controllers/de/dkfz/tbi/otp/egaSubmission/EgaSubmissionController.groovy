@@ -37,7 +37,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import static de.dkfz.tbi.otp.administration.Document.FormatType.CSV
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
-@Secured('ROLE_OPERATOR')
+@Secured("hasRole('ROLE_OPERATOR')")
 class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     static allowedMethods = [

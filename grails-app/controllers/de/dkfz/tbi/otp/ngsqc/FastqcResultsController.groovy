@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsqc
 
+import grails.plugin.springsecurity.annotation.Secured
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -38,6 +39,7 @@ class RenderFileCommand {
     }
 }
 
+@Secured('isFullyAuthenticated()')
 class FastqcResultsController {
 
     FastqcDataFilesService fastqcDataFilesService

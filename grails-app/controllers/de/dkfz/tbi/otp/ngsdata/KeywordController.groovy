@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class KeywordController implements CheckAndCall {
 
     KeywordService keywordService

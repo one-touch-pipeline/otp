@@ -22,6 +22,7 @@
 
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.administration.DocumentService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.StatisticService
 /*
  * show information about OTP
  */
+@Secured('permitAll')
 class InfoController {
     DocumentService documentService
     StatisticService statisticService

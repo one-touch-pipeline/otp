@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.administration
 
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class DocumentController {
 
     static allowedMethods = [
@@ -64,6 +66,7 @@ class DocumentController {
         redirect(action: "manage")
     }
 
+    @Secured('permitAll')
     def download(DownloadCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)

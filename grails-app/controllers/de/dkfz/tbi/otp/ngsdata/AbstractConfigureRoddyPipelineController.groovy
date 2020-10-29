@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 
+@Secured("hasRole('ROLE_OPERATOR')")
 abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigurePipelineController implements ConfigurePipelineHelper {
 
     static allowedMethods = [

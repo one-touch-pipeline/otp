@@ -47,7 +47,7 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
     }
 }
 
-@Secured(['ROLE_OPERATOR'])
+@Secured("hasRole('ROLE_OPERATOR')")
 class ProjectProgressController {
 
     ProjectService projectService

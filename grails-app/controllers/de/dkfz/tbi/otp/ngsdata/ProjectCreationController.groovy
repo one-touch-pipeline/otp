@@ -43,7 +43,7 @@ import de.dkfz.tbi.util.MultiObjectValueSource
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Secured(['ROLE_OPERATOR'])
+@Secured("hasRole('ROLE_OPERATOR')")
 class ProjectCreationController {
     static allowedMethods = [
             index: "GET",

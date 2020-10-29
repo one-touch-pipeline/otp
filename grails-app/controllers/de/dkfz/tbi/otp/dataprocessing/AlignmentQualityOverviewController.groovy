@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.*
@@ -42,6 +43,7 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Secured('isFullyAuthenticated()')
 class AlignmentQualityOverviewController implements CheckAndCall {
 
     static final String CHR_X_HG19 = 'chrX'

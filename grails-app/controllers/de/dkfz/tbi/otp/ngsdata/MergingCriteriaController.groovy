@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -29,11 +30,13 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.project.Project
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class MergingCriteriaController {
 
     MergingCriteriaService mergingCriteriaService
     ProjectSelectionService projectSelectionService
 
+    @Secured('isFullyAuthenticated()')
     def projectAndSeqTypeSpecific(SeqType seqType) {
         Project project = projectSelectionService.selectedProject
         MergingCriteria mergingCriteria = mergingCriteriaService.findMergingCriteria(project, seqType)

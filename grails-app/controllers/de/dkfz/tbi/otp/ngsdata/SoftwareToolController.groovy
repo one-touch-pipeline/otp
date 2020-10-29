@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class SoftwareToolController {
 
     static allowedMethods = [

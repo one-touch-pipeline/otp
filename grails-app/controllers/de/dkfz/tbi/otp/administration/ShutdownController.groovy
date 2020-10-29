@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
-@Secured(['ROLE_ADMIN'])
+@Secured("hasRole('ROLE_ADMIN')")
 class ShutdownController {
     ShutdownService shutdownService
 

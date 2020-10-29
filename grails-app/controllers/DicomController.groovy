@@ -19,6 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import grails.plugin.springsecurity.annotation.Secured
+
+@Secured("hasRole('ROLE_ADMIN')")
 class DicomController {
 
     def dictionary() {

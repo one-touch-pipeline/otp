@@ -41,7 +41,7 @@ import java.text.SimpleDateFormat
  * There is a list of users which is rendered in a dataTable and allows to modify
  * the users' properties.
  */
-@Secured('ROLE_ADMIN')
+@Secured("hasRole('ROLE_ADMIN')")
 class UserAdministrationController implements CheckAndCall {
 
     static allowedMethods = [

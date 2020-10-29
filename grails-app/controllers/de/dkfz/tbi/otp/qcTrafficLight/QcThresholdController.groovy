@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.qcTrafficLight
 
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -28,6 +29,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class QcThresholdController {
     QcThresholdService qcThresholdService
     ProjectSelectionService projectSelectionService
@@ -53,6 +55,7 @@ class QcThresholdController {
         ]
     }
 
+    @Secured('isFullyAuthenticated()')
     def projectConfiguration() {
         Project project = projectSelectionService.selectedProject
 
@@ -67,7 +70,7 @@ class QcThresholdController {
         ]
     }
 
-
+    @Secured('isFullyAuthenticated()')
     def create(CreateCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             qcThresholdService.createThreshold(
@@ -80,6 +83,7 @@ class QcThresholdController {
         })
     }
 
+    @Secured('isFullyAuthenticated()')
     def update(UpdateCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             qcThresholdService.updateThreshold(cmd.qcThreshold, cmd.condition,
@@ -90,10 +94,10 @@ class QcThresholdController {
         })
     }
 
+    @Secured('isFullyAuthenticated()')
     def delete(DeleteCommand cmd) {
         checkErrorAndCallMethod(cmd, { qcThresholdService.deleteThreshold(cmd.qcThreshold) })
     }
-
 
     private void checkErrorAndCallMethod(Object cmd, Closure<Errors> method) {
         if (cmd.hasErrors()) {

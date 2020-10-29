@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationException
 import groovy.transform.Canonical
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
+@Secured("hasRole('ROLE_ADMIN')")
 class ProcessingOptionController {
 
     static allowedMethods = [

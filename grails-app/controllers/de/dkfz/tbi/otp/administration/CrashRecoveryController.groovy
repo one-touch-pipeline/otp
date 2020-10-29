@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
-@Secured(['ROLE_ADMIN'])
+@Secured("hasRole('ROLE_ADMIN')")
 class CrashRecoveryController {
 
     CrashRecoveryService crashRecoveryService

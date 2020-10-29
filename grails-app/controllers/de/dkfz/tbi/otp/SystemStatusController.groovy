@@ -26,7 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.workflowExecution.*
 
-@Secured('ROLE_ADMIN')
+@Secured("hasRole('ROLE_ADMIN')")
 class SystemStatusController implements CheckAndCall {
 
     WorkflowSystemService workflowSystemService

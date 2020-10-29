@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 
+@Secured('isFullyAuthenticated()')
 class ProcessingThresholdController {
 
     static allowedMethods = [
@@ -91,7 +92,7 @@ class ProcessingThresholdController {
         ]
     }
 
-    @Secured(['ROLE_OPERATOR'])
+    @Secured("hasRole('ROLE_OPERATOR')")
     def update(ProcThresholdsCommand cmd) {
         assert cmd.validate()
         Project project = projectSelectionService.requestedProject

@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ProcessParameterService
 
+@Secured('isFullyAuthenticated()')
 class SeqTrackController {
 
     SeqTrackService seqTrackService

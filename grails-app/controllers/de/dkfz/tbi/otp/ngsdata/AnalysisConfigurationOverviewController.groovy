@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -32,6 +34,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Secured('isFullyAuthenticated()')
 class AnalysisConfigurationOverviewController {
 
     static allowedMethods = [

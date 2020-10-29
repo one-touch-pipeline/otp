@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.text.SimpleDateFormat
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class RunController {
 
     LsdfFilesService lsdfFilesService

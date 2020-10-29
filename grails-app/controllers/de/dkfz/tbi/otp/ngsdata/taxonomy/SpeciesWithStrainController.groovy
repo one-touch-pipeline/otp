@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class SpeciesWithStrainController {
 
     SpeciesWithStrainService speciesWithStrainService

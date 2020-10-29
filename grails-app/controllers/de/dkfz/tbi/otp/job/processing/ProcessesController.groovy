@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.async.Promise
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsNameUtils
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -41,6 +42,7 @@ import de.dkfz.tbi.util.TimestampHelper
 import static grails.async.Promises.task
 import static grails.async.Promises.waitAll
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ProcessesController {
     static allowedMethods = [
             restartWithProcess : "POST",

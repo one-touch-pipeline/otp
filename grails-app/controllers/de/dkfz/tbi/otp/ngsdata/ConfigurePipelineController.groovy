@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.project.RoddyConfiguration
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     ProcessingOptionService processingOptionService

@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 /**
  * Controller for enabling/disabling the auto-refresh functionality
  * of List Views.
  */
+@Secured('isFullyAuthenticated()')
 class RefreshController {
 
     /**

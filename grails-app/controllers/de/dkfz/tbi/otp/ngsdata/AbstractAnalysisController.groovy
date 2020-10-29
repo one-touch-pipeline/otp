@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 
+@Secured('isFullyAuthenticated()')
 abstract class AbstractAnalysisController {
 
     Map results() {

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import org.springframework.web.multipart.MultipartFile
@@ -36,6 +37,7 @@ import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ProjectInfoController implements CheckAndCall {
 
     static allowedMethods = [

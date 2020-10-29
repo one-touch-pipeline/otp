@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
+@Secured('isFullyAuthenticated()')
 class HomeController {
 
     HomeService homeService

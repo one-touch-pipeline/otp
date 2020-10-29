@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class MetaDataFieldsController implements CheckAndCall {
 
     static allowedMethods = [

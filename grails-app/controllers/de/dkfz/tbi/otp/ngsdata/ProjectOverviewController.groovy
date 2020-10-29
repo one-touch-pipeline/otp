@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+@Secured('isFullyAuthenticated()')
 class ProjectOverviewController {
 
     ProjectOverviewService projectOverviewService

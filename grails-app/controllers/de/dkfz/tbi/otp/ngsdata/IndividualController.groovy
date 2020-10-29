@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.json.JsonSlurper
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class IndividualController {
 
     IndividualService individualService
@@ -42,6 +44,7 @@ class IndividualController {
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
 
+    @Secured('isFullyAuthenticated()')
     def show() {
         Individual individual
         if (params.id) {
@@ -67,6 +70,7 @@ class IndividualController {
         ]
     }
 
+    @Secured('isFullyAuthenticated()')
     def list() {
         return [
                 tableHeader    : IndividualColumn.values()*.message,
@@ -83,6 +87,7 @@ class IndividualController {
         ]
     }
 
+    @Secured('isFullyAuthenticated()')
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
@@ -104,6 +109,7 @@ class IndividualController {
         render dataToRender as JSON
     }
 
+    @Secured("hasRole('ROLE_OPERATOR')")
     def insert() {
         List<Individual.Type> individualTypes = Individual.Type.values()
         List<String> sampleTypes = individualService.getSampleTypeNames()

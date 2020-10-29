@@ -25,6 +25,7 @@ import grails.converters.JSON
 import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
+@Secured('permitAll')
 class RootController {
     ProjectService projectService
     ProjectSelectionService projectSelectionService

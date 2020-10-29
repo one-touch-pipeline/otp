@@ -22,10 +22,12 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonBuilder
 
 import de.dkfz.tbi.otp.administration.LdapService
 
+@Secured('isFullyAuthenticated()')
 class LdapController {
 
     static allowedMethods = [

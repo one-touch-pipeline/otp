@@ -22,11 +22,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.CommentCommand
 
+@Secured('isFullyAuthenticated()')
 class DataFileController {
 
     LsdfFilesService lsdfFilesService

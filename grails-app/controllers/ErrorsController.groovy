@@ -21,9 +21,11 @@
  */
 
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.annotation.Secured
 
 import javax.servlet.http.HttpServletResponse
 
+@Secured('isFullyAuthenticated()')
 class ErrorsController {
     SpringSecurityService springSecurityService
 

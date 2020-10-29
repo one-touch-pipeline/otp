@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.project.Project
 
+@Secured("hasRole('ROLE_OPERATOR')")
 class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipelineController {
 
     static allowedMethods = [
