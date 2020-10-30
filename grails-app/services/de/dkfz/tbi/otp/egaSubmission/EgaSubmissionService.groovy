@@ -223,7 +223,7 @@ class EgaSubmissionService {
         List samplesWithSeqType = []
         submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
             submission.samplesToSubmit.remove(it)
-            samplesWithSeqType.add("${it.sample.id}${it.seqType.toString()}")
+            samplesWithSeqType.add("${it.sample.id}${it.seqType}")
             it.delete(flush: false)
         }
         submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES

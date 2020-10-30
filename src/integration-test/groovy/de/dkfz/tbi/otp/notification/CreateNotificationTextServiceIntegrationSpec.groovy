@@ -219,7 +219,7 @@ ${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalS
 
         String expected = """
 base notification
-stepInformation:${processingStep.toString()}
+stepInformation:${processingStep}
 seqCenterComment:${expectedSeqCenterComment}
 faq:
 """
@@ -309,7 +309,7 @@ ${otrsTicketSeqCenterComment}
 
         String expected = """
 base notification
-stepInformation:${processingStep.toString()}
+stepInformation:${processingStep}
 seqCenterComment:${expectedSeqCenterComment}
 faq:
 """

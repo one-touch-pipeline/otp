@@ -326,7 +326,7 @@ class MetadataImportService {
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode, String ticketNumber,
                                               String seqCenterComment, boolean automaticNotification) {
         Long timeImportStarted = System.currentTimeMillis()
-        log.debug("import started ${context.metadataFile.fileName.toString()} ${timeImportStarted}")
+        log.debug("import started ${context.metadataFile.fileName} ${timeImportStarted}")
         FastqImportInstance fastqImportInstance = new FastqImportInstance(
                 otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,

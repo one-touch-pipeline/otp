@@ -86,7 +86,7 @@ class ProjectInfo implements Entity {
     }
 
     String getPath() {
-        return "${project.projectDirectory.toString()}/${ProjectService.PROJECT_INFO}/${fileName}"
+        return "${project.projectDirectory}/${ProjectService.PROJECT_INFO}/${fileName}"
     }
 
     /** is this document a Data Transfer Agreement? */

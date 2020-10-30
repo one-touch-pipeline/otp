@@ -35,6 +35,7 @@ final int HIGH = 2
 final int MIDDLE = 3
 final int LOW = 3
 
+// rules sorted according this list: //https://codenarc.org/StarterRuleSet-AllRulesByCategory.groovy.txt
 
 ruleset {
     description '''
@@ -341,6 +342,10 @@ All the Rules that will be used for OTP
     HashtableIsObsolete {
         priority = CRITICAL
     }
+    ImplicitReturnStatement {
+        priority = LOW
+    }
+
     //ImplicitClosureParameter //There are more cases where this would deteriorate code quality instead of improving it
     IfStatementCouldBeTernary {
         priority = MIDDLE
@@ -438,6 +443,15 @@ All the Rules that will be used for OTP
     NestedForLoop {
         priority = HIGH
     }
+    OptionalCollectionReturnType {
+        priority = CRITICAL
+    }
+    OptionalField {
+        priority = CRITICAL
+    }
+    OptionalMethodParameter {
+        priority = CRITICAL
+    }
     PrivateFieldCouldBeFinal {
         priority = MIDDLE
     }
@@ -473,6 +487,9 @@ All the Rules that will be used for OTP
     // rulesets/enhanced.xml
     CloneWithoutCloneable {
         priority = DEFAULT
+    }
+    JUnitAssertEqualsConstantActualValue {
+        priority = HIGH
     }
     MissingOverrideAnnotation {
         priority = CRITICAL
@@ -682,6 +699,9 @@ All the Rules that will be used for OTP
     // rulesets/grails.xml
     //GrailsDomainHasEquals //Entity provides equals()
     //GrailsDomainHasToString //we don't do this in OTP
+    GrailsDomainGormMethods {
+        priority = LOW
+    }
     GrailsDomainReservedSqlKeywordName {
         priority = HIGH
     }

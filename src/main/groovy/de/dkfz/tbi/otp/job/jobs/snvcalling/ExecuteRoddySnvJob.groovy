@@ -82,7 +82,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
         cValues.add("${getChromosomeIndexParameterWithoutMitochondrium(roddySnvCallingInstance.referenceGenome)}")
-        cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory).toString()}")
+        cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory)}")
 
         return cValues
     }

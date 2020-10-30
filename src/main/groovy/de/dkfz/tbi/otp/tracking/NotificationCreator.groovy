@@ -170,7 +170,7 @@ class NotificationCreator {
 
             String content = createNotificationTextService.notification(ticket, status, notificationStep, project)
             if (!content) {
-                log.debug("No Email was sent! Subject would have been '${subject.toString()}.")
+                log.debug("No Email was sent! Subject would have been '${subject}.")
                 return
             }
             mailHelperService.sendEmail(subject.toString(), content, recipients)
@@ -206,7 +206,7 @@ class NotificationCreator {
 
         StringBuilder content = new StringBuilder()
         content.append("""\
-        |${status.toString()}
+        |${status}
         |
         |${seqTracks.size()} SeqTrack(s) in ticket ${ticket.ticketNumber}:
         |""".stripMargin())

@@ -94,7 +94,7 @@ abstract class ScheduledJob {
 
         StringWriter sw = new StringWriter()
         t.printStackTrace(new PrintWriter(sw))
-        String body = "${LocalDateTime.now()}\n\n${sw.toString()}"
+        String body = "${LocalDateTime.now()}\n\n${sw}"
 
         String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)
 

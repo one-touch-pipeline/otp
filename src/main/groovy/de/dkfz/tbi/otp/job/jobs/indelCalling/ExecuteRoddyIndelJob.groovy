@@ -75,7 +75,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         cValues.add("REFERENCE_GENOME:${referenceGenomeFastaFile.path}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
-        cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory).toString()}")
+        cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory)}")
         cValues.add("VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}")
         cValues.add("VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}")
         cValues.add("SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}")

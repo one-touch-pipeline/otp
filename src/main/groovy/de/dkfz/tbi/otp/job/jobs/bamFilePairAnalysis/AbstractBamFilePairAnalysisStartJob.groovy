@@ -76,7 +76,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                     analysis.save(flush: true)
                     prepareCreatingTheProcessAndTriggerTracking(analysis)
                     createProcess(analysis)
-                    log.debug "Analysis started for: ${analysis.toString()}"
+                    log.debug "Analysis started for: ${analysis}"
                 }
             }
         }

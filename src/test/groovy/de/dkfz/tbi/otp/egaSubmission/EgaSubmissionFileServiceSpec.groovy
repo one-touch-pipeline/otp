@@ -106,12 +106,12 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${EGA_SAMPLE_ALIAS.value}," +
                 "${FILE_TYPE.value}\n" +
                 "${sampleSubmissionObject1.sample.individual.displayName}," +
-                "${sampleSubmissionObject1.seqType.toString()}," +
+                "${sampleSubmissionObject1.seqType}," +
                 "${sampleSubmissionObject1.sample.sampleType.displayName}," +
                 "${egaSampleAlias[0]}," +
                 "${fileTypes[0]}\n" +
                 "${sampleSubmissionObject2.sample.individual.displayName}," +
-                "${sampleSubmissionObject2.seqType.toString()}," +
+                "${sampleSubmissionObject2.seqType}," +
                 "${sampleSubmissionObject2.sample.sampleType.displayName}," +
                 "${egaSampleAlias[1]}," +
                 "${fileTypes[1]}\n"

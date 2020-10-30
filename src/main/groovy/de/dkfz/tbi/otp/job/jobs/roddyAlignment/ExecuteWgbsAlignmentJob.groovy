@@ -103,7 +103,7 @@ if [ -e "${metadataFile.path}" ]; then
 fi
 
 cat <<EOD > ${metadataFile.path}
-${builder.toString()}
+${builder}
 EOD
 
 chmod 0444 ${metadataFile.path}

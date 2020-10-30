@@ -134,7 +134,7 @@ class RoddyWorkflowConfigService {
         ]
         String pattern = /^${patternHelper.join("_")}\.xml$/
         Matcher matcher = configFile.fileName.toString() =~ pattern
-        assert matcher.matches(): "The file name '${configFile.toString()}' does not match the pattern '${pattern}'"
+        assert matcher.matches(): "The file name '${configFile}' does not match the pattern '${pattern}'"
         assert config.programVersion.endsWith(":${matcher.group(1)}")
         def configuration = new XmlParser().parseText(configFile.text)
         assert configuration.@name == config.getNameUsedInConfig()

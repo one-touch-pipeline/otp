@@ -138,7 +138,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
 
         linkFileUtils.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
-                command ==~ "chmod 2750 ${linkDir.toString()}"
+                command ==~ "chmod 2750 ${linkDir}"
                 return new ProcessOutput(command, '', 0)
             }
         }

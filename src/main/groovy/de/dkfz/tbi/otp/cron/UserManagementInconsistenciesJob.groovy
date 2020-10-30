@@ -71,7 +71,7 @@ class UserManagementInconsistenciesJob {
                 String unixGroupHeader = """\
                     |Unix Group: ${unixGroup}
                     |Affected Projects: ${projects*.name}
-                    |Affected Users:    ${allUsersOfUnixGroup*.toString()}""".stripMargin()
+                    |Affected Users:    ${allUsersOfUnixGroup}""".stripMargin()
 
                 List<String> userDifferences = []
                 allUsersOfUnixGroup.each { User user ->
