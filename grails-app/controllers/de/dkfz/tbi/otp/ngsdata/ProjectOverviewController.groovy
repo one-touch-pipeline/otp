@@ -25,144 +25,17 @@ import grails.converters.JSON
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
 
 class ProjectOverviewController {
 
     ProjectOverviewService projectOverviewService
     CommentService commentService
     ProjectSelectionService projectSelectionService
-    SampleService sampleService
-    SampleOverviewService sampleOverviewService
 
     Map index() {
         return [:]
-    }
-
-    /**
-     * The basic data for the page projectOverview/laneOverview.
-     * The table content are retrieved asynchronously from {@link #dataTableSourceLaneOverview} via JavaScript.
-     */
-    Map laneOverview() {
-        Project project = projectSelectionService.selectedProject
-
-        List<SeqType> seqTypes = sampleOverviewService.seqTypeByProject(project)
-        List<String> sampleTypes = sampleOverviewService.sampleTypeByProject(project)
-        String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
-
-        return [
-                seqTypes            : seqTypes,
-                sampleTypes         : sampleTypes,
-                sampleType          : sampleTypeName,
-                pipelines           : findPipelines(),
-        ]
-    }
-
-    /**
-     * Retrieves the data shown in the table of projectOverview/laneOverview.
-     * The data structure is:
-     * <pre>
-     * [[mockPid1, sampleTypeName1, one sample identifier for mockPid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
-     * [mockPid1, sampleTypeName2, one sample identifier for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
-     * [mockPid2, sampleTypeName2, one sample identifier for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
-     * ...]
-     * </pre>
-     * The available seqTypes are depend on the selected Project.
-     */
-    JSON dataTableSourceLaneOverview(DataTableCommand cmd) {
-        boolean anythingWithdrawn = false
-        Project project = projectSelectionService.requestedProject
-
-        List<SeqType> seqTypes = sampleOverviewService.seqTypeByProject(project)
-        /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
-        Map dataLastMap = [:]
-
-        /**
-         * returns the InfoAboutOneSample for the given mock pid and sample type name.
-         * The InfoAboutOneSample are stored in a map of map structure in the variable dataLastMap.
-         * If no one exist yet, it is created.
-         */
-        def getDataForMockPidAndSampleTypeName = { String mockPid, String sampleTypeName ->
-            Map<String, InfoAboutOneSample> informationOfSampleMap = dataLastMap[mockPid]
-            if (!informationOfSampleMap) {
-                informationOfSampleMap = [:]
-                dataLastMap.put(mockPid, informationOfSampleMap)
-            }
-            InfoAboutOneSample informationOfSample = informationOfSampleMap[sampleTypeName]
-            if (!informationOfSample) {
-                informationOfSample = new InfoAboutOneSample()
-                informationOfSampleMap.put(sampleTypeName, informationOfSample)
-            }
-            return informationOfSample
-        }
-
-        List lanes = sampleOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project)
-        lanes.each {
-            InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
-            informationOfSample.laneCountRegistered.put(it.seqType.id, it.laneCount)
-        }
-
-        sampleOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
-            InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.individual.mockPid, it.sampleType.name)
-            getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.pipeline.id, []).add(it)
-        }
-
-        sampleService.getSamplesOfProject(project).each { Sample sample ->
-            getDataForMockPidAndSampleTypeName(sample.individual.mockPid, sample.sampleType.name)
-        }
-
-        List data = []
-        dataLastMap.each { String individual, Map<String, InfoAboutOneSample> dataMap ->
-            dataMap.each { String sampleType, InfoAboutOneSample informationOfSample ->
-                List<String> line = [individual, sampleType]
-                seqTypes.each { SeqType seqType ->
-                    line << informationOfSample.laneCountRegistered[seqType.id]
-
-                    Map<Long, Collection<AbstractMergedBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
-
-                    findPipelines().each { Pipeline pipeline ->
-                        String cell = ""
-                        bamFilesPerWorkflow?.get(pipeline.id).each {
-                            String subCell
-                            if (pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
-                                subCell = "${it.numberOfMergedLanes} | ${informationOfSample.laneCountRegistered[seqType.id]}"
-                            } else if (pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED) {
-                                subCell = "<span class='icon-OKAY'></span>"
-                                if (it.coverage) {
-                                    subCell += "| ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
-                                }
-                            } else {
-                                subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
-                            }
-                            if (it.withdrawn) {
-                                anythingWithdrawn = true
-                                subCell = "<span class='withdrawn'>" + subCell + "</span>"
-                            }
-                            cell += "${subCell}<br>"
-                        }
-                        line << cell
-                    }
-                }
-                data << line
-            }
-        }
-
-        Map dataToRender = cmd.dataToRender()
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-        dataToRender.anythingWithdrawn = anythingWithdrawn
-
-        render dataToRender as JSON
-    }
-
-    private List<Pipeline> findPipelines() {
-        Pipeline.findAllByType(Pipeline.Type.ALIGNMENT, [sort: "id"])
     }
 
     JSON individualCountByProject() {
