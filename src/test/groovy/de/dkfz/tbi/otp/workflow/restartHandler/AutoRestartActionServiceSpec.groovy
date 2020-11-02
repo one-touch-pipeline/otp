@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -58,6 +59,26 @@ class AutoRestartActionServiceSpec extends Specification implements ServiceUnitT
         1 * service.errorNotificationService.send(workflowStep, action, _, [errorDefinition])
     }
 
+    void "handleActionAndSendMail, when action is RESTART_WORKFLOW but restart workflow fail, then send mail with action stop"() {
+        given:
+        service.workflowService = Mock(WorkflowService)
+        service.errorNotificationService = Mock(ErrorNotificationService)
+        service.logService = Mock(LogService)
+
+        WorkflowJobErrorDefinition.Action action = WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW
+        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowJobErrorDefinition errorDefinition = createWorkflowJobErrorDefinition([
+                action: action,
+        ])
+
+        when:
+        service.handleActionAndSendMail(workflowStep, [errorDefinition], action, null)
+
+        then:
+        1 * service.workflowService.createRestartedWorkflow(workflowStep, true) >> { throw new OtpRuntimeException('Fail') }
+        1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, [errorDefinition])
+    }
+
     void "handleActionAndSendMail, when action is RESTART_JOB, then restart the job and send mail"() {
         given:
         service.errorNotificationService = Mock(ErrorNotificationService)
@@ -78,6 +99,28 @@ class AutoRestartActionServiceSpec extends Specification implements ServiceUnitT
         1 * service.jobService.searchForJobToRestart(workflowStep, errorDefinition.beanToRestart) >> workflowStepToRestart
         1 * service.jobService.createRestartedJobAfterJobFailure(workflowStepToRestart)
         1 * service.errorNotificationService.send(workflowStep, action, _, [errorDefinition])
+    }
+
+    void "handleActionAndSendMail, when action is RESTART_JOB but job restart fail, then send mail with action STOP"() {
+        given:
+        service.errorNotificationService = Mock(ErrorNotificationService)
+        service.jobService = Mock(JobService)
+        service.logService = Mock(LogService)
+
+        WorkflowJobErrorDefinition.Action action = WorkflowJobErrorDefinition.Action.RESTART_JOB
+        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStepToRestart = createWorkflowStep()
+        WorkflowJobErrorDefinition errorDefinition = createWorkflowJobErrorDefinition([
+                action: action,
+        ])
+
+        when:
+        service.handleActionAndSendMail(workflowStep, [errorDefinition], action, errorDefinition.beanToRestart)
+
+        then:
+        1 * service.jobService.searchForJobToRestart(workflowStep, errorDefinition.beanToRestart) >> workflowStepToRestart
+        1 * service.jobService.createRestartedJobAfterJobFailure(workflowStepToRestart) >> { throw new OtpRuntimeException('Fail') }
+        1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, [errorDefinition])
     }
 
     void "handleActionAndSendMail, when action is STOP, then restart the job and send mail"() {

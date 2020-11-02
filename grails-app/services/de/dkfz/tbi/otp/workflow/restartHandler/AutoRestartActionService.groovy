@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -45,22 +46,49 @@ class AutoRestartActionService {
                                  String beanToRestart) {
         switch (action) {
             case WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW:
-                workflowService.createRestartedWorkflow(workflowStep, true)
-                logService.addSimpleLogEntry(workflowStep, "Create restarted workflow")
+                restartWorkflow(workflowStep, matches)
                 break
             case WorkflowJobErrorDefinition.Action.RESTART_JOB:
-                jobService.createRestartedJobAfterJobFailure(jobService.searchForJobToRestart(workflowStep, beanToRestart))
-                logService.addSimpleLogEntry(workflowStep, "Create restarted job")
+                restartJob(workflowStep, matches, beanToRestart)
                 break
             case WorkflowJobErrorDefinition.Action.STOP:
                 logService.addSimpleLogEntry(workflowStep, "only sending email, no restarting action")
+                errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP,
+                        "combining matches rules say ${WorkflowJobErrorDefinition.Action.STOP}", matches)
                 break
             default:
                 logService.addSimpleLogEntry(workflowStep, "unknown action: ${action}, change to STOP")
                 errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP,
                         "STOP, since how to handle ${action} is unknown", matches)
-                return
+                break
         }
-        errorNotificationService.send(workflowStep, action, "combining matches rules say ${action}", matches)
+    }
+
+    private void restartWorkflow(WorkflowStep workflowStep, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
+        try {
+            workflowService.createRestartedWorkflow(workflowStep, true)
+        } catch (OtpRuntimeException e) {
+            logService.addSimpleLogEntryWithException(workflowStep, "Fail to restart workflow", e)
+            errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP,
+                    "STOP, since workflow restart failed", matches)
+            return
+        }
+        logService.addSimpleLogEntry(workflowStep, "Create restarted workflow")
+        errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
+                "combining matches rules say ${WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW}", matches)
+    }
+
+    private void restartJob(WorkflowStep workflowStep, List<JobErrorDefinitionWithLogWithIdentifier> matches, String beanToRestart) {
+        try {
+            jobService.createRestartedJobAfterJobFailure(jobService.searchForJobToRestart(workflowStep, beanToRestart))
+        } catch (OtpRuntimeException e) {
+            logService.addSimpleLogEntryWithException(workflowStep, "Fail to restart job", e)
+            errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP,
+                    "STOP, since job restart failed", matches)
+            return
+        }
+        logService.addSimpleLogEntry(workflowStep, "Create restarted job")
+        errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.RESTART_JOB,
+                "combining matches rules say ${WorkflowJobErrorDefinition.Action.RESTART_JOB}", matches)
     }
 }
