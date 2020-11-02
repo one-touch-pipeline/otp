@@ -68,8 +68,20 @@ class WorkflowStep implements Commentable, Entity {
                 return false
             }
         }
-        previous nullable: true
-        restartedFrom nullable: true
+        previous nullable: true, validator: { val, obj ->
+            if (val && val.workflowRun != obj.workflowRun) {
+                return 'workflowStep.previous.workflowRun.differ'
+            }
+        }
+        restartedFrom nullable: true, validator: { val, obj ->
+            if (val && val.workflowRun != obj.workflowRun) {
+                return 'workflowStep.restartedFrom.workflowRun.differ'
+            }
+            if (val && val.beanName != obj.beanName) {
+                return 'workflowStep.restartedFrom.beanName.differ'
+            }
+        }
+
         comment nullable: true
     }
 
@@ -81,8 +93,27 @@ class WorkflowStep implements Commentable, Entity {
         return CollectionUtils.atMostOneElement(findAllByPrevious(this))
     }
 
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     String getWesData() {
         return null
+    }
+
+    /**
+     * returns the previous running {@link WorkflowStep}, ignoring restarted ones.
+     *
+     * If the {@link WorkflowStep} was restart, then take the job before the restarted. Otherwise use the job run before this job.
+     *
+     * Example with 4 jobs, calling the method on job D:
+     * jobs: job A -> job B -> job C -> Job D
+     *
+     * Case 1: Job D was not restarted
+     * --> return Job C
+     *
+     * Case 2: job D is the restarted from job B
+     * --> return Job A
+     */
+    WorkflowStep getPreviousRunningWorkflowStep() {
+        (restartedFrom ?: this).previous
     }
 
     WorkflowStep getOriginalRestartedFrom() {

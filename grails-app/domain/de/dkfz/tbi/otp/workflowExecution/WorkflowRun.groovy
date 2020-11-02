@@ -86,14 +86,18 @@ class WorkflowRun implements Commentable, Entity {
     boolean jobCanBeRestarted = true
 
     static hasMany = [
-        configs: ExternalWorkflowConfigFragment,
-        workflowSteps: WorkflowStep,
+            configs      : ExternalWorkflowConfigFragment,
+            workflowSteps: WorkflowStep,
     ]
 
     static constraints = {
         workDirectory nullable: true
         combinedConfig nullable: true
-        restartedFrom nullable: true
+        restartedFrom nullable: true, validator: { val, obj ->
+            if (val && val.workflow != obj.workflow) {
+                return 'workflowRun.restartedFrom.workflow.differ'
+            }
+        }
         skippedMessage nullable: true
         comment nullable: true
         displayName blank: false, nullable: false

@@ -51,8 +51,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowStep createWorkflowStep(Map properties = [:]) {
         WorkflowStep step = createDomainObject(WorkflowStep, [
-                workflowRun: { properties.restartedFrom?.workflowRun ?: createWorkflowRun() },
-                beanName   : "beanName_${nextId}",
+                workflowRun: { properties.restartedFrom?.workflowRun ?: properties.previous?.workflowRun ?: createWorkflowRun() },
+                beanName   : { properties.restartedFrom?.beanName ?: "beanName_${nextId}" },
                 state      : WorkflowStep.State.CREATED,
         ], properties, false)
         //it is necessary to add the step in the list of workflowRuns before saving
