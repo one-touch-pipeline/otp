@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -42,6 +43,7 @@ abstract class AbstractLinkJob extends AbstractJob {
                     entry.target,
                     entry.link,
                     workflowStep.workflowRun.project.realm,
+                    CreateLinkOption.DELETE_EXISTING_FILE,
             )
         }
         doFurtherWork(workflowStep)
