@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
@@ -65,7 +66,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, _, _) >> null
+        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 
