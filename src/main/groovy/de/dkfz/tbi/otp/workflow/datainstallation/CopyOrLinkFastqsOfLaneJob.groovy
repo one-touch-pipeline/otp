@@ -45,6 +45,7 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
         if (seqTrack.linkedExternally) {
+            logService.addSimpleLogEntry(workflowStep, "Files will only be linked, no cluster jobs are created")
             createLinks(seqTrack)
             return []
         }

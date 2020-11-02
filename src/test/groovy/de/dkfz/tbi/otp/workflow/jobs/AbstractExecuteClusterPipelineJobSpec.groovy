@@ -65,6 +65,7 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
             1 * changeStateToSuccess(workflowStep)
             0 * _
         }
+        job.logService = Mock(LogService)
 
         when:
         job.execute(workflowStep)
@@ -87,6 +88,7 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
         job.clusterAccessService = Mock(ClusterAccessService) {
             1 * executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, _)
         }
+        job.logService = Mock(LogService)
 
         when:
         job.execute(workflowStep)

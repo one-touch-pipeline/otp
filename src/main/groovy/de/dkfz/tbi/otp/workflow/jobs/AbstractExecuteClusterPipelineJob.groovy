@@ -36,10 +36,12 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
     void execute(WorkflowStep workflowStep) {
         List<String> scripts = createScripts(workflowStep)
         if (scripts) {
+            logService.addSimpleLogEntry(workflowStep, "${scripts.size()} scripts will be send")
             submitScripts(workflowStep, scripts)
             workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)
             return
         }
+        logService.addSimpleLogEntry(workflowStep, "No scripts to send, job finish successfully")
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 

@@ -115,7 +115,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             1 * createAndGetLogDirectory(workflowStep) >> clusterLogDirectory
         }
         service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
         }
 
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager)
@@ -148,7 +148,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -174,7 +174,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -200,7 +200,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            2 * addSimpleLogEntry(workflowStep, _)
+            3 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -221,7 +221,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -243,7 +243,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -265,7 +265,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            2 * addSimpleLogEntry(workflowStep, _)
+            3 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -296,7 +296,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             2 * retrieveAndSaveJobInformationAfterJobStarted(_)
         }
         service.logService = Mock(LogService) {
-            3 * addSimpleLogEntry(workflowStep, _)
+            4 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
@@ -318,7 +318,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 

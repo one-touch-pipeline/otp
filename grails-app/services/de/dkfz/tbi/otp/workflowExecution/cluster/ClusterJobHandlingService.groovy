@@ -67,6 +67,7 @@ class ClusterJobHandlingService {
 
     List<BEJob> createBeJobsToSend(BatchEuphoriaJobManager jobManager, Realm realm, WorkflowStep workflowStep, List<String> scripts,
                                    Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) {
+        logService.addSimpleLogEntry(workflowStep, "Start preparing ${scripts.size()} scripts for sending to cluster")
         Map<JobSubmissionOption, String> combined = clusterJobHelperService.mergeResources(workflowStep.workflowRun.priority, realm, jobSubmissionOptions)
         ResourceSet resourceSet = clusterJobHelperService.createResourceSet(combined)
         String jobName = clusterJobHelperService.constructJobName(workflowStep)
@@ -90,12 +91,13 @@ class ClusterJobHandlingService {
                     null,
             )
         }
-        logService.addSimpleLogEntry(workflowStep, "Created cluster jobs")
+        logService.addSimpleLogEntry(workflowStep, "Finish preparing ${scripts.size()} scripts for sending to cluster")
         return beJobs
     }
 
     @SuppressWarnings("CatchException")
     void sendJobs(BatchEuphoriaJobManager jobManager, WorkflowStep workflowStep, List<BEJob> beJobs) {
+        logService.addSimpleLogEntry(workflowStep, "Begin submiting ${beJobs.size()} jobs to cluster: ${jobToString(beJobs)}")
         beJobs.each { BEJob job ->
             BEJobResult jobResult = jobManager.submitJob(job)
             if (!jobResult.successful) {
@@ -103,33 +105,36 @@ class ClusterJobHandlingService {
                 try {
                     jobManager.killJobs(beJobs)
                 } catch (Exception e) {
-                    logService.addSimpleLogEntry(workflowStep, "Failed to kill jobs after submitting ${job}")
+                    logService.addSimpleLogEntry(workflowStep, "Failed to kill jobs after submitting ${job}\nException: ${e.message}")
                     throw new SubmitClusterJobException("Failed to kill all jobs after an error occurred submitting the job: ${job}.", e)
                 }
                 throw new SubmitClusterJobException("An error occurred submitting the job: ${job}. Associated cluster jobs were killed.")
             }
         }
-        logService.addSimpleLogEntry(workflowStep, "Submit cluster jobs: ${jobToString(beJobs)}")
+        logService.addSimpleLogEntry(workflowStep, "Finish submiting ${beJobs.size()} jobs to cluster: ${jobToString(beJobs)}")
     }
 
     @SuppressWarnings("CatchException")
     void startJob(BatchEuphoriaJobManager jobManager, WorkflowStep workflowStep, List<BEJob> beJobs) {
+        logService.addSimpleLogEntry(workflowStep, "Begin starting ${beJobs.size()} cluster jobs: ${jobToString(beJobs)}")
         try {
             jobManager.startHeldJobs(beJobs)
         } catch (Exception e) {
-            logService.addSimpleLogEntry(workflowStep, "Failed to kill jobs after failed to start jobs: ${jobToString(beJobs)}")
+            logService.addSimpleLogEntry(workflowStep, "Failed to start jobs: ${jobToString(beJobs)}\nException: ${e.message}")
             try {
                 jobManager.killJobs(beJobs)
-            } catch (Exception ignored) {
-                logService.addSimpleLogEntry(workflowStep, "Failed to start jobs: ${jobToString(beJobs)}")
-                throw new StartClusterJobException("Failed to kill jobs after failing starting job: ${jobToString(beJobs)}", e)
+            } catch (Exception e2) {
+                logService.addSimpleLogEntry(workflowStep, "Failed to kill jobs after failed to start jobs: ${jobToString(beJobs)}\n" +
+                        "Exception: ${e2.message}")
+                throw new StartClusterJobException("Failed to kill jobs after failing starting jobs: ${jobToString(beJobs)}", e)
             }
             throw new StartClusterJobException("An error occurred when starting jobs: ${jobToString(beJobs)}", e)
         }
-        logService.addSimpleLogEntry(workflowStep, "Started cluster jobs: ${jobToString(beJobs)}")
+        logService.addSimpleLogEntry(workflowStep, "Finish starting ${beJobs.size()} cluster jobs: ${jobToString(beJobs)}")
     }
 
     List<ClusterJob> collectJobStatistics(Realm realm, WorkflowStep workflowStep, List<BEJob> beJobs) {
+        logService.addSimpleLogEntry(workflowStep, "Begin collecting  ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         String sshUser = configService.sshUser
         List<ClusterJob> clusterJobs = beJobs.collect { BEJob job ->
             ClusterJob clusterJob = clusterJobService.createClusterJob(
@@ -140,16 +145,17 @@ class ClusterJobHandlingService {
             logService.addSimpleLogEntry(workflowStep, "LogFile: ${clusterJob.jobLog}")
             return clusterJob
         }
-        logService.addSimpleLogEntry(workflowStep, "Collected cluster job statistic: ${jobToString(beJobs)}")
+        logService.addSimpleLogEntry(workflowStep, "Finish collecting ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         return clusterJobs
     }
 
     void startMonitorClusterJob(WorkflowStep workflowStep, List<ClusterJob> clusterJobs) {
+        logService.addSimpleLogEntry(workflowStep, "Begin starting of checking of cluster jobs: ${clusterJobs*.clusterJobId.join(', ')}")
         clusterJobs.each { ClusterJob clusterJob ->
             clusterJob.checkStatus = ClusterJob.CheckStatus.CHECKING
             clusterJob.save(flush: true)
         }
-        logService.addSimpleLogEntry(workflowStep, "Start checking of cluster jobs: ${clusterJobs*.clusterJobId.join(', ')}")
+        logService.addSimpleLogEntry(workflowStep, "All cluster jobs are now checked by the cluster monitor: ${clusterJobs*.clusterJobId.join(', ')}")
     }
 
     private String jobToString(List<BEJob> jobs) {
