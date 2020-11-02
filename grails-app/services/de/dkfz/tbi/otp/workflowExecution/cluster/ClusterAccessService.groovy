@@ -30,8 +30,8 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.workflowExecution.LogService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflow.shared.RunningClusterJobException
+import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
  * Service to send multiple scripts together to the cluster. For each job a cluster id will be returned.
@@ -46,6 +46,8 @@ class ClusterAccessService {
 
     LogService logService
 
+    WorkflowRunService workflowRunService
+
     List<String> executeJobs(Realm realm, WorkflowStep workflowStep, List<String> scripts, Map<JobSubmissionOption, String> jobSubmissionOptions = [:])
             throws Throwable {
         if (!scripts) {
@@ -53,9 +55,14 @@ class ClusterAccessService {
         }
         assert realm: 'No realm specified.'
 
+        ensureNoClusterJobIsInChecking(workflowStep)
+
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
 
         List<BEJob> beJobs = clusterJobHandlingService.createBeJobsToSend(jobManager, realm, workflowStep, scripts, jobSubmissionOptions)
+
+        //begin of not restartable area
+        workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
 
         clusterJobHandlingService.sendJobs(jobManager, workflowStep, beJobs)
 
@@ -65,9 +72,38 @@ class ClusterAccessService {
 
         clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
 
+        //end of not restartable area
+        workflowStep.workflowRun.with {
+            //its done in same transaction in which cluster jobs are saved
+            jobCanBeRestarted = true
+            save(flush: true)
+        }
+
         List<String> ids = beJobs*.jobID*.shortID
         logService.addSimpleLogEntry(workflowStep, "Executed jobs and got job IDs: ${ids.join(', ')}")
 
         return ids
+    }
+
+    private void ensureNoClusterJobIsInChecking(WorkflowStep workflowStep) {
+        List<ClusterJob> clusterJobs = workflowStep.workflowRun.workflowSteps*.clusterJobs.flatten() as List<ClusterJob>
+        List<ClusterJob> runningClusterJobs = clusterJobs.findAll { ClusterJob clusterJob ->
+            clusterJob.checkStatus != ClusterJob.CheckStatus.FINISHED
+        }
+
+        if (runningClusterJobs) {
+            String header = "id, clusterId, checkStatus"
+            String jobInfos = runningClusterJobs.collect {
+                [
+                        it.id,
+                        it.clusterJobId,
+                        it.checkStatus,
+                ].join(', ')
+            }.join('\n')
+            throw new RunningClusterJobException("The workflow has still ${runningClusterJobs.size()} cluster jobs in checkStatus " +
+            "${ClusterJob.CheckStatus.CREATED.name()} or  {ClusterJob.CheckStatus.CHECKING.name()}." +
+                    "As long as cluster jobs are in these states, the job cannot be restarted." +
+                    "\nCurrently the following jobs are affected:\n${header}\n${jobInfos}")
+        }
     }
 }

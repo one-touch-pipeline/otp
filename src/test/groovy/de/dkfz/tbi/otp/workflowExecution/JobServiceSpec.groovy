@@ -29,6 +29,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
+import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class JobServiceSpec extends Specification implements ServiceUnitTest<JobService>, DataTest, WorkflowSystemDomainFactory {
@@ -109,11 +110,14 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 state: WorkflowRun.State.FAILED,
         ])
         WorkflowStep step1 = createWorkflowStep(workflowRun: workflowRun)
-        WorkflowStep stepToRestart = createWorkflowStep(workflowRun: workflowRun)
+        WorkflowStep stepToRestart = createWorkflowStep([
+                workflowRun: workflowRun,
+                state      : WorkflowStep.State.FAILED,
+        ])
         workflowRun.save(flush: true)
 
         when:
-        service.createRestartedJob(stepToRestart)
+        service.createRestartedJobAfterJobFailure(stepToRestart)
 
         then:
         !step1.obsolete
@@ -139,7 +143,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         workflowRun.save(flush: true)
 
         when:
-        service.createRestartedJob(stepToRestart)
+        service.createRestartedJobAfterJobFailure(stepToRestart)
 
         then:
         !step1.obsolete
@@ -169,6 +173,25 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         WorkflowStep.State.FAILED  | WorkflowRun.State.SUCCESS
         WorkflowStep.State.SUCCESS | WorkflowRun.State.FAILED
         WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS
+    }
+
+    void "test createRestartedJobAfterJobFailure, when WorkflowStep is in not restartable state, then throw exception"() {
+        WorkflowRun workflowRun = createWorkflowRun([
+                state            : WorkflowRun.State.FAILED,
+                jobCanBeRestarted: false,
+        ])
+        createWorkflowStep(workflowRun: workflowRun)
+        WorkflowStep stepToRestart = createWorkflowStep([
+                workflowRun: workflowRun,
+                state      : WorkflowStep.State.FAILED,
+        ])
+        workflowRun.save(flush: true)
+
+        when:
+        service.createRestartedJobAfterJobFailure(stepToRestart)
+
+        then:
+        thrown(WorkflowJobIsNotRestartableException)
     }
 
     void "test createRestartedJobAfterSystemRestart"() {

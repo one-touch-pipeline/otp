@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.TransactionUtils
 
 class WorkflowRunService {
 
@@ -82,5 +83,15 @@ class WorkflowRunService {
                 workflow      : workflow,
                 displayName   : name,
         ]).save(flush: false)
+    }
+
+    void markJobAsNotRestartableInSeparateTransaction(WorkflowRun workflowRun) {
+        assert workflowRun
+
+        TransactionUtils.withNewTransaction {
+            workflowRun.refresh()
+            workflowRun.jobCanBeRestarted = false
+            workflowRun.save(flush: true)
+        }
     }
 }

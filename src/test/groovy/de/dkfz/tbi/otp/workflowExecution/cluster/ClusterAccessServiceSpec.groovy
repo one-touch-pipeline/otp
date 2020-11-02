@@ -30,8 +30,8 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.workflowExecution.LogService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflow.shared.RunningClusterJobException
+import de.dkfz.tbi.otp.workflowExecution.*
 
 class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<ClusterAccessService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -58,6 +58,7 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
             createClusterJob([
                     clusterJobId: it,
                     workflowStep: workflowStep,
+                    checkStatus : ClusterJob.CheckStatus.FINISHED,
             ])
         }
 
@@ -71,6 +72,10 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
             1 * startJob(batchEuphoriaJobManager, workflowStep, beJobs)
             1 * collectJobStatistics(realm, workflowStep, beJobs) >> clusterJobs
             1 * startMonitorClusterJob(workflowStep, clusterJobs)
+            0 * _
+        }
+        service.workflowRunService = Mock(WorkflowRunService) {
+            1 * markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
             0 * _
         }
         service.logService = Mock(LogService) {
@@ -94,5 +99,39 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
 
         then:
         thrown(NoScriptsGivenWorkflowException)
+    }
+
+    void "executeJobs, when workflowRun has running cluster jobs, then throw a RunningClusterJobException"() {
+        given:
+        Realm realm = createRealm()
+        WorkflowStep previous = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                previous: previous,
+        ])
+        createClusterJob([
+                workflowStep: previous,
+                checkStatus : ClusterJob.CheckStatus.CHECKING,
+        ])
+
+        List<String> scripts = ["script ${nextId}"]
+
+        service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
+            0 * _
+        }
+        service.clusterJobHandlingService = Mock(ClusterJobHandlingService) {
+            0 * _
+        }
+        service.workflowRunService = Mock(WorkflowRunService) {
+            0 * _
+        }
+        service.logService = Mock(LogService) {
+            0 * _
+        }
+
+        when:
+        service.executeJobs(realm, workflowStep, scripts)
+
+        then:
+        thrown(RunningClusterJobException)
     }
 }

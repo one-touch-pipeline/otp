@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
+import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 
 @Transactional
 class JobService {
@@ -51,6 +52,14 @@ class JobService {
 
     private void createRestartedJob(WorkflowStep stepToRestart) {
         assert stepToRestart
+
+        if (!stepToRestart.workflowRun.jobCanBeRestarted) {
+            throw new WorkflowJobIsNotRestartableException(
+                    "Can not restart job of ${stepToRestart.workflowRun.displayName}, since the job has failed at a timepoint it was working on an not save " +
+                            "repeatable action. To avoid the risk data inconsistency the job shouldn't be restarted. " +
+                            "Please restart the workflow instead, if possible.")
+        }
+
         WorkflowStep workflowStep = new WorkflowStep(
                 beanName: stepToRestart.beanName,
                 state: WorkflowStep.State.CREATED,

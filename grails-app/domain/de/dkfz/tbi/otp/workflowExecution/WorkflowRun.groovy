@@ -66,6 +66,25 @@ class WorkflowRun implements Commentable, Entity {
 
     String displayName
 
+    /**
+     * Flag to indicate, whether restarting a job can cause problems.
+     *
+     * Sometimes jobs needs to do an action, which can not repeated without risking of inconsistency.
+     * Example of such an action is sending cluster jobs. Since if a job fail after the cluster job was submitted and before OTP has saved the id, a restart
+     * would cause sending the cluster job again, which then run on the same files and cause invalid files.
+     *
+     * To avoid that, this flag is introduced to mark, that a job starts with such an action and has not finished yet.
+     * Since on errors, the transaction is roll-backed, it is necessary to to the change in a separate transaction. Therefore the service method
+     * {@link WorkflowRunService#markJobAsNotRestartableInSeparateTransaction(WorkflowRun)} is written. Change back can be done directly in the same action,
+     * since that should be persistent with all database changes.
+     *
+     * If a job do multiple things, it should try to do repeatable action first and start with the not repeatable action as late as possible to minimize
+     * the time a job is in this state.
+     *
+     * If the flag is true, the job system won't restart that job, so only restart of the workflow is possible.
+     */
+    boolean jobCanBeRestarted = true
+
     static hasMany = [
         configs: ExternalWorkflowConfigFragment,
         workflowSteps: WorkflowStep,

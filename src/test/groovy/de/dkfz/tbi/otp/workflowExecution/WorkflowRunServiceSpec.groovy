@@ -76,4 +76,16 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run.workflowSteps == []
         run.displayName == name
     }
+
+    void 'markJobAsNotRestartableInSeparateTransaction, when call, then change mayJobRestarted to true'() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+        assert workflowRun.jobCanBeRestarted
+
+        when:
+        service.markJobAsNotRestartableInSeparateTransaction(workflowRun)
+
+        then:
+        !workflowRun.jobCanBeRestarted
+    }
 }
