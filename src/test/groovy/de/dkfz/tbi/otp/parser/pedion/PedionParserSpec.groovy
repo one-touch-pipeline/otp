@@ -85,6 +85,9 @@ class PedionParserSpec extends Specification {
         'A02P-ABCDEF-C1RAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-sigmoid-colon-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'A02P-ABCDEF-C1SAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-adrenal-gland-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'A02P-ABCDEF-C1TAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-muscle-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1UAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-skin-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1VAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lung-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1WAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-fat-tissue-01'      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'A02P-ABCDEF-C1ZAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-unknown-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other biol replicate
         'A02P-ABCDEF-C1ACAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-03'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT

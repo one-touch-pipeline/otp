@@ -42,6 +42,9 @@ enum PedionTissue {
     SIGMOID_COLON('1R'),
     ADRENAL_GLAND('1S'),
     MUSCLE('1T'),
+    SKIN('1U'),
+    LUNG('1V'),
+    FAT_TISSUE('1W'),
     UNKNOWN('1Z'),
 
     final String code
