@@ -92,7 +92,6 @@ class WorkflowRunOverviewServiceIntegrationSpec extends Specification implements
         createWorkflowStep(workflowRun: run3)
         createWorkflowStep(workflowRun: run3)
 
-
         when:
         Map<Workflow, Timestamp> result = service.lastFailedRuns
 

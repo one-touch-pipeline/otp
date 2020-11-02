@@ -103,7 +103,7 @@ abstract class AbstractWorkflowDecider implements Decider {
         Collection<WorkflowArtefact> filteredArtefacts = filterForNeededArtefacts(newArtefacts)
         Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedArtefacts = groupArtefacts(filteredArtefacts)
         groupedArtefacts.each { it ->
-            def matchingWorkflows = ActiveProjectWorkflow.createCriteria().get {
+            ActiveProjectWorkflow matchingWorkflows = ActiveProjectWorkflow.createCriteria().get {
                 eq('project', it.project)
                 eq('seqType', it.seqType)
                 wokflowVersion {

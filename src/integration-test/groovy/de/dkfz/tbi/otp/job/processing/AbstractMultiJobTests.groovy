@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-import static SchedulerIntegrationTests.assertSucceeded
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests.assertSucceeded
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 import static junit.framework.TestCase.assertEquals
 import static junit.framework.TestCase.assertTrue

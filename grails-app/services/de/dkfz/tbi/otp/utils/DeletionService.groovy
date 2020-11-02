@@ -174,7 +174,7 @@ class DeletionService {
 
     void deleteProcessParameters(List<ProcessParameter> processParameters) {
         Set<ProcessParameter> processParametersSet = collectProcessParametersRecursively([] as Set<ProcessParameter>, processParameters)
-        Set<Process> processSet = processParametersSet.collect { it.process }
+        Set<Process> processSet = processParametersSet*.process
         processParametersSet.each {
             it.delete(flush: true)
         }

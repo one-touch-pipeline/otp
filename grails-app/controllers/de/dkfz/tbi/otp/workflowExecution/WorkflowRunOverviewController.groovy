@@ -28,7 +28,7 @@ import java.sql.Timestamp
 
 @Secured('ROLE_ADMIN')
 class WorkflowRunOverviewController {
-    
+
     static allowedMethods = [
             index: "GET",
     ]
