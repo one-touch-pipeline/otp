@@ -35,14 +35,14 @@ import java.util.regex.Pattern
 abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
 
     /**
-     * checks, that all cluster jobs has created the job status log file with the correct content.
+     * checks, that all cluster jobs have created the job status log file with the correct content.
      *
-     * Also it checks, that the {@link ClusterJob#checkStatus} is {@link ClusterJob.CheckStatus.FINISHED}
+     * Also it checks, that the {@link ClusterJob#checkStatus} is {@link ClusterJob.CheckStatus#FINISHED}
      */
     @Override
     protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
         Realm realm = workflowStep.realm
-        Collection<ClusterJob> clusterJobs = workflowStep.clusterJobs
+        Collection<ClusterJob> clusterJobs = workflowStep.previousRunningWorkflowStep.clusterJobs
         FileSystem fileSystem = getFileSystem(workflowStep)
         logService.addSimpleLogEntry(workflowStep, "Start checking of ${clusterJobs.size()} cluster jobs")
 

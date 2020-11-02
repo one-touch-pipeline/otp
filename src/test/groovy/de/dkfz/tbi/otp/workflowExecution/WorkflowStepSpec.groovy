@@ -31,7 +31,7 @@ class WorkflowStepSpec extends Specification implements WorkflowSystemDomainFact
     @Override
     Class[] getDomainClassesToMock() {
         [
-            WorkflowStep,
+                WorkflowStep,
         ]
     }
 
@@ -64,5 +64,53 @@ class WorkflowStepSpec extends Specification implements WorkflowSystemDomainFact
         expect:
         step.originalRestartedFrom == step.restartedFrom.restartedFrom.restartedFrom
         step.restartCount == 3
+    }
+
+    void "test getOriginalRestartedFrom and getRestartCount, when restarted three times with some jobs between"() {
+        given:
+        WorkflowStep step_1_1 = createWorkflowStep()
+        WorkflowStep step_1_2 = createWorkflowStep([previous: step_1_1])
+        WorkflowStep step_1_3 = createWorkflowStep([previous: step_1_2])
+        WorkflowStep step_2_2 = createWorkflowStep([previous: step_1_3, restartedFrom: step_1_2])
+        WorkflowStep step_2_3 = createWorkflowStep([previous: step_2_2])
+        WorkflowStep step_2_4 = createWorkflowStep([previous: step_2_3])
+        WorkflowStep step_3_3 = createWorkflowStep([previous: step_2_4, restartedFrom: step_2_3])
+        WorkflowStep step_4_2 = createWorkflowStep([previous: step_3_3, restartedFrom: step_2_2])
+        WorkflowStep step_5_2 = createWorkflowStep([previous: step_4_2, restartedFrom: step_4_2])
+
+        expect:
+        step_5_2.originalRestartedFrom == step_1_2
+        step_5_2.restartCount == 3
+    }
+
+    void "test previousRunningWorkflowStep, when not restart, return the previous"() {
+        given:
+        WorkflowStep expected = createWorkflowStep()
+        WorkflowStep checked = createWorkflowStep([
+                previous: expected
+        ])
+
+        expect:
+        expected == checked.previousRunningWorkflowStep
+        expected == checked.previous
+    }
+
+    void "test previousRunningWorkflowStep, when restart, return the previous of the restarted one"() {
+        given:
+        WorkflowStep expected = createWorkflowStep()
+        WorkflowStep restarted = createWorkflowStep([
+                previous: expected
+        ])
+        WorkflowStep failed = createWorkflowStep([
+                previous: restarted
+        ])
+        WorkflowStep checked = createWorkflowStep([
+                previous     : failed,
+                restartedFrom: restarted,
+        ])
+
+        expect:
+        expected == checked.previousRunningWorkflowStep
+        expected != checked.previous
     }
 }

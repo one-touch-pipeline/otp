@@ -51,7 +51,9 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
 
     private AbstractOtpClusterValidationJob job
 
-    private WorkflowStep workflowStep
+    private WorkflowStep workflowStepSendingClusterJob
+
+    private WorkflowStep workflowStepValidatingClusterJob
 
     private void setupData() {
         job = Spy(AbstractOtpClusterValidationJob)
@@ -61,13 +63,16 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         job.logService = Mock(LogService)
         job.jobStatusLoggingFileService = Mock(JobStatusLoggingFileService)
 
-        workflowStep = createWorkflowStep()
+        workflowStepSendingClusterJob = createWorkflowStep()
+        workflowStepValidatingClusterJob = createWorkflowStep([
+                previous: workflowStepSendingClusterJob
+        ])
     }
 
     private void setupDataWithClusterJob(ClusterJob.CheckStatus checkStatus = ClusterJob.CheckStatus.FINISHED) {
         setupData()
         createClusterJob([
-                workflowStep: workflowStep,
+                workflowStep: workflowStepSendingClusterJob,
                 checkStatus : checkStatus,
         ])
     }
@@ -77,7 +82,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         setupData()
 
         when:
-        job.ensureExternalJobsRunThrough(workflowStep)
+        job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
 
         then:
         noExceptionThrown()
@@ -89,7 +94,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         setupDataWithClusterJob(checkStatus)
 
         when:
-        job.ensureExternalJobsRunThrough(workflowStep)
+        job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
 
         then:
         ValidationJobFailedException e = thrown()
@@ -109,7 +114,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
 
         when:
-        job.ensureExternalJobsRunThrough(workflowStep)
+        job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
 
         then:
         ValidationJobFailedException e = thrown()
@@ -125,7 +130,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
 
         when:
-        job.ensureExternalJobsRunThrough(workflowStep)
+        job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
 
         then:
         ValidationJobFailedException e = thrown()
@@ -141,7 +146,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         1 * job.jobStatusLoggingFileService.constructMessage(_, _, _) >> 'wrong message'
 
         when:
-        job.ensureExternalJobsRunThrough(workflowStep)
+        job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
 
         then:
         ValidationJobFailedException e = thrown()
@@ -159,7 +164,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         1 * job.jobStatusLoggingFileService.constructMessage(_, _, _) >> message
 
         when:
-        job.ensureExternalJobsRunThrough(workflowStep)
+        job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
 
         then:
         noExceptionThrown()
