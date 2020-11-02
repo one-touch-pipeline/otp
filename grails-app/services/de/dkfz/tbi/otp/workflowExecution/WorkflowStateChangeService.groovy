@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
+import de.dkfz.tbi.otp.utils.StackTraceUtils
 
 @Transactional
 class WorkflowStateChangeService {
@@ -109,7 +110,7 @@ class WorkflowStateChangeService {
         step.workflowRun.state = WorkflowRun.State.FAILED
         step.workflowRun.save(flush: true)
 
-        step.workflowError = new WorkflowError(message: throwable.message, stacktrace: getStackTrace(throwable))
+        step.workflowError = new WorkflowError(message: throwable.message, stacktrace: StackTraceUtils.getStackTrace(throwable))
         step.state = WorkflowStep.State.FAILED
         step.save(flush: true)
     }
@@ -148,11 +149,5 @@ class WorkflowStateChangeService {
         assert run
         List<WorkflowRun> runs = WorkflowRunInputArtefact.findAllByWorkflowArtefactInList(run.outputArtefacts*.value)*.workflowRun
         return runs + runs.collectMany { getDependingWorkflowRuns(it) }
-    }
-
-    private String getStackTrace(Throwable throwable) {
-        StringWriter writer = new StringWriter()
-        throwable.printStackTrace(new PrintWriter(writer))
-        return writer.toString()
     }
 }

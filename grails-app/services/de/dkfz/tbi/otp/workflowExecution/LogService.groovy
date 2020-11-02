@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
+import de.dkfz.tbi.otp.utils.StackTraceUtils
 
 @Transactional
 class LogService {
@@ -40,4 +41,18 @@ class LogService {
             ]).save(flush: true)
         }
     }
+
+    /**
+     * Add the massage including the stacktrace as {@link WorkflowMessageLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
+     */
+    void addSimpleLogEntryWithException(WorkflowStep workflowStep, String message, Throwable t) {
+        String stacktrace = StackTraceUtils.getStackTrace(t)
+        TransactionUtils.withNewTransaction {
+            new WorkflowMessageLog([
+                    workflowStep: workflowStep,
+                    message     : "${message}\n\n${stacktrace}",
+            ]).save(flush: true)
+        }
+    }
+
 }

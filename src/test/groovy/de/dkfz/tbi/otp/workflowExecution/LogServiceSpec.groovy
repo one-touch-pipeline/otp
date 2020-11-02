@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
@@ -51,5 +52,22 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         workflowStep.logs.size() == 2
         (workflowStep.logs[0] as WorkflowMessageLog).message == message1
         (workflowStep.logs[1] as WorkflowMessageLog).message == message2
+    }
+
+    void "addSimpleLogEntry, when adding a message with stacktrace, the stacktrace is converted and added together with the message"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        String message = "message ${nextId}"
+        String exceptionMessage = "exception ${nextId}"
+        OtpRuntimeException otpRuntimeException = new OtpRuntimeException(exceptionMessage)
+
+        when:
+        service.addSimpleLogEntryWithException(workflowStep, message, otpRuntimeException)
+
+        then:
+        workflowStep.logs.size() == 1
+        WorkflowMessageLog log = workflowStep.logs[0]
+        log.message.startsWith(message)
+        log.message.contains(exceptionMessage)
     }
 }
