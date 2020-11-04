@@ -22,54 +22,62 @@
 
 <html>
 <head>
-    <meta name="layout" content="main" />
+    <meta name="layout" content="main"/>
     <title><g:message code="otp.menu.alignmentQuality"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
     <asset:javascript src="pages/alignmentQualityOverview/index/alignmentQualityOverview.js"/>
+    <asset:stylesheet src="modules/modal.css"/>
 </head>
 
 <body>
-    <div class="body">
-        <g:render template="/templates/messages"/>
+<div class="body">
+    <g:render template="/templates/messages"/>
 
-        <div class="project-selection-header-container">
-            <div class="grid-element">
-                <g:render template="/templates/projectSelection"/>
-            </div>
-            <div class="grid-element">
-                <g:if test="${seqType}">
-                    <div class="rounded-page-header-box">
-                        <span><g:message code="alignment.quality.seqType"/>:</span>
-                        <form style="display: inline">
-                            <g:hiddenField name="project" value="${selectedProject.name}"/>
-                            <g:select id="seqType" name='seqType' class="use-select-2" style="width: 40ch;"
-                                      data-columns="${columns}"
-                                      from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
-                        </form>
-                    </div>
-                </g:if>
-            </div>
+    <div class="project-selection-header-container">
+        <div class="grid-element">
+            <g:render template="/templates/projectSelection"/>
         </div>
 
-        <h1><g:message code="otp.menu.alignmentQuality"/></h1>
-        <div id="sample" data-sample="${sample?.id}">
-            <g:if test="${sample}">
-                <otp:annotation type="info">
-                    ${g.message(code: "alignment.quality.selectedSample", args: [sample])}
-                    <g:link action="index" params="[seqType: seqType.id]">${g.message(code: "alignment.quality.showAll")}</g:link>
-                </otp:annotation>
+        <div class="grid-element">
+            <g:if test="${seqType}">
+                <div class="rounded-page-header-box">
+                    <span><g:message code="alignment.quality.seqType"/>:</span>
+
+                    <form style="display: inline">
+                        <g:hiddenField name="project" value="${selectedProject.name}"/>
+                        <g:select id="seqType" name='seqType' class="use-select-2" style="width: 40ch;"
+                                  data-columns="${columns}"
+                                  from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
+                    </form>
+                </div>
             </g:if>
         </div>
-        <div class="otpDataTables alignmentQualityOverviewTable">
-            <otp:dataTable
+    </div>
+
+    <h1><g:message code="otp.menu.alignmentQuality"/></h1>
+
+    <div id="sample" data-sample="${sample?.id}">
+        <g:if test="${sample}">
+            <otp:annotation type="info">
+                ${g.message(code: "alignment.quality.selectedSample", args: [sample])}
+                <g:link action="index" params="[seqType: seqType.id]">${g.message(code: "alignment.quality.showAll")}</g:link>
+            </otp:annotation>
+        </g:if>
+    </div>
+
+    <div class="otpDataTables alignmentQualityOverviewTable">
+        <otp:dataTable
                 codes="${header}"
                 id="overviewTableProcessedMergedBMF"/>
-        </div>
+    </div>
     <asset:script type="text/javascript">
         $(function() {
             $.otp.alignmentQualityOverviewTable.register();
         });
     </asset:script>
-    </div>
+</div>
+<otp:otpModal modalId="wait">
+    <div class="modal-wait-message"><g:message code="alignment.quality.modal.message"/></div>
+</otp:otpModal>
 </body>
 </html>

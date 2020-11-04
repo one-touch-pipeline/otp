@@ -24,12 +24,13 @@
 /*global $ */
 
 $.otp.alignmentQualityOverview = {
-    change : function (dropdownMenu, id, oldValue) {
+    change: function (dropdownMenu, id, oldValue) {
         var comment = prompt("Please provide a comment for this change:");
 
         if (comment == null) {
             dropdownMenu.value = oldValue;
         } else {
+            $("#wait").css("display", "block")
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
@@ -42,7 +43,7 @@ $.otp.alignmentQualityOverview = {
                     "newValue": dropdownMenu.value,
                     "comment": comment,
                 },
-                "success" : function (json) {
+                "success": function (json) {
                     if (!json.success) {
                         alert("Failed to edit value.\n" + json.error);
                         dropdownMenu.value = oldValue;
@@ -50,8 +51,11 @@ $.otp.alignmentQualityOverview = {
                         $("#overviewTableProcessedMergedBMF").DataTable().destroy();
                         $.otp.alignmentQualityOverviewTable.register();
                     }
+                },
+                "complete": function () {
+                    $("#wait").css("display", "none")
                 }
             });
         }
-    },
+    }
 }

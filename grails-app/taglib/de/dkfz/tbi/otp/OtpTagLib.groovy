@@ -190,6 +190,9 @@ class OtpTagLib {
         return noSelectionValue?.entrySet()?.iterator()?.next()?.value?.encodeAsHTML() ?: "-"
     }
 
+    /**
+     * Bootstrap modal only for mainV2
+     */
     def modal = { attrs, body ->
         out << "<div id='${attrs.modalId}' class='modal fade' role='dialog'>"
         out << "<div class='modal-dialog'>"
@@ -209,6 +212,33 @@ class OtpTagLib {
         out << "</div>"
     }
 
+    /**
+     * OTP modal dialog with no boostrap dependencies
+     *
+     * needs assets/stylesheets/modules/modal.css to work
+     * needs assets/javascripts/modal.js to work as closable modal
+     */
+    def otpModal = { attrs, body ->
+        out << "<div id='${attrs.modalId}' class='modal' role='dialog'>"
+        out << "<div class='modal-dialog'>"
+        out << "<div class='modal-content'>"
+        if (attrs.title || attrs.closable) {
+            out << "<div class='modal-header'>"
+            if (attrs.title) {
+                out << "<h3 class='modal-title'>${attrs.title}</h3>"
+            }
+            if (attrs.closable) {
+                out << "<button class='close' type='button'>&times;</button>"
+            }
+            out << "</div>"
+        }
+        out << "<div class='modal-body'>"
+        out << body.call()
+        out << "</div>"
+        out << "</div>"
+        out << "</div>"
+        out << "</div>"
+    }
 
     def tableAdd = { attrs, body ->
         out << '<tr class="add-table-fields" style="display: none;">'
@@ -217,7 +247,7 @@ class OtpTagLib {
         out << '<tr>'
         out << '  <td class="add-table-buttons" colspan="100">'
         out << '    <button class="add">+</button>'
-        out <<      g.submitButton(class: "save", name: "Save", style: "display: none;")
+        out << g.submitButton(class: "save", name: "Save", style: "display: none;")
         out << '    <button class="cancel" style="display: none;">Cancel</button>'
         out << '  </td>'
         out << '</tr>'
