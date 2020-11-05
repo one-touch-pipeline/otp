@@ -43,7 +43,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 Comment,
                 DataFile,

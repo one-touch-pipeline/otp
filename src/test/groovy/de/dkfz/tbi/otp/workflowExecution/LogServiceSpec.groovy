@@ -32,7 +32,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 WorkflowMessageLog,
         ]
     }

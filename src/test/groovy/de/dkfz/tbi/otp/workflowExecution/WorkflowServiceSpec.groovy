@@ -32,7 +32,7 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Workflow,
                 WorkflowRun,
                 WorkflowRunInputArtefact,

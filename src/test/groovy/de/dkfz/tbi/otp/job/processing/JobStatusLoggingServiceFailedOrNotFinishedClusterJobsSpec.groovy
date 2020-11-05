@@ -36,7 +36,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingStep,
                 Realm,
         ]

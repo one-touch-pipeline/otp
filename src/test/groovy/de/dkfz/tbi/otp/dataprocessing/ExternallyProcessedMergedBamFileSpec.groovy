@@ -33,7 +33,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternallyProcessedMergedBamFile,
         ]
     }

@@ -42,7 +42,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 Comment,
                 DataFile,

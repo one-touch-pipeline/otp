@@ -34,7 +34,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 FastqcProcessedFile,
                 FileType,

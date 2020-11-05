@@ -36,7 +36,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 Comment,
                 DataFile,

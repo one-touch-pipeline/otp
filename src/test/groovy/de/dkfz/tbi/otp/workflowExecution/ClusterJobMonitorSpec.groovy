@@ -37,7 +37,7 @@ class ClusterJobMonitorSpec extends Specification implements WorkflowSystemDomai
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 JobExecutionPlan,
                 ProcessingStep,

@@ -46,7 +46,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 ProcessingOption,
                 Project,

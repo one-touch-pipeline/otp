@@ -33,7 +33,7 @@ class MergingCriteriaSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 MergingCriteria,
                 Project,
                 Realm,

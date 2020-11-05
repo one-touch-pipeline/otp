@@ -34,7 +34,7 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AclSid,
                 SeqPlatformGroup,
                 Role,

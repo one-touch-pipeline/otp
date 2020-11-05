@@ -32,7 +32,7 @@ class IndividualSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 Project,
                 Realm,

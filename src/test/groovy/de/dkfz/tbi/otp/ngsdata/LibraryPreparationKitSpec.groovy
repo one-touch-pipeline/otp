@@ -32,7 +32,7 @@ class LibraryPreparationKitSpec extends Specification implements DataTest, Domai
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 LibraryPreparationKit,
         ]
     }

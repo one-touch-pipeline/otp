@@ -38,7 +38,7 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Comment,
                 IlseSubmission,
                 Individual,

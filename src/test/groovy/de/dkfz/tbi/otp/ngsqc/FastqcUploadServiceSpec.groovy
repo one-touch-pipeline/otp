@@ -32,7 +32,7 @@ class FastqcUploadServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 FastqcProcessedFile,
                 FileType,

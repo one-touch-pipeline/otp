@@ -40,7 +40,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqImportInstance,
                 Realm,
                 SeqTrack,

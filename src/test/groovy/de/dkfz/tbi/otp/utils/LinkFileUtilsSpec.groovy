@@ -38,7 +38,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Realm,
         ]
     }

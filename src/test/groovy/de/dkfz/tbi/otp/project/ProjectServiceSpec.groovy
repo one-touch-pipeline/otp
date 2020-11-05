@@ -39,7 +39,7 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ConfigPerProjectAndSeqType,
                 Pipeline,
                 Project,

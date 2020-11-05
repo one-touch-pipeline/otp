@@ -30,7 +30,7 @@ class JobDecisionSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DecidingJobDefinition,
                 JobDecision,
                 JobExecutionPlan,

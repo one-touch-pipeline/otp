@@ -30,7 +30,7 @@ class PipelineSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Pipeline
         ]
     }

@@ -35,7 +35,7 @@ class AbstractFileSystemBamFileSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 MockAbstractFileSystemBamFile,
         ]
     }

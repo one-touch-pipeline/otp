@@ -48,7 +48,7 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 Realm,
                 ProcessingStep,

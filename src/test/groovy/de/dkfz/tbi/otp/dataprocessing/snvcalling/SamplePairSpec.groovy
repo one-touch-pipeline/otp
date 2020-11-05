@@ -34,7 +34,7 @@ class SamplePairSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternalMergingWorkPackage,
                 Individual,
                 LibraryPreparationKit,

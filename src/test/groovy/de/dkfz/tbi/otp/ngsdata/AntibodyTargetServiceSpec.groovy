@@ -28,7 +28,7 @@ class AntibodyTargetServiceSpec extends MetadataFieldsServiceSpec<AntibodyTarget
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AntibodyTarget,
         ]
     }

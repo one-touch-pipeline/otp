@@ -43,7 +43,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 CellRangerMergingWorkPackage,
                 CellRangerConfig,

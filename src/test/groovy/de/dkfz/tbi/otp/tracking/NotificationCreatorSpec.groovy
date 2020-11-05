@@ -40,7 +40,7 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 ProcessingOption,
                 OtrsTicket,

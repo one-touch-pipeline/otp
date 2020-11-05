@@ -32,7 +32,7 @@ class ClusterJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
         ]
     }

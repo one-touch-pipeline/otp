@@ -45,7 +45,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 CellRangerMergingWorkPackage,
                 CellRangerConfig,

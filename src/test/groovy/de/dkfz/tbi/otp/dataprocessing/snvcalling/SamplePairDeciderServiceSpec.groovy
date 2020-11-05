@@ -36,7 +36,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergingWorkPackage,
                 ExternalMergingWorkPackage,
                 Individual,

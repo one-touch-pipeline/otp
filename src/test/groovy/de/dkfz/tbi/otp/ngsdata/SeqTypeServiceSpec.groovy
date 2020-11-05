@@ -28,7 +28,7 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> implements D
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqType,
         ]
     }

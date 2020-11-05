@@ -33,7 +33,7 @@ class RoddySnvCallingInstanceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 AlignmentPass,
                 DataFile,

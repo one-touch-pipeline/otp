@@ -34,7 +34,7 @@ class MergingSetSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 FileType,
                 MergingCriteria,

@@ -40,7 +40,7 @@ class QcThresholdSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 CellRangerQualityAssessment,
                 DataFile,

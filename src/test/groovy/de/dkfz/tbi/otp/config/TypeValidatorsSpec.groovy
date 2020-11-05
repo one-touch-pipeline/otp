@@ -33,7 +33,7 @@ class TypeValidatorsSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobExecutionPlan,
                 JobDefinition,
                 SeqCenter,

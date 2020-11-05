@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.project.Project
 class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, DataTest {
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 DataFile,
                 FileType,

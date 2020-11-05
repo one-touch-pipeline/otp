@@ -32,7 +32,7 @@ class OtrsTicketServiceSpec extends Specification implements DataTest, DomainFac
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 OtrsTicket,
         ]
     }

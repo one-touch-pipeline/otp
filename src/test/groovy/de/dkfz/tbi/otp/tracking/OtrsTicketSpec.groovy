@@ -33,7 +33,7 @@ class OtrsTicketSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 MetaDataFile,
                 OtrsTicket,
                 Run,

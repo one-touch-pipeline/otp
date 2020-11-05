@@ -30,7 +30,7 @@ class DecisionMappingSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DecisionMapping,
                 JobDecision,
                 JobDefinition,

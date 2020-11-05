@@ -43,7 +43,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 DataFile,
                 FileType,

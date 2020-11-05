@@ -33,7 +33,7 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternalMergingWorkPackage,
                 ReferenceGenome,
                 Sample,

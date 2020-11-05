@@ -27,7 +27,7 @@ class SeqPlatformModelLabelServiceSpec extends MetadataFieldsServiceSpec<SeqPlat
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqPlatformModelLabel,
         ]
     }

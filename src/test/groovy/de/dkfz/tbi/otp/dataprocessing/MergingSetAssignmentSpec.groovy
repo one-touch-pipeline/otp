@@ -34,7 +34,7 @@ class MergingSetAssignmentSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 MergingCriteria,
                 MergingSet,
                 MergingSetAssignment,

@@ -32,7 +32,7 @@ class AllDeciderSpec extends Specification implements ServiceUnitTest<AllDecider
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Workflow,
                 WorkflowRun,
                 WorkflowRunInputArtefact,

@@ -33,7 +33,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqTrack,
                 WorkflowRun,
         ]

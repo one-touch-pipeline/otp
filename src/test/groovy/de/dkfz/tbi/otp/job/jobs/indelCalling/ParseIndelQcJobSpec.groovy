@@ -43,7 +43,7 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 DataFile,
                 FileType,

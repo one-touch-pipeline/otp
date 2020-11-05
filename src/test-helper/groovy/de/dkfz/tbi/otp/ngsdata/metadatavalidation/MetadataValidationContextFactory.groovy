@@ -40,7 +40,8 @@ class MetadataValidationContextFactory {
     @SuppressWarnings('UnsafeImplementationAsMap')
     static MetadataValidationContext createContext(Map properties = [:]) {
         return new MetadataValidationContext(
-                properties.metadataFile ?: Paths.get(properties.testDirectory ?: TestCase.uniqueNonExistentPath.path, "run${HelperUtils.uniqueString}" as String, 'metadata_fastq.tsv'),
+                properties.metadataFile ?: Paths.get(properties.testDirectory ?: TestCase.uniqueNonExistentPath.path, "run${HelperUtils.uniqueString}"
+                        as String, 'metadata_fastq.tsv'),
                 properties.metadataFileMd5sum ?: HelperUtils.randomMd5sum,
                 properties.spreadsheet ?: new Spreadsheet(properties.document ?: 'I am header!\nI am data!'),
                 properties.problems ?: new Problems(),

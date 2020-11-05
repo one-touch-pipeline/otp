@@ -31,7 +31,7 @@ class PicardMarkDuplicatesMetricsSpec extends Specification implements DataTest 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 PicardMarkDuplicatesMetrics,
                 ProcessedBamFile,
                 ProcessedMergedBamFile,

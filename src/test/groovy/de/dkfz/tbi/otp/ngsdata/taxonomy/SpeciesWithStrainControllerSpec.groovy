@@ -36,7 +36,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 CommonName,
                 Species,
                 SpeciesWithStrain,

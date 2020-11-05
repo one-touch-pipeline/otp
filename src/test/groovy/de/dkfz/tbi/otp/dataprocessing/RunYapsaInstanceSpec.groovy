@@ -36,7 +36,7 @@ class RunYapsaInstanceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AlignmentPass,
                 DataFile,
                 FileType,

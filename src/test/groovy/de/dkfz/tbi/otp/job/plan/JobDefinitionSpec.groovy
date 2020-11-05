@@ -28,7 +28,7 @@ class JobDefinitionSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobDefinition,
         ]
     }

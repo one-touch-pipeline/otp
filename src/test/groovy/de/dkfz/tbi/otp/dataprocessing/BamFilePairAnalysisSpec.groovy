@@ -41,7 +41,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 AceseqInstance,
                 AlignmentPass,

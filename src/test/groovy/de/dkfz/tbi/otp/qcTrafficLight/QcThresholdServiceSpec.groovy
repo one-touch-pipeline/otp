@@ -38,7 +38,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 CellRangerQualityAssessment,
                 Project,
                 QcThreshold,

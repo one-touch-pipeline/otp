@@ -67,7 +67,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AntibodyTarget,
                 DataFile,
                 FileType,

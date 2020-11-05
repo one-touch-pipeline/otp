@@ -33,7 +33,7 @@ class ProjectSpec extends Specification implements DomainFactoryCore, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Project,
                 Realm,
         ]

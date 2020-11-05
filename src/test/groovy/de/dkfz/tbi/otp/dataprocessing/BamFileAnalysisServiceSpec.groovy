@@ -33,7 +33,7 @@ class BamFileAnalysisServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 FileType,
                 Individual,

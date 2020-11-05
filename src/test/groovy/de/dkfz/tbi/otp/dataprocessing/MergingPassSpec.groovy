@@ -30,7 +30,7 @@ class MergingPassSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 MergingPass,
                 MergingSet,
         ]

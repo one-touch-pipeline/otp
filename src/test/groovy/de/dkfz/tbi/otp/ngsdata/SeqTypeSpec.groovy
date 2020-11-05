@@ -33,7 +33,7 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqType,
         ]
     }

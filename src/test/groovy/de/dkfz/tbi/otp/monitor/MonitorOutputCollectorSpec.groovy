@@ -36,7 +36,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobExecutionPlan,
                 Process,
                 ProcessingOption,

@@ -32,7 +32,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Workflow,
                 WorkflowRun,
                 WorkflowRunInputArtefact,

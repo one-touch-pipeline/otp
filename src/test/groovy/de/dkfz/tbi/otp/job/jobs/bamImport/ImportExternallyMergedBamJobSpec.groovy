@@ -52,7 +52,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedMergedBamFile,
                 ImportProcess,

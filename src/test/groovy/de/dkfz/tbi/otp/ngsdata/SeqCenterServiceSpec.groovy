@@ -30,7 +30,7 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqCenter,
         ]
     }

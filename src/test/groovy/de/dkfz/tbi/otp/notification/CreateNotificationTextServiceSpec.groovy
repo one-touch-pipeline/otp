@@ -48,7 +48,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 AntibodyTarget,
                 CellRangerConfig,

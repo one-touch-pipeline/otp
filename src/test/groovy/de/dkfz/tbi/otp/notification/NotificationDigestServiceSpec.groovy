@@ -40,7 +40,7 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Comment,
                 IlseSubmission,
                 Individual,

@@ -28,7 +28,7 @@ class RunSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqPlatformGroup,
                 SeqTrack,
         ]

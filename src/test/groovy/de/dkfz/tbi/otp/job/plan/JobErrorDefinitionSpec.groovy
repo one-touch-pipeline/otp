@@ -33,7 +33,7 @@ class JobErrorDefinitionSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobDefinition,
                 JobErrorDefinition,
                 JobExecutionPlan,

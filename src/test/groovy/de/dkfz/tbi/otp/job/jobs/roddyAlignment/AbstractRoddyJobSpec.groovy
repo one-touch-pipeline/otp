@@ -40,7 +40,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 DataFile,
                 FileType,

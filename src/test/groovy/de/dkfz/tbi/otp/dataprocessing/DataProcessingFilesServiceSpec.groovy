@@ -36,7 +36,7 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 Project,
                 Realm,

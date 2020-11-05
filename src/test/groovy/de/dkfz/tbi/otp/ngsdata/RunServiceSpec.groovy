@@ -32,7 +32,7 @@ class RunServiceSpec extends Specification implements DataTest, DomainFactoryCor
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 FileType,
                 Individual,
