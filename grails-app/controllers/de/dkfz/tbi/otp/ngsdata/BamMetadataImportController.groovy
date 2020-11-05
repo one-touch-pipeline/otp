@@ -62,7 +62,7 @@ class BamMetadataImportController {
                         cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths)
                 bamMetadataValidationContext = results.context
                 if (results.project != null) {
-                    redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
+                    redirect(controller: "sampleOverview", action: "index", params: [project: results.project.name])
                     hasRedirected = true
                     return
                 }
