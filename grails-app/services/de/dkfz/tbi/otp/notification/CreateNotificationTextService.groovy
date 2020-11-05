@@ -185,7 +185,7 @@ class CreateNotificationTextService {
         }
         String runNames = seqTracks*.run*.name.unique().sort().join(", ")
         String directories = getSeqTypeDirectories(seqTracks)
-        String otpLinks = createOtpLinks(seqTracks*.project, 'projectOverview', 'laneOverview')
+        String otpLinks = createOtpLinks(seqTracks*.project, 'sampleOverview', 'index')
 
         String message = messageSourceService.createMessage('notification.template.installation.base', [
                 runs   : runNames,
