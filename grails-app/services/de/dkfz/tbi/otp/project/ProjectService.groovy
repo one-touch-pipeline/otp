@@ -191,6 +191,10 @@ class ProjectService {
         ])
         assert project.save(flush: true)
 
+        if (project.relatedProjects) {
+            updateAllRelatedProjects(project)
+        }
+
         createProjectDirectoryIfNeeded(project)
 
         if (project.dirAnalysis) {
@@ -226,6 +230,17 @@ class ProjectService {
         }
 
         return project
+    }
+
+    void updateAllRelatedProjects(Project project) {
+        List<Project> relatedProjectList = project.relatedProjects.split(',')*.trim().findAll().unique().collect { String relatedProjectName ->
+            return atMostOneElement(Project.findAllByName(relatedProjectName))
+        }
+
+        //update all the related projects' relatedProjects field with the newly created project name
+        relatedProjectList.findAll().each { Project baseProject ->
+            addProjectToRelatedProjects(baseProject, project)
+        }
     }
 
     List<UserProjectRole> getUsersToCopyFromBaseProject(Project baseProject) {
@@ -331,6 +346,10 @@ class ProjectService {
 
         project."${fieldName}" = fieldValue
         project.save(flush: true)
+
+        if (fieldName == 'relatedProjects' && project.relatedProjects) {
+            updateAllRelatedProjects(project)
+        }
 
         if (fieldName == 'dirAnalysis' && project.dirAnalysis) {
             createAnalysisDirectoryIfPossible(project)

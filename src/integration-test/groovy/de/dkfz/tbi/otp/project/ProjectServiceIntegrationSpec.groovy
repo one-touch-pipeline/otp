@@ -174,6 +174,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 dirName                       : dirName,
                 individualPrefix              : 'individualPrefix',
                 dirAnalysis                   : dirAnalysis,
+                relatedProjects               : relatedProjects,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
                 qcThresholdHandling           : qcThresholdHandling,
                 unixGroup                     : unixGroup,
@@ -194,6 +195,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.name == name
         project.dirName == dirName
         project.dirAnalysis == dirAnalysis
+        project.relatedProjects == relatedProjects
         project.sampleIdentifierParserBeanName == sampleIdentifierParserBeanName
         project.qcThresholdHandling == qcThresholdHandling
         project.unixGroup == unixGroup
@@ -204,13 +206,37 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.processingPriority.priority == processingPriority
 
         where:
-        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
-        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
-        'project' | 'dir'   | ''          | ''             | null                | true           | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
-        'project' | 'dir'   | ''          | ''             | 'project'           | false          | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
-        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
+        name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
+        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''              | ''             | null                | true           | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
+        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | false          | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
+    }
+
+    @Unroll
+    void "test updateAllRelatedProjects updates all related projects with new project name"() {
+        given:
+        baseSetupData()
+        Project baseProject = createProject(name: "P2", relatedProjects: baseRelatedProjects)
+        Project baseProject2 = createProject(name: "P3", relatedProjects: "P4,P5")
+        Project newProject = createProject(name: "P1", relatedProjects: "P2,P3,P10")
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.updateAllRelatedProjects(newProject)
+        }
+
+        then:
+        baseProject.relatedProjects == expected
+        baseProject2.relatedProjects == "P1,P4,P5"
+
+        where:
+        baseRelatedProjects || expected
+        "P3"                || "P1,P3"
+        ""                  || "P1"
+        null                || "P1"
     }
 
     void "test createProject if directories are created"() {
@@ -692,7 +718,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         Project project = Project.findByName("testProject")
-        String relatedProjects = "relatedProjects"
+        String relatedProjects = "testProject3"
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -1707,6 +1733,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ]
     }
 
+    @Unroll
     void "test addProjectToRelatedProjects extends related projects with new project and cleans string"() {
         given:
         setupData()
