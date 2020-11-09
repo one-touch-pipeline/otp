@@ -42,6 +42,9 @@ String libPrepKit = '' //new lib prep kit
 
 String commentInfo = '' //some additional Information about the change, perhaps link to OTRS ticket
 
+boolean overrideLibPrepKit = false //if a lib prep kit already exist, override it
+
+boolean dryRun = true //run first without saving the changes
 
 Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
     or {
@@ -97,36 +100,39 @@ CommentService commentService = ctx.commentService
 
 SeqTrack.withTransaction {
     seqTrackList.each { SeqTrack seqTrack ->
-        println "$seqTrack  ${seqTrack.libraryPreparationKit}"
-        seqTrack.libraryPreparationKit = libraryPreparationKit
-        seqTrack.kitInfoReliability = InformationReliability.KNOWN
-        DataFile.findAllBySeqTrack(seqTrack).each {
-            MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
+        if (!seqTrack.libraryPreparationKit || (seqTrack.libraryPreparationKit && overrideLibPrepKit)) {
+            println "Change:\t$seqTrack  ${seqTrack.libraryPreparationKit}"
+            seqTrack.libraryPreparationKit = libraryPreparationKit
+            seqTrack.kitInfoReliability = InformationReliability.KNOWN
+            DataFile.findAllBySeqTrack(seqTrack).each {
+                MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
 
-            String oldComment = it.comment?.comment ?: ''
-            String newComment = "Correct ${entry?.value} to ${libPrepKit},\n${commentInfo}".trim()
-            String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
-            println "    $entry"
-            println newComment
-            commentService.saveComment(it, combinedComment)
-        }
-
-        /*
-         * Update MergingWorkPackages only, if mergingCriteria use lib prep kit
-         */
-        MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType))
-        if (mergingCriteria && mergingCriteria.useLibPrepKit) {
-            RoddyBamFile.createCriteria().list {
-                seqTracks {
-                    eq('id', seqTrack.id)
-                }
-            }*.mergingWorkPackage.unique().each { MergingWorkPackage workPackage ->
-                println "    $workPackage  ${workPackage.libraryPreparationKit}"
-                workPackage.libraryPreparationKit = libraryPreparationKit
+                String oldComment = it.comment?.comment ?: ''
+                String newComment = "Correct ${entry?.value} to ${libPrepKit},\n${commentInfo}".trim()
+                String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
+                println "    $entry"
+                println newComment
+                commentService.saveComment(it, combinedComment)
             }
+            /*
+            * Update MergingWorkPackages only, if mergingCriteria use lib prep kit
+            */
+            MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType))
+            if (mergingCriteria && mergingCriteria.useLibPrepKit) {
+                RoddyBamFile.createCriteria().list {
+                    seqTracks {
+                        eq('id', seqTrack.id)
+                    }
+                }*.mergingWorkPackage.unique().each { MergingWorkPackage workPackage ->
+                    println "    $workPackage  ${workPackage.libraryPreparationKit}"
+                    workPackage.libraryPreparationKit = libraryPreparationKit
+                }
+            }
+        } else {
+            println "Not changed:\t$seqTrack  ${seqTrack.libraryPreparationKit}"
         }
     }
 
-    assert false: 'Only for debug'
+    assert !dryRun: "DRY RUN: transaction intentionally failed to rollback changes"
 }
 
