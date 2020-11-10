@@ -299,7 +299,8 @@ patients.split('\n')*.trim().findAll {
                                 "${it.samplePair.sampleType1.dirName}_${it.samplePair.sampleType2.dirName}"
                         )
                         addToOutput("echo ${it.instancePath.absoluteDataManagementPath}")
-                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --chmod=${rsyncChmod} ${it.instancePath.absoluteDataManagementPath} ${resultFolder}")
+                        addToOutput("mkdir -p ${resultFolder}")
+                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${it.instancePath.absoluteDataManagementPath} ${resultFolder}")
                         if (getFileList) {
                             addToOutputList("ls -l --ignore=\"*roddyExec*\" ${it.instancePath.absoluteDataManagementPath}")
                         }
