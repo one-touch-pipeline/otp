@@ -114,7 +114,7 @@ class SampleOverviewController {
                             if (pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
                                 subCell = "${it.numberOfMergedLanes} | ${informationOfSample.laneCountRegistered[seqType.id]}"
                             } else if (pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED) {
-                                subCell = "<span class='icon-OKAY'></span>"
+                                subCell = "<span class='icon-OKAY'>yes</span>"
                                 if (it.coverage) {
                                     subCell += "| ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
                                 }
