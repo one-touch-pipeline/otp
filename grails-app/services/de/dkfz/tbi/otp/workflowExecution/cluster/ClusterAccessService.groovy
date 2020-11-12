@@ -68,7 +68,9 @@ class ClusterAccessService {
 
         clusterJobHandlingService.startJob(jobManager, workflowStep, beJobs)
 
-        List<ClusterJob> clusterJobs = clusterJobHandlingService.collectJobStatistics(realm, workflowStep, beJobs)
+        List<ClusterJob> clusterJobs = clusterJobHandlingService.createAndSaveClusterJobs(realm, workflowStep, beJobs)
+
+        clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)
 
         clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
 

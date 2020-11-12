@@ -276,7 +276,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         thrown(StartClusterJobException)
     }
 
-    void "collectJobStatistics, when all fine, then all jobs started and no exception thrown"() {
+    void "createAndSaveClusterJobs, when all fine, then create all cluster jobs and no exception thrown"() {
         given:
         setupJobData()
         Realm realm = createRealm()
@@ -292,19 +292,41 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
                 new ClusterJob([clusterJobId: clusterJobId])
             }
         }
-        service.clusterStatisticService = Mock(ClusterStatisticService) {
-            2 * retrieveAndSaveJobInformationAfterJobStarted(_)
-        }
         service.logService = Mock(LogService) {
-            4 * addSimpleLogEntry(workflowStep, _)
+            2 * addSimpleLogEntry(workflowStep, _)
             0 * _
         }
 
         when:
-        List<ClusterJob> clusterJobs = service.collectJobStatistics(realm, workflowStep, jobs)
+        List<ClusterJob> clusterJobs = service.createAndSaveClusterJobs(realm, workflowStep, jobs)
 
         then:
         TestCase.assertContainSame(clusterJobs*.clusterJobId, jobs*.jobID*.shortID)
+    }
+
+    void "collectJobStatistics, when all fine, then statistics are retrieved for all cluster jobs"() {
+        given:
+        setupJobData()
+        List<ClusterJob> clusterJobs = (1..3).collect {
+            createClusterJob([
+                    workflowStep: workflowStep,
+                    checkStatus : ClusterJob.CheckStatus.CREATED,
+            ])
+        }
+
+        service.clusterStatisticService = Mock(ClusterStatisticService) {
+            3 * retrieveAndSaveJobInformationAfterJobStarted(_)
+        }
+        service.logService = Mock(LogService) {
+            5 * addSimpleLogEntry(workflowStep, _)
+            0 * _
+        }
+
+        when:
+        service.collectJobStatistics(workflowStep, clusterJobs)
+
+        then:
+        noExceptionThrown()
     }
 
     void "startMonitorClusterJob, when all fine, then all jobs have the checkState CHECKING"() {

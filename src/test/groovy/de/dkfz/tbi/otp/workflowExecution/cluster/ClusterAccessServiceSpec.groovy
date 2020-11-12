@@ -70,7 +70,8 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
             1 * createBeJobsToSend(batchEuphoriaJobManager, realm, workflowStep, scripts, [:]) >> beJobs
             1 * sendJobs(batchEuphoriaJobManager, workflowStep, beJobs)
             1 * startJob(batchEuphoriaJobManager, workflowStep, beJobs)
-            1 * collectJobStatistics(realm, workflowStep, beJobs) >> clusterJobs
+            1 * createAndSaveClusterJobs(realm, workflowStep, beJobs) >> clusterJobs
+            1 * collectJobStatistics(workflowStep, clusterJobs)
             1 * startMonitorClusterJob(workflowStep, clusterJobs)
             0 * _
         }

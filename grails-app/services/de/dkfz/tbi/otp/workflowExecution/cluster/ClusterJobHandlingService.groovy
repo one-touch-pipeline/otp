@@ -133,32 +133,41 @@ class ClusterJobHandlingService {
         logService.addSimpleLogEntry(workflowStep, "Finish starting ${beJobs.size()} cluster jobs: ${jobToString(beJobs)}")
     }
 
-    List<ClusterJob> collectJobStatistics(Realm realm, WorkflowStep workflowStep, List<BEJob> beJobs) {
-        logService.addSimpleLogEntry(workflowStep, "Begin collecting  ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
+    List<ClusterJob> createAndSaveClusterJobs(Realm realm, WorkflowStep workflowStep, List<BEJob> beJobs) {
+        logService.addSimpleLogEntry(workflowStep, "Begin creating  ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         String sshUser = configService.sshUser
         List<ClusterJob> clusterJobs = beJobs.collect { BEJob job ->
-            ClusterJob clusterJob = clusterJobService.createClusterJob(
+            clusterJobService.createClusterJob(
                     realm, job.jobID.shortID, sshUser, workflowStep, job.jobName
             )
-            clusterStatisticService.retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
-
-            logService.addSimpleLogEntry(workflowStep, "LogFile: ${clusterJob.jobLog}")
-            return clusterJob
         }
-        logService.addSimpleLogEntry(workflowStep, "Finish collecting ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
+        logService.addSimpleLogEntry(workflowStep, "Finish creating ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         return clusterJobs
     }
 
+    void collectJobStatistics(WorkflowStep workflowStep, List<ClusterJob> clusterJobs) {
+        logService.addSimpleLogEntry(workflowStep, "Begin collecting  ${clusterJobs.size()} cluster job statistic: ${clusterJobToString(clusterJobs)}")
+        clusterJobs.collect { ClusterJob clusterJob ->
+            clusterStatisticService.retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
+            logService.addSimpleLogEntry(workflowStep, "LogFile: ${clusterJob.jobLog}")
+        }
+        logService.addSimpleLogEntry(workflowStep, "Finish collecting ${clusterJobs.size()} cluster job statistic: ${clusterJobToString(clusterJobs)}")
+    }
+
     void startMonitorClusterJob(WorkflowStep workflowStep, List<ClusterJob> clusterJobs) {
-        logService.addSimpleLogEntry(workflowStep, "Begin starting of checking of cluster jobs: ${clusterJobs*.clusterJobId.join(', ')}")
+        logService.addSimpleLogEntry(workflowStep, "Begin starting of checking of cluster jobs: ${clusterJobToString(clusterJobs)}")
         clusterJobs.each { ClusterJob clusterJob ->
             clusterJob.checkStatus = ClusterJob.CheckStatus.CHECKING
             clusterJob.save(flush: true)
         }
-        logService.addSimpleLogEntry(workflowStep, "All cluster jobs are now checked by the cluster monitor: ${clusterJobs*.clusterJobId.join(', ')}")
+        logService.addSimpleLogEntry(workflowStep, "All cluster jobs are now checked by the cluster monitor: ${clusterJobToString(clusterJobs)}")
     }
 
     private String jobToString(List<BEJob> jobs) {
         return jobs*.jobID*.shortID.join(', ')
+    }
+
+    private String clusterJobToString(List<ClusterJob> jobs) {
+        return jobs*.clusterJobId.join(', ')
     }
 }
