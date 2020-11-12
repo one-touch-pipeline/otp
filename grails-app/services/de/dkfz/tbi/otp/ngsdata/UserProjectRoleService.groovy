@@ -415,6 +415,9 @@ class UserProjectRoleService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
+        if (!userService.hasCurrentUserAdministrativeRoles() && userProjectRole.isPi()) {
+            throw new InsufficientRightsException("You don't have enough rights to execute this operation! Please ask your administrator.")
+        }
         boolean hadFileAccess = userProjectRole.accessToFiles
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {
             return userProjectRole
@@ -458,6 +461,9 @@ class UserProjectRoleService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole deleteProjectUserRole(UserProjectRole userProjectRole, ProjectRole currentProjectRole) {
         assert currentProjectRole in userProjectRole.projectRoles
+        if (currentProjectRole.name == ProjectRole.Basic.PI.name() && !userService.hasCurrentUserAdministrativeRoles()) {
+            throw new OtpRuntimeException("Cannot remove role ${ProjectRole.Basic.PI.name()}. Please ask an administrator!")
+        }
         if (userProjectRole.projectRoles.size() <= 1) {
             throw new OtpRuntimeException("A user must have at least one role!")
         }

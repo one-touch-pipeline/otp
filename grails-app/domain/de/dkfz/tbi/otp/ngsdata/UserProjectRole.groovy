@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
@@ -70,6 +71,10 @@ class UserProjectRole implements Serializable, Entity {
 
     boolean equalByAccessRelatedProperties(UserProjectRole userProjectRole) {
         return accessRelatedProperties.every { this."$it" == userProjectRole."$it" }
+    }
+
+    boolean isPi() {
+        return projectRoles.contains(CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name())))
     }
 
     @Override

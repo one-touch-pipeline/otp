@@ -30,8 +30,8 @@ $.confirmation = function (text) {
     return true
 };
 
-$(function() {
-    $('input[type=radio][name=addViaLdap]').change(function() {
+$(function () {
+    $('input[type=radio][name=addViaLdap]').change(function () {
         var ldapUserChecked = (this.value === "true");
         $('.inputField.ldapUser').prop("disabled", !ldapUserChecked);
         $('.inputField.nonLdapUser').prop("disabled", ldapUserChecked);
@@ -57,9 +57,39 @@ $(function() {
         $(this).parents('form').submit();
         return true
     });
+
+    $("div.submit-container button.changeProjectAccess").click(function () {
+        "use strict";
+        let container;
+        container = $(this).parent();
+
+        var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
+        if (confirmationText) {
+            var confirmed = confirm(confirmationText);
+            if (confirmed === false) {
+                return
+            }
+        }
+
+        $.ajax({
+            url: $("input:hidden[name=changeProjectAccessButton]", container).val(),
+            dataType: "json",
+            type: "POST",
+            success: function (data) {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    $.otp.warningMessage(data.error);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+            }
+        });
+    });
 });
 
-$(document).ready(function(){
+$(document).ready(function () {
     $('.loaded-content').show();
     $('.loader').hide();
 });

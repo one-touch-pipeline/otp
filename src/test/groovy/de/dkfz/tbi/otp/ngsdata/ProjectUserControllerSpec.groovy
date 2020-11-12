@@ -29,17 +29,18 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.administration.LdapService
-import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 import static javax.servlet.http.HttpServletResponse.SC_OK
 
-class ProjectUserControllerSpec extends Specification implements ControllerUnitTest<ProjectUserController>, DataTest, UserAndRoles {
+class ProjectUserControllerSpec extends Specification implements ControllerUnitTest<ProjectUserController>, DataTest, UserAndRoles, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -60,12 +61,16 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         given:
         Project project = DomainFactory.createProject()
 
+        createAllBasicProjectRoles()
+
         User enabledUser = DomainFactory.createUser()
         User disabledUser = DomainFactory.createUser()
         User unconnectedUser = DomainFactory.createUser()
         User currentUser = DomainFactory.createUser()
+
         String unknownUsername = "unknownUser"
         String ignoredUsername = "ignoredUser"
+
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND, ignoredUsername)
 
         addUserWithReadAccessToProject(enabledUser, project, true)
@@ -85,6 +90,14 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.springSecurityService = Mock(SpringSecurityService) {
             getCurrentUser() >> currentUser
         }
+        controller.userService = Mock(UserService) {
+            hasCurrentUserAdministrativeRoles() >> true
+        }
+        controller.projectRoleService = new ProjectRoleService([
+                userService: Mock(UserService) {
+                    hasCurrentUserAdministrativeRoles() >> true
+                }
+        ])
         controller.processingOptionService = new ProcessingOptionService()
 
         when:
@@ -173,5 +186,40 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         addViaLdap || errorMessage
         true       || "internal"
         false      || "external"
+    }
+
+    @Unroll
+    void "UserEntry, checks availableRoles for user having #x role"() {
+        given:
+        createUserAndRoles()
+        createAllBasicProjectRoles()
+        Project project = createProject()
+        DomainFactory.createUserProjectRole([
+                project     : project,
+                user        : getUser(ADMIN),
+                projectRoles: ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name()),
+        ])
+        DomainFactory.createUserProjectRole([
+                project     : project,
+                user        : getUser(USER),
+                projectRoles: ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name()),
+        ])
+
+        LdapUserDetails ldapUserDetails = new LdapUserDetails()
+
+        when:
+        UserEntry userEntry = new UserEntry(getUser(name), project, ldapUserDetails, hasAdministrativeRole)
+
+        then:
+        CollectionUtils.containSame(userEntry.availableRoles, result())
+
+        where:
+        x                   | name  | hasAdministrativeRole | result
+        "an administrative" | ADMIN | true                  | {
+            (ProjectRole.all - CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name())))*.name
+        }
+        "no administrative" | USER  | false                 | {
+            (ProjectRole.all - ProjectRole.findAllByNameInList([ProjectRole.Basic.SUBMITTER.name(), ProjectRole.Basic.PI.name(),]))*.name
+        }
     }
 }

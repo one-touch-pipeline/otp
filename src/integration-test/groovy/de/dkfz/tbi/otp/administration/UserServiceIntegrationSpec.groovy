@@ -137,14 +137,14 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         false         | []
     }
 
-    void "isCurrentUserAllowedToSeeRuns, check if current user has an administrative role"() {
+    void "hasCurrentUserAdministrativeRoles, check if current user has an administrative role"() {
         given:
         setupData()
         boolean check
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
-            check = userService.currentUserAllowedToSeeRuns
+            check = userService.hasCurrentUserAdministrativeRoles()
         }
 
         then:

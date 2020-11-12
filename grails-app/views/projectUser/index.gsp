@@ -291,11 +291,10 @@
                     </td>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                         <td>
-                            <g:form action="setEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id, "value": false]'>
-                                <input id="deactivateButton" type="submit" value="${g.message(code: 'projectUser.table.deactivateUser')}"
-                                       title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Deactivate"])}"
-                                       data-text="${confirmationText}"/>
-                            </g:form>
+                            <div class="submit-container">
+                                <input type="hidden" name="changeProjectAccessButton" value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false] )}"/>
+                                <button class="changeProjectAccess js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.table.deactivateUser"/></button>
+                            </div>
                         </td>
                     </sec:access>
                 </tr>
@@ -345,11 +344,10 @@
                         </td>
                         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                             <td>
-                                <g:form action="setEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id, "value": true]'>
-                                    <input id="reactivateButton" type="submit" value="${g.message(code: 'projectUser.table.reactivateUser', "value": true)}"
-                                           title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Activate"])}"
-                                           data-text="${confirmationText}"/>
-                                </g:form>
+                                <div class="submit-container">
+                                    <input type="hidden" name="changeProjectAccessButton" value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": true] )}"/>
+                                    <button class="changeProjectAccess js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.table.reactivateUser"/></button>
+                                </div>
                             </td>
                         </sec:access>
                     </tr>

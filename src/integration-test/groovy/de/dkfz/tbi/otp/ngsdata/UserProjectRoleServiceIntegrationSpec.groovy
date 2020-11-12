@@ -89,6 +89,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        userProjectRoleService.userService = new UserService()
 
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION,
@@ -296,7 +297,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
                 projectRoles: [pi],
-                manageUsers: true
+                manageUsers: true,
+                user: getUser(USER)
         )
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
@@ -306,6 +308,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 manageUsersAndDelegate: manageUsersAndDelegate,
                 receivesNotifications: receivesNotifications,
                 enabled: enabledStatus,
+        )
+
+        // mock user currently logged in
+        userProjectRoleService.userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService) {
+                    getCurrentUser() >> requesterUserProjectRole.user
+                }
         )
 
         when:
@@ -871,6 +880,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             )
         }
 
+        // mock user currently logged in
+        userProjectRoleService.userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService) {
+                    getCurrentUser() >> getUser(OPERATOR)
+                }
+        )
+
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRoles[0], true)
@@ -933,26 +949,164 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "test #flag access as project user"() {
+    @SuppressWarnings("LineLength")
+    void "test #flag access as project user with #role rights; userProjectRole contains ProjectRole #projectRole; initialized with #flagInit; expect success"() {
         given:
         setupData()
 
-        User user = DomainFactory.createUser()
+        User user = getUser(role)
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 project: createProject(unixGroup: UNIX_GROUP),
-                (flag): false,
+                (flag): flagInit,
+                projectRoles: ProjectRole.findAllByName(projectRole.name())
+        )
+
+        // mock user currently logged in
+        userProjectRoleService.userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService) {
+                    getCurrentUser() >> user
+                }
         )
 
         when:
         SpringSecurityUtils.doWithAuth(user.username) {
-            userProjectRoleService."set${flag.capitalize()}"(userProjectRole, true)
+            userProjectRoleService."set${flag.capitalize()}"(userProjectRole, !flagInit)
         }
 
         then:
-        userProjectRole."${flag}" == true
+        userProjectRole."${flag}" == result
 
         where:
-        flag << ["accessToOtp", "accessToFiles", "manageUsers", "manageUsersAndDelegate", "receivesNotifications", "enabled"]
+        flag                     | flagInit | projectRole                 | role     | result
+        //USER false -> (desired)true, Role PI
+        "accessToOtp"            | false    | ProjectRole.Basic.PI        | USER     | true
+        "accessToFiles"          | false    | ProjectRole.Basic.PI        | USER     | true
+        "manageUsers"            | false    | ProjectRole.Basic.PI        | USER     | true
+        "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | USER     | true
+        "receivesNotifications"  | false    | ProjectRole.Basic.PI        | USER     | true
+
+        //OPERATOR false -> (desired)true, Role PI
+        "accessToOtp"            | false    | ProjectRole.Basic.PI        | OPERATOR | true
+        "accessToFiles"          | false    | ProjectRole.Basic.PI        | OPERATOR | true
+        "manageUsers"            | false    | ProjectRole.Basic.PI        | OPERATOR | true
+        "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | OPERATOR | true
+        "receivesNotifications"  | false    | ProjectRole.Basic.PI        | OPERATOR | true
+        "enabled"                | false    | ProjectRole.Basic.PI        | OPERATOR | true
+
+        // ADMIN false -> (desired)true, Role PI
+        "accessToOtp"            | false    | ProjectRole.Basic.PI        | ADMIN    | true
+        "accessToFiles"          | false    | ProjectRole.Basic.PI        | ADMIN    | true
+        "manageUsers"            | false    | ProjectRole.Basic.PI        | ADMIN    | true
+        "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | ADMIN    | true
+        "receivesNotifications"  | false    | ProjectRole.Basic.PI        | ADMIN    | true
+        "enabled"                | false    | ProjectRole.Basic.PI        | ADMIN    | true
+
+        //USER true -> (desired)false, Role PI
+        "accessToOtp"            | true     | ProjectRole.Basic.PI        | USER     | false
+        "accessToFiles"          | true     | ProjectRole.Basic.PI        | USER     | false
+        "manageUsers"            | true     | ProjectRole.Basic.PI        | USER     | false
+        "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | USER     | false
+        "receivesNotifications"  | true     | ProjectRole.Basic.PI        | USER     | false
+
+        //OPERATOR true -> (desired)false, Role PI
+        "accessToOtp"            | true     | ProjectRole.Basic.PI        | OPERATOR | false
+        "accessToFiles"          | true     | ProjectRole.Basic.PI        | OPERATOR | false
+        "manageUsers"            | true     | ProjectRole.Basic.PI        | OPERATOR | false
+        "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | OPERATOR | false
+        "receivesNotifications"  | true     | ProjectRole.Basic.PI        | OPERATOR | false
+        "enabled"                | true     | ProjectRole.Basic.PI        | OPERATOR | false
+
+        // ADMIN true -> (desired)false, Role PI
+        "accessToOtp"            | true     | ProjectRole.Basic.PI        | ADMIN    | false
+        "accessToFiles"          | true     | ProjectRole.Basic.PI        | ADMIN    | false
+        "manageUsers"            | true     | ProjectRole.Basic.PI        | ADMIN    | false
+        "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | ADMIN    | false
+        "receivesNotifications"  | true     | ProjectRole.Basic.PI        | ADMIN    | false
+        "enabled"                | true     | ProjectRole.Basic.PI        | ADMIN    | false
+
+        //USER false -> (desired)true, Role Submitter
+        "accessToOtp"            | false    | ProjectRole.Basic.SUBMITTER | USER     | true
+        "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | USER     | true
+        "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | USER     | true
+        "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | USER     | true
+        "receivesNotifications"  | false    | ProjectRole.Basic.SUBMITTER | USER     | true
+        "enabled"                | false    | ProjectRole.Basic.SUBMITTER | USER     | true
+
+        //OPERATOR false -> (desired)true, Role Submitter
+        "accessToOtp"            | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+        "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+        "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+        "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+        "receivesNotifications"  | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+        "enabled"                | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+
+        // ADMIN false -> (desired)true, Role Submitter
+        "accessToOtp"            | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
+        "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
+        "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
+        "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
+        "receivesNotifications"  | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
+        "enabled"                | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
+
+        //USER true -> (desired)false, Role Submitter
+        "accessToOtp"            | true     | ProjectRole.Basic.SUBMITTER | USER     | false
+        "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | USER     | false
+        "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | USER     | false
+        "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | USER     | false
+        "receivesNotifications"  | true     | ProjectRole.Basic.SUBMITTER | USER     | false
+        "enabled"                | true     | ProjectRole.Basic.SUBMITTER | USER     | false
+
+        //OPERATOR true -> (desired)false, Role Submitter
+        "accessToOtp"            | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
+        "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
+        "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
+        "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
+        "receivesNotifications"  | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
+        "enabled"                | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
+
+        // ADMIN true -> (desired)false, Role Submitter
+        "accessToOtp"            | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
+        "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
+        "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
+        "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
+        "receivesNotifications"  | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
+        "enabled"                | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
+    }
+
+    @Unroll
+    @SuppressWarnings("LineLength")
+    void "test #flag access as project user with #role rights; userProjectRole contains ProjectRole #projectRole; initialized with #flagInit; expect failure "() {
+        given:
+        setupData()
+
+        User user = getUser(role)
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                project: createProject(unixGroup: UNIX_GROUP),
+                (flag): flagInit,
+                projectRoles: ProjectRole.findAllByName(projectRole.name())
+        )
+
+        // mock user currently logged in
+        userProjectRoleService.userService = new UserService(
+                springSecurityService: Mock(SpringSecurityService) {
+                    getCurrentUser() >> user
+                }
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(user.username) {
+            userProjectRoleService."set${flag.capitalize()}"(userProjectRole, !flagInit)
+        }
+
+        then:
+        thrown(InsufficientRightsException)
+
+        where:
+        flag      | flagInit | projectRole          | role
+        //USER false -> (desired)true, Role PI
+        "enabled" | false    | ProjectRole.Basic.PI | USER
+        //USER true -> (desired)false, Role PI
+        "enabled" | true     | ProjectRole.Basic.PI | USER
     }
 
     void "getEmailsOfToBeNotifiedProjectUsers, only return emails of users that receive notification and are enabled"() {

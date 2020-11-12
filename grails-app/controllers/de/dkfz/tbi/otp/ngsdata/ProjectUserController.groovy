@@ -44,6 +44,22 @@ class ProjectUserController implements CheckAndCall {
     LdapService ldapService
     SpringSecurityService springSecurityService
     ProcessingOptionService processingOptionService
+    ProjectRoleService projectRoleService
+
+    static allowedMethods = [
+            index: "GET",
+            addUserToProject: "POST",
+            addRoleToUserProjectRole: "POST",
+            deleteProjectRole: "POST",
+            setAccessToOtp: "POST",
+            setAccessToFiles: "POST",
+            setManageUsers: "POST",
+            setManageUsersAndDelegate: "POST",
+            setReceivesNotifications: "POST",
+            setEnabled: "POST",
+            updateName: "POST",
+            updateEmail: "POST",
+    ]
 
     def index() {
         Project project = projectSelectionService.selectedProject
@@ -69,20 +85,21 @@ class ProjectUserController implements CheckAndCall {
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = userProjectRolesOfProject.find { it.user == user }
             if (userProjectRole) {
-                userEntries.add(new UserEntry(user, project, ldapUserDetails))
+                userEntries.add(new UserEntry(user, project, ldapUserDetails, userService.hasCurrentUserAdministrativeRoles()))
             } else {
                 usersWithoutUserProjectRole.add(user.username)
             }
         }
-        Map<Boolean, UserEntry> userEntriesByEnabledStatus = userEntries.groupBy { it.userProjectRole.enabled }
+        Map<Boolean, List<UserEntry>> userEntriesByEnabledStatus = userEntries.groupBy { it.userProjectRole.enabled }
 
         return [
                 projectsOfUnixGroup        : Project.findAllByUnixGroup(project.unixGroup),
-                enabledProjectUsers        : userEntriesByEnabledStatus[true],
-                disabledProjectUsers       : userEntriesByEnabledStatus[false],
+                enabledProjectUsers        : userEntriesByEnabledStatus[true], // available Roles for each projectUsers in UserEntry
+                disabledProjectUsers       : userEntriesByEnabledStatus[false], // available Roles for each projectUsers in UserEntry
                 usersWithoutUserProjectRole: usersWithoutUserProjectRole,
                 unknownUsersWithFileAccess : nonDatabaseUsers,
-                availableRoles             : ProjectRole.findAll(),
+                // available Roles for adding a new user to a project. Caution: Not the available Roles for each projectUser.
+                availableRoles             : projectRoleService.listAvailableProjectRolesAuthenticatedByCurrentUser(),
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
                 emails                     : userProjectRoleService.getEmailsForNotification(project),
@@ -158,9 +175,9 @@ class ProjectUserController implements CheckAndCall {
 
     JSON deleteProjectRole(DeleteProjectRoleCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            userProjectRoleService.deleteProjectUserRole(cmd.userProjectRole, ProjectRole.findByName(cmd.currentRole))
+            userProjectRoleService.deleteProjectUserRole(cmd.userProjectRole, CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(cmd.currentRole)))
         }) {
-            return   [currentRole: cmd.currentRole]
+            return [currentRole: cmd.currentRole]
         }
     }
 
@@ -202,7 +219,6 @@ class ProjectUserController implements CheckAndCall {
     JSON setEnabled(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             userProjectRoleService.setEnabled(cmd.userProjectRole, cmd.value)
-            redirect(action: "index")
         }
     }
 
@@ -260,7 +276,11 @@ class UserEntry {
     boolean deactivated
     UserProjectRole userProjectRole
 
-    UserEntry(User user, Project project, LdapUserDetails ldapUserDetails) {
+    /**
+     * Class to describe a userEntry in the projectUser view
+     * @param hasAdministrativeRole is used to describe whether the user logged in has an administrative role. (caution: not ProjectRole)!
+     */
+    UserEntry(User user, Project project, LdapUserDetails ldapUserDetails, boolean hasAdministrativeRole = false) {
         this.user = user
         this.userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProject(user, project))
 
@@ -269,7 +289,8 @@ class UserEntry {
         this.thumbnailPhoto = inLdap ? ldapUserDetails.thumbnailPhoto.encodeAsBase64() : ""
         this.department = inLdap ? ldapUserDetails.department : ""
         this.projectRoleNames = userProjectRole.projectRoles*.name.sort()
-        this.availableRoles = (ProjectRole.findAll() - userProjectRole.projectRoles)*.name.sort()
+        // each UserEntry might have different Roles available dependent on the assigned Roles to the userProjectRole
+        this.availableRoles = fetchAvailableRoles(userProjectRole, hasAdministrativeRole)
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
         this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
@@ -278,6 +299,15 @@ class UserEntry {
         this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)
         this.manageUsersAndDelegate = getPermissionStatus(inLdap && userProjectRole.manageUsersAndDelegate)
         this.receivesNotifications = getPermissionStatus(userProjectRole.receivesNotifications)
+    }
+
+    private static List<String> fetchAvailableRoles(UserProjectRole userProjectRole, boolean hasAdministrativeRole) {
+        if (!hasAdministrativeRole) {
+            return (ProjectRole.findAll() - userProjectRole.projectRoles - CollectionUtils.exactlyOneElement(
+                    ProjectRole.findAllByName(ProjectRole.Basic.PI.name())
+            )) *.name.sort()
+        }
+        return (ProjectRole.findAll() - userProjectRole.projectRoles)*.name.sort()
     }
 
     private static PermissionStatus getPermissionStatus(boolean access) {
@@ -359,8 +389,8 @@ class UpdateProjectRoleCommand implements Validateable {
     static constraints = {
         newRoles(nullable: false, validator: { val, obj ->
             (val.size() == 0) || val.any { !(it in ProjectRole.findAll()*.name) } ? "Input not a valid ProjectRole" : true
-            })
-        }
+        })
+    }
 }
 
 class DeleteProjectRoleCommand implements Validateable {

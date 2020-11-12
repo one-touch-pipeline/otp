@@ -165,7 +165,7 @@ class UserService {
             return true
         }
 
-        User user = springSecurityService.currentUser
+        User user = springSecurityService.currentUser as User
         return user.acceptedPrivacyPolicy
     }
 
@@ -227,13 +227,13 @@ No user exists yet, create user ${currentUser} with admin rights.
         return getRolesOfUser(springSecurityService.currentUser as User)
     }
 
-    boolean checkRolesContainsAdministrativeRole(List <Role> roles) {
+    boolean checkRolesContainsAdministrativeRole(List<Role> roles) {
         return roles.any {
             it.authority in Role.ADMINISTRATIVE_ROLES
         }
     }
 
-    boolean isCurrentUserAllowedToSeeRuns() {
+    boolean hasCurrentUserAdministrativeRoles() {
         return checkRolesContainsAdministrativeRole(rolesOfCurrentUser)
     }
 }

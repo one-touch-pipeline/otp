@@ -19,27 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.security
 
-import grails.gorm.transactions.Transactional
+import groovy.transform.InheritConstructors
+import de.dkfz.tbi.otp.OtpRuntimeException
 
-import de.dkfz.tbi.otp.administration.UserService
-
-@Transactional
-class ProjectRoleService {
-
-    UserService userService
-
-    static boolean projectRolesContainAuthoritativeRole(Set<ProjectRole> projectRoles) {
-        return (projectRoles*.name)?.intersect(ProjectRole.AUTHORITY_PROJECT_ROLES)
-    }
-
-    List<ProjectRole> listAvailableProjectRolesAuthenticatedByCurrentUser() {
-        return ProjectRole.all.findAll {
-            if (userService.hasCurrentUserAdministrativeRoles()) {
-                return true
-            }
-            return it.name != ProjectRole.Basic.PI.name()
-        }
-    }
+@InheritConstructors
+class InsufficientRightsException extends OtpRuntimeException {
 }

@@ -46,7 +46,7 @@ class SequenceController {
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
             libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
             antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
-            showRunLinks: userService.isCurrentUserAllowedToSeeRuns(),
+            showRunLinks: userService.hasCurrentUserAdministrativeRoles(),
             filterTree : [
                     [name : 'projectSelection', msgcode: 'sequence.search.project',
                      type : 'LIST', from: projectService.getAllProjects(),
