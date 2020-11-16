@@ -42,10 +42,11 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         return createDomainObject(WorkflowRun, [
-                workflow   : { properties.restartedFrom?.workflow ?: createWorkflow() },
-                priority   : { createProcessingPriority() },
-                project    : { createProject() },
-                displayName: "displayName_${nextId}",
+                workflow      : { properties.restartedFrom?.workflow ?: createWorkflow() },
+                priority      : { createProcessingPriority() },
+                project       : { createProject() },
+                displayName   : "displayName_${nextId}",
+                combinedConfig: "{},"
         ], properties)
     }
 
@@ -137,12 +138,12 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
         ], properties)
     }
 
-    ExternalWorkflowConfigFragment createExternalWorkflowConfigFragment(Map properties = [:]) {
+    ExternalWorkflowConfigFragment createExternalWorkflowConfigFragment(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ExternalWorkflowConfigFragment, [
                 name: "externalWorkflowConfigFragmentName_${nextId}",
-                configValues: '{ "TestConfigKey": "TestConfigValue" }',
+                configValues: '{ "OTP_CLUSTER": { "MEMORY": "1" } }',
                 previous: null,
-        ], properties)
+        ], properties, saveAndValidate)
     }
 }
 

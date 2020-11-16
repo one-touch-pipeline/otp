@@ -281,7 +281,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 type: SelectorType.GENERIC,
                 fragmentName: "fragmentName",
                 priority: 0,
-                value: '{"config": 123}',
+                value: '{"OTP_CLUSTER": {"MEMORY": "1"}}',
         )
 
         when:

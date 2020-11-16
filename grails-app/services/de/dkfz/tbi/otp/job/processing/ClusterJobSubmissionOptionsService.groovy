@@ -84,6 +84,10 @@ class ClusterJobSubmissionOptionsService {
         } catch (ConverterException e) {
             throw new IllegalArgumentException("The string is no valid JSON string", e)
         }
+        return convertJsonStringToMap(jsonElement)
+    }
+
+    static Map<JobSubmissionOption, String> convertJsonStringToMap(JSONElement jsonElement) {
         if (!(jsonElement instanceof JSONObject)) {
             throw new IllegalArgumentException("The JSON string doesn't contain a map")
         }

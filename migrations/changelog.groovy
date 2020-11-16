@@ -509,4 +509,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/otp-610-flag-job-restartable.groovy'
+
+    include file: 'changelogs/2020/otp-681.groovy'
 }

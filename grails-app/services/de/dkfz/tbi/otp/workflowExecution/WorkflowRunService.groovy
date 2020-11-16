@@ -75,7 +75,7 @@ class WorkflowRunService {
                 state         : WorkflowRun.State.PENDING,
                 project       : project,
                 configs       : configs,
-                combinedConfig: null,
+                combinedConfig: "{}",
                 priority      : priority,
                 restartedFrom : null,
                 skippedMessage: null,

@@ -21,6 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.converters.JSON
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.json.JSONObject
+
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
@@ -92,7 +96,9 @@ class WorkflowRun implements Commentable, Entity {
 
     static constraints = {
         workDirectory nullable: true
-        combinedConfig nullable: true
+        combinedConfig validator: {
+            validateCombinedConfig(it)
+        }
         restartedFrom nullable: true, validator: { val, obj ->
             if (val && val.workflow != obj.workflow) {
                 return 'workflowRun.restartedFrom.workflow.differ'
@@ -142,5 +148,14 @@ class WorkflowRun implements Commentable, Entity {
 
     Realm getRealm() {
         return project.realm
+    }
+
+    @SuppressWarnings("Instanceof")
+    static boolean validateCombinedConfig(String s) {
+        try {
+            return JSON.parse(s) instanceof JSONObject
+        } catch (ConverterException ignored) {
+            return false
+        }
     }
 }

@@ -23,10 +23,12 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.converters.JSON
+import groovy.transform.TupleConstructor
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.*
 
 import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -35,6 +37,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 
     String name
+    /** nested maps in JSON format */
     String configValues
     ExternalWorkflowConfigFragment previous
 
@@ -43,7 +46,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         previous nullable: true
         deprecationDate nullable: true
         configValues validator: {
-            validateJsonString(it)
+            validateConfigValues(it)
         }
     }
 
@@ -74,16 +77,37 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     }
 
     @SuppressWarnings("Instanceof")
-    static Object validateJsonString(String s) {
+    static Object validateConfigValues(String s) {
         JSONElement jsonElement
         try {
             jsonElement = JSON.parse(s)
         } catch (JSONException | ConverterException ignored) {
-            return "json"
+            return "invalid.json"
         }
         if (!(jsonElement instanceof JSONObject)) {
-            return "map"
+            return "no.object"
         }
-        return jsonElement.isEmpty() ? "empty" : true
+        List<String> invalidTypes = jsonElement.collect { k, v ->
+            return (k as String) in Type.values()*.name() ? "" : k as String
+        }.findAll()
+        if (invalidTypes) {
+            return ["wrong.type", invalidTypes.join(", "), Type.values()*.name().join(", ")]
+        }
+        List<String> invalidConfigs = jsonElement.collect { k, v ->
+            Type t = Type.valueOf(k as String)
+            return (t.validateConfig && !t.validateConfig(v)) ? k as String : ""
+        }.findAll()
+        return invalidConfigs ? ["invalid.configs", invalidConfigs.join(",")] : true
+    }
+
+    /**
+     * The top-level JSON object in {@link ExternalWorkflowConfigFragment#configValues} must contain only the name() of these Types as keys
+     * Optionally the content can be validated by setting validateConfig, if no validation is required set it to null
+     */
+    @TupleConstructor enum Type {
+        /** used for jobs that are submitted directly to cluster by OTP */
+        OTP_CLUSTER({ ClusterJobSubmissionOptionsService.validateJsonString(it.toString()) }),
+
+        final Closure<Boolean> validateConfig
     }
 }

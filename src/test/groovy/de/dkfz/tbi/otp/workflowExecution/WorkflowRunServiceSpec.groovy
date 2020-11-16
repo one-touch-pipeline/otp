@@ -68,7 +68,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run
         run.workDirectory == dir
         run.configs == []
-        !run.combinedConfig
+        run.combinedConfig == "{}"
         run.workflow == workflow
         run.state == WorkflowRun.State.PENDING
         run.restartedFrom == null
