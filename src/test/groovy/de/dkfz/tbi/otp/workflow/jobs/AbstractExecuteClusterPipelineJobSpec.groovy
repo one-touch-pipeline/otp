@@ -26,6 +26,7 @@ import groovy.transform.TupleConstructor
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
 
@@ -95,5 +96,30 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
 
         then:
         true
+    }
+
+    void "execute, pass correct jobSubmissionOptions"() {
+        given:
+        List<String> scripts = [
+                "script ${nextId}",
+                "script ${nextId}",
+        ]
+        setupData(scripts)
+        job.clusterAccessService = Mock(ClusterAccessService)
+        job.logService = Mock(LogService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+
+        workflowStep.workflowRun.combinedConfig = '{"OTP_CLUSTER": {"CORES": "cores_1", "NODE_FEATURE": "node_2"}}'
+        workflowStep.workflowRun.save(flush: true)
+
+        workflowStep.workflowRun.project.realm.defaultJobSubmissionOptions = '{"MEMORY": "memory_3", "NODE_FEATURE": "node_4"}'
+        workflowStep.workflowRun.project.realm.save(flush: true)
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts,
+                [(JobSubmissionOption.MEMORY): 'memory_3', (JobSubmissionOption.NODE_FEATURE): 'node_2', (JobSubmissionOption.CORES): 'cores_1'])
     }
 }

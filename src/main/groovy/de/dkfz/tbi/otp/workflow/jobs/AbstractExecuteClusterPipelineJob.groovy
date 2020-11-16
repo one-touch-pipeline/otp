@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import grails.converters.JSON
+import org.grails.web.json.JSONElement
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterAccessService
 
 abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipelineJob {
@@ -48,7 +51,16 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
     protected abstract List<String> createScripts(WorkflowStep workflowStep)
 
     private void submitScripts(WorkflowStep workflowStep, List<String> scripts) {
-        Map<JobSubmissionOption, String> jobSubmissionOptions = [:] //TODO otp-681: extract map from WorkflowRun.combinedConfig
+        Map<JobSubmissionOption, String> jobSubmissionOptions = getJobSubmissionOptions(workflowStep.workflowRun)
         clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, jobSubmissionOptions)
+    }
+
+    private Map<JobSubmissionOption, String> getJobSubmissionOptions(WorkflowRun run) {
+        Map<JobSubmissionOption, String> options = ClusterJobSubmissionOptionsService.convertJsonStringToMap(run.realm.defaultJobSubmissionOptions)
+        JSONElement config = JSON.parse(run.combinedConfig)[ExternalWorkflowConfigFragment.Type.OTP_CLUSTER.name()] as JSONElement
+        if (config) {
+            options.putAll(ClusterJobSubmissionOptionsService.convertJsonStringToMap(config))
+        }
+        return options
     }
 }
