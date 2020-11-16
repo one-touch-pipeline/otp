@@ -30,13 +30,15 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.*
 
 import static org.springframework.util.Assert.*
 
-@SuppressWarnings(['JavaIoPackageAccess', 'Println']) //This class is written for scripts, so it needs the output in stdout
+@SuppressWarnings(['JavaIoPackageAccess', 'Println'])
+//This class is written for scripts, so it needs the output in stdout
 @Transactional
 class DataSwapService {
 
@@ -393,6 +395,81 @@ ln -s '${newDirectFileName}' \\
         "    ${seqTrack.id},  //${seqTrack}\n"
     }
 
+    class MoveIndividualHelper {
+        Project oldProject
+        Project newProject
+
+        Individual oldIndividual
+        Individual newIndividual
+
+        List<Sample> samples
+        List<SeqTrack> seqTracks
+
+        List<DataFile> fastqDataFiles
+        List<DataFile> bamDataFiles
+        List<DataFile> dataFiles
+        Map<DataFile, Map<String, String>> oldDataFileNameMap
+        List<String> oldFastqcFileNames
+
+        List<File> dirsToDelete = []
+
+        boolean sameLsdf
+
+        MoveIndividualHelper(Map<String, String> inputInformationOTP, Map<String, String> sampleTypeMap, Map<String, String> dataFileMap, StringBuilder log) {
+            checkInputInformation(inputInformationOTP)
+
+            oldProject = CollectionUtils.exactlyOneElement(Project.findAllByName(inputInformationOTP.oldProjectName),
+                    "old project ${inputInformationOTP.oldProjectName} not found")
+
+            newProject = CollectionUtils.exactlyOneElement(Project.findAllByName(inputInformationOTP.newProjectName),
+                    "new project ${inputInformationOTP.newProjectName} not found")
+
+            sameLsdf = oldProject.realm == newProject.realm
+
+            oldIndividual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(inputInformationOTP.oldPid),
+                    "old pid ${inputInformationOTP.oldPid} not found")
+
+            newIndividual = CollectionUtils.atMostOneElement(Individual.findAllByPid(inputInformationOTP.newPid))
+            if (inputInformationOTP.oldPid != inputInformationOTP.newPid) {
+                isNull(newIndividual, "new pid ${inputInformationOTP.newPid} already exist")
+            }
+
+            samples = Sample.findAllByIndividual(oldIndividual)
+            log << "\n  samples (${samples.size()}): ${samples}"
+
+            notEmpty(samples, "no samples found for ${oldIndividual}")
+            isTrue(samples.size() == sampleTypeMap.size(), "Given Sample map different in size than found samples!")
+            samples.each { Sample sample ->
+                isTrue(sampleTypeMap.containsKey(sample.sampleType.name), "${sample.sampleType.name} missed in map")
+                notNull(SampleType.findByName(sampleTypeMap.get(sample.sampleType.name)), "${sampleTypeMap.get(sample.sampleType.name)} " +
+                        "not found in database")
+            }
+
+            isTrue(oldIndividual.project == oldProject, "old individual ${inputInformationOTP.oldPid} should be in project" +
+                    " ${inputInformationOTP.oldProjectName}, but was in ${oldIndividual.project}")
+
+            seqTracks = samples ? SeqTrack.findAllBySampleInList(samples) : []
+            log << "\n  seqtracks (${seqTracks.size()}): "
+            seqTracks.each { log << "\n    - ${it}" }
+
+            fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, log)
+            bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, log)
+            dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
+            oldDataFileNameMap = collectFileNamesOfDataFiles(dataFiles)
+            oldFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
+        }
+
+        private void checkInputInformation(Map<String, String> inputInformationOTP) {
+            notNull(inputInformationOTP.oldProjectName, "parameter oldProjectName may not be null")
+
+            notNull(inputInformationOTP.newProjectName, "parameter newProjectName may not be null")
+
+            notNull(inputInformationOTP.oldPid, "parameter oldPid may not be null")
+
+            notNull(inputInformationOTP.newPid, "parameter newPid may not be null")
+        }
+    }
+
     /**
      * function to move one individual from one project to another, renaming it, change the sample type of connected samples
      * and rename data files using function renameDataFiles.
@@ -411,100 +488,75 @@ ln -s '${newDirectFileName}' \\
      * @param linkedFilesVerified when the source-fastq files have been linked from the sequencing facility, this flag
      *                            asserts that a human has checked that the symlinks still work (i.e. files still exist at the sequencing facility)
      */
-    void moveIndividual(String oldProjectName, String newProjectName, String oldPid, String newPid, Map<String, String> sampleTypeMap,
-                        Map<String, String> dataFileMap, String bashScriptName, StringBuilder log, boolean failOnMissingFiles,
-                        Path scriptOutputDirectory, boolean linkedFilesVerified = false) {
-        log << "\n\nmove ${oldPid} of ${oldProjectName} to ${newPid} of ${newProjectName} "
+    void moveIndividual(
+            Map<String, String> inputInformationOTP,
+            Map<String, String> sampleTypeMap,
+            Map<String, String> dataFileMap,
+            String bashScriptName,
+            StringBuilder log,
+            boolean failOnMissingFiles,
+            Path scriptOutputDirectory,
+            boolean linkedFilesVerified = false
+    ) {
+        log << "\n\nmove ${inputInformationOTP.oldPid} of ${inputInformationOTP.oldProjectName} to" +
+                " ${inputInformationOTP.newPid} of ${inputInformationOTP.newProjectName} "
 
         completeOmittedNewValuesAndLog(sampleTypeMap, 'samples', log)
         completeOmittedNewValuesAndLog(dataFileMap, 'datafiles', log)
 
-        notNull(oldProjectName, "parameter oldProjectName may not be null")
-        notNull(newProjectName, "parameter newProjectName may not be null")
-        notNull(oldPid, "parameter oldPid may not be null")
-        notNull(newPid, "parameter newPid may not be null")
         notNull(dataFileMap, "parameter dataFileMap may not be null")
 
-        Project oldProject = Project.findByName(oldProjectName)
-        notNull(oldProject, "old project ${oldProjectName} not found")
-        Project newProject = Project.findByName(newProjectName)
-        notNull(newProject, "new project ${newProjectName} not found")
+        MoveIndividualHelper moveIndividualHelper = new MoveIndividualHelper(inputInformationOTP, sampleTypeMap, dataFileMap, log)
 
-        Individual oldIndividual = Individual.findByPid(oldPid)
-        notNull(oldIndividual, "old pid ${oldPid} not found")
-        Individual newIndividual = Individual.findByPid(newPid)
-        if (oldPid != newPid) {
-            isNull(newIndividual, "new pid ${newPid} already exist")
-        }
-        String processingPathToOldIndividual = dataProcessingFilesService.getOutputDirectory(oldIndividual, DataProcessingFilesService.OutputDirectories.BASE)
-
-        List<Sample> samples = Sample.findAllByIndividual(oldIndividual)
-        log << "\n  samples (${samples.size()}): ${samples}"
-        notEmpty(samples, "no samples found for ${oldIndividual}")
-        isTrue(samples.size() == sampleTypeMap.size())
-        samples.each { Sample sample ->
-            isTrue(sampleTypeMap.containsKey(sample.sampleType.name), "${sample.sampleType.name} missed in map")
-            notNull(SampleType.findByName(sampleTypeMap.get(sample.sampleType.name)), "${sampleTypeMap.get(sample.sampleType.name)} " +
-                    "not found in database")
-        }
-
-        isTrue(oldIndividual.project == oldProject, "old individual ${oldPid} should be in project ${oldProjectName}, " +
-                "but was in ${oldIndividual.project}")
-
-        List<SeqTrack> seqTracks = samples ? SeqTrack.findAllBySampleInList(samples) : []
-        log << "\n  seqtracks (${seqTracks.size()}): "
-        seqTracks.each { log << "\n    - ${it}" }
-
-        boolean sameLsdf = oldProject.realm == newProject.realm
-
-        List<File> dirsToDelete = []
-
-        throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
-        if (!linkedFilesVerified) {
-            throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
-        }
+        String processingPathToOldIndividual = dataProcessingFilesService.getOutputDirectory(
+                moveIndividualHelper.oldIndividual,
+                DataProcessingFilesService.OutputDirectories.BASE
+        )
 
         // now the changing process(procedure) starts
-        if (seqTracks && AlignmentPass.findBySeqTrackInList(seqTracks)) {
-            log << "\n -->     found alignments for seqtracks (${AlignmentPass.findAllBySeqTrackInList(seqTracks)*.seqTrack.unique()}): "
+        if (moveIndividualHelper.seqTracks && AlignmentPass.findBySeqTrackInList(moveIndividualHelper.seqTracks)) {
+            log << "\n -->     found alignments for seqtracks (${AlignmentPass.findAllBySeqTrackInList(moveIndividualHelper.seqTracks)*.seqTrack.unique()}): "
         }
 
         Realm realm = configService.defaultRealm
-        Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm
-        )
-        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
+        // RestartAlignmentScript
+        createGroovyConsoleScriptToRestartAlignments(scriptOutputDirectory, bashScriptName, realm, moveIndividualHelper.seqTracks)
+
+        // MoveFilesScript will be filled during routine
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
         bashScriptToMoveFiles << BASH_HEADER
 
         Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
-        createBashScriptRoddy(seqTracks, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
+        createBashScriptRoddy(moveIndividualHelper.seqTracks, moveIndividualHelper.dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
 
-        seqTracks.each { SeqTrack seqTrack ->
+        moveIndividualHelper.seqTracks.each { SeqTrack seqTrack ->
             Map<String, List<File>> dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
-            dirsToDelete.addAll(dirs.get("dirsToDelete"))
+            moveIndividualHelper.dirsToDelete.addAll(dirs.get("dirsToDelete"))
             bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
-            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
+            // mark as swapped
+            seqTrack.swapped = true
+            seqTrack.save(flush: true)
         }
 
-        List<DataFile> fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, log)
-        List<DataFile> bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, log)
-        List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten()
-        Map<DataFile, Map<String, String>> oldDataFileNameMap = collectFileNamesOfDataFiles(dataFiles)
-        List<String> oldFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-
-        log << "\n  changing ${oldIndividual.project} to ${newProject} for ${oldIndividual}"
-        oldIndividual.project = newProject
-        oldIndividual.pid = newPid
-        oldIndividual.mockPid = newPid
-        oldIndividual.mockFullName = newPid
-        oldIndividual.save(flush: true)
+        log << "\n  changing ${moveIndividualHelper.oldIndividual.project} to ${moveIndividualHelper.newProject} for ${moveIndividualHelper.oldIndividual}"
+        moveIndividualHelper.oldIndividual.project = moveIndividualHelper.newProject
+        moveIndividualHelper.oldIndividual.pid = inputInformationOTP.newPid
+        moveIndividualHelper.oldIndividual.mockPid = inputInformationOTP.newPid
+        moveIndividualHelper.oldIndividual.mockFullName = inputInformationOTP.newPid
+        moveIndividualHelper.oldIndividual.save(flush: true)
 
         bashScriptToMoveFiles << "\n\n################ move data files ################\n"
-        bashScriptToMoveFiles << renameDataFiles(dataFiles, newProject, dataFileMap, oldDataFileNameMap, sameLsdf, log)
+        bashScriptToMoveFiles << renameDataFiles(
+                moveIndividualHelper.dataFiles,
+                moveIndividualHelper.newProject,
+                dataFileMap,
+                moveIndividualHelper.oldDataFileNameMap,
+                moveIndividualHelper.sameLsdf,
+                log
+        )
 
-        samples.each { Sample sample ->
+        moveIndividualHelper.samples.each { Sample sample ->
             SampleType newSampleType = SampleType.findByName(sampleTypeMap.get(sample.sampleType.name))
             log << "\n    change ${sample.sampleType.name} to ${newSampleType.name}"
             SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
@@ -513,35 +565,117 @@ ln -s '${newDirectFileName}' \\
         }
 
         bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
-        samples = Sample.findAllByIndividual(oldIndividual)
-        seqTracks = samples ? SeqTrack.findAllBySampleInList(samples) : []
-        List<DataFile> newDataFiles = seqTracks ? DataFile.findAllBySeqTrackInList(seqTracks) : []
+        moveIndividualHelper.samples = Sample.findAllByIndividual(moveIndividualHelper.oldIndividual)
+        moveIndividualHelper.seqTracks = moveIndividualHelper.samples ? SeqTrack.findAllBySampleInList(moveIndividualHelper.samples) : []
+        List<DataFile> newDataFiles = moveIndividualHelper.seqTracks ? DataFile.findAllBySeqTrackInList(moveIndividualHelper.seqTracks) : []
         List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
-        oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
+        moveIndividualHelper.oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), log, failOnMissingFiles)
         }
 
         bashScriptToMoveFiles << "\n\n################ delete analysis stuff ################\n"
-        dirsToDelete.flatten()*.path.each {
+        moveIndividualHelper.dirsToDelete.flatten()*.path.each {
             bashScriptToMoveFiles << "#rm -rf ${it}\n"
         }
 
         bashScriptToMoveFiles << "\n\n\n ################ delete old Individual ################ \n"
-        bashScriptToMoveFiles << "# rm -rf ${oldProject.projectSequencingDirectory}/*/view-by-pid/${oldPid}/\n"
+        bashScriptToMoveFiles << "# rm -rf ${moveIndividualHelper.oldProject.projectSequencingDirectory}/*/view-by-pid/${inputInformationOTP.oldPid}/\n"
         bashScriptToMoveFiles << "# rm -rf ${processingPathToOldIndividual}\n"
 
+        // Comment
         individualService.createComment("Individual swap", [
-                individual: oldIndividual,
-                project: oldProjectName,
-                pid: oldPid,
+                individual: moveIndividualHelper.oldIndividual,
+                project   : moveIndividualHelper.oldProject.name,
+                pid       : inputInformationOTP.oldPid,
         ], [
-                individual: oldIndividual,
-                project: newProjectName,
-                pid: newPid,
+                individual: moveIndividualHelper.oldIndividual,
+                project   : moveIndividualHelper.newProject.name,
+                pid       : inputInformationOTP.newPid,
         ])
 
-        createCommentForSwappedDatafiles(dataFiles)
+        createCommentForSwappedDatafiles(moveIndividualHelper.dataFiles)
+    }
+
+    class MoveSampleHelper {
+
+        Project oldProject
+        Project newProject
+
+        Individual oldIndividual
+        Individual newIndividual
+
+        SampleType oldSampleType
+        SampleType newSampleType
+
+        Sample sample
+
+        List<SeqTrack> seqTrackList
+
+        List<DataFile> fastqDataFiles
+        List<DataFile> bamDataFiles
+        List<DataFile> dataFiles
+        Map<DataFile, Map<String, String>> oldDataFileNameMap
+        List<String> oldFastqcFileNames
+        List<File> dirsToDelete
+
+        boolean sameLsdf
+
+        MoveSampleHelper(Map<String, String> inputInformationOTP, Map<String, String> dataFileMap, StringBuilder log) {
+            checkInputInformation(inputInformationOTP)
+
+            oldProject = CollectionUtils.exactlyOneElement(Project.findAllByName(inputInformationOTP.oldProjectName),
+                    "old project ${inputInformationOTP.oldProjectName} not found")
+            newProject = CollectionUtils.exactlyOneElement(Project.findAllByName(inputInformationOTP.newProjectName),
+                    "new project ${inputInformationOTP.newProjectName} not found")
+
+            sameLsdf = oldProject.realm == newProject.realm
+
+            oldIndividual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(inputInformationOTP.oldPid),
+                    "old pid ${inputInformationOTP.oldPid} not found")
+            newIndividual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(inputInformationOTP.newPid),
+                    "new pid ${inputInformationOTP.newPid} not found")
+            isTrue(
+                    oldIndividual.project == oldProject,
+                    "old individual ${inputInformationOTP.oldPid} should be in project" +
+                            " ${inputInformationOTP.oldProjectName}, but was in ${oldIndividual.project}"
+            )
+            isTrue(
+                    newIndividual.project == newProject,
+                    "new individual ${inputInformationOTP.newPid} should be in project" +
+                            "  ${inputInformationOTP.newProject}, but was in ${newIndividual.project}"
+            )
+
+            oldSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(inputInformationOTP.oldSampleTypeName),
+                    "old sample type ${inputInformationOTP.oldSampleTypeName} not found")
+            newSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(inputInformationOTP.newSampleTypeName),
+                    "new sample type ${inputInformationOTP.newSampleTypeName} not found")
+
+            sample = getSingleSampleForIndividualAndSampleType(oldIndividual, oldSampleType, log)
+
+            seqTrackList = getAndShowSeqTracksForSample(sample, log)
+
+            fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTrackList, dataFileMap, log)
+            bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTrackList, dataFileMap, log)
+            dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
+            oldDataFileNameMap = collectFileNamesOfDataFiles(dataFiles)
+            oldFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
+            dirsToDelete = []
+        }
+
+        private void checkInputInformation(Map<String, String> inputInformationOTP) {
+            notNull(inputInformationOTP.oldProjectName, "parameter oldProjectName may not be null")
+
+            notNull(inputInformationOTP.newProjectName, "parameter newProjectName may not be null")
+
+            notNull(inputInformationOTP.oldPid, "parameter oldPid may not be null")
+
+            notNull(inputInformationOTP.newPid, "parameter newPid may not be null")
+
+            notNull(inputInformationOTP.oldSampleTypeName, "parameter oldSampleTypeName may not be null")
+
+            notNull(inputInformationOTP.newSampleTypeName, "parameter newSampleTypeName may not be null")
+        }
     }
 
     /**
@@ -561,104 +695,78 @@ ln -s '${newDirectFileName}' \\
      * @param linkedFilesVerified when the source-fastq files have been linked from the sequencing facility, this flag
      * asserts that a human has checked that the symlinks still work (i.e. files still exist at the sequencing facility)
      */
-    void moveSample(String oldProjectName, String newProjectName, String oldPid, String newPid, String oldSampleTypeName,
-                    String newSampleTypeName, Map<String, String> dataFileMap, String bashScriptName,
+    void moveSample(Map<String, String> inputInformationOTP, Map<String, String> dataFileMap, String bashScriptName,
                     StringBuilder log, boolean failOnMissingFiles, Path scriptOutputDirectory,
-                    boolean linkedFilesVerified = false) throws IOException{
-        log << "\n\nmove ${oldPid} ${oldSampleTypeName} of ${oldProjectName} to ${newPid} ${newSampleTypeName} of ${newProjectName} "
-        completeOmittedNewValuesAndLog(dataFileMap, 'datafiles', log)
+                    boolean linkedFilesVerified = false) throws IOException {
+        log << "\n\nmove ${inputInformationOTP.oldPid} ${inputInformationOTP.oldSampleTypeName} of ${inputInformationOTP.oldProjectName} " +
+                "to ${inputInformationOTP.newPid} ${inputInformationOTP.newSampleTypeName} of ${inputInformationOTP.newProjectName} "
 
-        notNull(oldProjectName, "parameter oldProjectName may not be null")
-        notNull(newProjectName, "parameter newProjectName may not be null")
-        notNull(oldPid, "parameter oldPid may not be null")
-        notNull(newPid, "parameter newPid may not be null")
-        notNull(oldSampleTypeName, "parameter oldSampleTypeName may not be null")
-        notNull(newSampleTypeName, "parameter newSampleTypeName may not be null")
         notNull(dataFileMap, "parameter dataFileMap may not be null")
         notNull(bashScriptName, "parameter bashScriptName may not be null")
 
-        Project oldProject = Project.findByName(oldProjectName)
-        notNull(oldProject, "old project ${oldProjectName} not found")
-        Project newProject = Project.findByName(newProjectName)
-        notNull(newProject, "new project ${newProjectName} not found")
+        completeOmittedNewValuesAndLog(dataFileMap, 'datafiles', log)
+        MoveSampleHelper moveSampleHelper = new MoveSampleHelper(inputInformationOTP, dataFileMap, log)
 
-        Individual oldIndividual = Individual.findByPid(oldPid)
-        notNull(oldIndividual, "old pid ${oldPid} not found")
-        Individual newIndividual = Individual.findByPid(newPid)
-        notNull(newIndividual, "new pid ${newPid} not found")
-        isTrue(oldIndividual.project == oldProject, "old individual ${oldPid} should be in project {oldProjectName}, " +
-                "but was in ${oldIndividual.project}")
-        isTrue(newIndividual.project == newProject, "new individual ${newPid} should be in project {newProjectName}, " +
-                "but was in ${newIndividual.project}")
-
-        SampleType oldSampleType = SampleType.findByName(oldSampleTypeName)
-        notNull(oldSampleType, "old sample type ${oldSampleTypeName} not found")
-        SampleType newSampleType = SampleType.findByName(newSampleTypeName)
-        notNull(newSampleType, "new sample type ${newSampleTypeName} not found")
-
-        Sample sample = getSingleSampleForIndividualAndSampleType(oldIndividual, oldSampleType, log)
-
-        boolean sameLsdf = oldProject.realm == newProject.realm
-
-        List<SeqTrack> seqTrackList = getAndShowSeqTracksForSample(sample, log)
-
-        throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTrackList)
+        throwExceptionInCaseOfExternalMergedBamFileIsAttached(moveSampleHelper.seqTrackList)
         if (!linkedFilesVerified) {
-            throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTrackList)
+            throwExceptionInCaseOfSeqTracksAreOnlyLinked(moveSampleHelper.seqTrackList)
         }
 
-        if (seqTrackList && AlignmentPass.findBySeqTrackInList(seqTrackList)) {
-            log << "\n -->     found alignments for seqtracks (${AlignmentPass.findBySeqTrackInList(seqTrackList)*.seqTrack.unique()}): "
+        if (moveSampleHelper.seqTrackList && AlignmentPass.findBySeqTrackInList(moveSampleHelper.seqTrackList)) {
+            log << "\n -->     found alignments for seqtracks (${AlignmentPass.findBySeqTrackInList(moveSampleHelper.seqTrackList)*.seqTrack.unique()}): "
         }
-
-        List<DataFile> fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTrackList, dataFileMap, log)
-        List<DataFile> bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTrackList, dataFileMap, log)
-        List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten()
-        Map<DataFile, Map<String, String>> oldDataFileNameMap = collectFileNamesOfDataFiles(dataFiles)
-        List<String> oldFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-        List<File> dirsToDelete = []
 
         // validation ends here, now the changing is started
         Realm realm = configService.defaultRealm
-        Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm)
-        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
+        // RestartAlignmentScript
+        createGroovyConsoleScriptToRestartAlignments(scriptOutputDirectory, bashScriptName, realm, moveSampleHelper.seqTrackList)
+
+        // MoveFilesScript will be filled during routine
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
         bashScriptToMoveFiles << BASH_HEADER
 
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
-        createBashScriptRoddy(seqTrackList, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
+        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(
+                scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm
+        )
+        createBashScriptRoddy(
+                moveSampleHelper.seqTrackList, moveSampleHelper.dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified
+        )
 
-        seqTrackList.each { SeqTrack seqTrack ->
+        moveSampleHelper.seqTrackList.each { SeqTrack seqTrack ->
             Map dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
-            dirsToDelete << dirs.get("dirsToDelete")
+            dirs.get("dirsToDelete").each {
+                moveSampleHelper.dirsToDelete.push(it)
+            }
             bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
-            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
+
+            // mark as swapped
+            seqTrack.swapped = true
+            seqTrack.save(flush: true)
         }
 
-        if (seqTrackList && AlignmentPass.findBySeqTrackInList(seqTrackList)) {
+        if (moveSampleHelper.seqTrackList && AlignmentPass.findBySeqTrackInList(moveSampleHelper.seqTrackList)) {
             bashScriptToMoveFiles << "\n\n\n ################ delete old aligned & merged files ################ \n"
 
-            List<AlignmentPass> alignmentPasses = AlignmentPass.findAllBySeqTrackInList(seqTrackList)
+            List<AlignmentPass> alignmentPasses = AlignmentPass.findAllBySeqTrackInList(moveSampleHelper.seqTrackList)
             alignmentPasses.each { AlignmentPass alignmentPass ->
                 def dirTypeAlignment = DataProcessingFilesService.OutputDirectories.ALIGNMENT
-                String baseDirAlignment = dataProcessingFilesService.getOutputDirectory(oldIndividual, dirTypeAlignment)
+                String baseDirAlignment = dataProcessingFilesService.getOutputDirectory(moveSampleHelper.oldIndividual, dirTypeAlignment)
                 String middleDirAlignment = processedAlignmentFileService.getRunLaneDirectory(alignmentPass.seqTrack)
                 String oldPathToAlignedFiles = "${baseDirAlignment}/${middleDirAlignment}"
                 bashScriptToMoveFiles << "#rm -rf ${oldPathToAlignedFiles}\n"
             }
 
             def dirTypeMerging = DataProcessingFilesService.OutputDirectories.MERGING
-            String baseDirMerging = dataProcessingFilesService.getOutputDirectory(oldIndividual, dirTypeMerging)
-            String oldProcessingPathToMergedFiles = "${baseDirMerging}/${oldSampleType.name}"
+            String baseDirMerging = dataProcessingFilesService.getOutputDirectory(moveSampleHelper.oldIndividual, dirTypeMerging)
+            String oldProcessingPathToMergedFiles = "${baseDirMerging}/${moveSampleHelper.oldSampleType.name}"
             bashScriptToMoveFiles << "#rm -rf ${oldProcessingPathToMergedFiles}\n"
 
             List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.createCriteria().list {
                 mergingPass {
                     mergingSet {
                         mergingWorkPackage {
-                            eq("sample", sample)
+                            eq("sample", moveSampleHelper.sample)
                         }
                     }
                 }
@@ -670,49 +778,50 @@ ln -s '${newDirectFileName}' \\
                 String oldProjectPathToMergedFiles = latestProcessedMergedBamFile.baseDirectory.absolutePath
                 bashScriptToMoveFiles << "#rm -rf ${oldProjectPathToMergedFiles}\n"
             }
-        } else {
-            // If the seqTracks were not aligned for whatever reason they will be aligned now.
-            // !! Check if the seqTracks have to be aligned. If not, comment out this part.
-            seqTrackList.each { SeqTrack seqTrack ->
-                groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
-            }
         }
 
-        sample.sampleType = newSampleType
-        sample.individual = newIndividual
-        sample.save(flush: true)
+        moveSampleHelper.sample.sampleType = moveSampleHelper.newSampleType
+        moveSampleHelper.sample.individual = moveSampleHelper.newIndividual
+        moveSampleHelper.sample.save(flush: true)
 
         bashScriptToMoveFiles << "################ move data files ################ \n"
-        bashScriptToMoveFiles << renameDataFiles(dataFiles, newProject, dataFileMap, oldDataFileNameMap, sameLsdf, log)
+        bashScriptToMoveFiles << renameDataFiles(
+                moveSampleHelper.dataFiles,
+                moveSampleHelper.newProject,
+                dataFileMap,
+                moveSampleHelper.oldDataFileNameMap,
+                moveSampleHelper.sameLsdf,
+                log
+        )
 
-        SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
+        SampleIdentifier.findAllBySample(moveSampleHelper.sample)*.delete(flush: true)
 
-        List<String> newFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
+        List<String> newFastqcFileNames = moveSampleHelper.fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
         bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
 
-        oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
+        moveSampleHelper.oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), log, failOnMissingFiles)
         }
 
         bashScriptToMoveFiles << "# delete snv stuff\n"
-        dirsToDelete.flatten()*.path.each {
+        moveSampleHelper.dirsToDelete.flatten()*.path.each {
             bashScriptToMoveFiles << "#rm -rf ${it}\n"
         }
 
         individualService.createComment("Sample swap", [
-                individual: oldIndividual,
-                project: oldProjectName,
-                pid: oldPid,
-                sampleType: oldSampleTypeName,
+                individual: moveSampleHelper.oldIndividual,
+                project   : moveSampleHelper.oldProject.name,
+                pid       : moveSampleHelper.oldIndividual.pid,
+                sampleType: moveSampleHelper.oldSampleType.name,
         ], [
-                individual: newIndividual,
-                project: newProjectName,
-                pid: newPid,
-                sampleType: newSampleTypeName,
+                individual: moveSampleHelper.newIndividual,
+                project   : moveSampleHelper.newProject.name,
+                pid       : moveSampleHelper.newIndividual.pid,
+                sampleType: moveSampleHelper.newSampleType.name,
         ])
 
-        createCommentForSwappedDatafiles(dataFiles)
+        createCommentForSwappedDatafiles(moveSampleHelper.dataFiles)
     }
 
     /**
@@ -726,7 +835,7 @@ ln -s '${newDirectFileName}' \\
             seqTracks {
                 inList("id", seqTrackList*.id)
             }
-        }
+        } as List<RoddyBamFile>
 
         if (roddyBamFiles) {
             bashScriptToMoveFilesAsOtherUser << BASH_HEADER
@@ -808,7 +917,7 @@ ln -s '${newDirectFileName}' \\
      */
     void throwExceptionInCaseOfExternalMergedBamFileIsAttached(List<SeqTrack> seqTracks) {
         List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = seqTrackService.returnExternallyProcessedMergedBamFiles(seqTracks)
-        assert externallyProcessedMergedBamFiles.empty : "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
+        assert externallyProcessedMergedBamFiles.empty: "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
     }
 
     /**
@@ -818,7 +927,7 @@ ln -s '${newDirectFileName}' \\
         int linkedSeqTracks = seqTracks.findAll { SeqTrack seqTrack ->
             seqTrack.linkedExternally
         }.size()
-        assert !linkedSeqTracks : "There are ${linkedSeqTracks} seqTracks only linked"
+        assert !linkedSeqTracks: "There are ${linkedSeqTracks} seqTracks only linked"
     }
 
     /**
@@ -855,200 +964,291 @@ ln -s '${newDirectFileName}' \\
     }
 
     /**
+     * Helper class for a LaneSwap. Performs Input checking and data retrieval during object construction
+     */
+    class SwapLaneHelper {
+        Run run
+
+        Project oldProject
+        Project newProject
+
+        Individual oldIndividual
+        Individual newIndividual
+
+        SampleType oldSampleType
+        SampleType newSampleType
+
+        Sample oldSample
+        Sample newSample
+
+        SeqType oldSeqType
+        SeqType newSeqType
+
+        LibraryLayout oldLibraryLayout
+        LibraryLayout newLibraryLayout
+
+        boolean oldSingleCell
+        boolean newSingleCell
+        boolean sampleNeedsToBeCreated
+
+        List lanes
+
+        List<SeqTrack> seqTracks
+
+        List<String> oldFastqcFileNames
+
+        Map<DataFile, Map<String, String>> oldPathsPerDataFile
+
+        List<File> dirsToDelete = []
+
+        boolean sameLsdf
+
+        SwapLaneHelper(Map<String, List<String>> inputInformationOTP) {
+            checkInputInformation(inputInformationOTP)
+            run = CollectionUtils.exactlyOneElement(Run.findAllByName(extractSingleElement(inputInformationOTP.runName)),
+                    "The run (${inputInformationOTP.runName}) does not exist")
+
+            oldProject = CollectionUtils.exactlyOneElement(Project.findAllByName(extractSingleElement(inputInformationOTP.oldProjectName)),
+                    "The old project (${inputInformationOTP.oldProjectName}) does not exist")
+
+            newProject = CollectionUtils.exactlyOneElement(Project.findAllByName(extractSingleElement(inputInformationOTP.newProjectName)),
+                    "The new project (${inputInformationOTP.newProjectName}) does not exist")
+
+            sameLsdf = oldProject.realm == newProject.realm
+
+            oldIndividual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(extractSingleElement(inputInformationOTP.oldPid)),
+                    "The old Individual (${inputInformationOTP.oldPid}) does not exist")
+
+            newIndividual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(extractSingleElement(inputInformationOTP.newPid)),
+                    "The new Individual (${inputInformationOTP.newPid}) does not exist")
+
+            oldSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(extractSingleElement(inputInformationOTP.oldSampleTypeName)),
+                    "The old SampleType (${inputInformationOTP.oldSampleTypeName}) does not exist")
+
+            newSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(extractSingleElement(inputInformationOTP.newSampleTypeName)),
+                    "The new SampleType (${inputInformationOTP.newSampleTypeName}) does not exist")
+
+            oldSample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(this.oldIndividual, this.oldSampleType),
+                    "The old Sample (${oldIndividual} ${oldSampleType}) does not exist")
+
+            sampleNeedsToBeCreated = Boolean.parseBoolean(extractSingleElement(inputInformationOTP.sampleNeedsToBeCreated))
+            List<Sample> sampleList = Sample.findAllByIndividualAndSampleType(newIndividual, newSampleType)
+
+            if (sampleNeedsToBeCreated) {
+                assert sampleList.isEmpty() : "The new Sample (${newIndividual} ${newSampleType}) does exist, but should not"
+                newSample = new Sample(individual: newIndividual, sampleType: newSampleType).save(flush: true)
+            } else {
+                newSample = CollectionUtils.exactlyOneElement(sampleList, "The new Sample (${newIndividual} ${newSampleType}) does not exist")
+            }
+
+            oldLibraryLayout = LibraryLayout.findByName(extractSingleElement(inputInformationOTP.oldLibraryLayout))
+            notNull(oldLibraryLayout, "The old LibraryLayout ${inputInformationOTP.oldLibraryLayout} does not exists")
+
+            newLibraryLayout = LibraryLayout.findByName(extractSingleElement(inputInformationOTP.newLibraryLayout))
+            notNull(oldLibraryLayout, "The new LibraryLayout ${inputInformationOTP.newLibraryLayout} does not exists")
+
+            oldSingleCell = Boolean.parseBoolean(extractSingleElement(inputInformationOTP.oldSingleCell))
+            newSingleCell = Boolean.parseBoolean(extractSingleElement(inputInformationOTP.newSingleCell))
+            oldSeqType = CollectionUtils.exactlyOneElement(
+                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(
+                            extractSingleElement(inputInformationOTP.oldSeqTypeName),
+                            oldLibraryLayout,
+                            oldSingleCell
+                    ),
+                    "The old seqtype ${inputInformationOTP.oldSeqTypeName} ${inputInformationOTP.oldLibraryLayout} " +
+                            "${inputInformationOTP.oldSingleCell} does not exist"
+            )
+
+            newSeqType = CollectionUtils.exactlyOneElement(
+                    SeqType.findAllByNameAndLibraryLayoutAndSingleCell(
+                            extractSingleElement(inputInformationOTP.newSeqTypeName),
+                            newLibraryLayout,
+                            newSingleCell
+                    ),
+                    "The new seqtype ${inputInformationOTP.newSeqTypeName} ${inputInformationOTP.oldLibraryLayout} " +
+                            "${inputInformationOTP.newSingleCell} does not exist"
+            )
+
+            lanes = inputInformationOTP.lane as List
+            seqTracks = SeqTrack.findAllBySampleAndRunAndLaneIdInList(oldSample, run, lanes)
+            isTrue(seqTracks*.seqType.unique().size() == 1, "SeqTrack of different SeqTypes found!")
+            isTrue(seqTracks*.seqType.first() == oldSeqType, "expected '${oldSeqType}' but found '${seqTracks*.seqType.first()}'")
+            isTrue(seqTracks.size() == inputInformationOTP.lane.size(), "Given lane(s) ${inputInformationOTP.lane} and found SeqTracks differ!")
+
+            oldFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort { it.id }.collect {
+                fastqcDataFilesService.fastqcOutputFile(it)
+            }
+
+            oldPathsPerDataFile = collectFileNamesOfDataFiles(DataFile.findAllBySeqTrackInList(seqTracks))
+        }
+
+        private void checkInputInformation(Map<String, List<String>> inputInformationOTP) {
+            extractSingleElement(inputInformationOTP.oldProjectName)
+
+            extractSingleElement(inputInformationOTP.newProjectName)
+
+            extractSingleElement(inputInformationOTP.oldPid)
+
+            extractSingleElement(inputInformationOTP.newPid)
+
+            extractSingleElement(inputInformationOTP.oldSampleTypeName)
+
+            extractSingleElement(inputInformationOTP.newSampleTypeName)
+
+            extractSingleElement(inputInformationOTP.runName)
+
+            notNull(inputInformationOTP.lane, "lane not set")
+
+            extractSingleElement(inputInformationOTP.oldSeqTypeName)
+
+            extractSingleElement(inputInformationOTP.newSeqTypeName)
+
+            extractSingleElement(inputInformationOTP.oldSingleCell)
+
+            extractSingleElement(inputInformationOTP.newSingleCell)
+
+            extractSingleElement(inputInformationOTP.oldLibraryLayout)
+
+            extractSingleElement(inputInformationOTP.newLibraryLayout)
+
+            extractSingleElement(inputInformationOTP.sampleNeedsToBeCreated)
+        }
+
+        private String extractSingleElement(List<String> stringList) {
+            return CollectionUtils.exactlyOneElement(stringList)
+        }
+    }
+
+    /**
      * function for a lane swap: Allow to move to another sample (defined by Individual & SampleType),
      * change SeqType, library layout, rename data files using function renameDataFiles.
      *
      * The DB is changed automatically.
      * For the filesystem changes a script is written to ${scriptOutputDirectory} on the server running otp
      */
-    //no test written, because a new data swap function are planned
-    void swapLane(Map<String, String> inputInformationOTP, Map<String, String> dataFileMap, String bashScriptName,
+    void swapLane(Map<String, List<String>> inputInformationOTP, Map<String, String> dataFileMap, String bashScriptName,
                   StringBuilder log, boolean failOnMissingFiles, Path scriptOutputDirectory,
                   boolean linkedFilesVerified = false) {
         log << "\nswap from ${inputInformationOTP.oldPid} ${inputInformationOTP.oldSampleTypeName} to " +
                 "${inputInformationOTP.newPid} ${inputInformationOTP.newSampleTypeName}\n\n"
 
-        notNull(inputInformationOTP.oldProjectName)
-        notNull(inputInformationOTP.newProjectName)
-        notNull(inputInformationOTP.oldPid)
-        notNull(inputInformationOTP.newPid)
-        notNull(inputInformationOTP.oldSampleTypeName)
-        notNull(inputInformationOTP.newSampleTypeName)
-        notNull(inputInformationOTP.runName)
-        notNull(inputInformationOTP.lane)
-        notNull(inputInformationOTP.oldSeqTypeName)
-        notNull(inputInformationOTP.newSeqTypeName)
-        notNull(inputInformationOTP.oldSingleCell)
-        notNull(inputInformationOTP.newSingleCell)
-        notNull(inputInformationOTP.oldLibraryLayout)
-        notNull(inputInformationOTP.newLibraryLayout)
-        notNull(bashScriptName)
-        notNull(scriptOutputDirectory)
+        // check Input
+        notNull(bashScriptName, "bashScriptName not set")
+        notNull(scriptOutputDirectory, "scriptOutputDirectory not set")
+
+        // get DatabaseObjects and check findings
+        SwapLaneHelper swapLaneHelper = new SwapLaneHelper(inputInformationOTP)
+        log << "\n${swapLaneHelper.seqTracks.size()} seqTracks found\n"
+
+        throwExceptionInCaseOfExternalMergedBamFileIsAttached(swapLaneHelper.seqTracks)
+        if (!linkedFilesVerified) {
+            throwExceptionInCaseOfSeqTracksAreOnlyLinked(swapLaneHelper.seqTracks)
+        }
 
         completeOmittedNewValuesAndLog(dataFileMap, 'datafiles', log)
 
-        Realm realm = configService.defaultRealm
-        Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm
+        // RestartAlignmentScript
+        List<SeqTrack> seqTracksOfOldSample = SeqTrack.findAllBySampleAndSeqType(swapLaneHelper.oldSample, swapLaneHelper.oldSeqType)
+        createGroovyConsoleScriptToRestartAlignments(
+                scriptOutputDirectory,
+                bashScriptName,
+                configService.defaultRealm,
+                seqTracksOfOldSample
         )
-        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
+        // MoveFilesScript will be filled during routine
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(
+                scriptOutputDirectory,
+                "${bashScriptName}.sh",
+                configService.defaultRealm
+        )
         bashScriptToMoveFiles << BASH_HEADER
 
-        Run run = Run.findByName(inputInformationOTP.runName)
-        notNull(run, "The run (${inputInformationOTP.runName}) does not exist")
-
-        Project oldProject = Project.findByName(inputInformationOTP.oldProjectName)
-        notNull(oldProject, "The old project (${inputInformationOTP.oldProjectName}) does not exist")
-        Project newProject = Project.findByName(inputInformationOTP.newProjectName)
-        notNull(newProject, "The new project (${inputInformationOTP.newProjectName}) does not exist")
-
-        boolean sameLsdf = oldProject.realm == newProject.realm
-
-        Individual oldIndividual = Individual.findByPid(inputInformationOTP.oldPid)
-        notNull(oldIndividual, "The old Individual (${inputInformationOTP.oldPid}) does not exist")
-        Individual newIndividual = Individual.findByPid(inputInformationOTP.newPid)
-        notNull(newIndividual, "The new Individual (${inputInformationOTP.newPid}) does not exist")
-
-        isTrue(oldIndividual.project == oldProject, "The old individual does not exist in the old project")
-        isTrue(newIndividual.project == newProject, "The new individual does not exist in the new project")
-
-        SampleType oldSampleType = SampleType.findByName(inputInformationOTP.oldSampleTypeName)
-        notNull(oldSampleType, "The old SampleType (${inputInformationOTP.oldSampleTypeName}) does not exist")
-        SampleType newSampleType = SampleType.findByName(inputInformationOTP.newSampleTypeName)
-        notNull(newSampleType, "The new SampleType (${inputInformationOTP.newSampleTypeName}) does not exist")
-
-        Sample oldSample = Sample.findByIndividualAndSampleType(oldIndividual, oldSampleType)
-        notNull(oldSample, "The old Sample (${oldIndividual} ${oldSampleType}) does not exist")
-        Sample newSample = Sample.findByIndividualAndSampleType(newIndividual, newSampleType)
-        if (!inputInformationOTP["sampleNeedsToBeCreated"]) {
-            notNull(newSample, "The new Sample (${newIndividual} ${newSampleType}) does not exist")
-        } else {
-            isNull(newSample, "The new Sample (${newIndividual} ${newSampleType}) does exist, but should not")
-            newSample = new Sample(individual: newIndividual, sampleType: newSampleType).save(flush: true)
-        }
-
-        SeqType oldSeqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(
-                inputInformationOTP.oldSeqTypeName, inputInformationOTP.oldLibraryLayout, inputInformationOTP.oldSingleCell)
-        notNull(oldSeqType, "The old seqtype ${inputInformationOTP.oldSeqTypeName} ${inputInformationOTP.oldLibraryLayout} " +
-                "${inputInformationOTP.oldSingleCell} does not exist")
-        SeqType newSeqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(
-                inputInformationOTP.newSeqTypeName, inputInformationOTP.newLibraryLayout, inputInformationOTP.newSingleCell)
-        notNull(newSeqType, "The new seqtype ${inputInformationOTP.newSeqTypeName} ${inputInformationOTP.oldLibraryLayout} " +
-                "${inputInformationOTP.newSingleCell} does not exist")
-
-        List<SeqTrack> seqTracks = SeqTrack.findAllBySampleAndRunAndLaneIdInList(oldSample, run, inputInformationOTP.lane)
-        log << "\n${seqTracks.size()} seqTracks found\n"
-        isTrue(seqTracks*.seqType.unique().size() == 1)
-        isTrue(seqTracks*.seqType.first() == oldSeqType, "expected '${oldSeqType}' but found '${seqTracks*.seqType.first()}'")
-        isTrue(seqTracks.size() == inputInformationOTP.lane.size())
-        List<File> dirsToDelete = []
-
-        List<String> oldFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort { it.id }.collect {
-            fastqcDataFilesService.fastqcOutputFile(it)
-        }
-
-        Map<DataFile, Map<String, String>> oldPathsPerDataFile = collectFileNamesOfDataFiles(DataFile.findAllBySeqTrackInList(seqTracks))
-
-        throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
-        if (!linkedFilesVerified) {
-            throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
-        }
-
-        individualService.createComment("Lane swap",
-                [
-                        individual: oldIndividual,
-                        project: oldProject.name,
-                        sample: oldSample,
-                        pid: inputInformationOTP.oldPid,
-                        sampleType: oldSampleType.name,
-                        seqType: oldSeqType.name,
-                        singleCell: oldSeqType.singleCell,
-                        libraryLayout: oldSeqType.libraryLayout,
-                ],
-                [
-                        individual: newIndividual,
-                        project: newProject.name,
-                        sample: newSample,
-                        pid: inputInformationOTP.newPid,
-                        sampleType: newSampleType.name,
-                        seqType: newSeqType.name,
-                        singleCell: newSeqType.singleCell,
-                        libraryLayout: newSeqType.libraryLayout,
-                ],
-                "run: ${run.name}\nlane: ${inputInformationOTP.lane}"
+        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(
+                scriptOutputDirectory,
+                "${bashScriptName}-otherUser.sh",
+                configService.defaultRealm
+        )
+        createBashScriptRoddy(
+                seqTracksOfOldSample,
+                swapLaneHelper.dirsToDelete,
+                log, bashScriptToMoveFiles,
+                bashScriptToMoveFilesAsOtherUser,
+                !linkedFilesVerified
         )
 
-        List<SeqTrack> seqTracksOfOldSample = SeqTrack.findAllBySampleAndSeqType(oldSample, oldSeqType)
-
-        seqTracksOfOldSample.each { SeqTrack seqTrack ->
-            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
-        }
-
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
-        createBashScriptRoddy(seqTracksOfOldSample, dirsToDelete, log, bashScriptToMoveFiles,
-                bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
-
-        boolean alignmentsProcessed = AlignmentPass.findBySeqTrackInList(seqTracks)
+        boolean alignmentsProcessed = AlignmentPass.findBySeqTrackInList(swapLaneHelper.seqTracks)
         if (alignmentsProcessed) {
-            log << "Alignments found for SeqTracks ${seqTracks}\n\n"
+            log << "Alignments found for SeqTracks ${swapLaneHelper.seqTracks}\n\n"
 
             seqTracksOfOldSample.each { SeqTrack seqTrack ->
                 bashScriptToMoveFiles << "\n\n#Delete Alignment- & Merging stuff from ${seqTrack} and retrigger Alignment.\n"
                 AlignmentPass.findAllBySeqTrack(seqTrack)
-                dirsToDelete << deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
+                swapLaneHelper.dirsToDelete.push(deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified) as File)
 
                 def alignmentDirType = DataProcessingFilesService.OutputDirectories.ALIGNMENT
-                String baseDir = dataProcessingFilesService.getOutputDirectory(oldIndividual, alignmentDirType)
+                String baseDir = dataProcessingFilesService.getOutputDirectory(swapLaneHelper.oldIndividual, alignmentDirType)
                 String middleDir = processedAlignmentFileService.getRunLaneDirectory(seqTrack)
                 bashScriptToMoveFiles << "# rm -rf '${baseDir}/${middleDir}'\n"
 
                 def mergingDirType = DataProcessingFilesService.OutputDirectories.MERGING
-                String mergingResultDir = dataProcessingFilesService.getOutputDirectory(oldIndividual, mergingDirType)
-                bashScriptToMoveFiles << "# rm -rf '${mergingResultDir}/${oldSampleType.name}/${oldSeqType.name}/${oldSeqType.libraryLayout}'\n"
+                String mergingResultDir = dataProcessingFilesService.getOutputDirectory(swapLaneHelper.oldIndividual, mergingDirType)
+                bashScriptToMoveFiles << "# rm -rf '${mergingResultDir}/${swapLaneHelper.oldSampleType.name}/" +
+                        "${swapLaneHelper.oldSeqType.name}/${swapLaneHelper.oldSeqType.libraryLayout}'\n"
 
                 String projectDir = configService.rootPath
-                String mergedAlignmentDir = mergedAlignmentDataFileService.buildRelativePath(oldSeqType, oldSample)
+                String mergedAlignmentDir = mergedAlignmentDataFileService.buildRelativePath(swapLaneHelper.oldSeqType, swapLaneHelper.oldSample)
                 bashScriptToMoveFiles << "# rm -rf '${projectDir}/${mergedAlignmentDir}'\n"
             }
             bashScriptToMoveFiles << "# delete analyses stuff\n"
-            dirsToDelete.flatten()*.path.each {
+            swapLaneHelper.dirsToDelete.flatten()*.path.each {
                 bashScriptToMoveFiles << "#rm -rf ${it}\n"
             }
-            isTrue(AlignmentPass.findAllBySeqTrackInList(seqTracks).isEmpty(), "There are alignments for ${seqTracks}, which can not be deleted")
+            isTrue(
+                    AlignmentPass.findAllBySeqTrackInList(swapLaneHelper.seqTracks).isEmpty(),
+                    "There are alignments for ${swapLaneHelper.seqTracks}, which can not be deleted"
+            )
         }
 
-        seqTracks*.sample = newSample
-        notNull(seqTracks*.save(flush: true))
-        seqTracks = seqTracks.collect {
-            if (oldSeqType.hasAntibodyTarget != newSeqType.hasAntibodyTarget) {
-                throw new UnsupportedOperationException("Old and new SeqTypes (old: ${oldSeqType}; new: ${newSeqType}) differ in antibody target usage and " +
+        // change SeqTracks
+        swapLaneHelper.seqTracks = swapLaneHelper.seqTracks.collect {
+            if (swapLaneHelper.oldSeqType.hasAntibodyTarget != swapLaneHelper.newSeqType.hasAntibodyTarget) {
+                throw new UnsupportedOperationException("Old and new SeqTypes (old: ${swapLaneHelper.oldSeqType};" +
+                        " new: ${swapLaneHelper.newSeqType}) differ in antibody target usage and " +
                         "thus can not be swapped, as we would be missing the antibody target information.")
             }
-            it.seqType = newSeqType
+            it.swapped = true
+            it.seqType = swapLaneHelper.newSeqType
+            it.sample = swapLaneHelper.newSample
             assert it.save(flush: true)
             return it
         }
 
         bashScriptToMoveFiles << "\n\n#copy and remove fastq files\n"
-        bashScriptToMoveFiles << renameDataFiles(DataFile.findAllBySeqTrackInList(seqTracks), newProject, dataFileMap, oldPathsPerDataFile,
-                sameLsdf, log)
+        bashScriptToMoveFiles << renameDataFiles(
+                DataFile.findAllBySeqTrackInList(swapLaneHelper.seqTracks),
+                swapLaneHelper.newProject,
+                dataFileMap,
+                swapLaneHelper.oldPathsPerDataFile,
+                swapLaneHelper.sameLsdf,
+                log
+        )
 
-        List<String> newFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort { it.id }.collect {
+        // files need to be already renamed at this point
+        List<String> newFastqcFileNames = DataFile.findAllBySeqTrackInList(swapLaneHelper.seqTracks).sort { it.id }.collect {
             fastqcDataFilesService.fastqcOutputFile(it)
         }
 
         bashScriptToMoveFiles << "\n\n#copy and delete fastqc files\n\n"
 
-        oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
+        swapLaneHelper.oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), log, failOnMissingFiles)
         }
 
-        List<MergingAssignment> mergingAssignments = MergingAssignment.findAllBySeqTrackInList(seqTracks)
+        List<MergingAssignment> mergingAssignments = MergingAssignment.findAllBySeqTrackInList(swapLaneHelper.seqTracks)
         log << "\n${mergingAssignments.size()} MergingAssignment found"
         List<SeqScan> seqScans = mergingAssignments*.seqScan.unique()
-        if (seqScans)  {
+        if (seqScans) {
             List<MergingLog> mergingLogs = MergingLog.findAllBySeqScanInList(seqScans)
             MergingAssignment.findAllBySeqScanInList(seqScans)*.delete()
             if (mergingLogs) {
@@ -1058,14 +1258,58 @@ ln -s '${newDirectFileName}' \\
             seqScans*.delete()
         }
 
-        createCommentForSwappedDatafiles(DataFile.findAllBySeqTrackInList(seqTracks))
-
-        if (SeqTrack.findAllBySampleAndSeqType(oldSample, oldSeqType).empty) {
-            bashScriptToMoveFiles << "\n #There are no seqTracks belonging to the sample ${oldSample} -> delete it on the filesystem\n\n"
-            File basePath = oldProject.projectSequencingDirectory
-            bashScriptToMoveFiles << "#rm -rf '${basePath}/${oldSeqType.dirName}/view-by-pid/${oldIndividual.pid}/${oldSampleType.dirName}/" +
-                    "${oldSeqType.libraryLayoutDirName}'\n"
+        // check if there are any remaining SeqTracks for this sample/seqType combination left
+        if (SeqTrack.findAllBySampleAndSeqType(swapLaneHelper.oldSample, swapLaneHelper.oldSeqType).empty) {
+            bashScriptToMoveFiles << "\n #There are no seqTracks belonging to the sample ${swapLaneHelper.oldSample} -> delete it on the filesystem\n\n"
+            File basePath = swapLaneHelper.oldProject.projectSequencingDirectory
+            bashScriptToMoveFiles << "#rm -rf '${basePath}/${swapLaneHelper.oldSeqType.dirName}/" +
+                    "view-by-pid/${swapLaneHelper.oldIndividual.pid}/${swapLaneHelper.oldSampleType.dirName}/" +
+                    "${swapLaneHelper.oldSeqType.libraryLayoutDirName}'\n"
         }
+
+        // comment
+        individualService.createComment("Lane swap",
+                [
+                        individual   : swapLaneHelper.oldIndividual,
+                        project      : swapLaneHelper.oldProject.name,
+                        sample       : swapLaneHelper.oldSample,
+                        pid          : swapLaneHelper.oldIndividual.pid,
+                        sampleType   : swapLaneHelper.oldSampleType.name,
+                        seqType      : swapLaneHelper.oldSeqType.name,
+                        singleCell   : swapLaneHelper.oldSeqType.singleCell,
+                        libraryLayout: swapLaneHelper.oldSeqType.libraryLayout,
+                ],
+                [
+                        individual   : swapLaneHelper.newIndividual,
+                        project      : swapLaneHelper.newProject.name,
+                        sample       : swapLaneHelper.newSample,
+                        pid          : swapLaneHelper.newIndividual.pid,
+                        sampleType   : swapLaneHelper.newSampleType.name,
+                        seqType      : swapLaneHelper.newSeqType.name,
+                        singleCell   : swapLaneHelper.newSeqType.singleCell,
+                        libraryLayout: swapLaneHelper.newSeqType.libraryLayout,
+                ],
+                "run: ${swapLaneHelper.run.name}\nlane: ${inputInformationOTP.lane}"
+        )
+
+        createCommentForSwappedDatafiles(DataFile.findAllBySeqTrackInList(swapLaneHelper.seqTracks))
+    }
+
+    /**
+     * Helper method to create a groovy script to restart the alignment for all SeqTracks of the old sample.
+     * Returns all SeqTracks to restart.
+     */
+    List<SeqTrack> createGroovyConsoleScriptToRestartAlignments(Path scriptOutputDirectory, String bashScriptName, Realm realm, List<SeqTrack> seqTrackList) {
+        Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
+                scriptOutputDirectory, "restartAli_${bashScriptName}.groovy", realm
+        )
+        groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
+
+        seqTrackList.each { SeqTrack seqTrack ->
+            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
+        }
+
+        return seqTrackList
     }
 
     /**
@@ -1076,7 +1320,7 @@ ln -s '${newDirectFileName}' \\
      *
      * Note that this function mutates the swapMap in-place!
      */
-    private void completeOmittedNewValuesAndLog(Map<String, String> swapMap, String label, StringBuilder log) {
+    private static void completeOmittedNewValuesAndLog(Map<String, String> swapMap, String label, StringBuilder log) {
         log << "\n  swapping ${label}:"
 
         swapMap.each { String old, String neww ->

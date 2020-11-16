@@ -95,12 +95,14 @@ class DataSwapServiceTests implements UserAndRoles {
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
             dataSwapService.moveSample(
-                    bamFile.project.name,
-                    bamFile.project.name,
-                    bamFile.individual.pid,
-                    individual.pid,
-                    bamFile.sampleType.name,
-                    bamFile.sampleType.name,
+                    [
+                            'oldProjectName'   : bamFile.project.name,
+                            'newProjectName'   : bamFile.project.name,
+                            'oldPid'           : bamFile.individual.pid,
+                            'newPid'           : individual.pid,
+                            'oldSampleTypeName': bamFile.sampleType.name,
+                            'newSampleTypeName': bamFile.sampleType.name,
+                    ],
                     [(dataFileName1): '', (dataFileName2): ''],
                     script,
                     new StringBuilder(),
@@ -129,9 +131,9 @@ class DataSwapServiceTests implements UserAndRoles {
         assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
-            assert it.getComment().comment == "Attention: Datafile swapped!"
+            assert it.comment.comment == "Attention: Datafile swapped!"
         }
     }
 
@@ -171,10 +173,12 @@ class DataSwapServiceTests implements UserAndRoles {
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
             dataSwapService.moveIndividual(
-                    bamFile.project.name,
-                    newProject.name,
-                    bamFile.individual.pid,
-                    bamFile.individual.pid,
+                    [
+                            'oldProjectName': bamFile.project.name,
+                            'newProjectName': newProject.name,
+                            'oldPid'        : bamFile.individual.pid,
+                            'newPid'        : bamFile.individual.pid,
+                    ],
                     [(bamFile.sampleType.name): ""],
                     ['DataFileFileName_R1.gz': '', 'DataFileFileName_R2.gz': ''],
                     scriptName,
@@ -205,13 +209,13 @@ class DataSwapServiceTests implements UserAndRoles {
         String copyScriptContent = copyScript.text
         assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).getParent()}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).parent}'")
             assert copyScriptContent.contains("mv '${dataFilePaths[i]}' \\\n   '${lsdfFilesService.getFileFinalPath(it)}'")
             assert copyScriptContent.contains("mv '${dataFilePaths[i]}.md5sum' \\\n     '${lsdfFilesService.getFileFinalPath(it)}.md5sum'")
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
-            assert it.getComment().comment == "Attention: Datafile swapped!"
+            assert it.comment.comment == "Attention: Datafile swapped!"
         }
     }
 
@@ -327,7 +331,7 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
-        [
+        return [
                 roddyBamFile.workExecutionDirectories,
                 roddyBamFile.workMergedQADirectory,
                 roddyBamFile.workSingleLaneQADirectories.values(),

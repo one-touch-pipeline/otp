@@ -346,6 +346,8 @@ class MetaDataExport {
             put(ANTIBODY, seqTrack.antibody)
         }
 
+        put(SWAPPED, seqTrack.swapped.toString())
+
         return properties
     }
 

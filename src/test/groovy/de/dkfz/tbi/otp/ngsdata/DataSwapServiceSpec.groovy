@@ -23,21 +23,47 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import spock.lang.*
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class DataSwapServiceSpec extends Specification implements DataTest, ServiceUnitTest<DataSwapService>, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
+                Project,
+                SampleType,
+                SeqType,
+                Sample,
+                Individual,
+                SeqTrack,
+                ExternallyProcessedMergedBamFile,
+                RoddyBamFile,
+                AlignmentPass,
+                MergingAssignment,
         ]
     }
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+
+    protected TestConfigService configService
 
     void "completeOmittedNewValuesAndLog, valid keys, keys are used as values"() {
         given:
@@ -231,5 +257,137 @@ class DataSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         then:
         extractCommands == commands
+    }
+
+    void "swapLane, succeed"() {
+        given:
+
+        // Services
+        Path path = temporaryFolder.newFile().toPath()
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            fastqcOutputFile(_) >> path
+        }
+        service.lsdfFilesService = Mock(LsdfFilesService) {
+            getFileFinalPath(_) >> path
+            getFileViewByPidPath(_) >> path
+            getWellAllFileViewByPidPath(_) >> path
+        }
+        service.seqTrackService = new SeqTrackService()
+        Realm realm = createRealm()
+        service.configService = configService = new TestConfigService([
+                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.root.toString(),
+        ])
+        configService.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
+        }
+        service.fileService = Mock(FileService) {
+            createOrOverwriteScriptOutputFile(_, _, _) >> temporaryFolder.newFile().toPath()
+        }
+        CommentService mockedCommendService = Mock(CommentService) {
+            saveComment(_, _) >> null
+        }
+        service.commentService = mockedCommendService
+        service.individualService = new IndividualService([
+                commentService: mockedCommendService
+        ])
+
+        // Domain
+        SampleType newSampleType = createSampleType()
+        SeqType newSeqType = createSeqType([
+                singleCell: true
+        ])
+        Individual newIndividual = createIndividual()
+        Individual oldIndividual = createIndividual()
+
+        // creates the sample that will be on two SeqTracks of the same run
+        // the same individual will have another Sample, but this is correct
+        Sample falsyLabeledSample = createSample([
+                individual: oldIndividual,
+        ])
+        Sample correctlyLabeledSample = createSample([
+                individual: oldIndividual,
+        ])
+        SeqTrack seqTrackWithFalsySample1 = createSeqTrackWithOneDataFile([
+                sample: falsyLabeledSample,
+        ])
+        SeqTrack seqTrackWithFalsySample2 = createSeqTrackWithOneDataFile([
+                sample : falsyLabeledSample,
+                run    : seqTrackWithFalsySample1.run,
+                seqType: seqTrackWithFalsySample1.seqType,
+        ])
+        SeqTrack seqTrackWithCorrectlyLabeledSample = createSeqTrackWithOneDataFile([
+                sample: correctlyLabeledSample,
+                run   : seqTrackWithFalsySample1.run,
+        ])
+        createSeqTrack()  // a unconnected SeqTrack
+
+        // prepare input
+        String seqTrack1FileName = DataFile.findAllBySeqTrack(seqTrackWithFalsySample1).first().fileName
+        String seqTrack2FileName = DataFile.findAllBySeqTrack(seqTrackWithFalsySample2).first().fileName
+        Map<String, String> dataFileMap = [:]
+        dataFileMap.put(seqTrack1FileName, 'newFileName1')
+        dataFileMap.put(seqTrack2FileName, 'newFileName2')
+
+        Map<String, List<String>> inputInformation = [
+                'oldProjectName'        : [falsyLabeledSample.individual.project.name],
+                'newProjectName'        : [newIndividual.project.name],
+                'oldPid'                : [falsyLabeledSample.individual.pid],
+                'newPid'                : [newIndividual.pid],
+                'oldSampleTypeName'     : [falsyLabeledSample.sampleType.name],
+                'newSampleTypeName'     : [newSampleType.name],
+                'oldSeqTypeName'        : [seqTrackWithFalsySample1.seqType.name],
+                'newSeqTypeName'        : [newSeqType.name],
+                'oldSingleCell'         : [seqTrackWithFalsySample1.seqType.singleCell.toString()],
+                'newSingleCell'         : [newSeqType.singleCell.toString()],
+                'oldLibraryLayout'      : [seqTrackWithFalsySample1.seqType.libraryLayout.name()],
+                'newLibraryLayout'      : [newSeqType.libraryLayout.name()],
+                'runName'               : [seqTrackWithFalsySample1.run.name],
+                'lane'                  : [
+                        seqTrackWithFalsySample1.laneId,
+                        seqTrackWithFalsySample2.laneId,
+                ],
+                'sampleNeedsToBeCreated': [(true).toString()],
+        ]
+
+        when:
+        service.swapLane(
+                inputInformation,
+                dataFileMap,
+                'newUniqueScriptName',
+                new StringBuilder(),
+                true,
+                temporaryFolder.newFolder() as Path,
+                true
+        )
+
+        then: "no errors"
+        noExceptionThrown()
+
+        and: "SeqTracks have the new attributes"
+        List<SeqTrack> seqTracks = SeqTrack.findAllBySample(CollectionUtils.exactlyOneElement(Sample.findAllByIndividual(newIndividual)))
+        assert seqTracks.size() == 2
+        List<Boolean> resultBoolList = []
+        seqTracks.each {
+            resultBoolList.add(it.individual == newIndividual)
+            resultBoolList.add(it.run == seqTrackWithFalsySample1.run)
+            resultBoolList.add(it.sampleType == newSampleType)
+            resultBoolList.add(it.seqType == newSeqType)
+            resultBoolList.add(it.swapped)
+        }
+        assert resultBoolList.every { it }
+
+        and: "DataFiles to the new SeqTracks have the new name"
+        CollectionUtils.containSame(DataFile.findAllBySeqTrackInList(seqTracks)*.fileName, ['newFileName1', 'newFileName2'])
+
+        and: "Old dataFiles are untouched"
+        DataFile.findAll().size() == 3
+        DataFile.findAllBySeqTrack(seqTrackWithCorrectlyLabeledSample).size() == 1
+
+        and: "Old SeqTracks connection is removed"
+        CollectionUtils.containSame(SeqTrack.findAllBySampleInList(Sample.findAllByIndividual(oldIndividual))*.id, [seqTrackWithCorrectlyLabeledSample.id])
+        SeqTrack.findAllBySample(falsyLabeledSample) == []
+
+        and: "Falsy labeled sample is NOT removed from oldIndividual"
+        CollectionUtils.containSame(Sample.findAllByIndividual(oldIndividual), [falsyLabeledSample, correctlyLabeledSample])
     }
 }

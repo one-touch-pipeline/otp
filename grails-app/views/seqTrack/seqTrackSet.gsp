@@ -123,6 +123,10 @@
                             <strong>${UnitHelper.asReads(totalNReads, true)}</strong>
                         </div>
 
+                        <g:if test="${seqTrack.swapped}">
+                            <div class="grid-element lane commentSwapped" title="${g.message(code: "seqTrack.seqTrackSet.lanesPerRun.swapped.tooltip")}">&nbsp;</div>
+                        </g:if>
+
                         <g:each var="dataFile" status="i" in="${dataFiles}">
                             <g:set var="row" value="${i+3}"/>
                             <g:set var="withdrawn" value="${dataFile.fileWithdrawn ? 'withdrawn' : ''}"/>

@@ -164,6 +164,13 @@
                                         <img src="${assetPath(src: 'warning.png')}" title="${g.message(code: "individual.show.laneOverview.withdrawnDataWarning.tooltip")}"/>
                                     </g:if>
                                 </td>
+                                <td>
+                                    <g:if test="${seqTrackSet.containsSwappedLane}">
+                                            <img src="${assetPath(src: 'swapped.png')}"
+                                                 title="${g.message(code: "individual.show.laneOverview.swappedLaneWarning.tooltip")}"/>
+                                    </g:if>
+                                </td>
+
                                 <td><g:link controller="seqTrack" action="seqTrackSet" params="${seqTrackSelection}">Details</g:link></td>
                                 <td><strong>${sampleType}</strong></td>
                                 <td>

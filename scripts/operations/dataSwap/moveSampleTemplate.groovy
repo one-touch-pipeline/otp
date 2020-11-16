@@ -34,8 +34,8 @@ import java.nio.file.Path
  * Template to move sample or change the sample type. It can also rename the file names.
  *
  * Therefore the following input are needed:
- * - OldProject: The name of the project the patient is in currently
- * - NewProject: The new project name, may the same
+ * - OldProjectName: The name of the project the patient is in currently
+ * - NewProjectName: The new project name, may the same
  * - OldPid: The old patient
  * - NewPid: The new patient pid, may the same if the project is differ
  * - OldSampleTypeName: The old sample type name
@@ -71,14 +71,19 @@ boolean failOnMissingFiles = true
 try {
     Individual.withTransaction {
         dataSwapService.moveSample(
-                'OldProject', 'NewProject',
-                'OldPid', 'NewPid',
-                'OldSampleType', 'NewSampleType',
                 [
-                        'OldFileName1': 'NewFileName1',
-                        'OldFileName2': 'NewFileName2',
-                        'OldFileName3': '',
-                        'OldFileName4': '',
+                        'oldProjectName'   : 'oldProjectName',
+                        'newProjectName'   : 'newProjectName',
+                        'oldPid'           : 'oldPid',
+                        'newPid'           : 'newPid',
+                        'oldSampleTypeName': 'oldSampleTypeName',
+                        'newSampleTypeName': 'newSampleTypeName',
+                ],
+                [
+                        'oldFileName1': 'newFileName1',
+                        'oldFileName2': 'newFileName2',
+                        'oldFileName3': '',
+                        'oldFileName4': '',
                 ],
                 'uniqueScriptName',
                 outputStringBuilder,

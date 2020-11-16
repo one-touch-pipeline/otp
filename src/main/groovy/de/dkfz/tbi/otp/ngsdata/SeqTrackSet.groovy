@@ -31,6 +31,7 @@ class SeqTrackSet {
     final Set<DataFile> dataFiles
     final Long totalFileSize
     final Boolean containsWithdrawnData
+    final Boolean containsSwappedLane
 
     final List<SeqPlatform> seqPlatforms
     final List<SeqCenter> seqCenters
@@ -43,6 +44,7 @@ class SeqTrackSet {
         this.dataFiles = seqTracks.collectMany { it.dataFiles }
         this.totalFileSize = this.dataFiles.sum { it.fileSize } as Long
         this.containsWithdrawnData = this.dataFiles.any { it.fileWithdrawn }
+        this.containsSwappedLane = this.seqTracks.any { it.swapped }
 
         this.seqPlatforms = this.seqTracks*.seqPlatform.unique()
         this.seqCenters = this.seqTracks*.seqCenter.unique()

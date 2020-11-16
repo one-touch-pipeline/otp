@@ -510,5 +510,9 @@ databaseChangeLog = {
 
     include file: 'changelogs/2020/otp-610-flag-job-restartable.groovy'
 
+    changeSet(author: "albrecjp", id: "otp-698") {
+        sqlFile(path: 'changelogs/2020/otp-698.sql')
+    }
+
     include file: 'changelogs/2020/otp-681.groovy'
 }

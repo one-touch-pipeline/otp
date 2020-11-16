@@ -346,20 +346,21 @@ assert new Sample(
         snippet << """\
 dataSwapService.swapLane(
 \t[
-\t\t'oldProjectName'   : '${seqTrack.sample.individual.project.name}',
-\t\t'newProjectName'   : '${seqTrack.sample.individual.project.name}',
-\t\t'oldPid'           : '${seqTrack.sample.individual.pid}',
-\t\t'newPid'           : '${newSample.individual.pid}',
-\t\t'oldSampleTypeName': '${seqTrack.sample.sampleType.name}',
-\t\t'newSampleTypeName': '${newSample.sampleType.name}',
-\t\t'oldSeqTypeName'   : '${seqTrack.seqType.name}',
-\t\t'newSeqTypeName'   : '${seqTrack.seqType.name}',
-\t\t'oldSingleCell'    : '${seqTrack.seqType.singleCell}',
-\t\t'newSingleCell'    : '${seqTrack.seqType.singleCell}',
-\t\t'oldLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
-\t\t'newLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
-\t\t'runName'          : '${seqTrack.run.name}',
-\t\t'lane'             : ['${seqTrack.laneId}'],
+\t\t'oldProjectName'        : ['${seqTrack.sample.individual.project.name}'],
+\t\t'newProjectName'        : ['${seqTrack.sample.individual.project.name}'],
+\t\t'oldPid'                : ['${seqTrack.sample.individual.pid}'],
+\t\t'newPid'                : ['${newSample.individual.pid}'],
+\t\t'oldSampleTypeName'     : ['${seqTrack.sample.sampleType.name}'],
+\t\t'newSampleTypeName'     : ['${newSample.sampleType.name}'],
+\t\t'oldSeqTypeName'        : ['${seqTrack.seqType.name}'],
+\t\t'newSeqTypeName'        : ['${seqTrack.seqType.name}'],
+\t\t'oldSingleCell'         : ['${seqTrack.seqType.singleCell.toString()}'],
+\t\t'newSingleCell'         : ['${seqTrack.seqType.singleCell.toString()}'],
+\t\t'oldLibraryLayout'      : ['${seqTrack.seqType.libraryLayout}'],
+\t\t'newLibraryLayout'      : ['${seqTrack.seqType.libraryLayout}'],
+\t\t'runName'               : ['${seqTrack.run.name}'],
+\t\t'lane'                  : ['${seqTrack.laneId}'],
+\t\t'sampleNeedsToBeCreated': ['false'],
 \t], [
 """
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->

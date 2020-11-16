@@ -125,16 +125,22 @@ Closure<Integer> newSampleSwapScript = { StringBuilder script, Project newProjec
                                          Sample oldSample, SampleType newSampleType ->
     String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleType.displayName}"
 
-    script << "\n\tdataSwapService.moveSample('${oldIndividual.project.name}', '${newProject.name}',\n" +
-            "\t\t'${oldIndividual.pid}', '${newIndividualName}',\n" +
-            "\t\t'${oldSample.sampleType.name}', '${newSampleType.name}',\n" +
-            "\t\t["
+    script << "\n\tdataSwapService.moveSample( \n" +
+            "\t\t[\n" +
+            "\t\toldProjectName: '${oldIndividual.project.name}',\n" +
+            "\t\tnewProjectName: '${newProject.name}',\n" +
+            "\t\toldPid: '${oldIndividual.pid}',\n" +
+            "\t\tnewPid: '${newIndividualName}',\n" +
+            "\t\toldSampleTypeName: '${oldSample.sampleType.name}',\n" +
+            "\t\tnewSampleTypeName: '${newSampleType.name}',\n" +
+            "\t\t],\n" +
+            "\t\t[\n"
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            script << "\n\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}',"
+            script << "\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}', \n"
         }
     }
-    script << "\n\t\t],\n\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n\t)\n"
+    script << "\t\t],\n\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n\t)\n"
 
     files << fileName
 
@@ -349,11 +355,18 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
 ) {
     String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
 
-    script << "\n\tdataSwapService.moveIndividual('${oldIndividual.project.name}', '${newProject.name}', '${oldIndividual.pid}', '${newIndividualName}',\n\t\t["
+    script << "\n\tdataSwapService.moveIndividual(\n" +
+            "\t\t[\n" +
+            "\t\t'oldProjectName' :'${oldIndividual.project.name}',\n" +
+            "\t\t'newProjectName' : '${newProject.name}',\n" +
+            "\t\t'oldPid' : '${oldIndividual.pid}',\n" +
+            "\t\t'newPid' : '${newIndividualName}',\n" +
+            "\t\t],\n" +
+            "\t\t[\n"
     samples.each { sample ->
-        script << "'${sample.sampleType.name}': '${newSampleTypeClosure(sample.sampleType).name}', "
+        script << "\t\t'${sample.sampleType.name}': '${newSampleTypeClosure(sample.sampleType).name}', \n"
     }
-    script << "],"
+    script << "\t\t],"
 
     script << "\n\t\t[\n"
     samples.each { sample ->
@@ -364,7 +377,8 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
         }
     }
     script << "\t\t],\n"
-    script << "\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles)\n"
+    script << "\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n" +
+            "\t)\n"
     files << fileName
 
     return counter
@@ -451,20 +465,21 @@ assert new Sample(
         StringBuilder snippet = new StringBuilder()
         snippet << """
 \tdataSwapService.swapLane([
-\t\t'oldProjectName'   : '${oldIndividual.project.name}',
-\t\t'newProjectName'   : '${newProject.name}',
-\t\t'oldPid'           : '${oldIndividual.pid}',
-\t\t'newPid'           : '${newIndividual}',
-\t\t'oldSampleTypeName': '${oldSampleType.name}',
-\t\t'newSampleTypeName': '${newSampleType.name}',
-\t\t'oldSeqTypeName'   : '${seqTrack.seqType.name}',
-\t\t'newSeqTypeName'   : '${seqTrack.seqType.name}',
-\t\t'oldSingleCell'    : '${seqTrack.seqType.singleCell}',
-\t\t'newSingleCell'    : '${seqTrack.seqType.singleCell}',
-\t\t'oldLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
-\t\t'newLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
-\t\t'runName'          : '${seqTrack.run.name}',
+\t\t'oldProjectName'   : ['${oldIndividual.project.name}'],
+\t\t'newProjectName'   : ['${newProject.name}'],
+\t\t'oldPid'           : ['${oldIndividual.pid}'],
+\t\t'newPid'           : ['${newIndividual}'],
+\t\t'oldSampleTypeName': ['${oldSampleType.name}'],
+\t\t'newSampleTypeName': ['${newSampleType.name}'],
+\t\t'oldSeqTypeName'   : ['${seqTrack.seqType.name}'],
+\t\t'newSeqTypeName'   : ['${seqTrack.seqType.name}'],
+\t\t'oldSingleCell'    : ['${seqTrack.seqType.singleCell}'],
+\t\t'newSingleCell'    : ['${seqTrack.seqType.singleCell}'],
+\t\t'oldLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
+\t\t'newLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
+\t\t'runName'          : ['${seqTrack.run.name}'],
 \t\t'lane'             : ['${seqTrack.laneId}'],
+\t\t'sampleNeedsToBeCreated': ['false'],
 \t\t], [
 """
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->

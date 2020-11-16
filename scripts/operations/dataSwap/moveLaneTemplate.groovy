@@ -47,6 +47,7 @@ import java.nio.file.Path
  * - Map of all fastq file names for given run and laneids:
  *   - OldFileName: The old name of the fastq file
  *   - NewFileName: The new name of the fastq file. May be empty if it should not change
+ * - sampleNeedsToBeCreated: true or false, indicating whether the new sample needs to be created (true) or is already existent (false)
  * - uniqueScriptName: The name used for the generated scripts. That are a bash script to change the file system and a groovy script for trigger the alignment.
  *
  * You can use multiple 'dataSwapService.swapLane' calls in the script, duplicate therefore the call.
@@ -74,31 +75,34 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-        dataSwapService.swapLane([
-                'oldProjectName'   : 'OldProject',
-                'newProjectName'   : 'NewProject',
-                'oldPid'           : 'OldPid',
-                'newPid'           : 'NewPid',
-                'oldSampleTypeName': 'OldSampleType',
-                'newSampleTypeName': 'NewSampleType',
-                'oldSeqTypeName'   : 'OldSeqTypeName',
-                'newSeqTypeName'   : 'NewSeqTypeName',
-                'oldSingleCell'    : 'OldSingleCell',
-                'newSingleCell'    : 'NewSingleCell',
-                'oldLibraryLayout' : 'OldLibraryLayout',
-                'newLibraryLayout' : 'NewLibraryLayout',
-                'runName'          : 'RunName',
-                'lane'             : [
-                        'lane1',
-                        'lane2',
-                        //...
+        dataSwapService.swapLane(
+                [
+                        'oldProjectName'   : ['oldProject'],
+                        'newProjectName'   : ['newProject'],
+                        'oldPid'           : ['oldPid'],
+                        'newPid'           : ['newPid'],
+                        'oldSampleTypeName': ['oldSampleType'],
+                        'newSampleTypeName': ['newSampleType'],
+                        'oldSeqTypeName'   : ['oldSeqTypeName'],
+                        'newSeqTypeName'   : ['newSeqTypeName'],
+                        'oldSingleCell'    : ['oldSingleCell'],
+                        'newSingleCell'    : ['newSingleCell'],
+                        'oldLibraryLayout' : ['oldLibraryLayout'],
+                        'newLibraryLayout' : ['newLibraryLayout'],
+                        'runName'          : ['runName'],
+                        'lane'             : [
+                                'lane1',
+                                'lane2',
+                                //...
+                        ],
+                        'sampleNeedsToBeCreated': ['sampleNeedsToBeCreated'],
                 ],
-        ], [
-                'OldFileName1': 'NewFileName1',
-                'OldFileName2': 'NewFileName2',
-                'OldFileName3': '',
-                'OldFileName4': '',
-        ],
+                [
+                        'oldFileName1': 'newFileName1',
+                        'oldFileName2': 'newFileName2',
+                        'oldFileName3': '',
+                        'oldFileName4': '',
+                ],
                 'uniqueScriptName',
                 outputStringBuilder,
                 failOnMissingFiles,

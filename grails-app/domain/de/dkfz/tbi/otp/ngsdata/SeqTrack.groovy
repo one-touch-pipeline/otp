@@ -110,6 +110,9 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     String antibody
     AntibodyTarget antibodyTarget
 
+    /** Indicates whether samples have been swapped on this SeqTrack */
+    boolean swapped
+
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 

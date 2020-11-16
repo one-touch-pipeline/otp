@@ -70,17 +70,21 @@ boolean failOnMissingFiles = true
 try {
     Individual.withTransaction {
         dataSwapService.moveIndividual(
-                'OldProject', 'NewProject',
-                'OldPid', 'NewPid',
                 [
-                        'OldSampleType1': 'NewSampleType1',
-                        'OldSampleType2': 'NewSampleType2',
+                        'oldProjectName': 'oldProject',
+                        'newProjectName': 'newProject',
+                        'oldPid'        : 'oldPid',
+                        'newPid'        : 'newPid',
                 ],
                 [
-                        'OldFileName1': 'NewFileName1',
-                        'OldFileName2': 'NewFileName2',
-                        'OldFileName3': '',
-                        'OldFileName4': '',
+                        'oldSampleType1': 'newSampleType1',
+                        'oldSampleType2': 'newSampleType2',
+                ],
+                [
+                        'oldFileName1': 'newFileName1',
+                        'oldFileName2': 'newFileName2',
+                        'oldFileName3': '',
+                        'oldFileName4': '',
                 ],
                 'uniqueScriptName',
                 log,
