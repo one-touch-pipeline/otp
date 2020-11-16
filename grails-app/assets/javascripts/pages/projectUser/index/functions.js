@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,106 @@
 /*jslint browser: true */
 /*global $ */
 
-$.confirmation = function (text) {
-    if (text) {
-        return confirm(text);
+function onToggleAccessToFiles(context){
+    const modalText = $("input:hidden[name=confirmationTextHtml]").val();
+
+    if (modalText) {
+        openConfirmationModal(modalText,() => {
+            postFileAccessChange(context);
+        });
+    } else {
+        postFileAccessChange(context);
     }
-    return true
-};
+
+    hideLabelAndShowEditor(context);
+}
+
+function postFileAccessChange(context) {
+    const container = $(context).closest(".modal-editor-switch");
+    const orgVal = $("input:hidden[name=hasFileAccess]", container).val();
+    const invVal = (orgVal === "true" ? "false" : "true");
+
+    $.ajax({
+        url: $("input:hidden[name=target]", container).val(),
+        dataType: "json",
+        type: "POST",
+        data: { "value": invVal },
+        success: function (response) {
+            if (response.success) {
+                $.each(["label", "editor"], function () {
+                    $(".modal-editor-switch-" + this + " span", container).removeClass("icon-" + orgVal).addClass("icon-" + invVal);
+                });
+                if (response.tooltip) {
+                    $(".modal-editor-switch-label", container).attr('data-original-title', response.tooltip);
+                }
+                $("input:hidden[name=hasFileAccess]", container).val(invVal);
+                $("input:hidden[name=permissionState]", container).val(response.permissionState);
+            } else {
+                $.otp.warningMessage(response.error);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+        },
+        complete: function () {
+            hideEditorAndShowLabel(context)
+        }
+    });
+}
+
+function onFileAccessEditClick(context){
+    const outerContainer = $(context).closest(".modal-editor-switch");
+    const permissionState = $("input:hidden[name=permissionState]", outerContainer).val();
+    const modalText = "A change has been made recently and the admin was notified.<br />Are you really sure that you want to change it again?";
+
+    if (permissionState === "PENDING_DENIAL" ||
+        permissionState === "PENDING_APPROVAL" ||
+        permissionState === "pendingDenial" ||
+        permissionState === "pendingApproval") {
+        openConfirmationModal(modalText, () => {
+            onToggleAccessToFiles(context)
+        });
+    } else {
+        hideLabelAndShowEditor(context);
+    }
+}
+
+function openConfirmationModal(text, confirmCallback, cancelCallback) {
+    const modal = $("#confirmationModal");
+    const modalBody = $(".modal-body", modal);
+    const confirmButton = modal.find("#confirm");
+    const cancelButton = modal.find("#close");
+
+    confirmButton.unbind("click");
+    confirmButton.on("click", function () {
+        modal.hide();
+        confirmCallback();
+    });
+
+    cancelButton.unbind("click");
+    cancelButton.on("click", function () {
+        modal.hide();
+
+        if (cancelCallback) {
+            cancelCallback();
+        }
+    });
+
+    modalBody.html(text);
+    modal.modal("toggle").show();
+}
+
+function hideLabelAndShowEditor(context) {
+    const outerContainer = $(context).closest(".modal-editor-switch");
+    $(".modal-editor-switch-editor", outerContainer).show();
+    $(".modal-editor-switch-label", outerContainer).hide();
+}
+
+function hideEditorAndShowLabel(context) {
+    const outerContainer = $(context).closest(".modal-editor-switch");
+    $(".modal-editor-switch-editor", outerContainer).hide();
+    $(".modal-editor-switch-label", outerContainer).show();
+}
 
 $(function () {
     $('input[type=radio][name=addViaLdap]').change(function () {
@@ -43,19 +137,22 @@ $(function () {
         prompt("Emails for " + project, emails);
     });
 
-    $('#add-button, #deactivateButton, #reactivateButton').click(function () {
-        var text = $(this).data('text');
+    $('#add-button').click(function () {
+        const modalText = $("input:hidden[name=confirmationTextHtml]").val();
+
         //This is needed to prevent multiple submits
         this.disabled = true;
 
-        if (!$.confirmation(text)) {
+        if (modalText) {
+            openConfirmationModal(modalText, () => {
+                $(this).parents('form').submit();
+            }, () => {
+                this.disabled = false;
+            });
+        } else {
             this.disabled = false;
-            return false;
+            $(this).parents('form').submit();
         }
-
-        //This is needed since Chrome does not submit when the button is disabled, where as Firefox and Edge do
-        $(this).parents('form').submit();
-        return true
     });
 
     $("div.submit-container button.changeProjectAccess").click(function () {
@@ -63,33 +160,43 @@ $(function () {
         let container;
         container = $(this).parent();
 
-        var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
-        if (confirmationText) {
-            var confirmed = confirm(confirmationText);
-            if (confirmed === false) {
-                return
-            }
-        }
+        const postUrl = $("input:hidden[name=changeProjectAccessButton]", container).val();
+        const modalText = $("button[data-confirmation]", container).attr("data-confirmation");
 
-        $.ajax({
-            url: $("input:hidden[name=changeProjectAccessButton]", container).val(),
-            dataType: "json",
-            type: "POST",
-            success: function (data) {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    $.otp.warningMessage(data.error);
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
-            }
-        });
+        if (modalText) {
+            openConfirmationModal(modalText, () => {
+                submitChangeProjectAccess(postUrl);
+            });
+        } else {
+            submitChangeProjectAccess(postUrl);
+        }
     });
 });
+
+function submitChangeProjectAccess(postUrl) {
+    $.ajax({
+        url: postUrl,
+        dataType: "json",
+        type: "POST",
+        success: function (data) {
+            if (data.success) {
+                location.reload();
+            } else {c
+                $.otp.warningMessage(data.error);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+        }
+    });
+}
 
 $(document).ready(function () {
     $('.loaded-content').show();
     $('.loader').hide();
+    $('[data-toggle="tooltip"]').tooltip();
+    $('select.use-select-2').select2({
+        allowClear: true,
+        theme: 'bootstrap4'
+    });
 });

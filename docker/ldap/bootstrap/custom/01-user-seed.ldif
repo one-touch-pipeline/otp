@@ -108,8 +108,8 @@ dn: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
 cn: ralf
 department: Administration
-givenname: Dori
-mail: dori.admin@otp.dev
+givenname: Ralf
+mail: ralf.admin@otp.dev
 objectcategory: user
 objectclass: inetOrgPerson
 objectclass: user

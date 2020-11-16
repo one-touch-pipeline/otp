@@ -197,7 +197,11 @@ class OtpTagLib {
      * needs assets/javascripts/modal.js to work as closable modal
      */
     def otpModal = { attrs, body ->
-        out << "<div id='${attrs.modalId}' class='modal' role='dialog'>"
+        String backdrop = attrs.closable ? "" : 'data-backdrop="static"'
+        String confirmText = attrs.confirmText ?: "Confirm"
+        String closeText = attrs.closeText ?: "Close"
+
+        out << "<div id='${attrs.modalId}' tabindex='-1' class='modal' role='dialog' ${backdrop}>"
         out << "<div class='modal-dialog'>"
         out << "<div class='modal-content'>"
         if (attrs.title || attrs.closable) {
@@ -206,13 +210,19 @@ class OtpTagLib {
                 out << "<h3 class='modal-title'>${attrs.title}</h3>"
             }
             if (attrs.closable) {
-                out << "<button class='close' type='button'>&times;</button>"
+                out << "<button class='close' type='button' data-dismiss='modal'>&times;</button>"
             }
             out << "</div>"
         }
         out << "<div class='modal-body'>"
         out << body.call()
         out << "</div>"
+        if (attrs.type == "dialog") {
+            out << "<div class='modal-footer'>"
+            out << "<button id='close' type='button' class='btn btn-secondary' data-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
+            out << "<button id='confirm' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>${confirmText}</button>"
+            out << "</div>"
+        }
         out << "</div>"
         out << "</div>"
         out << "</div>"

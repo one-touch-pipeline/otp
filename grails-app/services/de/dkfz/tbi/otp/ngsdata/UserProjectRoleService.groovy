@@ -335,22 +335,35 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    /**
+     * Set accessToFiles for the given UserProjectRole to the given value.
+     * Also set the fileAccessChangeRequested and trigger the notification for the administration.
+     *
+     * if force is set neither fileAccessChangeRequested is set nor the administration gets notified.
+     *
+     * @param userProjectRole UserProjectRole to change
+     * @param value The new value for
+     * @param force The flag to determined whether the change should requested or set immediately
+     * @return The changed UserProjectRole
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value) {
+    UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value, boolean force = false) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == value }) {
             return userProjectRole
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = value
-            upr.fileAccessChangeRequested = true
+            upr.fileAccessChangeRequested = !force
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
         }
-        if (userProjectRole.accessToFiles) {
-            notifyAdministration(userProjectRole, OperatorAction.ADD)
-        } else {
-            notifyAdministration(userProjectRole, OperatorAction.REMOVE)
+        if (!force) {
+            if (userProjectRole.accessToFiles) {
+                notifyAdministration(userProjectRole, OperatorAction.ADD)
+            } else {
+                notifyAdministration(userProjectRole, OperatorAction.REMOVE)
+            }
         }
         return userProjectRole
     }

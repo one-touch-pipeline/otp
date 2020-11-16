@@ -1204,6 +1204,8 @@ body {
         max-width: 40px;
     }
 }
+
+//icons for file access not editable
 td span {
     .background-usage-hint {
         padding-left: 18px;
@@ -1245,13 +1247,18 @@ td span {
     }
 }
 
+.icon-asterisk {
+    padding-left: 10px;
+    background: url(asterisk.png) left center no-repeat;
+}
+
 //icons for file access editable
 td div {
     .background-usage-hint {
         padding-left: 18px;
     }
     .background-usage-hint-long {
-        padding-left: 50px;
+        padding-left: 25px;
     }
     &.filesAccessHandler-approved span {
         .background-usage-hint;
@@ -2959,6 +2966,32 @@ input[type=submit].submitting {
     padding: 10px;
 }
 
+.modal-editor-switch-label {
+    line-height: 10px;
+    margin: 0;
+}
+
+.modal-editor-switch-label button.edit {
+    line-height: 16px;
+    vertical-align: middle;
+}
+
+/**
+    Bootstrapped: Override template styles which
+    appear on a bootstrap and also on a non-bootstrap page.
+ */
+.bootstrapped .edit-switch-label {
+    margin: 0;
+}
+
+.bootstrapped .edit-switch-label button.remove {
+    line-height: 16px;
+    vertical-align: middle;
+}
+
+.bootstrapped .edit-switch-toggle .edit-switch-label {
+    line-height: 10px;
+}
 /**
 CSS for the quick navigation bar template.
  */

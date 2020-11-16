@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2020 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,26 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="layout" content="main" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
     <title><g:message code="projectUser.title" args="[selectedProject?.name]"/></title>
     <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="pages/projectUser/index/functions.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
+    <asset:javascript src="/webjars/bootstrap/4.5.3/js/bootstrap.bundle.min.js"/>
+    <asset:stylesheet src="/webjars/bootstrap/4.5.3/css/bootstrap.min.css"/>
 </head>
 <body>
 <div class="body">
     <g:set var="sharesUnixGroup" value="${projectsOfUnixGroup.size() > 1}"/>
-    <g:set var="projectsWithSharedUnixGroupListing" value="${projectsOfUnixGroup.sort { it.name }.collect { "\n  - "+it }.join("")}"/>
-    <g:set var="confirmationText" value="${sharesUnixGroup ? g.message(code: "projectUser.sharedUnixGroupConfirmation", args: [projectsWithSharedUnixGroupListing]) : ''}"/>
+    <g:set var="projectsWithSharedUnixGroupListing" value="${projectsOfUnixGroup.sort { it.name }.collect { "\n  - " + it }.join("")}"/>
+    <g:set var="projectsWithSharedUnixGroupListingHtml" value="${projectsOfUnixGroup.sort { it.name }.collect { "- " + it + "<br />" }.join("")}"/>
+    <g:set var="confirmationText"
+           value="${sharesUnixGroup ? g.message(code: "projectUser.sharedUnixGroupConfirmation", args: [projectsWithSharedUnixGroupListing]) : ''}"/>
+    <g:set var="confirmationTextHtml" value="${sharesUnixGroup ? g.message(code: "projectUser.sharedUnixGroupConfirmation",
+            args: ["<br /><br />" + projectsWithSharedUnixGroupListingHtml + "<br />" + g.message(code: "projectUser.sharedUnixGroupConfirmation.dialogAcceptQuestion")]) : ''}"/>
+
+    <input type="hidden" name="confirmationTextHtml" value="${confirmationTextHtml}">
 
     <g:render template="/templates/messages"/>
 
@@ -45,13 +53,14 @@
         <div class="grid-element">
             <g:if test="${sharesUnixGroup}">
                 <otp:annotation type="info">
-                    <span style="white-space: pre-wrap"><g:message code="projectUser.annotation.projectWithSharedUnixGroup" args="[projectsWithSharedUnixGroupListing]"/></span>
+                    <span style="white-space: pre-wrap"><g:message code="projectUser.annotation.projectWithSharedUnixGroup"
+                                                                   args="[projectsWithSharedUnixGroupListing]"/></span>
                 </otp:annotation>
             </g:if>
         </div>
     </div>
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-        <h2><g:message code="projectUser.addMember.action" args="[selectedProject?.name]"/></h2>
+        <h5><strong><g:message code="projectUser.addMember.action" args="[selectedProject?.name]"/></strong></h5>
         <otp:annotation type="info"><g:message code="projectUser.annotation.delayedFileAccessChanges"/></otp:annotation>
         <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject">
             <sec:access expression="hasRole('ROLE_OPERATOR')">
@@ -68,18 +77,23 @@
                 <table>
                     <tr>
                         <td><g:message code="projectUser.addMember.username"/></td>
-                        <td class="user-auto-complete"><input name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
+                        <td class="user-auto-complete"><input name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off"
+                                                              placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
                     </tr>
                     <tr>
                         <td><g:message code="projectUser.addMember.role"/></td>
                         <td>
                             <div class="loader"></div>
-                            <div class="loaded-content" hidden>
-                                <select multiple name="projectRoleNames" class="inputField ldapUser use-select-2">
-                                    <g:each in="${availableRoles}" var="role">
-                                        <option value="${role.name}">${role.name}</option>
-                                    </g:each>
-                                </select>
+                            <div class="loaded-content" style="display: none">
+                                <g:select id="selectorProjectRoleNamesLdap"
+                                          name="projectRoleNames"
+                                          class="inputField ldapUser use-select-2"
+                                          multiple="true"
+                                          value="${selectedProjectRoleNames}"
+                                          from="${availableRoles}"
+                                          optionKey="name"
+                                          optionValue="name"
+                                          data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"/>
                             </div>
                         </td>
                     </tr>
@@ -120,12 +134,16 @@
                             <td><g:message code="projectUser.addMember.role"/></td>
                             <td>
                                 <div class="loader"></div>
-                                <div class="loaded-content" hidden>
-                                    <select multiple name="projectRoleNames" class="inputField nonLdapUser use-select-2">
-                                        <g:each in="${availableRoles}" var="role">
-                                            <option value="${role.name}">${role.name}</option>
-                                        </g:each>
-                                    </select>
+                                <div class="loaded-content" style="display: none">
+                                    <g:select id="selectorProjectRoleNamesNonLdap"
+                                              name="projectRoleNames"
+                                              class="inputField nonLdapUser use-select-2"
+                                              multiple="true"
+                                              value="${selectedProjectRoleNames}"
+                                              from="${availableRoles}"
+                                              optionKey="name"
+                                              optionValue="name"
+                                              data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"/>
                                 </div>
                             </td>
                         </tr>
@@ -137,8 +155,7 @@
             </sec:access>
             <div class="submit-container">
                 <div>
-                    <input id="add-button" type="submit" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"
-                           data-text="${confirmationText}"/>
+                    <input id="add-button" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
                 </div>
                 <div>
                     <otp:annotation type="info" variant="inline"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
@@ -149,17 +166,17 @@
 
     <sec:access expression="hasRole('ROLE_OPERATOR')">
         <g:if test="${usersWithoutUserProjectRole || unknownUsersWithFileAccess}">
-            <h2><g:message code="projectUser.additionalUsers.header" args="[selectedProject.unixGroup]"/></h2>
-            <h3><g:message code="projectUser.additionalUsers.notConnected"/></h3>
+            <h5><strong><g:message code="projectUser.additionalUsers.header" args="[selectedProject.unixGroup]"/></strong></h5>
+            <h6><strong><g:message code="projectUser.additionalUsers.notConnected"/></strong></h6>
             ${usersWithoutUserProjectRole.join(", ") ?: 'None'}
 
-            <h3><g:message code="projectUser.additionalUsers.unregisteredUsers"/></h3>
+            <h6><strong><g:message code="projectUser.additionalUsers.unregisteredUsers"/></strong></h6>
             ${unknownUsersWithFileAccess.join(", ") ?: 'None'}
         </g:if>
     </sec:access>
 
     <div class="otpDataTables projectUserTable fixed-table-header">
-        <h2><g:message code="projectUser.activeUsers" args="[selectedProject.displayName]"/></h2>
+        <h5><strong><g:message code="projectUser.activeUsers" args="[selectedProject.displayName]"/></strong></h5>
         <table>
             <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: selectedProject]"/>
             <g:if test="${!enabledProjectUsers}">
@@ -189,70 +206,89 @@
                     </td>
                     <td>
                         <div class="loader"></div>
-                        <div class="loaded-content" hidden>
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                        <div class="loaded-content bootstrapped" style="display: none">
+                            <sec:access
+                                    expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                 <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
                                     <otp:editorSwitch
                                             template="remove"
-                                            link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName] )}"
+                                            link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName])}"
                                             value="${projectRoleName}"
                                             confirmation="${confirmationText}"
                                             name="${projectRoleName}"/>
                                 </g:each>
                                 <div class="submit-container">
-                                    <select multiple name="newRoles" class="use-select-2" style="width: 200px">
-                                        <g:each in="${userEntry.availableRoles}" var="role">
-                                            <option value="${role}">${role}</option>
-                                        </g:each>
-                                    </select>
-                                    <input type="hidden" name="targetAddRole" value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null] )}"/>
-                                    <button class="addRole js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.addRoleToUserProjectRole"/></button>
+                                    <g:select id="${userEntry.user.id}-selectorNewRoles"
+                                              name="newRoles"
+                                              class="use-select-2"
+                                              multiple="true"
+                                              from="${userEntry.availableRoles}"
+                                              style="width: 200px"
+                                              data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"
+                                    />
+                                    <input type="hidden" name="targetAddRole"
+                                           value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null])}"/>
+                                    <button class="addRole js-add" data-confirmation="${confirmationText}"><g:message
+                                            code="projectUser.addRoleToUserProjectRole"/></button>
                                 </div>
                             </sec:access>
                         </div>
-                        <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                        <sec:noAccess
+                                expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                             <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
-                                    ${projectRoleName} <br />
+                                ${projectRoleName} <br/>
                             </g:each>
                         </sec:noAccess>
                     </td>
                     <td><span class="icon-${userEntry.otpAccess}"></span></td>
                     <g:if test="${userEntry.inLdap}">
-                        <td>
+                        <td class="bootstrapped">
                             <div class="filesAccessHandler-${userEntry.fileAccess}">
-                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-                                    <otp:editorSwitch
-                                            template="toggle"
-                                            tooltip="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"
-                                            link="${g.createLink(controller: "projectUser", action: "setAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                            value="${userEntry.fileAccess.toBoolean()}"
-                                            confirmation="${confirmationText}"
-                                            pageReload="${userEntry.fileAccess.inconsistency.toString()}"
-                                    />
+                                <sec:access
+                                        expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                                    <div class="modal-editor-switch">
+                                        <div class="modal-editor-switch-editor" style="display: none">
+                                            <input type="hidden" name="target"
+                                                   value="${g.createLink(controller: "projectUser", action: "setAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"/>
+                                            <input type="hidden" name="hasFileAccess" value="${userEntry.fileAccess.toBoolean()}">
+                                            <input type="hidden" name="permissionState" value="${userEntry.fileAccess}">
+                                            <span class="icon-${userEntry.fileAccess}"></span><br>
+                                            <button onclick="onToggleAccessToFiles(this)"><g:message code="default.button.toggle.label"/></button><br>
+                                            <button onclick="hideEditorAndShowLabel(this)"><g:message code="default.button.cancel.label"/></button>
+                                        </div>
+
+                                        <p class="modal-editor-switch-label" data-toggle="tooltip" data-placement="top"
+                                           title="${message(code: userEntry.fileAccess.toolTipKey) ?: ''}">
+                                            <span class="icon-${userEntry.fileAccess}"></span>
+                                            <button class="edit" onclick="onFileAccessEditClick(this)">&nbsp;</button>
+                                        </p>
+                                    </div>
                                 </sec:access>
                                 <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                     <span></span>
                                 </sec:noAccess>
                             </div>
                         </td>
-                        <td>
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
+                        <td class="bootstrapped">
+                            <sec:access
+                                    expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
                                 <otp:editorSwitch
                                         template="toggle"
-                                        link="${g.createLink(controller: "projectUser", action: "setManageUsers", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                        link="${g.createLink(controller: "projectUser", action: "setManageUsers", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"
                                         value="${userEntry.manageUsers.toBoolean()}"
                                         confirmation="${confirmationText}"/>
                             </sec:access>
-                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
+                            <sec:noAccess
+                                    expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'DELEGATE_USER_MANAGEMENT')">
                                 <span class="icon-${userEntry.manageUsers}"></span>
                             </sec:noAccess>
                         </td>
                         <sec:access expression="hasRole('ROLE_OPERATOR')">
-                            <td>
+                            <td class="bootstrapped">
                                 <otp:editorSwitch
                                         roles="ROLE_OPERATOR"
                                         template="toggle"
-                                        link="${g.createLink(controller: "projectUser", action: "setManageUsersAndDelegate", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                        link="${g.createLink(controller: "projectUser", action: "setManageUsersAndDelegate", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"
                                         value="${userEntry.manageUsersAndDelegate.toBoolean()}"
                                         confirmation="${confirmationText}"/>
                             </td>
@@ -265,39 +301,46 @@
                             <td><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
                         </sec:access>
                     </g:else>
-                    <td>
-                        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
+                    <td class="bootstrapped">
+                        <sec:access
+                                expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
                             <otp:editorSwitch
                                     template="toggle"
-                                    link="${g.createLink(controller: "projectUser", action: "setReceivesNotifications", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                    link="${g.createLink(controller: "projectUser", action: "setReceivesNotifications", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"
                                     value="${userEntry.receivesNotifications.toBoolean()}"
                                     confirmation="${confirmationText}"/>
                         </sec:access>
-                        <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
+                        <sec:noAccess
+                                expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
                             <span class="icon-${userEntry.receivesNotifications}"></span>
                         </sec:noAccess>
                     </td>
-                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                    <sec:access
+                            expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                         <td>
                             <div class="submit-container">
-                                <input type="hidden" name="changeProjectAccessButton" value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false] )}"/>
-                                <button class="changeProjectAccess js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.table.deactivateUser"/></button>
+                                <input type="hidden" name="changeProjectAccessButton"
+                                       value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false])}"/>
+                                <button class="changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
+                                        code="projectUser.table.deactivateUser"/></button>
                             </div>
                         </td>
                     </sec:access>
                 </tr>
             </g:each>
         </table>
+        <p><span class="icon-asterisk"></span>${g.message(code: 'projectUser.table.fileAccess.legend')}</p>
     </div>
+    <button type="button" data-toggle="modal" data-target="#wait">click</button>
     <sec:access expression="hasRole('ROLE_OPERATOR')">
         <button id="listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
                 data-project="${selectedProject?.name}" data-emails="${emails}">
-            <g:message code="projectUser.table.copyEmail" />
+            <g:message code="projectUser.table.copyEmail"/>
         </button>
     </sec:access>
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable">
-            <h2><g:message code="projectUser.formerUsers"/></h2>
+            <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
             <table class="fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: selectedProject]"/>
                 <g:if test="${!disabledProjectUsers}">
@@ -327,14 +370,17 @@
                         </td>
                         <td>
                             <g:each var="projectRoles" in="${userEntry.projectRoleNames}">
-                                ${projectRoles} <br />
+                                ${projectRoles} <br/>
                             </g:each>
                         </td>
-                        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                        <sec:access
+                                expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                             <td>
                                 <div class="submit-container">
-                                    <input type="hidden" name="changeProjectAccessButton" value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": true] )}"/>
-                                    <button class="changeProjectAccess js-add" data-confirmation="${confirmationText}"><g:message code="projectUser.table.reactivateUser"/></button>
+                                    <input type="hidden" name="changeProjectAccessButton"
+                                           value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": true])}"/>
+                                    <button class="changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
+                                            code="projectUser.table.reactivateUser"/></button>
                                 </div>
                             </td>
                         </sec:access>
@@ -344,5 +390,7 @@
         </div>
     </sec:access>
 </div>
+<otp:otpModal modalId="confirmationModal" title="Warning" type="dialog" closeText="Cancel" confirmText="Confirm" closable="false">
+</otp:otpModal>
 </body>
 </html>

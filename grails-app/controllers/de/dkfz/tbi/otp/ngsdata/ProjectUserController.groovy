@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang.WordUtils
 
 import de.dkfz.tbi.otp.*
@@ -49,17 +50,17 @@ class ProjectUserController implements CheckAndCall {
     ProjectRoleService projectRoleService
 
     static allowedMethods = [
-            index: "GET",
-            addUserToProject: "POST",
-            addRoleToUserProjectRole: "POST",
-            deleteProjectRole: "POST",
-            setAccessToFiles: "POST",
-            setManageUsers: "POST",
+            index                    : "GET",
+            addUserToProject         : "POST",
+            addRoleToUserProjectRole : "POST",
+            deleteProjectRole        : "POST",
+            setAccessToFiles         : "POST",
+            setManageUsers           : "POST",
             setManageUsersAndDelegate: "POST",
-            setReceivesNotifications: "POST",
-            setEnabled: "POST",
-            updateName: "POST",
-            updateEmail: "POST",
+            setReceivesNotifications : "POST",
+            setEnabled               : "POST",
+            updateName               : "POST",
+            updateEmail              : "POST",
     ]
 
     def index() {
@@ -85,6 +86,18 @@ class ProjectUserController implements CheckAndCall {
         projectUsers.each { User user ->
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = userProjectRolesOfProject.find { it.user == user }
+
+            // force IS state from ldap in case of inconsistency
+            if (!((ldapUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
+                    (userProjectRole?.project?.unixGroup in ldapUserDetails?.memberOfGroupList) &&
+                    !userProjectRole?.fileAccessChangeRequested) {
+                userProjectRole = userProjectRoleService.setAccessToFiles(userProjectRole, true, true)
+            } else if (((ldapUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
+                    !(userProjectRole?.project?.unixGroup in ldapUserDetails?.memberOfGroupList)  &&
+                    !userProjectRole?.fileAccessChangeRequested) {
+                userProjectRole = userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
+            }
+
             if (userProjectRole) {
                 userEntries.add(new UserEntry(user, project, ldapUserDetails, userService.hasCurrentUserAdministrativeRoles()))
             } else {
@@ -156,8 +169,8 @@ class ProjectUserController implements CheckAndCall {
                         template    : "remove",
                         link        : g.createLink([
                                 controller: "projectUser",
-                                action: "deleteProjectRole",
-                                params: ['userProjectRole.id': currentUserProjectRole.id, 'currentRole': newUserRole]
+                                action    : "deleteProjectRole",
+                                params    : ['userProjectRole.id': currentUserProjectRole.id, 'currentRole': newUserRole]
                         ]),
                         value       : newUserRole,
                         name        : newUserRole,
@@ -188,8 +201,7 @@ class ProjectUserController implements CheckAndCall {
         }) {
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, ldapUserDetails)
-            userEntry.fileAccess.toolTipKey
-            [tooltip: g.message(code: userEntry.fileAccess.toolTipKey)]
+            [tooltip: g.message(code: userEntry.fileAccess.toolTipKey), permissionState: userEntry.fileAccess]
         }
     }
 
@@ -255,6 +267,7 @@ enum PermissionStatus {
     }
 }
 
+@Slf4j
 class UserEntry {
     boolean inLdap
     User user
@@ -289,8 +302,8 @@ class UserEntry {
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
         this.otpAccess = getPermissionStatus(inLdap)
-        this.fileAccess = getFilePermissionStatus(inLdap && userProjectRole.accessToFiles, project.unixGroup in ldapUserDetails?.memberOfGroupList,
-                userProjectRole.fileAccessChangeRequested)
+        this.fileAccess = getFilePermissionStatus(inLdap && userProjectRole.accessToFiles,
+                project.unixGroup in ldapUserDetails?.memberOfGroupList, userProjectRole.fileAccessChangeRequested)
         this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)
         this.manageUsersAndDelegate = getPermissionStatus(inLdap && userProjectRole.manageUsersAndDelegate)
         this.receivesNotifications = getPermissionStatus(userProjectRole.receivesNotifications)
@@ -300,7 +313,7 @@ class UserEntry {
         if (!hasAdministrativeRole) {
             return (ProjectRole.findAll() - userProjectRole.projectRoles - CollectionUtils.exactlyOneElement(
                     ProjectRole.findAllByName(ProjectRole.Basic.PI.name())
-            )) *.name.sort()
+            ))*.name.sort()
         }
         return (ProjectRole.findAll() - userProjectRole.projectRoles)*.name.sort()
     }
@@ -318,10 +331,6 @@ class UserEntry {
             return PermissionStatus.PENDING_APPROVAL
         } else if (!should && is && changeRequested) {
             return PermissionStatus.PENDING_DENIAL
-        } else if (should && !is && !changeRequested) {
-            return PermissionStatus.INCONSISTENCY_APPROVAL
-        } else if (!should && is && !changeRequested) {
-            return PermissionStatus.INCONSISTENCY_DENIAL
         }
         throw new OtpRuntimeException("Case should not occur: should: ${should}, is: ${is}, changeRequested: ${changeRequested}")
     }

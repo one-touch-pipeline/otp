@@ -255,6 +255,7 @@ dependencies {
     compile 'org.webjars:jquery:1.11.1'
     compile 'org.webjars:bootstrap:4.5.3'
     compile 'org.webjars.npm:bootstrap-icons:1.1.0'
+    compile 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.4.0'
     compile 'org.webjars:rgraph:4.66-stable'
     compile 'org.webjars:jquery-ui:1.10.4-1'
     compile 'org.webjars:select2:4.0.12'

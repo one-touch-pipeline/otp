@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -197,7 +197,7 @@ $(function() {
                 if (data.success) {
                     $.otp.infoMessage("Data deleted successfully");
                     $(outerContainer).remove();
-                    var submitContainer = $("div[name=submit-container]", outerOuterContainer)
+                    var submitContainer = $("div[class=submit-container]", outerOuterContainer)
                     var selectRoles = $("select[name=newRoles]", submitContainer);
                     selectRoles.append("<option value=" + data.currentRole + ">" + data.currentRole + "</option>")
                 } else {
