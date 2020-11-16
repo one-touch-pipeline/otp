@@ -24,7 +24,7 @@
 
 ## Alignment Quality Overview
 
-The "Alignment Quality Overview", available via "ALIGNMENT QUALITY CONTROL" in the "RESULTS" menu option displays the basic alignment quality results. Dependent on the actual sequencing type, the shown tables may differ.
+The "Alignment Quality Overview", available via "ALIGNMENT QUALITY CONTROL" in the "RESULTS" menu option, displays the basic alignment quality results. Dependent on the actual sequencing type, the shown tables may differ.
 
 ### WGS/WES/WGBS Data
 
@@ -51,7 +51,7 @@ The following table explains the columns of the alignment overview table for WGS
 
 For RNA-seq data quality values are shown that better account for the specific QC-requirements of this sequencing type. The workflow uses the [RNA-SeQC](https://github.com/broadinstitute/rnaseqc) tool, which is extensively documented [here](https://github.com/broadinstitute/rnaseqc/blob/master/Metrics.md).
 
- Here is a list of column names from the OTP overview table with explanations:
+Here is a list of column names from the OTP overview table with explanations:
 
 | Value | Description |
 |:-------|------|
