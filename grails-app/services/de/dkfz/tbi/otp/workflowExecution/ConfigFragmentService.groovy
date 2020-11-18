@@ -26,14 +26,17 @@ import org.grails.web.json.JSONObject
 class ConfigFragmentService {
     ConfigSelectorService configSelectorService
 
-    JSONObject parseExternalWorkflowConfigFragmentString(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
-        List<ExternalWorkflowConfigSelector> ewcs = configSelectorService.findAllSelectorsSortedByPriority(
+    List<ExternalWorkflowConfigFragment> getSortedFragments(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
+        return configSelectorService.findAllSelectorsSortedByPriority(
                 singleSelectSelectorExtendedCriteria
-        )
-        return new JSONObject(mergeSortedFragments(ewcs.collect { it.externalWorkflowConfigFragment.configValuesToMap() }))
+        )*.externalWorkflowConfigFragment
     }
 
-    private Map mergeSortedFragments(List<Map> prioritySortedHashMaps) {
+    JSONObject mergeSortedFragments(List<ExternalWorkflowConfigFragment> fragments) {
+        return new JSONObject(mergeSortedMaps(fragments*.configValuesToMap()))
+    }
+
+    private Map mergeSortedMaps(List<Map> prioritySortedHashMaps) {
         if (prioritySortedHashMaps) {
             Map combinedConfiguration = prioritySortedHashMaps.remove(0)
             return mergeSortedFragmentsRec(combinedConfiguration, prioritySortedHashMaps)

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import org.grails.web.json.JSONObject
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -55,6 +56,9 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
 
     void 'createWorkflowRun, when created, then the values should be correct'() {
         given:
+        service.configFragmentService = Mock(ConfigFragmentService) {
+            mergeSortedFragments(_) >> new JSONObject([config: "combined"])
+        }
         Workflow workflow = createWorkflow()
         SeqTrack seqTrack = createSeqTrack()
         Project project = createProject()
@@ -68,7 +72,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run
         run.workDirectory == dir
         run.configs == []
-        run.combinedConfig == "{}"
+        run.combinedConfig == '{"config":"combined"}'
         run.workflow == workflow
         run.state == WorkflowRun.State.PENDING
         run.restartedFrom == null

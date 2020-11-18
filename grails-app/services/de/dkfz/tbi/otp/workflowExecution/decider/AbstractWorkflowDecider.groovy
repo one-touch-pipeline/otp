@@ -106,7 +106,7 @@ abstract class AbstractWorkflowDecider implements Decider {
             ActiveProjectWorkflow matchingWorkflows = ActiveProjectWorkflow.createCriteria().get {
                 eq('project', it.project)
                 eq('seqType', it.seqType)
-                wokflowVersion {
+                workflowVersion {
                     eq('workflow', workflow)
                 }
                 isNull('deprecationDate')

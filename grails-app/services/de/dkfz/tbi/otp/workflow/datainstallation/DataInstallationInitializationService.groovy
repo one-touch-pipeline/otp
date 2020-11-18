@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.shared.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -36,10 +37,9 @@ class DataInstallationInitializationService {
 
     static final String OUTPUT_ROLE = "FASTQ"
 
+    ConfigFragmentService configFragmentService
     LsdfFilesService lsdfFilesService
-
     WorkflowArtefactService workflowArtefactService
-
     WorkflowRunService workflowRunService
 
     /**
@@ -61,11 +61,38 @@ class DataInstallationInitializationService {
         String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
         String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} " +
                 "${seqTrack.seqType.displayNameWithLibraryLayout} lane ${seqTrack.laneId} run ${seqTrack.run.name}"
-        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}")
+        List<ExternalWorkflowConfigFragment> configFragments = getConfigFragments(seqTrack, workflow)
+        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}",
+                configFragments)
         WorkflowArtefact artefact = workflowArtefactService.createWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType, name)
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
         return run
+    }
+
+    List<ExternalWorkflowConfigFragment> getConfigFragments(SeqTrack seqTrack, Workflow workflow) {
+        ActiveProjectWorkflow activeProjectWorkflow = ActiveProjectWorkflow.createCriteria().get {
+            eq('project', seqTrack.project)
+            eq('seqType', seqTrack.seqType)
+            eq('active', true)
+            workflowVersion {
+                eq('workflow', workflow)
+            }
+            isNull('deprecationDate')
+        }
+
+        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(seqTrack.project, seqTrack.seqType)
+        ).referenceGenome
+
+        return configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
+                seqTrack.project,
+                activeProjectWorkflow.workflowVersion,
+                workflow,
+                seqTrack.seqType,
+                referenceGenome,
+                seqTrack.libraryPreparationKit,
+        ))
     }
 
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {

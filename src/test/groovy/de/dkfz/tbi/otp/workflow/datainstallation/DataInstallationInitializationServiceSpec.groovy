@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import org.grails.web.json.JSONObject
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -57,11 +58,17 @@ class DataInstallationInitializationServiceSpec extends Specification
         FastqImportInstance instance = createFastqImportInstance([
                 dataFiles: seqTracks*.dataFiles.flatten(),
         ])
+        DataInstallationInitializationService service = Spy(DataInstallationInitializationService) {
+            getConfigFragments(_, _) >> []
+        }
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
             3 * getFileViewByPidPath(_) >> TestCase.uniqueNonExistentPath
         }
         service.workflowRunService = new WorkflowRunService()
+        service.workflowRunService.configFragmentService = Mock(ConfigFragmentService) {
+            mergeSortedFragments(_) >> new JSONObject()
+        }
         service.workflowArtefactService = new WorkflowArtefactService()
 
         when:

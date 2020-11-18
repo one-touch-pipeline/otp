@@ -26,6 +26,8 @@ import de.dkfz.tbi.otp.utils.TransactionUtils
 
 class WorkflowRunService {
 
+    ConfigFragmentService configFragmentService
+
     private final static String WAITING_WORKFLOW_QUERY = """
         from
             WorkflowRun wr
@@ -70,12 +72,13 @@ class WorkflowRunService {
     @SuppressWarnings('ParameterCount')
     WorkflowRun createWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, String name,
                                   List<ExternalWorkflowConfigFragment> configs = []) {
+        String combinedConfig = configFragmentService.mergeSortedFragments(configs)
         return new WorkflowRun([
                 workDirectory : workDirectory,
                 state         : WorkflowRun.State.PENDING,
                 project       : project,
                 configs       : configs,
-                combinedConfig: "{}",
+                combinedConfig: combinedConfig,
                 priority      : priority,
                 restartedFrom : null,
                 skippedMessage: null,

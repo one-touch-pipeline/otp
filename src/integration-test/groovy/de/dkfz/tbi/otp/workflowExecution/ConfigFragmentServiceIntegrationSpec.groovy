@@ -31,6 +31,26 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 @Integration
 class ConfigFragmentServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
+    void "test getSortedFragments"() {
+        given:
+        ConfigFragmentService service = new ConfigFragmentService()
+        ExternalWorkflowConfigSelector ewcs1 = createExternalWorkflowConfigSelector([
+                fineTuningPriority            : 0,
+        ])
+        ExternalWorkflowConfigSelector ewcs2 = createExternalWorkflowConfigSelector([
+                fineTuningPriority            : 5,
+        ])
+        ExternalWorkflowConfigSelector ewcs3 = createExternalWorkflowConfigSelector([
+                fineTuningPriority            : 1,
+        ])
+        service.configSelectorService = Mock(ConfigSelectorService) {
+            1 * findAllSelectorsSortedByPriority(_) >> [ewcs2, ewcs3, ewcs1]
+        }
+
+        expect:
+        [ewcs2, ewcs3, ewcs1]*.externalWorkflowConfigFragment == service.getSortedFragments(new SingleSelectSelectorExtendedCriteria())
+    }
+
     void "test parseExternalWorkflowConfigFragmentString"() {
         given:
         ConfigFragmentService service = new ConfigFragmentService()
@@ -40,7 +60,7 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
                 ["A": "A_ThisNotSinceLowerPrio", "B": ["C": "C_ThisNotSinceLowerPrio", "D": "D_ThisNotSinceLowerPrio"]],
         ]
         expect:
-        service.mergeSortedFragments(prioritySortedHashMaps) ==
+        service.mergeSortedMaps(prioritySortedHashMaps) ==
                 ["A": "A_ShouldAppear", "B": ["D": "D_ThisToo", "E": ["G": "G_ThisToo"], "C": "C_ThisSinceHigherPrio"], "F": "F_ShouldAppear"]
     }
 }
