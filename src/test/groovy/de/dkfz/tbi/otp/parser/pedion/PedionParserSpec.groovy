@@ -88,6 +88,8 @@ class PedionParserSpec extends Specification {
         'A02P-ABCDEF-C1UAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-skin-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'A02P-ABCDEF-C1VAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lung-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'A02P-ABCDEF-C1WAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-fat-tissue-01'      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1XAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lower-jaw-01'       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1YAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-salivary-gland-01'  | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'A02P-ABCDEF-C1ZAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-unknown-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         //other biol replicate
         'A02P-ABCDEF-C1ACAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-03'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
@@ -156,6 +158,10 @@ class PedionParserSpec extends Specification {
         'A02P-ABCDEF-C1AAAA5A'  | 'invalid sequencing assay: number for sequencing assay'
         'A02P-ABCDEF-C1AAAAA1'  | 'invalid sequencing assay: number 1 instead of char for sequencing assay'
         'A02P-ABCDEF-C1AAAAA9'  | 'invalid sequencing assay: number 9 instead of char for sequencing assay'
+        //invalid format
+        'A02P-ABCDEF-kh-C1AAAAAA'  | 'invalid format: after pseudonym must follow the category'
+        'A02P-ABCDEF-C1AAAAAA-kh'  | 'invalid format: Nothing should follow after sequencing assay!'
+        'kh-A02P-ABCDEF-C1AAAAAA'  | 'invalid format: Nothing should preceded sequencing assay!'
     }
 
     @Unroll

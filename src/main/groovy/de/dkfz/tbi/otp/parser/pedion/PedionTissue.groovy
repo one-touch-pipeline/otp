@@ -45,6 +45,8 @@ enum PedionTissue {
     SKIN('1U'),
     LUNG('1V'),
     FAT_TISSUE('1W'),
+    LOWER_JAW('1X'),
+    SALIVARY_GLAND('1Y'),
     UNKNOWN('1Z'),
 
     final String code

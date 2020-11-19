@@ -42,7 +42,7 @@ class PedionParser implements SampleIdentifierParser {
     static final String BIO_REPLICATE_KEY = "bioReplicate"
     static final String SAMPLE_IDENTIFIER_KEY = "sampleIdentifier"
 
-    static final String PROJECT_FUNDING_PERIOD = /[A-Z]/
+    static final String PROJECT_FUNDING_PERIOD = /^[A-Z]/
     static final String PROJECT_NUMBER = /[0-9]{2}/
     static final String PROJECT_SUFFIX = /[PR]/  //P=prospective, R=Retrospective
 
@@ -73,7 +73,7 @@ class PedionParser implements SampleIdentifierParser {
      * <li> technical replicate of sequencing assay: Different seq reruns from the same analyte sample  </li>
      * </ul>
      */
-    static final String BIH_GEN_FACILITY = /[A-Z]{4}/
+    static final String BIH_GEN_FACILITY = /[A-Z]{4}$/
 
     static final String PROJECT = "(?<${PROJECT_KEY}>${PROJECT_FUNDING_PERIOD}${PROJECT_NUMBER}${PROJECT_SUFFIX})"
 
