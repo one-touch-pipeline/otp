@@ -31,6 +31,8 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
+import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.MultiObjectValueSource
@@ -74,16 +76,23 @@ class ProjectRequestController {
                 seqTypes         : [null],
                 users            : [],
                 speciesWithStrain: [id: null],
+                projectType      : Project.ProjectType.SEQUENCING,
         ]
+
         Map<String, ?> projectRequestHelper = [:]
+        Map<String, String> abstractValues = [:]
         if (projectRequest) {
             projectRequestHelper << [
                 users        : projectRequest.users ?: [],
                 storagePeriod: projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
             ]
+            abstractValues = projectRequestService.listAdditionalFieldValues(projectRequest)
         }
-
         MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(flash.cmd, projectRequestHelper, projectRequest, defaults)
+
+        List<AbstractFieldDefinition> fieldDefinitions = projectRequestService.listAndFetchAbstractFields(multiObjectValueSource
+                .getByFieldName("projectType") as Project.ProjectType,  ProjectPageType.PROJECT_REQUEST)
+
         return sharedModel + [
                 cmd                 : flash.cmd as ProjectRequestCreationCommand,
                 projectRequestToEdit: projectRequest,
@@ -95,6 +104,8 @@ class ProjectRequestController {
                 seqTypes            : SeqType.all.sort { it.displayNameWithLibraryLayout },
                 availableRoles      : ProjectRole.findAll(),
                 source              : multiObjectValueSource,
+                abstractFields      : fieldDefinitions,
+                abstractValues      : abstractValues,
         ]
     }
 
@@ -113,31 +124,42 @@ class ProjectRequestController {
     }
 
     def save(ProjectRequestCreationCommand cmd) {
-        if (!cmd.validate()) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
+        if (!cmd.save) {
             flash.cmd = cmd
-            redirect(action: ACTION_INDEX)
-            return
-        }
-        try {
-            ProjectRequest createdRequest = projectRequestService.create(cmd)
-            String baseMessage = "${g.message(code: "projectRequest.store.success")}. "
-            if (projectRequestService.requesterIsEligibleToAccept(createdRequest)) {
-                flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.work")}")
-                redirect(action: ACTION_VIEW, id: createdRequest.id)
+            ProjectRequest projectRequest = ProjectRequest.findByName(cmd.name)
+            if (projectRequest) {
+                redirect(action: ACTION_INDEX, id: projectRequest.id)
             } else {
-                flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.waiting")}")
-                redirect(action: ACTION_OPEN)
+                redirect(action: ACTION_INDEX)
             }
-            return
-        } catch (ValidationException e) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.errors)
-            flash.cmd = cmd
-        } catch (LdapUserCreationException e) {
-            flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, [e.message])
-            flash.cmd = cmd
         }
-        redirect(action: ACTION_INDEX)
+        else {
+            if (!cmd.validate()) {
+                flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
+                flash.cmd = cmd
+                redirect(action: ACTION_INDEX)
+                return
+            }
+            try {
+                ProjectRequest createdRequest = projectRequestService.create(cmd)
+                String baseMessage = "${g.message(code: "projectRequest.store.success")}. "
+                if (projectRequestService.requesterIsEligibleToAccept(createdRequest)) {
+                    flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.work")}")
+                    redirect(action: ACTION_VIEW, id: createdRequest.id)
+                } else {
+                    flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.waiting")}")
+                    redirect(action: ACTION_OPEN)
+                }
+                return
+            } catch (ValidationException e) {
+                flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, e.errors)
+                flash.cmd = cmd
+            } catch (LdapUserCreationException e) {
+                flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, [e.message])
+                flash.cmd = cmd
+            }
+            redirect(action: ACTION_INDEX)
+        }
     }
 
     def approve(ApproveCommand cmd) {
@@ -178,6 +200,7 @@ class ProjectRequestController {
     }
 
     def saveEdit(EditProjectRequestCommand cmd) {
+        cmd.save = "save"
         if (!cmd.validate()) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.edit.failure") as String, cmd.errors)
             flash.cmd = cmd
@@ -220,11 +243,18 @@ class ProjectRequestController {
             render status: 404
             return
         }
+        Map<String, String> abstractValues = projectRequestService.listAdditionalFieldValues(projectRequest)
+
+        List<AbstractFieldDefinition> fieldDefinitions = projectRequestService.listAndFetchAbstractFields(projectRequest.projectType,
+                ProjectPageType.PROJECT_REQUEST)
+
         return sharedModel + [
-                projectRequest  : projectRequest,
-                eligibleToAccept: projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
-                eligibleToEdit  : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
-                eligibleToClose : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
+                projectRequest     : projectRequest,
+                eligibleToAccept   : projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
+                eligibleToEdit     : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
+                eligibleToClose    : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
+                abstractFields     : fieldDefinitions,
+                abstractValues     : abstractValues,
         ]
     }
 }
@@ -243,6 +273,7 @@ enum StoragePeriod {
 }
 
 class ProjectRequestCreationCommand {
+    String save
     String name
     String description
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
@@ -278,6 +309,9 @@ class ProjectRequestCreationCommand {
     String comments
 
     List<ProjectRequestUserCommand> users
+
+    List<String> additionalFieldName = []
+    Map<String, String> additionalFieldValue = [:]
 
     static constraints = {
         name blank: false

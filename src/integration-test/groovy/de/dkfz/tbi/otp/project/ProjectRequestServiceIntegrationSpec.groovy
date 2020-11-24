@@ -541,7 +541,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         noExceptionThrown()
     }
 
-
     void "isUserEligibleApproverForRequest, all states"() {
         given:
         ProjectRequest projectRequest = DomainFactory.createProjectRequest()

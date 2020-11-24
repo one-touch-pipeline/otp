@@ -34,4 +34,9 @@ class SetValueField extends AbstractFieldValue {
             return val?.any { it?.definition != obj.definition } ? 'projectFieldDefinition.do.not.match' : true
         }
     }
+
+    @Override
+    String getDisplayValue() {
+        return null
+    }
 }

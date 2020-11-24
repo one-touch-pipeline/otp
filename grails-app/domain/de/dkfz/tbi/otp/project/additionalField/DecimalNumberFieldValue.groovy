@@ -33,4 +33,9 @@ class DecimalNumberFieldValue extends AbstractSingleFieldValue {
     ProjectFieldType getProjectFieldType() {
         return ProjectFieldType.DECIMAL_NUMBER
     }
+
+    @Override
+    String getDisplayValue() {
+        return decimalNumberValue?.toString() ?: ""
+    }
 }

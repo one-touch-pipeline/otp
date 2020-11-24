@@ -33,4 +33,9 @@ class FlagFieldValue extends AbstractSingleFieldValue {
     ProjectFieldType getProjectFieldType() {
         return ProjectFieldType.FLAG
     }
+
+    @Override
+    String getDisplayValue() {
+        return flagValue?.toString() ?: ""
+    }
 }

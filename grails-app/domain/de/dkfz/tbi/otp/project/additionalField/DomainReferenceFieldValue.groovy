@@ -46,4 +46,9 @@ class DomainReferenceFieldValue extends AbstractSingleFieldValue {
     ProjectFieldType getProjectFieldType() {
         return ProjectFieldType.DOMAIN_REFERENCE
     }
+
+    @Override
+    String getDisplayValue() {
+        return customValue ?: ""
+    }
 }

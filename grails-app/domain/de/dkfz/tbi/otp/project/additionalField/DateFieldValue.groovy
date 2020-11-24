@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.project.additionalField
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class DateFieldValue extends AbstractSingleFieldValue {
 
@@ -34,5 +35,10 @@ class DateFieldValue extends AbstractSingleFieldValue {
     @Override
     ProjectFieldType getProjectFieldType() {
         return ProjectFieldType.DATE
+    }
+
+    @Override
+    String getDisplayValue() {
+        return dateValue?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) ?: ""
     }
 }

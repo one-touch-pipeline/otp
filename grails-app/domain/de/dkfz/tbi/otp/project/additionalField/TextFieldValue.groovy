@@ -37,4 +37,9 @@ class TextFieldValue extends AbstractSingleFieldValue {
     ProjectFieldType getProjectFieldType() {
         return ProjectFieldType.TEXT
     }
+
+    @Override
+    String getDisplayValue() {
+        return textValue ?: ""
+    }
 }

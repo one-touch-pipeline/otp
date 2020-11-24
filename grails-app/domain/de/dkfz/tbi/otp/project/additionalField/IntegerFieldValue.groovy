@@ -33,4 +33,9 @@ class IntegerFieldValue extends AbstractSingleFieldValue {
     ProjectFieldType getProjectFieldType() {
         return ProjectFieldType.INTEGER
     }
+
+    @Override
+    String getDisplayValue() {
+        return integerValue?.toString() ?: ""
+    }
 }

@@ -137,9 +137,7 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
     }
 
     private void handleChangeTypeEvent(ProjectFieldsCreateCommand cmd) {
-        ProjectFieldsCreateCommand cmdNew = cmd.projectFieldType.commandClass.newInstance()
-        cmdNew.copyValuesFrom(cmd)
-        flash.cmd = cmdNew
+        flash.cmd = cmd
         flash.message = new FlashMessage(g.message(code: 'projectFields.create.changeType', args: [cmd.projectFieldType]))
         redirect(action: "create")
     }

@@ -30,7 +30,7 @@ import java.time.LocalDate
 // doesn't work as abstract class
 trait ProjectPropertiesGivenWithRequest {
 
-    Set<AbstractFieldValue> projectFields
+    Set<AbstractFieldValue> projectFields = [] as Set
 
     /** This attribute is used externally. Please discuss a change in the team */
     String name

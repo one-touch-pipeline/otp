@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
+import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -53,12 +55,19 @@ class ProjectCreationController {
     ProjectService projectService
     ProjectGroupService projectGroupService
     ProcessingPriorityService processingPriorityService
+    ProjectRequestService projectRequestService
+
+    private void handleSubmitEvent(ProjectCreationCommand cmd) {
+        flash.cmd = cmd
+        redirect(action: "index")
+    }
 
     def index(ProjectCreationBasisCommand cmd) {
         List<ProjectRequest> projectRequests = ProjectRequest.findAllByStatus(ProjectRequest.Status.WAITING_FOR_OPERATOR)
 
         List<UserProjectRole> usersToCopyFromBaseProject = []
         Map<String, ?> baseProjectOverride = [:]
+        Map<String, String> abstractValues = [:]
         if (cmd.baseProject) {
             usersToCopyFromBaseProject = projectService.getUsersToCopyFromBaseProject(cmd.baseProject)
             baseProjectOverride << [
@@ -73,7 +82,13 @@ class ProjectCreationController {
                     usersToCopyFromBaseProject: usersToCopyFromBaseProject,
                     nameInMetadataFiles       : "",
             ]
+            abstractValues = projectRequestService.listAdditionalFieldValues(cmd.baseProject)
         }
+
+        if (cmd.projectRequest) {
+            abstractValues = projectRequestService.listAdditionalFieldValues(cmd.projectRequest)
+        }
+
         Map<String, ?> defaults = [
                 qcThresholdHandling            : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
                 processingPriority             : processingPriorityService.defaultPriority(),
@@ -84,6 +99,7 @@ class ProjectCreationController {
                 sendProjectCreationNotification: true,
                 projectRequestAvailable        : true,
         ]
+
         ProjectCreationCommand projectCreationCmd = flash.cmd as ProjectCreationCommand
         boolean showSharedUnixGroupAlert = flash.showSharedUnixGroupAlert as boolean
         boolean showIgnoreUsersFromBaseObjects = flash.showIgnoreUsersFromBaseObjects as boolean
@@ -93,6 +109,10 @@ class ProjectCreationController {
         )
 
         Set<ProjectInfo> baseProjectInfos = projectService.getSelectableBaseProjectInfos(cmd.baseProject)
+
+        List<AbstractFieldDefinition> fieldDefinitions = projectService.projectRequestService
+                .listAndFetchAbstractFields(multiObjectValueSource.getByFieldName("projectType") as Project.ProjectType,
+                        ProjectPageType.PROJECT_CREATION)
 
         return [
                 cmd                            : cmd as ProjectCreationBasisCommand,
@@ -114,6 +134,8 @@ class ProjectCreationController {
                 showSharedUnixGroupAlert       : showSharedUnixGroupAlert,
                 showIgnoreUsersFromBaseObjects : showIgnoreUsersFromBaseObjects,
                 source                         : multiObjectValueSource,
+                abstractFields                 : fieldDefinitions,
+                abstractValues                 : abstractValues,
         ]
     }
 
@@ -124,32 +146,44 @@ class ProjectCreationController {
         ]
         List<Project> projects = Project.findAllByUnixGroup(cmd.unixGroup)
 
-        if (cmd.hasErrors()) {
-            flash.cmd = cmd
-            flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, cmd.errors)
-            redirect(action: "index", params: basisCommandProperties)
-        } else if (projects && !cmd.ignoreUsersFromBaseObjects) {
-            flash.cmd = cmd
-            flash.showSharedUnixGroupAlert = true
-            String baseText
-            if (cmd.projectRequest || cmd.baseProject) {
-                baseText = g.message(code: "projectCreation.store.error.sharedUnixGroup.base")
-                flash.showIgnoreUsersFromBaseObjects = true
-            } else {
-                baseText = g.message(code: "projectCreation.store.error.sharedUnixGroup.new", args: [cmd.unixGroup, projects.join(' and ')])
-            }
-            flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, [
-                    baseText,
-                    g.message(code: "projectCreation.store.error.sharedUnixGroup.force") as String,
-            ])
-            redirect(action: "index", params: basisCommandProperties)
+        if (!cmd.save) {
+            handleSubmitEvent(cmd)
+            return
         } else {
-            Project project = projectService.createProject(cmd)
-            flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
-            if (cmd.sendProjectCreationNotification) {
-                projectService.sendProjectCreationNotificationEmail(project)
+            if (cmd.hasErrors()) {
+                flash.cmd = cmd
+                flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, cmd.errors)
+                redirect(action: "index", params: basisCommandProperties)
+            } else if (projects && !cmd.ignoreUsersFromBaseObjects) {
+                flash.cmd = cmd
+                flash.showSharedUnixGroupAlert = true
+                String baseText
+                if (cmd.projectRequest || cmd.baseProject) {
+                    baseText = g.message(code: "projectCreation.store.error.sharedUnixGroup.base")
+                    flash.showIgnoreUsersFromBaseObjects = true
+                } else {
+                    baseText = g.message(code: "projectCreation.store.error.sharedUnixGroup.new", args: [cmd.unixGroup, projects.join(' and ')])
+                }
+                flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, [
+                        baseText,
+                        g.message(code: "projectCreation.store.error.sharedUnixGroup.force") as String,
+                ])
+                redirect(action: "index", params: basisCommandProperties)
+            } else {
+                try {
+                    Project project = projectService.createProject(cmd)
+                    flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
+                    if (cmd.sendProjectCreationNotification) {
+                        projectService.sendProjectCreationNotificationEmail(project)
+                    }
+                    redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
+                    return
+                } catch (RuntimeException e) {
+                    flash.message = new FlashMessage(g.message(code: "projectCreation.fieldstore.failure", args: [cmd?.name ?: '']) as String, e.message)
+                }
+                flash.cmd = cmd
+                redirect(action: "index")
             }
-            redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
         }
     }
 }
@@ -172,6 +206,13 @@ class ProjectCreationBasisCommand implements Validateable {
         }
     }
 
+    @SuppressWarnings("ReturnNullFromCatchBlock")
+    String getAddPropertyValue(ProjectPropertiesGivenWithRequest baseObject, String propertyId) {
+        return baseObject?.projectFields?.find {
+            it.definition.id.toString() == propertyId
+        }?.displayValue ?: ""
+    }
+
     Object getProjectRequestProperty(String propertyName) {
         return getPropertyOrNull(projectRequest, propertyName)
     }
@@ -179,9 +220,19 @@ class ProjectCreationBasisCommand implements Validateable {
     Object getBaseProjectProperty(String propertyName) {
         return getPropertyOrNull(baseProject, propertyName)
     }
+
+    String getProjectRequestAddProperty(String propertyId) {
+        return getAddPropertyValue(projectRequest, propertyId)
+    }
+
+    String getBaseProjectAddProperty(String propertyId) {
+        return getAddPropertyValue(baseProject, propertyId)
+    }
+
 }
 
 class ProjectCreationCommand extends ProjectCreationBasisCommand {
+    String save
     String name
     String individualPrefix
     String dirName
@@ -219,6 +270,9 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     boolean sendProjectCreationNotification
     boolean publiclyAvailable
     boolean projectRequestAvailable
+
+    List<String> additionalFieldName = []
+    Map<String, String> additionalFieldValue = [:]
 
     static constraints = {
         name(blank: false, validator: { val, obj ->

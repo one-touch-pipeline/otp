@@ -21,10 +21,16 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.time.format.DateTimeFormatter" %>
-<%@ page import="de.dkfz.tbi.otp.ngsdata.UserProjectRole" %>
-<%@ page import="de.dkfz.tbi.otp.ngsdata.TumorEntity" %>
-<%@ page import="de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project;" %>
+<%@ page import="de.dkfz.tbi.otp.project.additionalField.FieldExistenceType;" %>
+<%@ page import="de.dkfz.tbi.otp.config.TypeValidators;" %>
+<%@ page import="de.dkfz.tbi.otp.project.additionalField.TextFieldDefinition;" %>
+<%@ page import="de.dkfz.tbi.otp.project.additionalField.ProjectFieldType;" %>
+<%@ page import="java.time.format.DateTimeFormatter;" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.UserProjectRole;" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.TumorEntity;" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain;" %>
+
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -68,7 +74,7 @@
     </g:form>
 
     <h2><g:message code="projectCreation.form.header"/></h2>
-    <g:uploadForm controller="projectCreation" action="save">
+    <g:uploadForm controller="projectCreation" action="save" method="POST" useToken="true">
         <g:if test="${showSharedUnixGroupAlert}">
             <otp:annotation type="warning">
                 <label class="vertical-align-middle">
@@ -186,7 +192,8 @@
             <tr>
                 <td><g:message code="project.keywords"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${(projectCreationCmd?.keywords ?: source.getAllByFieldName("keywords")).flatten().findResults { it ? it.toString() : null }.unique().sort() ?: [""]}"
+                    <g:each in="${(projectCreationCmd?.keywords ?: source.getAllByFieldName("keywords")).flatten()
+                            .findResults { it ? it.toString() : null }.unique().sort() ?: [""]}"
                             var="keyword" status="i">
                         <div class="field">
                             <g:textField list="keywordList" name="keywordNames" value="${keyword}"/>
@@ -214,7 +221,8 @@
             <tr>
                 <td><g:message code="project.relatedProjects"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${(projectCreationCmd?.relatedProjects ?: source.getAllByFieldName("relatedProjects").flatten().findAll().join(",")).split(",").toUnique()}"
+                    <g:each in="${(projectCreationCmd?.relatedProjects ?: source.getAllByFieldName("relatedProjects")
+                            .flatten().findAll().join(",")).split(",").toUnique()}"
                             var="relatedProject" status="i">
                         <div class="field">
                             <g:textField list="projectList" name="relatedProjectNames" value="${relatedProject}"/>
@@ -244,7 +252,7 @@
             <tr>
                 <td><g:message code="project.projectType"/></td>
                 <td><g:select name='projectType' class="use-select-2"
-                              from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true"/></td>
+                              from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true" onChange="submit();"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'projectType', cmd: cmd]"/>
             </tr>
             <tr>
@@ -358,10 +366,66 @@
                     <g:render template="baseValueColumns" model="[fieldName: 'projectRequestAvailable', cmd: cmd, type: 'boolean']"/>
                 </g:else>
             </tr>
+            <g:each in="${abstractFields}" var="abstractField">
+                <tr>
+                    <td><g:message code="${abstractField.name}"/></td>
+                    <g:if test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING &&
+                            abstractField.fieldUseForSequencingProjects == FieldExistenceType.REQUIRED) ||
+                            (source.getByFieldName("projectType") == Project.ProjectType.USER_MANAGEMENT &&
+                                    abstractField.fieldUseForDataManagementProjects == FieldExistenceType.REQUIRED)}">
+                        <g:if test="${abstractField.projectFieldType == ProjectFieldType.TEXT}">
+                            <g:if test="${((TextFieldDefinition) abstractField).typeValidator == TypeValidators.MULTI_LINE_TEXT}">
+                                <td><g:textArea class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
+                                                value="${(source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
+                                                                ?: abstractValues?.get(Long.toString(abstractField.id))) ?: abstractField.defaultValue}"
+                                                required="true"/></td>
+                            </g:if>
+                            <g:else>
+                                <td><g:textField class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
+                                                 value="${(source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
+                                                                 ?: abstractValues?.get(Long.toString(abstractField.id))) ?: abstractField.defaultValue}"
+                                                 required="true"/></td>
+                            </g:else>
+                        </g:if>
+                        <g:elseif test="${abstractField.projectFieldType == ProjectFieldType.INTEGER}">
+                            <td><g:field class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]" type="number"
+                                         value="${(source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
+                                                         ?: abstractValues?.get(Long.toString(abstractField.id))) ?: abstractField.defaultValue}"
+                                             required="true"/></td>
+                        </g:elseif>
+                    </g:if>
+                    <g:elseif test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING &&
+                            abstractField.fieldUseForSequencingProjects == FieldExistenceType.OPTIONAL) ||
+                            (source.getByFieldName("projectType") == Project.ProjectType.USER_MANAGEMENT &&
+                                    abstractField.fieldUseForDataManagementProjects == FieldExistenceType.OPTIONAL)}">
+                        <g:if test="${abstractField.projectFieldType == ProjectFieldType.TEXT}">
+                            <g:if test="${((TextFieldDefinition) abstractField).typeValidator == TypeValidators.MULTI_LINE_TEXT}">
+                                <td><g:textArea class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
+                                                value="${(source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
+                                                                ?: abstractValues?.get(Long.toString(abstractField.id))) ?: abstractField.defaultValue}"/>
+                                </td>
+                            </g:if>
+                            <g:else>
+                                <td><g:textField class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]"
+                                                 value="${(source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
+                                                                 ?: abstractValues?.get(Long.toString(abstractField.id))) ?: abstractField.defaultValue}"/>
+                                </td>
+                            </g:else>
+                        </g:if>
+                        <g:elseif test="${abstractField.projectFieldType == ProjectFieldType.INTEGER}">
+                            <td><g:field class="resize-vertical" name="additionalFieldValue[${Long.toString(abstractField.id)}]" type="number"
+                                         value="${(source.getByFieldName('additionalFieldValue')?.get(Long.toString(abstractField.id))
+                                                         ?: abstractValues?.get(Long.toString(abstractField.id))) ?: abstractField.defaultValue}"/>
+                            </td>
+                        </g:elseif>
+                    </g:elseif>
+                    <g:render template="additionalBaseValueColumns" model="[fieldName: abstractField.id.toString(), cmd: cmd, type: 'single-line-string']"/>
+                </tr>
+            </g:each>
             <tr>
                 <td></td>
                 <td>
-                    <g:submitButton name="submit" value="Submit"/>
+                    <g:submitButton name="save" value="Submit"/>
                     <label>
                         <g:checkBox name="sendProjectCreationNotification" checked="${source.getByFieldName("sendProjectCreationNotification")}" value="true"/>
                         <g:message code="project.notification"/>
@@ -371,14 +435,14 @@
                 <td></td>
             </tr>
 
-            %{-- if someone wants to change this, it is now hidden --}%
+        %{-- if someone wants to change this, it is now hidden --}%
             <tr hidden>
                 <td><g:message code="project.fingerPrinting"/></td>
                 <td><g:checkBox name="fingerPrinting" checked="${source.getByFieldName("fingerPrinting")}" value="true"/></td>
                 <td></td>
                 <td></td>
             </tr>
-        </table>
+            </table>
     </g:uploadForm>
 </div>
 </body>

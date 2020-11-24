@@ -21,6 +21,7 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.config.TypeValidators; de.dkfz.tbi.otp.project.additionalField.ProjectFieldType" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -409,6 +410,43 @@
                             </g:link>
                         </td>
                     </tr>
+                    <g:each in="${abstractFields}" var="abstractField" status="index">
+                        <g:if test="${abstractField.projectDisplayOnConfigPage.toString() != 'HIDE'}">
+                            <tr>
+                                <td><g:message code="${abstractField.name}"/></td>
+                                <td class="help" title="${g.message(code: "${abstractField.descriptionConfig}")}"></td>
+                                <g:if test="${abstractField.projectFieldType == ProjectFieldType.INTEGER}">
+                                    <td>
+                                        <otp:editorSwitch
+                                                roles="ROLE_OPERATOR"
+                                                template="integer"
+                                                link="${g.createLink(controller: 'projectConfig', action: 'updateAbstractField',
+                                                        params: ['fieldName': abstractField.id.toString()])}"
+                                                value="${abstractValues.get(Long.toString(abstractField.id))}"/>
+                                    </td>
+                                </g:if>
+                                <g:elseif test="${abstractField.typeValidator == TypeValidators.MULTI_LINE_TEXT}">
+                                    <td>
+                                        <otp:editorSwitch
+                                                roles="ROLE_OPERATOR"
+                                                template="textArea"
+                                                link="${g.createLink(controller: 'projectConfig', action: 'updateAbstractField',
+                                                        params: ['fieldName': abstractField.id.toString()])}"
+                                                value="${abstractValues.get(Long.toString(abstractField.id))}"/>
+                                    </td>
+                                </g:elseif>
+                                <g:else>
+                                    <td>
+                                        <otp:editorSwitch
+                                                roles="ROLE_OPERATOR"
+                                                link="${g.createLink(controller: 'projectConfig', action: 'updateAbstractField',
+                                                        params: ['fieldName': abstractField.id.toString()])}"
+                                                value="${abstractValues.get(Long.toString(abstractField.id))}"/>
+                                    </td>
+                                </g:else>
+                            </tr>
+                        </g:if>
+                    </g:each>
                 </sec:ifAllGranted>
                 <tr>
                     <td><g:message code="project.requestAvailable"/></td>

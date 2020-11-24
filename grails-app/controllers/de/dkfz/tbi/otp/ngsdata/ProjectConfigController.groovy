@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.*
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
+import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
@@ -58,6 +60,11 @@ class ProjectConfigController implements CheckAndCall {
         String projectRequestComments = (SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR) ?
                 projectRequestService.findProjectRequestByProject(project)?.comments : '')
 
+        Map<String, String> abstractValues = projectRequestService.listAdditionalFieldValues(project)
+
+        List<AbstractFieldDefinition> fieldDefinitions = projectRequestService
+                .listAndFetchAbstractFields(project.projectType, ProjectPageType.PROJECT_CONFIG)
+
         return [
                 creationDate                   : simpleDateFormat.format(project.dateCreated),
                 lastReceivedDate               : getLastReceivedDate(project),
@@ -74,12 +81,20 @@ class ProjectConfigController implements CheckAndCall {
                 publiclyAvailable              : project?.publiclyAvailable,
                 closed                         : project?.closed,
                 projectRequestAvailable        : project?.projectRequestAvailable,
+                abstractFields                 : fieldDefinitions,
+                abstractValues                 : abstractValues,
         ]
     }
 
     JSON updateProjectField(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
+        }
+    }
+
+    JSON updateAbstractField(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateAbstractFieldValueForProject(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 

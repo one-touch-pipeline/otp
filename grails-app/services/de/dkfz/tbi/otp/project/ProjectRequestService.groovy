@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.ProjectRequestUser.ApprovalState
+import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 
@@ -81,33 +83,72 @@ class ProjectRequestService {
         } as List<ProjectRequest>).unique()
     }
 
+    List<AbstractFieldDefinition> listAndFetchAbstractFields(Project.ProjectType projectType, ProjectPageType page) {
+        boolean isOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
+        List<AbstractFieldDefinition> fieldDefinitions = []
+        AbstractFieldDefinition.list().each {
+            if ((projectType == Project.ProjectType.SEQUENCING && it.fieldUseForSequencingProjects != FieldExistenceType.NOT_AVAILABLE) ||
+                    (projectType == Project.ProjectType.USER_MANAGEMENT && it.fieldUseForDataManagementProjects != FieldExistenceType.NOT_AVAILABLE)) {
+                if (page == ProjectPageType.PROJECT_REQUEST) {
+                    if (!it.legacy && it.sourceOfData == ProjectSourceOfData.REQUESTER) {
+                        fieldDefinitions << it
+                    }
+                } else if (page == ProjectPageType.PROJECT_CONFIG && it.projectDisplayOnConfigPage != ProjectDisplayOnConfigPage.HIDE) {
+                    if ((it.projectDisplayOnConfigPage == ProjectDisplayOnConfigPage.SHOW && (isOperator || (!isOperator && !it.legacy)))
+                            || (it.projectDisplayOnConfigPage == ProjectDisplayOnConfigPage.ONLY_FOR_OPERATOR && isOperator)) {
+                        fieldDefinitions << it
+                    }
+                } else if (page == ProjectPageType.PROJECT_CREATION && !it.legacy) {
+                    fieldDefinitions << it
+                }
+            }
+        }
+        return fieldDefinitions.sort { a, b ->
+            a.sortNumber <=> b.sortNumber ?: a.name.compareToIgnoreCase(b.name)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    Map<String, String> listAdditionalFieldValues(ProjectPropertiesGivenWithRequest projectRequest) {
+        return projectRequest.projectFields.collectEntries { AbstractFieldValue afv ->
+            [(afv.definition.id.toString()) : afv.displayValue]
+        }
+    }
+
     ProjectRequest create(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
         securityService.ensureNotSwitchedUser()
 
         ProjectRequest req = new ProjectRequest(
-                name                   : cmd.name,
-                description            : cmd.description,
-                keywords               : cmd.keywords as Set,
-                organizationalUnit     : cmd.organizationalUnit,
-                costCenter             : cmd.costCenter,
-                grantId                : cmd.grantId,
-                fundingBody            : cmd.fundingBody,
-                endDate                : cmd.endDate,
-                storageUntil           : resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
-                relatedProjects        : cmd.relatedProjects,
-                tumorEntity            : cmd.tumorEntity,
-                speciesWithStrain      : cmd.speciesWithStrain,
+                name: cmd.name,
+                description: cmd.description,
+                keywords: cmd.keywords as Set,
+                organizationalUnit: cmd.organizationalUnit,
+                costCenter: cmd.costCenter,
+                grantId: cmd.grantId,
+                fundingBody: cmd.fundingBody,
+                endDate: cmd.endDate,
+                storageUntil: resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
+                relatedProjects: cmd.relatedProjects,
+                tumorEntity: cmd.tumorEntity,
+                speciesWithStrain: cmd.speciesWithStrain,
                 customSpeciesWithStrain: cmd.customSpeciesWithStrain,
-                projectType            : cmd.projectType,
-                sequencingCenter       : cmd.sequencingCenter,
-                approxNoOfSamples      : cmd.approxNoOfSamples,
-                seqTypes               : cmd.seqTypes,
-                comments               : cmd.comments,
+                projectType: cmd.projectType,
+                sequencingCenter: cmd.sequencingCenter,
+                approxNoOfSamples: cmd.approxNoOfSamples,
+                seqTypes: cmd.seqTypes,
+                comments: cmd.comments,
 
-                requester              : securityService.currentUserAsUser,
-                users                  : projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users),
+                requester: securityService.currentUserAsUser,
+                users: projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users),
         )
         req.save(flush: true)
+
+        if (cmd.additionalFieldValue) {
+            cmd.additionalFieldValue.each { entry ->
+                saveAdditionalFieldValuesForProjectRequest(entry.value, entry.key, req)
+            }
+        }
+
         sendEmailOnCreation(req)
         logAction(req, "request created")
         return req
@@ -120,30 +161,64 @@ class ProjectRequestService {
         ensureEligibleToEdit(projectRequest)
 
         projectRequest.with {
-            name                    = cmd.name
-            description             = cmd.description
-            keywords                = cmd.keywords as Set
-            organizationalUnit      = cmd.organizationalUnit
-            costCenter              = cmd.costCenter
-            grantId                 = cmd.grantId
-            fundingBody             = cmd.fundingBody
-            endDate                 = cmd.endDate
-            storageUntil            = resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil)
-            relatedProjects         = cmd.relatedProjects
-            tumorEntity             = cmd.tumorEntity
-            speciesWithStrain       = cmd.speciesWithStrain
+            name = cmd.name
+            description = cmd.description
+            keywords = cmd.keywords as Set
+            organizationalUnit = cmd.organizationalUnit
+            costCenter = cmd.costCenter
+            grantId = cmd.grantId
+            fundingBody = cmd.fundingBody
+            endDate = cmd.endDate
+            storageUntil = resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil)
+            relatedProjects = cmd.relatedProjects
+            tumorEntity = cmd.tumorEntity
+            speciesWithStrain = cmd.speciesWithStrain
             customSpeciesWithStrain = cmd.customSpeciesWithStrain
-            projectType             = cmd.projectType
-            sequencingCenter        = cmd.sequencingCenter
-            approxNoOfSamples       = cmd.approxNoOfSamples
-            seqTypes                = cmd.seqTypes
-            comments                = cmd.comments
+            projectType = cmd.projectType
+            sequencingCenter = cmd.sequencingCenter
+            approxNoOfSamples = cmd.approxNoOfSamples
+            seqTypes = cmd.seqTypes
+            comments = cmd.comments
 
-            users                   = projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users)
+            users = projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users)
         }
         projectRequest.save(flush: true)
+
+        if (cmd.additionalFieldValue) {
+            cmd.additionalFieldValue.each { entry ->
+                boolean fieldDoesNotExist = true
+                projectRequest.projectFields.each { AbstractFieldValue abstractFieldValue ->
+                    if (Long.toString(abstractFieldValue.definition.id) == entry.key) {
+                        fieldDoesNotExist = false
+                        updateAdditionalFieldValuesForProjectRequest(entry.value, entry.key, projectRequest)
+                    }
+                }
+                if (fieldDoesNotExist) {
+                    saveAdditionalFieldValuesForProjectRequest(entry.value, entry.key, projectRequest)
+                }
+            }
+        }
+
         sendEmailOnEdit(projectRequest)
         logAction(projectRequest, "request edited")
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateAdditionalFieldValuesForProjectRequest(String fieldValue, String fieldId, ProjectRequest projectRequest) {
+        projectRequest.projectFields.each { AbstractFieldValue afv ->
+            if (afv.definition.id.toString() == fieldId) {
+                if (afv.definition.projectFieldType == ProjectFieldType.TEXT) {
+                    TextFieldValue tfv = afv
+                    tfv.textValue = fieldValue
+                    tfv.save(flush: true)
+                } else if (afv.definition.projectFieldType == ProjectFieldType.INTEGER) {
+                    IntegerFieldValue ifv = afv
+                    ifv.integerValue = fieldValue.toInteger()
+                    ifv.save(flush: true)
+                }
+                projectRequest.save(flush: true)
+            }
+        }
     }
 
     private static LocalDate resolveStoragePeriodToLocalDate(StoragePeriod storagePeriod, LocalDate given) {
@@ -309,12 +384,30 @@ class ProjectRequestService {
         return CollectionUtils.atMostOneElement(ProjectRequest.findAllByProject(project))
     }
 
+    void saveAdditionalFieldValuesForProjectRequest(String fieldValue, String fieldId, ProjectRequest projectRequest) {
+        AbstractFieldDefinition afd = AbstractFieldDefinition.findById(fieldId as Long)
+        if (afd.projectFieldType == ProjectFieldType.TEXT) {
+            TextFieldValue tfv = new TextFieldValue()
+            tfv.definition = afd
+            tfv.textValue = fieldValue
+            tfv.save(flush: true)
+            projectRequest.projectFields.add(tfv)
+        } else if (afd.projectFieldType == ProjectFieldType.INTEGER) {
+            IntegerFieldValue ifv = new IntegerFieldValue()
+            ifv.definition = afd
+            ifv.integerValue = fieldValue.toInteger()
+            ifv.save(flush: true)
+            projectRequest.projectFields.add(ifv)
+        }
+        projectRequest.save(flush: true)
+    }
+
     void sendEmailOnCreation(ProjectRequest request) {
         String link = linkGenerator.link(
                 controller: "projectRequest",
-                action    : "view",
-                absolute  : true,
-                id        : request.id,
+                action: "view",
+                absolute: true,
+                id: request.id,
         )
         String message = messageSourceService.createMessage("notification.template.projectRequest.new.body", [
                 requester  : request.requester.realName,
@@ -332,9 +425,9 @@ class ProjectRequestService {
     void sendEmailOnCompleteApproval(ProjectRequest request) {
         String link = linkGenerator.link(
                 controller: "projectCreation",
-                action    : "index",
-                absolute  : true,
-                params    : [
+                action: "index",
+                absolute: true,
+                params: [
                         'projectRequest.id': request.id,
                 ]
         )
@@ -353,9 +446,9 @@ class ProjectRequestService {
     void sendEmailOnEdit(ProjectRequest request) {
         String link = linkGenerator.link(
                 controller: "projectRequest",
-                action    : "view",
-                absolute  : true,
-                id        : request.id,
+                action: "view",
+                absolute: true,
+                id: request.id,
         )
         String message = messageSourceService.createMessage("notification.template.projectRequest.edit.body", [
                 requester  : request.requester.realName,

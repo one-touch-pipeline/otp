@@ -190,6 +190,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         description type: "text"
         internalNotes type: "text"
         comment cascade: "all-delete-orphan"
+        projectFields cascade: "all-delete-orphan"
     }
 
     String getDisplayName() {

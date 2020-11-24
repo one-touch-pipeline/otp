@@ -41,6 +41,12 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
+import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
+import de.dkfz.tbi.otp.project.additionalField.IntegerFieldValue
+import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
+
+import de.dkfz.tbi.otp.project.additionalField.TextFieldValue
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -189,7 +195,14 @@ class ProjectService {
                 publiclyAvailable             : projectParams.publiclyAvailable,
                 projectRequestAvailable       : projectParams.projectRequestAvailable,
         ])
-        assert project.save(flush: true)
+
+        project.save(flush: true)
+
+        if (projectParams.additionalFieldValue) {
+            projectParams.additionalFieldValue.each {
+                    saveAdditionalFieldValuesForProject(it.value, it.key, project)
+            }
+        }
 
         if (project.relatedProjects) {
             updateAllRelatedProjects(project)
@@ -240,6 +253,44 @@ class ProjectService {
         //update all the related projects' relatedProjects field with the newly created project name
         relatedProjectList.findAll().each { Project baseProject ->
             addProjectToRelatedProjects(baseProject, project)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void saveAdditionalFieldValuesForProject(String fieldValue, String fieldId, Project project) {
+        AbstractFieldDefinition afd = AbstractFieldDefinition.findById(fieldId as Long)
+        if (afd.projectFieldType == ProjectFieldType.TEXT) {
+            TextFieldValue tfv = new TextFieldValue()
+            tfv.definition = afd
+            tfv.textValue = fieldValue
+            tfv.save(flush: true)
+            project.projectFields.add(tfv)
+        } else if (afd.projectFieldType == ProjectFieldType.INTEGER) {
+            IntegerFieldValue ifv = new IntegerFieldValue()
+            ifv.definition = afd
+            ifv.integerValue = fieldValue.toInteger()
+            ifv.save(flush: true)
+            project.projectFields.add(ifv)
+        }
+        project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateAdditionalFieldValuesForProject(String fieldValue, String fieldId, Project project) {
+        project.projectFields.each { AbstractFieldValue afv ->
+            if (afv.definition.id.toString() == fieldId) {
+                if (afv.definition.projectFieldType == ProjectFieldType.TEXT) {
+                    TextFieldValue tfv = afv
+                    afv.definition
+                    tfv.textValue = fieldValue
+                    tfv.save(flush: true)
+                } else if (afv.definition.projectFieldType == ProjectFieldType.INTEGER) {
+                    IntegerFieldValue ifv = afv
+                    ifv.integerValue = fieldValue.toInteger()
+                    ifv.save(flush: true)
+                }
+                project.save(flush: true)
+            }
         }
     }
 
@@ -353,6 +404,20 @@ class ProjectService {
 
         if (fieldName == 'dirAnalysis' && project.dirAnalysis) {
             createAnalysisDirectoryIfPossible(project)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    <T> void updateAbstractFieldValueForProject(T fieldValue, String fieldId, Project project) {
+        boolean fieldDoesNotExist = true
+        project.projectFields.each { AbstractFieldValue abstractFieldValue ->
+            if (abstractFieldValue.definition.id.toString() == fieldId) {
+                fieldDoesNotExist = false
+                updateAdditionalFieldValuesForProject(fieldValue as String, fieldId, project)
+            }
+        }
+        if (fieldDoesNotExist) {
+            saveAdditionalFieldValuesForProject(fieldValue as String, fieldId, project)
         }
     }
 

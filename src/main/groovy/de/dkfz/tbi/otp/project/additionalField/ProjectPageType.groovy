@@ -21,24 +21,8 @@
  */
 package de.dkfz.tbi.otp.project.additionalField
 
-import de.dkfz.tbi.otp.utils.Entity
-
-abstract class AbstractFieldValue implements Entity {
-
-    AbstractFieldDefinition definition
-
-    static belongsTo = [
-            definition: AbstractFieldDefinition,
-    ]
-
-    static constraints = {
-        definition nullable: false  // although 'nullable: false' should be the default, it needs to be defined explicitly
-    }
-
-    static mapping = {
-        definition index: 'abstract_field_value_definition_idx', lazy: false
-    }
-
-    abstract String getDisplayValue()
-
+enum ProjectPageType {
+    PROJECT_REQUEST,
+    PROJECT_CONFIG,
+    PROJECT_CREATION,
 }
