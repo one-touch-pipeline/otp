@@ -54,6 +54,8 @@ class LicenseCheck {
             "src/docs",
 
             "grails-app/assets/lib",
+            "grails-app/assets/images",
+
             "misc/fonts",
             "misc/logo",
             "scripts/gitchangelog",

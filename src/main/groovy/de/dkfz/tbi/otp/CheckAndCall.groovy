@@ -51,27 +51,33 @@ trait CheckAndCall {
     def <T> T checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure<T> method) {
         T result = null
         withForm {
-            if (cmd && cmd.hasErrors()) {
-                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, cmd.errors)
-                flash.cmd = cmd
-            } else {
-                try {
-                    result = method()
-                    flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
-                } catch (ValidationException e) {
-                    flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.errors)
-                    flash.cmd = cmd
-                } catch (AssertionError e) {
-                    flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
-                    flash.cmd = cmd
-                } catch (OtpRuntimeException e) {
-                    flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
-                    flash.cmd = cmd
-                }
-            }
+            result = checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, msgCode, method)
         }.invalidToken {
             flash.message = new FlashMessage(g.message(code: "default.expired.session") as String)
             flash.cmd = cmd
+        }
+        return result
+    }
+
+    def <T> T checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(Validateable cmd, String msgCode, Closure<T> method) {
+        T result = null
+        if (cmd && cmd.hasErrors()) {
+            flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, cmd.errors)
+            flash.cmd = cmd
+       } else {
+            try {
+                result = method()
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
+            } catch (ValidationException e) {
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.errors)
+                flash.cmd = cmd
+            } catch (AssertionError e) {
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
+                flash.cmd = cmd
+            } catch (OtpRuntimeException e) {
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
+                flash.cmd = cmd
+            }
         }
         return result
     }

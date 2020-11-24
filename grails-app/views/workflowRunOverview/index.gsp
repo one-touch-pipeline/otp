@@ -65,16 +65,16 @@
         <g:each in="${workflows}" var="workflow">
             <tr>
                 <td><div class="${workflow.enabled ? "dot green" : "dot grey"}" title="${workflow.enabled ? "Enabled" : "Disabled"}"></div></td>
-                <td><g:link controller="workflowRunOverview" action="index" params="${["workflow.id": workflow.id]}">${workflow}</g:link></td>
-                <td><g:link controller="workflowRunOverview" action="index" params="${["workflow.id": workflow.id]}">
+                <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id]}">${workflow}</g:link></td>
+                <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id]}">
                     ${states.collect { state -> state.value.sum { runs[new Pair(it, workflow)] ?: 0 } }.sum()}
                 </g:link></td>
                 <g:each in="${states}" var="stateAndSubStates">
-                    <td><g:link controller="workflowRunOverview" action="index" params="${["workflow.id": workflow.id, state: stateAndSubStates.value]}">
+                    <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id, state: stateAndSubStates.value]}">
                         ${stateAndSubStates.value.sum { runs[new Pair(it, workflow)] ?: 0 }}
                     </g:link></td>
                     <g:each in="${stateAndSubStates.value}" var="subState">
-                        <td><g:link controller="workflowRunOverview" action="index"
+                        <td><g:link controller="workflowRunList" action="index"
                                     params="${["workflow.id": workflow.id, state: subState]}">${runs[new Pair(subState, workflow)] ?: "0"}</g:link></td>
                     </g:each>
                 </g:each>

@@ -76,6 +76,12 @@ class WorkflowStateChangeService {
         step.save(flush: true)
     }
 
+    void changeStateToFinalFailed(List<WorkflowStep> steps) {
+        steps.each {
+            changeStateToFinalFailed(it)
+        }
+    }
+
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
@@ -147,7 +153,9 @@ class WorkflowStateChangeService {
 
     private Collection<WorkflowRun> getDependingWorkflowRuns(WorkflowRun run) {
         assert run
-        List<WorkflowRun> runs = WorkflowRunInputArtefact.findAllByWorkflowArtefactInList(run.outputArtefacts*.value)*.workflowRun
+        List<WorkflowRun> runs = run.outputArtefacts*.value ?
+                WorkflowRunInputArtefact.findAllByWorkflowArtefactInList(run.outputArtefacts*.value)*.workflowRun :
+                []
         return runs + runs.collectMany { getDependingWorkflowRuns(it) }
     }
 }

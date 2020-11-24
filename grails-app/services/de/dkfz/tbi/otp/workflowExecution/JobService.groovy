@@ -60,21 +60,27 @@ class JobService {
                             "Please restart the workflow instead, if possible.")
         }
 
-        WorkflowStep workflowStep = new WorkflowStep(
-                beanName: stepToRestart.beanName,
-                state: WorkflowStep.State.CREATED,
-                previous: stepToRestart.workflowRun.workflowSteps.last(),
-                restartedFrom: stepToRestart,
-        ).save(flush: true)
-
         List<WorkflowStep> workflowSteps = stepToRestart.workflowRun.workflowSteps
         workflowSteps[workflowSteps.indexOf(stepToRestart)..(workflowSteps.size() - 1)].each { WorkflowStep step ->
             step.obsolete = true
             step.save(flush: true)
         }
-
-        stepToRestart.workflowRun.workflowSteps.add(workflowStep)
+        stepToRestart.workflowRun.state = WorkflowRun.State.PENDING
         stepToRestart.workflowRun.save(flush: true)
+
+        new WorkflowStep(
+                beanName: stepToRestart.beanName,
+                state: WorkflowStep.State.CREATED,
+                previous: stepToRestart.workflowRun.workflowSteps.last(),
+                restartedFrom: stepToRestart,
+                workflowRun: stepToRestart.workflowRun,
+        ).save(flush: true)
+    }
+
+    void createRestartedJobAfterJobFailures(List<WorkflowStep> stepsToRestart) {
+        stepsToRestart.each {
+            createRestartedJobAfterJobFailure(it)
+        }
     }
 
     void createRestartedJobAfterJobFailure(WorkflowStep stepToRestart) {
@@ -84,7 +90,7 @@ class JobService {
         assert workflowRun.state == WorkflowRun.State.FAILED
 
         WorkflowStep failedStep = workflowRun.workflowSteps.last()
-        assert failedStep.state == WorkflowStep.State.FAILED
+        assert failedStep.state == WorkflowStep.State.FAILED: "The last step is not in state FAILED"
 
         createRestartedJob(stepToRestart)
     }

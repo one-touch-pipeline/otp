@@ -35,35 +35,35 @@ class WorkflowRunOverviewController {
 
     WorkflowRunOverviewService workflowRunOverviewService
 
+    static final Map<String, List<WorkflowRun.State>> STATES = [
+            ("Input required"): [
+                    WorkflowRun.State.WAITING_ON_USER,
+                    WorkflowRun.State.FAILED,
+            ].asImmutable(),
+            ("Not finished")  : [
+                    WorkflowRun.State.PENDING,
+                    WorkflowRun.State.WAITING_ON_SYSTEM,
+                    WorkflowRun.State.RUNNING,
+            ].asImmutable(),
+            ("Finished")      : [
+                    WorkflowRun.State.SUCCESS,
+                    WorkflowRun.State.SKIPPED,
+                    WorkflowRun.State.FAILED_FINAL,
+                    WorkflowRun.State.KILLED,
+            ].asImmutable(),
+    ].asImmutable()
+
     def index() {
         List<Workflow> workflows = Workflow.list().sort { a, b ->
             !a.enabled <=> !b.enabled ?: String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
         }
-
-        Map<String, List<WorkflowRun.State>> states = [
-                ("Input required"): [
-                        WorkflowRun.State.WAITING_ON_USER,
-                        WorkflowRun.State.FAILED,
-                ],
-                ("Not finished")  : [
-                        WorkflowRun.State.PENDING,
-                        WorkflowRun.State.WAITING_ON_SYSTEM,
-                        WorkflowRun.State.RUNNING,
-                ],
-                ("Finished")      : [
-                        WorkflowRun.State.SUCCESS,
-                        WorkflowRun.State.SKIPPED,
-                        WorkflowRun.State.FAILED_FINAL,
-                        WorkflowRun.State.KILLED,
-                ],
-        ]
 
         Map<Pair<WorkflowRun.State, Workflow>, Long> runs = workflowRunOverviewService.numberOfRunsPerWorkflowAndState
         Map<Workflow, Timestamp> lastRuns = workflowRunOverviewService.lastRuns
         Map<Workflow, Timestamp> lastFails = workflowRunOverviewService.lastFailedRuns
 
         return [
-                states   : states,
+                states   : STATES,
                 workflows: workflows,
                 lastRuns : lastRuns,
                 lastFails: lastFails,

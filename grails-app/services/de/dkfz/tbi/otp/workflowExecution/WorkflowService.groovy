@@ -27,6 +27,12 @@ import grails.gorm.transactions.Transactional
 class WorkflowService {
     JobService jobService
 
+    void createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
+        steps.each {
+            createRestartedWorkflow(it, startDirectly)
+        }
+    }
+
     void createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
         assert step
         assert step.workflowRun.state == WorkflowRun.State.FAILED
