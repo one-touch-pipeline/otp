@@ -19,8 +19,6 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
-<%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName; de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 <g:applyLayout name="main">
 <head>
     <title><g:layoutTitle default="OTP"/></title>

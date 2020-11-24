@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2020 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,15 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+<g:applyLayout name="main">
+    <head>
+        <title><g:layoutTitle default="OTP"/></title>
+        <g:layoutHead/>
+        <asset:javascript src="modules/application.js"/>
+        <asset:stylesheet src="modules/application.css"/>
+    </head>
 
-<!doctype html>
-<html lang="en" class="${otp.environmentName()}">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title><g:layoutTitle default="OTP"/></title>
-    <asset:javascript src="modules/metadataImportDependencies.js"/>
-    <asset:stylesheet src="metadataImport/metadataImport.css"/>
-    <asset:stylesheet src="modules/defaultPageDependencies.css"/>
-    <g:layoutHead/>
-</head>
-<body>
-    <g:layoutBody/>
-    <asset:deferredScripts/>
-</body>
-</html>
+    <body>
+        <g:layoutBody/>
+    </body>
+</g:applyLayout>

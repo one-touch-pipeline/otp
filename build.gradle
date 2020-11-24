@@ -251,7 +251,7 @@ dependencies {
 
     testCompile "org.grails:grails-test-mixins:3.3.0"
 
-    // JS libraries
+    // JS and CSS libraries
     compile 'org.webjars:bootstrap:3.3.5'
     compile 'org.webjars:jquery:1.11.1'
     compile 'org.webjars:rgraph:4.66-stable'
@@ -262,6 +262,7 @@ dependencies {
     compile 'org.webjars:datatables-fixedcolumns:3.0.2'
     compile 'org.webjars:datatables-fixedheader:2.1.2-1'
     compile 'org.webjars:datatables-plugins:1.10.20'
+    compile 'org.webjars:bootstrap:4.5.3'
 }
 
 bootRun {

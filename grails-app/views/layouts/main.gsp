@@ -19,14 +19,12 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
-<%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName; de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 <!doctype html>
 <html lang="en" class="${otp.environmentName()}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title><g:layoutTitle default="Grails"/></title>
+    <title><g:layoutTitle default="OTP"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="contextPath" content="${request.contextPath}">
     <meta name="projectName" content="${selectedProject?.name}">
@@ -35,9 +33,6 @@
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:stylesheet src="modules/defaultPageDependencies.css"/>
     <asset:stylesheet src="modules/style.css"/>
-    <asset:script type="text/javascript">
-        $.otp.highlight(window.location.pathname);
-    </asset:script>
     <g:layoutHead/>
 </head>
 

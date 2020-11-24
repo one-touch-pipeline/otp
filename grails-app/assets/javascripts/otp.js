@@ -438,6 +438,8 @@ $.otp.applySelect2 = function (jqSelection) {
 };
 
 $(document).ready(function() {
+    $.otp.highlight(window.location.pathname);
+
     // apply select2 fancy search-box to all select-boxes that want it.
     // Currently opt-in, by setting css-class on the g:select
     // Since there are some cases where select2 doesn't integrate nicely we also provide
@@ -445,17 +447,23 @@ $(document).ready(function() {
     $.otp.applySelect2($('.use-select-2').not('.dont-use-select-2'));
 
     var t = $('[title]');
-    t.tooltip();
-    t.on('click', function () {
-        $(this)
-            .tooltip({
-                open: function (event, ui) {
-                    var $element = $(event.target);
-                    ui.tooltip.click(function () {
-                        $element.tooltip('close');
-                    });
-                },
-            })
-            .tooltip('open');
-    });
+    if ($.fn.tooltip.Constructor === undefined) {
+        // use jQueryUI
+        t.tooltip();
+        t.on('click', function () {
+            $(this)
+                .tooltip({
+                    open: function (event, ui) {
+                        var $element = $(event.target);
+                        ui.tooltip.click(function () {
+                            $element.tooltip('close');
+                        });
+                    },
+                })
+                .tooltip('open');
+        });
+    } else {
+        // use Bootstrap
+        t.tooltip({ trigger: 'hover focus click' });
+    }
 });
