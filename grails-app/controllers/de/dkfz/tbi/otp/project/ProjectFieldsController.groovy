@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.project
 
-import grails.converters.JSON
 import grails.core.GrailsApplication
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
@@ -29,13 +28,13 @@ import grails.validation.ValidationException
 import groovy.transform.ToString
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.TypeValidators
 import de.dkfz.tbi.otp.project.additionalField.*
+import de.dkfz.tbi.otp.utils.AbstractGeneralDomainPropertyUpdateController
 
-@Secured('ROLE_OPERATOR')
-class ProjectFieldsController implements CheckAndCall {
+@Secured("hasRole('ROLE_OPERATOR')")
+class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateController<AbstractFieldDefinition> {
 
     static allowedMethods = [
             index                : "GET",
@@ -46,8 +45,6 @@ class ProjectFieldsController implements CheckAndCall {
             createDecimalNumber  : "POST",
             createDate           : "POST",
             createDomainReference: "POST",
-            updateField          : "POST",
-            updateMultiField     : "POST",
             deleteFieldDefinition: "POST",
     ]
 
@@ -62,6 +59,8 @@ class ProjectFieldsController implements CheckAndCall {
 
     @Autowired
     GrailsApplication grailsApplication
+
+    final Class<AbstractFieldDefinition> entityClass = AbstractFieldDefinition
 
     def index() {
         List<AbstractFieldDefinition> fieldDefinitions = projectFieldsService.listAndFetchValueLists()
@@ -168,18 +167,6 @@ class ProjectFieldsController implements CheckAndCall {
         redirect(action: "create")
     }
 
-    JSON updateField(UpdateFieldDefinitionCommand cmd) {
-        checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
-            projectFieldsService.updateProperty(cmd.definition, cmd.property, cmd.value)
-        }
-    }
-
-    JSON updateMultiField(UpdateMultiFieldDefinitionCommand cmd) {
-        checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
-            projectFieldsService.updateProperties(cmd.definition, cmd.property, cmd.value)
-        }
-    }
-
     @SuppressWarnings('CatchRuntimeException')
     def deleteFieldDefinition(DeleteFieldDefinitionCommand cmd) {
         cmd.validate()
@@ -203,20 +190,6 @@ class ProjectFieldsController implements CheckAndCall {
         flash.cmd = cmd
         redirect(action: "index")
     }
-}
-
-@ToString(includeNames = true)
-class UpdateFieldDefinitionCommand implements Validateable {
-    AbstractFieldDefinition definition
-    String property
-    String value
-}
-
-@ToString(includeNames = true)
-class UpdateMultiFieldDefinitionCommand implements Validateable {
-    AbstractFieldDefinition definition
-    String property
-    List<String> value
 }
 
 @ToString(includeNames = true)

@@ -148,8 +148,8 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'name',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'name',
                                 ])}"
                                 value="${fieldDefinition.name}"/>
                     </td>
@@ -164,8 +164,8 @@
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'descriptionConfig',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'descriptionConfig',
                                 ])}"
                                 value="${fieldDefinition.descriptionConfig}"/>
                     </td>
@@ -174,8 +174,8 @@
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'descriptionRequest',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'descriptionRequest',
                                 ])}"
                                 value="${fieldDefinition.descriptionRequest}"/>
                     </td>
@@ -185,8 +185,8 @@
                                 template="dropDown"
                                 values="${de.dkfz.tbi.otp.project.additionalField.FieldExistenceType.values()}"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'fieldUseForSequencingProjects',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'fieldUseForSequencingProjects',
                                 ])}"
                                 value="${fieldDefinition.fieldUseForSequencingProjects}"/>
                     </td>
@@ -196,8 +196,8 @@
                                 template="dropDown"
                                 values="${de.dkfz.tbi.otp.project.additionalField.FieldExistenceType.values()}"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'fieldUseForDataManagementProjects',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'fieldUseForDataManagementProjects',
                                 ])}"
                                 value="${fieldDefinition.fieldUseForDataManagementProjects}"/>
                     </td>
@@ -207,8 +207,8 @@
                                 template="dropDown"
                                 values="${de.dkfz.tbi.otp.project.additionalField.ProjectSourceOfData.values()}"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'sourceOfData',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'sourceOfData',
                                 ])}"
                                 value="${fieldDefinition.sourceOfData}"/>
                     </td>
@@ -218,8 +218,8 @@
                                 template="dropDown"
                                 values="${de.dkfz.tbi.otp.project.additionalField.ProjectDisplayOnConfigPage.values()}"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'projectDisplayOnConfigPage',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'projectDisplayOnConfigPage',
                                 ])}"
                                 value="${fieldDefinition.projectDisplayOnConfigPage}"/>
                     </td>
@@ -228,8 +228,8 @@
                                 roles="ROLE_OPERATOR"
                                 template="integer"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'sortNumber',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'sortNumber',
                                 ])}"
                                 value="${fieldDefinition.sortNumber}"/>
                     </td>
@@ -238,8 +238,8 @@
                                 roles="ROLE_OPERATOR"
                                 template="toggle"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'changeOnlyByOperator',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'changeOnlyByOperator',
                                 ])}"
                                 value="${fieldDefinition.changeOnlyByOperator}"/>
                     </td>
@@ -248,8 +248,8 @@
                                 roles="ROLE_OPERATOR"
                                 template="toggle"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'usedExternally',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'usedExternally',
                                 ])}"
                                 value="${fieldDefinition.usedExternally}"/>
                     </td>
@@ -261,8 +261,8 @@
                                         template="dropDown"
                                         values="${data[((DomainReferenceFieldDefinition) fieldDefinition).domainClassName]}"
                                         link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                                'definition.id': "${fieldDefinition.id}",
-                                                'property'     : "${fieldDefinition.projectFieldType.propertyDefaultValue}",
+                                                'entityId': "${fieldDefinition.id}",
+                                                'property': "${fieldDefinition.projectFieldType.propertyDefaultValue}",
                                         ])}"
                                         optionKey="id"
                                         optionValue="stringForProjectFieldDomainReference"
@@ -274,8 +274,8 @@
                                         roles="ROLE_OPERATOR"
                                         template="${fieldDefinition.projectFieldType.templateDefaultValue}"
                                         link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                                'definition.id': "${fieldDefinition.id}",
-                                                'property'     : "${fieldDefinition.projectFieldType.propertyDefaultValue}",
+                                                'entityId': "${fieldDefinition.id}",
+                                                'property': "${fieldDefinition.projectFieldType.propertyDefaultValue}",
                                         ])}"
                                         value="${fieldDefinition.defaultValue ?: ''}"/>
                             </g:else>
@@ -290,8 +290,8 @@
                                     roles="ROLE_OPERATOR"
                                     template="${fieldDefinition.projectFieldType.templateAllowedValue}"
                                     link="${g.createLink(controller: 'projectFields', action: 'updateMultiField', params: [
-                                            'definition.id': "${fieldDefinition.id}",
-                                            'property'     : "${fieldDefinition.projectFieldType.propertyAllowedValue}",
+                                            'entityId': "${fieldDefinition.id}",
+                                            'property': "${fieldDefinition.projectFieldType.propertyAllowedValue}",
                                     ])}"
                                     value="${fieldDefinition.valueList ?: ['']}"/>
                         </g:if>
@@ -307,8 +307,8 @@
                                         template="dropDown"
                                         values="${validators}"
                                         link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                                'definition.id': "${fieldDefinition.id}",
-                                                'property'     : 'typeValidator',
+                                                'entityId': "${fieldDefinition.id}",
+                                                'property': 'typeValidator',
                                         ])}"
                                         noSelection="${[(""): "No Filter"]}"
                                         value="${((TextFieldDefinition) fieldDefinition).typeValidator}"/>
@@ -320,8 +320,8 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                            'definition.id': "${fieldDefinition.id}",
-                                            'property'     : 'regularExpression',
+                                            'entityId': "${fieldDefinition.id}",
+                                            'property': 'regularExpression',
                                     ])}"
                                     value="${((TextFieldDefinition) fieldDefinition).regularExpression}"/>
                         </g:if>
@@ -339,8 +339,8 @@
                                     roles="ROLE_OPERATOR"
                                     template="toggle"
                                     link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                            'definition.id': "${fieldDefinition.id}",
-                                            'property'     : 'allowCustomValue',
+                                            'entityId': "${fieldDefinition.id}",
+                                            'property': 'allowCustomValue',
                                     ])}"
                                     value="${((DomainReferenceFieldDefinition) fieldDefinition).allowCustomValue}"/>
                         </g:if>
@@ -350,8 +350,8 @@
                                 roles="ROLE_OPERATOR"
                                 template="toggle"
                                 link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
-                                        'definition.id': "${fieldDefinition.id}",
-                                        'property'     : 'legacy',
+                                        'entityId': "${fieldDefinition.id}",
+                                        'property': 'legacy',
                                 ])}"
                                 value="${fieldDefinition.legacy}"/>
                     </td>
