@@ -47,7 +47,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     void execute() {
         SessionUtils.withNewSession {
             int minPriority = minimumProcessingPriorityForOccupyingASlot
-            if (minPriority > ProcessingPriority.SUPREMUM) {
+            if (minPriority == ProcessingPriority.SUPREMUM) {
                 return
             }
 
