@@ -55,6 +55,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.individual',
             'alignment.quality.sampleType',
             'alignment.quality.qcStatus',
+            'alignment.quality.qcStatus',
+            'alignment.quality.qcComment',
+            'alignment.quality.qcAuthor',
     ].asImmutable()
     
     private static final List<String> HEADER_WHOLE_GENOME = HEADER_COMMON + [
@@ -307,6 +310,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                             "Status: ${(abstractMergedBamFile.qcTrafficLightStatus)} ${comment}",
                             icon, (abstractMergedBamFile.qcTrafficLightStatus).toString(), abstractMergedBamFile.id
                     ),
+                    qcStatusOnly: abstractMergedBamFile.qcTrafficLightStatus,
+                    qcComment: abstractMergedBamFile.comment?.comment,
+                    qcAuthor: abstractMergedBamFile.comment?.author,
                     kit               : new TableCellValue(
                             kit*.shortDisplayName.join(", ") ?: "-", null, null,
                             kit*.name.join(", ") ?: ""

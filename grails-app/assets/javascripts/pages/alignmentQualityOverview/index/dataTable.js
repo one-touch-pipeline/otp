@@ -91,6 +91,9 @@ $(function () {
             "pid",
             "sampleType",
             "qcStatus",
+            "qcStatusOnly",
+            "qcComment",
+            "qcAuthor",
         ];
 
         // coverage
@@ -185,7 +188,10 @@ $(function () {
         if ($('#seqType').val()) {
             var table = $("#overviewTableProcessedMergedBMF").dataTable({
                 sDom: '<i> B rt<"clear">',
-                buttons: $.otp.getDownloadButton(),
+                buttons: $.otp.getDownloadButton(".export_column"),
+                aoColumnDefs: [
+                    {bVisible: false, aTargets: [3, 4, 5]},
+                ],
                 bFilter: true,
                 bProcessing: true,
                 bServerSide: false,

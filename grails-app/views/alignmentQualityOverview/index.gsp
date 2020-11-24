@@ -65,9 +65,21 @@
     </div>
 
     <div class="otpDataTables alignmentQualityOverviewTable">
-        <otp:dataTable
-                codes="${header}"
-                id="overviewTableProcessedMergedBMF"/>
+        <table id="overviewTableProcessedMergedBMF">
+            <thead>
+                <tr>
+                    <g:each in="${header}" var="it" status="i">
+                        <g:if test="${i == 2}">
+                            <th><g:message code="${it}"/></th>
+                        </g:if>
+                        <g:else>
+                            <th class="export_column"><g:message code="${it}"/></th>
+                        </g:else>
+                    </g:each>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </div>
 <otp:otpModal modalId="wait">
