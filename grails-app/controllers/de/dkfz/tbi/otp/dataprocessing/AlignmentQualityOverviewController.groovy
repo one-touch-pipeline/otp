@@ -51,10 +51,13 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     private static final List<String> CHROMOSOMES = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
-    private static final List<String> HEADER_WHOLE_GENOME = [
+    private static final List<String> HEADER_COMMON = [
             'alignment.quality.individual',
             'alignment.quality.sampleType',
             'alignment.quality.qcStatus',
+    ].asImmutable()
+    
+    private static final List<String> HEADER_WHOLE_GENOME = HEADER_COMMON + [
             'alignment.quality.coverageWithoutN',
             'alignment.quality.coverageX',
             'alignment.quality.coverageY',
@@ -69,10 +72,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
-    private static final List<String> HEADER_RNA = [
-            'alignment.quality.individual',
-            'alignment.quality.sampleType',
-            'alignment.quality.qcStatus',
+    private static final List<String> HEADER_RNA = HEADER_COMMON + [
             'alignment.quality.arribaPlots',
             'alignment.quality.totalReadCounter',
             'alignment.quality.duplicates',
@@ -100,10 +100,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
-    private static final List<String> HEADER_EXOME = [
-            'alignment.quality.individual',
-            'alignment.quality.sampleType',
-            'alignment.quality.qcStatus',
+    private static final List<String> HEADER_EXOME = HEADER_COMMON + [
             'alignment.quality.onTargetRatio',
             'alignment.quality.targetCoverage',
             'alignment.quality.kit',
@@ -117,10 +114,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
-    private static final List<String> HEADER_CELL_RANGER = [
-            'alignment.quality.individual',
-            'alignment.quality.sampleType',
-            'alignment.quality.qcStatus',
+    private static final List<String> HEADER_CELL_RANGER = HEADER_COMMON + [
             'alignment.quality.cell.ranger.summary',
             'alignment.quality.cell.ranger.referenceGenome',
             'alignment.quality.cell.ranger.cellRangerVersion',
@@ -144,7 +138,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.cell.ranger.medianUmiCountsPerCell',
             'alignment.quality.kit',
             'alignment.quality.date',
-    ]
+    ].asImmutable()
 
     private static final List<String> SUPPORTED_SEQ_TYPES = [
             SeqTypeNames.WHOLE_GENOME.seqTypeName,
