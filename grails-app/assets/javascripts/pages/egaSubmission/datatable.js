@@ -38,7 +38,7 @@ $.otp.egaTable = {
         "use strict";
         $('#dataTable').dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.tableButtons,
+            buttons: $.otp.getDownloadButton(),
             paging: false,
         });
     }

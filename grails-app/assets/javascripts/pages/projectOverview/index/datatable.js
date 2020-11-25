@@ -41,7 +41,7 @@ $.otp.projectOverviewTable = {
         "use strict";
         var oTable = $(selector).dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.tableButtons,
+            buttons: $.otp.getDownloadButton(),
             oTableTools: $.otp.tableTools,
             bFilter: true,
             bProcessing: true,

@@ -27,7 +27,7 @@ $(function () {
     "use strict";
     var oTableLaneOverview = $("#laneOverviewId").dataTable({
         sDom: '<i> B rt<"clear">',
-        buttons: $.otp.tableButtons,
+        buttons: $.otp.getDownloadButton(),
         bFilter: true,
         bProcessing: true,
         bServerSide: false,

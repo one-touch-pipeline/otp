@@ -37,7 +37,7 @@ $.otp.sampleIdentifierOverviewTable = {
         "use strict";
         var oTable = $(selector).dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.tableButtons,
+            buttons: $.otp.getDownloadButton(),
             bFilter: true,
             bProcessing: true,
             bServerSide: false,

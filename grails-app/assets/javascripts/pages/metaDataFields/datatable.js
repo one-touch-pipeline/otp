@@ -27,16 +27,7 @@ $.otp.exportableMetaDataFieldsTable = function () {
     "use strict";
     return $('#metadatafields-datatable').dataTable({
         sDom: 'B t',
-        buttons: [
-            {
-                extend: 'csvHtml5',
-                text: 'Download CSV',
-                footer: false,
-                exportOptions: {
-                    columns: '.export_column'
-                }
-            }
-        ],
+        buttons: $.otp.getDownloadButton('.export_column'),
         bPaginate: false,
         ordering: false
     });

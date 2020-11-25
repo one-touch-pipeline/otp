@@ -29,7 +29,7 @@ $.otp.resultsTable = {
         "use strict";
         var oTable = tableElement.dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.tableButtons,
+            buttons: $.otp.getDownloadButton(),
             columnDefs: columnDefs,
             bFilter: true,
             bProcessing: true,

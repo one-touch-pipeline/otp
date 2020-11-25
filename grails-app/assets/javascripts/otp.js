@@ -376,17 +376,32 @@ $.otp.resizeBodyInit = function (table, margin) {
     });
 };
 
-$.otp.tableButtons = [
-    {
+$.otp.getDownloadButton = function (columnSelector) {
+    return [{
         extend: 'csvHtml5',
         text: 'Download CSV',
         footer: false,
         exportOptions: {
-            columns: ':visible'
+            columns: columnSelector || ':visible'
         }
-    }
-];
+    }]
+}
 
+$.otp.getDownloadButtonServerSide = function (downloadLink) {
+    return [{
+        extend: 'csv',
+        text: 'Download CSV',
+        titleAttr: 'Attention: Download can take a while',
+        action: function (e, dt, node, config) {
+            var iframe = document.createElement('iframe');
+            iframe.style.height = "0px";
+            iframe.style.width = "0px";
+            iframe.style.border = "0px";
+            iframe.src = downloadLink;
+            document.body.appendChild(iframe);
+        }
+    }]
+}
 
 /**
  * Applies the default OTP-wide select2 to the jquery selection.

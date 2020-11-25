@@ -34,25 +34,13 @@ $.otp.sequence = {
 
         $("#sequenceTable").dataTable({
             dom: '<i> B rt<"clear">S',
-            buttons: [ {
-                extend: 'csv',
-                text: 'Download CSV',
-                titleAttr: 'Attention: Download can take a while',
-                action: function ( e, dt, node, config ) {
-                    var iframe = document.createElement('iframe');
-                    iframe.style.height = "0px";
-                    iframe.style.width = "0px";
-                    iframe.style.border = "0px";
-                    iframe.src = $.otp.createLink({
-                        controller: 'sequence',
-                        action: 'exportAll',
-                        parameters: {
-                            filtering: JSON.stringify(searchCriteria()),
-                        }
-                    });
-                    document.body.appendChild( iframe );
+            buttons: $.otp.getDownloadButtonServerSide($.otp.createLink({
+                controller: 'sequence',
+                action: 'exportAll',
+                parameters: {
+                    filtering: JSON.stringify(searchCriteria()),
                 }
-            }],
+            })),
             bFilter: false,
             bProcessing: true,
             bServerSide: true,

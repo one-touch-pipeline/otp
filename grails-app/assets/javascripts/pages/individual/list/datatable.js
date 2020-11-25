@@ -35,7 +35,7 @@ $.otp.individual = {
 
         $("#individualTable").dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.tableButtons,
+            buttons: $.otp.getDownloadButton(),
             bFilter: true,
             bProcessing: true,
             bServerSide: true,
