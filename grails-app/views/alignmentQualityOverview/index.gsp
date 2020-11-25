@@ -25,7 +25,6 @@
     <meta name="layout" content="main"/>
     <title><g:message code="otp.menu.alignmentQuality"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
-    <asset:javascript src="pages/alignmentQualityOverview/index/alignmentQualityOverview.js"/>
     <asset:stylesheet src="modules/modal.css"/>
 </head>
 
@@ -70,11 +69,6 @@
                 codes="${header}"
                 id="overviewTableProcessedMergedBMF"/>
     </div>
-    <asset:script type="text/javascript">
-        $(function() {
-            $.otp.alignmentQualityOverviewTable.register();
-        });
-    </asset:script>
 </div>
 <otp:otpModal modalId="wait">
     <div class="modal-wait-message"><g:message code="alignment.quality.modal.message"/></div>

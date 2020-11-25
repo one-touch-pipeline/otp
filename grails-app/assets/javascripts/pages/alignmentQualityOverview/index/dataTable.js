@@ -23,17 +23,18 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.alignmentQualityOverviewTable = {
+$(function () {
+    "use strict";
     /**
      * Formats the all cells in a table row and puts them in the correct order
      * @param row map containing the data in one row with column names as the keys
      * @param columnNames name of the columns in the correct order
      * @returns {Array}
      */
-    tableRowsFormatter: function (row, columnNames) {
+    var tableRowsFormatter = function (row, columnNames) {
         var result = [];
         for (var i = 0; i < columnNames.length; i += 1) {
-            result.push($.otp.alignmentQualityOverviewTable.tableCellFormatter(row[columnNames[i]]));
+            result.push(tableCellFormatter(row[columnNames[i]]));
         }
         if (row.withdrawn) {
             var withdrawnRows = [];
@@ -43,9 +44,9 @@ $.otp.alignmentQualityOverviewTable = {
             result = withdrawnRows;
         }
         return result;
-    },
+    }
 
-    tableCellFormatter: function (data) {
+    var tableCellFormatter = function (data) {
         if (!data) {
             return "";
         }
@@ -53,11 +54,11 @@ $.otp.alignmentQualityOverviewTable = {
             return $('<div>').text(data).html(); // escape HTML
         }
         if (data.status == "BLOCKED" || data.status == "REJECTED") {
-            result ="<span title='" + data.tooltip + "'>" + "<select class='" + data.status + "' onchange='$.otp.alignmentQualityOverview.change(this, \"" + data.id + "\", \"" + data.status + "\")'>" +
-                 "<option value='ACCEPTED' class='ACCEPTED' " + (data.status == 'ACCEPTED' ? 'selected' : '') + ">&#10003; ACCEPTED</option>" +
-                 "<option value='BLOCKED'  class='BLOCKED'" + (data.status == 'BLOCKED' ? 'selected' : '') + ">&#9888; BLOCKED</option>" +
-                 "<option  value='REJECTED'  class='REJECTED' " + (data.status == 'REJECTED' ? 'selected' : '') + ">&#10005; REJECTED</option>" +
-                 "</select> " + $('<div>').text(data.value).html()+ "</span>";
+            result = "<span title='" + data.tooltip + "'>" + "<select class='qcDropdown " + data.status + "' data-id='" + data.id + "'>" +
+                "<option value='ACCEPTED' class='ACCEPTED' " + (data.status == 'ACCEPTED' ? 'selected' : '') + ">&#10003; ACCEPTED</option>" +
+                "<option value='BLOCKED'  class='BLOCKED'" + (data.status == 'BLOCKED' ? 'selected' : '') + ">&#9888; BLOCKED</option>" +
+                "<option  value='REJECTED'  class='REJECTED' " + (data.status == 'REJECTED' ? 'selected' : '') + ">&#10005; REJECTED</option>" +
+                "</select> " + $('<div>').text(data.value).html() + "</span>";
         } else {
             var result = $('<div>').text(data.value).html(); // escape HTML
 
@@ -69,23 +70,118 @@ $.otp.alignmentQualityOverviewTable = {
                 cssClass.push("icon-" + data.icon)
             }
             if (cssClass.length !== 0) {
-                result ="<span class='" + cssClass + "'>" + result + " </span>"
+                result = "<span class='" + cssClass + "'>" + result + " </span>"
             }
 
             if (data.tooltip) {
-                result ="<span title='" + data.tooltip + "'>" + result + "</span>"
+                result = "<span title='" + data.tooltip + "'>" + result + "</span>"
             }
             if (data.link) {
                 var target = data.linkTarget ? "target='" + data.linkTarget + "'" : "";
                 var href = "href='" + data.link + "'";
-                result ="<a " + target + " " + href + ">" + result + "</a>";
+                result = "<a " + target + " " + href + ">" + result + "</a>";
             }
         }
         return result;
-    },
+    }
 
-    register : function () {
-        "use strict";
+    var getColumnNames = function () {
+        var seqType = $('#seqType').data("columns");
+        var columnNames = [
+            "pid",
+            "sampleType",
+            "qcStatus",
+        ];
+
+        // coverage
+        if (seqType === 'WHOLE_GENOME') {
+            columnNames = columnNames.concat([
+                "coverageWithoutN",
+                "coverageX",
+                "coverageY",
+            ]);
+        } else if (seqType === 'EXOME') {
+            columnNames = columnNames.concat([
+                "onTargetRatio",
+                "targetCoverage",
+            ]);
+        } else if (seqType === 'RNA') {
+            columnNames = columnNames.concat([
+                "arribaPlots",
+                "totalReadCounter",
+                "percentDuplicates",
+                "threePNorm",
+                "fivePNorm",
+                "chimericPairs",
+                "duplicatesRate",
+                "end1Sense",
+                "end2Sense",
+                "estimatedLibrarySize",
+                "exonicRate",
+                "expressionProfilingEfficiency",
+                "genesDetected",
+                "intergenicRate",
+                "intragenicRate",
+                "intronicRate",
+                "mapped",
+                "mappedUnique",
+                "mappedUniqueRateOfTotal",
+                "mappingRate",
+                "meanCV",
+                "uniqueRateofMapped",
+                "rRNARate",
+            ]);
+        }
+
+        // general information
+        if (seqType === 'RNA') {
+            columnNames = columnNames.concat([
+                "kit",
+                "dateFromFileSystem",
+            ]);
+        } else if (seqType === 'CELL_RANGER') {
+            columnNames = columnNames.concat([
+                'summary',
+                'referenceGenome',
+                'cellRangerVersion',
+                'expectedCells',
+                'enforcedCells',
+                'estimatedNumberOfCells',
+                'meanReadsPerCell',
+                'medianGenesPerCell',
+                'numberOfReads',
+                'validBarcodes',
+                'sequencingSaturation',
+                'q30BasesInBarcode',
+                'q30BasesInRnaRead',
+                'q30BasesInUmi',
+                'readsMappedConfidentlyToIntergenicRegions',
+                'readsMappedConfidentlyToIntronicRegions',
+                'readsMappedConfidentlyToExonicRegions',
+                'readsMappedConfidentlyToTranscriptome',
+                'fractionReadsInCells',
+                'totalGenesDetected',
+                'medianUmiCountsPerCell',
+                "kit",
+                "dateFromFileSystem",
+            ]);
+        } else {
+            columnNames = columnNames.concat([
+                "kit",
+                "percentMappedReads",
+                "percentDuplicates",
+                "percentProperlyPaired",
+                "percentSingletons",
+                "insertSizeMedian",
+                "percentDiffChr",
+                "pipeline",
+                "dateFromFileSystem",
+            ]);
+        }
+        return columnNames
+    }
+
+    var initializeTable = function () {
         if ($('#seqType').val()) {
             var table = $("#overviewTableProcessedMergedBMF").dataTable({
                 sDom: '<i> B rt<"clear">',
@@ -125,101 +221,10 @@ $.otp.alignmentQualityOverviewTable = {
                             table.fnSettings().oFeatures.bServerSide = false;
                         },
                         "success": function (json) {
-                            var seqType = $('#seqType').data("columns");
-                            var columnNames = [
-                                "pid",
-                                "sampleType",
-                                "qcStatus",
-                            ];
-
-                            // coverage
-                            if (seqType === 'WHOLE_GENOME') {
-                                columnNames = columnNames.concat([
-                                    "coverageWithoutN",
-                                    "coverageX",
-                                    "coverageY",
-                                ]);
-                            } else if (seqType === 'EXOME') {
-                                columnNames = columnNames.concat([
-                                    "onTargetRatio",
-                                    "targetCoverage",
-                                ]);
-                            } else if (seqType === 'RNA') {
-                                columnNames = columnNames.concat([
-                                    "arribaPlots",
-                                    "totalReadCounter",
-                                    "percentDuplicates",
-                                    "threePNorm",
-                                    "fivePNorm",
-                                    "chimericPairs",
-                                    "duplicatesRate",
-                                    "end1Sense",
-                                    "end2Sense",
-                                    "estimatedLibrarySize",
-                                    "exonicRate",
-                                    "expressionProfilingEfficiency",
-                                    "genesDetected",
-                                    "intergenicRate",
-                                    "intragenicRate",
-                                    "intronicRate",
-                                    "mapped",
-                                    "mappedUnique",
-                                    "mappedUniqueRateOfTotal",
-                                    "mappingRate",
-                                    "meanCV",
-                                    "uniqueRateofMapped",
-                                    "rRNARate",
-                                ]);
-                            }
-
-                            // general information
-                            if (seqType === 'RNA') {
-                                columnNames = columnNames.concat([
-                                    "kit",
-                                    "dateFromFileSystem",
-                                ]);
-                            } else if (seqType === 'CELL_RANGER') {
-                                columnNames = columnNames.concat([
-                                    'summary',
-                                    'referenceGenome',
-                                    'cellRangerVersion',
-                                    'expectedCells',
-                                    'enforcedCells',
-                                    'estimatedNumberOfCells',
-                                    'meanReadsPerCell',
-                                    'medianGenesPerCell',
-                                    'numberOfReads',
-                                    'validBarcodes',
-                                    'sequencingSaturation',
-                                    'q30BasesInBarcode',
-                                    'q30BasesInRnaRead',
-                                    'q30BasesInUmi',
-                                    'readsMappedConfidentlyToIntergenicRegions',
-                                    'readsMappedConfidentlyToIntronicRegions',
-                                    'readsMappedConfidentlyToExonicRegions',
-                                    'readsMappedConfidentlyToTranscriptome',
-                                    'fractionReadsInCells',
-                                    'totalGenesDetected',
-                                    'medianUmiCountsPerCell',
-                                    "kit",
-                                    "dateFromFileSystem",
-                                ]);
-                            } else {
-                                columnNames = columnNames.concat([
-                                    "kit",
-                                    "percentMappedReads",
-                                    "percentDuplicates",
-                                    "percentProperlyPaired",
-                                    "percentSingletons",
-                                    "insertSizeMedian",
-                                    "percentDiffChr",
-                                    "pipeline",
-                                    "dateFromFileSystem",
-                                ]);
-                            }
+                            var columnNames = getColumnNames()
                             for (var i = 0; i < json.aaData.length; i += 1) {
                                 var row = json.aaData[i];
-                                var rowdata = $.otp.alignmentQualityOverviewTable.tableRowsFormatter(row, columnNames);
+                                var rowdata = tableRowsFormatter(row, columnNames);
 
                                 json.aaData[i] = rowdata;
                             }
@@ -231,4 +236,46 @@ $.otp.alignmentQualityOverviewTable = {
             });
         }
     }
-};
+
+    var changeQcStatus = function (dropdownMenu, id) {
+        var comment = prompt("Please provide a comment for this change:");
+        var oldValue = $(dropdownMenu).find("option[selected]").val();
+
+        if (comment == null) {
+            dropdownMenu.value = oldValue;
+        } else {
+            $("#wait").css("display", "block")
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": $.otp.createLink({
+                    controller: 'alignmentQualityOverview',
+                    action: 'changeQcStatus',
+                }),
+                "data": {
+                    "abstractBamFile.id": id,
+                    "newValue": dropdownMenu.value,
+                    "comment": comment,
+                },
+                "success": function (json) {
+                    if (!json.success) {
+                        alert("Failed to edit value.\n" + json.error);
+                        dropdownMenu.value = oldValue;
+                    } else {
+                        $("#overviewTableProcessedMergedBMF").DataTable().destroy();
+                        initializeTable();
+                    }
+                },
+                "complete": function () {
+                    $("#wait").css("display", "none")
+                }
+            });
+        }
+    };
+
+    $("#overviewTableProcessedMergedBMF").on("change", ".qcDropdown", function (e) {
+        changeQcStatus(e.target, $(e.target).data("id"))
+    })
+
+    initializeTable();
+});
