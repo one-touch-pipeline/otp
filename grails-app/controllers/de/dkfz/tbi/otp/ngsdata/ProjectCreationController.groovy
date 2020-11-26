@@ -82,7 +82,7 @@ class ProjectCreationController {
                 forceCopyFiles                 : true,
                 fingerPrinting                 : true,
                 sendProjectCreationNotification: true,
-                projectRequestAvailable        : false,
+                projectRequestAvailable        : true,
         ]
         ProjectCreationCommand projectCreationCmd = flash.cmd as ProjectCreationCommand
         boolean showSharedUnixGroupAlert = flash.showSharedUnixGroupAlert as boolean
