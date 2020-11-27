@@ -59,6 +59,7 @@ abstract class AbstractGeneralDomainPropertyUpdateController<T extends GormEntit
     JSON updateField(UpdateDomainPropertyCommand cmd) {
         return checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
             updateDomainPropertyService.updateProperty(entityClass, cmd.entityId, cmd.property, cmd.value)
+            return [:]
         }
     }
 
@@ -74,6 +75,7 @@ abstract class AbstractGeneralDomainPropertyUpdateController<T extends GormEntit
     JSON updateMultiField(UpdateDomainPropertiesCommand cmd) {
         return checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
             updateDomainPropertyService.updateProperties(entityClass, cmd.entityId, cmd.property, cmd.value)
+            return [:]
         }
     }
 }

@@ -2388,11 +2388,13 @@ div.dt-buttons {
     float: right;
 }
 
-.fixed-table-header th {
+.fixed-table-header {
+    th {
         position: sticky !important;
         position: -webkit-sticky;
         top: 0;
     }
+}
 
 .wrapTableHeader th {
     white-space: normal;
@@ -2805,19 +2807,26 @@ input[type=submit].submitting {
     max-height: 600px;
 }
 
-#otp .additionalFields {
-    .scroll-screen-width;
-    th {
-        * {
-            .tooltipIcon;
-        }
-        white-space: unset;
-        min-width: 22ch;
-        &.name {
+.fixed-first-column {
+    table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    th, td {
+        &:nth-child(1) {
+            position: sticky;
+            position: -webkit-sticky;
+            left: 0;
+            background-color: #9e0bff;
+            border-right-color: @tableBorderVertical;
+            border-right-width: thin;
+            border-right-style: solid;
             z-index: 1;
         }
     }
+}
 
+.table-coloring {
     tr:nth-last-child(2n) td {
         background-color: @tableColor1;
     }
@@ -2825,18 +2834,32 @@ input[type=submit].submitting {
     tr:nth-last-child(2n+1) td {
         background-color: @tableColor2;
     }
+}
 
-    th, td {
-        &:nth-child(1) {
-            border-right-color: @tableBorderVertical;
-            border-right-width: thin;
-            border-right-style: solid;
+.table-icons {
+    th {
+        * {
+            .tooltipIcon;
         }
     }
+}
 
-    table {
-        border-collapse: separate;
-        border-spacing: 0;
+.table-fixed-header-column-scroll-width-colored-multi-line-header {
+    .scroll-screen-width;
+    .fixed-table-header;
+    .fixed-first-column;
+    .table-coloring;
+    .table-icons;
+    th {
+        white-space: unset;
+    }
+}
+
+
+#otp .additionalFields {
+    .table-fixed-header-column-scroll-width-colored-multi-line-header;
+    th {
+        min-width: 22ch;
     }
 
     .defaultWordBreak {
@@ -2847,10 +2870,6 @@ input[type=submit].submitting {
 
     .name {
         min-width: 30ch;
-        position: sticky;
-        position: -webkit-sticky;
-        left: 0;
-        background-color: #9e0bff;
     }
 
     .description {
@@ -2895,6 +2914,28 @@ input[type=submit].submitting {
         select {
             width: 50ch;
         }
+    }
+}
+
+#otp .errorDefinitions {
+    .table-fixed-header-column-scroll-width-colored-multi-line-header;
+
+    th, td {
+        min-width: 30ch;
+        &.delete {
+            min-width: 10ch;
+        }
+        select {
+            width: 25ch;
+        }
+        &.jobBeanName {
+            select {
+                width: 50ch;
+            }
+        }
+    }
+    .wordBreak {
+        word-break: unset;
     }
 }
 

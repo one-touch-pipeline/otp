@@ -45,6 +45,7 @@ trait CheckAndCall {
             }
         }
         render data as JSON
+        return data
     }
 
     def <T> T checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure<T> method) {
@@ -75,21 +76,42 @@ trait CheckAndCall {
         return result
     }
 
+    /**
+     * A helper to check first the cmd object for validation errors and do then closure in try catch block and render the result as JSON.
+     *
+     * In case the cmd object has errors, the errors are concerted to a json result and rendered.
+     * Otherwise it execute the callable in a try catch block, which catches:
+     * - {@link ValidationException}
+     * - {@link NumberFormatException}
+     * - {@link AssertionError}
+     * - {@link RuntimeException}
+     * If one of them occurs, the error is converted to an failed JSON message and rendered.
+     * Other exception are not handled here.
+     *
+     * If no exception occurs, an success JSON is created. If the method return an Map, that would be added to the JSON respond.
+     *
+     * @param cmd the command o validate
+     * @param method the action to do if cmd has no errors. It should return a Map, which will be added to the success
+     * @return the JSON, which is already rendered to the browser
+     */
     @SuppressWarnings('CatchRuntimeException')
-    JSON checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure method) {
+    JSON checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure<Map> method) {
         Map data
         if (cmd.hasErrors()) {
             data = createErrorMessage(cmd.errors)
         } else {
             try {
-                method()
-                data = [success: true]
+                Map additionalData = method()
+                data = [
+                        success: true,
+                        additionalData: additionalData,
+                ]
             } catch (ValidationException e) {
                 data = createErrorMessage(e.errors)
             } catch (NumberFormatException e) {
                 data = [
                         success: false,
-                        error: [
+                        error  : [
                                 g.message(code: 'default.message.error'),
                                 g.message(code: 'default.message.noNumberException'),
                         ].join('\n    '),
@@ -97,7 +119,7 @@ trait CheckAndCall {
             } catch (AssertionError | RuntimeException e) {
                 data = [
                         success: false,
-                        error: [
+                        error  : [
                                 g.message(code: 'default.message.error'),
                                 e.localizedMessage,
                         ].join('\n    '),
@@ -105,6 +127,7 @@ trait CheckAndCall {
             }
         }
         render data as JSON
+        return data
     }
 
     private Map createErrorMessage(Errors errors) {

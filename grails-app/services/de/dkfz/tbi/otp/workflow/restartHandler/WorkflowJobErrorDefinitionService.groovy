@@ -22,15 +22,12 @@
 package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
+import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition.Action
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * Service to find matching {@WorkflowJobErrorDefinition} of available logs for {@link WorkflowStep}.
- *
- * Should only useed by {@link AutoRestartHandlerService}.
- */
 @Transactional
 class WorkflowJobErrorDefinitionService {
 
@@ -38,7 +35,57 @@ class WorkflowJobErrorDefinitionService {
 
     List<AbstractRestartHandlerLogService> restartHandlerLogServices
 
-    //needed for mocking
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<WorkflowJobErrorDefinition> listAll() {
+        return WorkflowJobErrorDefinition.list().sort {
+            it.name
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    WorkflowJobErrorDefinition create(WorkflowJobErrorDefinitionCreateCommand cmd) {
+        return new WorkflowJobErrorDefinition([
+                name                : cmd.name,
+                jobBeanName         : cmd.jobBeanName,
+                sourceType          : cmd.sourceType,
+                action              : cmd.restartAction,
+                errorExpression     : cmd.errorExpression,
+                allowRestartingCount: cmd.allowRestartingCount,
+                beanToRestart       : cmd.beanToRestart ?: null,
+                mailText            : cmd.mailText,
+        ]).save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void delete(WorkflowJobErrorDefinition workflowJobErrorDefinition) {
+        workflowJobErrorDefinition.delete(flush: true)
+    }
+
+    /**
+     * Change the action and handle the depending property beanToRestart.
+     *
+     * When the new action is {@link Action#RESTART_JOB} and {@link WorkflowJobErrorDefinition#beanToRestart} is null, then set it to the value of
+     * {@link WorkflowJobErrorDefinition#jobBeanName}.
+     * When the new action is not {@link Action#RESTART_JOB} and {@link WorkflowJobErrorDefinition#beanToRestart} is not null, then set it to the value null.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    WorkflowJobErrorDefinition updateAction(WorkflowJobErrorDefinition workflowJobErrorDefinition, Action action) {
+        workflowJobErrorDefinition.action = action
+        if (action == Action.RESTART_JOB && !workflowJobErrorDefinition.beanToRestart) {
+            workflowJobErrorDefinition.beanToRestart = workflowJobErrorDefinition.jobBeanName
+        }
+        if (action != Action.RESTART_JOB && workflowJobErrorDefinition.beanToRestart) {
+            workflowJobErrorDefinition.beanToRestart = null
+        }
+        return workflowJobErrorDefinition.save(flush: true)
+    }
+
+    /**
+     * Find matching {@WorkflowJobErrorDefinition} of available logs for {@link WorkflowStep}.
+     *
+     * Should only used by {@link AutoRestartHandlerService}.
+     */
+    //UnnecessaryGetter is needed for mocking
     @SuppressWarnings('UnnecessaryGetter')
     List<JobErrorDefinitionWithLogWithIdentifier> findMatchingJobErrorDefinition(WorkflowStep workflowStep) {
         List<JobErrorDefinitionWithLogWithIdentifier> definitions = []

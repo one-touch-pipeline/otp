@@ -20,23 +20,7 @@
   - SOFTWARE.
   --}%
 
-<div class="edit-switch edit-switch-drop-down">
-    <p class="edit-switch-editor" style="display: none">
-        <input type="hidden" name="target" value="${link}"/>
-        <g:select id="" name="dropdown"
-                  optionKey="${optionKey}"
-                  optionValue="${optionValue}"
-                  noSelection="${noSelection}"
-                  from="${values}"
-                  value="${value}"
-                  class="use-select-2"/>
-        <button class="save" data-confirmation="${confirmation}" data-success-handler="${sucessHandler}"><g:message code="default.button.update.label"/></button>
-        <button class="cancel"><g:message code="default.button.cancel.label"/></button>
-    </p>
-    <p class="edit-switch-label">
-        <span class="wordBreak">
-            <otp:getValueWithFallbacks value="${value}" optionValue="${optionValue}" noSelection="${noSelection}"/>
-        </span>
-        <button class="edit js-edit">&nbsp;</button>
-    </p>
+<div class="tab-menu">
+    <g:link controller="workflowJobErrorDefinition" action="index" class="${actionName=="index" ? "active" : ""}"><g:message code="workflowJobErrorDefinition.tab.index"/></g:link>
+    <g:link controller="workflowJobErrorDefinition" action="create" class="${actionName=="create" ? "active" : ""}"><g:message code="workflowJobErrorDefinition.tab.create"/></g:link>
 </div>

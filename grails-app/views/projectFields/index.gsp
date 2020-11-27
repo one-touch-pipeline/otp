@@ -39,7 +39,7 @@
     <h1><g:message code="projectFields.overview.title"/></h1>
 
     <div class="additionalFields">
-        <table class="otpDataTables fixed-table-header">
+        <table class="otpDataTables">
             <tr>
                 <th class="name">
                     <span title="${g.message(code: "projectFields.header.tooltip.name")}">

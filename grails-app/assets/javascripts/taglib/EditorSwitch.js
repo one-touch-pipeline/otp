@@ -287,6 +287,7 @@ $(function() {
                 return
             }
         }
+        var successCallback = $(that).attr("data-success-handler");
 
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
@@ -297,6 +298,9 @@ $(function() {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("select option:selected", container).text());
+                    if (successCallback) {
+                        window[successCallback](container, data.additionalData)
+                    }
                 } else {
                     $.otp.warningMessage(data.error);
                 }
