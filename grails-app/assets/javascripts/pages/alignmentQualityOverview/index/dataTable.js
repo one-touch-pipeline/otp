@@ -252,7 +252,7 @@ $(function () {
         if (comment == null) {
             dropdownMenu.value = oldValue;
         } else {
-            $("#wait").css("display", "block")
+            $("#waitModal").css("display", "block")
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
@@ -275,7 +275,7 @@ $(function () {
                     }
                 },
                 "complete": function () {
-                    $("#wait").css("display", "none")
+                    $("#waitModal").css("display", "none")
                 }
             });
         }

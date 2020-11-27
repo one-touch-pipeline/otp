@@ -22,10 +22,9 @@
 
 <html>
 <head>
-    <meta name="layout" content="main"/>
     <title><g:message code="otp.menu.alignmentQuality"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
-    <asset:stylesheet src="modules/modal.css"/>
+    <asset:stylesheet src="pages/alignmentQualityOverview/index.css"/>
 </head>
 
 <body>
@@ -53,7 +52,7 @@
         </div>
     </div>
 
-    <h1><g:message code="otp.menu.alignmentQuality"/></h1>
+    <h5><strong><g:message code="otp.menu.alignmentQuality"/></strong></h5>
 
     <div id="sample" data-sample="${sample?.id}">
         <g:if test="${sample}">
@@ -82,7 +81,7 @@
         </table>
     </div>
 </div>
-<otp:otpModal modalId="wait">
+<otp:otpModal modalId="waitModal">
     <div class="modal-wait-message"><g:message code="alignment.quality.modal.message"/></div>
 </otp:otpModal>
 </body>

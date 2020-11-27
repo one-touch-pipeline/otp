@@ -24,13 +24,10 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title><g:message code="projectUser.title" args="[selectedProject?.name]"/></title>
     <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="pages/projectUser/index/functions.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
-    <asset:javascript src="/webjars/bootstrap/4.5.3/js/bootstrap.bundle.min.js"/>
-    <asset:stylesheet src="/webjars/bootstrap/4.5.3/css/bootstrap.min.css"/>
 </head>
 <body>
 <div class="body">

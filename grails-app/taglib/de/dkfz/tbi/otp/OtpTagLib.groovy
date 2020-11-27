@@ -191,17 +191,18 @@ class OtpTagLib {
     }
 
     /**
-     * OTP modal dialog with no boostrap dependencies
+     * Boostrap Modal
      *
-     * needs assets/stylesheets/modules/modal.css to work
-     * needs assets/javascripts/modal.js to work as closable modal
+     * needs bootstrap dependencies to work:
+     * <asset:javascript src="/webjars/bootstrap/4.5.3/js/bootstrap.bundle.js"/>
+     * <asset:stylesheet src="/webjars/bootstrap/4.5.3/css/bootstrap.css"/>
      */
     def otpModal = { attrs, body ->
         String backdrop = attrs.closable ? "" : 'data-backdrop="static"'
         String confirmText = attrs.confirmText ?: "Confirm"
         String closeText = attrs.closeText ?: "Close"
 
-        out << "<div id='${attrs.modalId}' tabindex='-1' class='modal' role='dialog' ${backdrop}>"
+        out << "<div id='${attrs.modalId}' tabindex='-1' class='modal fade' role='dialog' ${backdrop}>"
         out << "<div class='modal-dialog'>"
         out << "<div class='modal-content'>"
         if (attrs.title || attrs.closable) {
