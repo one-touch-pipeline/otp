@@ -29,6 +29,7 @@ import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -245,6 +246,9 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
                     processingOptionService: Mock(ProcessingOptionService) {
                         _ * findOptionAsString(_) >> "option"
                     },
+                    ldapService: Mock(LdapService) {
+                        isUserInLdapAndActivated(_) >> true
+                    }
             )
         )
         createUserAndRoles()

@@ -216,19 +216,8 @@
                             </g:each>
                         </sec:noAccess>
                     </td>
+                    <td><span class="icon-${userEntry.otpAccess}"></span></td>
                     <g:if test="${userEntry.inLdap}">
-                        <td>
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-                                <otp:editorSwitch
-                                        template="toggle"
-                                        link="${g.createLink(controller: "projectUser", action: "setAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                        value="${userEntry.otpAccess.toBoolean()}"
-                                        confirmation="${confirmationText}"/>
-                            </sec:access>
-                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-                                <span class="icon-${userEntry.otpAccess}"></span>
-                            </sec:noAccess>
-                        </td>
                         <td>
                             <div class="filesAccessHandler-${userEntry.fileAccess}">
                                 <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
@@ -270,7 +259,6 @@
                         </sec:access>
                     </g:if>
                     <g:else>
-                        <td><span class="icon-${userEntry.otpAccess}"></span></td>
                         <td><span class="icon-${userEntry.fileAccess}" title="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"></span></td>
                         <td><span class="icon-${userEntry.manageUsers}"></span></td>
                         <sec:access expression="hasRole('ROLE_OPERATOR')">

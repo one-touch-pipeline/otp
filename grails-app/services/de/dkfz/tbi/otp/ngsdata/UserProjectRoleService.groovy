@@ -321,12 +321,13 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole setAccessToOtp(UserProjectRole userProjectRole, boolean value) {
-        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == value }) {
+    UserProjectRole setAccessToOtp(UserProjectRole userProjectRole) {
+        boolean accessToOtp = ldapService.isUserInLdapAndActivated(userProjectRole.user)
+        if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == accessToOtp }) {
             return userProjectRole
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
-            upr.accessToOtp = value
+            upr.accessToOtp = accessToOtp
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_OTP, message)
@@ -424,8 +425,8 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.enabled = value
+            upr.accessToOtp = ldapService.isUserInLdapAndActivated(upr.user)
             // users should be reactivated without any further permissions
-            upr.accessToOtp = false
             upr.accessToFiles = false
             upr.manageUsers = false
             upr.manageUsersAndDelegate = false

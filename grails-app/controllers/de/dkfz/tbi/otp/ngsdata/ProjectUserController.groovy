@@ -53,7 +53,6 @@ class ProjectUserController implements CheckAndCall {
             addUserToProject: "POST",
             addRoleToUserProjectRole: "POST",
             deleteProjectRole: "POST",
-            setAccessToOtp: "POST",
             setAccessToFiles: "POST",
             setManageUsers: "POST",
             setManageUsersAndDelegate: "POST",
@@ -183,12 +182,6 @@ class ProjectUserController implements CheckAndCall {
         }
     }
 
-    JSON setAccessToOtp(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.setAccessToOtp(cmd.userProjectRole, cmd.value)
-        }
-    }
-
     JSON setAccessToFiles(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
@@ -295,7 +288,7 @@ class UserEntry {
         this.availableRoles = fetchAvailableRoles(userProjectRole, hasAdministrativeRole)
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
-        this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
+        this.otpAccess = getPermissionStatus(inLdap)
         this.fileAccess = getFilePermissionStatus(inLdap && userProjectRole.accessToFiles, project.unixGroup in ldapUserDetails?.memberOfGroupList,
                 userProjectRole.fileAccessChangeRequested)
         this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)

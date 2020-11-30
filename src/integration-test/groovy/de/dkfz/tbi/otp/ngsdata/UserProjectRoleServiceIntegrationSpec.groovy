@@ -302,7 +302,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
-                accessToOtp: accessToOtp,
+                accessToOtp: !accountInLdap,
                 accessToFiles: accessToFiles,
                 manageUsers: manageUsers,
                 manageUsersAndDelegate: manageUsersAndDelegate,
@@ -317,6 +317,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 }
         )
 
+        // mock user existence in ldap
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            isUserInLdapAndActivated(_) >> accountInLdap
+        }
+
         when:
         SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
             userProjectRoleService.setEnabled(userProjectRole, !enabledStatus)
@@ -325,8 +330,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then: "new enabled status was set"
         userProjectRole.enabled == !enabledStatus
 
-        and: "all permissions are taken and non are granted"
-        !userProjectRole.accessToOtp
+        and: "all permissions are taken and non are granted, except accessToOtp which depends on the ldap system"
+        userProjectRole.accessToOtp == accountInLdap
         !userProjectRole.accessToFiles
         !userProjectRole.manageUsers
         !userProjectRole.manageUsersAndDelegate
@@ -343,10 +348,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         0 * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
-        accessToOtp | accessToFiles | manageUsers | manageUsersAndDelegate | receivesNotifications | enabledStatus || removeMailCount | notifyEnableUser
-        true        | true          | true        | true                   | true                  | true          || 1               | 0
-        true        | false         | true        | true                   | true                  | true          || 0               | 0
-        false       | false         | false       | false                  | false                 | false         || 0               | 1
+        accountInLdap | accessToFiles | manageUsers | manageUsersAndDelegate | receivesNotifications | enabledStatus || removeMailCount | notifyEnableUser
+        true          | true          | true        | true                   | true                  | true          || 1               | 0
+        true          | false         | true        | true                   | true                  | true          || 0               | 0
+        true          | false         | false       | false                  | false                 | false         || 0               | 1
+        false         | false         | false       | false                  | false                 | false         || 0               | 1
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username or email"() {
@@ -887,6 +893,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 }
         )
 
+        // mock user existence in ldap
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            isUserInLdapAndActivated(_) >> true
+        }
+
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRoles[0], true)
@@ -909,7 +920,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         where:
         flag                     | fileAccessMail
-        "accessToOtp"            | 0
         "accessToFiles"          | 1
         "manageUsers"            | 0
         "manageUsersAndDelegate" | 0
@@ -968,6 +978,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 }
         )
 
+        // mock user existence in ldap
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            isUserInLdapAndActivated(_) >> true
+        }
+
         when:
         SpringSecurityUtils.doWithAuth(user.username) {
             userProjectRoleService."set${flag.capitalize()}"(userProjectRole, !flagInit)
@@ -979,14 +994,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         where:
         flag                     | flagInit | projectRole                 | role     | result
         //USER false -> (desired)true, Role PI
-        "accessToOtp"            | false    | ProjectRole.Basic.PI        | USER     | true
         "accessToFiles"          | false    | ProjectRole.Basic.PI        | USER     | true
         "manageUsers"            | false    | ProjectRole.Basic.PI        | USER     | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | USER     | true
         "receivesNotifications"  | false    | ProjectRole.Basic.PI        | USER     | true
 
         //OPERATOR false -> (desired)true, Role PI
-        "accessToOtp"            | false    | ProjectRole.Basic.PI        | OPERATOR | true
         "accessToFiles"          | false    | ProjectRole.Basic.PI        | OPERATOR | true
         "manageUsers"            | false    | ProjectRole.Basic.PI        | OPERATOR | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | OPERATOR | true
@@ -994,7 +1007,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | false    | ProjectRole.Basic.PI        | OPERATOR | true
 
         // ADMIN false -> (desired)true, Role PI
-        "accessToOtp"            | false    | ProjectRole.Basic.PI        | ADMIN    | true
         "accessToFiles"          | false    | ProjectRole.Basic.PI        | ADMIN    | true
         "manageUsers"            | false    | ProjectRole.Basic.PI        | ADMIN    | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | ADMIN    | true
@@ -1002,14 +1014,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | false    | ProjectRole.Basic.PI        | ADMIN    | true
 
         //USER true -> (desired)false, Role PI
-        "accessToOtp"            | true     | ProjectRole.Basic.PI        | USER     | false
         "accessToFiles"          | true     | ProjectRole.Basic.PI        | USER     | false
         "manageUsers"            | true     | ProjectRole.Basic.PI        | USER     | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | USER     | false
         "receivesNotifications"  | true     | ProjectRole.Basic.PI        | USER     | false
 
         //OPERATOR true -> (desired)false, Role PI
-        "accessToOtp"            | true     | ProjectRole.Basic.PI        | OPERATOR | false
         "accessToFiles"          | true     | ProjectRole.Basic.PI        | OPERATOR | false
         "manageUsers"            | true     | ProjectRole.Basic.PI        | OPERATOR | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | OPERATOR | false
@@ -1017,7 +1027,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | true     | ProjectRole.Basic.PI        | OPERATOR | false
 
         // ADMIN true -> (desired)false, Role PI
-        "accessToOtp"            | true     | ProjectRole.Basic.PI        | ADMIN    | false
         "accessToFiles"          | true     | ProjectRole.Basic.PI        | ADMIN    | false
         "manageUsers"            | true     | ProjectRole.Basic.PI        | ADMIN    | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | ADMIN    | false
@@ -1025,7 +1034,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | true     | ProjectRole.Basic.PI        | ADMIN    | false
 
         //USER false -> (desired)true, Role Submitter
-        "accessToOtp"            | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | USER     | true
@@ -1033,7 +1041,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | false    | ProjectRole.Basic.SUBMITTER | USER     | true
 
         //OPERATOR false -> (desired)true, Role Submitter
-        "accessToOtp"            | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
+
         "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
         "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
@@ -1041,7 +1049,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
 
         // ADMIN false -> (desired)true, Role Submitter
-        "accessToOtp"            | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
         "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
         "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
@@ -1049,7 +1056,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
 
         //USER true -> (desired)false, Role Submitter
-        "accessToOtp"            | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | USER     | false
@@ -1057,7 +1063,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | true     | ProjectRole.Basic.SUBMITTER | USER     | false
 
         //OPERATOR true -> (desired)false, Role Submitter
-        "accessToOtp"            | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
         "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
         "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
@@ -1065,7 +1070,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
 
         // ADMIN true -> (desired)false, Role Submitter
-        "accessToOtp"            | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
         "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
         "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | ADMIN    | false

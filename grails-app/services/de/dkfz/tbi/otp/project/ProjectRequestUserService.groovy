@@ -91,7 +91,7 @@ class ProjectRequestUserService {
                 projectRequestUser.projectRoles,
         )
         userProjectRoleService.with {
-            setAccessToOtp(upr, true)
+            setAccessToOtp(upr)
             setAccessToFiles(upr, projectRequestUser.accessToFiles)
             setManageUsers(upr, projectRequestUser.manageUsers)
             setManageUsersAndDelegate(upr, projectRequestUser.manageUsersAndDelegate)

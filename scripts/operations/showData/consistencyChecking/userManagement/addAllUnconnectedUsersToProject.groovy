@@ -42,7 +42,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 Set<ProjectRole> projectRoles = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name()) as Set<ProjectRole>
 // UserProjectRole flags
 boolean enabled = true
-boolean accessToOtp = true
 boolean accessToFiles = true
 boolean manageUsers = false
 boolean manageUsersAndDelegate = false
@@ -86,12 +85,13 @@ Project.list().sort { it.name }.each { Project project ->
     println("\n")
     usersToConnect.each { String username ->
         if (!(username in blacklistedUsernames)) {
+            User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
             newUPRs << new UserProjectRole(
-                    user: CollectionUtils.exactlyOneElement(User.findAllByUsername(username)),
+                    user: user,
                     project: project,
                     projectRoles: projectRoles,
                     enabled: enabled,
-                    accessToOtp: accessToOtp,
+                    accessToOtp: ldapService.isUserInLdapAndActivated(user),
                     accessToFiles: accessToFiles,
                     manageUsers: manageUsers,
                     manageUsersAndDelegate: manageUsersAndDelegate,
