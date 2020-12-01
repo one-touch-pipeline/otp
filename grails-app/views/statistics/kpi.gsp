@@ -22,36 +22,42 @@
 
 <html>
 <head>
-    <title>KPIs</title>
-    <meta name="layout" content="mainV2"/>
+    <title>${g.message(code: "start.numbers.title")}</title>
+    <asset:javascript src="pages/statistics/kpi.js"/>
 </head>
 <body>
     <div class="body container">
+        <g:render template="/templates/projectSelection"/>
         <div class="col-xs-12">
-            <h2>KPIs</h2>
+            <h2>${g.message(code: "start.numbers.title")}</h2>
             <hr>
         </div>
+
         <div class="col-xs-12 col-sm-12 statistics-container">
             <div class="optionsContainer">
                 <g:form action="kpi" class="form-inline" method="get">
                     <input type="hidden" name="${projectParameter}" value="${selectedProject.name}"/>
-                    <input type="hidden" name="projectGroup" value="${projectGroup}"/>
                     <div class="input-group">
-                        <div class="input-group-addon">
-                            <b>${g.message(code: "start.numbers.startDate")}</b>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><label for="projectGroup">${g.message(code: "start.numbers.group")}</label></span>
                         </div>
-                        <input type="date"class="form-control" id="start" name="start">
-                    </div>
+                        <g:select class="form-control" id="projectGroup" name="projectGroup" value="${projectGroup}" from="${availableProjectGroups*.name}"
+                                  noSelection='["": g.message(code: "start.numbers.allProjects")]'/>
 
-                    <div class="input-group">
-                        <div class="input-group-addon">
-                            <b>${g.message(code: "start.numbers.endDate")}</b>
+                        <div class="input-group-prepend input-group-append">
+                            <span class="input-group-text"><label for="start">${g.message(code: "start.numbers.startDate")}</label></span>
                         </div>
-                        <input type="date"class="form-control" id="end" name="end">
-                    </div>
-                    <g:actionSubmit class="btn btn-primary" value="${g.message(code: "start.numbers.btnDate")}"
-                                    action="kpi"/>
+                        <input type="date" class="form-control" id="start" name="start" value="${startDate}" max="${maxDate}">
 
+                        <div class="input-group-prepend input-group-append">
+                            <span class="input-group-text"><label for="end">${g.message(code: "start.numbers.endDate")}</label></span>
+                        </div>
+                        <input type="date" class="form-control" id="end" name="end" value="${endDate}" max="${maxDate}">
+
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit" id="button-addon2">${g.message(code: "start.numbers.btnDate")}</button>
+                        </div>
+                    </div>
                 </g:form>
             </div>
             <br>
@@ -63,7 +69,7 @@
                     ${g.message(code: "start.numbers.info.users")}</div>
             </g:if>
             <div class="statistics-box">
-                <h2>${projectGroup ?: "All"}</h2>
+                <h2>${projectGroup ?: g.message(code: "start.numbers.allProjects")}</h2>
                 <hr>
                 <p class="projects"><span
                         class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.users")}
@@ -99,15 +105,11 @@
             </div>
 
             <div class="statistics-box">
-                Download <g:link action="downloadDirectoriesCSV">
-                    directories.csv
-                </g:link>
+                <h2>${g.message(code: "start.numbers.download")}</h2>
+                <hr>
+                <g:link action="downloadDirectoriesCSV">directories.csv</g:link>
             </div>
         </div>
     </div>
-<script>
-    var startDate = '${startDate}';
-    var endDate = '${endDate}';
-</script>
 </body>
 </html>

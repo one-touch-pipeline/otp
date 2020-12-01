@@ -23,18 +23,12 @@ package de.dkfz.tbi.otp.interceptor
 
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.springframework.context.i18n.LocaleContextHolder
 
-import de.dkfz.tbi.otp.ProjectSelectionCommand
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
 @CompileStatic
 class ProjectSelectionInterceptor {
-    PluginAwareResourceBundleMessageSource messageSource
     ProjectService projectService
     ProjectSelectionService projectSelectionService
     SpringSecurityService springSecurityService
@@ -57,36 +51,8 @@ class ProjectSelectionInterceptor {
     boolean after() {
         if (model != null && springSecurityService.loggedIn) {
             model.selectedProject = projectSelectionService.selectedProject
-
-            List<Project> allProjects = projectService.allProjects
-            model.availableProjects = allProjects
-
+            model.availableProjects = projectService.allProjects
             model.projectParameter = ProjectSelectionService.PROJECT_SELECTION_PARAMETER
-            // projects in groups
-            Map<String, List<ProjectSelectionCommand>> availableProjectsInGroups = [:]
-            Map<ProjectGroup, List<Project>> projectsMap = allProjects.groupBy { it.projectGroup }
-            List<Project> projectsWithoutGroup = projectsMap.remove(null)
-            projectsMap.each { ProjectGroup group, List<Project> projects ->
-                String displayName = messageSource.getMessage("header.projectSelection.allGroupOrCategory", [group.name].toArray(), LocaleContextHolder.locale)
-                availableProjectsInGroups.put(
-                        group.name,
-                        [
-                            new ProjectSelectionCommand(displayName: displayName, type: ProjectSelectionCommand.Type.GROUP, id: group.id)
-                        ] + projects.collect {
-                            new ProjectSelectionCommand(displayName: it.name, type: ProjectSelectionCommand.Type.PROJECT, id: it.id)
-                        }
-                )
-            }
-            model.availableProjectsInGroups = availableProjectsInGroups
-
-            // projects not in groups
-            List<ProjectSelectionCommand> availableProjectsWithoutGroup = []
-            projectsWithoutGroup?.each { Project project ->
-                availableProjectsWithoutGroup.add(
-                        new ProjectSelectionCommand(displayName: project.name, type: ProjectSelectionCommand.Type.PROJECT, id: project.id)
-                )
-            }
-            model.availableProjectsWithoutGroup = availableProjectsWithoutGroup
         }
         true
     }

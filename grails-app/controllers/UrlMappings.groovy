@@ -30,8 +30,6 @@ class UrlMappings {
         }
 
         "/"(controller: "info", action: "about")
-        /* TODO: OTP-2282: uncomment and delete line above
-        "/"(controller:"root", action: "intro") //*/
         "403"(controller: "errors", action: "error403")
         "404"(controller: "errors", action: "error404")
         "405"(controller: "errors", action: "error405")

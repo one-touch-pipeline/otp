@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
-//= require /webjars/rgraph/4.66-stable/RGraph.common.core.js
-//= require /webjars/rgraph/4.66-stable/RGraph.bar.js
-//= require /webjars/rgraph/4.66-stable/RGraph.pie.js
+$(function () {
+    "use strict";
+
+    $('#start').change(function () {
+        var date = $("#start").val();
+        $('#end').attr("min", date);
+    });
+
+    $('#end').change(function () {
+        var date = $("#end").val();
+        $('#start').attr("max", date);
+    });
+});

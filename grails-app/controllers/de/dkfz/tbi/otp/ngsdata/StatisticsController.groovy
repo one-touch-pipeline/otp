@@ -58,15 +58,19 @@ class StatisticsController {
 
     def kpi() {
         List<Project> projects
-        if (!params.projectGroup || params.projectGroup == "ALL") {
-            projects = projectService.allProjects
-        } else {
+        if (params.projectGroup) {
             projects = projectService.allProjects.intersect(Project.findAllByProjectGroup(projectGroupService.projectGroupByName(params.projectGroup)))
+        } else {
+            projects = projectService.allProjects
         }
         Project project = projectSelectionService.selectedProject
 
-        Date startDate = params.start ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(params.start) : null
-        Date endDate = params.end ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(params.end) : null
+        List<ProjectGroup> availableProjectGroups = projects.groupBy { it.projectGroup }.keySet().findAll().toList()
+                .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        Date startDate = params.start && params.end ? dateFormat.parse(params.start) : null
+        Date endDate = params.end && params.end ? dateFormat.parse(params.end) : new Date()
 
         if (!projects) {
             return [
@@ -93,6 +97,7 @@ class StatisticsController {
 
         return [
                 projectGroup               : params.projectGroup,
+                availableProjectGroups     : availableProjectGroups,
                 numberOfProject            : numberOfProjects,
                 numberOfSamples            : samples,
                 numberOfUsers              : users,
@@ -102,8 +107,9 @@ class StatisticsController {
                 numberOfUsersProject       : usersProject,
                 numberOfCreatedUsersProject: usersCreatedProject,
                 numberOfClusterJobsProject : clusterJobsProject,
-                startDate                  : params.start,
-                endDate                    : params.end,
+                startDate                  : startDate ? dateFormat.format(startDate) : "",
+                endDate                    : endDate ? dateFormat.format(endDate) : "",
+                maxDate                    : dateFormat.format(new Date()),
         ]
     }
 }

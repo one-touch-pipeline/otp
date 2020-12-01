@@ -135,10 +135,6 @@ grails.plugin.springsecurity.useSwitchUserFilter = true
 
 grails.plugin.springsecurity.successHandler.targetUrlParameter = "target"
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
-/* TODO: OTP-2282 uncomment when switching to the new layout and remove line above
-grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"
-grails.plugin.springsecurity.failureHandler.defaultFailureUrl = "/?login=failed"
-//*/
 grails.plugin.springsecurity.apf.storeLastUsername = true
 grails.plugin.springsecurity.logout.postOnly = false
 grails.plugin.springsecurity.printStatusMessages = false
