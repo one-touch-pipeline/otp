@@ -28,9 +28,11 @@
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.*
+import de.dkfz.tbi.otp.parser.covid19.Covid19SampleIdentifierParser
 import de.dkfz.tbi.otp.parser.hipo.*
 import de.dkfz.tbi.otp.parser.inform.InformSampleIdentifierParser
 import de.dkfz.tbi.otp.parser.itccp4.ITCC_4P_Parser
+import de.dkfz.tbi.otp.parser.pedion.PedionParser
 
 //----------------------------------------
 //input area
@@ -63,6 +65,7 @@ assert parser: 'Please select one parser'
 
 List<String> output = []
 List<String> table = []
+List<String> notParsable = []
 
 static String getSanitizedSampleTypeDbName(String sampleTypeName) {
     SampleType sampleType = SampleType.findSampleTypeByName(sampleTypeName)
@@ -85,19 +88,27 @@ try {
         }.each { String line ->
             output << "parse: ${line}"
             DefaultParsedSampleIdentifier identifier = parser.tryParse(line)
-            assert identifier: "can not parse '${line}'"
-
-            table << [
-                    identifier.projectName,
-                    identifier.pid,
-                    getSanitizedSampleTypeDbName(identifier.sampleTypeDbName),
-                    identifier.fullSampleName,
-            ].join(', ')
+            if (identifier) {
+                table << [
+                        identifier.projectName,
+                        identifier.pid,
+                        getSanitizedSampleTypeDbName(identifier.sampleTypeDbName),
+                        identifier.fullSampleName,
+                ].join(', ')
+            } else {
+                notParsable << line
+            }
         }
     }
 } finally {
+    println "parsed input (${output.size()}):"
     println output.join('\n')
     println '\n----------------------------------------------\n'
+    println "parsed values (${table.size()}):"
+    println "project, pid, sampleType, identifier"
     println table.join('\n')
+    println '\n----------------------------------------------\n'
+    println "not parsable identifiers (${notParsable.size()}):"
+    println notParsable.join('\n')
 }
 ''
