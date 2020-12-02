@@ -37,7 +37,7 @@
 
     <h2><g:message code="metadataImport.blackListedIlseNumbers.create.description"/></h2>
 
-    <g:form action="addBlacklistedIlseNumbers" method="POST">
+    <g:form useToken="true" action="addBlacklistedIlseNumbers" method="POST">
         <span class="tooltipIcon" title="${g.message(code: "metadataImport.blackListedIlseNumbers.ilses.info")}">
             <g:message code="metadataImport.blackListedIlseNumbers.ilses"/>
         </span>: <g:textField name="ilse" size="15" value="${command?.ilse}"/>
