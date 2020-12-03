@@ -70,6 +70,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <td><g:message code="project.unixGroup"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'unixGroup'])}"
+                                value="${selectedProject.unixGroup}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td><g:message code="project.keywords"/></td>
                     <td></td>
                     <td>
@@ -105,19 +115,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><g:message code="project.tumorEntity"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                template="dropDown"
-                                link="${g.createLink(controller: "projectConfig", action: 'updateTumorEntity', params: ['fieldName': 'tumorEntity'])}"
-                                noSelection="${['': 'None']}"
-                                values="${tumorEntities}"
-                                value="${selectedProject.tumorEntity}"/>
-                    </td>
-                </tr>
-                <tr>
                     <td><g:message code="project.speciesWithStrain"/></td>
                     <td></td>
                     <td>
@@ -132,16 +129,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><g:message code="project.unixGroup"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'unixGroup'])}"
-                                value="${selectedProject.unixGroup}"/>
-                    </td>
-                </tr>
-                <tr>
                     <td><g:message code="project.costCenter"/></td>
                     <td></td>
                     <td>
@@ -149,36 +136,6 @@
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'costCenter'])}"
                                 value="${selectedProject.costCenter}"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td><g:message code="project.organizationalUnit"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'organizationalUnit'])}"
-                                value="${selectedProject.organizationalUnit}"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td><g:message code="project.fundingBody"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'fundingBody'])}"
-                                value="${selectedProject.fundingBody}"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td><g:message code="project.grantId"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'grantId'])}"
-                                value="${selectedProject.grantId}"/>
                     </td>
                 </tr>
                 <tr>
@@ -214,22 +171,6 @@
                     <td><g:message code="project.lastDate"/></td>
                     <td></td>
                     <td>${lastReceivedDate}</td>
-                </tr>
-                <tr>
-                    <td><g:message code="project.endDate"/></td>
-                    <td></td>
-                    <td>
-                        <sec:ifAllGranted roles="ROLE_OPERATOR">
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    template="date"
-                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['fieldName': 'endDate'])}"
-                                    value="${selectedProject.endDate}"/>
-                        </sec:ifAllGranted>
-                        <sec:ifNotGranted roles="ROLE_OPERATOR">
-                            ${selectedProject.endDate ?: g.message(code: "project.endDate.empty")}
-                        </sec:ifNotGranted>
-                    </td>
                 </tr>
                 <tr>
                     <td><g:message code="project.storageUntil"/></td>
@@ -379,18 +320,6 @@
                                 value="${closed}"/>
                     </td>
                 </tr>
-                <tr>
-                    <td><g:message code="project.requestAvailable"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: "updateRequestAvailable", params: ['fieldName': 'projectRequestAvailable'])}"
-                                values="${["true", "false"]}"
-                                value="${projectRequestAvailable}"/>
-                    </td>
-                </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
                         <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.internalNotes"/></td>
@@ -410,6 +339,67 @@
                         <td></td>
                         <td><div class="project-multiline-wrapper" style="max-height: 20em; max-width: none">${projectRequestComments}</div></td>
                     </tr>
+                </sec:ifAllGranted>
+                <tr>
+                    <td><g:message code="project.tumorEntity"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: "projectConfig", action: 'updateTumorEntity', params: ['fieldName': 'tumorEntity'])}"
+                                noSelection="${['': 'None']}"
+                                values="${tumorEntities}"
+                                value="${selectedProject.tumorEntity}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><g:message code="project.endDate"/></td>
+                    <td></td>
+                    <td>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="date"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['fieldName': 'endDate'])}"
+                                    value="${selectedProject.endDate}"/>
+                        </sec:ifAllGranted>
+                        <sec:ifNotGranted roles="ROLE_OPERATOR">
+                            ${selectedProject.endDate ?: g.message(code: "project.endDate.empty")}
+                        </sec:ifNotGranted>
+                    </td>
+                </tr>
+                <tr>
+                    <td><g:message code="project.organizationalUnit"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'organizationalUnit'])}"
+                                value="${selectedProject.organizationalUnit}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><g:message code="project.fundingBody"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'fundingBody'])}"
+                                value="${selectedProject.fundingBody}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><g:message code="project.grantId"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'grantId'])}"
+                                value="${selectedProject.grantId}"/>
+                    </td>
+                </tr>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
                         <td><g:message code="projectOverview.projectInfos"/></td>
                         <td></td>
@@ -420,6 +410,18 @@
                         </td>
                     </tr>
                 </sec:ifAllGranted>
+                <tr>
+                    <td><g:message code="project.requestAvailable"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateRequestAvailable", params: ['fieldName': 'projectRequestAvailable'])}"
+                                values="${["true", "false"]}"
+                                value="${projectRequestAvailable}"/>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>

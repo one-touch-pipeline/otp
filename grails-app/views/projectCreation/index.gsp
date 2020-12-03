@@ -179,6 +179,11 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'dirAnalysis', cmd: cmd]"/>
             </tr>
             <tr>
+                <td><g:message code="project.unixGroup"/></td>
+                <td><g:textField name="unixGroup" value="${source.getByFieldName("unixGroup")}" required="true"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'unixGroup', cmd: cmd]"/>
+            </tr>
+            <tr>
                 <td><g:message code="project.keywords"/></td>
                 <td class="multi-input-field">
                     <g:each in="${(projectCreationCmd?.keywords ?: source.getAllByFieldName("keywords")).flatten().findResults { it ? it.toString() : null }.unique().sort() ?: [""]}"
@@ -230,13 +235,6 @@
                 </g:each>
             </datalist>
             <tr>
-                <td><g:message code="project.tumorEntity"/></td>
-                <td><g:select name="tumorEntity" class="use-select-2"
-                              from="${tumorEntities}" value="${(source.getByFieldName("tumorEntity") as TumorEntity)?.id}" optionKey="id"
-                              noSelection="${['': 'No Tumor Entity']}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'tumorEntity', cmd: cmd]"/>
-            </tr>
-            <tr>
                 <td><g:message code="project.speciesWithStrain"/></td>
                 <td><g:select name="speciesWithStrain" class="use-select-2"
                               from="${allSpeciesWithStrains}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}" optionKey="id"
@@ -244,29 +242,9 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrain', cmd: cmd]"/>
             </tr>
             <tr>
-                <td><g:message code="project.unixGroup"/></td>
-                <td><g:textField name="unixGroup" value="${source.getByFieldName("unixGroup")}" required="true"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'unixGroup', cmd: cmd]"/>
-            </tr>
-            <tr>
                 <td><g:message code="project.costCenter"/></td>
                 <td><g:textField name="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'costCenter', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.organizationalUnit"/></td>
-                <td><g:textField name="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'organizationalUnit', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.fundingBody"/></td>
-                <td><g:textField name="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'fundingBody', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.grantId"/></td>
-                <td><g:textField name="grantId" value="${source.getByFieldName("grantId")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'grantId', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.projectType"/></td>
@@ -278,11 +256,6 @@
                 <td><g:message code="project.forceCopyFiles"/></td>
                 <td><g:checkBox name="forceCopyFiles" checked="${source.getByFieldName("forceCopyFiles")}" value="true"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'forceCopyFiles', cmd: cmd, type: 'boolean']"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.endDate"/></td>
-                <td><input type="date" name="endDateInput" value="${(source.getFieldAsLocalDate("endDate"))?.format(DateTimeFormatter.ISO_LOCAL_DATE)}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'endDate', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.storageUntil"/></td>
@@ -322,6 +295,51 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'qcThresholdHandling', cmd: cmd]"/>
             </tr>
             <tr>
+                <td><g:message code="project.internalNotes"/></td>
+                <td><g:textArea class="resize-vertical" name="internalNotes" value="${source.getByFieldName("internalNotes")}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'internalNotes', cmd: cmd, type: 'multi-line-string']"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.tumorEntity"/></td>
+                <td><g:select name="tumorEntity" class="use-select-2"
+                              from="${tumorEntities}" value="${(source.getByFieldName("tumorEntity") as TumorEntity)?.id}" optionKey="id"
+                              noSelection="${['': 'No Tumor Entity']}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'tumorEntity', cmd: cmd]"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.endDate"/></td>
+                <td><input type="date" name="endDateInput" value="${(source.getFieldAsLocalDate("endDate"))?.format(DateTimeFormatter.ISO_LOCAL_DATE)}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'endDate', cmd: cmd]"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.organizationalUnit"/></td>
+                <td><g:textField name="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'organizationalUnit', cmd: cmd]"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.fundingBody"/></td>
+                <td><g:textField name="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'fundingBody', cmd: cmd]"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.grantId"/></td>
+                <td><g:textField name="grantId" value="${source.getByFieldName("grantId")}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'grantId', cmd: cmd]"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.projectInfo"/></td>
+                <td><input type="file" name="projectInfoFile" id="projectInfoFile" ${projectCreationCmd?.projectInfoFile as boolean ? "required" : ""}/></td>
+                <td></td>
+                <td>
+                    <g:if test="${baseProjectInfos}">
+                        <g:select name="projectInfoToCopy" class="use-select-2"
+                                  from="${baseProjectInfos}" value="${projectCreationCmd?.projectInfoToCopy?.id}"
+                                  optionKey="id" optionValue="path"
+                                  noSelection="${['': 'No project info selected']}"/>
+                    </g:if>
+                </td>
+            </tr>
+            <tr>
                 <td><g:message code="project.publiclyAvailable"/></td>
                 <td><g:checkBox name="publiclyAvailable" checked="${source.getByFieldName("publiclyAvailable")}" value="true"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'publiclyAvailable', cmd: cmd, type: 'boolean']"/>
@@ -339,24 +357,6 @@
                     <td><g:checkBox name="projectRequestAvailable" value="${source.getByFieldName("projectRequestAvailable")}"/></td>
                     <g:render template="baseValueColumns" model="[fieldName: 'projectRequestAvailable', cmd: cmd, type: 'boolean']"/>
                 </g:else>
-            </tr>
-            <tr>
-                <td><g:message code="project.projectInfo"/></td>
-                <td><input type="file" name="projectInfoFile" id="projectInfoFile" ${projectCreationCmd?.projectInfoFile as boolean ? "required" : ""}/></td>
-                <td></td>
-                <td>
-                    <g:if test="${baseProjectInfos}">
-                        <g:select name="projectInfoToCopy" class="use-select-2"
-                                  from="${baseProjectInfos}" value="${projectCreationCmd?.projectInfoToCopy?.id}"
-                                  optionKey="id" optionValue="path"
-                                  noSelection="${['': 'No project info selected']}"/>
-                    </g:if>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.internalNotes"/></td>
-                <td><g:textArea class="resize-vertical" name="internalNotes" value="${source.getByFieldName("internalNotes")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'internalNotes', cmd: cmd, type: 'multi-line-string']"/>
             </tr>
             <tr>
                 <td></td>

@@ -68,11 +68,6 @@
             <td><input name="name" id="name" value="${source.getByFieldName("name")}" required/></td>
         </tr>
         <tr>
-            <td><label for="description">${g.message(code: "project.description")}*</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.description.detail")}"></td>
-            <td><textarea class="resize-vertical" name="description" id="description" required>${source.getByFieldName("description")}</textarea></td>
-        </tr>
-        <tr>
             <td><label for="keyword">${g.message(code: "project.keywords")}*</label></td>
             <td class="help" title="${g.message(code: "projectRequest.keywords.detail")}"></td>
             <td class="multi-input-field">
@@ -95,57 +90,15 @@
             </td>
         </tr>
         <tr>
-            <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}*</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.organizationalUnit.detail")}"></td>
-            <td><input name="organizationalUnit" id="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}" required/></td>
-        </tr>
-        <tr>
-            <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
-            <td><input name="costCenter" id="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
-        </tr>
-        <tr>
-            <td><label for="fundingBody">${g.message(code: "project.fundingBody")}</label></td>
-            <td></td>
-            <td><input name="fundingBody" id="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
-        </tr>
-        <tr>
-            <td><label for="grantId">${g.message(code: "project.grantId")}</label></td>
-            <td></td>
-            <td><input name="grantId" id="grantId" value="${source.getByFieldName("grantId")}"/></td>
-        </tr>
-        <tr>
-            <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
-            <td></td>
-            <td><input name="endDate" id="endDate" value="${source.getByFieldName("endDate")}" type="date"/></td>
-        </tr>
-        <tr>
-            <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}*</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
-            <td>
-                <g:select name="storagePeriod" class="use-select-2"
-                          value="${source.getByFieldName("storagePeriod")}" from="${storagePeriods}"
-                          optionKey="name" optionValue="description"
-                          noSelection="${["": ""]}" required="true" />
-                <br>
-                <input name="storageUntil" id="storageUntil" value="${source.getByFieldName("storageUntil")}" type="date" style="display: none"/>
-            </td>
+            <td><label for="description">${g.message(code: "project.description")}*</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.description.detail")}"></td>
+            <td><textarea class="resize-vertical" name="description" id="description" required>${source.getByFieldName("description")}</textarea></td>
         </tr>
         <tr>
             <td><label for="relatedProjects">${g.message(code: "project.relatedProjects")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.relatedProjects.detail")}"></td>
             <td><input name="relatedProjects" id="relatedProjects" value="${source.getByFieldName("relatedProjects")}"/></td>
         </tr>
-%{--
-        <tr>
-            <td><label for="tumorEntity">${g.message(code: "project.tumorEntity")}</label></td>
-            <td></td>
-            <td>
-                <g:select name="tumorEntity.id" id="tumorEntity" class="use-select-2"
-                          value="${cmd?.tumorEntity?.id}" from="${tumorEntities}" optionValue="name" optionKey="id"
-                          noSelection="${[null: ""]}" /></td>
-        </tr>
---}%
         <tr>
             <g:set var="customSpeciesWithStrain" value="${source.getByFieldName("customSpeciesWithStrain")}"/>
             <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}</label></td>
@@ -160,21 +113,63 @@
             </td>
         </tr>
         <tr>
+            <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
+            <td><input name="costCenter" id="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
+        </tr>
+        <tr>
             <td><label for="projectType">${g.message(code: "project.projectType")}</label></td>
             <td></td>
             <td><g:select id="projectType" name="projectType" class="use-select-2"
                           from="${projectTypes}" value="${source.getByFieldName("projectType")}"/></td>
         </tr>
         <tr>
-            <td><label for="sequencingCenter">${g.message(code: "projectRequest.sequencingCenter")}</label></td>
-            <td></td>
-            <td><input name="sequencingCenter" id="sequencingCenter" value="${source.getByFieldName("sequencingCenter")}"/></td>
+            <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}*</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
+            <td>
+                <g:select name="storagePeriod" class="use-select-2"
+                          value="${source.getByFieldName("storagePeriod")}" from="${storagePeriods}"
+                          optionKey="name" optionValue="description"
+                          noSelection="${["": ""]}" required="true" />
+                <br>
+                <input name="storageUntil" id="storageUntil" value="${source.getByFieldName("storageUntil")}" type="date" style="display: none"/>
+            </td>
         </tr>
         <tr>
-            <td><label for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}</label></td>
+            <td><label for="comments">${g.message(code: "projectRequest.comments")}</label></td>
             <td></td>
-            <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" value="${source.getByFieldName("approxNoOfSamples")}"/></td>
+            <td><textarea class="resize-vertical" name="comments" id="comments">${source.getByFieldName("comments")}</textarea></td>
         </tr>
+        <tr>
+            <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
+            <td></td>
+            <td><input name="endDate" id="endDate" value="${source.getByFieldName("endDate")}" type="date"/></td>
+        </tr>
+        <tr>
+            <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}*</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.organizationalUnit.detail")}"></td>
+            <td><input name="organizationalUnit" id="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}" required/></td>
+        </tr>
+        <tr>
+            <td><label for="fundingBody">${g.message(code: "project.fundingBody")}</label></td>
+            <td></td>
+            <td><input name="fundingBody" id="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
+        </tr>
+        <tr>
+            <td><label for="grantId">${g.message(code: "project.grantId")}</label></td>
+            <td></td>
+            <td><input name="grantId" id="grantId" value="${source.getByFieldName("grantId")}"/></td>
+        </tr>
+%{--
+        <tr>
+            <td><label for="tumorEntity">${g.message(code: "project.tumorEntity")}</label></td>
+            <td></td>
+            <td>
+                <g:select name="tumorEntity.id" id="tumorEntity" class="use-select-2"
+                          value="${cmd?.tumorEntity?.id}" from="${tumorEntities}" optionValue="name" optionKey="id"
+                          noSelection="${[null: ""]}" /></td>
+        </tr>
+--}%
         <tr>
             <td>${g.message(code: "projectRequest.seqTypes")}</td>
             <td class="help" title="${g.message(code: "projectRequest.seqTypes.detail")}"></td>
@@ -196,9 +191,14 @@
             </td>
         </tr>
         <tr>
-            <td><label for="comments">${g.message(code: "projectRequest.comments")}</label></td>
+            <td><label for="sequencingCenter">${g.message(code: "projectRequest.sequencingCenter")}</label></td>
             <td></td>
-            <td><textarea class="resize-vertical" name="comments" id="comments">${source.getByFieldName("comments")}</textarea></td>
+            <td><input name="sequencingCenter" id="sequencingCenter" value="${source.getByFieldName("sequencingCenter")}"/></td>
+        </tr>
+        <tr>
+            <td><label for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}</label></td>
+            <td></td>
+            <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" value="${source.getByFieldName("approxNoOfSamples")}"/></td>
         </tr>
     </table>
 

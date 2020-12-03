@@ -49,14 +49,9 @@
                     <td>${g.message(code: "projectRequest.requester")}</td>
                     <td>${projectRequest.requester}</td>
                 </tr>
-
                 <tr>
                     <td>${g.message(code: "project.name")}</td>
                     <td>${projectRequest.name}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.description")}</td>
-                    <td><div class="project-multiline-wrapper">${projectRequest.description}</div></td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "project.keywords")}</td>
@@ -67,12 +62,40 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>${g.message(code: "project.organizationalUnit")}</td>
-                    <td>${projectRequest.organizationalUnit}</td>
+                    <td>${g.message(code: "project.description")}</td>
+                    <td><div class="project-multiline-wrapper">${projectRequest.description}</div></td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.relatedProjects")}</td>
+                    <td>${projectRequest.relatedProjects}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.speciesWithStrain")}</td>
+                    <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "project.costCenter")}</td>
                     <td>${projectRequest.costCenter}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.projectType")}</td>
+                    <td>${projectRequest.projectType}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.storageUntil")}</td>
+                    <td>${projectRequest.storageUntil ?: StoragePeriod.INFINITELY.description}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.comments")}</td>
+                    <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.endDate")}</td>
+                    <td>${projectRequest.endDate}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.organizationalUnit")}</td>
+                    <td>${projectRequest.organizationalUnit}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "project.fundingBody")}</td>
@@ -82,18 +105,6 @@
                     <td>${g.message(code: "project.grantId")}</td>
                     <td>${projectRequest.grantId}</td>
                 </tr>
-                <tr>
-                    <td>${g.message(code: "project.endDate")}</td>
-                    <td>${projectRequest.endDate}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.storageUntil")}</td>
-                    <td>${projectRequest.storageUntil ?: StoragePeriod.INFINITELY.description}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.relatedProjects")}</td>
-                    <td>${projectRequest.relatedProjects}</td>
-                </tr>
                 %{--
                 <tr>
                     <td>${g.message(code: "project.tumorEntity")}</td>
@@ -101,12 +112,8 @@
                 </tr>
                 --}%
                 <tr>
-                    <td>${g.message(code: "project.speciesWithStrain")}</td>
-                    <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.projectType")}</td>
-                    <td>${projectRequest.projectType}</td>
+                    <td>${g.message(code: "projectRequest.seqTypes")}</td>
+                    <td>${projectRequest.seqTypes?.join(", ")}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "projectRequest.sequencingCenter")}</td>
@@ -115,14 +122,6 @@
                 <tr>
                     <td>${g.message(code: "projectRequest.approxNoOfSamples")}</td>
                     <td>${projectRequest.approxNoOfSamples}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "projectRequest.seqTypes")}</td>
-                    <td>${projectRequest.seqTypes?.join(", ")}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "projectRequest.comments")}</td>
-                    <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "projectRequest.users")}</td>
