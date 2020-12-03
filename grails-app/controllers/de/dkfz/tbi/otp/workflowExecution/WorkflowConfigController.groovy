@@ -183,12 +183,6 @@ class CreateCommand extends SelectorCommand {
     String fragmentName
     Integer priority
     String value
-
-    static constraints = {
-        value validator: {
-            ExternalWorkflowConfigFragment.validateJsonString(it)
-        }
-    }
 }
 
 class UpdateCommand extends CreateCommand {
