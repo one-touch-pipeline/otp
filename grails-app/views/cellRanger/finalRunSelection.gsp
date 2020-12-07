@@ -32,6 +32,13 @@
 <div class="body">
     <g:render template="/templates/projectSelection"/>
     <g:render template="/templates/messages"/>
+
+    <g:render template="/templates/quickNavigationBar" model="[
+            linkText : g.message(code: 'cellRanger.linkTo.configurationPage'),
+            link : g.createLink(controller: 'cellRangerConfiguration', action: 'index'),
+            tooltip : g.message(code: 'cellRanger.linkTo.configurationPage.tooltip')
+    ]"/>
+
     <h1>${g.message(code: "otp.menu.cellRanger.finalRunSelection")}</h1>
 
     <otp:annotation type="info">${g.message(code: "cellRanger.selection.info")}</otp:annotation>

@@ -49,6 +49,13 @@
     </div>
 
     <h1><g:message code="cellRanger.title" args="[selectedProject.name, seqType.displayName]"/></h1>
+
+    <g:render template="/templates/quickNavigationBar" model="[
+            linkText : g.message(code: 'cellRanger.linkTo.runSelectionPage'),
+            link : g.createLink(controller: 'cellRanger', action: 'finalRunSelection'),
+            tooltip : g.message(code: 'cellRanger.linkTo.runSelectionPage.tooltip')
+    ]"/>
+
     <h2>Configure version</h2>
     <g:form action="updateVersion" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
         <table class="pipelineTable">
