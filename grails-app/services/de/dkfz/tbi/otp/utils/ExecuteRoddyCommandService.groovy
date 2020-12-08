@@ -162,19 +162,24 @@ class ExecuteRoddyCommandService {
     void createWorkOutputDirectory(Realm realm, File file) {
         assert realm: "Realm must not be null"
         assert file: "File must not be null"
+        String fileList = [
+                file,
+                file.parentFile,
+                file.parentFile.parentFile,
+                file.parentFile.parentFile.parentFile,
+        ].join(' ')
         if (file.exists()) {
             remoteShellHelper.executeCommand(realm, """\
                 |umask 027
                 |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
-                |chmod 2750 ${file}""".stripMargin()
+                |chmod 2750 ${fileList}""".stripMargin()
             )
         } else {
             remoteShellHelper.executeCommand(realm, """\
                 |umask 027
-                |mkdir -m 2750 -p ${file.parent} && \\
                 |mkdir -m 2750 -p ${file} && \\
                 |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
-                |chmod 2750 ${file}""".stripMargin()
+                |chmod 2750 ${fileList}""".stripMargin()
             )
             WaitingFileUtils.waitUntilExists(file)
         }
