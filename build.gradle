@@ -272,6 +272,11 @@ bootRun {
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 
+// required for bootRun on Windows
+grails {
+    pathingJar = true
+}
+
 tasks.withType(Test) {
     maxParallelForks = System.getenv('MAX_PARALLEL_FORKS')?.isInteger() ? System.getenv('MAX_PARALLEL_FORKS') as int : 1
     systemProperty "geb.env", System.getProperty('geb.env')

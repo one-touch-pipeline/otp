@@ -34,7 +34,7 @@ error_handler() {
 }
 
 docker_compose() {
-    docker-compose -f docker/otp/docker-compose.yml "$@"
+    docker-compose -f docker/database/docker-compose.yml "$@"
 }
 
 rebuild_image() {

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 
 # Copyright 2011-2019 The OTP authors
 #
@@ -20,15 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -euxo pipefail
-
-cd docker/database
-
-if ! podman image exists otp-postgres; then
-  buildah bud -t otp-postgres .
+if [[ "$USER_GROUPS" ]]; then
+  for USER_GROUP in $USER_GROUPS; do
+    addgroup $USER_GROUP
+    addgroup $USER_NAME $USER_GROUP
+  done
+  if [[ "$LDAP_USERS" ]]; then
+    for LDAP_USER in $LDAP_USERS; do
+      adduser -S $LDAP_USER --no-create-home
+      for USER_GROUP in $USER_GROUPS; do
+        addgroup $LDAP_USER $USER_GROUP
+      done
+    done
+  fi
 fi
-
-podman pod rm -f otp-postgres || true
-podman container rm -fv otp-postgres || true
-podman pod create --name otp-postgres -p 127.0.0.1:5432:5432
-podman run -d --pod otp-postgres otp-postgres

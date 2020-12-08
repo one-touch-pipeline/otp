@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# Copyright 2011-2019 The OTP authors
+# Copyright 2011-2020 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -euxo pipefail
+FROM ghcr.io/linuxserver/openssh-server
 
-cd docker/database
+ADD 10-add-users-to-groups.sh /config/custom-cont-init.d/10-add-user-to-group.sh
 
-if ! podman image exists otp-postgres; then
-  buildah bud -t otp-postgres .
-fi
-
-podman pod rm -f otp-postgres || true
-podman container rm -fv otp-postgres || true
-podman pod create --name otp-postgres -p 127.0.0.1:5432:5432
-podman run -d --pod otp-postgres otp-postgres
+RUN mkdir /otp && chmod 2777 /otp

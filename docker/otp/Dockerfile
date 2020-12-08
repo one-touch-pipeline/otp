@@ -1,4 +1,4 @@
-# Copyright 2011-2019 The OTP authors
+# Copyright 2011-2020 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,7 +18,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM postgres:9.5.9
-MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
+FROM gradle:4.9-jdk8-alpine
 
-ADD *.sql /docker-entrypoint-initdb.d/
+USER root
+
+RUN mkdir /otp && chmod 2777 /otp
+
+ARG APP_HOME=/usr/app/
+ARG GRADLE_PROXY_ENABLED=false
+ARG GRADLE_PROXY_HOST
+ARG GRADLE_PROXY_PORT
+
+ENV GRADLE_COMMAND=bootRun
+ENV OTP_PROPERTIES=$APP_HOME.otp.properties
+
+WORKDIR $APP_HOME
+
+COPY . .
+
+RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
+    echo "systemProp.http.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
+    echo "systemProp.http.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties && \
+    echo "systemProp.https.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
+    echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties \
+    ; fi
+
+ENTRYPOINT gradle $GRADLE_COMMAND
+
+EXPOSE 8080

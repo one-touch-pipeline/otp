@@ -1,0 +1,135 @@
+# Copyright 2011-2020 The OTP authors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+#
+##
+##
+
+####################################################
+## Add Orgazantional Units
+## These should provide a better overview of the tree
+####################################################
+
+dn: OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+objectclass: organizationalunit
+ou: users
+
+dn: OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+objectclass: organizationalUnit
+ou: persons
+
+dn: OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectclass: organizationalUnit
+ou: groups
+
+####################################################
+## Add Groups
+####################################################
+
+dn: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: groupOfNames
+objectClass: groupOfUsers
+cn: developer
+distinguishedname: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
+objectcategory: group
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }} 
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+
+dn: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: groupOfNames
+objectClass: groupOfUsers
+cn: test_project_01
+distinguishedname: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+objectcategory: group
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }} 
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }} 
+member: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+
+####################################################
+## Add Users and Set as Members of above Groups
+####################################################
+
+dn: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: dave
+department: Development
+givenname: Dave
+mail: dave.development@otp.dev
+objectcategory: user
+objectclass: inetOrgPerson
+objectclass: user
+sn: Development
+thumbnailphoto: someImageData
+uid: dave
+useraccountcontrol: 1024
+memberOf: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+
+dn: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: dori
+department: Development
+givenname: Dori
+mail: dori.development@otp.dev
+objectcategory: user
+objectclass: inetOrgPerson
+objectclass: user
+sn: Development
+thumbnailphoto: someImageData
+uid: dori
+useraccountcontrol: 1024
+memberOf: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+
+dn: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: ralf
+department: Administration
+givenname: Dori
+mail: dori.admin@otp.dev
+objectcategory: user
+objectclass: inetOrgPerson
+objectclass: user
+sn: Admin
+thumbnailphoto: someImageData
+uid: ralf
+useraccountcontrol: 1024
+memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+
+dn: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: otp
+department: Administration
+givenname: Otp
+mail: admin@dummy.de
+objectcategory: user
+objectclass: inetOrgPerson
+objectclass: user
+sn: Admin
+thumbnailphoto: someImageData
+uid: otp
+useraccountcontrol: 1024
+memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}

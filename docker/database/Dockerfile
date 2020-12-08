@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2011-2019 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,15 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -euxo pipefail
+FROM postgres:9.5.9
+MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
-cd docker/database
-
-if ! podman image exists otp-postgres; then
-  buildah bud -t otp-postgres .
-fi
-
-podman pod rm -f otp-postgres || true
-podman container rm -fv otp-postgres || true
-podman pod create --name otp-postgres -p 127.0.0.1:5432:5432
-podman run -d --pod otp-postgres otp-postgres
+ADD *.sql /docker-entrypoint-initdb.d/

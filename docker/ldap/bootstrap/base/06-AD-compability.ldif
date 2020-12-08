@@ -1,0 +1,63 @@
+# Copyright 2011-2020 The OTP authors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+#
+##
+##
+dn: cn=compability,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: compability
+#
+olcAttributeTypes: ( 1.2.840.113556.1.4.782 NAME 'objectCategory'
+  DESC 'objectCategory for compability with active directory'
+  SUP name )
+#
+olcAttributeTypes: ( 1.2.840.113556.1.2.141 NAME 'department'
+  DESC 'department for compability with active directory'
+  SUP name )
+#
+olcAttributeTypes: ( 1.2.840.113556.1.4.159 NAME 'accountExpires'
+  DESC 'accountExpires for compability with active directory'
+  SUP name )
+#
+olcAttributeTypes: ( 2.16.840.1.113730.3.1.35 NAME 'thumbnailPhoto'
+  DESC 'thumbnailPhoto for compability with active directory'
+  SUP name )
+#
+olcAttributeTypes: ( 1.2.840.113556.1.4.8 NAME 'userAccountControl'
+  DESC 'userAccountControl for compability with active directory'
+  SUP name)
+#
+olcAttributeTypes: ( 1.2.840.113556.1.2.102 NAME 'memberOf'
+  DESC 'memberOf for compability with active directory'
+  SUP name)
+#
+olcObjectClasses: ( 1.2.840.113556.1.5.9 NAME 'user'
+        DESC 'a user for compability with active directory'
+        SUP inetOrgPerson STRUCTURAL
+        MUST cn
+        MAY ( userPassword $ department $ objectCategory $ accountExpires $ 
+        department $ thumbnailPhoto $ userAccountControl $ memberOf) )
+#
+olcObjectClasses: (2.5.4.96 NAME 'groupOfUsers'
+        DESC 'a group for compability with active directory'
+        SUP groupofnames STRUCTURAL
+        MUST cn
+        MAY  (objectCategory $ distinguishedName ) )

@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# Copyright 2011-2019 The OTP authors
+# Copyright 2011-2020 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -euxo pipefail
+FROM osixia/openldap:1.4.0
 
-cd docker/database
+ADD bootstrap/base /container/service/slapd/assets/config/bootstrap/ldif
+ADD bootstrap/custom /container/service/slapd/assets/config/bootstrap/ldif/custom
 
-if ! podman image exists otp-postgres; then
-  buildah bud -t otp-postgres .
-fi
-
-podman pod rm -f otp-postgres || true
-podman container rm -fv otp-postgres || true
-podman pod create --name otp-postgres -p 127.0.0.1:5432:5432
-podman run -d --pod otp-postgres otp-postgres
+ADD environment /container/environment/01-custom

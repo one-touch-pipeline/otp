@@ -20,8 +20,6 @@
  * SOFTWARE.
  */
 
-#!/usr/bin/env groovy
-
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException
 import java.nio.file.*

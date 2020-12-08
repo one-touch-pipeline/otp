@@ -1,0 +1,101 @@
+# Copyright 2011-2020 The OTP authors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+version: '3.0'
+services:
+  otp:
+    container_name: otp-dev
+    restart: on-failure
+    build:
+      dockerfile: docker/otp/Dockerfile
+      context: .
+      args:
+        GRADLE_PROXY_ENABLED: $GRADLE_PROXY_ENABLED
+        GRADLE_PROXY_HOST: $GRADLE_PROXY_HOST
+        GRADLE_PROXY_PORT: $GRADLE_PROXY_PORT
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+    volumes:
+      - gradle_dependencies:/home/gradle/.gradle
+      - filesystem:/otp
+    depends_on:
+      - postgres
+    links:
+      - openssh-server:cluster-host
+      - open-ldap:ldap-host
+
+  postgres:
+    container_name: otp-dev-postgres
+    env_file:
+      - .env
+    build:
+      context: ./docker/database/
+      dockerfile: Dockerfile.dev
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  open-ldap:
+    container_name: otp-dev-ldap
+    build: docker/ldap
+    ports:
+      - 389:389
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+    command: --copy-service
+
+  php-ldap-admin:
+    image: osixia/phpldapadmin:latest
+    container_name: otp-dev-ldap-admin
+    ports:
+      - 8090:80
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap_host
+      PHPLDAPADMIN_HTTPS: "false"
+    links:
+      - open-ldap:ldap_host
+
+  openssh-server:
+    container_name: otp-dev-ssh-server
+    build: docker/ssh
+    env_file:
+      - .env
+    volumes:
+      - filesystem:/otp
+    ports:
+      - ${SSH_PORT:-2222}:2222
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: otp-dev-mailhog
+    ports:
+      - 8025:8025
+      - 1025:1025
+
+volumes:
+  gradle_dependencies:
+  db_data:
+  ldap_data:
+  ldap_config:
+  filesystem:
