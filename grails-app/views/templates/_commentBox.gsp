@@ -39,8 +39,8 @@ To be used in conjunction with: common/CommentBox.js
     </div>
     <sec:ifAllGranted roles="ROLE_OPERATOR">
         <div>
-            <button id="button-save" data-controller="${targetController}" data-action="${targetAction}" disabled><g:message code="commentBox.save"/></button>
-            <button id="button-cancel" disabled><g:message code="commentBox.cancel"/></button>
+            <button id="button-save" class="btn btn-primary" data-controller="${targetController}" data-action="${targetAction}" disabled><g:message code="commentBox.save"/></button>
+            <button id="button-cancel" class="btn btn-primary" disabled><g:message code="commentBox.cancel"/></button>
             <span id="authorSpan">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')} ${comment?.author}</span>
         </div>
     </sec:ifAllGranted>
