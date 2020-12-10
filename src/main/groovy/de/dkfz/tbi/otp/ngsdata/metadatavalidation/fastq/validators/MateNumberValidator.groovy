@@ -55,6 +55,7 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
 
     @Override
     void checkColumn(MetadataValidationContext context) {
+        addErrorForMissingRequiredColumn(context, MetaDataColumn.READ.name())
     }
 
     @Override

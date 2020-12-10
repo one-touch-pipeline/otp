@@ -33,18 +33,23 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class MateNumberValidatorSpec extends Specification {
 
-    void 'validate, when column is missing, adds no error'() {
+    void 'validate, when column is missing, adds an error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 SomeColumn
 SomeValue
 """)
 
+        Collection<Problem> expectedProblems = [
+                new Problem(Collections.emptySet(), Level.ERROR, "Required column 'READ' is missing.",
+                        "Required column 'READ' is missing.")
+        ]
+
         when:
         new MateNumberValidator().validate(context)
 
         then:
-        context.problems.empty
+        context.problems.first().message == expectedProblems.first().message
     }
 
     @Unroll
