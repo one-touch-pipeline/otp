@@ -74,10 +74,6 @@
                     <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
                 </tr>
                 <tr>
-                    <td>${g.message(code: "project.costCenter")}</td>
-                    <td>${projectRequest.costCenter}</td>
-                </tr>
-                <tr>
                     <td>${g.message(code: "project.projectType")}</td>
                     <td>${projectRequest.projectType}</td>
                 </tr>
@@ -92,6 +88,10 @@
                 <tr>
                     <td>${g.message(code: "project.endDate")}</td>
                     <td>${projectRequest.endDate}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "project.costCenter")}</td>
+                    <td>${projectRequest.costCenter}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "project.organizationalUnit")}</td>

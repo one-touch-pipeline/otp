@@ -242,11 +242,6 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrain', cmd: cmd]"/>
             </tr>
             <tr>
-                <td><g:message code="project.costCenter"/></td>
-                <td><g:textField name="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'costCenter', cmd: cmd]"/>
-            </tr>
-            <tr>
                 <td><g:message code="project.projectType"/></td>
                 <td><g:select name='projectType' class="use-select-2"
                               from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true"/></td>
@@ -310,6 +305,11 @@
                 <td><g:message code="project.endDate"/></td>
                 <td><input type="date" name="endDateInput" value="${(source.getFieldAsLocalDate("endDate"))?.format(DateTimeFormatter.ISO_LOCAL_DATE)}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'endDate', cmd: cmd]"/>
+            </tr>
+            <tr>
+                <td><g:message code="project.costCenter"/></td>
+                <td><g:textField name="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'costCenter', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.organizationalUnit"/></td>

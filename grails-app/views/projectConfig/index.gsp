@@ -129,16 +129,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><g:message code="project.costCenter"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'costCenter'])}"
-                                value="${selectedProject.costCenter}"/>
-                    </td>
-                </tr>
-                <tr>
                     <td><g:message code="project.projectType"/></td>
                     <td></td>
                     <td>
@@ -367,6 +357,16 @@
                         <sec:ifNotGranted roles="ROLE_OPERATOR">
                             ${selectedProject.endDate ?: g.message(code: "project.endDate.empty")}
                         </sec:ifNotGranted>
+                    </td>
+                </tr>
+                <tr>
+                    <td><g:message code="project.costCenter"/></td>
+                    <td></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'costCenter'])}"
+                                value="${selectedProject.costCenter}"/>
                     </td>
                 </tr>
                 <tr>

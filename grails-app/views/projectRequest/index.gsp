@@ -113,11 +113,6 @@
             </td>
         </tr>
         <tr>
-            <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
-            <td><input name="costCenter" id="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
-        </tr>
-        <tr>
             <td><label for="projectType">${g.message(code: "project.projectType")}</label></td>
             <td></td>
             <td><g:select id="projectType" name="projectType" class="use-select-2"
@@ -144,6 +139,11 @@
             <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
             <td></td>
             <td><input name="endDate" id="endDate" value="${source.getByFieldName("endDate")}" type="date"/></td>
+        </tr>
+        <tr>
+            <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
+            <td><input name="costCenter" id="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
         </tr>
         <tr>
             <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}*</label></td>
