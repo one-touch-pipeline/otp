@@ -185,7 +185,7 @@ patients.split('\n')*.trim().findAll {
                         Path targetFastqFolder = Paths.get(
                                 targetFolderWithPid.toString(),
                                 lsdfFilesService.getFilePathInViewByPid(dataFile)
-                        )
+                        ).parent
                         addToOutput("echo ${currentFile}")
                         addToOutput("mkdir -p ${targetFastqFolder}")
                         String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"
