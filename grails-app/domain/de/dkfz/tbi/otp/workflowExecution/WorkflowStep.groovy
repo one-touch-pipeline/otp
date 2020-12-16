@@ -77,7 +77,7 @@ class WorkflowStep implements Commentable, Entity {
                 return 'workflowStep.previous.workflowRun.differ'
             }
         }
-        restartedFrom nullable: true, validator: { val, obj ->
+        restartedFrom nullable: true, unique: true, validator: { val, obj ->
             if (val && val.workflowRun != obj.workflowRun) {
                 return 'workflowStep.restartedFrom.workflowRun.differ'
             }

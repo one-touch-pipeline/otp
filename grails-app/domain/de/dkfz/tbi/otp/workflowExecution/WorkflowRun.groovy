@@ -99,7 +99,7 @@ class WorkflowRun implements Commentable, Entity {
         combinedConfig validator: {
             validateCombinedConfig(it)
         }
-        restartedFrom nullable: true, validator: { val, obj ->
+        restartedFrom nullable: true, unique: true, validator: { val, obj ->
             if (val && val.workflow != obj.workflow) {
                 return 'workflowRun.restartedFrom.workflow.differ'
             }

@@ -42,6 +42,7 @@ class WorkflowService {
                 project: step.workflowRun.project,
                 displayName: step.workflowRun.displayName,
                 combinedConfig: step.workflowRun.combinedConfig,
+                restartedFrom: step.workflowRun,
         ).save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
