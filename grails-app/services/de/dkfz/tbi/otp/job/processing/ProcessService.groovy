@@ -27,7 +27,6 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.PlanInformation
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
@@ -119,20 +118,6 @@ class ProcessService {
             return ""
         }
         return file.getText()
-    }
-
-    /**
-     * Retrieves the cluster job log file for the given ClusterJob and returns the file content.
-     * @param clusterJob for which the log file should be retrieved
-     * @return Content of log file or empty String in case log file does not exist
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    String processingStepClusterJobLog(ClusterJob clusterJob) {
-        File file = new File(clusterJob.jobLog)
-        if (!file.exists() || !file.isFile()) {
-            return ""
-        }
-        return "Log location: ${clusterJob.jobLog}\n\n${file.getText()}"
     }
 
     /**

@@ -27,20 +27,38 @@ import org.joda.time.Period
 import org.joda.time.format.PeriodFormat
 
 import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.project.Project
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobDetailController {
 
     ClusterJobService clusterJobService
 
+    static allowedMethods = [
+            show                     : "GET",
+            showLog                  : "GET",
+            getStatesTimeDistribution: "GET",
+    ]
+
     def show() {
-        ClusterJob clusterJob = ClusterJob.get(params.id)
+        ClusterJob clusterJob = ClusterJob.get(params.id as long)
         Individual individual = clusterJob ? clusterJobService.findProcessParameterObjectByClusterJob(clusterJob)?.individual : null
+        Project project = clusterJob.oldSystem ? individual?.project : clusterJob.workflowStep.workflowRun.project
 
         return [
                 'job'       : clusterJob,
                 'individual': individual,
+                'project'   : project,
                 'NA'        : ClusterJob.NOT_AVAILABLE,
+        ]
+    }
+
+    def showLog() {
+        ClusterJob clusterJob = ClusterJob.get(params.id as long)
+        String content = clusterJobService.getClusterJobLog(clusterJob)
+        return [
+                job    : clusterJob,
+                content: content,
         ]
     }
 

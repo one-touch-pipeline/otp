@@ -76,9 +76,12 @@ on the general cluster job page
                         <td></td>
                         <td><g:message code="jobstats.jobSpecific.detail.table.attribute.project"/></td>
                         <td>
-                            <g:if test="${individual != null}">
-                                <g:link controller="projectOverview" action="index" params="[(projectParameter): individual.project.name]">${individual.project}</g:link>
+                            <g:if test="${project != null}">
+                                <g:link controller="projectOverview" action="index" params="[(projectParameter): project.name]">${project}</g:link>
                             </g:if>
+                            <g:else>
+                                ${NA}
+                            </g:else>
                         </td>
                     </tr>
                     <tr>
@@ -89,6 +92,9 @@ on the general cluster job page
                             <g:if test="${individual != null}">
                                 <g:link controller="individual" action="show" id="${individual.id}">${individual.mockPid}</g:link>
                             </g:if>
+                            <g:else>
+                                ${NA}
+                            </g:else>
                         </td>
                     </tr>
                     <tr>

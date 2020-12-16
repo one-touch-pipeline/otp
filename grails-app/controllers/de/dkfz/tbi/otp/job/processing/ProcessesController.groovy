@@ -359,11 +359,6 @@ class ProcessesController {
         ]
     }
 
-    def processingStepClusterJobLog() {
-        ClusterJob clusterJob = ClusterJob.findById(params.id as long)
-        render contentType: "text/plain", text: processService.processingStepClusterJobLog(clusterJob)
-    }
-
     def restartStep() {
         boolean ok = true
         String error = null

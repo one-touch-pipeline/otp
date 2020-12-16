@@ -48,14 +48,14 @@ $(function () {
                 '<td></td>' +
                 '</tr>'
         }
-        for (var i = 0; i < d.logs.length; i++) {
+        if (d.hasLogs) {
             childTable += '<tr>' +
                 '<td></td>' +
                 '<td>Workflow logs</td>' +
                 '<td></td>' +
                 '<td>' + $.otp.createLinkMarkup({text: "Log", controller: "workflowRunDetails", action: "showLogs", id: d.id}) + '</td>' +
                 '<td></td>' +
-                '<td>' + d.logs[i].id + '</td>' +
+                '<td></td>' +
                 '</tr>'
         }
         if (d.error) {
@@ -89,7 +89,7 @@ $(function () {
                     if (type === "sort") {
                         return null;
                     }
-                    if (!row.error && !row.clusterJobs.length && !row.wes && !row.logs.length) {
+                    if (!row.error && !row.clusterJobs.length && !row.wes && !row.hasLogs) {
                         return ""
                     }
                     return "<div class='details-control'><i title='Show/hide details' class='bi bi-chevron-bar-expand'></i></div>"

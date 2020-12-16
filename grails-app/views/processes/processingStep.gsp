@@ -121,7 +121,7 @@
                     <td>${clusterJob.clusterJobId}</td>
                     <td>
                         <g:if test="${clusterJob.jobLog && new File(clusterJob.jobLog).exists()}">
-                            <g:link action="processingStepClusterJobLog" id="${clusterJob.id}">
+                            <g:link controller="clusterJobDetail" action="showLog" id="${clusterJob.id}">
                                 <g:message code="workflow.paramater.table.inline.log"/>
                             </g:link>
                         </g:if><g:else>

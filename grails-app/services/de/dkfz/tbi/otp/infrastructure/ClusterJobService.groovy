@@ -201,11 +201,29 @@ class ClusterJobService {
     }
 
     /**
+     * Retrieves the cluster job log file for the given ClusterJob and returns the file content.
+     * @param clusterJob for which the log file should be retrieved
+     * @return Content of log file
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    String getClusterJobLog(ClusterJob clusterJob) {
+        if (!clusterJob.jobLog) {
+            return "Path to job log not set."
+        }
+        try {
+            FileSystem fs = fileSystemService.getRemoteFileSystem(clusterJob.realm)
+            return fs.getPath(clusterJob.jobLog).text
+        } catch (IOException e) {
+            return e.message
+        }
+    }
+
+    /**
      * returns the specific workflow object to a cluster job, e.g. Run, AlignmentPass
      * @return Object or null
      */
     static ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {
-        return job.processingStep.processParameterObject
+        return job.processingStep?.processParameterObject
     }
 
     /**

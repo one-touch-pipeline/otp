@@ -42,6 +42,8 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
             index      : "GET",
             data       : "GET",
             saveComment: "POST",
+            showError  : "GET",
+            showLogs   : "GET",
     ]
 
     def index(RunShowDetailsCommand cmd) {
@@ -96,7 +98,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
                         ]
                     },
                     wes        : step.wesIdentifier,
-                    logs       : step.logs,
+                    hasLogs    : !step.logs.empty,
             ]
         }
         render cmd.getDataToRender(result) as JSON
@@ -107,6 +109,31 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         commentService.saveComment(workflowRun, cmd.comment)
         Map dataToRender = [date: workflowRun.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: workflowRun.comment.author]
         render dataToRender as JSON
+    }
+
+    def showError() {
+        WorkflowStep step = WorkflowStep.get(params.id as long)
+        if (!step?.workflowError) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND)
+            return []
+        }
+
+        return [
+                step: step,
+        ]
+    }
+
+    def showLogs() {
+        WorkflowStep step = WorkflowStep.get(params.id as long)
+        if (!step) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND)
+            return []
+        }
+
+        return [
+                step    : step,
+                messages: step.logs*.displayLog(),
+        ]
     }
 }
 
