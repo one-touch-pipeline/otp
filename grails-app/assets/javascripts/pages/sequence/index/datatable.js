@@ -34,13 +34,15 @@ $.otp.sequence = {
 
         $("#sequenceTable").dataTable({
             dom: '<i> B rt<"clear">S',
-            buttons: $.otp.getDownloadButtonServerSide($.otp.createLink({
-                controller: 'sequence',
-                action: 'exportAll',
-                parameters: {
-                    filtering: JSON.stringify(searchCriteria()),
-                }
-            })),
+            buttons: $.otp.getDownloadButtonServerSide(function () {
+                return $.otp.createLink({
+                    controller: 'sequence',
+                    action: 'exportAll',
+                    parameters: {
+                        filtering: JSON.stringify(searchCriteria()),
+                    }
+                })
+            }),
             bFilter: false,
             bProcessing: true,
             bServerSide: true,

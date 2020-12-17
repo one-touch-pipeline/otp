@@ -402,7 +402,7 @@ $.otp.getDownloadButtonServerSide = function (downloadLink) {
             iframe.style.height = "0px";
             iframe.style.width = "0px";
             iframe.style.border = "0px";
-            iframe.src = downloadLink;
+            iframe.src = downloadLink();
             document.body.appendChild(iframe);
         }
     }]
