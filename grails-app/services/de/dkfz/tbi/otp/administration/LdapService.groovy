@@ -169,7 +169,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(query, new IsUserDeactivatedMapper(ldapService: this))[0]
     }
 
-    Boolean isUserInLdapAndActivated(User user) {
+    boolean isUserInLdapAndActivated(User user) {
         return (existsInLdap(user) && !isUserDeactivated(user))
     }
 

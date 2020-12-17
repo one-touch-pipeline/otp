@@ -98,8 +98,7 @@ class DeactivateUsersJob extends ScheduledJob {
         log.info("Disable user ${user} with deactivation date ${user.plannedDeactivationDate}")
         Set<String> affectedUnixGroups = [] as Set<String>
         UserProjectRole.findAllByUserAndEnabled(user, true).each { UserProjectRole userProjectRole ->
-            userProjectRole.enabled = false
-            userProjectRole.save(flush: true)
+            userProjectRoleService.doSetEnabled(userProjectRole, false)
             if (isInGroup(user, userProjectRole.project.unixGroup)) {
                 affectedUnixGroups.add(userProjectRole.project.unixGroup)
             }

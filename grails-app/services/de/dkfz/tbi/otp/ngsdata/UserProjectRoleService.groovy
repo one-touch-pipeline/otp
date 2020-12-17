@@ -423,16 +423,7 @@ class UserProjectRoleService {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {
             return userProjectRole
         }
-        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
-            upr.enabled = value
-            upr.accessToOtp = ldapService.isUserInLdapAndActivated(upr.user)
-            // users should be reactivated without any further permissions
-            upr.accessToFiles = false
-            upr.manageUsers = false
-            upr.manageUsersAndDelegate = false
-            upr.receivesNotifications = false
-            assert upr.save(flush: true)
-        }
+        doSetEnabled(userProjectRole, value)
         if (value) {
             notifyProjectAuthoritiesAndUser(userProjectRole)
         } else {
@@ -443,6 +434,19 @@ class UserProjectRoleService {
         String message = "${value ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}"
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, message)
         return userProjectRole
+    }
+
+    void doSetEnabled(UserProjectRole userProjectRole, boolean value) {
+        applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.enabled = value
+            upr.accessToOtp = value && ldapService.isUserInLdapAndActivated(upr.user)
+            // users should be reactivated without any further permissions
+            upr.accessToFiles = false
+            upr.manageUsers = false
+            upr.manageUsersAndDelegate = false
+            upr.receivesNotifications = false
+            assert upr.save(flush: true)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")

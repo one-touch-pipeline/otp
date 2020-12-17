@@ -112,13 +112,17 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 mailHelperService: Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { }
                 },
+                userProjectRoleService: new UserProjectRoleService(),
         ])
+        job.userProjectRoleService.ldapService = Mock(LdapService) {
+            isUserInLdapAndActivated(_) >> false
+        }
 
         User user = DomainFactory.createUser()
         List<UserProjectRole> userProjectRoles = [
                 DomainFactory.createUserProjectRole(user: user),
                 DomainFactory.createUserProjectRole(user: user),
-                DomainFactory.createUserProjectRole(user: user, enabled: false),
+                DomainFactory.createUserProjectRole(user: user, enabled: false, accessToOtp: false, receivesNotifications: false),
         ]
 
         when:
@@ -126,6 +130,11 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
 
         then:
         userProjectRoles.every { !it.enabled }
+        userProjectRoles.every { !it.accessToOtp }
+        userProjectRoles.every { !it.accessToFiles }
+        userProjectRoles.every { !it.manageUsers }
+        userProjectRoles.every { !it.manageUsersAndDelegate }
+        userProjectRoles.every { !it.receivesNotifications }
         user.plannedDeactivationDate == null
     }
 
@@ -144,7 +153,9 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 mailHelperService: Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { }
                 },
+                userProjectRoleService: new UserProjectRoleService(),
         ])
+        job.userProjectRoleService.ldapService = Mock(LdapService)
 
         Closure<User> createUserWithProjectsHelper = { String username, int offset ->
             Date date = new Date(System.currentTimeMillis() + offset * 24 * 60 * 60 * 1000)

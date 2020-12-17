@@ -331,7 +331,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRole.enabled == !enabledStatus
 
         and: "all permissions are taken and non are granted, except accessToOtp which depends on the ldap system"
-        userProjectRole.accessToOtp == accountInLdap
+        userProjectRole.accessToOtp == (!enabledStatus && accountInLdap)
         !userProjectRole.accessToFiles
         !userProjectRole.manageUsers
         !userProjectRole.manageUsersAndDelegate
