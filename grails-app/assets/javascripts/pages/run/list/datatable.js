@@ -35,7 +35,7 @@ $.otp.run = {
 
         $("#runTable").dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton(),
+            buttons: $.otp.getDownloadButton("","list_of_runs"),
             bFilter: true,
             bProcessing: true,
             bServerSide: true,

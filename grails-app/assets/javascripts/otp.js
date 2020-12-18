@@ -376,10 +376,15 @@ $.otp.resizeBodyInit = function (table, margin) {
     });
 };
 
-$.otp.getDownloadButton = function (columnSelector) {
+$.otp.getDownloadButton = function (columnSelector, fileName) {
+    const defaultFileName = document.title.replaceAll(" ", "_");
+    const date = new Date();
+    const formattedDate = date.getUTCFullYear() + '-' + (date.getUTCMonth()+1) + '-' + date.getUTCDate();
+
     return [{
         extend: 'csvHtml5',
         text: 'Download CSV',
+        title: (fileName || defaultFileName) + '_' + formattedDate,
         footer: false,
         exportOptions: {
             columns: columnSelector || ':visible'

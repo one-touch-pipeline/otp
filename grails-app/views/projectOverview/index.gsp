@@ -38,7 +38,7 @@
         <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>
 
         <h2 class="data-table-header"><g:message code="projectOverview.table.sampleType.title"/></h2>
-        <div class="otpDataTables">
+        <div class="otpDataTables" data-csv-title="number_of_samples_by_sample_type">
             <otp:dataTable
                 codes="${[
                     'projectOverview.table.sampleTypeName',
@@ -48,7 +48,7 @@
         </div>
 
         <h2 class="data-table-header"><g:message code="projectOverview.title.centersOverviewTable"/></h2>
-        <div class="otpDataTables">
+        <div class="otpDataTables" data-csv-title="sequencing_center">
             <otp:dataTable
                 codes="${[
                     'overview.statistic.center.name',
@@ -59,7 +59,7 @@
         </div>
 
         <h2 class="data-table-header"><g:message code="projectOverview.table.statistic.title"/></h2>
-        <div class="otpDataTables">
+        <div class="otpDataTables" data-csv-title="sequences_of_samples">
             <otp:dataTable
                 codes="${[
                     'projectOverview.index.PID',
@@ -76,7 +76,7 @@
         </div>
 
         <h2 class="data-table-header"><g:message code="projectOverview.table.seqType.title"/></h2>
-        <div class="otpDataTables">
+        <div class="otpDataTables" data-csv-title="sequencing_technologies">
             <otp:dataTable
                 codes="${[
                         'projectOverview.seqType.seqName',

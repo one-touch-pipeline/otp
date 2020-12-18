@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+import java.text.SimpleDateFormat
+
 @Secured('isFullyAuthenticated()')
 class SequenceController {
     SeqTrackService seqTrackService
@@ -125,6 +127,8 @@ class SequenceController {
 
     def exportAll(DataTableCommand cmd) {
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        String currentDate = dateFormat.format(new Date())
 
         List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
 
@@ -155,7 +159,7 @@ class SequenceController {
                 .join(',').replaceAll("<br/?>", " ")
         String content = "${contentHeader}\n${contentBody}\n"
         response.setContentType("application/octet-stream")
-        response.setHeader("Content-disposition", "filename=sequence_export.csv")
+        response.setHeader("Content-disposition", "filename=Alignment_Quality_Control_" + currentDate + ".csv")
         response.outputStream << content.toString().bytes
     }
 }

@@ -39,9 +39,11 @@ $.otp.projectOverviewTable = {
 
     registerDataTable: function (selector, url, successUpdate) {
         "use strict";
+        const fileName = $(selector).parent().attr("data-csv-title") + "-" + $(".selected-project-value strong").text();
+
         var oTable = $(selector).dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton(),
+            buttons: $.otp.getDownloadButton("", fileName),
             oTableTools: $.otp.tableTools,
             bFilter: true,
             bProcessing: true,

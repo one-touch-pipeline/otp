@@ -25,9 +25,11 @@
 
 $(function () {
     "use strict";
+    const fileName = "Sample_Overview-" + $(".selected-project-value strong").text();
+
     var oTableLaneOverview = $("#laneOverviewId").dataTable({
         sDom: '<i> B rt<"clear">',
-        buttons: $.otp.getDownloadButton(),
+        buttons: $.otp.getDownloadButton("", fileName),
         bFilter: true,
         bProcessing: true,
         bServerSide: false,

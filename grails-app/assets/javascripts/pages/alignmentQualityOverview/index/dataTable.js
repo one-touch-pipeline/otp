@@ -186,9 +186,11 @@ $(function () {
 
     var initializeTable = function () {
         if ($('#seqType').val()) {
+            const fileName = "Alignment_Quality_Control-" + $(".selected-project-value strong").text();
+
             var table = $("#overviewTableProcessedMergedBMF").dataTable({
                 sDom: '<i> B rt<"clear">',
-                buttons: $.otp.getDownloadButton(".export_column"),
+                buttons: $.otp.getDownloadButton(".export_column", fileName),
                 aoColumnDefs: [
                     {bVisible: false, aTargets: [3, 4, 5]},
                 ],

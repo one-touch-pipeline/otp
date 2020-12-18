@@ -35,9 +35,12 @@ $.otp.sampleIdentifierOverviewTable = {
 
     registerDataTable: function (selector, url) {
         "use strict";
+
+        const fileName = "Sample_Identifier-" + $(".selected-project-value strong").text();
+
         var oTable = $(selector).dataTable({
             sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton(),
+            buttons: $.otp.getDownloadButton("", fileName),
             bFilter: true,
             bProcessing: true,
             bServerSide: false,
