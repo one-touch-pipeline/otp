@@ -67,7 +67,7 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
 
     @Test
     void testParseSampleIdentifier_WithInformSampleNameAndDefaultParsers_ShouldReturnInformSampleIdentifier() {
-        Project project = createProject(name: 'INFORM', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.INFORM)
-        assert sampleIdentifierService.parseSampleIdentifier('I123_456_1T3_D1', project).projectName == 'INFORM'
+        Project project = createProject(name: 'INFORM1', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.INFORM)
+        assert sampleIdentifierService.parseSampleIdentifier('I123_456_1T3_D1', project).projectName == 'INFORM1'
     }
 }

@@ -41,7 +41,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         if (matcher) {
             assert matcher.matches()
             return new DefaultParsedSampleIdentifier(
-                    'INFORM',
+                    'INFORM1',
                     matcher.group('pid'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,

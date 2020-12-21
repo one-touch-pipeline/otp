@@ -45,7 +45,7 @@ class InformSampleIdentifierParserSpec extends Specification {
 
         then:
         validPid
-        defaultParsedSampleIdentifier.projectName == 'INFORM'
+        defaultParsedSampleIdentifier.projectName == 'INFORM1'
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
         defaultParsedSampleIdentifier.fullSampleName == input
