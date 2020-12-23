@@ -114,7 +114,7 @@ Closure<ScriptOutput> createSwapScript = { String swapLabel ->
 
         scriptOutput.meta << "${parsedEntry.oldSample} [${parsedEntry.identifier}] --> ${parsedEntry.newSample}"
 
-        Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = getDataFilesBySampleIdentifierString(parsedEntry.identifier).groupBy { it.seqTrack }
+        Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = getDataFilesBySampleIdentifierString(parsedEntry).groupBy { it.seqTrack }
         dataFilesPerSeqTrack.eachWithIndex { SeqTrack seqTrack, List<DataFile> dataFiles, int index ->
             String fileName = "mv_${counter++}_${parsedEntry.oldSampleString}_ST_${index}_${seqTrack.laneId}__to__${parsedEntry.newSampleString}"
 
@@ -179,10 +179,11 @@ createSwapScript(swapLabel).printToStdout()
  * Utility Functions and Classes
  ********************************************************************************/
 
-private List<DataFile> getDataFilesBySampleIdentifierString(String sampleIdentifier) {
+private List<DataFile> getDataFilesBySampleIdentifierString(ParsedSwapMapEntry entry) {
     return DataFile.withCriteria {
         seqTrack {
-            eq('sampleIdentifier', sampleIdentifier)
+            eq('sampleIdentifier', entry.identifier)
+            eq('sample', entry.oldSample)
         }
     }
 }
