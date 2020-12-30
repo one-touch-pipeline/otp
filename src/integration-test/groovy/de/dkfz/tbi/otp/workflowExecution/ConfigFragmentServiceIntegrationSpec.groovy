@@ -35,13 +35,13 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
         given:
         ConfigFragmentService service = new ConfigFragmentService()
         ExternalWorkflowConfigSelector ewcs1 = createExternalWorkflowConfigSelector([
-                fineTuningPriority            : 0,
+                customPriority            : 0,
         ])
         ExternalWorkflowConfigSelector ewcs2 = createExternalWorkflowConfigSelector([
-                fineTuningPriority            : 5,
+                customPriority            : 5,
         ])
         ExternalWorkflowConfigSelector ewcs3 = createExternalWorkflowConfigSelector([
-                fineTuningPriority            : 1,
+                customPriority            : 1,
         ])
         service.configSelectorService = Mock(ConfigSelectorService) {
             1 * findAllSelectorsSortedByPriority(_) >> [ewcs2, ewcs3, ewcs1]

@@ -169,9 +169,15 @@
                     <td><label for="fragmentName">${g.message(code: "workflowConfig.fragment.name")}</label></td>
                     <td><input id="fragmentName" name="fragmentName" type="text" value="${editedCmd ? editedCmd?.fragmentName : fragment?.name}" autocomplete="off"/></td>
                 </tr>
+
                 <tr>
-                    <td><label for="priority">${g.message(code: "workflowConfig.selector.priority")}</label></td>
-                    <td><input id="priority" name="priority" type="text" value="${editedCmd ? editedCmd?.priority : selector?.basePriority}" autocomplete="off" required/></td>
+                    <td><label for="customPriority">${g.message(code: "workflowConfig.selector.customPriority")}</label></td>
+                    <td><input id="customPriority" name="customPriority" type="text" value="${editedCmd ? editedCmd?.customPriority : selector?.customPriority}" autocomplete="off" required/></td>
+                </tr>
+
+                <tr>
+                    <td><label>${g.message(code: "workflowConfig.selector.suggestedPriority")}</label></td>
+                    <td><label>${selector?.calculateSuggestedPriority()}</label></td>
                 </tr>
 
                 <tr>

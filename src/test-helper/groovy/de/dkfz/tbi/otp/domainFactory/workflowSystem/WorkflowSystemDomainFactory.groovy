@@ -133,8 +133,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 projects: { [createProject()] },
                 externalWorkflowConfigFragment: { createExternalWorkflowConfigFragment() },
                 selectorType: { SelectorType.GENERIC },
-                basePriority: nextId,
-                fineTuningPriority: nextId,
+                customPriority: nextId,
         ], properties)
     }
 

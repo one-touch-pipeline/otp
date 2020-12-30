@@ -246,8 +246,7 @@ class ConfigSelectorService {
                 libraryPreparationKits: cmd.libraryPreparationKits as Set,
                 externalWorkflowConfigFragment: fragment,
                 selectorType: cmd.type,
-                basePriority: cmd.priority,
-                fineTuningPriority: 0,
+                customPriority: cmd.customPriority,
         ).save(flush: true)
         return selector
     }
@@ -262,7 +261,7 @@ class ConfigSelectorService {
         cmd.selector.libraryPreparationKits = cmd.libraryPreparationKits as Set
 
         cmd.selector.name = cmd.selectorName
-        cmd.selector.basePriority = cmd.priority
+        cmd.selector.customPriority = cmd.customPriority
         cmd.selector.selectorType = cmd.type
 
         if (cmd.fragment.name != cmd.fragmentName ||

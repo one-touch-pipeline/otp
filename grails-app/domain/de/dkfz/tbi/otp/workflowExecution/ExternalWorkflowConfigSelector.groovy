@@ -40,8 +40,7 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
 
     ExternalWorkflowConfigFragment externalWorkflowConfigFragment
     SelectorType selectorType
-    int basePriority
-    int fineTuningPriority
+    int customPriority
 
     static hasMany = [
             workflows             : Workflow,
@@ -61,10 +60,13 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
         }
     }
 
+    int calculateSuggestedPriority() {
+        return 0
+    }
+
     @Override
     int compareTo(ExternalWorkflowConfigSelector externalWorkflowConfigSelector) {
-        return externalWorkflowConfigSelector.basePriority <=> basePriority ?:
-                externalWorkflowConfigSelector.fineTuningPriority <=> fineTuningPriority
+        return externalWorkflowConfigSelector.customPriority <=> customPriority
     }
 
     List<ExternalWorkflowConfigFragment> getFragments() {

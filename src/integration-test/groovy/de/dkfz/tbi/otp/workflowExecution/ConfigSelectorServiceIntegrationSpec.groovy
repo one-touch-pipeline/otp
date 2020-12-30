@@ -218,19 +218,19 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         setupData()
 
         ExternalWorkflowConfigSelector ewcs1 = ExternalWorkflowConfigSelector.findByName("ewcs1")
-        ewcs1.basePriority = 1
+        ewcs1.customPriority = 1
         ewcs1.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs3 = ExternalWorkflowConfigSelector.findByName("ewcs3")
-        ewcs3.basePriority = 5
+        ewcs3.customPriority = 5
         ewcs3.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs4 = ExternalWorkflowConfigSelector.findByName("ewcs4")
-        ewcs4.basePriority = 0
+        ewcs4.customPriority = 0
         ewcs4.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs5 = ExternalWorkflowConfigSelector.findByName("ewcs5")
-        ewcs5.basePriority = 3
+        ewcs5.customPriority = 3
         ewcs5.save(flush: true)
 
         expect:
@@ -239,10 +239,10 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         )*.name == [ewcs3.name, ewcs5.name, ewcs1.name, ewcs4.name]
     }
 
-    ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name, int basePriority) {
+    ExternalWorkflowConfigSelector createEWCSHelperBaseCriteria(String name, int customPriority) {
         return createExternalWorkflowConfigSelector([
                 name        : name,
-                basePriority: basePriority,
+                customPriority: customPriority,
         ])
     }
 
@@ -280,7 +280,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 selectorName: "selectorName",
                 type: SelectorType.GENERIC,
                 fragmentName: "fragmentName",
-                priority: 0,
+                customPriority: 0,
                 value: '{"OTP_CLUSTER": {"MEMORY": "1"}}',
         )
 
@@ -315,7 +315,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 selectorName: selector.name,
                 type: selector.selectorType,
                 fragmentName: selector.externalWorkflowConfigFragment.name,
-                priority: selector.basePriority,
+                customPriority: selector.customPriority,
                 value: selector.externalWorkflowConfigFragment.configValues,
         )
     }

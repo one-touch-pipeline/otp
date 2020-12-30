@@ -181,7 +181,7 @@ class CreateCommand extends SelectorCommand {
     String selectorName
     SelectorType type
     String fragmentName
-    Integer priority
+    Integer customPriority
     String value
 }
 

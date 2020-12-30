@@ -23,7 +23,7 @@
 <g:set var="selector" value="${selector as de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector}"/>
 <div style="border: 1px black solid">
     <div>
-        <b>${selector.basePriority} (${selector.fineTuningPriority}) <g:link controller="workflowConfig" action="index" params="${['selector.id': selector.id]}">${selector.name}</g:link></b>
+        <b>${selector.customPriority} <g:link controller="workflowConfig" action="index" params="${['selector.id': selector.id]}">${selector.name}</g:link></b>
         <otp:expandable collapsed="expanded">
             <table>
                 <tr>
