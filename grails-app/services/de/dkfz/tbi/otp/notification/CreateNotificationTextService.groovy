@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
@@ -262,7 +263,7 @@ class CreateNotificationTextService {
                 boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
                 bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
-                    String individuals = multipleConfigs ? (config.individual ?: "default") : ""
+                    String individuals = multipleConfigs && config instanceof RoddyWorkflowConfig ? (config.individual ?: "default") : ""
                     builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
                             individuals       : individuals,
