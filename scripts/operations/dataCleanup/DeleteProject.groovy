@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.DeletionService
  *
  * Additional it is possible to include the analyses directory in the delete script.
  *
- * Since many project/analysis directories ae linked, the delete script create a rm for the path itself and also for the realpath of that.
+ * Since many project/analysis directories are linked, the delete script create a rm for the path itself and also for the realpath of that.
  */
 
 // input area
