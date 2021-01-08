@@ -27,27 +27,45 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
 /**
- * Delete a project from OTP and the filesystem
+ * Delete of a project or only parts.
  *
- * There are two modes:
+ * The scripts supports the check for empty projects, which is enabled by default. In that case the deletion is stopped, if the project already contains
+ * fastq files or bam files. Other data like projectInfos, dta's or samples are allowed in empty projects.
+ *
+ * There scripts supports two modes:
  *   - DELETE_ALL: Delete the project in OTP and delete the entire project directory
- *   - DELETE_SEQUENCING_ONLY: Delete the project data in OTP but delete only the sequencing directory
+ *   - DELETE_SEQUENCING_ONLY: Delete the project data in OTP. That are patient and all depending data in OTP and the sequencing directory in the file system.
+ *     the project itself, projectInfos, dta and workflow configuration are kept.
  *
- * There are multiple fine-tuning flags, for additional behaviour:
- *   - assertProjectEmpty: check for dependent SeqTracks and Bams and fail if any are found
- *   - deleteAnalysisDirectory: append a command to also delete the analysis directory
+ * Additional it is possible to include the analyses directory in the delete script.
+ *
+ * Since many project/analysis directories ae linked, the delete script create a rm for the path itself and also for the realpath of that.
  */
 
 // input area
 //----------------------
 
+/**
+ * The name of the project for deletion.
+ */
 String projectName = ""
 
+/**
+ * The deletion mode: complete project or only the data inside the project
+ */
 ProjectDeletionMode mode =
-        ProjectDeletionMode.DELETE_ALL
-        //ProjectDeletionMode.DELETE_SEQUENCING_ONLY
+        ProjectDeletionMode.DELETE_ALL //delete the complete project
+        //ProjectDeletionMode.DELETE_SEQUENCING_ONLY //delete only the data of the project, but not the project itself
 
+/**
+ * checks that the project is empty. That means that it do not contain any fastq or bam files.
+ * If the check is true and the project contains fastq or bam files, the scripts stops without doing anything.
+ */
 boolean assertProjectEmpty = true
+
+/**
+ * Should the delete bash script also contain the analysis directory?
+ */
 boolean deleteAnalysisDirectory = true
 
 
