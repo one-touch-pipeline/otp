@@ -415,4 +415,18 @@ LIMIT 1
         }
         return fullyGroupedAsSets
     }
+
+    /**
+     * Returns a sublist of given SeqTracks which all have an analysable SeqType.
+     *
+     * @param seqTracks list of sequence tracks
+     * @return sublist of the given seqTracks with analysable SeqTypes.
+     */
+    static List<SeqTrack> getAnalysableSeqTracks(List<SeqTrack> seqTracks) {
+        List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
+
+        return seqTracks.findAll { SeqTrack seqTrack ->
+            seqTrack.seqType in analysableSeqTypes
+        }
+    }
 }

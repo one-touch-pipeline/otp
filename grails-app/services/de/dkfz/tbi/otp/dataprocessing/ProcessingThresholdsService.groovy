@@ -67,15 +67,43 @@ class ProcessingThresholdsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    ProcessingThresholds findByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
-        return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
+    List<ProcessingThresholds> findAllByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
+        return ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
     }
 
     List<SeqTrack> getSeqTracksWithoutProcessingThreshold(List<SeqTrack> seqTracks) {
         List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
         seqTracks.findAll { SeqTrack seqTrack ->
             (seqTrack.seqType in analysableSeqTypes &&
-                    !findByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType))
+                    findAllByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType).isEmpty())
         }
+    }
+
+    /**
+     * Generate default thresholds for all seq tracks of a given list.
+     * They will be saved with numberOfLanes = 1 by default.
+     *
+     * @param seqTracks with configured alignment
+     * @return generated processing thresholds
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<ProcessingThresholds> generateDefaultThresholds(List<SeqTrack> seqTracks) {
+        final int defaultNumberOfLanes = 1
+        List<ProcessingThresholds> generatedThresholds = []
+
+        seqTracks.forEach { seqTrack ->
+            List<ProcessingThresholds> processingThresholds = findAllByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType)
+
+            if (processingThresholds.isEmpty()) {
+                generatedThresholds.add(
+                        new ProcessingThresholds(project      : seqTrack.project,
+                                seqType      : seqTrack.seqType,
+                                sampleType   : seqTrack.sampleType,
+                                numberOfLanes: defaultNumberOfLanes,)
+                                .save(flush: true))
+            }
+        }
+
+        return generatedThresholds
     }
 }

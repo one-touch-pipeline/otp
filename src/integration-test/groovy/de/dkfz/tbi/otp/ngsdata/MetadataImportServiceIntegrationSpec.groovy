@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInSameDirectory
@@ -60,6 +61,8 @@ class MetadataImportServiceIntegrationSpec extends Specification {
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         SeqTrack st1 = DomainFactory.createSeqTrack()
         SeqTrack st2 = DomainFactory.createSeqTrack()
+        ProcessingThresholds p1 = DomainFactory.createProcessingThresholds()
+        ProcessingThresholds p2 = DomainFactory.createProcessingThresholds()
 
         service.sampleTypeService = Mock(SampleTypeService) {
             getSeqTracksWithoutSampleCategory(_) >> [st1]
@@ -71,9 +74,13 @@ class MetadataImportServiceIntegrationSpec extends Specification {
             1 * sendEmail(_, _, _)  >> { String subject, String body, String recipient ->
                 assert subject.contains("threshold")
                 assert subject.contains("category")
-                assert body.contains(st1.sampleType.displayName)
-                assert body.contains(st2.sampleType.displayName)
-                assert body.contains(st2.seqType.displayName)
+                assert body.contains(st1.project.displayName)
+                assert body.contains(p1.project.displayName)
+                assert body.contains(p1.sampleType.displayName)
+                assert body.contains(p1.seqType.displayName)
+                assert body.contains(p2.project.displayName)
+                assert body.contains(p2.sampleType.displayName)
+                assert body.contains(p2.seqType.displayName)
                 assert recipient == "operator"
             }
         }
@@ -82,7 +89,7 @@ class MetadataImportServiceIntegrationSpec extends Specification {
         }
 
         when:
-        service.notifyAboutUnsetConfig([st1, st2], ticket)
+        service.notifyAboutUnsetConfig([st1, st2], [p1, p2], ticket)
 
         then:
         true

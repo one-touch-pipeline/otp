@@ -358,34 +358,42 @@ class MetadataImportService {
         )
         assert metaDataFile.save(flush: true)
 
-        notifyAboutUnsetConfig(fastqImportInstance.dataFiles*.seqTrack as List, fastqImportInstance.otrsTicket)
+        List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.dataFiles*.seqTrack as List).unique())
+        List<ProcessingThresholds> generatedThresholds = processingThresholdsService.generateDefaultThresholds(analysableSeqTracks)
+
+        notifyAboutUnsetConfig(analysableSeqTracks, generatedThresholds, fastqImportInstance.otrsTicket)
 
         log.debug("import stopped ${metaDataFile.fileName} ${timeImportStarted}: ${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile
     }
 
-    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, OtrsTicket ticket) {
-        List<SeqTrack> configured = getSeqTracksWithConfiguredAlignment(seqTracks.unique())
+    /**
+     * Send an email notification with a list of the unset categories
+     * and the generated default thresholds.
+     *
+     * @param seqTracks
+     * @param defaultThresholds
+     * @param ticket
+     */
+    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, List<ProcessingThresholds> defaultThresholds, OtrsTicket ticket) {
+        List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(seqTracks)
 
-        List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(configured)
-        List<SeqTrack> withoutThreshold = processingThresholdsService.getSeqTracksWithoutProcessingThreshold(configured)
-
-        if (withoutCategory || withoutThreshold) {
+        if (withoutCategory || defaultThresholds) {
             StringBuilder subject = new StringBuilder()
             if (ticket) {
                 subject.append("[${ticket.prefixedTicketNumber}] ")
             }
             subject.append("Configuration missing for ")
-            subject.append([withoutCategory ? "category" : "", withoutThreshold ? "threshold" : ""].findAll().join(" and "))
+            subject.append([withoutCategory ? "category" : "", defaultThresholds ? "threshold" : ""].findAll().join(" and "))
 
             String body = ""
             if (withoutCategory) {
                 body += "\nNo category set for:\n"
                 body += "${withoutCategory.collect { "${it.project} - ${it.sampleType.displayName}" }.unique().join(";\n")}\n"
             }
-            if (withoutThreshold) {
-                body += "\nNo threshold set for:\n"
-                body += "${withoutThreshold.collect { "${it.project} - ${it.sampleType.displayName} - ${it.seqType.displayName}" }.unique().join(";\n")}\n"
+            if (defaultThresholds) {
+                body += "\nThese thresholds have been generated automatically:\n"
+                body += "${defaultThresholds.collect { "${it.project} - ${it.sampleType.displayName} - ${it.seqType.displayName}, min. Lanes: ${it.numberOfLanes}" }.unique().join("\n")}\n"
             }
 
             mailHelperService.sendEmail(

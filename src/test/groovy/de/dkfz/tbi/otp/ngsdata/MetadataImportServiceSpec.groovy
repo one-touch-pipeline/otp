@@ -442,6 +442,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     @Unroll
     void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, FastqImportInstance.ImportMode importMode) {
         given:
+        DomainFactory.createAllAnalysableSeqTypes()
+
         final String WGBS_T = SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName
         final String WG = SeqTypeNames.WHOLE_GENOME.seqTypeName
         final String EXON = SeqTypeNames.EXOME.seqTypeName
@@ -490,7 +492,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             )
         }
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(automaticNotification: true)
-        SeqType mySeqType = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME, libraryLayout: LibraryLayout.SINGLE)
+        SeqType mySeqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
         SeqType mySeqTypeTag = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: LibraryLayout.SINGLE)
         SeqType exomeSingle = DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
         SeqType exomePaired = DomainFactory.createExomeSeqType(LibraryLayout.PAIRED)
@@ -526,7 +528,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
 
         MetadataImportService service = Spy(MetadataImportService) {
-            notifyAboutUnsetConfig(_, _) >> null
+            notifyAboutUnsetConfig(_, _, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             parseAndFindOrSaveSampleIdentifier(parse, _) >> createSampleIdentifierForSample2(parse)
@@ -875,6 +877,8 @@ ${ILSE_NO}                      -             1234          1234          -     
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
 
+        DomainFactory.createAllAnalysableSeqTypes()
+
         SeqType seqTypeWithAntibodyTarget = DomainFactory.createSeqType([
                 libraryLayout    : LibraryLayout.PAIRED,
                 hasAntibodyTarget: true,
@@ -894,7 +898,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         )
 
         MetadataImportService service = Spy(MetadataImportService) {
-            notifyAboutUnsetConfig(_, _) >> null
+            notifyAboutUnsetConfig(_, _, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
@@ -1050,6 +1054,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         String md5sumIndex1 = HelperUtils.randomMd5sum
         String md5sumIndex2 = HelperUtils.randomMd5sum
 
+        DomainFactory.createAllAnalysableSeqTypes()
         SeqType seqType = DomainFactory.createSeqTypePaired()
         SeqCenter seqCenter = DomainFactory.createSeqCenter()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
@@ -1065,7 +1070,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         )
 
         MetadataImportService service = Spy(MetadataImportService) {
-            notifyAboutUnsetConfig(_, _) >> null
+            notifyAboutUnsetConfig(_, _, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
@@ -1779,5 +1784,6 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         service.allDecider = Mock(AllDecider) {
             _ * decide(_, _) >> []
         }
+        service.processingThresholdsService = Mock(ProcessingThresholdsService)
     }
 }
