@@ -328,7 +328,6 @@
         </table>
         <p><span class="icon-asterisk"></span>${g.message(code: 'projectUser.table.fileAccess.legend')}</p>
     </div>
-    <button type="button" data-toggle="modal" data-target="#wait">click</button>
     <sec:access expression="hasRole('ROLE_OPERATOR')">
         <button id="listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
                 data-project="${selectedProject?.name}" data-emails="${emails}">

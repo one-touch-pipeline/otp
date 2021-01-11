@@ -158,7 +158,7 @@ $.otp.message = function (message, warning) {
     if (warning) {
         classes += " errors";
     }
-    button = $("<div class=\"close\"><button></button></div>");
+    button = $("<div class=\"close-info-box\"><button></button></div>");
     $("button", button).click(function () {
         $(this).parent().parent().remove();
     });

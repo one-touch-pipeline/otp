@@ -206,7 +206,7 @@
             </div>
         </div>
     </g:if>
-    <div id="infoBox"></div>
+    <div id="infoBox" class="info-box"></div>
     <g:layoutBody/>
     <div class="footer" role="contentinfo">
         &copy;2011-2020

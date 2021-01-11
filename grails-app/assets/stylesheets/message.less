@@ -20,6 +20,16 @@
  * SOFTWARE.
  */
 
+.info-box:not(:empty) {
+  width: 100%;
+  display: inline-block;
+}
+
+.info-box p {
+  margin-bottom: auto;
+  margin-top: auto;
+}
+
 .errors ul,
 .message {
   padding: 0;
@@ -32,9 +42,11 @@
   padding: 0.5em;
 }
 .message {
-  background: #f3f3ff url(../images/skin/information.png) 0 50% no-repeat;
+  background: #f3f3ff url(../images/skin/information.png) 6px 50% no-repeat;
   border: 1px solid #b2d1ff;
   color: #006dba;
+}
+.message :not(.errors) {
   padding-left: 22px;
 }
 .errors {
@@ -50,9 +62,11 @@
 div.message, div.errors {
   p {
     float: left;
+    margin-top: -2px;
   }
-  div.close {
+  div.close-info-box {
     float: right;
+    line-height: 1;
     button {
       background: transparent url(../images/close.png) 0 50% no-repeat;
       width: 16px;

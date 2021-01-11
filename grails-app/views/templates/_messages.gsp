@@ -27,8 +27,8 @@ To use it, store a `FlashMessage` object in `flash.message`.
 
 --}%
 <g:if test="${flash.message && flash.message instanceof FlashMessage}">
-    <div id="infoBox"><div class="${(flash.message.errorObject || flash.message.errorList) ? "errors" : "message"}">
-        <div class="close"><button onclick="$(this).parent().parent().remove();"></button></div>
+    <div id="infoBox" class="info-box"><div class="${(flash.message.errorObject || flash.message.errorList) ? "errors" : "message"}">
+        <div class="close-info-box"><button onclick="$(this).parent().parent().remove();"></button></div>
         <div>
             ${flash.message.message}<br>
             <g:if test="${flash.message.errorObject}">
