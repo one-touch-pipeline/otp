@@ -30,13 +30,22 @@
  * - project name
  * - pid
  * - ilseNumber
- * - sampleIds (select full sample)
+ * - sampleIds
  * - md5Sum of datafile (select complete otp lane, for paired also the other read)
+ * - about a input table defining seqTracks. Each line needs to be find at least one seqTrack. Be careful with combining with filters.
+ *   The table has following 5-6 columns:
+ *   - pid
+ *   - sample type
+ *   - seqType name or alias (for example WGS, WES, RNA, ...)
+ *   - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
+ *   - single cell flag: true = single cell, false = bulk
+ *   - sampleName: optional column, if present, the seqTrack has to have this sample name
  *
  * Additional a filter can be done about:
- * - sampleType
- * - seqType (Specified about sampleTypeName, libraryLayout and single cell flag)
- *
+ * - sampleType: Only seqTracks of this sampleType is shown.
+ *   If used together with input table all sample types used there should be included, otherwise the seqTracks there will be lost.
+ * - seqType (Specified about sampleTypeName, libraryLayout and single cell flag).
+ *   If used together with input table all seqTypes used there should be included, otherwise the seqTracks there will be lost.
  *
  * Please provide one value per line. Spaces around the values are trimmed away. Empty lines and lines starting with # are ignored.
  *
@@ -63,20 +72,27 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 //=============================================
 // input area
 
-
+/**
+ * List of project, one per line
+ */
 String selectByProject = """
 #project1
 #project2
 
 """
 
+/**
+ * List of pids, one per line
+ */
 String selectByIndividual = """
 #pid1
 #pid2
 
 """
 
-
+/**
+ * List of ilse, one per line
+ */
 String selectByIlse = """
 #ilse1
 #ilse2
@@ -84,6 +100,9 @@ String selectByIlse = """
 """
 
 
+/**
+ * List of sample types, one per line
+ */
 String selectBySampleName = """
 #sampleName1
 #sampleName2
@@ -91,7 +110,10 @@ String selectBySampleName = """
 """
 
 
-//select complete otp lane, for paired also the other read (fastq file)
+/**
+ * List of md5sums, one per line.
+ * For paired data always the corresponding read are also fetched.
+ */
 String selectByMd5Sum = """
 #Md5Sum1
 #Md5Sum2
@@ -99,22 +121,50 @@ String selectByMd5Sum = """
 """
 
 
+/**
+ * List of sample types, one per line
+ */
 String filterBySampleType = """
 #sampleType1
 #sampleType2
 
 """
 
-//A SeqType is defined as a combination of SeqTypeName (or alias), LibraryLayout (PAIRED, SINGLE, MATE_PAIRED) and singleCell flag (true = single cell, false = bulk).
-//Example:
-//EXON PAIRED false
-//WGS SINGLE false
-//10x_scRNA PAIRED true
+
+/**
+ * A SeqType is defined as a combination of:
+ * - SeqTypeName (or alias)
+ * - LibraryLayout (PAIRED, SINGLE, MATE_PAIRED)
+ * - singleCell flag (true = single cell, false = bulk).
+ *
+ * The columns can be separated by space, comma, semicolon or tab. Multiple separators are merged together.
+ */
 String filterBySeqTypeName = """
-#seqType1
-#seqType2
+#EXON PAIRED false
+#WGS SINGLE false
+#10x_scRNA PAIRED true
 
 """
+
+
+/**
+ * Multi selector using:
+ * - pid
+ * - sample type
+ * - seqType name or alias (for example WGS, WES, RNA, ...
+ * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
+ * - single cell flag: true = single cell, false = bulk
+ * - sampleName: optional
+ *
+ * The columns can be separated by space, comma, semicolon or tab. Multiple separators are merged together.
+ */
+String multiColumnInput = """
+#pid1,tumor,WGS,PAIRED,false,sampleName1
+#pid3,control,WES,PAIRED,false,
+#pid5,control,RNA,SINGLE,true,sampleName2
+
+"""
+
 
 /**
  * Name of the file to generate. The name must be absolute.
@@ -135,7 +185,7 @@ static <T> List<T> parseHelper(String inputArea, String inputType, Closure<T> se
     inputArea.split('\n')*.trim().findAll {
         it && !it.startsWith('#')
     }.collect {
-        CollectionUtils.exactlyOneElement(selection(it), "Could not found ${inputType} '${it}")
+        CollectionUtils.exactlyOneElement(selection(it), "Could not found ${inputType} '${it}'")
     }
 }
 
@@ -151,13 +201,13 @@ List<IlseSubmission> ilseSubmissions = parseHelper(selectByIlse, 'IlseNumber') {
     IlseSubmission.findAllByIlseNumber(it as long)
 }
 
-List<SeqTrack> seqTracks = selectBySampleName.split('\n')*.trim().findAll {
+List<SeqTrack> seqTracksSampleIdentifier = selectBySampleName.split('\n')*.trim().findAll {
     it && !it.startsWith('#')
 }.collectMany {
     List<SeqTrack> seqTracks = SeqTrack.findAllBySampleIdentifier(it)
 
     if (!seqTracks) {
-        throw new AssertionError("Could not find any Otp lane with the sample name ${it}")
+        throw new AssertionError("Could not find any OTP lane with the sample name ${it}")
     }
     return seqTracks
 }
@@ -180,12 +230,12 @@ List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'SampleTYpe') {
 List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
     it && !it.startsWith('#')
 }.collect {
-    String[] values = it.split(' ')
-    assert values.size() == 3: "A seqtype is defined by three parts"
+    String[] values = it.split('[ ,;\t]+')
+    int valueSize = values.size()
+    assert valueSize == 3: "A seqtype is defined by three parts"
     LibraryLayout libraryLayout = LibraryLayout.findByName(values[1])
     assert libraryLayout: "${values[1]} is no valid library layout"
     boolean singleCell = Boolean.parseBoolean(values[2])
-    println singleCell
 
     SeqType seqType = seqTypeService.findByNameOrImportAlias(values[0], [
             libraryLayout: libraryLayout,
@@ -195,13 +245,59 @@ List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
     return seqType
 }
 
-if (!projects && !individuals && !ilseSubmissions && !seqTracks && !seqTracksPerMd5sum) {
+List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().findAll { String line ->
+    line && !line.startsWith('#')
+}.collectMany { String line ->
+    List<String> values = line.split('[ ,;\t]+')*.trim()
+    int valueSize = values.size()
+    assert valueSize in [5, 6]: "A multi input is defined by 5 or 6 columns"
+    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(values[0], values[0], values[0]),
+            "Could not find one individual with name ${values[0]}")
+    SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
+            "Could not find one sampleType with name ${values[1]}")
+
+    LibraryLayout libraryLayout = LibraryLayout.findByName(values[3])
+    assert libraryLayout: "${values[3]} is no valid sequencingReadType"
+    boolean singleCell = Boolean.parseBoolean(values[4])
+
+    SeqType seqType = seqTypeService.findByNameOrImportAlias(values[2], [
+            libraryLayout: libraryLayout,
+            singleCell   : singleCell,
+    ])
+    assert seqType: "Could not find seqType with : ${values[2]} ${values[3]} ${values[4]}"
+
+    List<SeqTrack> seqTracks = SeqTrack.withCriteria {
+        sample {
+            eq('individual', individual)
+            eq('sampleType', sampleType)
+        }
+        eq('seqType', seqType)
+        if (values.size() == 6) {
+            eq('sampleIdentifier', values[5])
+        }
+    }
+    assert seqTracks: "Could not find any seqtracks for ${values.join(' ')}"
+    return seqTracks
+}
+
+if (!projects && !individuals && !ilseSubmissions && !seqTracksSampleIdentifier && !seqTracksPerMd5sum && !seqTrackPerMultiImport) {
     println "no selection defined, stopped"
     return
 }
 
+if (seqTrackPerMultiImport && sampleTypes && !sampleTypes.containsAll(seqTrackPerMultiImport*.sampleType.unique())) {
+    println "Attention: your sampleTypes filter do not contain all sample types used in your table input. " +
+            "Therefore some of the seqTracks there will removed"
+}
+
+if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMultiImport*.seqType.unique())) {
+    println "Attention: your seqTypes filter do not contain all seqTypes used in your table input. " +
+            "Therefore some of the seqTracks there will removed"
+}
+
 //=============================================
 // work area
+
 
 Collection<DataFile> dataFiles = DataFile.createCriteria().list {
     seqTrack {
@@ -218,14 +314,17 @@ Collection<DataFile> dataFiles = DataFile.createCriteria().list {
                     'in'('individual', individuals)
                 }
             }
-            if (seqTracks) {
-                'in'('id', seqTracks*.id)
+            if (seqTracksSampleIdentifier) {
+                'in'('id', seqTracksSampleIdentifier*.id)
             }
             if (seqTracksPerMd5sum) {
                 'in'('id', seqTracksPerMd5sum*.id)
             }
             if (ilseSubmissions) {
                 'in'('ilseSubmission', ilseSubmissions)
+            }
+            if (seqTrackPerMultiImport) {
+                'in'('id', seqTrackPerMultiImport*.id)
             }
         }
         if (seqTypes) {
@@ -254,7 +353,11 @@ Collection<DataFile> dataFiles = DataFile.createCriteria().list {
     order('fileName')
 }
 
-assert dataFiles: "Could not find any Datafiles for the Criteria."
+if (dataFiles) {
+    println "Found ${dataFiles.size()} lanes"
+} else {
+    throw new OtpRuntimeException("Could not find any Datafiles for the Criteria.")
+}
 
 
 class MetaDataExport {
