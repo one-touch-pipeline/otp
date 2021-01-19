@@ -134,10 +134,7 @@ $.otp.workflows = {
      */
     createRestartProcessingStepLink: function (id, dataTable) {
         "use strict";
-        var imageLink = $.otp.createLink({
-            controller: 'assets',
-            action: 'redo.png'
-        });
+        var imageLink = $.otp.createAssetLink('redo.png');
         return '<a id="restartProcessingStepLink" onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
     },
 };

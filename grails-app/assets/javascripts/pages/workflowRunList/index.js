@@ -46,7 +46,7 @@ $(function () {
                         return row.comment;
                     }
                     if (row.comment) {
-                        return '<div title="' + row.comment + '"><img src="' + $.otp.createLink({controller: "assets", action: "info.png"}) + '"></div>';
+                        return '<div title="' + row.comment + '"><img src="' + $.otp.createAssetLink("info.png") + '"></div>';
                     }
                     return "";
                 }
@@ -87,7 +87,7 @@ $(function () {
                         "              <i class='bi-file-earmark-x'></i>" +
                         "          </button>" +
                                      button( $.otp.createLink({controller: "workflowRunList", action: "restartStep"}), row.stepId , "Restart \"" + row.step + "\" step",
-                                          buttonsDisabled ,$.otp.createLink({controller: "assets", action: "restart-step.svg"})) +
+                                          buttonsDisabled ,$.otp.createAssetLink("restart-step.svg")) +
                         "            <div class='btn-group' role='group'>" +
                         "              <button type='button' class='btn btn-primary dropdown-toggle dropdown-toggle-split' data-toggle='dropdown' " +
                         "                      aria-haspopup='true' aria-expanded='false' title='Restart previous steps'" + buttonsDisabled + stepsDisabled + ">" +
@@ -101,7 +101,7 @@ $(function () {
                     result += "        </div>" +
                         "            </div>" +
                                      button( $.otp.createLink({controller: "workflowRunList", action: "restartRun"}), row.stepId, "Restart run",
-                                         buttonsDisabled, $.otp.createLink({controller: "assets", action: "restart-run.svg"})) +
+                                         buttonsDisabled, $.otp.createAssetLink("restart-run.svg")) +
                         "          </div>" +
                         "        </form>"
                     return result

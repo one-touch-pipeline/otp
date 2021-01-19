@@ -144,7 +144,11 @@ $.otp = {
             link += ' target="' + target + '"';
         }
         return link + '>' + text + '</a>';
-    }
+    },
+
+    createAssetLink(path) {
+        return $.otp.createLink({controller: "assets", action: path})
+    },
 };
 
 
