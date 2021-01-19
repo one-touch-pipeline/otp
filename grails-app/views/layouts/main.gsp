@@ -152,6 +152,20 @@
                                     </li>
                                 </ul>
                             </li>
+                            <li class="navigation menuContainerItem workflow">
+                                <ul>
+                                    <li class="allGranted nav_container"><a class="menuLinkContainer"><g:message
+                                            code="otp.menu.newWorkflow"/> &#9661;</a>
+                                        <ul>
+                                            <li><g:link controller="systemStatus" action="index"><g:message code="otp.menu.systemStatus"/></g:link></li>
+                                            <li><g:link controller="workflowRunOverview" action="index"><g:message
+                                                    code="otp.menu.workflowRunOverview"/></g:link></li>
+                                            <li><g:link controller="workflowRunList" action="index"><g:message code="otp.menu.workflowRunList"/></g:link></li>
+                                            <li><g:link controller="workflowConfig" action="index"><g:message code="otp.menu.workflowConfig"/></g:link></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
                         </sec:ifAnyGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
                             <li class="navigation menuContainerItem admin">
