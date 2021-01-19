@@ -1965,6 +1965,11 @@ td div {
     .border-radius(50%);
     display: inline-block;
 
+    &.small {
+        width: 17px;
+        height: 17px;
+    }
+
     &.red {
         background-color: @danger;
     }
@@ -1994,6 +1999,9 @@ td div {
     width: 20px;
     height: 20px;
     animation: spin 2s linear infinite;
+    box-sizing: content-box;
+    color: black;
+
 
     &.red {
         border-right: 7px solid deeppink;
@@ -2009,6 +2017,12 @@ td div {
     }
     &.green {
         border-top: 7px solid mediumseagreen;
+    }
+
+    &.small {
+        border-width: 3px;
+        width: 10px;
+        height: 10px;
     }
 }
 

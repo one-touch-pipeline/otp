@@ -25,14 +25,18 @@ var statusToClassName = function (status) {
         case "WAITING_ON_USER":
             return "dot orange";
         case "FAILED":
+        case "FINISHED/FAILED":
             return "dot red";
         case "PENDING":
+        case "CREATED":
             return "dot grey";
         case "WAITING_ON_SYSTEM":
             return "sm-loader grey";
         case "RUNNING":
+        case "CHECKING":
             return "sm-loader green";
         case "SUCCESS":
+        case "FINISHED/COMPLETED":
             return "dot green";
         case "SKIPPED":
             return "dot black";

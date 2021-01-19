@@ -113,8 +113,8 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
     @TupleConstructor
     enum Column {
         CHECKBOX("", ""),
-        STATUS("", "state"),
-        COMMENT("", "comment"),
+        STATUS("Status", "state"),
+        COMMENT("Comment", "comment"),
         WORKFLOW("workflowRun.list.workflow", ""),
         NAME("workflowRun.list.name", "displayName"),
         STEP("workflowRun.list.step", ""),

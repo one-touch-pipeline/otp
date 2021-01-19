@@ -24,23 +24,26 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import org.joda.time.*
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.roddy.execution.jobs.GenericJobInfo
 import de.dkfz.roddy.tools.BufferUnit
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import javax.sql.DataSource
+import java.nio.file.FileSystem
+import java.nio.file.Files
 
 import static java.util.concurrent.TimeUnit.HOURS
 
 @Transactional
 class ClusterJobService {
 
+    FileSystemService fileSystemService
     DataSource dataSource
     static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
 
@@ -183,6 +186,18 @@ class ClusterJobService {
 
     private static Duration convertFromJava8DurationToJodaDuration(java.time.Duration duration) {
         return duration ? Duration.millis(duration.toMillis()) : null
+    }
+
+    /**
+     * Does log exist and can be read.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    boolean doesClusterJobLogExist(ClusterJob clusterJob) {
+        if (!clusterJob.jobLog) {
+            return false
+        }
+        FileSystem fs = fileSystemService.getRemoteFileSystem(clusterJob.realm)
+        return Files.isReadable(fs.getPath(clusterJob.jobLog))
     }
 
     /**

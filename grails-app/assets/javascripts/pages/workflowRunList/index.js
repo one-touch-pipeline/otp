@@ -52,7 +52,21 @@ $(function () {
                 }
             },
             {'data': 'workflow', 'orderable': false},
-            {'data': 'name'},
+            {
+                'data': function (row, type, set, meta) {
+                    if (type === "sort") {
+                        return row.name;
+                    }
+                    if (row.name) {
+                        return '<a href="' + $.otp.createLink({controller: "workflowRunDetails", action: "index", id: row.id, parameters: {
+                                "workflow.id": $('#workflow').val(),
+                                "state": $('#state').val(),
+                                "name": $('#name').val(),
+                            }}) + '">' + row.name + '</a>';
+                    }
+                    return "";
+                }
+            },
             {'data': 'step', 'orderable': false},
             {'data': 'dateCreated'},
             {'data': 'lastUpdated'},
@@ -69,8 +83,9 @@ $(function () {
 
                     var result = "<form method='POST' class='single'>" +
                         "          <div class='btn-group'>" +
-                                     button($.otp.createLink({controller: "workflowRunList", action: "setFailedFinal"}), row.stepId, "Set failed final",
-                                          buttonsDisabled, $.otp.createLink({controller: "assets", action: "set-failed-final.svg"})) +
+                        "          <button class='btn btn-primary' formaction='" + $.otp.createLink({controller: "workflowRunList", action: "setFailedFinal"}) + "' name='step' value='" + row.stepId + "' title='" + "Set failed final" + "' " + buttonsDisabled + ">" +
+                        "              <i class='bi-file-earmark-x'></i>" +
+                        "          </button>" +
                                      button( $.otp.createLink({controller: "workflowRunList", action: "restartStep"}), row.stepId , "Restart \"" + row.step + "\" step",
                                           buttonsDisabled ,$.otp.createLink({controller: "assets", action: "restart-step.svg"})) +
                         "            <div class='btn-group' role='group'>" +

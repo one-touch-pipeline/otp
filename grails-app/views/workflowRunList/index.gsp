@@ -89,8 +89,7 @@
                 <form method="POST" id="bulk">
                     <div class="btn-group">
                         <button class="btn btn-primary" formaction="${g.createLink(action: "setFailedFinal")}"
-                                title="${g.message(code: "workflowRun.list.setFailed")}"><asset:image src="set-failed-final.svg"
-                                                                                                      style="height:1em; width:1em"/></button>
+                                title="${g.message(code: "workflowRun.list.setFailed")}"><i class="bi-file-earmark-x"></i></button>
                         <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
                                 title="${g.message(code: "workflowRun.list.restartSteps")}"><asset:image src="restart-step.svg"
                                                                                                          style="height:1em; width:1em"/></button>
@@ -111,6 +110,12 @@
                 <g:if test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListController.Column.CHECKBOX}">
                     <th><input type='checkbox' name='selectAll' id="selectAll"></th>
                 </g:if>
+                <g:elseif test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListController.Column.STATUS}">
+                    <th><i class="bi-circle-fill" title="${g.message(code: column.message)}"></i></th>
+                </g:elseif>
+                <g:elseif test="${column == de.dkfz.tbi.otp.workflowExecution.WorkflowRunListController.Column.COMMENT}">
+                    <th><i class="bi-info-circle" title="${g.message(code: column.message)}"></i></th>
+                </g:elseif>
                 <g:else>
                     <th>${g.message(code: column.message)}</th>
                 </g:else>

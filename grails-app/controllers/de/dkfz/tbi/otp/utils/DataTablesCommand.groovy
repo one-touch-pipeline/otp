@@ -55,11 +55,12 @@ class DataTablesCommand {
 
     Map getDataToRender(List data, Integer recordsTotal = null, Integer recordsFiltered = null, Map<String, Object> additionalData = null,
                         String error = null) {
+        int totalRecords = (recordsTotal != null) ? recordsTotal : data.size()
         Map result = [
                 draw: draw,
                 data: data,
-                recordsTotal: recordsTotal ?: data.size(),
-                recordsFiltered: recordsFiltered ?: recordsTotal ?: data.size(),
+                recordsTotal: totalRecords,
+                recordsFiltered: (recordsFiltered != null) ? recordsFiltered : totalRecords,
         ]
         if (error) {
             result["error"] = error
