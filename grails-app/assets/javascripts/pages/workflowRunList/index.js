@@ -20,31 +20,6 @@
  * SOFTWARE.
  */
 $(function () {
-    var statusToClassName = function (status) {
-        "use strict";
-        switch (status) {
-            case "WAITING_ON_USER":
-                return "dot orange";
-            case "FAILED":
-                return "dot red";
-            case "PENDING":
-                return "dot grey";
-            case "WAITING_ON_SYSTEM":
-                return "sm-loader grey";
-            case "RUNNING":
-                return "sm-loader green";
-            case "SUCCESS":
-                return "dot green";
-            case "SKIPPED":
-                return "dot black";
-            case "FAILED_FINAL":
-                return "dot blue";
-            case "KILLED":
-                return "dot purple";
-        }
-        return "";
-    }
-
     var table = $("#runs").DataTable({
         columns: [
             {
@@ -142,12 +117,6 @@ $(function () {
             },
         },
     });
-
-    var button = function(action, value, title, buttonsDisabled, imgSrc) {
-        return "<button class='btn btn-primary' formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + ">" +
-            "<img src='" + imgSrc + "' style='height:1em; width:1em'/>" +
-            "</button>"
-    }
 
     table.on('draw', function () {
         $('[title]').tooltip({trigger: 'hover focus click'});

@@ -22,6 +22,7 @@
 <html>
 <head>
     <title>${g.message(code: "workflowRun.list.title")}</title>
+    <asset:javascript src="pages/workflowRunList/common.js"/>
     <asset:javascript src="pages/workflowRunList/index.js"/>
 </head>
 

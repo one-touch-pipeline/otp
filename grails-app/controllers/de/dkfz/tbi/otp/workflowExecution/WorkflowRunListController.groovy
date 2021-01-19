@@ -26,29 +26,14 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.SqlUtil
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.utils.DataTablesCommand
 
-import java.time.Duration
-import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
-
 @Secured("hasRole('ROLE_OPERATOR')")
-class WorkflowRunListController implements CheckAndCall {
-
-    ConfigService configService
-    JobService jobService
-    WorkflowService workflowService
-    WorkflowStateChangeService workflowStateChangeService
+class WorkflowRunListController extends AbstractWorkflowRunController {
 
     static allowedMethods = [
             index         : "GET",
             data          : "GET",
-            setFailedFinal: "POST",
-            restartStep   : "POST",
-            restartRun    : "POST",
     ]
 
     Map index(RunShowCommand cmd) {
@@ -68,18 +53,7 @@ class WorkflowRunListController implements CheckAndCall {
     def data(RunDataShowCommand cmd) {
         cmd.processParams(params)
 
-        Closure criteria = {
-            if (cmd.name) {
-                ilike("displayName", "%${SqlUtil.replaceWildcardCharactersInLikeExpression(cmd.name)}%")
-            }
-            if (cmd.states) {
-                'in'("state", cmd.states)
-            }
-            if (cmd.workflow) {
-                eq("workflow", cmd.workflow)
-            }
-            ne("state", WorkflowRun.State.LEGACY)
-        }
+        Closure criteria = getCriteria(cmd.workflow, cmd.states, cmd.name)
 
         List data = WorkflowRun.createCriteria().list {
             criteria.delegate = delegate
@@ -159,41 +133,6 @@ class WorkflowRunListController implements CheckAndCall {
             }
             return values()[column]
         }
-    }
-
-    def setFailedFinal(RunUpdateCommand cmd) {
-        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.setFailed") {
-            workflowStateChangeService.changeStateToFinalFailed(cmd.step.collect { WorkflowStep.get(it) })
-        }
-        redirect action: "index", params: ["workflow.id": cmd.workflow?.id, state: cmd.state, name: cmd.name]
-   }
-
-    def restartStep(RunUpdateCommand cmd) {
-        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
-            jobService.createRestartedJobAfterJobFailures(cmd.step.collect { WorkflowStep.get(it) })
-        }
-        redirect action: "index", params: ["workflow.id": cmd.workflow?.id, state: cmd.state, name: cmd.name]
-    }
-
-    def restartRun(RunUpdateCommand cmd) {
-        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartRuns") {
-            workflowService.createRestartedWorkflows(cmd.step.collect { WorkflowStep.get(it) })
-        }
-        redirect action: "index", params: ["workflow.id": cmd.workflow?.id, state: cmd.state, name: cmd.name]
-    }
-
-    private LocalDateTime convertDateToLocalDateTime(Date date) {
-        return date.toInstant().atZone(configService.timeZoneId).toLocalDateTime()
-    }
-
-    private String getFormattedDuration(LocalDateTime start, LocalDateTime end) {
-        long millis = Duration.between(start, end) toMillis()
-        return String.format("%02d:%02d:%02d",
-                TimeUnit.MILLISECONDS.toHours(millis),
-                TimeUnit.MILLISECONDS.toMinutes(millis) -
-                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
-                TimeUnit.MILLISECONDS.toSeconds(millis) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)))
     }
 }
 
