@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,25 +20,57 @@
  * SOFTWARE.
  */
 
-@babyblue: #A9BCF5;
-@darkblue: #81BEF7;
-@otpBlack: #222;
-@tableColor1: #A5D3FF;
-@tableColor2: #FFF;
-@tableBorderVertical: #A4C3CA;
+/**
+ BEGIN of global styles:
+  used to override global settings from the global otp.less.
+  Should be removed there or overwritten in a separate bootstrap.less file.
+ */
+input {
+  padding: 0;
+}
+
+input[type="text"] {
+  height: auto;
+}
+
+input:disabled {
+  color: #495057;
+}
+
+tr:nth-last-child(2n) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+th {
+  background-image: none;
+  background-color: initial;
+  color: initial;
+}
+
+tbody th {
+  border: initial;
+}
+
+.input-group {
+  z-index: 0;
+}
 
 /**
-* Those are the same as in bootstraps _root.scss.
-* Seems like Grails doesn't support to import them in less out of the webjars folder.
-*/
-@primary: #007bff;
-@secondary: #6c757d;
-@danger: #dc3545;
-@success: #28a745;
-@info: #17a2b8;
-@warning: #ffc107;
+  END of global styles.
+ */
+.outer-container {
+  margin-bottom: 60px;
+  margin-top: 80px;
+}
 
-// re-usable colours for errors, see also: .input-error
-@errorText: #cc0000;
-@errorAccent: #ffaaaa;
-@errorBackground: #fff3f3;
+.otp-table-textarea-sm:disabled {
+  height: 36px;
+}
+
+.otp-table-textarea-sm:enabled {
+  height: 72px;
+}
+
+.otp-background-white:not(:hover) {
+  background-color: #fff !important;
+}

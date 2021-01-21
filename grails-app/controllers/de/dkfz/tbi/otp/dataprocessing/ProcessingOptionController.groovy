@@ -21,16 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.ValidationException
 import groovy.transform.Canonical
+import org.springframework.http.HttpStatus
 
-import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
 @Secured("hasRole('ROLE_ADMIN')")
@@ -39,10 +37,10 @@ class ProcessingOptionController {
     static allowedMethods = [
             index : "GET",
             update: "POST",
+            obsolete: "POST",
     ]
 
     ProcessingOptionService processingOptionService
-    ProjectService projectService
     PropertiesValidationService propertiesValidationService
 
     private static final int MAX_LENGTH = 100
@@ -56,38 +54,12 @@ class ProcessingOptionController {
             types.sort().collect { String type ->
                 ProcessingOption existingOption = existingOptions.find { it.name == name && it.type == type }
 
-                OptionProblem.ProblemType problemType = propertiesValidationService.validateProcessingOptionName(name, type)?.type
-
-                new OptionRow(
-                        new TableCellValue(
-                                name.name(),
-                                null,
-                                null,
-                                name.description,
-                        ),
-                        new TableCellValue(
-                                type ?: "",
-                                (problemType == OptionProblem.ProblemType.MISSING) ?
-                                        TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
-                                null,
-                                type,
-                        ),
-                        new TableCellValue(
-                                existingOption?.value ?
-                                        existingOption.value.length() > MAX_LENGTH ?
-                                                "...${existingOption.value[-MAX_LENGTH..-1]}" :
-                                                existingOption.value :
-                                        "",
-                                (problemType in [OptionProblem.ProblemType.VALUE_INVALID, OptionProblem.ProblemType.TYPE_INVALID]) ?
-                                        TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
-                                null,
-                                existingOption?.value,
-                        ),
-                        name.validatorForValue.allowedValues?.sort(),
-                        existingOption?.project,
-                        existingOption?.dateCreated?.format("yyyy-MM-dd HH:mm:ss"),
-                        name.validatorForValue == TypeValidators.MULTI_LINE_TEXT,
-                )
+                if (existingOption) {
+                    generateOptionRow(existingOption)
+                } else {
+                    ProcessingOption unsavedOption = new ProcessingOption(name: name, type: type)
+                    generateOptionRow(unsavedOption)
+                }
             }
         }
 
@@ -96,31 +68,72 @@ class ProcessingOptionController {
         ]
     }
 
-    def update(ProcessingOptionValueCommand cmd) {
+    JSON update(ProcessingOptionCommand cmd) {
         try {
-            processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type, cmd.specificProject)
-            flash.message = new FlashMessage(g.message(code: "processingOption.store.success") as String)
-        } catch (ValidationException e) {
-            flash.message = new FlashMessage(g.message(code: "processingOption.store.failure") as String, e.errors)
+            ProcessingOption processingOption = processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type, cmd.specificProject)
+            render generateOptionRow(processingOption) as JSON
+        } catch (Exception ignored) {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.store.failure") as String)
         }
-        redirect(action: "index")
+        return [] as JSON
     }
 
     def obsolete(ProcessingOptionCommand cmd) {
         try {
             processingOptionService.obsoleteOptionByName(cmd.optionName, cmd.type, cmd.specificProject)
-            flash.message = new FlashMessage(g.message(code: "processingOption.obsolete.success") as String)
-        } catch (ValidationException e) {
-            flash.message = new FlashMessage(g.message(code: "processingOption.obsolete.failure") as String, e.errors)
-        } catch (ProcessingException e) {
-            flash.message = new FlashMessage(g.message(code: "processingOption.obsolete.failure") as String, e.message)
+        } catch (Exception ignored) {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.obsolete.failure") as String)
         }
-        redirect(action: "index")
+        Map data = [obsoleted: true]
+        render data as JSON
+    }
+
+    /**
+     * Generate an optionRow of a processingOption and fill it with meta data.
+     * An option row is a presentable format used in the UI.
+     * @param processingOption
+     * @return OptionRow
+     */
+    private OptionRow generateOptionRow(ProcessingOption processingOption) {
+        OptionProblem.ProblemType problemType = propertiesValidationService.validateProcessingOptionName(processingOption.name, processingOption.type)?.type
+
+        return new OptionRow(
+                name: new TableCellValue(
+                        value: processingOption.name.toString(),
+                        warnColor: null,
+                        link: null,
+                        tooltip: processingOption.name.getDescription(),
+                ),
+                type: new TableCellValue(
+                        value: processingOption.type ?: "",
+                        warnColor: (problemType == OptionProblem.ProblemType.TYPE_INVALID) ?
+                                TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
+                        link: null,
+                        tooltip: processingOption.type,
+                ),
+                value: new TableCellValue(
+                        value: processingOption?.value ?
+                                processingOption.value.length() > MAX_LENGTH ?
+                                        "...${processingOption.value[-MAX_LENGTH..-1]}" :
+                                        processingOption.value :
+                                "",
+                        warnColor: (problemType in [OptionProblem.ProblemType.VALUE_INVALID, OptionProblem.ProblemType.MISSING]) ?
+                                TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
+                        link: null,
+                        tooltip: processingOption?.value,
+                ),
+                allowedValues: processingOption.name.validatorForValue.allowedValues?.sort(),
+                project: processingOption?.project,
+                dateCreated: processingOption?.dateCreated?.format("yyyy-MM-dd HH:mm"),
+                multiline: processingOption.name.validatorForValue == TypeValidators.MULTI_LINE_TEXT,
+                defaultValue: processingOption.name?.defaultValue
+        )
     }
 }
 
 class ProcessingOptionCommand {
     OptionName optionName
+    String value
     String type
     Project specificProject
 
@@ -130,13 +143,6 @@ class ProcessingOptionCommand {
 
     static constraints = {
         specificProject nullable: true
-    }
-}
-
-class ProcessingOptionValueCommand extends ProcessingOptionCommand {
-    String value
-
-    static constraints = {
         value nullable: true
     }
 }
@@ -150,4 +156,5 @@ class OptionRow {
     Project project
     String dateCreated
     boolean multiline
+    String defaultValue
 }

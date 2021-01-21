@@ -20,68 +20,83 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.qcTrafficLight.TableCellValue" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title><g:message code="processingOption.title"/></title>
-    <asset:javascript src="taglib/EditorSwitch.js"/>
+    <asset:stylesheet src="pages/processingOption/styles.less"/>
+    <asset:javascript src="pages/processingOption/index/functions.js"/>
 </head>
 <body>
-    <div class="body">
-        <g:render template="/templates/messages"/>
 
-        <h1><g:message code="processingOption.title"/></h1>
+<div class="container-fluid outer-container">
+    <h3><g:message code="processingOption.title"/></h3>
+    <p><g:message code="processingOption.subtitle"/></p>
 
-        <div class="otpDataTables">
-            <table class="fixed-table-header processing-options-table">
-                <thead>
-                <tr>
-                    <th><g:message code="processingOption.list.headers.name"/></th>
-                    <th><g:message code="processingOption.list.headers.type"/></th>
-                    <th><g:message code="processingOption.list.headers.value"/></th>
-                    <th></th>
-                    <th></th>
-                    <th><g:message code="processingOption.list.headers.dateCreated"/></th>
-                    <th><g:message code="processingOption.list.headers.project"/></th>
-                </tr>
-                </thead>
-                <tbody>
-                <g:each in="${options}" var="option">
-                    <otp:editTable>
-                        <g:form action="update">
-                            <input type="hidden" name="optionName" value="${option.name.value}">
-                            <input type="hidden" name="type" value="${option.type.value}">
-                            <input type="hidden" name="specificProject.id" value="${option.project?.id}">
-                            <td><otp:tableCell cell="${option.name}"/></td>
-                            <td><otp:tableCell cell="${option.type}"/></td>
-                            <td>
-                                <span class="edit-fields" style="display: none;">
-                                    <g:if test="${option.allowedValues}">
-                                        <g:select id="" name="value" class="use-select-2" from="${option.allowedValues}" value="${option.value.value}"/>
+    <table class="table-sm table-striped table-hover">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col"><g:message code="processingOption.list.headers.name"/></th>
+            <th scope="col"><g:message code="processingOption.list.headers.type"/></th>
+            <th scope="col"><g:message code="processingOption.list.headers.value"/></th>
+            <th scope="col"><g:message code="processingOption.list.headers.dateCreated"/></th>
+            <th scope="col"><g:message code="processingOption.list.headers.project"/></th>
+        </tr>
+        </thead>
+        <tbody>
+        <g:each status="rowIndex" in="${options}" var="option">
+            <tr>
+                <th scope="row">${rowIndex+1}</th>
+                <td data-toggle="tooltip" data-placement="top" title="${option.name?.tooltip}">${option.name.value}</td>
+                <td class="${option.type.warnColor == TableCellValue.WarnColor.ERROR ? 'table-danger' : ''}">${option.type.value}</td>
+                <td id="value-cell-${rowIndex}" class="${option.value.warnColor == TableCellValue.WarnColor.ERROR ? 'table-danger' : ''}">
+                    <div class="input-group">
+                        <g:if test="${option.allowedValues}">
+                            <select class="form-control form-control-sm custom-select custom-select-sm" disabled id="value-${rowIndex}" aria-label="Select a processing option">
+                                <g:if test="${!option.value.value}">
+                                    <option selected disabled>${g.message(code: "processingOption.placeholder.choose")}</option>
+                                </g:if>
+                                <g:each in="${option.allowedValues}">
+                                    <g:if test="${option.value.value == it}">
+                                        <option selected value="${it}">${it}</option>
                                     </g:if>
-                                    <g:elseif test="${option.multiline}">
-                                        <g:textArea class="editor-field" name="value" rows="10">${option.value.tooltip}</g:textArea>
-                                    </g:elseif>
                                     <g:else>
-                                        <input class="editor-field" name="value" value="${option.value.tooltip}"/>
+                                        <option value="${it}">${it}</option>
                                     </g:else>
-                                </span>
-                                <span class="show-fields">
-                                    <otp:tableCell cell="${option.value}"/>
-                                </span>
-                            </td>
-                            <td><otp:editTableButtons/></td>
-                            <td><g:actionSubmit action="obsolete" name="obsolete" value="Obsolete"/></td>
-                            <td>${option.dateCreated}</td>
-                            <td>${option.project?.name}</td>
-                        </g:form>
-                    </otp:editTable>
-                </g:each>
-                </tbody>
-            </table>
-        </div>
-    </div>
+                                </g:each>
+                            </select>
+                        </g:if>
+                        <g:elseif test="${option.multiline}">
+                            <g:textArea disabled="true" id="value-${rowIndex}" class="form-control form-control-sm otp-table-textarea-sm"  placeholder="${g.message(code: "processingOption.placeholder.noValue")}" name="value">${option.value.tooltip}</g:textArea>
+                        </g:elseif>
+                        <g:else>
+                            <input disabled type="text" id="value-${rowIndex}" class="form-control form-control-sm" placeholder="${option.defaultValue ? option.defaultValue + " " + g.message(code: "processingOption.placeholder.suffix") : g.message(code: "processingOption.placeholder.noValue")}" aria-label="Processing option value" value="${option.value.value}">
+                        </g:else>
+                        <g:set var="oldValue" value="123" />
+                        <div class="input-group-append">
+                            <button class="btn btn-success btn-sm" type="button" id="button-save-${rowIndex}" onclick="onSave(${rowIndex}, '${option.name.value}', '${option.value.value.replace('\n', '&#10;')}', '${option.type.value}', '${option.project?.id}')" style="display: none;">
+                                <i class="bi bi-save"></i>
+                                <g:message code="processingOption.button.save"/>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm otp-background-white" type="button" id="button-edit-${rowIndex}" onclick="onEdit(${rowIndex})">
+                                <i class="bi bi-pencil"></i>
+                                <g:message code="processingOption.button.edit"/>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm otp-background-white" type="button" onclick="onObsolete('${rowIndex}', '${option.name.value}', '${option.type.value}', '${option.project?.id}')">
+                                <i class="bi bi-trash"></i>
+                                <g:message code="processingOption.button.obsolete"/>
+                            </button>
+                        </div>
+                    </div>
+                </td>
+                <td>${option.dateCreated}</td>
+                <td>${option.project?.name}</td>
+            </tr>
+        </g:each>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
