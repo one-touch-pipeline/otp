@@ -107,6 +107,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     @TupleConstructor enum Type {
         /** used for jobs that are submitted directly to cluster by OTP */
         OTP_CLUSTER({ ClusterJobSubmissionOptionsService.validateJsonString(it.toString()) }),
+        WORKFLOWS({ true }),
 
         final Closure<Boolean> validateConfig
     }
