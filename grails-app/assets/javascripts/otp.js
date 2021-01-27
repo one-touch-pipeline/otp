@@ -151,7 +151,9 @@ $.otp = {
     },
 };
 
-
+/**
+ * @deprecated Use Bootstrap toasts instead, see toaster.js
+ */
 $.otp.message = function (message, warning) {
     "use strict";
     if (!message) {
@@ -171,12 +173,16 @@ $.otp.message = function (message, warning) {
     divCode.append($("<div style=\"clear: both;\"></div>"));
     $("#infoBox").append(divCode);
 };
-
+/**
+ * @deprecated Use Bootstrap toasts instead, see toaster.js
+ */
 $.otp.infoMessage = function (message) {
     "use strict";
     this.message(message, false);
 };
-
+/**
+ * @deprecated Use Bootstrap toasts instead, see toaster.js
+ */
 $.otp.warningMessage = function (message) {
     "use strict";
     this.message(message, true);
@@ -490,4 +496,9 @@ $(document).ready(function() {
         // use Bootstrap
         t.tooltip({ trigger: 'hover focus click' });
     }
+
+    // close toasts that are not added with js
+    $('body').on('click', '[data-dismiss="toast"]', function () {
+        $(this).closest('.toast').toast('hide');
+    });
 });

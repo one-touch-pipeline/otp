@@ -29,7 +29,6 @@
 <body>
 <div class="body">
     <h1>${g.message(code: "workflowRun.list.title")}</h1>
-    <g:render template="/templates/messages"/>
 
     <div class="container-fluid">
         <div class="row">

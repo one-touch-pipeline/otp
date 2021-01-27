@@ -30,7 +30,6 @@
 
 <body>
 <div class="body">
-    <g:render template="/templates/messages"/>
     <div class="container-fluid">
     <div class="row">
         <div class="col-7">

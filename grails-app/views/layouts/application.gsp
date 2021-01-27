@@ -28,6 +28,7 @@
     </head>
 
     <body>
+        <g:render template="/layouts/messages"/>
         <g:layoutBody/>
     </body>
 </g:applyLayout>
