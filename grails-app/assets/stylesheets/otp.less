@@ -19,34 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-/******************************************
-* Common less classes
-******************************************/
 @import "colors";
+@import "common";
 
 @width: 1250px; //if you change this you also have to change the width of "header.png" and "header_operator.png"
 
-.box-shadowed (@x, @y, @radius, @color) {
-    -moz-box-shadow: @arguments;
-    -webkit-box-shadow: @arguments;
-    box-shadow: @arguments;
-}
-.box-shadowed2 (@x, @y, @blur, @radius, @color) {
-    -moz-box-shadow: @arguments;
-    -webkit-box-shadow: @arguments;
-    box-shadow: @arguments;
-}
-.no-box-shadow {
-    -moz-box-shadow: none;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-}
-.border-radius (@radius) {
-    -moz-border-radius: @radius;
-    -webkit-border-radius: @radius;
-    border-radius: @radius;
-}
 .image-button {
     background-color: transparent;
     background-repeat: no-repeat;
@@ -74,15 +51,6 @@
     .image-button;
     background-image: url(../images/document-edit.png);
     width: 16px;
-}
-.comment-button {
-    border: 1px solid grey;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    &:focus, &:hover {
-        cursor: pointer;
-        border: 1px solid black;
-    }
 }
 .rounded-page-header-box {
     padding: 4px;
@@ -114,11 +82,8 @@
     }
 }
 
-/* FONT STACK */
 body,
 input, select, textarea, option, button {
-    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    font-size: 10pt;
     .ACCEPTED {
         color:#006400;
     }
@@ -177,32 +142,6 @@ div.tableBlock {
     font-weight: bold;
     font-size: 0.8;
 }
-.button {
-    display: block;
-    background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    float: right;
-    border: 1px solid #cccccc;
-    margin: 0.5em 0.5em 0.5em 0.5em;
-    padding: 0.2em 0.5em 0.2em 0.5em;
-    .border-radius(0.3em);
-    background-color: #DDD;
-    color: #666666;
-    &:hover, &:focus {
-        .no-box-shadow;
-        background-color: #999999;
-        outline: none;
-        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
-        a{
-            color: white;
-        }
-    }
-    a {
-        text-decoration:none;
-    }
-    a:visited {
-        color: #666666;
-    }
-}
 .transition(@obj:all, @time:.5s, @easing:easeOut){
     transition: @obj @time @easing;
     -moz-transition: @obj @time @easing;
@@ -217,21 +156,6 @@ a {
         position: absolute;
         left: -9999px;
     }
-}
-h1 {
-    font-size: 1.5em;
-}
-h2 {
-    font-size: 1.17em;
-}
-h3 {
-    font-size: 1.00em;
-}
-h4 {
-    font-size: 0.83em;
-}
-h5 {
-    font-size: 0.67em;
 }
 
 .otpExtraTopMargin {
@@ -263,16 +187,7 @@ img {
         padding: 0 0.25em;
     }
 }
-.spinner {
-    background: url(../images/spinner.gif) 50% 50% no-repeat transparent;
-    height: 16px;
-    width: 16px;
-    padding: 0.5em;
-    position: absolute;
-    right: 0;
-    top: 0;
-    text-indent: -9999px;
-}
+
 /* NAVIGATION MENU */
 .nav {
     .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
@@ -359,42 +274,6 @@ label {
     display: inline-block;
     margin: 0 0.25em 0 0;
 }
-input, select, textarea, button, a.btn {
-    color: #333;
-    background-color: #fcfcfc;
-    border: 1px solid #aaa;
-    .border-radius(4px);
-    font-size: 1em;
-    padding: 0.2em 0.4em;
-    text-decoration: none;
-    &:disabled {
-        color: #aaa;
-        background-color: #f6f5f4;
-    }
-    &:focus {
-        .box-shadowed(0, 0, 0.5em, #ffffff);
-        outline: 0;
-    }
-    &.code {
-        font-family: monospace;
-    }
-}
-select {
-    padding: 0.2em 0.2em 0.2em 0;
-}
-select[multiple] {
-    vertical-align: auto;
-    color: #1E90FF;
-}
-input[type=checkbox], input[type=radio] {
-    background-color: transparent;
-    border: 0;
-    padding: 0;
-}
-input[type=text] {
-    height: 28px;
-    box-sizing: border-box;
-}
 
 .required-indicator {
     color: #48802C;
@@ -477,42 +356,19 @@ input:invalid, select:invalid, textarea:invalid {
 
 /* TABLES */
 table {
-    border-bottom: 1px solid #DFDFDF;
-    border-collapse: collapse;
     width: 100%;
-    margin-bottom: 0.8em;
-    &.dataTable {
-        td {
-            white-space: nowrap;
-        }
-    }
-    &.form {
-        width: auto;
-    }
-    &.newSample {
-        display: none;
-        width: auto;
-        padding: 0;
-        margin: 0;
-    }
+}
+th {
+    border-top:  1px solid #DFDFDF;
+    border-bottom: 2px solid #DFDFDF;
 }
 tr {
-    border: 0;
     &.TUMOR {
         background: #f0f0ff;
     }
     &.CONTROL {
         background: #ffffff;
         border-bottom: 1px dotted #d0d0d0;
-    }
-    &:nth-last-child(2n) {
-        background-color: #A5D3FF;
-    }
-    &.intermediateHeader {
-        background-color: white;
-        td {
-            padding-top: 3em;
-        }
     }
 }
 
@@ -535,10 +391,6 @@ tr {
 tr>td:first-child, tr>th:first-child {
 }
 td, th {
-    line-height: 1.5em;
-    padding: 0.1em 0.1em;
-    text-align: left;
-    vertical-align: middle;
     &.error {
         width: 22px;
         padding: 0px;
@@ -554,51 +406,6 @@ td, th {
     ul {
         list-style-type: none;
         padding: 0px;
-    }
-}
-th {
-    @webkit-gradient: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(1, #eaeaea));
-    @moz-gradient: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    background-color: #efefef;
-    background-image: @moz-gradient;
-    background-image: @webkit-gradient;
-    color: #666666;
-    font-weight: bold;
-    line-height: 1.7em;
-    padding: 0.2em 0.1em;
-    border-top:  1px solid #DFDFDF;
-    border-bottom: 2px solid #DFDFDF;
-    white-space: nowrap;
-    &.sample {
-        background-image: -moz-linear-gradient(right, #ffffff, #f4f4ff);
-        background-color: #ffffff;
-        border-top:  1px dotted #DFDFDF;
-        border-bottom: 1px dotted #DFDFDF;
-    }
-    a {
-        display: block;
-        text-decoration: none;
-        &:link, &:visited {
-            color: #666666;
-        }
-        &:hover, &:focus {
-            color: #333333;
-        }
-    }
-    &.sortable a  {
-        background-position: right;
-        background-repeat: no-repeat;
-        padding-right: 1.1em;
-    }
-    &.asc a, &.sorting_asc {
-        @image: url(skin/sorted_asc.gif) center right no-repeat;
-        background: @image, @webkit-gradient;
-        background: @image, @moz-gradient;
-    }
-    &.desc a, &.sorting_desc {
-        @image: url(skin/sorted_desc.gif) center right no-repeat;
-        background: @image, @webkit-gradient;
-        background: @image, @moz-gradient;
     }
 }
 
@@ -662,10 +469,12 @@ td {
     }
     button.edit {
         .edit-button;
+        line-height: normal;
         width: 16px;
     }
     button.remove {
         .remove-button;
+        line-height: normal;
         width: 16px;
     }
     &.tableEntry {
@@ -703,29 +512,6 @@ td {
     border-left: 1px solid;
 }
 
-/* PAGINATION */
-.pagination {
-    .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
-    border-top: 0;
-    margin: 0;
-    padding: 0.3em 0.2em;
-    text-align: center;
-    background-color: #EFEFEF;
-    a, &.currentStep {
-        .border-radius(0.3em);
-        color: #666666;
-        display: inline-block;
-        margin: 0 0.1em;
-        padding: 0.25em 0.7em;
-        text-decoration: none;
-        &:hover, &:focus {
-            background-color: #999999;
-            color: #ffffff;
-            outline: none;
-            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
-        }
-    }
-}
 /* ACTION BUTTONS */
 .buttons {
     .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);

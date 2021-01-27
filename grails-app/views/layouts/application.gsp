@@ -19,12 +19,12 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<g:applyLayout name="main">
+<g:applyLayout name="common">
     <head>
         <title><g:layoutTitle default="OTP"/></title>
-        <g:layoutHead/>
         <asset:javascript src="modules/application.js"/>
         <asset:stylesheet src="modules/application.css"/>
+        <g:layoutHead/>
     </head>
 
     <body>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,5 +20,8 @@
  * SOFTWARE.
  */
 
-//= require /webjars/jquery/1.11.1/jquery.js
-//= require ../pages/metadataImport/index/metadataImportDataTable.js
+/*
+*= require /webjars/jquery-ui/1.10.4/themes/base/jquery-ui.css
+*= require ../metadataImport.less
+*= require ../message.less
+*/

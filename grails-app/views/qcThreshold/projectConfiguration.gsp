@@ -56,7 +56,7 @@
             <g:set var="propFieldWidth" value="40ch"/>
             <g:each in="${classesWithProperties}" var="cl">
                 <thead>
-                <tr class="intermediateHeader"><td colspan="9"><h2>${cl.clasz.simpleName}</h2></td></tr>
+                <tr class="intermediateHeader"><td colspan="10"><h2>${cl.clasz.simpleName}</h2></td></tr>
 
                 <tr>
                     <th>${g.message(code: "qcThreshold.property")}</th>

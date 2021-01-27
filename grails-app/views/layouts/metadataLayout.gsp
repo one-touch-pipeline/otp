@@ -26,9 +26,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title><g:layoutTitle default="OTP"/></title>
-    <asset:javascript src="modules/metadataImportDependencies.js"/>
-    <asset:stylesheet src="metadataImport/metadataImport.css"/>
-    <asset:stylesheet src="modules/defaultPageDependencies.css"/>
+    <asset:javascript src="modules/defaultPageDependencies.js"/>
+    <asset:stylesheet src="modules/metadataImport.css"/>
     <g:layoutHead/>
 </head>
 <body>

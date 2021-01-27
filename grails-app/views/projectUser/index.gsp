@@ -41,8 +41,6 @@
 
     <input type="hidden" name="confirmationTextHtml" value="${confirmationTextHtml}">
 
-    <g:render template="/templates/messages"/>
-
     <div class="project-selection-header-container">
         <div class="grid-element">
             <g:render template="/templates/projectSelection"/>
@@ -71,7 +69,7 @@
                 </label>
             </sec:access>
             <div class="form internal">
-                <table>
+                <table class="table-sm table-striped table-hover">
                     <tr>
                         <td><g:message code="projectUser.addMember.username"/></td>
                         <td class="user-auto-complete"><input name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off"
@@ -118,7 +116,7 @@
             </div>
             <sec:access expression="hasRole('ROLE_OPERATOR')">
                 <div class="form external">
-                    <table>
+                    <table class="table-sm table-striped table-hover">
                         <tr>
                             <td><g:message code="projectUser.addMember.name"/></td>
                             <td><input name="realName" type="text" class="inputField nonLdapUser" placeholder="${g.message(code: 'projectUser.addMember.realNameDescription')}"></td>
@@ -152,7 +150,7 @@
             </sec:access>
             <div class="submit-container">
                 <div>
-                    <input id="add-button" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
+                    <input class="btn btn-primary" id="add-button" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
                 </div>
                 <div>
                     <otp:annotation type="info" variant="inline"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
@@ -174,7 +172,7 @@
 
     <div class="otpDataTables projectUserTable fixed-table-header">
         <h5><strong><g:message code="projectUser.activeUsers" args="[selectedProject.displayName]"/></strong></h5>
-        <table>
+        <table class="table-sm table-striped table-hover">
             <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: selectedProject]"/>
             <g:if test="${!enabledProjectUsers}">
                 <g:render template="noUsersTableRow"/>
@@ -225,7 +223,7 @@
                                     />
                                     <input type="hidden" name="targetAddRole"
                                            value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null])}"/>
-                                    <button class="addRole js-add" data-confirmation="${confirmationText}"><g:message
+                                    <button class="btn btn-primary addRole js-add" data-confirmation="${confirmationText}"><g:message
                                             code="projectUser.addRoleToUserProjectRole"/></button>
                                 </div>
                             </sec:access>
@@ -250,14 +248,14 @@
                                             <input type="hidden" name="hasFileAccess" value="${userEntry.fileAccess.toBoolean()}">
                                             <input type="hidden" name="permissionState" value="${userEntry.fileAccess}">
                                             <span class="icon-${userEntry.fileAccess}"></span><br>
-                                            <button onclick="onToggleAccessToFiles(this)"><g:message code="default.button.toggle.label"/></button><br>
-                                            <button onclick="hideEditorAndShowLabel(this)"><g:message code="default.button.cancel.label"/></button>
+                                            <button class="btn btn-primary" onclick="onToggleAccessToFiles(this)"><g:message code="default.button.toggle.label"/></button><br>
+                                            <button class="btn btn-primary" onclick="hideEditorAndShowLabel(this)"><g:message code="default.button.cancel.label"/></button>
                                         </div>
 
                                         <p class="modal-editor-switch-label" data-toggle="tooltip" data-placement="top"
                                            title="${message(code: userEntry.fileAccess.toolTipKey) ?: ''}">
                                             <span class="icon-${userEntry.fileAccess}"></span>
-                                            <button class="edit" onclick="onFileAccessEditClick(this)">&nbsp;</button>
+                                            <button class="btn btn-primary edit" onclick="onFileAccessEditClick(this)">&nbsp;</button>
                                         </p>
                                     </div>
                                 </sec:access>
@@ -318,7 +316,7 @@
                             <div class="submit-container">
                                 <input type="hidden" name="changeProjectAccessButton"
                                        value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false])}"/>
-                                <button class="changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
+                                <button class="btn btn-primary changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
                                         code="projectUser.table.deactivateUser"/></button>
                             </div>
                         </td>
@@ -329,7 +327,7 @@
         <p><span class="icon-asterisk"></span>${g.message(code: 'projectUser.table.fileAccess.legend')}</p>
     </div>
     <sec:access expression="hasRole('ROLE_OPERATOR')">
-        <button id="listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
+        <button class="btn btn-primary" id="listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
                 data-project="${selectedProject?.name}" data-emails="${emails}">
             <g:message code="projectUser.table.copyEmail"/>
         </button>
@@ -337,7 +335,7 @@
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable">
             <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
-            <table class="fixed-table-header">
+            <table class="table-sm table-striped table-hover fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: selectedProject]"/>
                 <g:if test="${!disabledProjectUsers}">
                     <g:render template="noUsersTableRow"/>
@@ -375,7 +373,7 @@
                                 <div class="submit-container">
                                     <input type="hidden" name="changeProjectAccessButton"
                                            value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": true])}"/>
-                                    <button class="changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
+                                    <button class="btn btn-primary changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
                                             code="projectUser.table.reactivateUser"/></button>
                                 </div>
                             </td>

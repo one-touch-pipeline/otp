@@ -1,0 +1,217 @@
+/*
+ * Copyright 2011-2021 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+@import "colors";
+@import "common";
+
+body,
+input, select, textarea, option, button {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 10pt;
+}
+
+.button {
+    display: block;
+    background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
+    float: right;
+    border: 1px solid #cccccc;
+    margin: 0.5em 0.5em 0.5em 0.5em;
+    padding: 0.2em 0.5em 0.2em 0.5em;
+    .border-radius(0.3em);
+    background-color: #DDD;
+    color: #666666;
+    &:hover, &:focus {
+        .no-box-shadow;
+        background-color: #999999;
+        outline: none;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+        a{
+            color: white;
+        }
+    }
+    a {
+        text-decoration:none;
+    }
+    a:visited {
+        color: #666666;
+    }
+}
+
+h1 {
+    font-size: 1.5em;
+}
+h2 {
+    font-size: 1.17em;
+}
+h3 {
+    font-size: 1.00em;
+}
+h4 {
+    font-size: 0.83em;
+}
+h5 {
+    font-size: 0.67em;
+}
+
+input, select, textarea, button, a.btn {
+    color: #333;
+    background-color: #fcfcfc;
+    border: 1px solid #aaa;
+    .border-radius(4px);
+    font-size: 1em;
+    padding: 0.2em 0.4em;
+    text-decoration: none;
+    &:disabled {
+        color: #aaa;
+        background-color: #f6f5f4;
+    }
+    &:focus {
+        .box-shadowed(0, 0, 0.5em, #ffffff);
+        outline: 0;
+    }
+    &.code {
+        font-family: monospace;
+    }
+}
+select {
+    padding: 0.2em 0.2em 0.2em 0;
+}
+select[multiple] {
+    vertical-align: auto;
+    color: #1E90FF;
+}
+input[type=checkbox], input[type=radio] {
+    background-color: transparent;
+    border: 0;
+    padding: 0;
+}
+input[type=text] {
+    height: 28px;
+    box-sizing: border-box;
+}
+
+table {
+    border-bottom: 1px solid #DFDFDF;
+    border-collapse: collapse;
+    margin-bottom: 0.8em;
+    &.dataTable {
+        td {
+            white-space: nowrap;
+        }
+    }
+    &.form {
+        width: auto;
+    }
+    &.newSample {
+        display: none;
+        width: auto;
+        padding: 0;
+        margin: 0;
+    }
+}
+
+tr {
+    border: 0;
+    &:nth-last-child(2n) {
+        background-color: #A5D3FF;
+    }
+    &.intermediateHeader {
+        background-color: white;
+        td {
+            padding-top: 3em;
+        }
+    }
+}
+
+td, th {
+    line-height: 1.5em;
+    padding: 0.1em 0.1em;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    @webkit-gradient: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(1, #eaeaea));
+    @moz-gradient: -moz-linear-gradient(center bottom, #efefef, #ffffff);
+    background-color: #efefef;
+    background-image: @moz-gradient;
+    background-image: @webkit-gradient;
+    color: #666666;
+    font-weight: bold;
+    line-height: 1.7em;
+    padding: 0.2em 0.1em;
+    white-space: nowrap;
+    &.sample {
+        background-image: -moz-linear-gradient(right, #ffffff, #f4f4ff);
+        background-color: #ffffff;
+        border-top:  1px dotted #DFDFDF;
+        border-bottom: 1px dotted #DFDFDF;
+    }
+    a {
+        display: block;
+        text-decoration: none;
+        &:link, &:visited {
+            color: #666666;
+        }
+        &:hover, &:focus {
+            color: #333333;
+        }
+    }
+    &.sortable a  {
+        background-position: right;
+        background-repeat: no-repeat;
+        padding-right: 1.1em;
+    }
+    &.asc a, &.sorting_asc {
+        @image: url(skin/sorted_asc.gif) center right no-repeat;
+        background: @image, @webkit-gradient;
+        background: @image, @moz-gradient;
+    }
+    &.desc a, &.sorting_desc {
+        @image: url(skin/sorted_desc.gif) center right no-repeat;
+        background: @image, @webkit-gradient;
+        background: @image, @moz-gradient;
+    }
+}
+
+/* PAGINATION */
+.pagination {
+    .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
+    border-top: 0;
+    margin: 0;
+    padding: 0.3em 0.2em;
+    text-align: center;
+    background-color: #EFEFEF;
+    a, &.currentStep {
+        .border-radius(0.3em);
+        color: #666666;
+        display: inline-block;
+        margin: 0 0.1em;
+        padding: 0.25em 0.7em;
+        text-decoration: none;
+        &:hover, &:focus {
+            background-color: #999999;
+            color: #ffffff;
+            outline: none;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+        }
+    }
+}

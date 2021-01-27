@@ -35,7 +35,7 @@ $(function () {
         bServerSide: false,
         bSort: true,
         bJQueryUI: false,
-        bAutoWidth: true,
+        bAutoWidth: false,
         sAjaxSource: $.otp.createLink({
             controller: 'sampleOverview',
             action: 'dataTableSourceLaneOverview'

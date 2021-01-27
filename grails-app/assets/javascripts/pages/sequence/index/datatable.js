@@ -53,12 +53,12 @@ $.otp.sequence = {
                 controller: 'sequence',
                 action: 'dataTableSource'
             }),
-            bScrollCollapse: true,
             sScrollX: 'auto',
             sScrollXInner: "100%",
             sScrollY: 490,
             iDisplayLength: 100,
             bDeferRender: true,
+            scroller: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name: "filtering",

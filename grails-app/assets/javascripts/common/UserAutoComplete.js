@@ -46,6 +46,14 @@ $.ui.autocomplete.prototype._renderItem = function (table, item) {
 };
 
 $(function () {
+    var failure = function(title, message) {
+        if ($.otp.toaster) {
+            $.otp.toaster.showErrorToast(title, message);
+        } else {
+            $.otp.warningMessage(title + message);
+        }
+    }
+
     $(".user-auto-complete").on("input", "input", function (e) {
         "use strict";
         var searchElement = $(e.target);
@@ -96,7 +104,7 @@ $(function () {
                 searchElement.data("uiAutocomplete").search(searchElement.val());
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown)
+                failure(textStatus + " occurred while processing the data.", "Reason: " + errorThrown)
             }
         });
     });

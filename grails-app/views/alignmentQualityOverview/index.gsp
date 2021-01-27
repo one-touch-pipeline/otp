@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <h5><strong><g:message code="otp.menu.alignmentQuality"/></strong></h5>
+    <h1><g:message code="otp.menu.alignmentQuality"/></h1>
 
     <div id="sample" data-sample="${sample?.id}">
         <g:if test="${sample}">

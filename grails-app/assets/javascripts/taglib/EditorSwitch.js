@@ -24,6 +24,22 @@
  */
 
 $(function() {
+    var success = function(title, message) {
+        if ($.otp.toaster) {
+            $.otp.toaster.showSuccessToast(title, message);
+        } else {
+            $.otp.infoMessage(title + message);
+        }
+    }
+
+    var failure = function(title, message) {
+        if ($.otp.toaster) {
+            $.otp.toaster.showErrorToast(title, message);
+        } else {
+            $.otp.warningMessage(title + message);
+        }
+    }
+
     $("td.add-table-buttons button.add").click(function (event) {
         "use strict";
         event.preventDefault();
@@ -96,15 +112,15 @@ $(function() {
             data: {value: inputField.val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($("input[name=value]", container).val());
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     $("input[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
                 $("input[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -125,7 +141,7 @@ $(function() {
             data: {value: $("textarea", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($("textarea", container).val());
                     if (data.updateMap) {
                         for (var key in data.updateMap) {
@@ -134,12 +150,12 @@ $(function() {
                         }
                     }
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     $("textarea", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
                 $("textarea", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -160,10 +176,10 @@ $(function() {
             data: { value: $("input:text[name=value]", container).val() },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
@@ -195,19 +211,19 @@ $(function() {
             data: { value: $("input:hidden[name=targetDeleteValue]", container).attr("value") },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data deleted successfully");
+                    success("Data stored successfully", "");
                     $(outerContainer).remove();
                     var submitContainer = $("div[class=submit-container]", outerOuterContainer)
                     var selectRoles = $("select[name=newRoles]", submitContainer);
                     selectRoles.append("<option value=" + data.currentRole + ">" + data.currentRole + "</option>")
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     $("p.edit-switch-editor", outerContainer).hide();
                     $("p.edit-switch-label", outerContainer).show();
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
                 $("p.edit-switch-editor", outerContainer).hide();
                 $("p.edit-switch-label", outerContainer).show();
             }
@@ -245,7 +261,7 @@ $(function() {
             data: { value: JSON.stringify(selectedNewRoles) },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     // Update drop down menue
                     for (let i=0; i<selectNewRoles.length; i++) {
                         for (let j=0; j<data.currentProjectRole.length; j++) {
@@ -263,11 +279,11 @@ $(function() {
                         $(outerContainer.children()[0]).find("button.cancel").click(function () {cancelAddRoleCommand($(this))});
                     }
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
             }
         });
     });
@@ -296,17 +312,17 @@ $(function() {
             data: { value: $("select option:selected", container).attr("value") },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($("select option:selected", container).text());
                     if (successCallback) {
                         window[successCallback](container, data.additionalData)
                     }
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -325,14 +341,14 @@ $(function() {
             data: { value: $('input[type="date"]', container).val() },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($('input[type="date"]', container).val());
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -356,7 +372,7 @@ $(function() {
             data: value,
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     var names = [];
                     $("input:checkbox", container).each(function () {
                         if (this.checked) {
@@ -368,12 +384,12 @@ $(function() {
                     });
                     $("p.edit-switch-label span", outerContainer).text(names.join(", ") || "(None selected)");
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     resetCheckboxes(container);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
                 resetCheckboxes(container);
             }
         });
@@ -400,15 +416,15 @@ $(function() {
             data: { value: $("select option:selected", container).text() },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -430,15 +446,15 @@ $(function() {
             data: { value: $("input:text[name=value]", container).val() },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -469,14 +485,14 @@ $(function() {
             data: data,
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     window.setTimeout(function() { location.reload() }, 300);
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
             }
         });
         $("span.edit-switch-editor", outerContainer).hide();
@@ -506,7 +522,7 @@ $(function() {
             data: { "value": invVal },
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $.each(["label", "editor"], function () {
                         $("p.edit-switch-" + this + " span", outerContainer).removeClass("icon-" + orgVal).addClass("icon-" + invVal);
                     });
@@ -519,11 +535,11 @@ $(function() {
                         window.setTimeout(function() { location.reload() }, 100); //reloads page after 0.5 seconds
                     }
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -605,15 +621,15 @@ $(function() {
             data: dataValues,
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage("Data stored successfully");
+                    success("Data stored successfully", "");
                     $(".edit-switch-label span", outerContainer).text(displayValue);
                     multiInputField.data('values', dataValues);
                 } else {
-                    $.otp.warningMessage(data.error);
+                    failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
             }
         });
         $(".edit-switch-editor", outerContainer).hide();

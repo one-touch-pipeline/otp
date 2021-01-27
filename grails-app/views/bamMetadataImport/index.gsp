@@ -32,7 +32,7 @@
             <g:message code="bamMetadataImport.titleOperator"/>
         </sec:ifAllGranted>
     </title>
-    <asset:javascript src="modules/defaultPageDependencies.js"/>
+    <asset:javascript src="pages/metadataImport/index/metadataImportDataTable.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="common/DisableOnSubmit.js"/>
 </head>

@@ -58,11 +58,11 @@ function postFileAccessChange(context) {
                 $("input:hidden[name=hasFileAccess]", container).val(invVal);
                 $("input:hidden[name=permissionState]", container).val(response.permissionState);
             } else {
-                $.otp.warningMessage(response.error);
+                $.otp.toaster.showErrorToast("Saving failed.", response.error);
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+            $.otp.toaster.showErrorToast(textStatus + " occurred while processing the data.",  errorThrown);
         },
         complete: function () {
             hideEditorAndShowLabel(context)
@@ -181,12 +181,12 @@ function submitChangeProjectAccess(postUrl) {
         success: function (data) {
             if (data.success) {
                 location.reload();
-            } else {c
-                $.otp.warningMessage(data.error);
+            } else {
+                $.otp.toaster.showErrorToast("Saving failed.", data.error);
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+            $.otp.toaster.showErrorToast(textStatus + " occurred while processing the data.", errorThrown);
         }
     });
 }
