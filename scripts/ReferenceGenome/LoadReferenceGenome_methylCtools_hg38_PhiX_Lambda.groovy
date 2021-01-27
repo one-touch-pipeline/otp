@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import groovy.transform.Field
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
@@ -32,12 +35,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "methylCtools_hg38_PhiX_Lambda"
+@Field
 String path = "bwa06_methylCtools_hg38_PhiX_Lambda"
 String fileNamePrefix = "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.conv"
 String cytosinePositionsIndex = "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.pos.gz"
 String chromosomePrefix = "chr"
 String chromosomeSuffix = "chr"
 String fingerPrintingFileName = null
+@Field
 List<String> statSizeFileNames = [
         "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.chrLenOnlyACGT.tab",
 ]

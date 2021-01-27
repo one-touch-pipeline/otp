@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import grails.converters.JSON
+import grails.databinding.BindUsing
 import groovy.transform.TupleConstructor
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.*
@@ -37,7 +38,14 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<ExternalWorkflowConfigFragment>, Entity {
 
     String name
-    /** nested maps in JSON format */
+
+    /** Nested maps in JSON format
+     * @BindUsing closure forces the keys to be stored with quotes,
+     * which is ignored by validation due to parsing.
+     * */
+    @BindUsing({ obj, source ->
+        JSON.parse(source['configValues'] as String).toString()
+    })
     String configValues
     ExternalWorkflowConfigFragment previous
 
@@ -104,11 +112,14 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
      * The top-level JSON object in {@link ExternalWorkflowConfigFragment#configValues} must contain only the name() of these Types as keys
      * Optionally the content can be validated by setting validateConfig, if no validation is required set it to null
      */
-    @TupleConstructor enum Type {
+    @TupleConstructor
+    enum Type {
         /** used for jobs that are submitted directly to cluster by OTP */
         OTP_CLUSTER({ ClusterJobSubmissionOptionsService.validateJsonString(it.toString()) }),
         WORKFLOWS({ true }),
 
         final Closure<Boolean> validateConfig
     }
+
+
 }

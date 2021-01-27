@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,44 @@
  * SOFTWARE.
  */
 
-//= require ../shared/workflowConfigBase
+package rollout.docker
 
-$(function () {
-    var update = function (e) {
-        $(e.target).parents("form").submit();
+import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
+
+/**
+ * Creates some realistic LibraryPreparationKits for Docker Setup.
+ */
+
+def libPrepKitParameter = [
+        [
+                name            : "Agilent SureSelect V3",
+                shortDisplayName: "Ag SuSe V3",
+
+        ],
+        [
+                name            : "Agilent SureSelect V4",
+                shortDisplayName: "Ag SuSe V4",
+
+        ],
+        [
+                name            : "Agilent SureSelect V4+UTRs",
+                shortDisplayName: "Ag SuSe V4+UTRs",
+
+        ],
+        [
+                name            : "Agilent SureSelect V5",
+                shortDisplayName: "Ag SuSe V5",
+
+        ],
+        [
+                name            : "Agilent SureSelect V5+UTRs",
+                shortDisplayName: "Ag SuSe V5+UTRs",
+
+        ],
+]
+
+LibraryPreparationKit.withTransaction {
+    libPrepKitParameter.each {
+        new LibraryPreparationKit(it).save(flush: true)
     }
-    var form = $("form.selector");
-    form.on("change", "select", update);
-    form.on("change", "input", update);
-    form.on("keyup", "input[type=text]", update);
-
-
-    $(".format").on("click", function (e) {
-        e.preventDefault();
-        var value = $("#configValue");
-        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
-    });
-});
+}

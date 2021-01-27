@@ -1,4 +1,5 @@
 package ReferenceGenome
+
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -23,6 +24,7 @@ package ReferenceGenome
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import groovy.transform.Field
 
 /*
  *  This scripts inserts a new ReferenceGenome object
@@ -33,12 +35,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "mm9_phiX"
+@Field
 String path = "bwa07_mm9_PhiX"
 String fileNamePrefix = "mm9_phiX"
 String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
 String fingerPrintingFileName = null
+@Field
 List<String> statSizeFileNames = [
         "mm9_phiX.fa.chrLenOnlyACGT_realChromosomes.tab",
         "mm9_phiX.fa.chrLenOnlyACGT.tab",

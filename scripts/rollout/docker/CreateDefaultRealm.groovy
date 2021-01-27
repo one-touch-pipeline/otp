@@ -20,21 +20,24 @@
  * SOFTWARE.
  */
 
-//= require ../shared/workflowConfigBase
+package rollout.docker
 
-$(function () {
-    var update = function (e) {
-        $(e.target).parents("form").submit();
-    }
-    var form = $("form.selector");
-    form.on("change", "select", update);
-    form.on("change", "input", update);
-    form.on("keyup", "input[type=text]", update);
+import de.dkfz.tbi.otp.ngsdata.Realm
 
+/**
+ * Calls ../CreateDefaultRealm.groovy with configuration for Docker setup.
+ */
 
-    $(".format").on("click", function (e) {
-        e.preventDefault();
-        var value = $("#configValue");
-        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
-    });
-});
+GroovyShell shell = new GroovyShell()
+def rollout = shell.parse(new File('scripts/rollout/CreateDefaultRealm.groovy'))
+
+Realm realm = new Realm([
+        name                       : 'dev_realm',
+        jobScheduler               : Realm.JobScheduler.LSF,
+        host                       : 'cluster-host',
+        port                       : 2222,
+        timeout                    : 0,
+        defaultJobSubmissionOptions: '{"WALLTIME":"PT48H", "MEMORY":"1g"}',
+])
+
+rollout.createDefaultRealm(ctx, realm)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,16 @@
  * SOFTWARE.
  */
 
-//= require ../shared/workflowConfigBase
-
 $(function () {
-    var update = function (e) {
-        $(e.target).parents("form").submit();
-    }
-    var form = $("form.selector");
-    form.on("change", "select", update);
-    form.on("change", "input", update);
-    form.on("keyup", "input[type=text]", update);
-
-
-    $(".format").on("click", function (e) {
-        e.preventDefault();
-        var value = $("#configValue");
-        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
+    const selectorTypeSelector = $("#relatedSelectorType");
+    selectorTypeSelector.on("change", function (e) {
+        var types = $(e.target).val();
+        $("#relatedSelectors").children("div").each(function () {
+            if (types !== null && types.indexOf($(this).data("type")) === -1) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+        });
     });
-});
+})

@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import groovy.transform.Field
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
@@ -32,12 +35,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "hg38_CGA_000001405.15-no_alt_analysis_set"
+@Field
 String path = "bwa06_hg38_CGA_000001405.15-no_alt_analysis_set"
 String fileNamePrefix = "GCA_000001405.15_GRCh38_no_alt_analysis_set"
 String cytosinePositionsIndex = null
 String chromosomePrefix = "chr"
 String chromosomeSuffix = ""
 String fingerPrintingFileName = null
+@Field
 List<String> statSizeFileNames = [
         "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.chrLenOnlyACGT.tab",
         "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.chrLenOnlyACGT_realChromosomes.tab",

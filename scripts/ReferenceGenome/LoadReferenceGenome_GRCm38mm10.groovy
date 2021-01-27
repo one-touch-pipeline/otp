@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import groovy.transform.Field
+
 import de.dkfz.tbi.otp.ngsdata.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -33,12 +36,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "GRCm38mm10"
+@Field
 String path = "bwa06_GRCm38mm10"
 String fileNamePrefix = "GRCm38mm10"
 String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
 String fingerPrintingFileName = null
+@Field
 List<String> statSizeFileNames = [
         "GRCm38mm10.fa.chrLenOnlyACGT_realChromosomes.tab",
         "GRCm38mm10.fa.chrLenOnlyACGT.tab",

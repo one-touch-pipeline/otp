@@ -22,7 +22,7 @@ FROM gradle:4.9-jdk8-alpine
 
 USER root
 
-RUN mkdir /otp && chmod 2777 /otp
+RUN mkdir -m 2777 -p /otp
 
 ARG APP_HOME=/usr/app/
 ARG GRADLE_PROXY_ENABLED=false
@@ -42,6 +42,8 @@ RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
     echo "systemProp.https.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
     echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties \
     ; fi
+
+USER 1000
 
 ENTRYPOINT gradle $GRADLE_COMMAND
 

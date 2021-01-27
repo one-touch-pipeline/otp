@@ -36,7 +36,7 @@
                 </tr>
                 <tr>
                     <td>${g.message(code: "workflowConfig.selector.versions")}</td>
-                    <td>${selector.workflowVersions*.version.join(", ") ?: g.message(code: "workflowConfig.selector.all")}</td>
+                    <td>${selector.workflowVersions*.workflowVersion.join(", ") ?: g.message(code: "workflowConfig.selector.all")}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "workflowConfig.selector.projects")}</td>

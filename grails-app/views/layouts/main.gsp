@@ -162,6 +162,7 @@
                                                     code="otp.menu.workflowRunOverview"/></g:link></li>
                                             <li><g:link controller="workflowRunList" action="index"><g:message code="otp.menu.workflowRunList"/></g:link></li>
                                             <li><g:link controller="workflowConfig" action="index"><g:message code="otp.menu.workflowConfig"/></g:link></li>
+                                            <li><g:link controller="workflowConfigViewer" action="index"><g:message code="otp.menu.workflowConfigViewer"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>

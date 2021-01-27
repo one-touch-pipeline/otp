@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import groovy.transform.Field
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
@@ -32,12 +35,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "hs37d5_Bovine_Phix"
+@Field
 String path = "bwa06_hs37d5_Bovine_Phix"
 String fileNamePrefix = "hs37d5_PhiX_Btau"
 String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
 String fingerPrintingFileName = null
+@Field
 List<String> statSizeFileNames = [
         "hs37d5_Bovine_PhiX.fa.chrLenOnly_realChromosomes.tab",
 ]

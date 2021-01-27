@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,30 +20,60 @@
  * SOFTWARE.
  */
 
+package rollout
+
+import org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.util.*
-import de.dkfz.tbi.otp.dataprocessing.*
 
-String realmName
+/**
+ * @see Realm
+ * @see ProcessingOption
+ *
+ * Basic script for creating a default realm.
+ *
+ * The parameters for the processing options are defined in the form
+ * of a {@code Map<ProcessingOption.OptionName, Object>} and are unsed to create
+ * the desired processing options by the createProcessingOptions function.
+ */
 
-assert realmName
+// inputs
+// --------------------------------------------------------
 
-ProcessingOptionService processingOptionService = ctx.ProcessingOptionService
+String realmName = 'some-realm-name'
+Realm.JobScheduler jobScheduler = Realm.JobScheduler.LSF
+String host = 'invalid-host-name'
+int port = -1
+timeout = -1
+String defaultJobSubmissionOptions = ''
 
-//create default realm
-Realm.withTransaction {
-    Realm realm = new Realm([
-            name                       : realmName,
-            jobScheduler               : Realm.JobScheduler.PBS,
-            host                       : 'test.host.invalid',
-            port                       : -1,
-            timeout                    : -1,
-            defaultJobSubmissionOptions: '',
-    ])
+//
+// --------------------------------------------------------
 
-    assert realm.save(flush: true)
+Realm realm = new Realm([
+        name                       : realmName,
+        jobScheduler               : jobScheduler,
+        host                       : host,
+        port                       : port,
+        timeout                    : timeout,
+        defaultJobSubmissionOptions: defaultJobSubmissionOptions,
+])
 
-    processingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, realmName)
+/**
+ * Create a Realm and set it as default in the processing options.
+ *
+ * @param ctx ctx The AnnotationConfigEmbeddedWebApplicationContext, necessary if the function
+ * is called from another script.
+ * @param realm The realm to create
+ * @return a String indicating a successfully creation.
+ */
+static String createDefaultRealm (AnnotationConfigEmbeddedWebApplicationContext ctx, Realm realm){
+    Realm.withTransaction {
+        assert realm.save(flush: true)
+        ctx.ProcessingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, realm.name)
+        return "$realm.name created"
+    }
 }
-''
+
+createDefaultRealm(ctx, realm)

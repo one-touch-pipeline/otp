@@ -37,11 +37,14 @@ services:
     volumes:
       - gradle_dependencies:/home/gradle/.gradle
       - filesystem:/otp
+      # the LOCAL_SOURCE_PATH has to be set in the .env file
+      - $LOCAL_SOURCE_PATH:/usr/app
     depends_on:
       - postgres
     links:
       - openssh-server:cluster-host
       - open-ldap:ldap-host
+      - mailhog:mail-host
 
   postgres:
     container_name: otp-dev-postgres

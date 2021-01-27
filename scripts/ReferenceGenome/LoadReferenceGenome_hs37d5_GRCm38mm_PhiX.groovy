@@ -1,3 +1,4 @@
+package ReferenceGenome
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -20,8 +21,12 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.*
+
+import groovy.transform.Field
+
+import de.dkfz.tbi.otp.ngsdata.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 
 /*
  *  This scripts inserts a new ReferenceGenome object
@@ -32,12 +37,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "hs37d5_GRCm38mm_PhiX"
+@Field
 String path = "bwa06_hs37d5_GRCm38mm_PhiX"
 String fileNamePrefix = "hs37d5_GRCm38mm10_PhiX"
 String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
 String fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
+@Field
 List<String> statSizeFileNames = [
         "hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab",
         "hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab",

@@ -242,3 +242,4 @@ environments {
         grails.plugin.console.baseUrl="/console"
     }
 }
+grails.plugin.console.fileStore.remote.defaultPath=System.getenv("CONSOLE_REMOTE_DEFAULTPATH")

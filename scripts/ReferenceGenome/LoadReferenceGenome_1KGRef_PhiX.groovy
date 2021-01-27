@@ -22,6 +22,7 @@
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import groovy.transform.Field
 
 /*
  *  This scripts inserts a new ReferenceGenome object
@@ -32,12 +33,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "1KGRef_PhiX"
+@Field
 String path = "bwa06_1KGRef_PhiX"
 String fileNamePrefix = "hs37d5_PhiX"
 String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
 String fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
+@Field
 List<String> statSizeFileNames = [
         "hs37d5_PhiX.fa.chrLenOnlyACGT_realChromosomes.tab",
         "hs37d5_PhiX.fa.chrLenOnlyACGT.tab",

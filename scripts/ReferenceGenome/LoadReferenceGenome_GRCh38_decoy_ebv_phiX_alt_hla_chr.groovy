@@ -22,6 +22,7 @@
 
 package ReferenceGenome
 
+import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -35,12 +36,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "GRCh38_decoy_ebv_phiX_alt_hla_chr"
+@Field
 String path = "GRCh38_decoy_ebv_phiX_alt_hla_chr"
 String fileNamePrefix = "GRCh38_decoy_ebv_phiX_alt_hla_chr"
 String cytosinePositionsIndex = null
 String chromosomePrefix = "chr"
 String chromosomeSuffix = ""
 String fingerPrintingFileName = null
+@Field
 List<String> statSizeFileNames = [
         "GRCh38_decoy_ebv_phiX_alt_hla_chr.fa.chrLenOnlyACGT_realChromosomes.tsv",
 ]

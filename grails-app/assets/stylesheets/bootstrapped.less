@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,45 @@
  * SOFTWARE.
  */
 
-//= require ../shared/workflowConfigBase
+/**
+Global style definitions which are relevant for all bootstrap pages.
+*/
 
-$(function () {
-    var update = function (e) {
-        $(e.target).parents("form").submit();
-    }
-    var form = $("form.selector");
-    form.on("change", "select", update);
-    form.on("change", "input", update);
-    form.on("keyup", "input[type=text]", update);
+.otp-main-container {
+    margin-bottom: 60px;
+    margin-top: 60px;
+}
 
+/**
+Override unnecessary styles of otp.less
+ */
+input {
+    padding: 0;
+}
 
-    $(".format").on("click", function (e) {
-        e.preventDefault();
-        var value = $("#configValue");
-        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
-    });
-});
+input[type="text"] {
+    height: auto;
+}
+
+input:disabled {
+    color: #495057;
+}
+
+tr:nth-last-child(2n) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+th {
+    background-image: none;
+    background-color: initial;
+    color: initial;
+}
+
+tbody th {
+    border: initial;
+}
+
+.input-group {
+    z-index: 0;
+}
+

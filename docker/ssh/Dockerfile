@@ -22,4 +22,4 @@ FROM ghcr.io/linuxserver/openssh-server
 
 ADD 10-add-users-to-groups.sh /config/custom-cont-init.d/10-add-user-to-group.sh
 
-RUN mkdir /otp && chmod 2777 /otp
+RUN mkdir -m 2777 -p /otp

@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import groovy.transform.Field
+
 import de.dkfz.tbi.otp.ngsdata.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -33,12 +36,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "hs37d5_GRCm38mm"
+@Field
 String path = "bwa06_hs37d5_GRCm38mm"
 String fileNamePrefix = "hs37d5_GRCm38mm"
 String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
 String fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
+@Field
 List<String> statSizeFileNames = [
         "hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab",
         "hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab",

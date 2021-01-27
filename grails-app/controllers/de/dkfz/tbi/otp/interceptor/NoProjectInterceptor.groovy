@@ -43,6 +43,9 @@ class NoProjectInterceptor {
                 .except(controller: 'logout', action: 'index')
                 .except(controller: 'info')
                 .except(controller: 'document')
+                .except(controller: 'metaDataFields')
+                .except(controller: 'softwareTool')
+                .except(controller: 'speciesWithStrain')
                 // admin pages
                 .except(controller: 'userAdministration')
                 .except(controller: 'roles')
@@ -51,6 +54,8 @@ class NoProjectInterceptor {
                 .except(controller: 'jobErrorDefinition')
                 .except(controller: 'dicom')
                 .except(controller: 'shutdown')
+                .except(controller: 'console')
+                .except(uri: '/static/**')
     }
 
     @Override

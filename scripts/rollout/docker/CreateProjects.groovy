@@ -20,21 +20,33 @@
  * SOFTWARE.
  */
 
-//= require ../shared/workflowConfigBase
+package rollout.docker
 
-$(function () {
-    var update = function (e) {
-        $(e.target).parents("form").submit();
-    }
-    var form = $("form.selector");
-    form.on("change", "select", update);
-    form.on("change", "input", update);
-    form.on("keyup", "input[type=text]", update);
+import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.Project
+
+/**
+ * Calls ../CreateProjects.groovy with configuration for Docker setup.
+ */
+
+GroovyShell shell = new GroovyShell()
+def rollout = shell.parse(new File('scripts/rollout/CreateProjects.groovy'))
+
+String ANALYSIS_BASE_PATH = "/otp/projects/analysis/"
+Set<String> names = ["testProject1", "testProject2"]
+
+Map<String, Object> projectCreationParameter = [
+        name             : names,
+        individualPrefix : ["DEV1", "DEV2"],
+        dirName          : names,
+        dirAnalysis      : names.collect{ANALYSIS_BASE_PATH+it},
+        unixGroup        : ["test_project_01"],
+        sampleIdentifierParserBeanName: [SampleIdentifierParserBeanName.NO_PARSER],
+        qcThresholdHandling: [QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK],
+        projectType: [Project.ProjectType.SEQUENCING],
+        processingPriority: [ctx.processingPriorityService.defaultPriority()]
+]
 
 
-    $(".format").on("click", function (e) {
-        e.preventDefault();
-        var value = $("#configValue");
-        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
-    });
-});
+rollout.createProjects(ctx, projectCreationParameter)

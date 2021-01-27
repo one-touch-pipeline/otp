@@ -1,3 +1,5 @@
+package de.dkfz.tbi.otp.workflowExecution
+
 /*
  * Copyright 2011-2020 The OTP authors
  *
@@ -19,17 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
 
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
-
-import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
 @Secured(['ROLE_ADMIN'])
-class WorkflowConfigController implements CheckAndCall {
+class WorkflowConfigController implements BaseWorkflowConfigController {
 
     static allowedMethods = [
             index    : "GET",
@@ -57,7 +56,7 @@ class WorkflowConfigController implements CheckAndCall {
                     cmd.projects as Set,
                     cmd.seqTypes as Set,
                     cmd.referenceGenomes as Set,
-                    cmd.libraryPreparationKits as Set,
+                    cmd.libraryPreparationKits as Set
             )
             selector = configSelectorService.findExactSelector(extendedCriteria)
             fragment = selector?.externalWorkflowConfigFragment
@@ -88,24 +87,10 @@ class WorkflowConfigController implements CheckAndCall {
                 selectedProjects,
                 selectedSeqTypes,
                 selectedReferenceGenomes,
-                selectedLibraryPreparationKits,
+                selectedLibraryPreparationKits
         )).sort()
 
         List<ExternalWorkflowConfigSelector> allSelectors = configSelectorService.all
-
-        Set<Workflow> workflows = Workflow.findAllByDeprecatedDateIsNull().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString()) }
-        Set<WorkflowVersion> workflowVersions = WorkflowVersion.all.sort { a, b ->
-            String.CASE_INSENSITIVE_ORDER.compare(a.workflow.toString(), b.workflow.toString()) ?:
-                    String.CASE_INSENSITIVE_ORDER.compare(a.workflowVersion, b.workflowVersion)
-        }
-        Set<Project> projects = Project.all.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
-        Set<SeqType> seqTypes = SeqType.all.sort {
-            a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.displayNameWithLibraryLayout, b.displayNameWithLibraryLayout)
-        }
-        Set<ReferenceGenome> referenceGenomes = ReferenceGenome.all.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
-        Set<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.all.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
-
-        Set<SelectorType> selectorTypes = SelectorType.values().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()) }
 
         return [
                 allSelectors                  : allSelectors,

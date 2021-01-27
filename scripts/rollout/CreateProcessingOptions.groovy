@@ -19,18 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package rollout
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext
 
 /**
- * The list contains customized values.
+ * @see ProcessingOption
  *
- * Please fill the values.
+ * Basic script for creating processing options.
+ *
+ * The parameters for the processing options are defined in the form
+ * of a {@code Map<ProcessingOption.OptionName, Object>} and are unsed to create
+ * the desired processing options by the createProcessingOptions function.
  */
 
-ProcessingOptionService processingOptionService = ctx.processingOptionService
+/*
+* Input
+* ---------------------------------------------------------
+*/
 
-[
+Map<ProcessingOption.OptionName, String> processingOptions = [
         (ProcessingOption.OptionName.EMAIL_SENDER)                     : '',
         (ProcessingOption.OptionName.EMAIL_REPLY_TO)                   : '',
         (ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)     : '',
@@ -58,10 +67,30 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
         (ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ) : '2339',
         (ProcessingOption.OptionName.TIME_ZONE)                        : 'Europe/Berlin',
 
-].each {
-    processingOptionService.createOrUpdate(
-            it.key,
-            it.value
-    )
+]
+
+/*
+* ProcessingOption creation
+* ---------------------------------------------------------
+*/
+
+/**
+ * Create processing options.
+ *
+ * @param ctx The AnnotationConfigEmbeddedWebApplicationContext, necessary if the function
+ * is called from another script.
+ * @param processingOptions The parameter map containing the processing options configuration.
+ * @return a String indicating a successfully creation.
+ */
+static String createProcessingOptions(AnnotationConfigEmbeddedWebApplicationContext ctx, Map<ProcessingOption.OptionName, String> processingOptions) {
+    ProcessingOptionService processingOptionService = ctx.processingOptionService
+    processingOptions.each {
+        processingOptionService.createOrUpdate(
+                it.key,
+                it.value
+        )
+    }
+    return "Processing options: ${processingOptions} created"
 }
-''
+
+createProcessingOptions(ctx, processingOptions)

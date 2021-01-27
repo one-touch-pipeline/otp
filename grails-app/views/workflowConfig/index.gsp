@@ -206,12 +206,12 @@
         <h2>${g.message(code: "workflowConfig.config.related")}</h2>
 
         ${g.message(code: "workflowConfig.selector.type")}
-        <g:select id="relatedSelectorType" name="relatedSelectorType" from="${selectorTypes}" multiple="true" class="use-select-2" autocomplete="off"/>
+        <g:select id="relatedSelectorType" name="relatedSelectorType" from="${selectorTypes}" multiple="true" class="use-select-2" autocomplete="off" data-placeholder="${g.message(code: "workflowConfig.selector.type.filter")}"/>
 
         <div id="relatedSelectors">
             <g:each in="${relatedSelectors}" var="selector">
                 <div data-type="${selector.selectorType}">
-                    <g:render template="selector" model="[selector: selector]"/>
+                    <g:render template="/templates/selector" model="[selector: selector]"/>
                 </div>
             </g:each>
             <g:if test="${!relatedSelectors}">

@@ -92,4 +92,5 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
         )
         return !(other && other.id != externalWorkflowConfigSelector.id)
     }
+
 }

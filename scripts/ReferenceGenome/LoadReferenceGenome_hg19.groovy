@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+
+import groovy.transform.Field
+
 import de.dkfz.tbi.otp.ngsdata.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -33,12 +36,14 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 */
 
 String name = "hg19"
+@Field
 String path = "bwa06_hg19_chr"
 String fileNamePrefix = "hg19_1-22_X_Y_M"
 String cytosinePositionsIndex = null
 String chromosomePrefix = "chr"
 String chromosomeSuffix = ""
 String fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
+@Field
 List<String> statSizeFileNames = [
         "hg19_1-22_X_Y_M.fa.chrLenOnlyACGT.tab",
 ]
