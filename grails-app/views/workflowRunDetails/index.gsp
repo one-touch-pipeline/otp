@@ -122,7 +122,7 @@
         </div>
     </div>
 
-    <table id="steps" data-id="${workflowRun.id}">
+    <table id="steps" class="table-sm table-striped table-hover" data-id="${workflowRun.id}">
         <thead>
         <tr>
             <th></th>

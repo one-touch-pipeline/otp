@@ -23,7 +23,6 @@
 
 <html>
 <head>
-    <meta name="layout" content="main"/>
     <title>${g.message(code: "workflowRun.overview.title")}</title>
     <asset:javascript src="pages/workflowRunOverview/index.js"/>
 </head>
@@ -31,9 +30,9 @@
 <body>
 <div class="body">
     <h1>${g.message(code: "workflowRun.overview.title")}</h1>
-    <button class="toggleButton">${g.message(code: "workflowRun.overview.show.detailed")}</button>
-    <button class="toggleButton" hidden>${g.message(code: "workflowRun.overview.show.condensed")}</button>
-    <table id="runs">
+    <button class="btn btn-primary toggleButton">${g.message(code: "workflowRun.overview.show.detailed")}</button>
+    <button class="btn btn-primary toggleButton" style="display: none">${g.message(code: "workflowRun.overview.show.condensed")}</button>
+    <table id="runs" class="table-sm table-striped table-hover">
         <thead>
         <tr>
             <th></th>

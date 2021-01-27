@@ -33,7 +33,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm">
-                <table class="key-value-table key-input">
+                <table class="table-sm table-striped table-hover key-value-table key-input">
                     <tr>
                         <td><label for="workflow">${g.message(code: "workflowRun.list.workflow")}</label></td>
                         <td><g:select id="workflow" name="workflow.id" from="${workflows}" optionKey="id" value="${cmd?.workflow?.id}"
@@ -64,7 +64,7 @@
             </div>
 
             <div class="col-sm-5">
-                <table class="key-value-table key-input">
+                <table class="table-striped table-hover key-value-table key-input">
                     <tr>
                         <td>${g.message(code: "workflowRun.list.allRuns")}</td>
                         <td id="allRuns"></td>
@@ -102,7 +102,7 @@
     </div>
     <br>
 
-    <table id="runs">
+    <table id="runs" class="table-sm table-striped table-hover">
         <thead>
         <tr>
             <g:each in="${columns}" var="column" status="i">
