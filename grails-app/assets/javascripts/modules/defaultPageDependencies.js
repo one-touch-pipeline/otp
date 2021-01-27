@@ -22,7 +22,7 @@
 
 //= require /webjars/jquery/1.11.1/jquery.js
 //= require /webjars/jquery-ui/1.10.4/ui/jquery-ui.js
-//= require /webjars/datatables/1.10.7/js/jquery.dataTables.js
+//= require /webjars/datatables/1.10.23/js/jquery.dataTables.js
 //= require /webjars/datatables-fixedcolumns/3.0.2/js/dataTables.fixedColumns.js
 //= require /webjars/datatables-fixedheader/2.1.2/js/dataTables.fixedHeader.js
 //= require /webjars/datatables-buttons/1.3.1-1/js/dataTables.buttons.js
