@@ -27,6 +27,7 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Secured("hasRole('ROLE_ADMIN')")
 class ShutdownController {
@@ -56,10 +57,16 @@ class ShutdownController {
                     notResumableJobs << it
                 }
             }
+
+            List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.getRestartableRunningWorkflowSteps()
+            List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.getNonRestartableRunningWorkflowSteps()
+
             render(view: "status", model: [
                     shutdown: shutdownInformation,
                     resumableJobs: resumableJobs,
                     notResumableJobs: notResumableJobs,
+                    restartableRunningWorkflowSteps: restartableRunningWorkflowSteps,
+                    notRestartableRunningWorkflowSteps: notRestartableRunningWorkflowSteps,
             ])
         }
     }

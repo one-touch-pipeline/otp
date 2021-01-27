@@ -23,26 +23,33 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title>Server Shutdown</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <asset:stylesheet src="pages/shutdown/index/styles.less"/>
+    <title><g:message code="serverShutdown.title"/></title>
 </head>
 <body>
-    <div class="body">
+    <div class="container-fluid otp-main-container">
         <g:render template="/templates/messages"/>
-        <h1><g:message code="serverShutdown.title"/></h1>
-        <p>
-            <g:if test="${shutdownSucceeded}">
-                <g:message code="serverShutdown.successful"/>
-            </g:if>
-            <g:else>
-                <g:form action="planShutdown">
-                    <label for="shutdownReason"><g:message code="serverShutdown.reason"/></label>
-                    <input type="text" name="reason" id="shutdownReason"/>
-                    <g:submitButton name="Plan Shutdown"/>
-                </g:form>
-            </g:else>
-        </p>
+
+        <h3><g:message code="serverShutdown.title"/></h3>
+        <p><g:message code="serverShutdown.description"/></p>
+        <div class="card plan-shutdown-card">
+            <div class="card-body">
+                <g:if test="${shutdownSucceeded}">
+                    <g:message code="serverShutdown.successful"/>
+                </g:if>
+                <g:else>
+                    <g:form action="planShutdown">
+                        <div class="form-group">
+                            <label for="reasonInput"><g:message code="serverShutdown.reasonLabel"/></label>
+                            <input type="text" name="reason" class="form-control" id="reasonInput" aria-describedby="reasonHelp">
+                            <small id="reasonHelp" class="form-text text-muted"><g:message code="serverShutdown.reason"/></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><g:message code="serverShutdown.planButton"/></button>
+                    </g:form>
+                </g:else>
+            </div>
+        </div>
     </div>
 </body>
 </html>

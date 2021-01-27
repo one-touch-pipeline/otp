@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import org.springframework.beans.factory.DisposableBean
@@ -35,6 +34,10 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.workflowExecution.LogService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 import java.util.concurrent.locks.ReentrantLock
 
@@ -50,11 +53,13 @@ class ShutdownService implements DisposableBean {
     // service is not transactional as the database access has to be locked
     static transactional = false
 
-    GrailsApplication grailsApplication
     SchedulerService schedulerService
     SpringSecurityService springSecurityService
     ProcessService processService
     ConfigService configService
+    WorkflowSystemService workflowSystemService
+    WorkflowStepService workflowStepService
+    LogService logService
 
     // all methods in this service contain critical sections to not start two shutdowns
     private final ReentrantLock lock = new ReentrantLock()
@@ -68,6 +73,7 @@ class ShutdownService implements DisposableBean {
                 info.succeeded = new Date()
                 info.save(flush: true)
                 suspendResumeableJobs()
+                logRunningWorkflowSteps()
                 log.info("OTP is shutting down")
                 DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS, info.initiatedBy.username)
             }
@@ -79,6 +85,23 @@ class ShutdownService implements DisposableBean {
         shutdownSuccessful = true
     }
 
+    /**
+     * Write logs about the running workflow steps.
+     * Should be called before the shutdown.
+     */
+    private void logRunningWorkflowSteps() {
+        List<WorkflowStep> workflowSteps = workflowStepService.runningWorkflowSteps()
+
+        workflowSteps.each { WorkflowStep step ->
+            if (step.workflowRun.jobCanBeRestarted) {
+                logService.addSimpleLogEntry(step, "Step will be stopped soon. It can be restarted.")
+            } else {
+                logService.addSimpleLogEntry(step, "This step is not restartable, but the server will shutdown now.")
+            }
+        }
+    }
+
+    @Deprecated
     private void suspendResumeableJobs() {
         List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
         runningJobs.each { ProcessingStep step ->
@@ -105,6 +128,7 @@ class ShutdownService implements DisposableBean {
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
                 info.save(flush: true)
                 schedulerService.suspendScheduler()
+                workflowSystemService.stopWorkflowSystem()
             }
         } catch (ValidationException e) {
             return e.errors
@@ -130,6 +154,7 @@ class ShutdownService implements DisposableBean {
                 info.canceled = new Date()
                 info.save(flush: true)
                 schedulerService.resumeScheduler()
+                workflowSystemService.startWorkflowSystem()
             }
         } catch (ValidationException e) {
             return e.errors
@@ -151,9 +176,32 @@ class ShutdownService implements DisposableBean {
      * Retrieves a list of all currently running ProcessingSteps.
      * @return The List of currently running processing steps.
      */
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingStep> getRunningJobs() {
         return schedulerService.retrieveRunningProcessingSteps()
+    }
+
+    /**
+     * Retrieve a list of all running workflowSteps where the workflowRuns are resumable.
+     * @return list of running and restartable workflowSteps
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<WorkflowStep> getRestartableRunningWorkflowSteps() {
+        return workflowStepService.runningWorkflowSteps().findAll( {
+            it.workflowRun.jobCanBeRestarted
+        })
+    }
+
+    /**
+     * Retrieve a list of all running workflowSteps where the workflowRuns are not resumable.
+     * @return list of running and not restartable workflowSteps
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<WorkflowStep> getNonRestartableRunningWorkflowSteps() {
+        return workflowStepService.runningWorkflowSteps().findAll( {
+            !it.workflowRun.jobCanBeRestarted
+        })
     }
 
     boolean isShutdownSuccessful() {
@@ -163,6 +211,7 @@ class ShutdownService implements DisposableBean {
     /**
      * Safely determines if the job of that processing step is resumeable.
      */
+    @Deprecated
     boolean isJobResumable(ProcessingStep step) {
         try {
             return schedulerService.isJobResumable(step)
@@ -172,6 +221,7 @@ class ShutdownService implements DisposableBean {
         }
     }
 
+    @Deprecated
     private void suspendProcessingStep(ProcessingStep step) {
         processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(

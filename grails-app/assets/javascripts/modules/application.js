@@ -21,3 +21,4 @@
  */
 
 //= require /webjars/bootstrap/4.5.3/js/bootstrap.bundle.js
+//= require common/toaster.js

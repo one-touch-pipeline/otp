@@ -48,6 +48,7 @@ import static ch.qos.logback.classic.ClassicConstants.FINALIZE_SESSION_MARKER
 import static grails.async.Promises.task
 import static org.springframework.util.Assert.notNull
 
+@Deprecated
 @Scope("singleton")
 @Component
 @Slf4j
