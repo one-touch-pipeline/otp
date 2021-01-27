@@ -144,6 +144,7 @@
                     <thead>
                         <tr>
                             <th><%-- contains withdrawn data warning placeholder --%></th>
+                            <th><%-- contains swapped data warning placeholder --%></th>
                             <th><%-- details link placeholder --%></th>
                             <th><g:message code="individual.show.laneOverview.sampleType"/></th>
                             <th>Sample ID</th>
