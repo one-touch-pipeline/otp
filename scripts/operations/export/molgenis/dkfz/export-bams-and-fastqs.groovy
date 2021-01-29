@@ -62,6 +62,12 @@ enum DataFileColumns {
     SEQ_TRACK_ID("SeqTrack ID", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.id
     }),
+    SAMPLE_ID("Sample ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.sample.id
+    }),
+    INDIVIDUAL_ID("Individual ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.individual.id
+    }),
     PID("PID", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.individual.pid
     }),
@@ -76,6 +82,9 @@ enum DataFileColumns {
     }),
     SAMPLE_IDENTIFIER("Sample Identifier", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sampleIdentifier
+    }),
+    SAMPLE_TYPE_ID("Sample Type ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.sampleType.id
     }),
     SAMPLE_TYPE("Sample Type", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.sampleType.name
@@ -95,6 +104,9 @@ enum DataFileColumns {
     SEQ_LENGTH("Sequence Length", { DataFile dataFile, Map properties = [:] ->
         return dataFile.sequenceLength
     }),
+    FASTQC_ID("FastQC ID", { DataFile dataFile, Map properties = [:] ->
+        return FastqcProcessedFile.findByDataFile(dataFile)?.id
+    }),
     FASTQC_PATH("FastQC Path", { DataFile dataFile, Map properties = [:] ->
         return (properties["fastqcDataFilesService"] as FastqcDataFilesService).fastqcOutputFile(dataFile)
     }),
@@ -107,8 +119,14 @@ enum DataFileColumns {
     RUN_DATE_EXECUTED("Run Date Executed", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.run.dateExecuted
     }),
+    SEQ_CENTER_ID("Seq Center ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.seqTrack.run.seqCenter.id
+    }),
     SEQ_CENTER("Seq Center", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.run.seqCenter.name
+    }),
+    SEQ_PLATFORM_ID("Seq Platform ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.seqTrack.run.seqPlatform.id
     }),
     SEQ_PLATFORM("Seq Platform", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.run.seqPlatform.name
@@ -134,8 +152,17 @@ enum DataFileColumns {
     LIB_NAME("Lib Name", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.libraryName
     }),
+    LIB_PREP_KIT_ID("Lib Prep Kit ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.seqTrack.libraryPreparationKit?.id
+    }),
     LIB_PREP_KIT("Lib Prep Kit", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.libraryPreparationKit?.name
+    }),
+    ANTIBODY_TARGET_ID("Antibody Target ID", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.seqTrack.antibodyTarget?.id
+    }),
+    ANTIBODY_TARGET("Antibody Target", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.seqTrack.antibodyTarget?.name
     }),
     ANTIBODY("Antibody", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.antibody
