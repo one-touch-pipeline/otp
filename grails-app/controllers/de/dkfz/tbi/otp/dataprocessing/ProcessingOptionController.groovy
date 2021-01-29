@@ -28,8 +28,11 @@ import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+
+import javax.xml.bind.ValidationException
 
 @Secured("hasRole('ROLE_ADMIN')")
 class ProcessingOptionController {
@@ -72,7 +75,7 @@ class ProcessingOptionController {
         try {
             ProcessingOption processingOption = processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type, cmd.specificProject)
             render generateOptionRow(processingOption) as JSON
-        } catch (Exception ignored) {
+        } catch (ValidationException ignored) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.store.failure") as String)
         }
         return [] as JSON
@@ -81,7 +84,7 @@ class ProcessingOptionController {
     def obsolete(ProcessingOptionCommand cmd) {
         try {
             processingOptionService.obsoleteOptionByName(cmd.optionName, cmd.type, cmd.specificProject)
-        } catch (Exception ignored) {
+        } catch (ValidationException | ProcessingException ignored) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.obsolete.failure") as String)
         }
         Map data = [obsoleted: true]
@@ -91,8 +94,8 @@ class ProcessingOptionController {
     /**
      * Generate an optionRow of a processingOption and fill it with meta data.
      * An option row is a presentable format used in the UI.
-     * @param processingOption
-     * @return OptionRow
+     * @param processingOption for the row which should be created
+     * @return OptionRow: wrapped processing option with row data
      */
     private OptionRow generateOptionRow(ProcessingOption processingOption) {
         OptionProblem.ProblemType problemType = propertiesValidationService.validateProcessingOptionName(processingOption.name, processingOption.type)?.type
@@ -102,7 +105,7 @@ class ProcessingOptionController {
                         value: processingOption.name.toString(),
                         warnColor: null,
                         link: null,
-                        tooltip: processingOption.name.getDescription(),
+                        tooltip: processingOption.name.description,
                 ),
                 type: new TableCellValue(
                         value: processingOption.type ?: "",

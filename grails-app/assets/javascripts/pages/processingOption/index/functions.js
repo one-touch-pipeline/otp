@@ -42,7 +42,11 @@ function onObsolete(rowIndex, name, type, specificProject) {
                 "(" + name + ", " + type + ")");
         },
         error: function (error) {
-            $.otp.toaster.showErrorToast("Obsoletion failed (Option " + optionNumber + ")", error?.responseJSON?.message + "\n\n(" + name + ", " + type + ")");
+            if (error && error.responseJSON && error.responseJSON.message) {
+                $.otp.toaster.showErrorToast("Obsoletion failed (Option " + optionNumber + ")", error.responseJSON.message + "\n\n(" + name + ", " + type + ")");
+            } else {
+                $.otp.toaster.showErrorToast("Obsoletion failed (Option " + optionNumber + ")", "Unknown error on obsoletion.\n\n(" + name + ", " + type + ")");
+            }
         }
     });
 }
@@ -87,7 +91,11 @@ function onSave(rowIndex, name, oldValue, type, specificProject) {
         },
         error: function(error) {
             inputField.val(oldValue);
-            $.otp.toaster.showErrorToast("Saving failed (Option " + optionNumber + ")", error?.responseJSON?.message + "\n\n(" + name + ", " + type + ")");
+            if (error && error.responseJSON && error.responseJSON.message) {
+                $.otp.toaster.showErrorToast("Saving failed (Option " + optionNumber + ")", error.responseJSON.message + "\n\n(" + name + ", " + type + ")");
+            } else {
+                $.otp.toaster.showErrorToast("Saving failed (Option " + optionNumber + ")",  "Unknown error during save.\n\n(" + name + ", " + type + ")");
+            }
         }
     });
 }
