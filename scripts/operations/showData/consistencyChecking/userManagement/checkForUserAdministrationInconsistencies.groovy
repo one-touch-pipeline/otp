@@ -1,3 +1,4 @@
+package operations.showData.consistencyChecking.userManagement
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -60,6 +61,7 @@ import de.dkfz.tbi.otp.security.*
 List output = []
 
 LdapService ldapService = ctx.getBean('ldapService')
+UserProjectRoleService uprs = ctx.getBean('userProjectRoleService')
 
 
 // this cache maps username to LdapUserDetails in an effort to reduce the number of duplicate ldap requests
@@ -137,7 +139,7 @@ User.findAll().each { User user ->
 String format = "%-10s | %-6s | %-6s | %-7s | %-7s | %-10s | %s (%s)"
 output << sprintf(format, ["in Unx-Grp", "Access", "ldap", "planned", "enabled", "User", "Project", "Unix Group"])
 output << sprintf(format, ["", "", "deact.", "deact.", "in OTP", "", "", "", ""])
-UserProjectRole.findAll().sort{
+UserProjectRole.findAll().sort {
     [it.project.name, it.user.username,].join(',')
 }.each { UserProjectRole userProjectRole ->
     if (!userProjectRole.user.username) {
@@ -145,11 +147,15 @@ UserProjectRole.findAll().sort{
     }
     boolean fileAccessInOtp = userProjectRole.accessToFiles
     boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUser(userProjectRole.user)
-    boolean ldapDeactivited = ldapService.isUserDeactivated(userProjectRole.user)
+    boolean ldapDeactivated = ldapService.isUserDeactivated(userProjectRole.user)
+    if (fileAccessInOtp && !fileAccessInLdap) {
+        uprs.setAccessToFiles(userProjectRole, false, true)
+        fileAccessInOtp = false
+    }
     if (fileAccessInOtp != fileAccessInLdap) {
         output << sprintf(
                 format,
-                [fileAccessInLdap, fileAccessInOtp, ldapDeactivited, userProjectRole.user.plannedDeactivationDate as boolean,  userProjectRole.enabled,
+                [fileAccessInLdap, fileAccessInOtp, ldapDeactivated, userProjectRole.user.plannedDeactivationDate as boolean, userProjectRole.enabled,
                  userProjectRole.user.username, userProjectRole.project.name, userProjectRole.project.unixGroup]
         )
     }
