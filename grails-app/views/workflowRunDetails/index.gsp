@@ -39,11 +39,11 @@
                 <div class="btn-group">
                     <button class="btn btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
                             formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
-                        <i class="bi-file-earmark-x"></i>${g.message(code: "workflowRun.details.setFailed")}
+                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailed")}
                     </button>
                     <button class="btn btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
                             formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
-                        <i class="bi-file-earmark-x"></i>${g.message(code: "workflowRun.details.restartRun")}
+                        <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
                     </button>
                 </div>
             </g:form>

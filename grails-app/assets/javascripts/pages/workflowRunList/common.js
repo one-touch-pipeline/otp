@@ -48,8 +48,8 @@ var statusToClassName = function (status) {
     return "";
 };
 
-var button = function (action, value, title, buttonsDisabled, imgSrc) {
+var button = function (action, value, title, buttonsDisabled, icon) {
     return "<button class='btn btn-primary' formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + ">" +
-        "<img src='" + imgSrc + "' style='height:1em; width:1em'/>" +
+        "<i class='bi-" + icon + "'></i>" +
         "</button>"
 };

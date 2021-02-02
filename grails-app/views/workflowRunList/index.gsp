@@ -90,11 +90,9 @@
                         <button class="btn btn-primary" formaction="${g.createLink(action: "setFailedFinal")}"
                                 title="${g.message(code: "workflowRun.list.setFailed")}"><i class="bi-file-earmark-x"></i></button>
                         <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
-                                title="${g.message(code: "workflowRun.list.restartSteps")}"><asset:image src="restart-step.svg"
-                                                                                                         style="height:1em; width:1em"/></button>
+                                title="${g.message(code: "workflowRun.list.restartSteps")}"><i class="bi-reply"></i></button>
                         <button class="btn btn-primary" formaction="${g.createLink(action: "restartRun")}"
-                                title="${g.message(code: "workflowRun.list.restartRuns")}"><asset:image src="restart-run.svg"
-                                                                                                        style="height:1em; width:1em"/></button>
+                                title="${g.message(code: "workflowRun.list.restartRuns")}"><i class="bi-reply-all"></i></button>
                     </div>
                 </form>
             </div>

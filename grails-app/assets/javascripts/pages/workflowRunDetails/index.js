@@ -112,7 +112,7 @@ $(function () {
 
                     return "<form method='POST' class='single'>" +
                         button($.otp.createLink({controller: "workflowRunDetails", action: "restartStep"}), row.id, "Restart step",
-                            buttonsDisabled, $.otp.createAssetLink("restart-step.svg")) +
+                            buttonsDisabled, "reply") +
                         "</form>"
                 },
                 'orderable': false,
