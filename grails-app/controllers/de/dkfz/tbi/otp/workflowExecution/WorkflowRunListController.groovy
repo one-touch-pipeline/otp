@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.utils.DataTablesCommand
@@ -133,16 +132,6 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
             }
             return values()[column]
         }
-    }
-}
-
-class RunUpdateCommand extends RunShowCommand implements Validateable {
-    List<Long> step = []
-
-    static constraints = {
-        workflow nullable: true
-        state nullable: true
-        name nullable: true
     }
 }
 

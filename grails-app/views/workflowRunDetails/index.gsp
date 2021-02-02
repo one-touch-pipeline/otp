@@ -35,7 +35,8 @@
         <div class="col-7">
             <h1><div id="runStatus" title="${workflowRun.state}" data-status="${workflowRun.state}" style="display: inline-block"></div> ${g.message(code: "workflowRun.details.title")} ${workflowRun.displayName}</h1>
             <g:form method="POST">
-                <input type="hidden" name="workflowRun.id" value="${workflowRun.id}">
+                <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
+                <input type="hidden" name="redirect" value="${uriWithParams}"/>
                 <div class="btn-group">
                     <button class="btn btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
                             formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">

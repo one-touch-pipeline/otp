@@ -175,9 +175,15 @@ $(function () {
     });
 
     var addSelection = function (form) {
-        addHiddenField(form, "workflow.id", $('#workflow').val());
-        addHiddenField(form, "state", $('#state').val());
-        addHiddenField(form, "name", $('#name').val());
+        addHiddenField(form, "redirect",
+            $.otp.createLink({
+                controller: "workflowRunList",
+                parameters: {
+                    "workflow.id": $('#workflow').val(),
+                    "state": $('#state').val(),
+                    "name": $('#name').val(),
+                }
+            }).slice($.otp.contextPath.length))
     }
 
     var addHiddenField = function (form, name, value) {

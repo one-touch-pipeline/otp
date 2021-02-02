@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.validation.Validateable
+
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.config.ConfigService
@@ -45,21 +47,21 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.setFailed") {
             workflowStateChangeService.changeStateToFinalFailed(cmd.step.collect { WorkflowStep.get(it) })
         }
-        redirect action: "index", params: ["workflow.id": cmd.workflow?.id, state: cmd.state, name: cmd.name]
+        redirect uri: cmd.redirect
     }
 
     def restartStep(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
             jobService.createRestartedJobAfterJobFailures(cmd.step.collect { WorkflowStep.get(it) })
         }
-        redirect action: "index", params: ["workflow.id": cmd.workflow?.id, state: cmd.state, name: cmd.name]
+        redirect uri: cmd.redirect
     }
 
     def restartRun(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartRuns") {
             workflowService.createRestartedWorkflows(cmd.step.collect { WorkflowStep.get(it) })
         }
-        redirect action: "index", params: ["workflow.id": cmd.workflow?.id, state: cmd.state, name: cmd.name]
+        redirect uri: cmd.redirect
     }
 
     protected Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {
@@ -89,5 +91,16 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
                         TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
                 TimeUnit.MILLISECONDS.toSeconds(millis) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)))
+    }
+}
+
+class RunUpdateCommand implements Validateable {
+    List<Long> step = []
+    String redirect
+
+    static constraints = {
+        redirect(nullable: false, validator: { String val ->
+            val.startsWith("/")
+        })
     }
 }

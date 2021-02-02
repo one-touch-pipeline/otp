@@ -111,8 +111,8 @@ $(function () {
                     var buttonsDisabled = lastStepFailed ? "" : " disabled "
 
                     return "<form method='POST' class='single'>" +
-                        button($.otp.createLink({controller: "workflowRunDetails", action: "restartStep"}), row.id, "Restart step",
-                            buttonsDisabled, "reply") +
+                        button($.otp.createLink({controller: "workflowRunDetails", action: "restartStep", parameters: {"redirect": $.otp.uriWithParams}}),
+                            row.id, "Restart step", buttonsDisabled, "reply") +
                         "</form>"
                 },
                 'orderable': false,

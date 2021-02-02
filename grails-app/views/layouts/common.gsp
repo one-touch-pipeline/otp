@@ -27,6 +27,7 @@
     <title><g:layoutTitle default="OTP"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="contextPath" content="${request.contextPath}">
+    <meta name="uriWithParams" content="${uriWithParams}">
     <meta name="projectName" content="${selectedProject?.name}">
     <meta name="projectParameter" content="${projectParameter}">
     <otp:favicon/>

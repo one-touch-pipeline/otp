@@ -214,7 +214,7 @@ Hat der Verantwortliche die Sie betreffenden personenbezogenen Daten öffentlich
     <hr>
     <br>
     <g:form action="accept" class="inline-element">
-        <input type="hidden" name="redirect" value="${request.forwardURI - request.contextPath}"/>
+        <input type="hidden" name="redirect" value="${uriWithParams}"/>
         <input type="checkbox" name="accept" id="accept"/> <label for="accept">${g.message(code: "privacyPolicy.acceptance")}</label><br><br>
             <button>${g.message(code: "privacyPolicy.continue")}</button>
     </g:form>

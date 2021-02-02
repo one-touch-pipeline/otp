@@ -84,6 +84,8 @@ class OptionsInterceptor {
                 version = "Branch ${branch}"
             }
             model.version = "${version} (${hash})"
+
+            model.uriWithParams = "${request.forwardURI - request.contextPath}?${request.queryString}"
         }
         true
     }

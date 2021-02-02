@@ -25,6 +25,7 @@
 
 $.otp = {
     contextPath:      $("head meta[name=contextPath]").attr("content"),
+    uriWithParams:    $("head meta[name=uriWithParams]").attr("content"),
     projectName:      $("head meta[name=projectName]").attr("content"),
     projectParameter: $("head meta[name=projectParameter]").attr("content"),
 
