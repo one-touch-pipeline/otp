@@ -494,7 +494,7 @@ $(document).ready(function() {
         });
     } else {
         // use Bootstrap
-        t.tooltip({ trigger: 'hover focus click' });
+        t.tooltip();
     }
 
     // close toasts that are not added with js

@@ -134,7 +134,7 @@ $(function () {
     });
 
     table.on('draw', function () {
-        $('[title]').tooltip({trigger: 'hover focus click'});
+        $('[title]').tooltip();
     });
 
     var setCount = function (values) {

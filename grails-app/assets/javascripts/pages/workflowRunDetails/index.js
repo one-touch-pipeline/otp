@@ -139,7 +139,7 @@ $(function () {
     });
 
     table.on('draw', function () {
-        $('[title]').tooltip({trigger: 'hover focus click'});
+        $('[title]').tooltip();
         if (lastStepFailed) {
             $('#steps tbody tr:first-child td .details-control').trigger('click');
         }
@@ -155,7 +155,7 @@ $(function () {
         } else {
             row.child(format(row.data())).show();
             tr.addClass('shown');
-            $('[title]').tooltip({trigger: 'hover focus click'});
+            $('[title]').tooltip();
         }
     });
 
