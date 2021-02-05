@@ -21,18 +21,39 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.MetadataImportService
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BASE_MATERIAL
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class SampleIdentifierValidator extends SingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator {
+class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    SampleIdentifierService sampleIdentifierService
+
+    @Autowired
+    MetadataImportService metadataImportService
 
     @Override
     Collection<String> getDescriptions() {
@@ -40,28 +61,86 @@ class SampleIdentifierValidator extends SingleValueValidator<AbstractMetadataVal
     }
 
     @Override
-    String getColumnTitle(AbstractMetadataValidationContext context) {
-        return MetaDataColumn.SAMPLE_NAME.name()
+    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+        return [
+                SAMPLE_NAME,
+                SEQUENCING_TYPE,
+                SEQUENCING_READ_TYPE,
+        ]*.name()
     }
 
     @Override
-    void validateValue(AbstractMetadataValidationContext context, String importId, Set<Cell> cells) {
-        if (identifierOccupied(importId)) {
-            context.addProblem(
-                    cells,
-                    Level.WARNING,
-                    "Sample Identifier '${importId}' is already registered for another sample.",
-                    "At least one Sample Identifier is already registered for another sample.")
+    List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
+        return [
+                BASE_MATERIAL,
+                TAGMENTATION,
+                PROJECT,
+        ]*.name()
+    }
+
+    @Override
+    void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        valueTuples.each { ValueTuple valueTuple ->
+            String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
+            ParsedSampleIdentifier identifier = findExistingParsedSampleIdentifierForValueTuple(valueTuple)
+
+            if (!identifier) {
+                return
+            }
+
+            SeqType seqType = metadataImportService.getSeqTypeFromMetadata(valueTuple)
+
+            if (!seqType) {
+                return
+            }
+
+            if (identifierOccupied(sampleName, identifier.pid, seqType)) {
+                context.addProblem(
+                        valueTuple.cells,
+                        Level.WARNING,
+                        "Sample Identifier '${sampleName}' is already registered for another sample with the same pid and seq type.",
+                        "At least one Sample Identifier is already registered for another sample.")
+            }
         }
     }
 
-    boolean identifierOccupied(String importId) {
+    boolean identifierOccupied(String sampleName, String patientId, SeqType seqType) {
         return SeqTrack.createCriteria().get {
             projections {
                 property('id')
             }
-            eq('sampleIdentifier', importId)
+            eq('sampleIdentifier', sampleName)
+            eq('seqType', seqType)
+            sample {
+                individual {
+                    eq('pid', patientId)
+                }
+            }
             maxResults 1
         }
+    }
+
+    private ParsedSampleIdentifier findExistingParsedSampleIdentifierForValueTuple(ValueTuple valueTuple) {
+        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
+
+        if (sampleIdentifier) {
+            return [
+                    pid: sampleIdentifier.sample.individual.pid,
+                    fullSampleName: sampleName,
+            ] as DefaultParsedSampleIdentifier
+        }
+
+        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
+        if (!project) {
+            return null
+        }
+
+        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
+        if (!parsedSampleIdentifier) {
+            return null
+        }
+
+        return parsedSampleIdentifier
     }
 }

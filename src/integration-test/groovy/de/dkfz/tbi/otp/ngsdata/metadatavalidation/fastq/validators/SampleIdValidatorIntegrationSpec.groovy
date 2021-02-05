@@ -21,18 +21,32 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.MetadataImportService
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
+import java.util.regex.Matcher
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -41,38 +55,134 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Integration
 class SampleIdValidatorIntegrationSpec extends Specification implements DomainFactoryCore {
 
-    void 'validate, succeed when sampleID not registered yet'() {
+    SampleIdentifierValidator validator = new SampleIdentifierValidator()
+
+    void setup() {
+        SampleIdentifierParser sampleIdentifierParser = new SampleIdentifierParser() {
+
+            @Override
+            ParsedSampleIdentifier tryParse(String sampleIdentifier) {
+                Matcher match = sampleIdentifier =~ /(.*)#(.*)#(.*)/
+                if (match.matches()) {
+                    return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
+                }
+                return null
+            }
+
+            @SuppressWarnings("UnusedMethodParameter")
+            @Override
+            boolean tryParsePid(String pid) {
+                return true
+            }
+
+            @Override
+            String tryParseSingleCellWellLabel(String sampleIdentifier) {
+                return null
+            }
+        }
+
+        MetadataImportService metadataImportService = new MetadataImportService()
+        metadataImportService.seqTypeService = new SeqTypeService()
+        validator.metadataImportService = metadataImportService
+        validator.sampleIdentifierService = Spy(SampleIdentifierService) {
+            _ * getSampleIdentifierParser(_) >> { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
+                sampleIdentifierParser
+            }
+        }
+    }
+
+    void 'validate, succeed when sampleIdentifier not registered yet in combination with given seqType and pid'() {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SAMPLE_NAME}\n" +
-                        "aBrandNewSampleId"
+                "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
+                        "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.PROJECT}\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType\tsomeValue\tsomeValue\tsomeValue\tsomeValue"
         )
 
         when:
-        new SampleIdentifierValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
     }
 
-    void 'validate, fails when sampleID already registered'() {
+    void 'validate, succeed when using the same sampleIdentifier for the same pid with a new seqType'() {
         given:
-
         SeqTrack seqTrack = createSeqTrack()
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SAMPLE_NAME}\n" +
-                        "${seqTrack.sampleIdentifier}\n" +
-                        "aBrandNewSampleId"
+                "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
+                "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.PROJECT}\n" +
+                        "${seqTrack.sampleIdentifier}\taBrandNewSeqType\tsomeValue\tsomevalue\tsomeValue\tsomeValue\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType2\tsomeValue2\tsomeValue\tsomeValue\tsomeValue"
         )
 
         when:
-        new SampleIdentifierValidator().validate(context)
+        validator.validate(context)
+
+        then:
+        context.problems.empty
+    }
+
+    void 'validate, fails when sampleIdentifier is already registered'() {
+        given:
+        Sample sample = createSample()
+        SampleIdentifier sampleIdentifier = createSampleIdentifier(
+                sample: sample,
+                name: "mock1",
+        )
+        SeqTrack seqTrack = createSeqTrack(
+                sample: sample,
+                sampleIdentifier: sampleIdentifier.name,
+        )
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.PROJECT}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
+                "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\n" +
+                        "${seqTrack.sampleIdentifier}\t${seqTrack.seqType.name}\t${seqTrack.project.name}\t${seqTrack.seqType.libraryLayout}\tsomeValue\tsomeValue\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType\taBrandNewProject\taBrandNewReadType\tsomeValue\tsomeValue"
+        )
+
+        when:
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
-        containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample.")
+        containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "F2", "C2"])
+        problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
+    }
+
+    void 'validate, fails when parsed sampleIdentifier is already registered' () {
+        given:
+        Project project = createProject(
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP,
+        )
+        Individual individual = createIndividual(
+                project: project,
+        )
+        Sample sample = createSample(
+                individual: individual,
+        )
+        SeqTrack seqTrack = createSeqTrack(
+                sampleIdentifier: project.name + '#' + individual.pid + '#' + sample.sampleType.name,
+                sample: sample,
+        )
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.PROJECT}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
+                        "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\n" +
+                        "${project.name}#${seqTrack.individual.pid}#${seqTrack.sampleType.name}\t${seqTrack.seqType.name}\t${seqTrack.project.name}\t${seqTrack.seqType.libraryLayout}\tsomeValue\tsomeValue\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType\taBrandNewProject\taBrandNewReadType\tsomeValue\tsomeValue"
+        )
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.WARNING
+        containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "F2", "C2"])
+        problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 }
