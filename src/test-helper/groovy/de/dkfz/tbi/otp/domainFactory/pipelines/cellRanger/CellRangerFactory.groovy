@@ -79,10 +79,11 @@ trait CellRangerFactory implements IsAlignment {
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithDataFiles(workPackage)]
         workPackage.seqTracks = seqTracks
         workPackage.save(flush: true)
+        int identifier = SingleCellBamFile.nextIdentifier(workPackage)
         SingleCellBamFile bamFile = createDomainObject(SingleCellBamFile, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
-                        workDirectoryName  : "singleCell_${nextId}",
-                        identifier         : SingleCellBamFile.nextIdentifier(workPackage),
+                        workDirectoryName  : SingleCellBamFile.buildWorkDirectoryName(workPackage, identifier),
+                        identifier         : identifier,
                         fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                         fileSize           : 10000,
                 ], properties)

@@ -28,7 +28,6 @@ import grails.validation.ValidationException
 import org.springframework.validation.Errors
 import spock.lang.Specification
 import spock.lang.Unroll
-
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.CellRangerMwpParameter
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -38,7 +37,6 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
-
 import java.sql.Timestamp
 import java.time.LocalDate
 
@@ -414,7 +412,8 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         createUserAndRoles()
         CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1)
-        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType, config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType,
+                config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
 
         CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
         cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
@@ -436,7 +435,11 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         createUserAndRoles()
         CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1)
-        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType, config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType, config: mwp1.config,
+                referenceGenomeIndex: mwp1.referenceGenomeIndex)
+
+        mwp1.bamFileInProjectFolder = createBamFile(workPackage: mwp1)
+        mwp2.bamFileInProjectFolder = createBamFile(workPackage: mwp2)
 
         CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
         cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
@@ -452,6 +455,31 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         then:
         mwp1.status == CellRangerMergingWorkPackage.Status.FINAL
         mwp2.status == CellRangerMergingWorkPackage.Status.DELETED
+    }
+
+    void "test selectMwpAsFinal doesn't delete output dir for a rerun with same properties"() {
+        given:
+        createUserAndRoles()
+        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1, status: CellRangerMergingWorkPackage.Status.DELETED)
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 1, sample: mwp1.sample, seqType: mwp1.seqType,
+                libraryPreparationKit: mwp1.libraryPreparationKit, config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+
+        mwp1.bamFileInProjectFolder = createBamFile(workPackage: mwp1)
+        mwp2.bamFileInProjectFolder = createBamFile(workPackage: mwp2)
+
+        CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
+        cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
+            0 * deleteOutputDirectory(mwp1.bamFileInProjectFolder)
+            1 * correctFilePermissions(mwp2.bamFileInProjectFolder)
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            cellRangerConfigurationService.selectMwpAsFinal(mwp2)
+        }
+
+        then:
+        mwp2.status == CellRangerMergingWorkPackage.Status.FINAL
     }
 
     void "deleteMwps, sets status and calls delete"() {

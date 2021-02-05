@@ -215,7 +215,6 @@ class CellRangerConfigurationService {
                 mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex
         )
         deleteMwps(allMwps - mwpToKeep)
-
         mwpToKeep.status = CellRangerMergingWorkPackage.Status.FINAL
         mwpToKeep.save(flush: true)
         cellRangerWorkflowService.correctFilePermissions(mwpToKeep.bamFileInProjectFolder as SingleCellBamFile)
@@ -234,6 +233,7 @@ class CellRangerConfigurationService {
                 eq("programVersion", programVersion)
             }
             eq("referenceGenomeIndex", reference)
+            eq("status", CellRangerMergingWorkPackage.Status.UNSET)
         } as List<CellRangerMergingWorkPackage>)
     }
 
