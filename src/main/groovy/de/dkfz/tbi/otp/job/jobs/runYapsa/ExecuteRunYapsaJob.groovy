@@ -58,6 +58,10 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         final RunYapsaInstance RUN_YAPSA_INSTANCE = processParameterObject
         final Realm REALM = RUN_YAPSA_INSTANCE.project.realm
 
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
+                fileService.toPath(RUN_YAPSA_INSTANCE.workDirectory, fileSystemService.getRemoteFileSystem(REALM)),
+                REALM, "", FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+
         String jobScript = createScript(RUN_YAPSA_INSTANCE)
 
         clusterJobSchedulerService.executeJob(REALM, jobScript)
@@ -98,8 +102,6 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
             ${moduleLoader}
             ${rActivation}
             ${runYapsaActivationPrefix} ${CONFIG.programVersion}
-
-            mkdir -p -m 2750 ${outputDirectory.absolutePath}
 
             ${runYapsaCall.join(" ")}
 

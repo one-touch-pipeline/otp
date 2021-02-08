@@ -148,8 +148,6 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
             load r
             load programmVersion\\d+
 
-            mkdir -p -m 2750 /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+
-
             runYAPSA.R -i /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/snv_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf -o /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+ -s WGS -r /reference/genome.fa -v
 
             """.stripIndent()
