@@ -543,13 +543,13 @@ class MetadataImportService {
             log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
             assert seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
+            mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
             Collection<MergingWorkPackage> mergingWorkPackages = []
             if (align) {
                 mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
             }
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
-            mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
         }
     }
 
