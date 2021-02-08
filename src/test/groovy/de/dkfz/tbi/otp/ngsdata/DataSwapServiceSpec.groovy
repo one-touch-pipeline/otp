@@ -239,7 +239,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 "mkdir -p -m 2750 '${NEW_ALL_PATH}'",
                 "ln -s '${NEW_FINAL_PATH}' \\",
                 "'${NEW_WELL_PATH}'",
-                "sed -i '/${OLD_ENTRY}/d' ${OLD_MAPPING_PATH}",
+                "sed -i '\\#${OLD_ENTRY}#d' ${OLD_MAPPING_PATH}",
                 "touch '${NEW_MAPPING_PATH}'",
                 "echo '${NEW_ENTRY}' >> '${NEW_MAPPING_PATH}'",
                 "if [ ! -s '${OLD_MAPPING_PATH}' ]",

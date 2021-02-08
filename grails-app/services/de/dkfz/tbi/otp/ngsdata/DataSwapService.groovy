@@ -373,7 +373,7 @@ ln -s '${newDirectFileName}' \\
                 "ln -s '${newDirectFileName}' \\\n      '${wellFile}'",
                 '',
                 '## remove entry from old mapping file',
-                "sed -i '/${oldValues[WELL_MAPPING_FILE_ENTRY_NAME]}/d' ${oldMappingFile}",
+                "sed -i '\\#${oldValues[WELL_MAPPING_FILE_ENTRY_NAME]}#d' ${oldMappingFile}",
                 '',
                 '## add entry to new mapping file',
                 "touch '${mappingFile}'",
