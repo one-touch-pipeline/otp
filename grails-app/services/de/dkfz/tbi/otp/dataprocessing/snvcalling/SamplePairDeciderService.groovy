@@ -76,7 +76,7 @@ class SamplePairDeciderService {
     List<SamplePair> findOrCreateSamplePairs(AbstractMergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
 
-        if (!SeqTypeService.allAlignableSeqTypes.contains(mergingWorkPackage.seqType)) {
+        if (!SeqTypeService.allAnalysableSeqTypes.contains(mergingWorkPackage.seqType)) {
             return []
         }
 

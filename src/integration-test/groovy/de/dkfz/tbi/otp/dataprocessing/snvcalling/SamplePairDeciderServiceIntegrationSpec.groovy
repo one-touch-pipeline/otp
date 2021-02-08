@@ -93,7 +93,7 @@ class SamplePairDeciderServiceIntegrationSpec extends Specification implements I
     void "findOrCreateSamplePairsForProject(project), if multiple samples available, create correct sample pairs"() {
         given:
         Project project1 = createProject()
-        SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
+        SeqType seqType = DomainFactory.createAllAnalysableSeqTypes().first()
         Map<String, ?> data1a = createDataForIndividual(project1, seqType)
         Map<String, ?> data1b = createDataForIndividual(project1, seqType)
         Map<String, ?> data1c = createDataForIndividual(project1, seqType)
