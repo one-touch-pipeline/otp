@@ -29,7 +29,8 @@ class RoddySophiaConfigTemplate {
     static String createConfig(RoddyConfiguration sophiaPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType="project"
-               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, sophiaPipelineConfiguration.seqType, sophiaPipelineConfiguration.pluginName, sophiaPipelineConfiguration.programVersion, sophiaPipelineConfiguration.configVersion)}"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, sophiaPipelineConfiguration.seqType, sophiaPipelineConfiguration.pluginName,
+                sophiaPipelineConfiguration.programVersion, sophiaPipelineConfiguration.configVersion)}"
                description="Project configuration for ${sophiaPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${sophiaPipelineConfiguration.baseProjectConfig}">
 

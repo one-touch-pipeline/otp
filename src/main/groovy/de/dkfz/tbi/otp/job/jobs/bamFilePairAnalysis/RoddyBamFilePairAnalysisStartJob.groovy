@@ -46,7 +46,8 @@ trait RoddyBamFilePairAnalysisStartJob implements BamFilePairAnalysisStartJobTra
                 samplePair.individual, samplePair.seqType, pipeline)
 
         if (config == null) {
-            throw new RuntimeException("No ${RoddyWorkflowConfig.simpleName} found for ${Pipeline.simpleName} ${pipeline}, ${Individual.simpleName} ${samplePair.individual} (${Project.simpleName} ${samplePair.project}), ${SeqType.simpleName} ${samplePair.seqType}")
+            throw new RuntimeException("No ${RoddyWorkflowConfig.simpleName} found for ${Pipeline.simpleName} ${pipeline}, ${Individual.simpleName} " +
+                    "${samplePair.individual} (${Project.simpleName} ${samplePair.project}), ${SeqType.simpleName} ${samplePair.seqType}")
         }
         return config
     }

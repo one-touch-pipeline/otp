@@ -41,7 +41,7 @@ class ProcessingTimeStatisticsServiceSpec extends Specification {
         Date date = new Date()
 
         expect:
-        "-${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date.minus(dateDiff))
+        "-${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date - dateDiff)
     }
 
     void "getFormattedPeriod, when period is positive, return formatted String"() {
@@ -50,7 +50,7 @@ class ProcessingTimeStatisticsServiceSpec extends Specification {
         Date date = new Date()
 
         expect:
-        "${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date.plus(dateDiff))
+        "${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date + dateDiff)
     }
 
     void "getFormattedPeriod, when period is longer than a week, return formatted String with days as most superior unit"() {
@@ -59,6 +59,6 @@ class ProcessingTimeStatisticsServiceSpec extends Specification {
         Date date = new Date()
 
         expect:
-        "-${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date.minus(dateDiff))
+        "-${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date - dateDiff)
     }
 }

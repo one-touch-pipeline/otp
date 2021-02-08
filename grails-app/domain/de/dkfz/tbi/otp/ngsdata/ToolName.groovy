@@ -32,6 +32,9 @@ class ToolName implements Entity {
 
     String name
     Type type
+
+    // suppressing because changing this would involve refactoring the code as well as the database columns
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String path
 
     static constraints = {

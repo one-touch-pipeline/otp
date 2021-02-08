@@ -50,6 +50,9 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubmitWaitValidateJob {
 
     static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
+
+    // suppressed because breaking the line would break the pattern
+    @SuppressWarnings("LineLength")
     static final Pattern RODDY_EXECUTION_STORE_DIRECTORY_PATTERN = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired

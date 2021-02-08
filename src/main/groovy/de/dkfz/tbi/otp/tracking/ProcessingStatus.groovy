@@ -53,7 +53,8 @@ class ProcessingStatus {
     }
 
     Collection<SamplePairProcessingStatus> getSamplePairProcessingStatuses() {
-        return ((Collection<SamplePairProcessingStatus>) seqTrackProcessingStatuses*.mergingWorkPackageProcessingStatuses*.samplePairProcessingStatuses.flatten()).unique()
+        return ((Collection<SamplePairProcessingStatus>)
+                seqTrackProcessingStatuses*.mergingWorkPackageProcessingStatuses*.samplePairProcessingStatuses.flatten()).unique()
     }
 
     WorkflowProcessingStatus getInstallationProcessingStatus() {

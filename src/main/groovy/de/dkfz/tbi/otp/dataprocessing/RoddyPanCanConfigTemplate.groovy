@@ -105,7 +105,8 @@ class RoddyPanCanConfigTemplate {
 
                 <!-- Merge tool -->
                 <cvalue name="markDuplicatesVariant" value="${panCanAlignmentConfiguration.mergeTool}" type="string"
-                    description="Allowed values: biobambam, picard, sambamba. Default: empty. If set, this option takes precedence over the older useBioBamBamMarkDuplicates option."/>
+                    description="Allowed values: biobambam, picard, sambamba. Default: empty. If set, this option takes precedence over the older
+                    useBioBamBamMarkDuplicates option."/>
 
 ${additional}
 

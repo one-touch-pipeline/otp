@@ -34,7 +34,8 @@ class WorkflowArtefactController {
 
     def index(WorkflowArtefact workflowArtefact) {
         if (!workflowArtefact) {
-            flash.message = new FlashMessage(g.message(code: "workflowArtefact.message.artefactIdNotSet") as String, g.message(code: "workflowArtefact.message.artefactIdNotSet.error") as String)
+            flash.message = new FlashMessage(g.message(code: "workflowArtefact.message.artefactIdNotSet") as String,
+                    g.message(code: "workflowArtefact.message.artefactIdNotSet.error") as String)
             return
         }
 

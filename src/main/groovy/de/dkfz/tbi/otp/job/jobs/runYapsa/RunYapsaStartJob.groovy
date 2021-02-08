@@ -64,6 +64,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
         return "runYapsa_${ config.programVersion.replace("/", "-") }_${ getFormattedDate() }"
     }
 
+    @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     @Override
     ConfigPerProjectAndSeqType getConfig(SamplePair samplePair) {
         Pipeline pipeline = getBamFileAnalysisService().getPipeline()

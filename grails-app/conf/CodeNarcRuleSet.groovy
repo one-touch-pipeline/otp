@@ -78,7 +78,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ClassForName {
-        priority = HIGH
+        priority = DEFAULT
     }
     ComparisonOfTwoConstants {
         priority = DEFAULT
@@ -442,7 +442,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     NestedForLoop {
-        priority = HIGH
+        priority = DEFAULT
     }
     OptionalCollectionReturnType {
         priority = CRITICAL
@@ -602,13 +602,13 @@ All the Rules that will be used for OTP
         priority = MIDDLE
     }
     LineLength {
-        priority = HIGH
+        priority = DEFAULT
         length = 160
         doNotApplyToFilesMatching = "(.*/.*test.*/.*)|(.*Validator.*)"
         ignoreLineRegex = /\s*\@((Pre)|(Post))Authorize\(.*\)/ //filter out Pre and PostAuthorize annotations
     }
     LineLength {
-        priority = LOW
+        priority = DEFAULT
         length = 242
         applyToFileNames = TEST
         doNotApplyToFileNames = VALIDATOR
@@ -665,7 +665,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     TrailingWhitespace {
-        priority = HIGH
+        priority = DEFAULT
     }
 
     // rulesets/generic.xml
@@ -704,7 +704,7 @@ All the Rules that will be used for OTP
         priority = LOW
     }
     GrailsDomainReservedSqlKeywordName {
-        priority = HIGH
+        priority = DEFAULT
     }
     //GrailsDomainStringPropertyMaxSize //done by hibernate
     GrailsDomainWithServiceReference {
@@ -765,7 +765,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ExplicitCallToMinusMethod {
-        priority = HIGH
+        priority = DEFAULT
     }
     ExplicitCallToModMethod {
         priority = CRITICAL
@@ -777,7 +777,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ExplicitCallToPlusMethod {
-        priority = HIGH
+        priority = DEFAULT
     }
     ExplicitCallToPowerMethod {
         priority = CRITICAL

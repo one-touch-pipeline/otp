@@ -114,6 +114,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         return instance
     }
 
+    @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     void "test createScript"() {
         given:
         ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root", (OtpProperty.PATH_TOOLS): "/tools"])

@@ -94,6 +94,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         }
     }
 
+    @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     @SuppressWarnings('JavaIoPackageAccess') //method is about files
     private NextAction copyFiles(ImportProcess importProcess) throws Throwable {
         NextAction action = NextAction.SUCCEED

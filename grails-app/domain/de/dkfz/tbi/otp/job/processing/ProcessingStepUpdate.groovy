@@ -38,7 +38,10 @@ class ProcessingStepUpdate implements Serializable, Entity {
 
     /**
      * The date when this update was performed.
+     *
+     * suppressing because changing this would involve refactoring the code as well as the database columns
      */
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     Date date
 
     /**

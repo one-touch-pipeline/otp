@@ -194,7 +194,8 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
             noProcess << object.id
             return true
         } else if (processes.size() > 1) {
-            output << "${INDENT}Attention: There were ${processes.size()} processes created for the object ${valueToShow(object)} (${object.id}). That can cause problems."
+            output << "${INDENT}Attention: There were ${processes.size()} processes created for the object ${valueToShow(object)} (${object.id}). " +
+                    "That can cause problems."
         }
         Process lastProcess = processes.max { it.id }
         ProcessingStep ps = ProcessingStep.findByProcessAndNextIsNull(lastProcess)
@@ -210,7 +211,8 @@ the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n'
 
             Comment comment = ps.process.comment
             if (comment) {
-                errorOutput << "the comment (${comment.modificationDate.format("yyyy-MM-dd")} by ${comment.author}): ${ps.process.comment.comment.replaceAll('\n', "\n${INDENT3}")}"
+                errorOutput << "the comment (${comment.modificationDate.format("yyyy-MM-dd")} by ${comment.author}): " +
+                        "${ps.process.comment.comment.replaceAll('\n', "\n${INDENT3}")}"
             }
             if (update == null) {
                 errorOutput << "no update available: Please inform a maintainer\n"

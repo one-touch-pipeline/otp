@@ -60,7 +60,7 @@ To be used in conjunction with: common/DataTableFilter.js
                         <span id="${column.name}" class="dateSelection">
                             <g:message code="search.from.date"/>:
                             <input type="date" name="${column.name}_start" autocomplete="off"
-                                   value="${new Date().minus(7).format('yyyy-MM-dd')}"/>
+                                   value="${(new Date() - 7).format('yyyy-MM-dd')}"/>
                             <g:message code="search.to.date"/>:
                             <input type="date" name="${column.name}_end" autocomplete="off"
                                    value="${new Date().format('yyyy-MM-dd')}"/>

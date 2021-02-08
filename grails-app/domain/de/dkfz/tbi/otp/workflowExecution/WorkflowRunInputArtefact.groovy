@@ -26,8 +26,15 @@ import de.dkfz.tbi.otp.utils.Entity
 class WorkflowRunInputArtefact implements Entity {
 
     WorkflowRun workflowRun
-    // 'role' of the artefact for the workflow, e.g. "disease" and "control"
+
+    /**
+     * 'role' of the artefact for the workflow, e.g. "disease" and "control"
+     *
+     * suppressing because changing this would involve refactoring the code as well as the database columns
+     */
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String role
+
     WorkflowArtefact workflowArtefact
 
     static constraints = {

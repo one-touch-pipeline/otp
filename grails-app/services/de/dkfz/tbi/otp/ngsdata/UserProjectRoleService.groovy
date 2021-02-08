@@ -97,7 +97,8 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
-    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map flags = [:]) throws AssertionError {
+    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map flags = [:])
+            throws AssertionError {
         assert project: "project must not be null"
         User user = createUserWithLdapData(username)
 

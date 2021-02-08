@@ -27,7 +27,13 @@ class ReferenceGenomeIndex implements Entity {
 
     ToolName toolName
     ReferenceGenome referenceGenome
-    // depending on the tool, path may be a file or a directory
+
+    /**
+     * depending on the tool, path may be a file or a directory
+     *
+     * suppressing because changing this would involve refactoring the code as well as the database columns
+     */
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String path
     String indexToolVersion
 

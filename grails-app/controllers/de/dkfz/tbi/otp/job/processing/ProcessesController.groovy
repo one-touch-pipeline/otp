@@ -203,7 +203,8 @@ class ProcessesController {
                     ExecutionState.STARTED,
             ]
         }
-        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, cmd.iDisplayLength, cmd.iDisplayStart, sort, cmd.sortOrder, restriction)
+        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, cmd.iDisplayLength, cmd.iDisplayStart, sort,
+                cmd.sortOrder, restriction)
         dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan, restriction)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
@@ -257,6 +258,8 @@ class ProcessesController {
         ]
     }
 
+    // suppressing because this controller will be removed within the old workflow system
+    @SuppressWarnings("ClassForName")
     boolean showRestartButton(Process process) {
         return (RestartableStartJob.isAssignableFrom(Class.forName(process.getStartJobClass())) &&
                 !Process.findByRestarted(process))

@@ -25,6 +25,9 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class Parameter implements Serializable, Entity {
     ParameterType type
+
+    // suppressing because changing this would involve refactoring the code as well as the database columns
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
 
     static mapping = {

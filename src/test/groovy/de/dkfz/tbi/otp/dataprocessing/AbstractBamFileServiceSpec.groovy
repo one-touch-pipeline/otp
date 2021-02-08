@@ -33,7 +33,7 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest {
 
     AbstractBamFileService abstractBamFileService
 
-    Date createdBefore = new Date().plus(1)
+    Date createdBefore = new Date() + 1
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -137,7 +137,7 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest {
 
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileDateIsLater() {
         given:
-        createdBefore = new Date().minus(1)
+        createdBefore = new Date() - 1
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
 
         expect:

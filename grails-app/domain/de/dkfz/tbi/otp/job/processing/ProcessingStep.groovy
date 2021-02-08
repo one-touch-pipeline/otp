@@ -242,6 +242,8 @@ class ProcessingStep implements Serializable, Entity {
         ].findAll().join('_')
     }
 
+    // suppressing because this entity will be removed within the old workflow system
+    @SuppressWarnings("ClassForName")
     boolean belongsToMultiJob() {
         Class jobClass = Class.forName(jobClass, true, getClass().getClassLoader())
         return AbstractMultiJob.isAssignableFrom(jobClass)

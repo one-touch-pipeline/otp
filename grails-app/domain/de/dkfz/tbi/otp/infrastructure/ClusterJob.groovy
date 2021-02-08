@@ -379,7 +379,7 @@ class ClusterJob implements Entity {
      */
     Duration getWalltimeDiff () {
         if (requestedWalltime != null && elapsedWalltime != null) {
-            return requestedWalltime.minus(elapsedWalltime)
+            return requestedWalltime - elapsedWalltime
         } else {
             return null
         }

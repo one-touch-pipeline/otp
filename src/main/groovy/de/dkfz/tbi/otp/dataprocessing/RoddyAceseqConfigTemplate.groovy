@@ -29,7 +29,8 @@ class RoddyAceseqConfigTemplate {
     static String createConfig(RoddyConfiguration aceseqPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType="project"
-               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, aceseqPipelineConfiguration.seqType, aceseqPipelineConfiguration.pluginName, aceseqPipelineConfiguration.programVersion, aceseqPipelineConfiguration.configVersion)}"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, aceseqPipelineConfiguration.seqType, aceseqPipelineConfiguration.pluginName,
+                aceseqPipelineConfiguration.programVersion, aceseqPipelineConfiguration.configVersion)}"
                description="Project configuration for ${aceseqPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${aceseqPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>

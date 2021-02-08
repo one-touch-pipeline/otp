@@ -91,7 +91,8 @@ class DataFileConsistencyChecker {
                     }
                 }
             }
-            log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: ${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
+            log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: " +
+                    "${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
         }
     }
 

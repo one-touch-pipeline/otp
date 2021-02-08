@@ -53,7 +53,8 @@ abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob 
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForIndividual(
                 mergingWorkPackage.individual, mergingWorkPackage.seqType, mergingWorkPackage.pipeline
         )
-        assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and ${mergingWorkPackage.pipeline}"
+        assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and " +
+                "${mergingWorkPackage.pipeline}"
         return config
     }
 }

@@ -221,7 +221,8 @@ class OtpTagLib {
         if (attrs.type == "dialog") {
             out << "<div class='modal-footer'>"
             out << "<button id='close' type='button' class='btn btn-secondary' data-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
-            out << "<button id='confirm' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>${confirmText}</button>"
+            out << "<button id='confirm' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>" +
+                    "${confirmText}</button>"
             out << "</div>"
         }
         out << "</div>"

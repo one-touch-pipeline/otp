@@ -29,6 +29,8 @@ class MergingWorkPackageAlignmentProperty implements Entity {
 
     String name
 
+    // suppressing because changing this would involve refactoring the code as well as the database columns
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
 
     static belongsTo = [

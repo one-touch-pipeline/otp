@@ -49,7 +49,8 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
     }
 
     @SuppressWarnings("AssignCollectionSort")
-    protected String createExceptionString(Map<ClusterJobIdentifier, String> failedClusterJobs, Collection<? extends ClusterJobIdentifier> finishedClusterJobs) {
+    protected String createExceptionString(Map<ClusterJobIdentifier, String> failedClusterJobs, Collection<?
+            extends ClusterJobIdentifier> finishedClusterJobs) {
         Comparator sortByClusterJobId = { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 ->
             identifier1.clusterJobId <=> identifier2.clusterJobId
         } as Comparator
@@ -80,7 +81,8 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
     /**
      * Returns all failed or not finished ClusterJobs
      */
-    protected abstract Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable
+    protected abstract Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(Collection<? extends ClusterJobIdentifier> finishedClusterJobs)
+            throws Throwable
 
     /**
      * Called when the job is started.

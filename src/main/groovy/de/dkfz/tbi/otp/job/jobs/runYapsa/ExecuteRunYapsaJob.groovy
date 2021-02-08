@@ -65,6 +65,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 
+    @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     private String createScript(RunYapsaInstance runYapsaInstance) {
         final RunYapsaConfig CONFIG = runYapsaInstance.config
         File outputDirectory = runYapsaInstance.workDirectory

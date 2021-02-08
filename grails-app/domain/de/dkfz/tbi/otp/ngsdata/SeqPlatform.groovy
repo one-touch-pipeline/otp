@@ -47,7 +47,8 @@ class SeqPlatform implements Entity, Legacy {
         Because of this we implemented the same constraint in a custom validator:
          */
         name(blank: false, validator: { val, obj ->
-            SeqPlatform seqPlatform = SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(val, obj.seqPlatformModelLabel, obj.sequencingKitLabel)
+            SeqPlatform seqPlatform =
+                    SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(val, obj.seqPlatformModelLabel, obj.sequencingKitLabel)
             return !seqPlatform || seqPlatform == obj
         })
         seqPlatformModelLabel(nullable: true)

@@ -656,13 +656,13 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
-        Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
+        Date startDate = startDateOffset  == null ? null : baseDate - startDateOffset
+        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
 
         Individual individual = createIndividual()
 
         ClusterJob clusterJob = DomainFactory.createClusterJob('individual': individual)
-        clusterJob.dateCreated = baseDate.minus(1)
+        clusterJob.dateCreated = baseDate - 1
         clusterJob.save(flush: true)
 
         when:

@@ -38,11 +38,11 @@ class SampleServiceIntegrationSpec extends Specification implements DomainFactor
     void "test getCountOfSamplesForSpecifiedPeriodAndProjects for given date"() {
         given:
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
-        Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
+        Date startDate = startDateOffset  == null ? null : baseDate - startDateOffset
+        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
 
         Sample sample = createSample()
-        sample.dateCreated = baseDate.minus(1)
+        sample.dateCreated = baseDate - 1
         sample.save(flush: true)
 
         when:

@@ -38,7 +38,7 @@
                 <div class="error-list"></div>
             </div>
             <div class="date-pickers">
-                from: <input type="text" class="datePicker" id="dpFrom" value="${new Date().minus(6).format('yyyy-MM-dd')}">
+                from: <input type="text" class="datePicker" id="dpFrom" value="${(new Date() - 6).format('yyyy-MM-dd')}">
                 to: <input type="text" class="datePicker" id="dpTo" value="${new Date().format('yyyy-MM-dd')}">
             </div>
         </div>

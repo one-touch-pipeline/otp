@@ -527,8 +527,10 @@ ln -s '${newDirectFileName}' \\
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}.sh", realm)
         bashScriptToMoveFiles << BASH_HEADER
 
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "${bashScriptName}-otherUser.sh", realm)
-        createBashScriptRoddy(moveIndividualHelper.seqTracks, moveIndividualHelper.dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
+        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory,
+                "${bashScriptName}-otherUser.sh", realm)
+        createBashScriptRoddy(moveIndividualHelper.seqTracks, moveIndividualHelper.dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser,
+                !linkedFilesVerified)
 
         moveIndividualHelper.seqTracks.each { SeqTrack seqTrack ->
             Map<String, List<File>> dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)

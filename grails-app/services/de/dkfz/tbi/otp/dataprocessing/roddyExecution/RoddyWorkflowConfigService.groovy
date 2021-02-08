@@ -47,7 +47,8 @@ class RoddyWorkflowConfigService {
         assert individual : "The individual is not allowed to be null"
 
         RoddyBamFile.withTransaction {
-            importProjectConfigFile(project, seqType, programVersionToUse, pipeline, configFilePath, configVersion, getMd5sum(configFilePath), adapterTrimmingNeeded, individual)
+            importProjectConfigFile(project, seqType, programVersionToUse, pipeline, configFilePath, configVersion, getMd5sum(configFilePath),
+                    adapterTrimmingNeeded, individual)
 
             List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
                 eq('seqType', seqType)

@@ -29,7 +29,10 @@ class ConsistencyCheck implements ProcessParameterObject, Entity {
 
     /**
      * Date of when the consistency check was performed
+     *
+     * suppressing because changing this would involve refactoring the code as well as the database columns
      */
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     Date date = new Date()
 
     @Override

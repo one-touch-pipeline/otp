@@ -155,7 +155,8 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     protected void checkProperties(Map properties) {
         assert properties.dirName: "the input dirname must not be null"
         assert properties.libraryLayout: "the input libraryLayout must not be null"
-        assert properties.libraryLayout instanceof LibraryLayout: "the input libraryLayout has to be of class 'LibraryLayout' but is '${properties.libraryLayout.class}"
+        assert properties.libraryLayout instanceof LibraryLayout: "the input libraryLayout has to be of class 'LibraryLayout' but " +
+                "is '${properties.libraryLayout.class}"
         assert properties.displayName: "the input displayName must not be null"
         assert properties.singleCell != null: "the input singleCell must not be null"
         assert !findByNameOrImportAlias(properties.displayName, properties): "The SeqType with displayname'${properties.displayName}' exists already"

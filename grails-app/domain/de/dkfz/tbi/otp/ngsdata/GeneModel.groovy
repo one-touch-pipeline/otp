@@ -32,6 +32,9 @@ class GeneModel implements Entity {
 
 
     ReferenceGenome referenceGenome
+
+    // suppressing because changing this would involve refactoring the code as well as the database columns
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String path
     String fileName
     String excludeFileName

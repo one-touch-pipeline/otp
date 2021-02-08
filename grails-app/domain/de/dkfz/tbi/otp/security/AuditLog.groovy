@@ -48,7 +48,11 @@ class AuditLog implements Entity {
     }
 
     User user
+
+    // suppressing because changing this would involve refactoring the code as well as the database columns
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     Date timestamp = Date.valueOf(LocalDate.now())
+
     Action action
     String description
 

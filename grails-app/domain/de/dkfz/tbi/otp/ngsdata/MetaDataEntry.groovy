@@ -25,6 +25,8 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class MetaDataEntry implements Entity {
 
+    // suppressing because changing this would involve refactoring the code as well as the database columns
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
     DataFile dataFile
     MetaDataKey key

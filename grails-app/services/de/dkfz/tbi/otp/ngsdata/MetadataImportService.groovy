@@ -371,10 +371,13 @@ class MetadataImportService {
      * Send an email notification with a list of the unset categories
      * and the generated default thresholds.
      *
+     * suppress line length because GString injection must not contain line feeds
+     *
      * @param seqTracks
      * @param defaultThresholds
      * @param ticket
      */
+    @SuppressWarnings("LineLength")
     protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, List<ProcessingThresholds> defaultThresholds, OtrsTicket ticket) {
         List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(seqTracks)
 

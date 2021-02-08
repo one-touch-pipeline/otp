@@ -27,6 +27,10 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
+/**
+ * @deprecated Not needed for the new workflow system. It will be removed within the old workflow system.
+ */
+@Deprecated
 @Transactional
 class CrashRecoveryService {
 
@@ -219,15 +223,8 @@ class CrashRecoveryService {
                 }
                 // validate that all output parameters are set
                 List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT)
-                for (ParameterType parameterType in parameterTypes) {
-                    boolean found = false
-                    for (Parameter param in step.output) {
-                        if (param.type == parameterType) {
-                            found = true
-                            break
-                        }
-                    }
-                    if (!found) {
+                parameterTypes.each { ParameterType parameterType ->
+                    if (!step.output.any { Parameter param -> param.type == parameterType }) {
                         status.setRollbackOnly()
                         throw new RuntimeException("Parameter for type ${parameterType.id} has not been set")
                     }

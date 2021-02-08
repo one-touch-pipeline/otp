@@ -29,7 +29,8 @@ class RoddyIndelConfigTemplate {
     static String createConfig(RoddyConfiguration indelPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType="project"
-               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, indelPipelineConfiguration.seqType, indelPipelineConfiguration.pluginName, indelPipelineConfiguration.programVersion, indelPipelineConfiguration.configVersion)}"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, indelPipelineConfiguration.seqType, indelPipelineConfiguration.pluginName,
+                indelPipelineConfiguration.programVersion, indelPipelineConfiguration.configVersion)}"
                description="Indel project configuration for ${indelPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${indelPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>

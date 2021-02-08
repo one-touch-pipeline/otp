@@ -42,7 +42,10 @@ class ReferenceGenome implements Entity {
      * Reference genome specific directory
      *
      * This directory is in {@link de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName#BASE_PATH_REFERENCE_GENOME}.
+     *
+     * suppressing because changing this would involve refactoring the code as well as the database columns
      */
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String path
 
     /**

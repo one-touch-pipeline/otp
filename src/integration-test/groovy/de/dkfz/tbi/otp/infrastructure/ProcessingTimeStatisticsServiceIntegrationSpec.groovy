@@ -114,17 +114,17 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         comment.save(flush: true)
 
         OtrsTicket ticket = DomainFactory.createOtrsTicket(
-                submissionReceivedNotice: new Date().minus(1),
+                submissionReceivedNotice: new Date() - 1,
                 ticketCreated: new Date(),
-                dateCreated: new Date().plus(1),
-                installationStarted: new Date().plus(2),
-                installationFinished: new Date().plus(3),
-                fastqcStarted: new Date().plus(4),
-                fastqcFinished: new Date().plus(5),
-                alignmentStarted: new Date().plus(6),
-                alignmentFinished: new Date().plus(7),
-                snvStarted: new Date().plus(8),
-                snvFinished: new Date().plus(9),
+                dateCreated: new Date() + 1,
+                installationStarted: new Date() + 2,
+                installationFinished: new Date() + 3,
+                fastqcStarted: new Date() + 4,
+                fastqcFinished: new Date() + 5,
+                alignmentStarted: new Date() + 6,
+                alignmentFinished: new Date() + 7,
+                snvStarted: new Date() + 8,
+                snvFinished: new Date() + 9,
                 finalNotificationSent: true,
                 comment: comment,
         )

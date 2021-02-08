@@ -55,7 +55,7 @@ class ProjectProgressController {
 
     def progress() {
         return [
-            startDate: new Date().minus(8).format('yyyy-MM-dd'),
+            startDate: (new Date() - 8).format('yyyy-MM-dd'),
             endDate: new Date().format('yyyy-MM-dd'),
         ]
     }
@@ -65,7 +65,7 @@ class ProjectProgressController {
         List<Project> projects = projectProgressService.getProjectsFromNameList(cmd.projectNames ?: projectService.allProjects*.name)
 
         //the end date is increased by one day, since the check consider also the time
-        List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, cmd.endDate.plus(1))
+        List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, cmd.endDate + 1)
         List data = fillTable(runs)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords

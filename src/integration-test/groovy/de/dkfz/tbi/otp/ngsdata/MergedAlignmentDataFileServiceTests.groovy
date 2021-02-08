@@ -34,23 +34,6 @@ class MergedAlignmentDataFileServiceTests {
     MergedAlignmentDataFileService mergedAlignmentDataFileService
 
     @Test
-    void testAlignmentSequenceFiles() {
-        List<SeqScan> scans = SeqScan.list([max: 10])
-        for (SeqScan scan in scans) {
-            mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
-        }
-    }
-
-    @Test
-    void testScansWithSingleLane() {
-        SeqType type = SeqType.findByNameAndLibraryLayout("RNA", LibraryLayout.PAIRED)
-        List<SeqScan> scans = SeqScan.findAllBySeqType(type)
-        for (SeqScan scan in scans) {
-            mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
-        }
-    }
-
-    @Test
     void testBuildRelativePath() {
         TestData testData = new TestData()
         testData.createObjects()

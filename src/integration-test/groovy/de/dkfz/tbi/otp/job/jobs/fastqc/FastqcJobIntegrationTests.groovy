@@ -199,7 +199,13 @@ class FastqcJobIntegrationTests {
         dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, fastqImportInstance: fastqImportInstance, nReads: nReads, sequenceLength: sequenceLength, fileType: dataFile.fileType])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack,
+                                                           project: seqTrack.project,
+                                                           run: seqTrack.run,
+                                                           fastqImportInstance: fastqImportInstance,
+                                                           nReads: nReads,
+                                                           sequenceLength: sequenceLength,
+                                                           fileType: dataFile.fileType,])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -218,7 +224,12 @@ class FastqcJobIntegrationTests {
         dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, fastqImportInstance: fastqImportInstance, nReads: nReads2, sequenceLength: sequenceLength])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack,
+                                                           project: seqTrack.project,
+                                                           run: seqTrack.run,
+                                                           fastqImportInstance: fastqImportInstance,
+                                                           nReads: nReads2,
+                                                           sequenceLength: sequenceLength,])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -239,7 +250,13 @@ class FastqcJobIntegrationTests {
         dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, fastqImportInstance: fastqImportInstance, sequenceLength: sequenceLength, nReads: nReads, fileType: dataFile.fileType])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack,
+                                                           project: seqTrack.project,
+                                                           run: seqTrack.run,
+                                                           fastqImportInstance: fastqImportInstance,
+                                                           sequenceLength: sequenceLength,
+                                                           nReads: nReads,
+                                                           fileType: dataFile.fileType,])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -258,7 +275,13 @@ class FastqcJobIntegrationTests {
         dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, fastqImportInstance: fastqImportInstance, sequenceLength: sequenceLength2, nReads: nReads, fileType: dataFile.fileType])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack,
+                                                           project: seqTrack.project,
+                                                           run: seqTrack.run,
+                                                           fastqImportInstance: fastqImportInstance,
+                                                           sequenceLength: sequenceLength2,
+                                                           nReads: nReads,
+                                                           fileType: dataFile.fileType,])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -277,7 +300,13 @@ class FastqcJobIntegrationTests {
         dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, fastqImportInstance: fastqImportInstance, sequenceLength: sequenceLength2, nReads: nReads, fileType: dataFile.fileType])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack,
+                                                           project: seqTrack.project,
+                                                           run: seqTrack.run,
+                                                           fastqImportInstance: fastqImportInstance,
+                                                           sequenceLength: sequenceLength2,
+                                                           nReads: nReads,
+                                                           fileType: dataFile.fileType,])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }

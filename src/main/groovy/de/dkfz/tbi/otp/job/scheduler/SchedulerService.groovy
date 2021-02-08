@@ -402,7 +402,8 @@ class SchedulerService {
                 throw new ProcessingException("Could not create a FINISHED Update for Job")
             }
         } else {
-            job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT be created."
+            job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT " +
+                    "be created."
         }
         Parameter failedOutputParameter
         job.getOutputParameters().each { Parameter param ->
@@ -422,7 +423,8 @@ class SchedulerService {
         }
         if (failedOutputParameter) {
             // at least one output parameter is wrong - set to failure
-            createError(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.", job.class)
+            createError(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of " +
+                    "type Output.", job.class)
             log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
             markProcessAsFailed(step)
             return
@@ -430,14 +432,7 @@ class SchedulerService {
         // check that all Output Parameters are set
         List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT)
         for (ParameterType parameterType in parameterTypes) {
-            boolean found = false
-            for (Parameter param in step.output) {
-                if (param.type == parameterType) {
-                    found = true
-                    break
-                }
-            }
-            if (!found) {
+            if (!step.output.any { Parameter param -> param.type == parameterType }) {
                 // a required output parameter has not been generated
                 createError(step, "Required Output Parameter of type ${parameterType.id} is not set.", job.class)
                 log.error("Required Output Parameter of type ${parameterType.id} is not set.")
@@ -468,7 +463,8 @@ class SchedulerService {
                     )
                     endStateUpdate.save(flush: true)
                 } else {
-                    job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A SUCCESS ProcessingStepUpdate will NOT be created."
+                    job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A SUCCESS ProcessingStepUpdate " +
+                            "will NOT be created."
                 }
                 if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
                     ((DecisionProcessingStep) step).decision = (job as DecisionJob).getDecision()
@@ -479,7 +475,8 @@ class SchedulerService {
                 }
                 if (endState == ExecutionState.FAILURE) {
                     log.debug("Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
-                    ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE", processingStepUpdate: endStateUpdate)
+                    ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution " +
+                            "state set to FAILURE", processingStepUpdate: endStateUpdate)
                     endStateUpdate.error = error
                     if (!error.save(flush: true)) {
                         log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
@@ -768,7 +765,8 @@ class SchedulerService {
             // updating the JobExecutionPlan information has to be thread save due to multiple processes ending in the same time is possible
             ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(last).sort { it.id }.last()
             if (update.state != ExecutionState.SUCCESS) {
-                throw new IncorrectProcessingException("Process finished but is not in success state. (Note that currently the last job of a workflow has to be an EndStateAwareJob. See OTP-991.)")
+                throw new IncorrectProcessingException("Process finished but is not in success state. (Note that currently the last job of a workflow has " +
+                        "to be an EndStateAwareJob. See OTP-991.)")
             }
             last.process.finished = true
             last.process.save(flush: true)
@@ -810,8 +808,10 @@ class SchedulerService {
                     throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
                 }
                 processService.setOperatorIsAwareOfFailure(step.process, false)
-                ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created, processingStep: step)
-                ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
+                ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created,
+                        processingStep: step)
+                ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type" +
+                        " ${failedConstantParameter.type.name} to new processing step",
                         processingStepUpdate: failure)
                 failure.error = error
                 if (!failure.save(flush: true)) {
@@ -864,11 +864,14 @@ class SchedulerService {
         assert job.log
         final Job currentJob = jobExecutedByCurrentThread
         if (currentJob != null) {
-            throw new IllegalStateException("SchedulerService was notified by the current thread that it is about to start executing job ${job}, but SchedulerService thinks that the thread is already executing job ${currentJob}. Apparently the thread did not call SchedulerService.finishedJobExecutionOnCurrentThread() or it called startingJobExecutionOnCurrentThread() more than once.")
+            throw new IllegalStateException("SchedulerService was notified by the current thread that it is about to start executing job ${job}, but " +
+                    "SchedulerService thinks that the thread is already executing job ${currentJob}. Apparently the thread did not call " +
+                    "SchedulerService.finishedJobExecutionOnCurrentThread() or it called startingJobExecutionOnCurrentThread() more than once.")
         }
         final Logger currentLog = LogThreadLocal.threadLog
         if (currentLog != null) {
-            throw new IllegalStateException("SchedulerService was notified by the current thread that it is about to start executing job ${job}, but LogThreadLocal is already holding a log (${currentLog}).")
+            throw new IllegalStateException("SchedulerService was notified by the current thread that it is about to start executing job ${job}, but " +
+                    "LogThreadLocal is already holding a log (${currentLog}).")
         }
         jobByThread.set(job)
         LogThreadLocal.threadLog = job.log
@@ -883,13 +886,18 @@ class SchedulerService {
         notNull job
         final Job currentJob = jobExecutedByCurrentThread
         if (currentJob == null) {
-            ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing job ${job}, but SchedulerService thought that the thread is not executing any job. Apparently the thread did not call SchedulerService.startingJobExecutionOnCurrentThread() or it called finishedJobExecutionOnCurrentThread() more than once.")
+            ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing " +
+                    "job ${job}, but SchedulerService thought that the thread is not executing any job. Apparently the thread did not call " +
+                    "SchedulerService.startingJobExecutionOnCurrentThread() or it called finishedJobExecutionOnCurrentThread() more than once.")
         } else if (job != currentJob) {
-            ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing job ${job}, but SchedulerService thought that the thread is executing job ${currentJob}.")
+            ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing " +
+                    "job ${job}, but SchedulerService thought that the thread is executing job ${currentJob}.")
         } else {
             final Logger currentLog = LogThreadLocal.threadLog
             if (currentLog != job.log) {
-                ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing job ${job} and SchedulerService thought that LogThreadLocal is holding that job's log, but LogThreadLocal is holding log ${currentLog}.")
+                ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing " +
+                        "job ${job} and SchedulerService thought that LogThreadLocal is holding that job's log, but LogThreadLocal is holding " +
+                        "log ${currentLog}.")
             }
         }
         jobByThread.remove()
