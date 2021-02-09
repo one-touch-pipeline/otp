@@ -114,6 +114,7 @@ class WorkflowRun implements Commentable, Entity {
         priority index: 'workflow_run_priority_idx'
         state index: 'workflow_run_state_idx'
         comment cascade: "all-delete-orphan"
+        workDirectory type: 'text'
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

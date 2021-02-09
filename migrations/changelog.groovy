@@ -523,4 +523,8 @@ databaseChangeLog = {
     changeSet(author: "gabkol", id: "otp-915") {
         sqlFile(path: 'changelogs/2021/otp-915.sql')
     }
+
+    changeSet(author: "borufka", id: "otp-596") {
+        sqlFile(path: 'changelogs/2021/otp-596-use-text-for-workdirectory.sql')
+    }
 }
