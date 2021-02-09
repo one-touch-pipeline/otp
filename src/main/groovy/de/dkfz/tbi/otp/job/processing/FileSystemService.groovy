@@ -27,6 +27,7 @@ import com.jcraft.jsch.IdentityRepository
 import com.jcraft.jsch.agentproxy.*
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -38,14 +39,14 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.LoginFailedRemoteFileSystemException
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.FileSystem
-import java.nio.file.FileSystemException
-import java.nio.file.FileSystems
+import java.nio.file.*
 
 import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
+@Slf4j
 @Scope("singleton")
 @Component
 @Transactional
@@ -81,14 +82,14 @@ class FileSystemService {
                     config.put("PreferredAuthentications", "publickey")
                     break
                 case SshAuthMethod.SSH_AGENT:
-                    Connector connector = ConnectorFactory.getDefault().createConnector()
+                    Connector connector = ConnectorFactory.default.createConnector()
                     if (connector != null) {
                         IdentityRepository repository = new RemoteIdentityRepository(connector)
                         env.withIdentityRepository(repository)
                     }
                     break
                 case SshAuthMethod.PASSWORD:
-                    env.withPassword(configService.getSshPassword().toCharArray())
+                    env.withPassword(configService.sshPassword().toCharArray())
                     break
             }
 
@@ -109,8 +110,8 @@ class FileSystemService {
 
     FileSystem getRemoteFileSystemOnDefaultRealm() throws Throwable {
         String realmName = processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
-        Realm realm = Realm.findByName(realmName)
-        assert realm: "Default realm could not be resolved"
+        Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByName(realmName),
+                "Default realm could not be resolved")
         return getFilesystem(realm)
     }
 
@@ -123,20 +124,18 @@ class FileSystemService {
         boolean useRemote = processingOptionService.findOptionAsBoolean(optionName)
         if (useRemote) {
             return remoteFileSystemOnDefaultRealm
-        } else {
-            return FileSystems.default
         }
+        return FileSystems.default
     }
 
     FileSystem getRealmOrLocalFileSystemByProcessingOption(ProcessingOption.OptionName optionName) throws Throwable {
         String realmName = processingOptionService.findOptionAsString(optionName)
         if (realmName) {
-            Realm realm = Realm.findByName(realmName)
-            assert realm
-            getFilesystem(realm)
-        } else {
-            return FileSystems.default
+            Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByName(realmName),
+                    "Default realm could not be resolved")
+            return getFilesystem(realm)
         }
+        return FileSystems.default
     }
 
     FileSystem getFilesystemForProcessingForRealm() throws Throwable {
@@ -158,7 +157,35 @@ class FileSystemService {
     @Scheduled(fixedDelay = 30000L)
     void keepAlive() {
         createdFileSystems.each { Realm realm, FileSystem fileSystem ->
+            log.debug("Send keep alive for ${realm}")
             SFTPFileSystemProvider.keepAlive(fileSystem)
+        }
+    }
+
+    /**
+     * Check, if currently remote file systems exist
+     */
+    boolean hasRemoteFileSystems() {
+        return !createdFileSystems.isEmpty()
+    }
+
+    /**
+     * Close the used remote file systems.
+     *
+     * <b>Attention:</b>
+     * This method is only for running workflow tests and should never be used in production.
+     *
+     * Since each workflow tests starts with an empty database, each test have other realms and therefore can not reuse the cached file system.
+     * To avoid collecting more and more not needed cached file system and references to not valid realm, the cache are closed after each test.
+     *
+     * Since in production always the same realm is used, the cache shouldn't cleared and therefore this method also not used.
+     */
+    void closeFileSystem() {
+        Map<Realm, FileSystem> fileSystems = createdFileSystems
+        createdFileSystems = [:]
+        fileSystems.each { Realm realm, FileSystem fileSystem ->
+            log.debug("closing filesystems for realm ${realm}")
+            fileSystem.close()
         }
     }
 }

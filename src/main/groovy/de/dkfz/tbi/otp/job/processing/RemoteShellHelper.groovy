@@ -54,17 +54,21 @@ import java.util.concurrent.Semaphore
 @Slf4j
 class RemoteShellHelper {
 
-    static private final int TIME_FOR_RETRY_REMOTE_ACCESS = 10 * 60
+    static private final int FACTOR_10 = 10
 
-    static private final int CHANNEL_TIMEOUT = 5 * 60
+    static private final int MILLI_SECONDS_PER_SECOND = 1000
 
+    static private final int SECONDS_PER_MINUTE = 60
+
+    static private final int TIME_FOR_RETRY_REMOTE_ACCESS = FACTOR_10 * SECONDS_PER_MINUTE
+
+    static private final int CHANNEL_TIMEOUT = 5 * SECONDS_PER_MINUTE
 
     @Autowired
     ConfigService configService
 
     @Autowired
     ProcessingOptionService processingOptionService
-
 
     private JSch jsch
 
@@ -100,21 +104,20 @@ class RemoteShellHelper {
     ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
         assert realm: "No realm specified."
         assert command: "No command specified to be run remotely."
-        String sshUser = configService.getSshUser()
-        String password = configService.getSshPassword()
-        File keyFile = configService.getSshKeyFile()
-        SshAuthMethod sshAuthMethod = configService.getSshAuthenticationMethod()
+        String sshUser = configService.sshUser
+        String password = configService.sshPassword
+        File keyFile = configService.sshKeyFile
+        SshAuthMethod sshAuthMethod = configService.sshAuthenticationMethod
         try {
             return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
         } catch (ProcessingException e) {
             if (e.cause && e.cause instanceof JSchException && e.cause.message.contains('channel is not opened.')) {
                 logToJob("'channel is not opened' error occur, try again in ${TIME_FOR_RETRY_REMOTE_ACCESS} seconds")
                 log.error("'channel is not opened' error occur, try again in ${TIME_FOR_RETRY_REMOTE_ACCESS} seconds")
-                Thread.sleep(TIME_FOR_RETRY_REMOTE_ACCESS * 1000)
+                Thread.sleep(TIME_FOR_RETRY_REMOTE_ACCESS * MILLI_SECONDS_PER_SECOND)
                 return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
-            } else {
-                throw e
             }
+            throw e
         }
     }
 
@@ -133,6 +136,8 @@ class RemoteShellHelper {
      * @param command The command to be executed on the remote server
      * @return process output of the command executed
      */
+    //maxSshCalls is initialized here, since during loading the class the database can not be accessed (not ready)
+    @SuppressWarnings(['AssignmentToStaticFieldFromInstanceMethod', 'CatchException'])
     protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod, String command) {
         assert command: "No command specified."
         if (!password && !keyFile) {
@@ -199,7 +204,7 @@ class RemoteShellHelper {
                         config.put("PreferredAuthentications", "publickey")
                         break
                     case SshAuthMethod.SSH_AGENT:
-                        Connector connector = ConnectorFactory.getDefault().createConnector()
+                        Connector connector = ConnectorFactory.default.createConnector()
                         if (connector != null) {
                             IdentityRepository repository = new RemoteIdentityRepository(connector)
                             jsch.setIdentityRepository(repository)
@@ -231,25 +236,27 @@ class RemoteShellHelper {
      * @param channel The channel to read from
      * @return The output of the finished process
      */
-    @SuppressWarnings('BusyWait') //the method needs to wait for the channel to end and a wait method is not provided.
+    //the method needs to wait for the channel to end and a wait method is not provided.
+    @SuppressWarnings('BusyWait')
     private static ProcessOutput getOutput(ChannelExec channel) {
         OutputStream outputErrorStream = new ByteArrayOutputStream()
         OutputStream outputStream = new ByteArrayOutputStream()
         channel.setOutputStream(outputStream)
         channel.setErrStream(outputErrorStream)
 
-        channel.connect(CHANNEL_TIMEOUT * 1000)
+        channel.connect(CHANNEL_TIMEOUT * MILLI_SECONDS_PER_SECOND)
         while (!channel.isClosed()) {
-            Thread.sleep(10)
+            Thread.sleep(FACTOR_10)
         }
         return new ProcessOutput(
                 outputStream.toString("UTF-8"),
                 outputErrorStream.toString("UTF-8"),
-                channel.getExitStatus()
+                channel.exitStatus
         )
     }
 
     @Scheduled(fixedDelay = 60000L)
+    @SuppressWarnings('CatchThrowable')
     void keepAlive() {
         sessionPerRealm.each { Realm realm, Session session ->
             log.debug("Send keep alive for ${realm}")
@@ -264,8 +271,39 @@ class RemoteShellHelper {
         }
     }
 
+    /**
+     * Check, if currently cached remote session exist
+     */
+    boolean hasRemoteFileSystems() {
+        return !sessionPerRealm.isEmpty()
+    }
+
+    /**
+     * Close the used remote file systems.
+     *
+     * <b>Attention:</b>
+     * This method is only for running workflow tests and should never be used in production.
+     *
+     * Since each workflow tests starts with an empty database, each test have other realms and therefore can not reuse the cached file system.
+     * To avoid collecting more and more not needed cached file system and references to not valid realm, the cache are closed after each test.
+     *
+     * Since in production always the same realm is used, the cache shouldn't cleared and therefore this method also not used.
+     */
+    void closeFileSystem() {
+        Map<Realm, Session> sessionPerRealmCopy = sessionPerRealm
+        sessionPerRealm = [:]
+        sessionPerRealmCopy.each { Realm realm, Session session ->
+            log.debug("closing filesystems for realm ${realm}")
+            session.disconnect()
+        }
+    }
+
+    /**
+     * @Deprecated Old workflow system
+     */
+    @Deprecated
     private void logToJob(String message) {
-        Logger log = LogThreadLocal.getThreadLog()
+        Logger log = LogThreadLocal.threadLog
         log?.debug message
     }
 }
