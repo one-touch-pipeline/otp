@@ -45,8 +45,10 @@ class WorkflowSystemService {
                 jobService.createRestartedJobAfterSystemRestart(it)
             }
             firstStart = false
+            log.info("job system handle first start")
         }
         enabled = true
+        log.info("job system started")
     }
 
     void stopWorkflowSystem() {
@@ -55,6 +57,7 @@ class WorkflowSystemService {
             return
         }
         enabled = false
+        log.info("job system stopped")
     }
 
     boolean hasRunAfterStart() {
