@@ -23,9 +23,10 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import groovy.json.JsonBuilder
 
 import de.dkfz.tbi.otp.administration.LdapService
+import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.administration.UserService
 
 @Secured('isFullyAuthenticated()')
 class LdapController {
@@ -34,14 +35,31 @@ class LdapController {
             getUserSearchSuggestions: "GET",
     ]
 
+    UserService userService
     LdapService ldapService
 
-    JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
-        render new JsonBuilder(ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)) as JSON
+    /**
+     * Return a json list of all users from the ldap system which fit the search criteria.
+     * At the top of the list are those ldap users which are also already otp users.
+     *
+     * @param cmd search criteria
+     * @return list of all users from the ldap system which fit the search criteria
+     */
+    def getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
+        List<LdapUserDetails> ldapUsers = ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)
+
+        List<LdapUserDetails> otpLdapUsers = ldapUsers.findAll { LdapUserDetails ldapUser ->
+            ldapUser.username in userService.allUsers*.username
+        }
+
+        ldapUsers.removeAll(otpLdapUsers)
+        ldapUsers.addAll(0, otpLdapUsers)
+
+        render ldapUsers as JSON
     }
 }
 
-class UserSearchSuggestionsCommand implements Serializable {
+class UserSearchSuggestionsCommand {
     String searchString
 
     void setValue(String value) {

@@ -62,7 +62,7 @@ $(function () {
             success: function (data) {
                 var suggestionMap = [];
                 var focused = "";
-                var result = data.content;
+                var result = data;
                 for (var i = 0; i < result.length; i++) {
                     suggestionMap.push({
                         // autocomplete completes with the 'value' column
