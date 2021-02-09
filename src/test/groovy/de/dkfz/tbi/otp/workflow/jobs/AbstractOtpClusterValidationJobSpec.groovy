@@ -41,7 +41,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 WorkflowStep,
         ]
     }

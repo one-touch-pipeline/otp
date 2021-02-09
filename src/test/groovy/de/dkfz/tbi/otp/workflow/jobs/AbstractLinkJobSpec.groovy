@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -38,7 +39,7 @@ class AbstractLinkJobSpec extends Specification implements DataTest, WorkflowSys
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 WorkflowStep,
         ]
     }
@@ -53,14 +54,15 @@ class AbstractLinkJobSpec extends Specification implements DataTest, WorkflowSys
         AbstractLinkJob job = Spy(AbstractLinkJob)
         job.fileService = Mock(FileService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.logService = Mock(LogService)
 
         when:
         job.execute(workflowStep)
 
         then:
         1 * job.getLinkMap(workflowStep) >> { [new LinkEntry(target: target1, link: link1), new LinkEntry(target: target2, link: link2)] }
-        1 * job.fileService.createLink(target1, link1, workflowStep.workflowRun.project.realm, CreateLinkOption.DELETE_EXISTING_FILE)
-        1 * job.fileService.createLink(target2, link2, workflowStep.workflowRun.project.realm, CreateLinkOption.DELETE_EXISTING_FILE)
+        1 * job.fileService.createLink(link1, target1, workflowStep.workflowRun.project.realm, CreateLinkOption.DELETE_EXISTING_FILE)
+        1 * job.fileService.createLink(link2, target2, workflowStep.workflowRun.project.realm, CreateLinkOption.DELETE_EXISTING_FILE)
         1 * job.doFurtherWork(workflowStep) >> null
         1 * job.saveResult(workflowStep) >> null
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)

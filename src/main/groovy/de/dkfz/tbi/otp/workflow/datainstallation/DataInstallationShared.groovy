@@ -36,6 +36,6 @@ trait DataInstallationShared {
     DataInstallationInitializationService dataInstallationInitializationService
 
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        dataInstallationInitializationService.getSeqTrack(workflowStep)
+        return dataInstallationInitializationService.getSeqTrack(workflowStep)
     }
 }

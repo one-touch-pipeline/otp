@@ -34,7 +34,7 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 WorkflowArtefact,
                 WorkflowStep,
         ]

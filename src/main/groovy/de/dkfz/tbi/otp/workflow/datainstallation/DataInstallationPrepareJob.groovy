@@ -48,13 +48,22 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
         notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert seqTrack.save(flush: true)
+
+        FileSystem fileSystem = getFileSystem(workflowStep)
+        Path runDirectory = lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first(), fileSystem).parent
+        logService.addSimpleLogEntry(workflowStep, "Creating work directory ${runDirectory}")
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
+                runDirectory,
+                workflowStep.workflowRun.project.realm,
+                workflowStep.workflowRun.project.unixGroup,
+        )
     }
 
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         FileSystem fileSystem = getFileSystem(workflowStep)
-        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first(), fileSystem)
+        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first(), fileSystem).parent
     }
 
     @Override

@@ -113,10 +113,11 @@ abstract class AbstractValidationJob extends AbstractJob {
     abstract protected List<Path> getExpectedDirectories(WorkflowStep workflowStep)
 
     /**
-     * callback to do further checks. It should collect problems and return them as List of Strings
+     * optional callback to do further checks. It should collect problems and return them as List of Strings
      */
     @SuppressWarnings("UnusedMethodParameter")
     protected List<String> doFurtherValidationAndReturnProblems(WorkflowStep workflowStep) {
+        return []
     }
 
     /**

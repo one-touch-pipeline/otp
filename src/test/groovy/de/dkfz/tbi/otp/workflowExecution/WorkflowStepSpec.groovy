@@ -30,7 +30,7 @@ class WorkflowStepSpec extends Specification implements WorkflowSystemDomainFact
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 WorkflowStep,
         ]
     }

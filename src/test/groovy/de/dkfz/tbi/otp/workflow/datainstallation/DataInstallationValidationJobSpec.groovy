@@ -38,7 +38,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqImportInstance,
                 Sample,
                 SampleType,

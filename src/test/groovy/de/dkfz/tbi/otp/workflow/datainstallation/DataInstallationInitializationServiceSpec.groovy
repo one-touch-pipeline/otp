@@ -36,7 +36,7 @@ class DataInstallationInitializationServiceSpec extends Specification
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqImportInstance,
                 SeqTrack,
                 WorkflowArtefact,

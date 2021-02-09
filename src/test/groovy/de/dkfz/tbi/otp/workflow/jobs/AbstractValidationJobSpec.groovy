@@ -34,7 +34,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 WorkflowStep,
         ]
     }

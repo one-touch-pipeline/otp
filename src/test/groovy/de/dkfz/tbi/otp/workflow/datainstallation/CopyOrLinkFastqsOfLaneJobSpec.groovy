@@ -51,7 +51,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 WorkflowArtefact,
                 WorkflowStep,
@@ -114,9 +114,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
             1 * createLink(target2, source2, _, CreateLinkOption.DELETE_EXISTING_FILE)
             0 * _
         }
-        job.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(step, _)
-        }
+        job.logService = Mock(LogService)
 
         when:
         List<String> scripts = job.createScripts(step)

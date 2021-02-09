@@ -35,7 +35,7 @@ class WorkflowSpec extends Specification implements WorkflowSystemDomainFactory,
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Workflow,
         ]
     }

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 /**
  * Links result files
  */
+@Slf4j
 abstract class AbstractLinkJob extends AbstractJob {
 
     @Autowired
@@ -39,9 +41,10 @@ abstract class AbstractLinkJob extends AbstractJob {
     @Override
     final void execute(WorkflowStep workflowStep) {
         getLinkMap(workflowStep).each { LinkEntry entry ->
+            logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
             fileService.createLink(
-                    entry.target,
                     entry.link,
+                    entry.target,
                     workflowStep.workflowRun.project.realm,
                     CreateLinkOption.DELETE_EXISTING_FILE,
             )
@@ -57,6 +60,8 @@ abstract class AbstractLinkJob extends AbstractJob {
     }
 
     abstract protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep)
+
     abstract protected void doFurtherWork(WorkflowStep workflowStep)
+
     abstract protected void saveResult(WorkflowStep workflowStep)
 }

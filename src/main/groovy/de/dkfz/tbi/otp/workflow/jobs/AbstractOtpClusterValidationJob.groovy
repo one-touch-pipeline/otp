@@ -44,12 +44,12 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
         Realm realm = workflowStep.realm
         Collection<ClusterJob> clusterJobs = workflowStep.previousRunningWorkflowStep.clusterJobs
         FileSystem fileSystem = getFileSystem(workflowStep)
-        logService.addSimpleLogEntry(workflowStep, "Start checking of ${clusterJobs.size()} cluster jobs")
+        logService.addSimpleLogEntry(workflowStep, "Start checking of ${clusterJobs.size()} cluster jobs for finished successfully (run till the end).")
 
         List<String> problems = clusterJobs.sort {
             it.clusterJobId
         }.collect { ClusterJob clusterJob ->
-            checkSingleClusterJobAndReturnErrorMessage(realm, fileSystem, workflowStep, clusterJob)
+            checkSingleClusterJobAndReturnErrorMessage(realm, fileSystem, clusterJob)
         }.findAll()
 
         if (problems.isEmpty()) {
@@ -62,12 +62,12 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
         }
     }
 
-    private String checkSingleClusterJobAndReturnErrorMessage(Realm realm, FileSystem fileSystem, WorkflowStep workflowStep, ClusterJob clusterJob) {
+    private String checkSingleClusterJobAndReturnErrorMessage(Realm realm, FileSystem fileSystem, ClusterJob clusterJob) {
         if (clusterJob.checkStatus != ClusterJob.CheckStatus.FINISHED) {
             return "Cluster job ${clusterJob.clusterJobId} is in state ${clusterJob.checkStatus} instead of FINISHED"
         }
 
-        Path logFile = fileSystem.getPath(jobStatusLoggingFileService.constructLogFileLocation(realm, workflowStep, clusterJob.clusterJobId))
+        Path logFile = fileSystem.getPath(jobStatusLoggingFileService.constructLogFileLocation(realm, clusterJob.workflowStep, clusterJob.clusterJobId))
         if (!Files.exists(logFile)) {
             return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} does not exist."
         }
@@ -75,7 +75,7 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
             return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} can not be read."
         }
 
-        String expectedLogMessage = jobStatusLoggingFileService.constructMessage(realm, workflowStep, clusterJob.clusterJobId)
+        String expectedLogMessage = jobStatusLoggingFileService.constructMessage(realm, clusterJob.workflowStep, clusterJob.clusterJobId)
         String logFileText = logFile.text
         return (logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/) ? null :
             "Did not find \"${expectedLogMessage}\" in ${logFile}."

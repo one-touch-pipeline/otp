@@ -25,20 +25,23 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class DataInstallationPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 Sample,
                 SampleType,
@@ -50,10 +53,26 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
+        Path path = Paths.get("/tmp/somePath${nextId}")
+        Path file = path.resolve("file${nextId}")
+
         DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
         job.notificationCreator = Mock(NotificationCreator)
+        job.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystem(_) >> FileSystems.default
+            0 * _
+        }
+        job.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPathAsPath(_ as DataFile, FileSystems.default) >> file
+            0 * _
+        }
+        job.fileService = Mock(FileService) {
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(path, _, _)
+            0 * _
+        }
+        job.logService = Mock(LogService)
 
         when:
         job.doFurtherPreparation(workflowStep)
@@ -67,7 +86,7 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         SeqTrack seqTrack = createSeqTrackWithTwoDataFile()
-        String workDirectory = "/adsf"
+        Path workDirectory = Paths.get('/workDirectory')
         DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
@@ -75,10 +94,10 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
             1 * getRemoteFileSystem(_) >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileViewByPidPathAsPath(_, _) >> Paths.get(workDirectory)
+            1 * getFileViewByPidPathAsPath(_, _) >> workDirectory.resolve('file')
         }
 
         expect:
-        workDirectory == job.buildWorkDirectoryPath(workflowStep).toString()
+        workDirectory == job.buildWorkDirectoryPath(workflowStep)
     }
 }

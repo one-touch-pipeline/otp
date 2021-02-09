@@ -42,7 +42,7 @@ class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstalla
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         FileSystem fs = getFileSystem(workflowStep)
 
-        seqTrack.dataFiles.collect { DataFile dataFile ->
+        return seqTrack.dataFiles.collect { DataFile dataFile ->
             Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile, fs)
             Path link = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fs)
             return new LinkEntry(target: target, link: link)

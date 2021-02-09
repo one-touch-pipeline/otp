@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
@@ -37,6 +38,7 @@ import java.nio.file.Path
  *  - link input files, if the job requires a certain file structure
  *  - create configuration files, if required
  */
+@Slf4j
 abstract class AbstractPrepareJob extends AbstractJob {
 
     @Autowired
@@ -46,6 +48,7 @@ abstract class AbstractPrepareJob extends AbstractJob {
     final void execute(WorkflowStep workflowStep) {
         Path workDirectory = buildWorkDirectoryPath(workflowStep)
         if (workDirectory) {
+            logService.addSimpleLogEntry(workflowStep, "Creating work directory ${workDirectory}")
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                     workDirectory,
                     workflowStep.workflowRun.project.realm,
@@ -55,9 +58,10 @@ abstract class AbstractPrepareJob extends AbstractJob {
             workflowStep.workflowRun.save(flush: true)
         }
         generateMapForLinking(workflowStep).each { LinkEntry entry ->
+            logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
             fileService.createLink(
-                    entry.target,
                     entry.link,
+                    entry.target,
                     workflowStep.workflowRun.project.realm,
                     CreateLinkOption.DELETE_EXISTING_FILE,
             )

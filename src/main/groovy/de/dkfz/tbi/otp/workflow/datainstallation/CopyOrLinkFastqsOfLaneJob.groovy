@@ -46,19 +46,19 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
 
         if (seqTrack.linkedExternally) {
             logService.addSimpleLogEntry(workflowStep, "Files will only be linked, no cluster jobs are created")
-            createLinks(seqTrack)
+            createLinks(workflowStep, seqTrack)
             return []
         }
         return createCopyJob(seqTrack)
     }
 
-    private void createLinks(SeqTrack seqTrack) {
+    private void createLinks(WorkflowStep workflowStep, SeqTrack seqTrack) {
         Realm realm = seqTrack.project.realm
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
         seqTrack.dataFiles.each { DataFile dataFile ->
             Path target = lsdfFilesService.getFileInitialPathAsPath(dataFile, fileSystem)
             Path link = lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem)
+            logService.addSimpleLogEntry(workflowStep, "Creating link ${link} to ${target}")
             fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
         }
     }
@@ -67,7 +67,7 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
         Realm realm = seqTrack.project.realm
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-        seqTrack.dataFiles.collect { DataFile dataFile ->
+        return seqTrack.dataFiles.collect { DataFile dataFile ->
             Path source = lsdfFilesService.getFileInitialPathAsPath(dataFile, fileSystem)
             Path destination = lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem)
 

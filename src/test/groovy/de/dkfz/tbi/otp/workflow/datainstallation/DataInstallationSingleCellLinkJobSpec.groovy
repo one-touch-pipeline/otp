@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
@@ -37,7 +38,7 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqImportInstance,
                 Sample,
                 SampleType,
@@ -93,6 +94,7 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
         job.singleCellMappingFileService = Mock(SingleCellMappingFileService)
+        job.logService = Mock(LogService)
 
         when:
         job.doFurtherWork(workflowStep)

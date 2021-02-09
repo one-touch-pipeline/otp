@@ -62,6 +62,7 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
+            logService.addSimpleLogEntry(workflowStep, "Add all datafiles to single cell mapping file")
             seqTrack.dataFiles.each { DataFile dataFile ->
                 singleCellMappingFileService.addMappingFileEntryIfMissing(dataFile)
             }

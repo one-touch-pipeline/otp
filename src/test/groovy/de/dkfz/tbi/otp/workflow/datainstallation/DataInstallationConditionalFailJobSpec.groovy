@@ -40,7 +40,7 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 DataFile,
                 Sample,
                 SampleType,

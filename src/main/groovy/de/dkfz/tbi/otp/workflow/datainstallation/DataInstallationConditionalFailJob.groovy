@@ -50,13 +50,13 @@ class DataInstallationConditionalFailJob extends AbstractConditionalFailJob impl
 
         FileSystem fs = getFileSystem(workflowStep)
 
-        final Collection<Path> MISSING_PATHS = dataFiles.collect { DataFile file ->
+        final Collection<Path> missingPaths = dataFiles.collect { DataFile file ->
             lsdfFilesService.getFileInitialPathAsPath(file, fs)
         }.findAll { Path path ->
             !FileService.isFileReadableAndNotEmpty(path)
         }
-        if (MISSING_PATHS) {
-            throw new WorkflowException("The following ${MISSING_PATHS.size()} files are missing:\n${MISSING_PATHS.join("\n")}")
+        if (missingPaths) {
+            throw new WorkflowException("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}")
         }
     }
 }

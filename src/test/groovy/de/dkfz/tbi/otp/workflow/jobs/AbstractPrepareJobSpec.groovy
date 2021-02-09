@@ -39,7 +39,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingPriority,
                 Project,
                 Realm,
@@ -55,6 +55,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         AbstractPrepareJob job = Spy(AbstractPrepareJob)
         job.fileService = Mock(FileService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.logService = Mock(LogService)
         WorkflowStep workflowStep = createWorkflowStep()
 
         when:
