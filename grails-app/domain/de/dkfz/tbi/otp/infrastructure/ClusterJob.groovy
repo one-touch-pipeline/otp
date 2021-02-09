@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
@@ -50,20 +52,26 @@ class ClusterJob implements Entity {
 
     static final String NOT_AVAILABLE = "N/A"
 
+    static final int DIGIT_COUNT = 2
+
     static final PeriodFormatter HH_MM_SS = new PeriodFormatterBuilder()
             .printZeroAlways()
-            .minimumPrintedDigits(2)
+            .minimumPrintedDigits(DIGIT_COUNT)
             .appendHours()
             .appendLiteral(":")
             .printZeroAlways()
-            .minimumPrintedDigits(2)
+            .minimumPrintedDigits(DIGIT_COUNT)
             .appendMinutes()
             .appendLiteral(":")
             .printZeroAlways()
-            .minimumPrintedDigits(2)
+            .minimumPrintedDigits(DIGIT_COUNT)
             .appendSeconds()
             .toFormatter()
 
+    /**
+     * @deprecated old workflow system
+     */
+    @Deprecated
     ProcessingStep processingStep
 
     enum Status {
@@ -253,7 +261,7 @@ class ClusterJob implements Entity {
         realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
         userName blank: false
-        clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") })
+        clusterJobName(blank: false, nullable: false)
         jobClass(blank: false, nullable: false)
         seqType(nullable: true)
         nBases(nullable: true)
@@ -262,7 +270,8 @@ class ClusterJob implements Entity {
         basesPerBytesFastq(nullable: true)
         xten(nullable: true)
         queued(nullable: false)
-        jobLog nullable: true, validator: { !it || new File(it).isAbsolute() } // can't use OtpPath.isValidAbsolutePath(it) here, because path may contain ":"
+        // can't use OtpPath.isValidAbsolutePath(it) here, because path may contain ":"
+        jobLog nullable: true, validator: { !it || Paths.get(it).absolute }
         // the following values must be nullable because they get filled after the job is finished
         // and may not be available from every cluster job scheduler
         exitStatus(nullable: true)
@@ -333,84 +342,79 @@ class ClusterJob implements Entity {
      * describes how efficient the memory was used
      * {@link #usedMemory} divided by {@link #requestedMemory}
      */
-    Double getMemoryEfficiency () {
+    Double getMemoryEfficiency() {
         if (usedMemory != null && requestedMemory != null) {
-             return usedMemory * 1.0 / requestedMemory
-        } else {
-            return null
+            return ((double) usedMemory) / requestedMemory
         }
+        return null
     }
 
     /**
      * cpu time per core
      */
-    Double getCpuTimePerCore () {
+    Double getCpuTimePerCore() {
         if (cpuTime != null && usedCores != null) {
             return cpuTime.millis / usedCores
-        } else {
-            return null
         }
+        return null
     }
 
     /**
      * average cpu cores utilized
      */
-    Double getCpuAvgUtilised () {
+    Double getCpuAvgUtilised() {
         if (cpuTime != null && elapsedWalltime != null && elapsedWalltime.millis != 0) {
-            (cpuTime.millis * 1.0) / elapsedWalltime.millis
-        } else {
-            return null
+            return ((double) cpuTime.millis) / elapsedWalltime.millis
         }
+        return null
     }
 
     /**
      * elapsed walltime for the job
      */
-    Duration getElapsedWalltime () {
+    Duration getElapsedWalltime() {
         if (ended != null && started != null) {
             return new Duration(started, ended)
-        } else {
-            return null
         }
+        return null
     }
 
     /**
      * difference of requested and elapsed walltime
      */
-    Duration getWalltimeDiff () {
+    Duration getWalltimeDiff() {
         if (requestedWalltime != null && elapsedWalltime != null) {
             return requestedWalltime - elapsedWalltime
-        } else {
-            return null
         }
+        return null
     }
 
-    String getRequestedWalltimeAsISO () {
+    String getRequestedWalltimeAsISO() {
         return formatPeriodAsISOString(requestedWalltime)
     }
 
-    String getElapsedWalltimeAsISO () {
+    String getElapsedWalltimeAsISO() {
         return formatPeriodAsISOString(elapsedWalltime)
     }
 
-    String getElapsedWalltimeAsHhMmSs () {
+    String getElapsedWalltimeAsHhMmSs() {
         return formatPeriodAsHhMmSs(elapsedWalltime)
     }
 
-    String getWalltimeDiffAsISO () {
+    String getWalltimeDiffAsISO() {
         return formatPeriodAsISOString(walltimeDiff)
     }
 
-    String getCpuTimeAsISO () {
+    String getCpuTimeAsISO() {
         return formatPeriodAsISOString(cpuTime)
     }
 
-    private String formatPeriodAsISOString (Duration value) {
-        return value ? PeriodFormat.getDefault().print(new Period(value.getMillis())) : NOT_AVAILABLE
+    private String formatPeriodAsISOString(Duration value) {
+        return value ? PeriodFormat.default.print(new Period(value.millis)) : NOT_AVAILABLE
     }
 
-    private String formatPeriodAsHhMmSs (Duration value) {
-        return value ? HH_MM_SS.print(new Period(value.getMillis())) : NOT_AVAILABLE
+    private String formatPeriodAsHhMmSs(Duration value) {
+        return value ? HH_MM_SS.print(new Period(value.millis)) : NOT_AVAILABLE
     }
 
     static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
