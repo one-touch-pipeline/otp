@@ -118,13 +118,13 @@ class WorkflowRun implements Commentable, Entity {
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {
-        WorkflowRunInputArtefact.findAllByWorkflowRun(this).collectEntries {
+        return WorkflowRunInputArtefact.findAllByWorkflowRun(this).collectEntries {
             [it.role, it.workflowArtefact]
         }
     }
 
     Map<String, WorkflowArtefact> getOutputArtefacts() {
-        WorkflowArtefact.findAllByProducedBy(this).collectEntries {
+        return WorkflowArtefact.findAllByProducedBy(this).collectEntries {
             [it.outputRole, it]
         }
     }
@@ -158,5 +158,14 @@ class WorkflowRun implements Commentable, Entity {
         } catch (ConverterException ignored) {
             return false
         }
+    }
+
+    String displayInfo() {
+        return "workflowRun ${id} ${displayName} in state ${state} for ${workflow.displayName}"
+    }
+
+    @Override
+    String toString() {
+        return "workflowRun ${id} ${displayName} in state ${state}"
     }
 }

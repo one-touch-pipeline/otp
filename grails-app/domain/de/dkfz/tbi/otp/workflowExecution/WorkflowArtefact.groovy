@@ -84,11 +84,16 @@ class WorkflowArtefact implements Withdrawable, Entity {
     // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
     Optional<Artefact> getArtefact() {
         Optional.ofNullable(atMostOneElement(
-                        executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])
-                ) as Artefact)
+                executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])
+        ) as Artefact)
     }
 
     Project getProject() {
         return individual?.project
+    }
+
+    @Override
+    String toString() {
+        return "workflowArtefact ${id} ${displayName}"
     }
 }

@@ -113,7 +113,7 @@ class WorkflowStep implements Commentable, Entity {
      * --> return Job A
      */
     WorkflowStep getPreviousRunningWorkflowStep() {
-        (restartedFrom ?: this).previous
+        return (restartedFrom ?: this).previous
     }
 
     WorkflowStep getOriginalRestartedFrom() {
@@ -139,12 +139,21 @@ class WorkflowStep implements Commentable, Entity {
     }
 
     List<WorkflowLog> getLogs() {
-        WorkflowLog.findAllByWorkflowStep(this).sort {
+        return WorkflowLog.findAllByWorkflowStep(this).sort {
             it.dateCreated
         }
     }
 
     Realm getRealm() {
         return workflowRun.realm
+    }
+
+    String displayInfo() {
+        return "workflowStep ${id} ${beanName} in ${state} for ${workflowRun.displayInfo()}"
+    }
+
+    @Override
+    String toString() {
+        return "workflowStep ${id} ${beanName} in ${state}"
     }
 }
