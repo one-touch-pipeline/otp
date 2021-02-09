@@ -21,13 +21,15 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.tracking.NotificationCreator
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.TransactionUtils
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.restartHandler.AutoRestartHandlerService
 import de.dkfz.tbi.otp.workflow.restartHandler.ErrorNotificationService
@@ -35,6 +37,8 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 
 import static grails.async.Promises.task
 
+@Slf4j
+@Component
 class JobScheduler {
 
     @Autowired
@@ -61,13 +65,16 @@ class JobScheduler {
     @Scheduled(fixedDelay = 1000L)
     void scheduleJob() {
         if (workflowSystemService.enabled) {
-            WorkflowStep step = CollectionUtils.atMostOneElement(
-                    WorkflowStep.findAllByState(WorkflowStep.State.CREATED, [sort: 'id', order: 'asc', max: 1])
-            )
-            if (step) {
-                workflowStateChangeService.changeStateToRunning(step)
-                task {
-                    executeAndCheckJob(step)
+            SessionUtils.withNewSession {
+                WorkflowStep step = CollectionUtils.atMostOneElement(
+                        WorkflowStep.findAllByState(WorkflowStep.State.CREATED, [sort: 'id', order: 'asc', max: 1])
+                )
+                if (step) {
+                    log.debug("Found job to starting asyncron: ${step.displayInfo()}")
+                    workflowStateChangeService.changeStateToRunning(step)
+                    task {
+                        executeAndCheckJob(step)
+                    }
                 }
             }
         }
@@ -75,29 +82,61 @@ class JobScheduler {
 
     @SuppressWarnings("CatchThrowable")
     protected void executeAndCheckJob(WorkflowStep workflowStep) {
-        assert workflowStep
         try {
-            Job job = applicationContext.getBean(workflowStep.beanName, Job)
-            TransactionUtils.withNewTransaction {
-                job.execute(workflowStep)
-            }
-            if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING) {
-                jobService.createNextJob(workflowStep.workflowRun)
-            } else if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.SUCCESS) {
-                notifyUsers(workflowStep)
-            } else if (workflowStep.state == WorkflowStep.State.FAILED && workflowStep.workflowRun.state != WorkflowRun.State.FAILED) {
-                throw new JobSchedulerException("Workflow step is in state `FAILED`, but the run is in state `${workflowStep.workflowRun.state}")
-            } else if (workflowStep.state == WorkflowStep.State.RUNNING) {
-                throw new JobSchedulerException("Workflow step is still in state `RUNNING` after the job finished")
-            } else if (workflowStep.state == WorkflowStep.State.FAILED) {
-                autoRestartHandlerService.handleRestarts(workflowStep)
-            }
-        } catch (Throwable t) {
+            assert workflowStep
+            executeJob(workflowStep)
+            checkResult(workflowStep)
+        } catch (Throwable exceptionInJob) {
+            handleException(workflowStep, exceptionInJob)
+        }
+    }
+
+    @Transactional
+    private void executeJob(WorkflowStep workflowStep) {
+        workflowStep.refresh()
+        log.debug("Start job: ${workflowStep.displayInfo()}")
+        Job job = applicationContext.getBean(workflowStep.beanName, Job)
+        job.execute(workflowStep)
+        log.debug("Finish job: ${workflowStep.displayInfo()}")
+    }
+
+    @Transactional
+    private void checkResult(WorkflowStep workflowStep) {
+        workflowStep.refresh()
+        if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING) {
+            jobService.createNextJob(workflowStep.workflowRun)
+        } else if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.SUCCESS) {
+            notifyUsers(workflowStep)
+        } else if (workflowStep.state == WorkflowStep.State.FAILED && workflowStep.workflowRun.state != WorkflowRun.State.FAILED) {
+            throw new JobSchedulerException("Workflow step is in state `FAILED`, but the run is in state `${workflowStep.workflowRun.state}")
+        } else if (workflowStep.state == WorkflowStep.State.RUNNING) {
+            throw new JobSchedulerException("Workflow step is still in state `RUNNING` after the job finished")
+        } else if (workflowStep.state == WorkflowStep.State.FAILED) {
+            autoRestartHandlerService.handleRestarts(workflowStep)
+        }
+    }
+
+    @Transactional
+    @SuppressWarnings("CatchThrowable")
+    private void handleException(WorkflowStep workflowStep, Throwable exceptionInJob) {
+        workflowStep.refresh()
+        try {
+            workflowStateChangeService.changeStateToFailed(workflowStep, exceptionInJob)
+            autoRestartHandlerService.handleRestarts(workflowStep)
+        } catch (Throwable exceptionInExceptionHandling) {
             try {
-                workflowStateChangeService.changeStateToFailed(workflowStep, t)
-                autoRestartHandlerService.handleRestarts(workflowStep)
-            } catch (Throwable t2) {
-                errorNotificationService.sendMaintainer(workflowStep, t2)
+                errorNotificationService.sendMaintainer(workflowStep, exceptionInJob, exceptionInExceptionHandling)
+            } catch (Throwable exceptionInSendingSimpleMail) {
+                String messageToLog = [
+                        "Fail to send simple mail to maintainer for job: ${workflowStep}",
+                        "Exception in job:",
+                        StackTraceUtils.getStackTrace(exceptionInJob),
+                        "Exception in exception handling:",
+                        StackTraceUtils.getStackTrace(exceptionInExceptionHandling),
+                        "Exception in simple mail sending:",
+                        StackTraceUtils.getStackTrace(exceptionInSendingSimpleMail),
+                ].join('\n')
+                log.error(messageToLog)
             }
         }
     }

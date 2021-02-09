@@ -26,15 +26,25 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 class WorkflowRunSchedulerSpec extends Specification implements ServiceUnitTest<WorkflowRunScheduler>, DataTest, WorkflowSystemDomainFactory {
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                Realm,
+        ]
+    }
 
     //isEnabled is the mocked method name and can therefore not written as property
     @SuppressWarnings('UnnecessaryGetter')
     void "scheduleWorkflowRun, if system runs and nextWaitingWorkflow return a workflowRun, then call createJob with it"() {
         given:
         WorkflowRunScheduler scheduler = createWorkflowRunScheduler()
-        WorkflowRun workflowRun = new WorkflowRun()
+        WorkflowRun workflowRun = new WorkflowRun([
+                workflow: new Workflow(),
+        ])
 
         when:
         scheduler.scheduleWorkflowRun()

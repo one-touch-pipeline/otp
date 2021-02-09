@@ -21,9 +21,15 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.utils.SessionUtils
+
+@Slf4j
+@Component
 class WorkflowRunScheduler {
 
     @Autowired
@@ -41,11 +47,13 @@ class WorkflowRunScheduler {
         if (!workflowSystemService.enabled) {
             return
         }
-        int runningWorkflowCount = workflowRunService.countOfRunningWorkflows()
-        WorkflowRun workflowRun = workflowRunService.nextWaitingWorkflow(runningWorkflowCount)
-
-        if (workflowRun) {
-            jobService.createNextJob(workflowRun)
+        SessionUtils.withNewSession {
+            int runningWorkflowCount = workflowRunService.countOfRunningWorkflows()
+            WorkflowRun workflowRun = workflowRunService.nextWaitingWorkflow(runningWorkflowCount)
+            if (workflowRun) {
+                log.debug("Found workflow to start: ${workflowRun.displayInfo()}")
+                jobService.createNextJob(workflowRun)
+            }
         }
     }
 }
