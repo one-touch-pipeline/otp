@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -47,23 +48,24 @@ class ErrorNotificationService {
 
     ProcessingOptionService processingOptionService
 
-    void sendMaintainer(WorkflowStep workflowStep, Throwable t) {
+    void sendMaintainer(WorkflowStep workflowStep, Throwable exceptionInJob, Throwable exceptionInExceptionHandling) {
         String subject = [
                 workflowStep.workflowRun.priority.errorMailPrefix,
                 ": Exception in RestartHandler for: ",
-                workflowStep.workflowRun.workflow,
+                workflowStep.workflowRun.workflow.displayName,
                 ' in ',
                 workflowStep.beanName,
         ].join('')
 
-        StringWriter sw = new StringWriter()
-        t.printStackTrace(new PrintWriter(sw))
         String body = [
-                "Run id: ${workflowStep.workflowRun.id}",
-                "Step id: ${workflowStep.id}",
+                "Workflow: ${workflowStep.workflowRun.workflow}",
+                "Run: ${workflowStep.workflowRun}",
+                "Step: ${workflowStep}",
                 "Time: ${LocalDateTime.now()}",
-                '\nStacktrace:',
-                sw,
+                '\nStacktrace in job:',
+                StackTraceUtils.getStackTrace(exceptionInJob),
+                '\nStacktrace in exception handling:',
+                StackTraceUtils.getStackTrace(exceptionInExceptionHandling),
         ].join('\n')
 
         mailHelperService.sendEmail(subject, body, recipients)
@@ -74,17 +76,15 @@ class ErrorNotificationService {
         assert action
         assert checkText
 
-        if (recipients) {
-            String subject = createSubject(workflowStep, action)
-            String body = [
-                    getRestartInformation(action, checkText, matches),
-                    createWorkflowInformation(workflowStep),
-                    createArtefactsInformation(workflowStep),
-                    createWorkflowStepInformation(workflowStep),
-                    createLogInformation(workflowStep),
-            ].join('\n')
-            mailHelperService.sendEmail(subject, body, recipients)
-        }
+        String subject = createSubject(workflowStep, action)
+        String body = [
+                getRestartInformation(action, checkText, matches),
+                createWorkflowInformation(workflowStep),
+                createArtefactsInformation(workflowStep),
+                createWorkflowStepInformation(workflowStep),
+                createLogInformation(workflowStep),
+        ].join('\n')
+        mailHelperService.sendEmail(subject, body, recipients)
     }
 
     private List<String> getRecipients() {
@@ -142,6 +142,7 @@ class ErrorNotificationService {
 
         message << header("Workflow run")
         message << "ID: ${workflowStep.workflowRun.id}, started at: ${dateString(workflowStep.workflowRun.dateCreated)}"
+        message << "DisplayName: ${workflowStep.workflowRun.displayName}"
         message << "Restart count: ${workflowStep.workflowRun.restartCount}"
         if (workflowStep.workflowRun.restartCount > 0) {
             message << "Restarted from ID: ${workflowStep.workflowRun.restartedFrom?.id}, " +
@@ -246,7 +247,7 @@ class ErrorNotificationService {
     }
 
     private String header(String s) {
-        "\n${s}\n${"=" * s.length()}"
+        return "\n${s}\n${"=" * s.length()}"
     }
 
     private String dateString(DateTime date) {
@@ -270,7 +271,7 @@ class ErrorNotificationService {
     @Deprecated
     Set<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {
         assert workflowStep
-        (workflowStep.workflowRun.inputArtefacts.values() + workflowStep.workflowRun.outputArtefacts.values())
+        return (workflowStep.workflowRun.inputArtefacts.values() + workflowStep.workflowRun.outputArtefacts.values())
                 *.artefact.findAll { it.present }*.get()
                 .collectMany { (it as ProcessParameterObject).containedSeqTracks } as Set
     }

@@ -41,7 +41,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
     }
 
     private List<JobErrorDefinitionWithLogWithIdentifier> createDefinition(Map map1 = [:], Map map2 = [:]) {
-        [
+        return [
                 new JobErrorDefinitionWithLogWithIdentifier([
                         errorDefinition: new WorkflowJobErrorDefinition([
                                 action              : WorkflowJobErrorDefinition.Action.RESTART_JOB,
@@ -83,6 +83,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> []
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found no matching ErrorDefinition over all logs') }
         1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, [])
     }
@@ -101,6 +102,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> definitions
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found 2 matching ErrorDefinition over all logs') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found following actions:') }
         1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, definitions)
@@ -120,6 +122,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> definitions
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found 2 matching ErrorDefinition over all logs') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single action:') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found following beans for job restart:') }
@@ -140,6 +143,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> definitions
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found 2 matching ErrorDefinition over all logs') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single action:') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single bean for job restart:') }
@@ -163,6 +167,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> definitions
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found 2 matching ErrorDefinition over all logs') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single action:') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single bean for job restart:') }
@@ -189,6 +194,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> definitions
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found 2 matching ErrorDefinition over all logs') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single action:') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single bean for job restart:') }
@@ -207,6 +213,7 @@ class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnit
 
         then:
         1 * service.workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep) >> definitions
+        1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('AutoRestartHandler starting') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found 2 matching ErrorDefinition over all logs') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single action:') }
         1 * service.logService.addSimpleLogEntry(workflowStep) { String message -> message.contains('found single bean for job restart:') }

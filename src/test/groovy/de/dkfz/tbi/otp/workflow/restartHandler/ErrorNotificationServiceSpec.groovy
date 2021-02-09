@@ -25,7 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.OtpException
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
@@ -41,7 +41,7 @@ class ErrorNotificationServiceSpec extends Specification
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 SeqTrack,
                 Workflow,
@@ -59,10 +59,11 @@ class ErrorNotificationServiceSpec extends Specification
 
         WorkflowStep step = createWorkflowStep()
         DomainFactory.createProcessingOptionForErrorRecipient("error@example.com")
-        OtpException e = new OtpException('error')
+        OtpRuntimeException e1 = new OtpRuntimeException('error job')
+        OtpRuntimeException e2 = new OtpRuntimeException('error restart handler')
 
         when:
-        service.sendMaintainer(step, e)
+        service.sendMaintainer(step, e1, e2)
 
         then:
         1 * service.mailHelperService.sendEmail(_ as String, _ as String, ["error@example.com"]) >> { String subject, String content, recipient ->
@@ -70,9 +71,12 @@ class ErrorNotificationServiceSpec extends Specification
             assert subject.contains('RestartHandler')
             assert subject.contains(step.workflowRun.workflow.name)
             assert subject.contains(step.beanName)
-            assert content.contains(step.workflowRun.id.toString())
-            assert content.contains(step.id.toString())
-            assert content.contains(e.message)
+
+            assert content.contains(step.workflowRun.workflow.name)
+            assert content.contains(step.workflowRun.toString())
+            assert content.contains(step.toString())
+            assert content.contains(e1.message)
+            assert content.contains(e2.message)
         }
     }
 

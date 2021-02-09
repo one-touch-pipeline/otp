@@ -241,6 +241,6 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
         then:
         1 * jobScheduler.workflowStateChangeService.changeStateToFailed(workflowStep, _ as FileNotFoundException) >> { }
         1 * jobScheduler.autoRestartHandlerService.handleRestarts(workflowStep) >> { throw new WorkflowException() }
-        1 * jobScheduler.errorNotificationService.sendMaintainer(workflowStep, _) >> { }
+        1 * jobScheduler.errorNotificationService.sendMaintainer(workflowStep, _, _) >> { }
     }
 }

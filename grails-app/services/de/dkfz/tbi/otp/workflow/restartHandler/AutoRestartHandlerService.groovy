@@ -38,6 +38,7 @@ class AutoRestartHandlerService {
     WorkflowJobErrorDefinitionService workflowJobErrorDefinitionService
 
     void handleRestarts(WorkflowStep workflowStep) {
+        logService.addSimpleLogEntry(workflowStep, "AutoRestartHandler starting")
         List<JobErrorDefinitionWithLogWithIdentifier> matches = workflowJobErrorDefinitionService.findMatchingJobErrorDefinition(workflowStep)
         if (!matches) {
             logService.addSimpleLogEntry(workflowStep, "found no matching ErrorDefinition over all logs")

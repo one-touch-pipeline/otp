@@ -41,8 +41,11 @@ class ClusterJobLogService extends AbstractRestartHandlerLogService {
 
     FileService fileService
 
+    static private final long FACTOR_1024 = 1024
+
     static final long MAX_FILE_SIZE_IN_MIB = 10
-    static final long MAX_FILE_SIZE = MAX_FILE_SIZE_IN_MIB * 1024L * 1024L
+
+    static final long MAX_FILE_SIZE = MAX_FILE_SIZE_IN_MIB * FACTOR_1024 * FACTOR_1024
 
     @Override
     WorkflowJobErrorDefinition.SourceType getSourceType() {
