@@ -170,7 +170,9 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             loadWorkflow()
 
             SpringSecurityUtils.doWithAuth(ADMIN) {
-                new File("scripts/initializations").listFiles().each { File script ->
+                new File("scripts/initializations").listFiles().findAll {
+                    it.isFile()
+                }.each { File script ->
                     runScript(script)
                 }
             }
