@@ -23,39 +23,30 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Component
 @Slf4j
 abstract class AbstractClusterJobMonitor {
+
+    final String name
+
     @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
 
-    @Autowired
-    SchedulerService schedulerService
-
-    @Scheduled(fixedDelay = 30000L)
-    void check() {
-        if (!schedulerService.isActive()) {
-            return //job system is inactive
-        }
-
-        SessionUtils.withNewSession {
-            doCheck()
-        }
+    protected AbstractClusterJobMonitor(String name) {
+        this.name = name
     }
 
     @SuppressWarnings('CatchThrowable')
     protected void doCheck() {
         List<ClusterJob> clusterJobsToCheck = findAllClusterJobsToCheck()
-        log.debug("Check for finished cluster jobs: ${clusterJobsToCheck.size()}")
+        log.debug("${name}: Check for finished cluster jobs: ${clusterJobsToCheck.size()}")
 
         clusterJobsToCheck.groupBy { ClusterJob clusterJob ->
             clusterJob.realm
@@ -64,9 +55,9 @@ abstract class AbstractClusterJobMonitor {
             List<String> finishedClusterJobIds = []
             try {
                 jobStates = clusterJobSchedulerService.retrieveKnownJobsWithState(realm)
-                log.debug("Retrieving job states for ${realm}")
+                log.debug("${name}: Retrieving job states for ${realm}")
             } catch (Throwable e) {
-                log.error("Retrieving job states for ${realm} failed, skip", e)
+                log.error("${name}: Retrieving job states for ${realm} failed, skip", e)
                 return
             }
 
@@ -74,13 +65,14 @@ abstract class AbstractClusterJobMonitor {
                 ClusterJobStatus status = jobStates.get(new ClusterJobIdentifier(clusterJob), ClusterJobStatus.COMPLETED)
                 boolean completed = (status == ClusterJobStatus.COMPLETED)
                 boolean unknown = (status == ClusterJobStatus.UNKNOWN)
-                log.debug("Checking cluster job ID ${clusterJob.clusterJobId}: ${completed ? 'finished' : unknown ? 'state UNKNOWN' : 'still running'}")
+                log.debug("${name}: Checking cluster job ID ${clusterJob.clusterJobId}: " +
+                        "${completed ? 'finished' : unknown ? 'state UNKNOWN' : 'still running'}")
                 if (completed) {
                     handleFinishedClusterJob(clusterJob)
                     finishedClusterJobIds.add(clusterJob.clusterJobId)
                 }
             }
-            log.debug("Finshed ${finishedClusterJobIds.size()} cluster jobs on ${realm}: ${finishedClusterJobIds.sort().join(', ')}")
+            log.debug("${name}: Finshed ${finishedClusterJobIds.size()} cluster jobs on ${realm}: ${finishedClusterJobIds.sort().join(', ')}")
         }
     }
 
@@ -96,7 +88,7 @@ abstract class AbstractClusterJobMonitor {
             try {
                 clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
             } catch (Throwable e) {
-                log.warn("Failed to fill in runtime statistics for ${clusterJob}", e)
+                log.warn("${name}: Failed to fill in runtime statistics for ${clusterJob}", e)
             }
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
             clusterJob.save(flush: true)

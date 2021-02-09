@@ -46,10 +46,12 @@ import static org.springframework.util.Assert.notNull
  * In case the execute method throws an exception this is intercepted and the error handling is invoked. After
  * a Job finished this class takes care of invoking the next to be executed Job and triggers it.
  *
+ * @deprecated old job system
  * @see Job
  * @see ProcessingStep
  * @see ProcessingStepUpdate
  */
+@Deprecated
 @Component("scheduler")
 @Slf4j
 class Scheduler {

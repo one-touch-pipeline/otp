@@ -21,26 +21,53 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.scheduler.AbstractClusterJobMonitor
+import de.dkfz.tbi.otp.utils.SessionUtils
 
+/**
+ * The monitor checks periodically the cluster jobs for ending ones and in case all cluster jbs
+ * of an otp job finish it creates the next job.
+ */
 @Component
 @Slf4j
 class ClusterJobMonitor extends AbstractClusterJobMonitor {
+
+    @Autowired
+    WorkflowSystemService workflowSystemService
+
     @Autowired
     JobService jobService
 
+    ClusterJobMonitor() {
+        super('New system')
+    }
+
+    @Scheduled(fixedDelay = 30000L)
+    void check() {
+        if (!workflowSystemService.enabled) {
+            return //job system is inactive
+        }
+
+        SessionUtils.withNewSession {
+            doCheck()
+        }
+    }
     @Override
     protected List<ClusterJob> findAllClusterJobsToCheck() {
         return ClusterJob.findAllByCheckStatusAndOldSystem(ClusterJob.CheckStatus.CHECKING, false)
     }
 
     @Override
+    @Transactional
     protected void handleFinishedClusterJobs(ClusterJob clusterJob) {
+        clusterJob.refresh()
         if (clusterJob.workflowStep.clusterJobs.every { it.checkStatus == ClusterJob.CheckStatus.FINISHED }) {
             jobService.createNextJob(clusterJob.workflowStep.workflowRun)
         }

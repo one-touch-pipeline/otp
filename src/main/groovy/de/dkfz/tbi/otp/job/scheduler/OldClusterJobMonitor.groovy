@@ -23,11 +23,13 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * This service is able to track the execution of jobs on the cluster.
@@ -36,13 +38,34 @@ import de.dkfz.tbi.otp.job.processing.*
  *
  * The service performs a scheduled checking for all registered cluster jobs and
  * notifies the MonitoringJobs the cluster job belongs to.
+ *
+ * @Deprecated Old job system
  */
+@Deprecated
 @Component
 @Slf4j
 class OldClusterJobMonitor extends AbstractClusterJobMonitor {
 
     @Autowired
     Scheduler scheduler
+
+    @Autowired
+    SchedulerService schedulerService
+
+    OldClusterJobMonitor() {
+        super('Old system')
+    }
+
+    @Scheduled(fixedDelay = 30000L)
+    void check() {
+        if (!schedulerService.isActive()) {
+            return //job system is inactive
+        }
+
+        SessionUtils.withNewSession {
+            doCheck()
+        }
+    }
 
     @Override
     protected List<ClusterJob> findAllClusterJobsToCheck() {
