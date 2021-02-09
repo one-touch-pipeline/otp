@@ -36,9 +36,11 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.SshAuthMethod
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.infrastructure.LoginFailedRemoteFileSystemException
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
+import java.nio.file.FileSystemException
 import java.nio.file.FileSystems
 
 import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
@@ -96,11 +98,9 @@ class FileSystemService {
 
             try {
                 fileSystem = FileSystems.newFileSystem(URI.create("sftp://${realm.host}:${realm.port}"), env, grailsApplication.classLoader)
-            } catch (Throwable throwable) {
-                if (throwable.cause) {
-                    throw throwable.cause
-                }
-                throw throwable
+            } catch (FileSystemException exception) {
+                throw new LoginFailedRemoteFileSystemException("Fail to login ${configService.sshUser}@${realm.host}:${realm.port} using authentication " +
+                        "method ${configService.sshAuthenticationMethod}", exception)
             }
             createdFileSystems[realm] = fileSystem
         }
