@@ -95,7 +95,10 @@ appender("WAIT_TO_FILE_SYSTEM", RollingFileAppender) {
     }
 }
 
-String appenderToUse = Environment.current == Environment.PRODUCTION ? 'OTP' : 'STDOUT'
+List<String> appenderToUse = ['OTP']
+if (Environment.current != Environment.PRODUCTION ){ //if not production, log also to stdout
+    appenderToUse <<'STDOUT'
+}
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 String jobLogDir = otpProperties.getProperty(OtpProperty.PATH_JOB_LOGS.key) ?: OtpProperty.PATH_JOB_LOGS.defaultValue
@@ -163,12 +166,12 @@ configurator.doConfigure(new ByteArrayInputStream(jobLogConfig.getBytes(Standard
 
 
 logger("de.dkfz.tbi.otp.infrastructure.FileService.WAITING", DEBUG, ['WAIT_TO_FILE_SYSTEM'], false)
-logger("de.dkfz.tbi.otp", DEBUG, [appenderToUse], false)
-logger("seedme", DEBUG, [appenderToUse], false)
-logger("liquibase", INFO, [appenderToUse], false)
-logger("grails.plugin.databasemigration", INFO, [appenderToUse], false)
-logger("org.hibernate.SQL", ERROR, [appenderToUse], false)
+logger("de.dkfz.tbi.otp", DEBUG, appenderToUse, false)
+logger("seedme", DEBUG, appenderToUse, false)
+logger("liquibase", INFO, appenderToUse, false)
+logger("grails.plugin.databasemigration", INFO, appenderToUse, false)
+logger("org.hibernate.SQL", ERROR, appenderToUse, false)
 
-logger("de.dkfz.roddy.execution.jobs.cluster", DEBUG, [appenderToUse], false)
+logger("de.dkfz.roddy.execution.jobs.cluster", DEBUG, appenderToUse, false)
 
-root(ERROR, [appenderToUse])
+root(ERROR, appenderToUse)
