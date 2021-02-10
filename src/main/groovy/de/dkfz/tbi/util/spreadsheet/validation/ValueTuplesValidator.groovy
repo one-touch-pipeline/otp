@@ -32,7 +32,7 @@ import de.dkfz.tbi.util.spreadsheet.*
 abstract class ValueTuplesValidator<C extends ValidationContext> extends ColumnSetValidator<C> {
 
     @Override
-    void validate(C context) {
+    final void validate(C context) {
         List<Column> columns = findColumns(context)
         if (columns != null) {
             Map<Map<String, String>, Set<Cell>> cellsByValues = [:]

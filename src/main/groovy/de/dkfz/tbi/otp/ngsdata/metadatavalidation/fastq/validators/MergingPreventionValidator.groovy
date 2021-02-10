@@ -167,7 +167,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
         }
     }
 
-    private AntibodyTarget findAntibodyTarget(ValueTuple valueTuple, SeqType seqType) {
+    protected AntibodyTarget findAntibodyTarget(ValueTuple valueTuple, SeqType seqType) {
         String antibodyTargetName = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
         if (seqType.hasAntibodyTarget && antibodyTargetName) {
             return antibodyTargetService.findByNameOrImportAlias(antibodyTargetName)
@@ -175,7 +175,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
         return null
     }
 
-    private SeqPlatform findSeqPlatform(ValueTuple valueTuple) {
+    protected SeqPlatform findSeqPlatform(ValueTuple valueTuple) {
         return seqPlatformService.findSeqPlatform(
                 valueTuple.getValue(INSTRUMENT_PLATFORM.name()),
                 valueTuple.getValue(INSTRUMENT_MODEL.name()),

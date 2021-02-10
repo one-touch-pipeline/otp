@@ -35,11 +35,10 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.parser.*
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.TestSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
-
-import java.util.regex.Matcher
 
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.NO_ALIGNMENT
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.OTP_ALIGNMENT
@@ -49,7 +48,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
                 DataFile,
@@ -169,29 +168,6 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
                         "${project.name}#${scSample.individual.pid}#${scSample.sampleType.name}\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\tunknown\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n"
         )
 
-        SampleIdentifierParser sampleIdentifierParser = new SampleIdentifierParser() {
-
-            @Override
-            ParsedSampleIdentifier tryParse(String sampleIdentifier) {
-                Matcher match = sampleIdentifier =~ /(.*)#(.*)#(.*)/
-                if (match.matches()) {
-                    return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
-                }
-                return null
-            }
-
-            @SuppressWarnings("UnusedMethodParameter")
-            @Override
-            boolean tryParsePid(String pid) {
-                return true
-            }
-
-            @Override
-            String tryParseSingleCellWellLabel(String sampleIdentifier) {
-                return null
-            }
-        }
-
         Validator<MetadataValidationContext> validator = new MergingPreventionValidator([
                 antibodyTargetService       : new AntibodyTargetService(),
                 libraryPreparationKitService: new LibraryPreparationKitService(),
@@ -200,7 +176,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
                 ]),
                 sampleIdentifierService     : Spy(SampleIdentifierService) {
                     _ * getSampleIdentifierParser(_) >> { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
-                        sampleIdentifierParser
+                        new TestSampleIdentifierParser()
                     }
                 },
                 seqPlatformService          : new SeqPlatformService([

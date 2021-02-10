@@ -30,12 +30,11 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.parser.*
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.TestSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
-
-import java.util.regex.Matcher
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.NO_ALIGNMENT
@@ -70,15 +69,14 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
             MetaDataColumn.PROJECT,
     ]*.name().asImmutable()
 
-    static final String PARSE_PREFIX = 'PARSE'
     static final String PARSE_PROJECT = 'PROJECT'
     static final String PARSE_INDIVIDUAL = 'INDIVIDUAL'
     static final String PARSE_SAMPLE_TYPE = 'sampletype'
 
     static final String SAMPLE_NAME = 'sampleName'
-    static final String PARSE_SAMPLE_NAME = "${PARSE_PREFIX}_${PARSE_PROJECT}_${PARSE_INDIVIDUAL}_${PARSE_SAMPLE_TYPE}"
-    static final String PARSE_SAMPLE_NAME_NEW_PROJECT = "${PARSE_PREFIX}_new_${PARSE_INDIVIDUAL}_${PARSE_SAMPLE_TYPE}"
-    static final String PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE = "${PARSE_PREFIX}_${PARSE_PROJECT}_${PARSE_INDIVIDUAL}_new"
+    static final String PARSE_SAMPLE_NAME = "${PARSE_PROJECT}#${PARSE_INDIVIDUAL}#${PARSE_SAMPLE_TYPE}"
+    static final String PARSE_SAMPLE_NAME_NEW_PROJECT = "new#${PARSE_INDIVIDUAL}#${PARSE_SAMPLE_TYPE}"
+    static final String PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE = "${PARSE_PROJECT}#${PARSE_INDIVIDUAL}#new"
     static final String LIB_PREP_KIT_NAME = 'libPrepKitName'
 
     @Unroll
@@ -126,32 +124,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
                 libraryPreparationKitService: new LibraryPreparationKitService(),
                 sampleIdentifierService: [
                         getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
-                            new SampleIdentifierParser() {
-                                //codenarc would expect it at column 13 :-(
-                                @SuppressWarnings("Indentation")
-                                @Override
-                                ParsedSampleIdentifier tryParse(String sampleIdentifier) {
-                                    Matcher match = sampleIdentifier =~ /${PARSE_PREFIX}_(.*)_(.*)_(.*)/
-                                    if (match.matches()) {
-                                        return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
-                                    }
-                                    return null
-                                }
-
-                                //codenarc would expect it at column 13 :-(
-                                @SuppressWarnings(["UnusedMethodParameter", "Indentation"])
-                                @Override
-                                boolean tryParsePid(String pid) {
-                                    return true
-                                }
-
-                                //codenarc would expect it at column 13 :-(
-                                @SuppressWarnings("Indentation")
-                                @Override
-                                String tryParseSingleCellWellLabel(String sampleIdentifier) {
-                                    return null
-                                }
-                            }
+                            new TestSampleIdentifierParser()
                         }
                 ] as SampleIdentifierService,
         ).validate(context)
