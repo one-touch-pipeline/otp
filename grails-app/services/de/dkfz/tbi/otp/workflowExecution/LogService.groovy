@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.SpringSecurityService
 
 import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
@@ -29,6 +30,8 @@ import de.dkfz.tbi.otp.utils.StackTraceUtils
 
 @Transactional
 class LogService {
+
+    SpringSecurityService springSecurityService
 
     /**
      * Add the massage as {@link WorkflowMessageLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
@@ -38,6 +41,7 @@ class LogService {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : message,
+                    createdBy : springSecurityService.currentUser?.username ?: "SYSTEM",
             ]).save(flush: true)
         }
     }
@@ -51,6 +55,7 @@ class LogService {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : "${message}\n\n${stacktrace}",
+                    createdBy : springSecurityService.currentUser?.username ?: "SYSTEM",
             ]).save(flush: true)
         }
     }

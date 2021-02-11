@@ -21,12 +21,15 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class LogServiceSpec extends Specification implements ServiceUnitTest<LogService>, DataTest, WorkflowSystemDomainFactory {
@@ -36,6 +39,10 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         return [
                 WorkflowMessageLog,
         ]
+    }
+
+    void setup() {
+        service.springSecurityService = Mock(SpringSecurityService)
     }
 
     void "addSimpleLogEntry, when adding two messages, then the messages are connected to the processing step and return in the creation order"() {
@@ -54,7 +61,38 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         (workflowStep.logs[1] as WorkflowMessageLog).message == message2
     }
 
-    void "addSimpleLogEntry, when adding a message with stacktrace, the stacktrace is converted and added together with the message"() {
+    void "addSimpleLogEntry, when the user is not set then log it with the username = SYSTEM"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        String message = "message ${nextId}"
+
+        when:
+        service.addSimpleLogEntry(workflowStep, message)
+
+        then:
+        workflowStep.logs.size() == 1
+        workflowStep.logs[0].createdBy == "SYSTEM"
+    }
+
+    void "addSimpleLogEntry, when the user is set then log it with the username"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        String message = "message ${nextId}"
+        User testUser = DomainFactory.createUser()
+
+        service.springSecurityService = Mock(SpringSecurityService) {
+            getCurrentUser() >> testUser
+        }
+
+        when:
+        service.addSimpleLogEntry(workflowStep, message)
+
+        then:
+        workflowStep.logs.size() == 1
+        workflowStep.logs[0].createdBy == testUser.username
+    }
+
+    void "addSimpleLogEntryWithException, when adding a message with stacktrace, the stacktrace is converted and added together with the message"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         String message = "message ${nextId}"
@@ -66,8 +104,43 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
 
         then:
         workflowStep.logs.size() == 1
-        WorkflowMessageLog log = workflowStep.logs[0]
+        WorkflowMessageLog log = workflowStep.logs[0] as WorkflowMessageLog
         log.message.startsWith(message)
         log.message.contains(exceptionMessage)
+    }
+
+    void "addSimpleLogEntryWithException, when the user is not set then log it with the username = SYSTEM"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        String message = "message ${nextId}"
+        String exceptionMessage = "exception ${nextId}"
+        OtpRuntimeException otpRuntimeException = new OtpRuntimeException(exceptionMessage)
+
+        when:
+        service.addSimpleLogEntryWithException(workflowStep, message, otpRuntimeException)
+
+        then:
+        workflowStep.logs.size() == 1
+        workflowStep.logs[0].createdBy == "SYSTEM"
+    }
+
+    void "addSimpleLogEntryWithException, when the user is set then log it with the username"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        String message = "message ${nextId}"
+        String exceptionMessage = "exception ${nextId}"
+        OtpRuntimeException otpRuntimeException = new OtpRuntimeException(exceptionMessage)
+        User testUser = DomainFactory.createUser()
+
+        service.springSecurityService = Mock(SpringSecurityService) {
+            getCurrentUser() >> testUser
+        }
+
+        when:
+        service.addSimpleLogEntryWithException(workflowStep, message, otpRuntimeException)
+
+        then:
+        workflowStep.logs.size() == 1
+        workflowStep.logs[0].createdBy == testUser.username
     }
 }
