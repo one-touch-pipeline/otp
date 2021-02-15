@@ -38,10 +38,10 @@ class ClusterJobServiceUnitTests {
     ClusterJobService clusterJobService = new ClusterJobService()
 
     @Test
-    void test_getDaysAndHoursBetween_WhenFromEqualsTo_ShouldReturnListOfTwentyFiveDates() {
+    void test_DateTimeIntervalWithHourBuckets_hourBuckets_WhenInputIs24_hours_ThenShouldReturnListOfTwentyFiveDates() {
         List dates = (0..24).collect { SDATE_LOCALDATE.toDateTimeAtStartOfDay().plusHours(it) }
 
-        assert dates == clusterJobService.getDaysAndHoursBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
+        assert dates == new ClusterJobService.DateTimeIntervalWithHourBuckets(SDATE_LOCALDATE, SDATE_LOCALDATE).hourBuckets
     }
 
     @Test

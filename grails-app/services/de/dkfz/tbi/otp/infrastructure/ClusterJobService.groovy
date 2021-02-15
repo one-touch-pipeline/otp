@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import javax.sql.DataSource
@@ -41,30 +42,36 @@ import static java.util.concurrent.TimeUnit.HOURS
 class ClusterJobService {
 
     DataSource dataSource
-
     static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
-    static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
-    // we assume that jobs with an elapsed walltime under 10ms "obviously failed"
-    static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.millis(9)
 
-    private static final QUERY_BY_TIMESPAN = """
+    static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
+    static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.millis(9)
+    // we assume that jobs with an elapsed walltime under 10ms "obviously failed"
+
+    static private final int FACTOR_2 = 2
+
+    static private final long FACTOR_100 = 100
+
+    static private final long FACTOR_1024 = 1024
+
+    static private final String QUERY_BY_TIMESPAN = """
  job.queued >= ?
  AND job.ended < ?
  AND job.ended > job.started
 """
 
-    private static final QUERY_BY_TIMESPAN_NOTFAILED = """
+    static private final String QUERY_BY_TIMESPAN_NOTFAILED = """
  ${QUERY_BY_TIMESPAN}
  AND job.exit_status != 'FAILED'
 """
 
-    private static final QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE = """
+    static private final String QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE = """
  ${QUERY_BY_TIMESPAN}
  AND job.job_class = ?
  AND job.seq_type_id = ?
 """
 
-    private static final QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED = """
+    static private final String QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED = """
  ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE}
  AND job.exit_status != 'FAILED'
 """
@@ -75,7 +82,7 @@ class ClusterJobService {
     @SuppressWarnings("ParameterCount")
     ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
                                 ProcessingStep processingStep, SeqType seqType = null,
-                                String clusterJobName = processingStep.getClusterJobName(),
+                                String clusterJobName = processingStep.clusterJobName,
                                 String jobClass = processingStep.nonQualifiedJobClass) {
         ClusterJob job = new ClusterJob(
                 processingStep: processingStep,
@@ -101,6 +108,7 @@ class ClusterJobService {
                                 String jobClass = workflowStep.class.simpleName) {
         ClusterJob job = new ClusterJob([
                 workflowStep  : workflowStep,
+                oldSystem     : false,
                 realm         : realm,
                 clusterJobId  : clusterJobId,
                 userName      : userName,
@@ -115,13 +123,17 @@ class ClusterJobService {
      * Stores values for statistics after the job has been sent
      */
     void amendClusterJob(ClusterJob job, GenericJobInfo jobInfo) {
-        job.requestedCores = jobInfo.askedResources?.cores
-        job.requestedWalltime = convertFromJava8DurationToJodaDuration(jobInfo?.askedResources?.walltime)
-        job.requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
+        job.with {
+            requestedCores = jobInfo.askedResources?.cores
+            requestedWalltime = convertFromJava8DurationToJodaDuration(jobInfo?.askedResources?.walltime)
+            requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
 
-        job.jobLog = jobInfo.logFile
-        job.accountName = jobInfo.account
-        job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.findByClusterJobId(it) } : []
+            jobLog = jobInfo.logFile
+            accountName = jobInfo.account
+            dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect {
+                CollectionUtils.exactlyOneElement(ClusterJob.findAllByClusterJobId(it))
+            } : []
+        }
 
         assert job.save(flush: true)
     }
@@ -130,32 +142,31 @@ class ClusterJobService {
      * Stores values for statistics after the job has finished
      */
     void completeClusterJob(ClusterJob job, ClusterJob.Status status, GenericJobInfo jobInfo) {
-        job.exitStatus = status
-        job.exitCode = jobInfo.exitCode
+        job.with {
+            exitStatus = status
+            exitCode = jobInfo.exitCode
+            queued = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.submitTime) ?: job.queued
+            eligible = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.eligibleTime)
+            started = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.startTime)
+            ended = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.endTime)
+            systemSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeSystemSuspState)
+            userSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeUserSuspState)
 
-        if (job.queued && jobInfo.submitTime) {
-            job.queued = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.submitTime)
+            cpuTime = convertFromJava8DurationToJodaDuration(jobInfo.cpuTime)
+            usedCores = jobInfo.usedResources?.cores
+            usedMemory = jobInfo.usedResources?.mem?.toLong(BufferUnit.k)
+            usedSwap = jobInfo.usedResources?.swap?.toLong(BufferUnit.k) as Integer
+
+            node = jobInfo.executionHosts?.unique()?.sort()?.join(",")
+            startCount = jobInfo.startCount
+
+            xten = isXten(job)
+            nBases = getBasesSum(job)
+            nReads = getReadsSum(job)
+            fileSize = getFileSizesSum(job)
+
+            save(flush: true)
         }
-        job.eligible = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.eligibleTime)
-        job.started = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.startTime)
-        job.ended = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.endTime)
-        job.systemSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeSystemSuspState)
-        job.userSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeUserSuspState)
-
-        job.cpuTime = convertFromJava8DurationToJodaDuration(jobInfo.cpuTime)
-        job.usedCores = jobInfo.usedResources?.cores
-        job.usedMemory = jobInfo.usedResources?.mem?.toLong(BufferUnit.k)
-        job.usedSwap = jobInfo.usedResources?.swap?.toLong(BufferUnit.k)
-
-        job.node = jobInfo.executionHosts?.unique()?.sort()?.join(",")
-        job.startCount = jobInfo.startCount
-
-        job.xten = isXten(job)
-        job.nBases = getBasesSum(job)
-        job.nReads = getReadsSum(job)
-        job.fileSize = getFileSizesSum(job)
-
-        assert job.save(flush: true)
 
         handleObviouslyFailedClusterJob(job)
     }
@@ -182,9 +193,15 @@ class ClusterJobService {
     /**
      * returns true if a job belongs to data that is sequenced by X-Ten machines
      */
+    //There are cases that xten and non xten are together, so the null as third value is needed
+    @SuppressWarnings('BooleanMethodReturnsNull')
     static Boolean isXten(ClusterJob job) {
+        if (!job.oldSystem) {
+            //new workflow system do not support access to seqtracks, which are needed to get that information
+            return null
+        }
         ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
-        List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.getContainedSeqTracks().toList()*.seqPlatform.seqPlatformModelLabel
+        List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.containedSeqTracks.toList()*.seqPlatform*.seqPlatformModelLabel
         if (seqPlatformModelLabels*.id.unique().size() == 1 && seqPlatformModelLabels.first() != null) {
             return seqPlatformModelLabels.first().name == "HiSeq X Ten"
         }
@@ -195,8 +212,12 @@ class ClusterJobService {
      * returns the sum of bases of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
      */
     static Long getBasesSum(ClusterJob job) {
+        if (!job.oldSystem) {
+            //new workflow system do not support access to seqtracks, which are needed to get that information
+            return null
+        }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
-            workflowObject.getContainedSeqTracks()?.sum { it.nBasePairs ?: 0 }
+            workflowObject.containedSeqTracks?.sum { it.nBasePairs ?: 0 }
         }
     }
 
@@ -204,8 +225,12 @@ class ClusterJobService {
      * returns the sum of file sizes of all {@link DataFile} that belong to this job
      */
     static Long getFileSizesSum(ClusterJob job) {
+        if (!job.oldSystem) {
+            //new workflow system do not support access to seqtracks, which are needed to get that information
+            return null
+        }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
-            List<SeqTrack> seqTracks = workflowObject.getContainedSeqTracks().asList()
+            List<SeqTrack> seqTracks = workflowObject.containedSeqTracks.asList()
             (seqTracks ? DataFile.findAllBySeqTrackInListAndIndexFile(seqTracks, false) : [])?.sum { it.fileSize }
         }
     }
@@ -214,8 +239,12 @@ class ClusterJobService {
      * returns the sum of reads of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
      */
     static Long getReadsSum(ClusterJob job) {
+        if (!job.oldSystem) {
+            //new workflow system do not support access to seqtracks, which are needed to get that information
+            return null
+        }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
-            List<Long> nReads = workflowObject.getContainedSeqTracks()*.getNReads()
+            List<Long> nReads = workflowObject.containedSeqTracks*.NReads
             nReads.contains(null) ? null : nReads.sum()
         }
     }
@@ -262,13 +291,13 @@ class ClusterJobService {
      * @return List [clusterJob1, clusterJob2, ...]
      */
     List findAllClusterJobsByDateBetween(
-            LocalDate sDate, LocalDate eDate, String filter, int offset, int displayedLines, String sortedColumn, String sortOrder) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+            LocalDate startDate, LocalDate endDate, String filter, int offset, int displayedLines, String sortedColumn, String sortOrder) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
         return ClusterJob.createCriteria().list {
             order(sortedColumn, sortOrder)
-            ge('queued', startDate)
-            lt('ended', endDate)
+            ge('queued', startEndDateTime.startDate)
+            lt('ended', startEndDateTime.endDate)
             if (filter) {
                 or {
                     ilike('clusterJobId', "%${filter}%")
@@ -283,13 +312,13 @@ class ClusterJobService {
     /**
      * returns the number of Cluster Jobs in a specific time span
      */
-    int countAllClusterJobsByDateBetween(LocalDate sDate, LocalDate eDate, String filter) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    int countAllClusterJobsByDateBetween(LocalDate startDate, LocalDate endDate, String filter) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
         return ClusterJob.createCriteria().get {
             projections {
-                ge('queued', startDate)
-                lt('ended', endDate)
+                ge('queued', startEndDateTime.startDate)
+                lt('ended', startEndDateTime.endDate)
                 if (filter) {
                     or {
                         ilike('clusterJobId', "%${filter}%")
@@ -298,7 +327,7 @@ class ClusterJobService {
                 }
                 rowCount()
             }
-        }
+        } as int
     }
 
     /**
@@ -310,7 +339,7 @@ class ClusterJobService {
                 'in'('project', projects)
             }
             if (startDate && endDate) {
-                between('dateCreated', startDate,  endDate)
+                between('dateCreated', startDate, endDate)
             }
         }
     }
@@ -319,10 +348,10 @@ class ClusterJobService {
      * returns a unique list of job classes in a specific time-span
      * existing in the Cluster Job table
      */
-    List findAllJobClassesByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    List findAllJobClassesByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -335,7 +364,7 @@ SELECT
 
         List jobClasses = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
             jobClasses << it.jobclass
         }
 
@@ -346,10 +375,10 @@ SELECT
      * returns a List of exit codes and their occurrence in a specific time span
      * @return ArrayList [[exitCode, number of occurrences], ...]
      */
-    List findAllExitCodesByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    List findAllExitCodesByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -364,7 +393,7 @@ SELECT
 
         List exitCodeOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
             exitCodeOccurenceList << [it.exitCode, it.exitCodeCount]
         }
 
@@ -375,10 +404,10 @@ SELECT
      * returns a List of exit statuses and their occurrence in a specific time span
      * @return ArrayList [[exitStatus, number of occurrences], ...]
      */
-    List findAllExitStatusesByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    List findAllExitStatusesByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -392,7 +421,7 @@ SELECT
 
         List exitStatusOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
             exitStatusOccurenceList << [it.exitStatus as ClusterJob.Status, it.exitStatusCount]
         }
 
@@ -404,10 +433,10 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 jobs failed processing
      */
-    Map findAllFailedByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
+    Map findAllFailedByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -422,15 +451,15 @@ SELECT
 
         Map hours = [:]
 
-        sql.eachRow(query, [startDate.millis, endDate.millis]) {
+        sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
             hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
         }
 
-        List data = hourBuckets.collect {
+        List data = startEndDateTimeWithHourBuckets.hourBuckets.collect {
             it in hours ? hours[it] : 0
         }
 
-        return [days: hourBuckets*.toString(FORMAT_STRING), data: data]
+        return [days: startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), data: data]
     }
 
     /**
@@ -438,10 +467,10 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: ['queued': [0, ...], 'started': [1, ...], 'ended': [0, ...]]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 0 jobs have been queued, 1 job has been started and 0 jobs have been ended
      */
-    Map findAllStatesByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
+    Map findAllStatesByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         Map data = ["queued": [], "started": [], "ended": []]
 
@@ -459,16 +488,16 @@ SELECT
 
             Map hours = [:]
 
-            sql.eachRow(query, [startDate.millis, endDate.millis]) {
+            sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
                 hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
             }
 
-            data."${it}" = hourBuckets.collect {
+            data."${it}" = startEndDateTimeWithHourBuckets.hourBuckets.collect {
                 it in hours ? hours[it] : 0
             }
         }
 
-        return ["days": hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
     }
 
     /**
@@ -476,10 +505,10 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 cores were used to process the jobs
      */
-    Map findAllAvgCoreUsageByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
+    Map findAllAvgCoreUsageByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -492,9 +521,9 @@ SELECT
  GROUP BY job.started / $HOURS_TO_MILLIS, job.ended / $HOURS_TO_MILLIS
 """
 
-        List results = []
+        List<Map<String, ?>> results = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis]) {
+        sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
             results << [
                     startDate : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
                     endDate   : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
@@ -502,10 +531,10 @@ SELECT
             ]
         }
 
-        def data = hourBuckets.collect { currentHour ->
-            def nextHour = currentHour.plusHours(1)
+        List<Integer> data = startEndDateTimeWithHourBuckets.hourBuckets.collect { currentHour ->
+            DateTime nextHour = currentHour.plusHours(1)
 
-            def jobsThisHour = results.findAll {
+            List jobsThisHour = results.findAll {
                 it.startDate < nextHour && currentHour <= it.endDate
             }
 
@@ -514,7 +543,7 @@ SELECT
             return cpuAvgUsedSum ? cpuAvgUsedSum as Integer : 0
         }
 
-        return ["days": hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
     }
 
     /**
@@ -522,10 +551,10 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [2048, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 2048 mb memory was used to process the jobs
      */
-    Map findAllMemoryUsageByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
+    Map findAllMemoryUsageByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -538,20 +567,20 @@ SELECT
  GROUP BY job.started / $HOURS_TO_MILLIS, job.ended / $HOURS_TO_MILLIS
 """
 
-        List results = []
+        List<Map<String, ?>> results = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis]) {
+        sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
             results << [
                     startDate    : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
                     endDate      : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
-                    memoryAvgUsed: it.sumAvgMemoryUsed / (1024 ** 2),
+                    memoryAvgUsed: it.sumAvgMemoryUsed / (FACTOR_1024 * FACTOR_1024),
             ]
         }
 
-        def data = hourBuckets.collect { currentHour ->
-            def nextHour = currentHour.plusHours(1)
+        List<Integer> data = startEndDateTimeWithHourBuckets.hourBuckets.collect { currentHour ->
+            DateTime nextHour = currentHour.plusHours(1)
 
-            def jobsThisHour = results.findAll {
+            List jobsThisHour = results.findAll {
                 currentHour <= it.endDate && it.endDate < nextHour || it.startDate < nextHour && nextHour < it.endDate
             }
 
@@ -560,17 +589,17 @@ SELECT
             return memoryAvgUsedSum ? memoryAvgUsedSum as Integer : 0
         }
 
-        return ["days": hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
     }
 
     /**
      * returns the average time in queue and average processing time, both as absolut and percentage values, for all jobs
      * @return map [queue: [percentageQueue, queuePeriod], process: [percentageProcess, processPeriod]]
      */
-    Map findAllStatesTimeDistributionByDateBetween(LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    Map findAllStatesTimeDistributionByDateBetween(LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -583,27 +612,26 @@ SELECT
 
         Long queue, process, pQueue, pProcess
 
-        sql.query(query, [startDate.millis, endDate.millis], {
+        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
             it.next()
             queue = it.getLong('queueTime') ?: 0
             process = it.getLong('processingTime') ?: 0
-        })
+        }
 
+        pQueue = queue ? ((FACTOR_100 / (queue + process) * queue) as double).round() : 0
+        pProcess = queue ? FACTOR_100 - pQueue : 0
 
-        pQueue = queue ? ((100 / (queue + process) * queue) as double).round() : 0
-        pProcess = queue ? 100 - pQueue : 0
-
-        return [queue: [pQueue, new Period(queue).getHours().toString()], process: [pProcess, new Period(process).getHours().toString()]]
+        return [queue: [pQueue, new Period(queue).hours.toString()], process: [pProcess, new Period(process).hours.toString()]]
     }
 
     /**
      * returns a unique list of sequencing types
      * existing in the Cluster Job table
      */
-    List findJobClassSpecificSeqTypesByDateBetween(String jobClass, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    List findJobClassSpecificSeqTypesByDateBetween(String jobClass, LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -618,7 +646,7 @@ SELECT
 
         List seqTypes = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass]) {
             seqTypes << SeqType.get(it.seqType)
         }
 
@@ -632,10 +660,10 @@ SELECT
      * [0] = exitCode
      * [1] = count of exitCode
      */
-    List findJobClassAndSeqTypeSpecificExitCodesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    List findJobClassAndSeqTypeSpecificExitCodesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -650,7 +678,7 @@ SELECT
 
         List exitCodeOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
             exitCodeOccurenceList << [it.exitCode, it.exitCodeCount]
         }
 
@@ -664,10 +692,10 @@ SELECT
      * [0] = exitStatus
      * [1] = count of exitCode
      */
-    List findJobClassAndSeqTypeSpecificExitStatusesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    List findJobClassAndSeqTypeSpecificExitStatusesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -682,7 +710,7 @@ SELECT
 
         List exitStatusOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
             exitStatusOccurenceList << [it.exitStatus as ClusterJob.Status, it.exitStatusCount]
         }
 
@@ -694,10 +722,10 @@ SELECT
      * and array of all dates (per hour) existing in the given time span
      * @return ["days": [day1Hour0, day2Hour1, ...], "data": ["queued": [...], "started": [...], "ended":[...]]]
      */
-    Map findJobClassAndSeqTypeSpecificStatesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
+    Map findJobClassAndSeqTypeSpecificStatesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
+        DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         Map data = ["queued": [], "started": [], "ended": []]
 
@@ -717,16 +745,16 @@ SELECT
 
             Map hours = [:]
 
-            sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
+            sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis, jobClass, seqType?.id]) {
                 hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
             }
 
-            data."${it}" = hourBuckets.collect {
+            data."${it}" = startEndDateTimeWithHourBuckets.hourBuckets.collect {
                 it in hours ? hours[it] : 0
             }
         }
 
-        return ["days": hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
     }
 
     /**
@@ -734,10 +762,10 @@ SELECT
      * the maximum values for both, to align the graphics and
      * aligned labels for the graphic
      */
-    Map findJobClassAndSeqTypeSpecificWalltimesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    Map findJobClassAndSeqTypeSpecificWalltimesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -750,14 +778,14 @@ SELECT
  ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
 """
 
-        def walltimeData = []
+        List<List> walltimeData = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
+        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
             walltimeData << [it.reads, it.elapsedWalltime, it.xten ? 'blue' : 'black', it.id]
         }
 
-        def xAxisMax = walltimeData ? walltimeData*.get(0).max() ?: 0 : 0
-        def labels = xAxisMax == 0 ? [] : getLabels(xAxisMax, 10)
+        Long xAxisMax = walltimeData ? walltimeData*.get(0).max() ?: 0 : 0
+        List labels = xAxisMax == 0 ? [] : getLabels(xAxisMax, 10)
 
         return ["data": walltimeData, "labels": labels, "xMax": xAxisMax]
     }
@@ -766,10 +794,10 @@ SELECT
      * returns the average core usage of a specific jobclass and seq type
      * @return double
      */
-    double findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    double findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -782,25 +810,24 @@ SELECT
 
         Double avgCpu
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id], {
+        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
             it.next()
             Long avgCpuTime = it.getLong('avgCpuTime')
             Long avgWalltime = it.getLong('avgWalltime')
             avgCpu = avgCpuTime && avgWalltime ? (avgCpuTime / avgWalltime) as Double : 0
-        })
+        }
 
-
-        return avgCpu.round(2)
+        return avgCpu.round(FACTOR_2)
     }
 
     /**
      * return the average memory usage of a specific jobclass and seqtype
      * @return int
      */
-    int findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    int findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -812,10 +839,10 @@ SELECT
 
         Integer avgMemory
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id], {
+        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
             it.next()
             avgMemory = it.getLong('avgMemory')
-        })
+        }
 
         return avgMemory ?: 0
     }
@@ -825,9 +852,9 @@ SELECT
      * @return map ["avgQueue": avgQueue, "avgProcess": avgProcess]
      */
     Map findSpecificAvgStatesTimeDistribution(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate, Long basesToBeNormalized = null) {
-        def (DateTime startDateTime, DateTime endDateTime) = parseDateArgs(startDate, endDate)
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -845,16 +872,16 @@ SELECT
         // prevents negative values that could appear cause of rounding errors with milliseconds values
         // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
         sql.query(query, [
-                startDateTime.millis,
-                endDateTime.millis,
+                startEndDateTime.startDate.millis,
+                startEndDateTime.endDate.millis,
                 jobClass,
                 seqType?.id,
-        ], {
+        ]) {
             it.next()
             avgBases = it.getLong('basesCount')
             avgQueue = Math.max(0, it.getLong('avgQueue') ?: 0)
             avgProcess = Math.max(0, it.getLong('avgProcess') ?: 0)
-        })
+        }
 
         // normalize result to custom number of bases
         if (basesToBeNormalized) {
@@ -869,15 +896,15 @@ SELECT
      * @param referenceGenomeSizeInBases used to recalculate the coverage from the selected amount of bases (inputcoverage = inputbases / referencegenomesize)
      * @return map ["minCov": minimumCoverage, "maxCov": maximumCoverage, "avgCov": averageCoverage, "medianCov": medianCoverage]
      */
-    Map findJobClassAndSeqTypeSpecificCoverages(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, Double referenceGenomeSizeInBases) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    Map findJobClassAndSeqTypeSpecificCoverages(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate, Double referenceGenomeSizeInBases) {
+        DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         Map coverageStatistic = [avgCov: null, minCov: null, maxCov: null, medianCov: null]
         Long jobCount
 
-        def query = """
+        String query = """
 SELECT
 count(*) as jobCount,
 avg(n_bases) as avgBases,
@@ -889,7 +916,7 @@ WHERE
  AND n_bases IS NOT NULL
 """
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
+        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
             it.next()
             jobCount = it.getLong('jobCount')
             if (jobCount) {
@@ -904,7 +931,7 @@ WHERE
         }
 
         // if even number take the average of the two middle numbers
-        if (jobCount % 2 == 0L) {
+        if (jobCount % FACTOR_2 == 0L) {
             query = """
 SELECT
 avg(n_bases_from_offset) as medianBases
@@ -931,10 +958,9 @@ WHERE
 """
         }
 
+        int medianOffset = Math.round(jobCount / FACTOR_2) - 1
 
-        int medianOffset = Math.round(jobCount / 2) - 1
-
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id, medianOffset]) {
+        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType.id, medianOffset]) {
             it.next()
             coverageStatistic.put('medianCov', it.getLong('medianBases') / referenceGenomeSizeInBases)
         }
@@ -956,41 +982,23 @@ WHERE
         Duration queue = new Duration(job.queued, job.started)
         Duration process = new Duration(job.started, job.ended)
 
-        Long processMillis = Math.max(0, process.getMillis())
-        Long queueMillis = Math.max(0, queue.getMillis())
+        Long processMillis = Math.max(0, process.millis)
+        Long queueMillis = Math.max(0, queue.millis)
 
         Long total = queueMillis + processMillis
-        Long percentageProcess = Math.round(100 / total * processMillis)
-        Long percentageQueue = 100 - percentageProcess
+        Long percentageProcess = Math.round(FACTOR_100 / total * processMillis)
+        Long percentageQueue = FACTOR_100 - percentageProcess
 
         return [
                 "process": [
                         percentage: percentageProcess,
-                        ms: process.millis,
+                        ms        : process.millis,
                 ],
-                "queue": [
+                "queue"  : [
                         percentage: percentageQueue,
-                        ms: queue.millis,
+                        ms        : queue.millis,
                 ],
         ]
-    }
-
-    /**
-     * returns all dates and hours between the two given dates as DateTime
-     * e.g startDate = 2000-01-01, endDate = 2000-01-02
-     * result = [2000-01-01 00:00:00, 2000-01-01 01:00:00, 2000-01-01 02:00:00, ... , 2000-03-01 00:00:00]
-     */
-    List getDaysAndHoursBetween(LocalDate sDate, LocalDate eDate) {
-        def daysArr = []
-
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
-
-        while (startDate < endDate.plusHours(1)) {
-            daysArr << startDate
-            startDate = startDate.plusHours(1)
-        }
-
-        return daysArr
     }
 
     /**
@@ -998,7 +1006,7 @@ WHERE
      * @return latest Job Date (queued)
      */
     LocalDate getLatestJobDate() {
-        def sql = new Sql(dataSource)
+        Sql sql = new Sql(dataSource)
 
         String query = """
 SELECT
@@ -1022,36 +1030,56 @@ SELECT
      * @return List of dates as Strings and Integer-values
      * e.g. max = 8000 and quot = 10, return = [["800", "1600", "2400", ... , "8000"], [800, 1600, 2400, ... , 8000] ]
      */
-    List getLabels(Long max, int quot) {
-        def labels = (1..quot).collect {
-            (max / quot * it).toDouble().round(2)
+    List<List> getLabels(Long max, int quot) {
+        List<Double> labels = (1..quot).collect {
+            (max / quot * it).toDouble().round(FACTOR_2)
         }
-        def labelsAsString = labels*.toString()
+        List<String> labelsAsString = labels*.toString()
 
         return [labelsAsString, labels]
     }
 
     /**
-     * parses arguments for methods with dates and the use of the getDaysAndHoursBetween-method
-     * @return list containing the Datetime-objects for startDate and endDate and
-     * the list returned by the getDaysAndHoursBetween-method
+     * Helper to convert dates and use it
      */
-    private List parseArgs(LocalDate sDate, LocalDate eDate) {
-        ArrayList<String> hourBuckets = getDaysAndHoursBetween(sDate, eDate)
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    static class DateTimeInterval {
+        final DateTime startDate
+        final DateTime endDate
 
-        return [startDate, endDate, hourBuckets]
+        DateTimeInterval(LocalDate startDate, LocalDate endDate) {
+            this.startDate = startDate.toDateTimeAtStartOfDay()
+            this.endDate = endDate.plusDays(1).toDateTimeAtStartOfDay()
+        }
     }
 
-    /**
-     * parses arguments for methods with dates
-     * @return list containing the Datetime-objects for startDate and endDate
-     */
+    static class DateTimeIntervalWithHourBuckets {
 
-    private List parseDateArgs(LocalDate sDate, LocalDate eDate) {
-        DateTime startDate = sDate.toDateTimeAtStartOfDay()
-        DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
+        @Delegate
+        final DateTimeInterval dateTimeInterval
 
-        return [startDate, endDate]
+        final List<DateTime> hourBuckets
+
+        DateTimeIntervalWithHourBuckets(LocalDate startDate, LocalDate endDate) {
+            dateTimeInterval = new DateTimeInterval(startDate, endDate)
+            hourBuckets = getDaysAndHoursBetween(dateTimeInterval).asImmutable()
+        }
+
+        /**
+         * returns all dates and hours between the two given dates as DateTime
+         * e.g startDate = 2000-01-01, endDate = 2000-01-02
+         * result = [2000-01-01 00:00:00, 2000-01-01 01:00:00, 2000-01-01 02:00:00, ... , 2000-03-01 00:00:00]
+         */
+        private List<DateTime> getDaysAndHoursBetween(DateTimeInterval startEndDateTime) {
+            List<DateTime> daysArr = []
+            DateTime date = startEndDateTime.startDate
+            DateTime endDate = startEndDateTime.endDate.plusHours(1)
+
+            while (date < endDate) {
+                daysArr << date
+                date = date.plusHours(1)
+            }
+
+            return daysArr
+        }
     }
 }
