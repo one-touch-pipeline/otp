@@ -230,11 +230,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     private File getAndCheckPathFromProperty(OtpProperty property) {
-        File file = new File(otpProperties.get(property) ?: property.defaultValue)
-        if (!file.absolute && Environment.getCurrent() == Environment.PRODUCTION) {
-            throw new RuntimeException("${property} is \"${file}\", but only an absolute path is allowed.")
-        }
-        return file
+        return new File(otpProperties.get(property) ?: property.defaultValue)
     }
 
     private boolean getBooleanValue(OtpProperty otpPropertiesValue) {

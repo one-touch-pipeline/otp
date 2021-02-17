@@ -1,5 +1,7 @@
+package de.dkfz.tbi.otp
+
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,13 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp
 
 import groovy.transform.InheritConstructors
 
-/**
- * Base runtime exception for all runtime exceptions thrown in OTP
- */
 @InheritConstructors
-class OtpRuntimeException extends RuntimeException {
+class FileInconsistencyException extends OtpRuntimeException {
 }

@@ -59,12 +59,12 @@ class AlignmentInfoService {
 
         if (output.exitCode != 0) {
             log?.debug("Alignment information can't be detected:\n${output}")
-            throw new RuntimeException("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
+            throw new NotSupportedException("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
         }
 
         if (output.stderr.contains("The project configuration \"${nameInConfigFile}.config\" could not be found")) {
             log?.debug("Error during output of roddy:\n${output}")
-            throw new RuntimeException("Roddy could not find the configuration '${nameInConfigFile}'. Probably some access problem.")
+            throw new FileNotFoundException("Roddy could not find the configuration '${nameInConfigFile}'. Probably some access problem.")
         }
 
         return output
@@ -129,7 +129,7 @@ class AlignmentInfoService {
 
         if (!merge.command) {
             log?.debug("Could not extract merging configuration from output:\n${output}")
-            throw new RuntimeException("Could not extract merging configuration value from the roddy output")
+            throw new ParsingException("Could not extract merging configuration value from the roddy output")
         }
 
         return merge
@@ -170,7 +170,7 @@ class AlignmentInfoService {
 
         if (!bwa.command) {
             log?.debug("Could not extract alignment configuration from output:\n${output}")
-            throw new RuntimeException("Could not extract alignment configuration value from the roddy output")
+            throw new ParsingException("Could not extract alignment configuration value from the roddy output")
         }
 
         return bwa
@@ -194,7 +194,7 @@ class AlignmentInfoService {
 
         if (res.isEmpty()) {
             log?.debug("Could not extract any configuration value from the roddy output:\n${output}")
-            throw new RuntimeException("Could not extract any configuration value from the roddy output")
+            throw new ParsingException("Could not extract any configuration value from the roddy output")
         }
 
         return res

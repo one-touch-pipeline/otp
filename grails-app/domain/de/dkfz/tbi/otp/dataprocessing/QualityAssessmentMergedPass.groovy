@@ -108,7 +108,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
             return abstractMergedBamFile.mergingSet
         } else {
-            throw new RuntimeException("MergingSet exists only for ProcessedMergedBamFiles")
+            throw new NotSupportedException("MergingSet exists only for ProcessedMergedBamFiles")
         }
     }
 
@@ -120,7 +120,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
             return abstractMergedBamFile.mergingPass
         } else {
-            throw new RuntimeException("MergingPass exists only for ProcessedMergedBamFiles")
+            throw new NotSupportedException("MergingPass exists only for ProcessedMergedBamFiles")
         }
     }
 

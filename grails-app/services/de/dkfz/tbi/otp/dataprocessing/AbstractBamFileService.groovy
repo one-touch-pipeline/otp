@@ -126,7 +126,7 @@ class AbstractBamFileService {
             //In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'
             return null
         } else {
-            throw new RuntimeException("The 'with N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
+            throw new NotSupportedException("The 'with N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
         }
     }
 
@@ -162,7 +162,7 @@ class AbstractBamFileService {
                 return null
             }
         } else {
-            throw new RuntimeException("The coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
+            throw new NotSupportedException("The coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
         }
         return basesMapped / length
     }

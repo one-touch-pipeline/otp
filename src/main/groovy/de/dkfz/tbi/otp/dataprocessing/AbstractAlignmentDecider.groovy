@@ -81,6 +81,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return workPackages
     }
 
+    // ignore: in case of an adaptation to the new workflow system
+    // TODO: if this class will be adapt in the future, it should not throw RuntimeException
+    @SuppressWarnings('ThrowRuntimeException ')
     void ensureConfigurationIsComplete(SeqTrack seqTrack) {
         if (seqTrack.configuredReferenceGenome == null) {
             throw new RuntimeException("Reference genome is not configured for SeqTrack ${seqTrack}.")

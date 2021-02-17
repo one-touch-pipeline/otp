@@ -23,6 +23,9 @@ package de.dkfz.tbi.otp.dataprocessing.roddy
 
 import groovy.transform.*
 
+import de.dkfz.tbi.otp.dataprocessing.FileNotFoundException
+import de.dkfz.tbi.otp.dataprocessing.ParsingException
+import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import java.util.regex.Matcher
@@ -70,11 +73,11 @@ class JobStateLogFile {
     private validateFile() {
         try {
             WaitingFileUtils.waitUntilExists(file)
-        } catch (AssertionError e) {
-            throw new RuntimeException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parentFile}", e)
+        } catch (AssertionError ignored) {
+            throw new FileNotFoundException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parentFile}")
         }
         if (!file.canRead()) {
-            throw new RuntimeException("file ${file} exists, but is not readable")
+            throw new FileNotReadableException("$file")
         }
     }
 
@@ -98,7 +101,7 @@ class JobStateLogFile {
                         entries.put(logFileEntry.clusterJobId, logFileEntry)
                 }
             } else {
-                throw new RuntimeException("${file} contains non-matching entry: ${line}")
+                throw new ParsingException("${file} contains non-matching entry: ${line}")
             }
         }
         return entries

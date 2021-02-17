@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.FileInconsistencyException
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -144,7 +145,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
             abstractMergedBamFileService.getExistingBamFilePath(analysis.sampleType1BamFile)
             abstractMergedBamFileService.getExistingBamFilePath(analysis.sampleType2BamFile)
         } catch (final AssertionError e) {
-            throw new RuntimeException('The input BAM files have changed on the file system while this job processed them.', e)
+            throw new FileInconsistencyException('The input BAM files have changed on the file system while this job processed them.', e)
         }
     }
 

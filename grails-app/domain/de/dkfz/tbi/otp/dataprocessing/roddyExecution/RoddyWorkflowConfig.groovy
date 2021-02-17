@@ -39,7 +39,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
     //dot makes problems in roddy config identifiers, therefore an underscore is used
-    final static String CONFIG_VERSION_PATTERN =  /^v\d+_\d+$/
+    final static String CONFIG_VERSION_PATTERN = /^v\d+_\d+$/
 
     final static String CONFIG_PATH_ELEMENT = 'configFiles'
 
@@ -74,11 +74,11 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
                 // This validator asserts that the config is unique for the given properties.
                 // Unique constraint can't be used since individual is optional and can be null.
                 Long id = atMostOneElement(RoddyWorkflowConfig.findAllWhere(
-                        project:        obj.project,
-                        seqType:        obj.seqType,
-                        pipeline:       obj.pipeline,
-                        individual:     obj.individual,
-                        obsoleteDate:   null,
+                        project: obj.project,
+                        seqType: obj.seqType,
+                        pipeline: obj.pipeline,
+                        individual: obj.individual,
+                        obsoleteDate: null,
                 ))?.id
                 !id || id == obj.id
             }
@@ -89,12 +89,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
                 // This validator asserts that the config is unique for the given properties.
                 // Unique constraint can't be used since individual is optional and can be null.
                 Long id = atMostOneElement(RoddyWorkflowConfig.findAllWhere(
-                        project       : config.project,
-                        seqType       : config.seqType,
-                        pipeline      : config.pipeline,
-                        individual    : config.individual,
+                        project: config.project,
+                        seqType: config.seqType,
+                        pipeline: config.pipeline,
+                        individual: config.individual,
                         programVersion: config.programVersion,
-                        configVersion : config.configVersion,
+                        configVersion: config.configVersion,
                 ))?.id
                 !id || id == config.id
             }
@@ -125,18 +125,14 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     }
 
     protected static RoddyWorkflowConfig getLatest(final Project project, final Individual individual, final SeqType seqType, final Pipeline pipeline) {
-        assert project : "The project is not allowed to be null"
-        assert seqType : "The seqType is not allowed to be null"
-        assert pipeline : "The pipeline is not allowed to be null"
+        assert project: "The project is not allowed to be null"
+        assert seqType: "The seqType is not allowed to be null"
+        assert pipeline: "The pipeline is not allowed to be null"
         assert individual == null || individual.project == project
-        try {
-            return (RoddyWorkflowConfig) atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(
-                    project, seqType, pipeline, null, individual))
-        } catch (final Throwable t) {
-            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, " +
-                    "SeqType ${seqType}, " +
-                    "Individual ${individual} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
-        }
+        return (RoddyWorkflowConfig) atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(
+                project, seqType, pipeline, null, individual), "Found more than one RoddyWorkflowConfig for Project ${project}, " +
+                "SeqType ${seqType}, " +
+                "Individual ${individual} and Pipeline ${pipeline}.")
     }
 
     static RoddyWorkflowConfig getLatestForProject(final Project project, final SeqType seqType, final Pipeline pipeline) {
@@ -144,7 +140,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     }
 
     static RoddyWorkflowConfig getLatestForIndividual(final Individual individual, final SeqType seqType, final Pipeline pipeline) {
-        assert individual : "The individual is not allowed to be null"
+        assert individual: "The individual is not allowed to be null"
         return getLatest(individual.project, individual, seqType, pipeline) ?: getLatestForProject(individual.project, seqType, pipeline)
     }
 

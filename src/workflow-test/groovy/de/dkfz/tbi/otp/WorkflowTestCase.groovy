@@ -337,6 +337,8 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         }
     }
 
+    // ignored: will be removed with the old workflow system
+    @SuppressWarnings('ThrowRuntimeException')
     protected void outputFailureInfoAndThrowException(Collection<ProcessingStepUpdate> failureProcessingStepUpdates) {
         List<String> combinedErrorMessage = []
         failureProcessingStepUpdates.each {

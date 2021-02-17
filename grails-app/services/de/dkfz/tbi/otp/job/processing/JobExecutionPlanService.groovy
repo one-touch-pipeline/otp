@@ -166,7 +166,7 @@ class JobExecutionPlanService {
         query = query + "GROUP BY p.id\n"
         query = query + "ORDER BY p.${column} ${order ? 'asc' : 'desc'}"
 
-        LinkedHashMap<Process, ProcessingStepUpdate> results = [:]
+        Map<Process, ProcessingStepUpdate> results = [:]
         Map params = [planIds: plans]
         if (states) {
             params.put("states", states)

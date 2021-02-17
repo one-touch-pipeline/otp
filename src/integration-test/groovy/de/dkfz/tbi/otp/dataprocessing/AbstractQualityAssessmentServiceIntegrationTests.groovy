@@ -152,7 +152,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
                 name: '9',
                 alias: '9',
         )
-        TestCase.shouldFailWithMessage(RuntimeException, /^Missed chromosomes: .+ \(expected: .*; found .*\).$/, {
+        TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/, {
             abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
         })
     }
@@ -205,7 +205,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
 
-        TestCase.shouldFailWithMessage(RuntimeException, /^Missed chromosomes: .+ \(expected: .*; found .*\).$/, {
+        TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/, {
             abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
         })
     }

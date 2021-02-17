@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.project.Project
@@ -61,7 +62,7 @@ class OtpPath {
 
     private File getAbsolutePath(File path) {
         if (!path.isAbsolute()) {
-            throw new RuntimeException("${path} is not absolute.")
+            throw new NotSupportedException("${path} is not absolute.")
         }
         return new File(path.absolutePath, relativePath.path)
     }

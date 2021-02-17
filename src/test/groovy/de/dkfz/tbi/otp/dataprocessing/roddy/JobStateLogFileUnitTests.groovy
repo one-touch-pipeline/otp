@@ -26,12 +26,13 @@ import org.junit.*
 import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.FileNotFoundException
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 
+import static de.dkfz.tbi.TestCase.shouldFail
 import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG_FILE_NAME
 import static junit.framework.Assert.assertFalse
@@ -69,7 +70,7 @@ class JobStateLogFileUnitTests {
     @Test
     void testValidateFile_WhenFileDoesNotExist_ShouldThrowException() {
         JobStateLogFile.metaClass.parseJobStateLogFile = { -> [:] }
-        shouldFailWithMessage(RuntimeException, /${JOB_STATE_LOG_FILE_NAME}\sis\snot\sfound.*/) {
+        shouldFail(FileNotFoundException) {
             JobStateLogFile.getInstance(TestCase.uniqueNonExistentPath)
         }
     }
@@ -80,7 +81,7 @@ class JobStateLogFileUnitTests {
         File file = tmpDir.newFile(JOB_STATE_LOG_FILE_NAME)
         file.createNewFile()
         file.setReadable(false)
-        shouldFailWithMessage(RuntimeException, /file.*exists,\sbut\sis\snot\sreadable/) {
+        shouldFail(FileNotReadableException) {
             JobStateLogFile.getInstance(tmpDir.root)
         }
     }

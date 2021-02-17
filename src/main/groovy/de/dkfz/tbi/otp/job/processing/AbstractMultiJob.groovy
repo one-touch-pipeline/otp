@@ -92,11 +92,13 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
             //     TODO: scheduler.doOnOtherThread(this, { callExecute() } )
             // } else {
             //     // Workaround: Hope. Hope that this job does not perform any time-consuming operation.
-                   callExecute()
+            callExecute()
             // }
         }
     }
 
+    // suppress because it will be removed together with the old workflow system
+    @SuppressWarnings("AssertWithinFinallyBlock")
     private void callExecute() {
         synchronized (lockForResumable) {
             boolean waited = false

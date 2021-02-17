@@ -57,7 +57,7 @@ All the Rules that will be used for OTP
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {
-        priority = HIGH
+        priority = DEFAULT
     }
     AssignmentInConditional {
         priority = DEFAULT
@@ -308,7 +308,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ThreadLocalNotStaticFinal {
-        priority = HIGH
+        priority = DEFAULT
     }
     ThreadYield {
         priority = DEFAULT
@@ -433,7 +433,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ImplementationAsType {
-        priority = HIGH
+        priority = DEFAULT
     }
     Instanceof {
         priority = MIDDLE

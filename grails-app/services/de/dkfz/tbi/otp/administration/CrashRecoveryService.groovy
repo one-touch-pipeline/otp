@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
  * @deprecated Not needed for the new workflow system. It will be removed within the old workflow system.
  */
 @Deprecated
+@SuppressWarnings('ThrowRuntimeException')
 @Transactional
 class CrashRecoveryService {
 

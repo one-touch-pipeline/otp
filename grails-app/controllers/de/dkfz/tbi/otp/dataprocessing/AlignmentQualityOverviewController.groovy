@@ -209,7 +209,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 columns = "CELL_RANGER"
                 break
             default:
-                throw new RuntimeException("How should ${seqType.naturalId} be handled")
+                throw new NotSupportedException("How should ${seqType.naturalId} be handled")
         }
 
         return [
@@ -438,7 +438,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     break
 
                 default:
-                    throw new RuntimeException("${cmd.seqType.name} cannot be handled")
+                    throw new NotSupportedException("${cmd.seqType.name} cannot be handled")
             }
 
             map += thresholdColorizer.colorize(qcKeysMap, it)

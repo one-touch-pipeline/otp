@@ -113,7 +113,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         abstractRoddyJob.failedOrNotFinishedClusterJobs([])
 
         then:
-        def e = thrown(RuntimeException)
+        def e = thrown(FileNotFoundException)
         e.message.contains("is not found in")
     }
 

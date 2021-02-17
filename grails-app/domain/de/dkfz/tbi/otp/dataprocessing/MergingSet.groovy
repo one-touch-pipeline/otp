@@ -105,6 +105,8 @@ class MergingSet implements Entity {
         return MergingSetAssignment.findAllByMergingSet(this)*.bamFile
     }
 
+    // ignore: will probably replaced with new workflow system
+    @SuppressWarnings('ThrowRuntimeException')
     Set<SeqTrack> getContainedSeqTracks() {
         final Set<SeqTrack> seqTracks = [] as Set
         MergingSetAssignment.findAllByMergingSet(this).each {

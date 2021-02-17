@@ -296,7 +296,7 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetLatestWorkExecutionDirectory_WhenRoddyExecutionDirectoryNamesEmpty_ShouldFail() {
-        shouldFail(RuntimeException) {
+        shouldFail(AssertionError) {
             roddyBamFile.latestWorkExecutionDirectory
         }
     }

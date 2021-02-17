@@ -94,6 +94,7 @@ class SchedulerService {
      */
     private boolean startupOk = false
 
+    @SuppressWarnings('ThreadLocalNotStaticFinal')
     private final ThreadLocal<Job> jobByThread = new ThreadLocal<Job>()
 
     boolean isActive() {

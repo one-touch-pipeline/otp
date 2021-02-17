@@ -373,7 +373,7 @@ SELECT
 
     /**
      * returns a List of exit codes and their occurrence in a specific time span
-     * @return ArrayList [[exitCode, number of occurrences], ...]
+     * @return List [[exitCode, number of occurrences], ...]
      */
     List findAllExitCodesByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
@@ -402,7 +402,7 @@ SELECT
 
     /**
      * returns a List of exit statuses and their occurrence in a specific time span
-     * @return ArrayList [[exitStatus, number of occurrences], ...]
+     * @return List [[exitStatus, number of occurrences], ...]
      */
     List findAllExitStatusesByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)

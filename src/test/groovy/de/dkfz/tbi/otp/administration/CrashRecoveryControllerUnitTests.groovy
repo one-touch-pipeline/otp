@@ -27,6 +27,8 @@ import org.junit.Test
 
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
+// ignored: will be removed with the old workflow system
+@SuppressWarnings('ThrowRuntimeException')
 @TestFor(CrashRecoveryController)
 class CrashRecoveryControllerUnitTests {
 

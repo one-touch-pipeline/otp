@@ -92,10 +92,7 @@ class AnalysisDeletionService {
     }
 
     static void assertThatNoWorkflowsAreRunning(List<BamFilePairAnalysis> instances) {
-        if (instances.find {
-            it.processingState == AnalysisProcessingStates.IN_PROGRESS && !it.withdrawn
-        }) {
-            throw new RuntimeException("There are some analysis workflows running for ${instances[0].sampleType1BamFile}")
-        }
+        assert instances.find { it.processingState != AnalysisProcessingStates.IN_PROGRESS || it.withdrawn }:
+                "There are some analysis workflows running for ${instances[0].sampleType1BamFile}"
     }
 }

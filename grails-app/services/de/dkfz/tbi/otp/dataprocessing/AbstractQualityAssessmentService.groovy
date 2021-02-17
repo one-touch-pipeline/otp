@@ -44,9 +44,7 @@ class AbstractQualityAssessmentService {
         Collection<String> missedElements = expectedChromosomeNames.findAll { String chromosomeName ->
             !chromosomeNames.contains(chromosomeName)
         }
-        if (!missedElements.isEmpty()) {
-            throw new RuntimeException("Missed chromosomes: ${missedElements.join(', ')} (expected: ${expectedChromosomeNames}; found ${chromosomeNames}).")
-        }
+        assert !missedElements: "Missed chromosomes: ${missedElements.join(', ')} (expected: ${expectedChromosomeNames}; found ${chromosomeNames})."
     }
 
     private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, File qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {

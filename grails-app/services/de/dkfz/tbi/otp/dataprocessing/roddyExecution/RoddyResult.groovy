@@ -71,9 +71,7 @@ trait RoddyResult {
     // exec_150625_102449388_SOMEUSER_WGS
     // exec_yyMMdd_HHmmssSSS_user_analysis
     File getLatestWorkExecutionDirectory() {
-        if (!roddyExecutionDirectoryNames) {
-            throw new RuntimeException("No roddyExecutionDirectoryNames have been stored in the database for ${this}.")
-        }
+        assert roddyExecutionDirectoryNames: "No roddyExecutionDirectoryNames have been stored in the database for ${this}."
 
         String latestDirectoryName = roddyExecutionDirectoryNames.last()
         assert latestDirectoryName == roddyExecutionDirectoryNames.max()
