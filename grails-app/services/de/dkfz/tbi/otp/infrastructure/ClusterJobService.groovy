@@ -131,7 +131,10 @@ class ClusterJobService {
             jobLog = jobInfo.logFile
             accountName = jobInfo.account
             dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect {
-                CollectionUtils.exactlyOneElement(ClusterJob.findAllByClusterJobId(it))
+                CollectionUtils.exactlyOneElement(
+                        job.oldSystem ? ClusterJob.findAllByClusterJobIdAndProcessingStep(it, job.processingStep) :
+                                ClusterJob.findAllByClusterJobIdAndWorkflowStep(it, job.workflowStep)
+                )
             } : []
         }
 

@@ -74,7 +74,16 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
 
-        ClusterJob c2 = createClusterJob(seqType: seqType)
+        ClusterJob c2 = createClusterJob([
+                seqType: seqType,
+                processingStep: job.processingStep,
+        ])
+
+        //case of same cluster id, but other job
+        createClusterJob([
+                seqType: seqType,
+                clusterJobId: c2.clusterJobId,
+        ])
 
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.clusterJobId])
 
