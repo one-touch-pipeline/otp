@@ -24,6 +24,11 @@ package de.dkfz.tbi.otp.workflowExecution.log
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+/**
+ * Base class of different types of log messages for the workflow system.
+ *
+ * The objects should be created in a separate transaction to be sure they consist in case a rollback occurs.
+ */
 abstract class WorkflowLog implements Entity {
 
     WorkflowStep workflowStep

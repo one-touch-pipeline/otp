@@ -21,6 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.log
 
+/**
+ * A log class to hold a simple message as string.
+ *
+ * The objects should be created in a separate transaction to be sure they consist in case a rollback occurs.
+ */
 class WorkflowMessageLog extends WorkflowLog {
 
     String message
@@ -31,6 +36,6 @@ class WorkflowMessageLog extends WorkflowLog {
 
     @Override
     String displayLog() {
-        return "${this.class}:${this.id} : ${message}"
+        return "${this.class.simpleName}:${this.id}: ${message}"
     }
 }

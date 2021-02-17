@@ -21,6 +21,17 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.log
 
+/**
+ * A log class to hold the different components of a command.
+ *
+ * It saves:
+ * - the command
+ * - the exit code
+ * - stdout
+ * - stderr
+ *
+ * The objects should be created in a separate transaction to be sure they consist in case a rollback occurs.
+ */
 class WorkflowCommandLog extends WorkflowLog {
 
     String command
@@ -38,7 +49,7 @@ class WorkflowCommandLog extends WorkflowLog {
     @Override
     String displayLog() {
         return """\
-            |${this.class}:${this.id}
+            |${this.class.simpleName}:${this.id}
             |Command:
             |${command}
             |
