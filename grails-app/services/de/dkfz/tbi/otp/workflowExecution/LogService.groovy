@@ -24,10 +24,15 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 
-import de.dkfz.tbi.otp.utils.TransactionUtils
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.StackTraceUtils
+import de.dkfz.tbi.otp.utils.TransactionUtils
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
+/**
+ * Helper to add new logs to an {@link WorkflowStep} using an separate transaction, so it is added persistently.
+ */
 @Transactional
 class LogService {
 
@@ -60,4 +65,21 @@ class LogService {
         }
     }
 
+    /**
+     * Add the message as {@link WorkflowCommandLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
+     */
+    void addCommandLogEntry(WorkflowStep workflowStepParam, String commandParam, ProcessOutput processOutput) {
+        TransactionUtils.withNewTransaction {
+            //map constructor won't work, if a string is empty, since that is mapped to null and then the validation fail
+            WorkflowCommandLog log = new WorkflowCommandLog()
+            log.with {
+                workflowStep = workflowStepParam
+                command = commandParam
+                exitCode = processOutput.exitCode
+                stdout = processOutput.stdout
+                stderr = processOutput.stderr
+                save(flush: true)
+            }
+        }
+    }
 }

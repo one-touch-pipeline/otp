@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.ExecutedCommandLogCallbackThreadLocalHolder
 
 import java.util.concurrent.Semaphore
 
@@ -159,6 +160,7 @@ class RemoteShellHelper {
             channel.setCommand(command)
 
             ProcessOutput processOutput = getOutput(channel)
+            ExecutedCommandLogCallbackThreadLocalHolder.get()?.executedCommand(command, processOutput)
 
             if (processOutput.exitCode != 0) {
                 logToJob("received exit code:\n" + processOutput.exitCode)
