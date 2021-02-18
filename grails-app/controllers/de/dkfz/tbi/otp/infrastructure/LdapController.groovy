@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import de.dkfz.tbi.otp.administration.LdapService
-import de.dkfz.tbi.otp.administration.LdapUserDetails
-import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.administration.*
 
 @Secured('isFullyAuthenticated()')
 class LdapController {
@@ -48,8 +46,10 @@ class LdapController {
     def getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
         List<LdapUserDetails> ldapUsers = ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)
 
+        Set<String> otpUserNames = userService.getAllUserNamesOfOtpUsers(ldapUsers*.username)
+
         List<LdapUserDetails> otpLdapUsers = ldapUsers.findAll { LdapUserDetails ldapUser ->
-            ldapUser.username in userService.allUsers*.username
+            ldapUser.username in otpUserNames
         }
 
         ldapUsers.removeAll(otpLdapUsers)

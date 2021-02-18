@@ -53,6 +53,14 @@ class UserService {
         return User.list()
     }
 
+    /**
+     * returns otp users of a list of ad accounts.
+     * It is needed for autocompletion, so it needs accessible for normal users.
+     */
+    Set<String> getAllUserNamesOfOtpUsers(List<String> usernames) {
+        return usernames ? User.findAllByUsernameInList(usernames)*.username : []
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     int getUserCount() {
         return User.count()

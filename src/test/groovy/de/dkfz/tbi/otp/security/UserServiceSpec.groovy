@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.security
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Mock([
@@ -32,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
         User,
         UserRole,
 ])
-class UserServiceSpec extends Specification {
+class UserServiceSpec extends Specification implements DomainFactoryCore {
 
     void "createFirstAdminUserIfNoUserExists, if no user exists, create one"() {
         given:
@@ -57,5 +59,28 @@ class UserServiceSpec extends Specification {
 
         then:
         User.count == 1
+    }
+
+    void "getAllUsersInAdList"() {
+        given:
+        DomainFactory.createUser()
+        User user1 = DomainFactory.createUser()
+        DomainFactory.createUser()
+        User user2 = DomainFactory.createUser()
+        DomainFactory.createUser()
+
+        List<String> names = [
+                "user ${nextId}",
+                user1.username,
+                "user ${nextId}",
+                user2.username,
+                "user ${nextId}",
+        ]
+
+        when:
+        Set<String> users = new UserService().getAllUserNamesOfOtpUsers(names)
+
+        then:
+        TestCase.assertContainSame([user1, user2]*.username, users)
     }
 }
