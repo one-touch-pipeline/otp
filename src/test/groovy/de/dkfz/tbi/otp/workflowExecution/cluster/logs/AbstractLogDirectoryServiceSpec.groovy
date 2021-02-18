@@ -50,7 +50,7 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Realm,
         ]
     }

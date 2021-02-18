@@ -41,7 +41,7 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 Realm,
                 WorkflowStep,

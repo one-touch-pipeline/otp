@@ -42,7 +42,7 @@ class ClusterJobHelperServiceSpec extends Specification implements ServiceUnitTe
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Realm,
                 WorkflowStep,
         ]

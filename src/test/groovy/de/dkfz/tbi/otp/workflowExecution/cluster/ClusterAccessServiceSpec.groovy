@@ -37,7 +37,7 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 Realm,
                 WorkflowStep,
@@ -79,9 +79,7 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
             1 * markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
             0 * _
         }
-        service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep, _)
-        }
+        service.logService = Mock(LogService)
 
         when:
         List<String> result = service.executeJobs(realm, workflowStep, scripts)

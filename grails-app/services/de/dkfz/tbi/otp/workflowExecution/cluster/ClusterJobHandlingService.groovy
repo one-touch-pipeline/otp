@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.cluster
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.roddy.BEException
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.*
@@ -46,6 +47,8 @@ import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileServic
 @GrailsCompileStatic
 @Transactional
 class ClusterJobHandlingService {
+
+    static final String NESTED_FAIL_MESSAGE_FOR_KILL = "Failed to kill associated jobs following an error submitting the job"
 
     ConfigService configService
 
@@ -95,23 +98,38 @@ class ClusterJobHandlingService {
         return beJobs
     }
 
-    @SuppressWarnings("CatchException")
     void sendJobs(BatchEuphoriaJobManager jobManager, WorkflowStep workflowStep, List<BEJob> beJobs) {
         logService.addSimpleLogEntry(workflowStep, "Begin submiting ${beJobs.size()} jobs to cluster: ${jobToString(beJobs)}")
         beJobs.each { BEJob job ->
-            BEJobResult jobResult = jobManager.submitJob(job)
+            BEJobResult jobResult
+            try {
+                jobResult = jobManager.submitJob(job)
+            } catch (BEException bEException) {
+                logService.addSimpleLogEntryWithException(workflowStep, "Exception occured during submiting job:\n${job}", bEException)
+                killFailedClusterJobs(workflowStep, job, beJobs, jobManager)
+            }
             if (!jobResult.successful) {
-                logService.addSimpleLogEntry(workflowStep, "Failed to submit job: ${job}, try killing associated cluster jobs: ${jobToString(beJobs)}")
-                try {
-                    jobManager.killJobs(beJobs)
-                } catch (Exception e) {
-                    logService.addSimpleLogEntry(workflowStep, "Failed to kill jobs after submitting ${job}\nException: ${e.message}")
-                    throw new SubmitClusterJobException("Failed to kill all jobs after an error occurred submitting the job: ${job}.", e)
-                }
-                throw new SubmitClusterJobException("An error occurred submitting the job: ${job}. Associated cluster jobs were killed.")
+                logService.addSimpleLogEntry(workflowStep, "Failed to submit job:\n${job}")
+                killFailedClusterJobs(workflowStep, job, beJobs, jobManager)
             }
         }
         logService.addSimpleLogEntry(workflowStep, "Finish submiting ${beJobs.size()} jobs to cluster: ${jobToString(beJobs)}")
+    }
+
+    @SuppressWarnings("CatchException")
+    private void killFailedClusterJobs(WorkflowStep workflowStep, BEJob job, List<BEJob> beJobs, BatchEuphoriaJobManager jobManager) {
+        List<BEJob> startedBeJobs = beJobs.findAll {
+            it.runResult
+        }
+        logService.addSimpleLogEntry(workflowStep, "Try killing associated cluster jobs: ${jobToString(startedBeJobs)}")
+        try {
+            jobManager.killJobs(startedBeJobs)
+        } catch (Exception e) {
+            String message = "${NESTED_FAIL_MESSAGE_FOR_KILL}:\n${job}."
+            logService.addSimpleLogEntryWithException(workflowStep, message, e)
+            throw new KillClusterJobException(message, e)
+        }
+        throw new SubmitClusterJobException("An error occurred submitting the job: ${job}. Associated cluster jobs were killed.")
     }
 
     @SuppressWarnings("CatchException")
@@ -121,12 +139,13 @@ class ClusterJobHandlingService {
             jobManager.startHeldJobs(beJobs)
         } catch (Exception e) {
             logService.addSimpleLogEntry(workflowStep, "Failed to start jobs: ${jobToString(beJobs)}\nException: ${e.message}")
+            logService.addSimpleLogEntry(workflowStep, "Try killing associated cluster jobs: ${jobToString(beJobs)}")
             try {
                 jobManager.killJobs(beJobs)
             } catch (Exception e2) {
                 logService.addSimpleLogEntry(workflowStep, "Failed to kill jobs after failed to start jobs: ${jobToString(beJobs)}\n" +
                         "Exception: ${e2.message}")
-                throw new StartClusterJobException("Failed to kill jobs after failing starting jobs: ${jobToString(beJobs)}", e)
+                throw new KillClusterJobException("Failed to kill jobs after failing starting jobs: ${jobToString(beJobs)}", e)
             }
             throw new StartClusterJobException("An error occurred when starting jobs: ${jobToString(beJobs)}", e)
         }

@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.roddy.BEException
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.io.ExecutionResult
@@ -50,7 +51,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 Realm,
                 WorkflowStep,
@@ -159,7 +160,29 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         true
     }
 
-    void "sendJobs, when submit fail, then call killJobs and throw SubmitClusterJobException"() {
+    void "sendJobs, when submit fail on first, then call killJobs only for first and throw SubmitClusterJobException"() {
+        given:
+        setupJobData()
+
+        BEJobResult jobResult1 = createBEJobResult(job1, false)
+
+        BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
+            1 * submitJob(job1) >> jobResult1
+            1 * killJobs([job1])
+            0 * _
+        }
+
+        service.logService = Mock(LogService)
+
+        when:
+        service.sendJobs(jobManager, workflowStep, [job1, job2])
+
+        then:
+        SubmitClusterJobException e = thrown()
+        !e.message.contains(ClusterJobHandlingService.NESTED_FAIL_MESSAGE_FOR_KILL)
+    }
+
+    void "sendJobs, when submit fail on second, then call killJobs for both and throw SubmitClusterJobException"() {
         given:
         setupJobData()
 
@@ -173,16 +196,57 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             0 * _
         }
 
-        service.logService = Mock(LogService) {
-            2 * addSimpleLogEntry(workflowStep, _)
-            0 * _
-        }
+        service.logService = Mock(LogService)
 
         when:
         service.sendJobs(jobManager, workflowStep, [job1, job2])
 
         then:
-        thrown(SubmitClusterJobException)
+        SubmitClusterJobException e = thrown()
+        !e.message.contains(ClusterJobHandlingService.NESTED_FAIL_MESSAGE_FOR_KILL)
+    }
+
+    void "sendJobs, when submit throw exception on first, then call killJobs for empty list and throw SubmitClusterJobException"() {
+        given:
+        setupJobData()
+
+        BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
+            1 * submitJob(job1) >> { throw new BEException('test failure') }
+            1 * killJobs([])
+            0 * _
+        }
+
+        service.logService = Mock(LogService)
+
+        when:
+        service.sendJobs(jobManager, workflowStep, [job1, job2])
+
+        then:
+        SubmitClusterJobException e = thrown()
+        !e.message.contains(ClusterJobHandlingService.NESTED_FAIL_MESSAGE_FOR_KILL)
+    }
+
+    void "sendJobs, when submit throw exception on second, then call killJobs for first and throw SubmitClusterJobException"() {
+        given:
+        setupJobData()
+
+        BEJobResult jobResult1 = createBEJobResult(job1)
+
+        BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
+            1 * submitJob(job1) >> jobResult1
+            1 * submitJob(job2) >> { throw new BEException('test failure') }
+            1 * killJobs([job1])
+            0 * _
+        }
+
+        service.logService = Mock(LogService)
+
+        when:
+        service.sendJobs(jobManager, workflowStep, [job1, job2])
+
+        then:
+        SubmitClusterJobException e = thrown()
+        !e.message.contains(ClusterJobHandlingService.NESTED_FAIL_MESSAGE_FOR_KILL)
     }
 
     void "sendJobs, when submit fail and killJobs fail, then throw also the SubmitClusterJobException"() {
@@ -199,16 +263,14 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             0 * _
         }
 
-        service.logService = Mock(LogService) {
-            3 * addSimpleLogEntry(workflowStep, _)
-            0 * _
-        }
+        service.logService = Mock(LogService)
 
         when:
         service.sendJobs(jobManager, workflowStep, [job1, job2])
 
         then:
-        thrown(SubmitClusterJobException)
+        KillClusterJobException e = thrown()
+        e.message.contains(ClusterJobHandlingService.NESTED_FAIL_MESSAGE_FOR_KILL)
     }
 
     void "startJob, when all fine, then all jobs started and no exception thrown"() {
@@ -242,10 +304,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             0 * _
         }
 
-        service.logService = Mock(LogService) {
-            2 * addSimpleLogEntry(workflowStep, _)
-            0 * _
-        }
+        service.logService = Mock(LogService)
 
         when:
         service.startJob(jobManager, workflowStep, [job1, job2])
@@ -264,16 +323,12 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             0 * _
         }
 
-        service.logService = Mock(LogService) {
-            3 * addSimpleLogEntry(workflowStep, _)
-            0 * _
-        }
-
+        service.logService = Mock(LogService)
         when:
         service.startJob(jobManager, workflowStep, [job1, job2])
 
         then:
-        thrown(StartClusterJobException)
+        thrown(KillClusterJobException)
     }
 
     void "createAndSaveClusterJobs, when all fine, then create all cluster jobs and no exception thrown"() {
@@ -370,6 +425,8 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     }
 
     private BEJobResult createBEJobResult(BEJob job, boolean success = true) {
-        return new BEJobResult(null, job, new ExecutionResult(success, success ? 0 : 1, [], ''), null, [:], [])
+        BEJobResult jobResult = new BEJobResult(null, job, new ExecutionResult(success, success ? 0 : 1, [], ''), null, [:], [])
+        job.runResult = jobResult
+        return jobResult
     }
 }

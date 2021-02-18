@@ -39,7 +39,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
 
     @Override
     Class[] getDomainClassesToMock() {
-        super.domainClassesToMock + [
+        return super.domainClassesToMock + [
                 WorkflowStep,
         ]
     }

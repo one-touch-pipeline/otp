@@ -60,6 +60,11 @@ class ClusterAccessService {
 
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
 
+        logService.addSimpleLogEntry(workflowStep, "Submitting ${scripts.size()} jobs")
+        scripts.eachWithIndex { String script, int index ->
+            logService.addSimpleLogEntry(workflowStep, "Job ${index}:\n${script}")
+        }
+
         List<BEJob> beJobs = clusterJobHandlingService.createBeJobsToSend(jobManager, realm, workflowStep, scripts, jobSubmissionOptions)
 
         //begin of not restartable area
@@ -106,7 +111,7 @@ class ClusterAccessService {
                 ].join(', ')
             }.join('\n')
             throw new RunningClusterJobException("The workflow has still ${runningClusterJobs.size()} cluster jobs in checkStatus " +
-            "${ClusterJob.CheckStatus.CREATED.name()} or  {ClusterJob.CheckStatus.CHECKING.name()}." +
+                    "${ClusterJob.CheckStatus.CREATED.name()} or  {ClusterJob.CheckStatus.CHECKING.name()}." +
                     "As long as cluster jobs are in these states, the job cannot be restarted." +
                     "\nCurrently the following jobs are affected:\n${header}\n${jobInfos}")
         }
