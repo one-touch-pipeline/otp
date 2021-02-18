@@ -89,7 +89,7 @@ class FileSystemService {
                     }
                     break
                 case SshAuthMethod.PASSWORD:
-                    env.withPassword(configService.sshPassword().toCharArray())
+                    env.withPassword(configService.sshPassword.toCharArray())
                     break
             }
 
