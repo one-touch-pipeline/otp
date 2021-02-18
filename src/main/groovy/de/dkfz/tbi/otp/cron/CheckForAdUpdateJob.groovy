@@ -48,7 +48,7 @@ class CheckForAdUpdateJob extends ScheduledJob {
     ConfigService configService
 
     @Override
-    boolean isAdditionalRunConditionsMet() {
+    boolean isAdditionalRunConditionMet() {
         return configService.ldapEnabled
     }
 

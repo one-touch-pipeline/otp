@@ -407,6 +407,10 @@ class ProcessingOption implements Entity {
                 "Email address for all mails to be handled by an OTP maintainer",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
+        EMAIL_MONTHLY_KPI_RECEIVER(
+                "Email address for the receiver of the de.NBI monthly KPI reports",
+                Necessity.REQUIRED, null, TypeValidators.MAIL
+        ),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE(
                 "Notes from the sequencing center that is sent with every notification mail",

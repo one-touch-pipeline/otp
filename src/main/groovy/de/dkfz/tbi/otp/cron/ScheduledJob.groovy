@@ -48,6 +48,7 @@ abstract class ScheduledJob {
             DeactivateUsersJob,
             ScheduleUsersForDeactivationJob,
             UnknownLdapUsersJob,
+            GenerateAndSendKPIsForNBI,
     ]
 
     @Autowired
@@ -82,10 +83,10 @@ abstract class ScheduledJob {
     boolean isScheduledJobRunPreconditionsMet() {
         return schedulerService.active &&
                 processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.CRONJOB_ACTIVE, this.class.canonicalName) &&
-                additionalRunConditionsMet
+                additionalRunConditionMet
     }
 
-    boolean isAdditionalRunConditionsMet() {
+    boolean isAdditionalRunConditionMet() {
         return true
     }
 
