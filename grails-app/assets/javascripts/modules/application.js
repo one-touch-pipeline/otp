@@ -30,7 +30,8 @@
 //= require /webjars/datatables-buttons/1.3.1-1/js/dataTables.buttons.js
 //= require /webjars/datatables-buttons/1.3.1-1/js/buttons.html5.js
 //= require /webjars/datatables-plugins/1.10.20/pagination/select.js
-//= require dataTable/dataTables.scroller.js
+//= require /webjars/datatables.net-scroller/js/dataTables.scroller.js
+//= require /webjars/datatables.net-scroller-bs4/js/scroller.bootstrap4.js
 //= require /webjars/select2/4.0.12/js/select2.full.js
 
 //= require otp.js
