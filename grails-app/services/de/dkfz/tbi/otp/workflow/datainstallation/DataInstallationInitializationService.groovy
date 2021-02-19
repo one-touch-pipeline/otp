@@ -24,12 +24,14 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.shared.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
 
+/**
+ * A service providing functionality needed by the different jobs for the data installation workflow.
+ */
 @Transactional
 class DataInstallationInitializationService {
 
@@ -45,16 +47,20 @@ class DataInstallationInitializationService {
     /**
      * Create for all {@link SeqTrack}s of the {@link FastqImportInstance} a {@link WorkflowRun} and an output {@link WorkflowArtefact}
      * with role {@link #OUTPUT_ROLE} connecting the {@link WorkflowRun} with the {@link SeqTrack}.
-     *
-     * The returned {@link WorkflowRun}s are saved, but not flushed yet.
      */
     List<WorkflowRun> createWorkflowRuns(FastqImportInstance instance, ProcessingPriority priority = null) {
         Workflow workflow = Workflow.getExactlyOneWorkflow(WORKFLOW)
-        return instance.dataFiles.groupBy {
+        List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
             it.seqTrack
         }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
             createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
         }
+
+        WorkflowRun.withTransaction { status ->
+            status.flush()
+        }
+
+        return workflowRuns
     }
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
@@ -62,35 +68,21 @@ class DataInstallationInitializationService {
         String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} " +
                 "${seqTrack.seqType.displayNameWithLibraryLayout} lane ${seqTrack.laneId} run ${seqTrack.run.name}"
         List<ExternalWorkflowConfigFragment> configFragments = getConfigFragments(seqTrack, workflow)
-        WorkflowRun run = workflowRunService.createWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}",
+        WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}",
                 configFragments)
-        WorkflowArtefact artefact = workflowArtefactService.createWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType, name)
+        WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType, name)
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
         return run
     }
 
     List<ExternalWorkflowConfigFragment> getConfigFragments(SeqTrack seqTrack, Workflow workflow) {
-        ActiveProjectWorkflow activeProjectWorkflow = ActiveProjectWorkflow.createCriteria().get {
-            eq('project', seqTrack.project)
-            eq('seqType', seqTrack.seqType)
-            eq('active', true)
-            workflowVersion {
-                eq('workflow', workflow)
-            }
-            isNull('deprecationDate')
-        }
-
-        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(
-                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(seqTrack.project, seqTrack.seqType)
-        ).referenceGenome
-
         return configFragmentService.getSortedFragments(new SingleSelectSelectorExtendedCriteria(
-                seqTrack.project,
-                activeProjectWorkflow.workflowVersion,
                 workflow,
+                null, //workflowVersion, installation are not versioned
+                seqTrack.project,
                 seqTrack.seqType,
-                referenceGenome,
+                null, //referenceGenome, not used for installation
                 seqTrack.libraryPreparationKit,
         ))
     }

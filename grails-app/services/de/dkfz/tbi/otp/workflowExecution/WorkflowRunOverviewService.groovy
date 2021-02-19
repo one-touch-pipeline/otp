@@ -27,7 +27,7 @@ import java.sql.Timestamp
 
 class WorkflowRunOverviewService {
     Map<Pair<WorkflowRun.State, Workflow>, Long> getNumberOfRunsPerWorkflowAndState() {
-        WorkflowRun.createCriteria().list {
+        return WorkflowRun.createCriteria().list {
             projections {
                 groupProperty("state")
                 groupProperty("workflow")

@@ -38,7 +38,7 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         ]
     }
 
-    void "createWorkflowArtefact, when created, then the values should be correct"() {
+    void "buildWorkflowArtefact, when created, then the values should be correct"() {
         given:
         WorkflowRun run = createWorkflowRun()
         String role = "role ${nextId}"
@@ -47,7 +47,7 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         String name = "asdf"
 
         when:
-        WorkflowArtefact artefact = service.createWorkflowArtefact(run, role, individual, seqType, name)
+        WorkflowArtefact artefact = service.buildWorkflowArtefact(run, role, individual, seqType, name)
 
         then:
         artefact

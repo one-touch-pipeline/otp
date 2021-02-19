@@ -54,7 +54,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         count == countOfRunningWorkflowStates
     }
 
-    void 'createWorkflowRun, when created, then the values should be correct'() {
+    void 'buildWorkflowRun, when created, then the values should be correct'() {
         given:
         service.configFragmentService = Mock(ConfigFragmentService) {
             mergeSortedFragments(_) >> new JSONObject([config: "combined"])
@@ -66,7 +66,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         String name = "asdf"
 
         when:
-        WorkflowRun run = service.createWorkflowRun(workflow, seqTrack.processingPriority, dir, project, name)
+        WorkflowRun run = service.buildWorkflowRun(workflow, seqTrack.processingPriority, dir, project, name)
 
         then:
         run
