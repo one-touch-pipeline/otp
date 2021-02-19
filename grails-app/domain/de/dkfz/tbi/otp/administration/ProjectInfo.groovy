@@ -42,6 +42,8 @@ class ProjectInfo implements Entity {
         PROBAND,
         /** Recipient is involved in a long-term cooperation with the local project PI, perhaps even as sample provider. */
         COOPERATION,
+        /** For EGA submissions, authorizing the upload of the data to EGA */
+        REPOSITORY,
         /** For those gray areas that earn legal departments their paychecks. You probably do not want to use this. */
         UNKNOWN,
     }
