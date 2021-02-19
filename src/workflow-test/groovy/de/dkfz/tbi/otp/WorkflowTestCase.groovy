@@ -46,6 +46,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem
@@ -60,7 +61,10 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
  *
  * To run the workflow tests the preparation steps described in
  * src/docs/guide/testing.md have to be followed.
+ *
+ * @Deprecated old workflow system, will replaced by {@link AbstractWorkflowSpec}
  */
+@Deprecated
 @Slf4j
 @Integration
 abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore {
@@ -116,6 +120,8 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
      * This method can be overridden if a workflow script needs some additional setup
      * before it can be loaded.
      */
+    //empty callback for subclasses
+    @SuppressWarnings('EmptyMethodInAbstractClass')
     protected void setupForLoadingWorkflow() {
         // do nothing by default
     }
@@ -124,7 +130,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
      * This method can be overridden if other job submission options are needed.
      */
     protected String getJobSubmissionOptions() {
-        JsonOutput.toJson([
+        return JsonOutput.toJson([
                 (JobSubmissionOption.WALLTIME): Duration.ofMinutes(20).toString(),
                 (JobSubmissionOption.MEMORY)  : "5g",
         ])
@@ -358,7 +364,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             }
         }
         if (!failureProcessingStepUpdates.empty) {
-            throw new RuntimeException("""\
+            throw new OtpRuntimeException("""\
                 |There were ${failureProcessingStepUpdates.size()} failures:
                 |${combinedErrorMessage.join("\n")}
                 |Details have been written to standard output. See the test report or run grails test-app -echoOut.
@@ -495,6 +501,7 @@ echo \$TEMP_DIR
      *  find the start job and execute it, then wait for
      *  either the workflow to finish or the timeout
      */
+    @SuppressWarnings("CatchThrowable")
     protected void execute(int numberOfProcesses = 1, boolean ensureNoFailure = true) {
         SessionUtils.withNewSession {
             updateProjectValuesForTestRunning()
