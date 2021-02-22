@@ -40,11 +40,18 @@
             <input type="text"/>
         </div>
         <h1><g:message code="crashRecovery.title"/></h1>
-            <g:if test="${!processingOptionsValid}">
-                <otp:annotation type="danger">
-                    There are invalid processing options: <g:link controller="processingOption">view and correct them here</g:link>
-                </otp:annotation>
-            </g:if>
+
+        <g:render template="/templates/quickNavigationBar" model="[
+                linkText : 'Crash Recovery (new workflow system)',
+                link : g.createLink(controller: 'crashRepair', action: 'index'),
+                tooltip : 'Navigate to the crash recovery page of the new workflow system'
+        ]"/>
+
+        <g:if test="${!processingOptionsValid}">
+            <otp:annotation type="danger">
+                There are invalid processing options: <g:link controller="processingOption">view and correct them here</g:link>
+            </otp:annotation>
+        </g:if>
         <div>
             <p>Select one of the Crashed Jobs and click one of the actions underneath the table. Jobs that are at least sometimes resumable are preselected.</p>
             <ul>

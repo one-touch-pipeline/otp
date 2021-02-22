@@ -121,6 +121,15 @@ class WorkflowStateChangeService {
         step.save(flush: true)
     }
 
+    /**
+     * Change the state of a workflow step to failed and save it with a default workflow error message.
+     * @param step which should be changed to failed
+     */
+    void changeStateToFailedWithManualChangedError(WorkflowStep step) {
+        Throwable throwable = new Throwable("Step has manually been set to failed state.")
+        changeStateToFailed(step, throwable)
+    }
+
     void changeStateToSuccess(WorkflowStep step) {
         assert step
         step.state = WorkflowStep.State.SUCCESS

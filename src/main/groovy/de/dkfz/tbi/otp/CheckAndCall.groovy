@@ -24,10 +24,35 @@ package de.dkfz.tbi.otp
 import grails.converters.JSON
 import grails.validation.Validateable
 import grails.validation.ValidationException
+import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 
 trait CheckAndCall {
 
+    /**
+     * Catch default errors for the input command and the method processing. Return default error messages and default HTTP status codes.
+     * @param cmd Validateable input command
+     * @param method closure method with the main logic
+     * @return http error messae in case of an error
+     */
+    def checkDefaultErrorsAndCallMethod(Validateable cmd, Closure method) {
+        if (cmd.hasErrors()) {
+            String errorMessage = createErrorMessageStringFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
+            return response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), errorMessage)
+        }
+
+        try {
+            method()
+        } catch (OtpRuntimeException | ValidationException | AssertionError e) {
+            log.error(e.localizedMessage)
+            return response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "default.message.error.unknown"))
+        }
+    }
+
+    /**
+     * @deprecated Is deprecated because it returns on errors a HTTP success status code. Use checkDefaultErrorsAndCallMethod instead.
+     */
+    @Deprecated
     JSON checkErrorAndCallMethod(Validateable cmd, Closure method, Closure<Map> additionalSuccessReturnValues = { [:] }) {
         Map data
         if (cmd.hasErrors()) {
@@ -83,6 +108,8 @@ trait CheckAndCall {
     }
 
     /**
+     * @deprecated Is deprecated because it returns on errors a HTTP success status code.
+     *
      * A helper to check first the cmd object for validation errors and do then closure in try catch block and render the result as JSON.
      *
      * In case the cmd object has errors, the errors are concerted to a json result and rendered.
@@ -100,6 +127,7 @@ trait CheckAndCall {
      * @param method the action to do if cmd has no errors. It should return a Map, which will be added to the success
      * @return the JSON, which is already rendered to the browser
      */
+    @Deprecated
     @SuppressWarnings('CatchRuntimeException')
     JSON checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure<Map> method) {
         Map data
@@ -136,6 +164,10 @@ trait CheckAndCall {
         return data
     }
 
+    /**
+     * @deprecated Is deprecated because it is used to return an error message with HTTP status 200.
+     */
+    @Deprecated
     private Map createErrorMessage(Errors errors) {
         List<String> errorMessages = []
         if (errors.errorCount == 1) {
@@ -150,5 +182,21 @@ trait CheckAndCall {
                 success: false,
                 error  : errorMessages.join('\n    '),
         ]
+    }
+
+    private String createErrorMessageStringFromErrors(Errors errors) {
+        String errorMessages = ""
+
+        if (errors.errorCount == 1) {
+            errorMessages << g.message(code: "default.message.error")
+        } else {
+            errorMessages << g.message(code: "default.message.errors", args: errors.errorCount)
+        }
+
+        errors.allErrors.each {
+            errorMessages << g.message(error: it)
+        }
+
+        return errorMessages.join('\n    ')
     }
 }

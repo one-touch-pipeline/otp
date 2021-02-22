@@ -57,6 +57,10 @@ class WorkflowStep implements Commentable, Entity {
 
     Set<ClusterJob> clusterJobs = [] as Set
 
+    static belongsTo = [
+            workflowRun: WorkflowRun
+    ]
+
     static hasMany = [
             clusterJobs: ClusterJob,
     ]

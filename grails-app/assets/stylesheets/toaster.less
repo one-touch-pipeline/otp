@@ -27,6 +27,23 @@
     top: 8px;
     right: 8px;
     z-index: 10;
+
+    .toast {
+        background-color: rgba(255, 255, 255, 1);
+    }
+
+    .otp-toast-time-txt {
+        margin-left: 5px;
+    }
+
+    .toast-body {
+        overflow-wrap: break-word;
+    }
+}
+
+.otp-toast-icon-wrapper {
+    line-height: 1;
+    margin-right: 5px;
 }
 
 .otpInfoToast {
@@ -43,18 +60,4 @@
 
 .otpErrorToast {
     border-color: @danger;
-}
-
-.otpToastBox {
-    .toast {
-        background-color: rgba(255, 255, 255, 1);
-    }
-    .toast-body {
-        overflow-wrap: break-word;
-    }
-}
-
-.otp-toast-icon-wrapper {
-    line-height: 1;
-    margin-right: 5px;
 }

@@ -31,7 +31,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showInfoToast: function (title, message) {
+    showInfoToast: function (title = 'Info', message = '') {
         this.showToast(title, message, 'info');
     },
     /**
@@ -40,7 +40,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showSuccessToast: function (title, message) {
+    showSuccessToast: function (title = 'Success', message = 'Operation has been successful.') {
         this.showToast(title, message, 'success');
     },
     /**
@@ -49,7 +49,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showWarningToast: function (title, message) {
+    showWarningToast: function (title = 'Warning', message = 'A warning occurred during the operation.') {
         this.showToast(title, message, 'warning');
     },
     /**
@@ -58,7 +58,7 @@ $.otp.toaster = {
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showErrorToast: function (title, message) {
+    showErrorToast: function (title = 'Error', message = 'Unknown error. Please try again.' ) {
         this.showToast(title, message, 'danger');
     },
     /**
@@ -77,7 +77,7 @@ $.otp.toaster = {
             '            <div class="toast-header">\n' +
             '                <span class="otp-toast-icon-wrapper text-' + state + '">' + stateProps.icon + '</span>\n' +
             '                <strong class="mr-auto">' + title + '</strong>\n' +
-            '                <small class="text-muted">' + date + '</small>\n' +
+            '                <small class="text-muted otp-toast-time-txt">' + date + '</small>\n' +
             '                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">\n' +
             '                    <span aria-hidden="true">&times;</span>\n' +
             '                </button>\n' +
