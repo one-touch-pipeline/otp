@@ -108,7 +108,6 @@ class ProjectRequestService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     Map<String, String> listAdditionalFieldValues(ProjectPropertiesGivenWithRequest projectRequest) {
         return projectRequest.projectFields.collectEntries { AbstractFieldValue afv ->
             [(afv.definition.id.toString()) : afv.displayValue]
