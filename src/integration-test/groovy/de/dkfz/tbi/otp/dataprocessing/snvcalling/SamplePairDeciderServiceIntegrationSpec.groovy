@@ -119,12 +119,6 @@ class SamplePairDeciderServiceIntegrationSpec extends Specification implements I
                     2 * filterByCategory(data1a.allWorkPackages, SampleType.Category.DISEASE) >> data1a.diseaseWorkPackages
                     2 * filterByCategory(data1b.allWorkPackages, SampleType.Category.DISEASE) >> data1b.diseaseWorkPackages
                     2 * filterByCategory(data1c.allWorkPackages, SampleType.Category.DISEASE) >> data1c.diseaseWorkPackages
-                    2 * filterBySequencingPlatformGroupIfAvailable(data1a.controlWorkPackages, _) >> data1a.controlWorkPackages
-                    2 * filterBySequencingPlatformGroupIfAvailable(data1b.controlWorkPackages, _) >> data1b.controlWorkPackages
-                    2 * filterBySequencingPlatformGroupIfAvailable(data1c.controlWorkPackages, _) >> data1c.controlWorkPackages
-                    2 * filterBySequencingPlatformGroupIfAvailable(data1a.diseaseWorkPackages, _) >> data1a.diseaseWorkPackages
-                    2 * filterBySequencingPlatformGroupIfAvailable(data1b.diseaseWorkPackages, _) >> data1b.diseaseWorkPackages
-                    2 * filterBySequencingPlatformGroupIfAvailable(data1c.diseaseWorkPackages, _) >> data1c.diseaseWorkPackages
                     0 * _
                 }
         ])

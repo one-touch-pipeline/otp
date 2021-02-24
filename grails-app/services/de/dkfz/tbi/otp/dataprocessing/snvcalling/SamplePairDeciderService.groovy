@@ -99,11 +99,6 @@ class SamplePairDeciderService {
         otherMergingWorkPackages = abstractMergingWorkPackageService.filterByCategory(otherMergingWorkPackages,
                 correspondingCategory)
 
-        if (mergingWorkPackage instanceof MergingWorkPackage) {
-            otherMergingWorkPackages = abstractMergingWorkPackageService.filterBySequencingPlatformGroupIfAvailable(
-                    otherMergingWorkPackages, mergingWorkPackage.seqPlatformGroup)
-        }
-
         switch (category) {
             case SampleType.Category.DISEASE:
                 return findOrCreateSamplePairs(mergingWorkPackage, otherMergingWorkPackages)

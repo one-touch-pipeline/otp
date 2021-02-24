@@ -74,7 +74,6 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                 abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
                     1 * findMergingWorkPackage(_, _, _) >> [mergingWorkPackage1, mergingWorkPackage2]
                     1 * filterByCategory(_, _) >> [mergingWorkPackage2]
-                    filterSeqPlatformGroup * filterBySequencingPlatformGroupIfAvailable(_, _) >> [mergingWorkPackage2]
                 }
         ])
 
@@ -135,7 +134,6 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                 abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
                     1 * findMergingWorkPackage(_, _, _) >> mergingWorkPackages
                     1 * filterByCategory(_, _) >> mergingWorkPackages[2..4]
-                    1 * filterBySequencingPlatformGroupIfAvailable(_, _) >> mergingWorkPackages[2..4]
                 }
         ])
 
@@ -281,9 +279,6 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                     4 * findMergingWorkPackage(_, _, _) >> mergingWorkPackages
                     2 * filterByCategory(_, SampleType.Category.DISEASE) >> mergingWorkPackages[0..3]
                     2 * filterByCategory(_, SampleType.Category.CONTROL) >> mergingWorkPackages[4..7]
-                    4 * filterBySequencingPlatformGroupIfAvailable(_, _) >> { List<MergingWorkPackage> mergingWorkPackages1, def seqPlatformGroup ->
-                        return mergingWorkPackages1
-                    }
                 }
         ])
         List expectedCombination = [

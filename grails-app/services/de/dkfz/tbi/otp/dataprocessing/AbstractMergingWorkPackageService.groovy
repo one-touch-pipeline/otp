@@ -58,17 +58,4 @@ class AbstractMergingWorkPackageService {
             it.sampleType.getCategory(it.project) == category
         }
     }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<AbstractMergingWorkPackage> filterBySequencingPlatformGroupIfAvailable(
-            List<AbstractMergingWorkPackage> mergingWorkPackages, SeqPlatformGroup seqPlatformGroup) {
-        assert seqPlatformGroup
-        return mergingWorkPackages.findAll {
-            if (it instanceof MergingWorkPackage) {
-                it.seqPlatformGroup == seqPlatformGroup
-            } else {
-                true
-            }
-        }
-    }
 }

@@ -160,30 +160,4 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
                 SampleType.Category.CONTROL,
         ]
     }
-
-
-    void "filterBySequencingPlatformGroupIfAvailable, if a list is given, return only the MergingWorkPackage with the given seqPlatformGroup and all createExternalMergingWorkPackage"() {
-        given:
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
-        List<AbstractMergingWorkPackage> expectedMergingWorkPackages = [
-                new MergingWorkPackage([seqPlatformGroup: seqPlatformGroup]),
-                new ExternalMergingWorkPackage(),
-                new MergingWorkPackage([seqPlatformGroup: seqPlatformGroup]),
-                new ExternalMergingWorkPackage(),
-                new MergingWorkPackage([seqPlatformGroup: seqPlatformGroup]),
-        ]
-
-        List<AbstractMergingWorkPackage> all = [
-                new MergingWorkPackage([seqPlatformGroup: new SeqPlatformGroup()]),
-                new MergingWorkPackage([seqPlatformGroup: new SeqPlatformGroup()]),
-        ] + expectedMergingWorkPackages
-
-        AbstractMergingWorkPackageService service = new AbstractMergingWorkPackageService()
-
-        when:
-        List<AbstractMergingWorkPackage> mergingWorkPackages = service.filterBySequencingPlatformGroupIfAvailable(all, seqPlatformGroup)
-
-        then:
-        TestCase.assertContainSame(expectedMergingWorkPackages, mergingWorkPackages)
-    }
 }
