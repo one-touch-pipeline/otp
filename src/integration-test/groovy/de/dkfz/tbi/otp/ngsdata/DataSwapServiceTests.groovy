@@ -220,21 +220,6 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     @Test
-    void test_changeMetadataEntry() {
-        setupData()
-        Sample sample = DomainFactory.createSample()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = DomainFactory.createMetaDataKey()
-        String newValue = "NEW"
-        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(key: metaDataKey, dataFile: dataFile)
-
-        dataSwapService.changeMetadataEntry(sample, metaDataKey.name, metaDataEntry.value, newValue)
-
-        assert metaDataEntry.value == newValue
-    }
-
-    @Test
     void test_getSingleSampleForIndividualAndSampleType_singleSample() {
         setupData()
         Individual individual = DomainFactory.createIndividual()
