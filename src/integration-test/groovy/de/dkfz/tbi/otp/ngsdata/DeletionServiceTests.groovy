@@ -288,20 +288,6 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testDeleteSeqScanAndCorrespondingInformation() {
-        setupData()
-        SeqScan seqScan = DomainFactory.createSeqScan()
-        MergingLog mergingLog = DomainFactory.createMergingLog(seqScan: seqScan)
-        MergedAlignmentDataFile mergedAlignmentDataFile = DomainFactory.createMergedAlignmentDataFile(mergingLog: mergingLog)
-
-        deletionService.deleteSeqScanAndCorrespondingInformation(seqScan)
-
-        assert !MergingLog.get(mergingLog.id)
-        assert !MergedAlignmentDataFile.get(mergedAlignmentDataFile.id)
-        assert !SeqScan.get(seqScan.id)
-    }
-
-    @Test
     void testDeleteSeqTrack() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
@@ -325,30 +311,6 @@ class DeletionServiceTests implements UserAndRoles {
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
             deletionService.deleteSeqTrack(seqTrack)
         }
-    }
-
-    @Test
-    void testDeleteRun() {
-        setupData()
-        Run run = DomainFactory.createRun()
-        DataFile dataFile = DomainFactory.createDataFile(run: run)
-
-        deletionService.deleteRun(run)
-
-        assert !Run.get(run.id)
-        assert !DataFile.get(dataFile.id)
-    }
-
-    @Test
-    void testDeleteRunByName() {
-        setupData()
-        Run run = DomainFactory.createRun()
-        DataFile dataFile = DomainFactory.createDataFile(run: run)
-
-        deletionService.deleteRunByName(run.name)
-
-        assert !Run.get(run.id)
-        assert !DataFile.get(dataFile.id)
     }
 
     @Test
@@ -496,8 +458,8 @@ class DeletionServiceTests implements UserAndRoles {
     private ProcessedMergedBamFile deleteProcessingFilesOfProject_PMBF_Setup() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum: HelperUtils.randomMd5sum,
-                fileSize: 1000,
+                md5sum             : HelperUtils.randomMd5sum,
+                fileSize           : 1000,
         ])
         dataBaseSetupForMergedBamFiles(bamFile)
         createFastqFiles(bamFile)
@@ -703,37 +665,5 @@ class DeletionServiceTests implements UserAndRoles {
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
-    }
-
-    @Test
-    void testDeleteIndividual_SnvWasExecuted() {
-        setupData()
-        testDeleteIndividualMethod(DomainFactory.createSnvInstanceWithRoddyBamFiles())
-    }
-
-    @Test
-    void testDeleteIndividual_IndelWasExecuted() {
-        setupData()
-        testDeleteIndividualMethod(DomainFactory.createIndelCallingInstanceWithRoddyBamFiles())
-    }
-
-    private void testDeleteIndividualMethod(BamFilePairAnalysis instance) {
-        List<File> filesToDelete = []
-
-        String pid = instance.individual.pid
-        instance.sampleType1BamFile.containedSeqTracks.each { SeqTrack seqTrack ->
-            filesToDelete << seqTrack.dataFiles.collect { new File(lsdfFilesService.getFileFinalPath(it)) }
-        }
-        filesToDelete << instance.instancePath.absoluteDataManagementPath
-        filesToDelete << instance.individual.getViewByPidPath(instance.seqType).absoluteDataManagementPath
-
-        List<String> allFilesToDeleteCmd = deletionService.deleteIndividual(pid)
-        String allFilesToDeleteCmdConcatenated = allFilesToDeleteCmd[0] + allFilesToDeleteCmd[1]
-
-        assert !Individual.findAllByPid(pid)
-
-        filesToDelete.flatten().each { File file ->
-            assert allFilesToDeleteCmdConcatenated.contains(file.absolutePath)
-        }
     }
 }
