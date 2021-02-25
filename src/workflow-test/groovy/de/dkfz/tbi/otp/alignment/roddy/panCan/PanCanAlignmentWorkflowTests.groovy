@@ -41,7 +41,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
     @Autowired
     PanCanStartJob panCanStartJob
 
-
     void "test no processableObject found"() {
         given:
         RoddyBamFile firstBamFile
@@ -64,8 +63,8 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
         then:
         SessionUtils.withNewSession {
-            assert 0 == Process.list().size()
-            assert 1 == RoddyBamFile.findAll().size()
+            assert Process.list().size() == 0
+            assert RoddyBamFile.findAll().size() == 1
             checkFirstBamFileState(firstBamFile, true, [
                     seqTracks         : seqTracks,
                     containedSeqTracks: seqTracks,
@@ -79,21 +78,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         given:
         SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
-        }
-
-        when:
-        execute()
-
-        then:
-        verify_AlignLanesOnly_AllFine()
-    }
-
-    void "test alignLanesOnly, no baseBam exists, one lane, workflow_1_0_182_1, all fine"() {
-        given:
-        SessionUtils.withNewSession {
-            createSeqTrack("readGroup1")
-            MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
-            createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
         }
 
         when:
@@ -135,7 +119,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         verify_AlignLanesOnly_AllFine()
     }
 
-
     void "test alignLanesOnly, no baseBam exists, one lane, with fingerPrinting, all fine"() {
         given:
         SessionUtils.withNewSession {
@@ -149,7 +132,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         then:
         verify_AlignLanesOnly_AllFine()
     }
-
 
     void "test alignLanesOnly, no baseBam exists, two lane, all fine"() {
         given:
@@ -167,23 +149,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         then:
         check_alignLanesOnly_NoBaseBamExist_TwoLanes(firstSeqTrack, secondSeqTrack)
     }
-
-    void "test, alignBaseBam and new lanes, workflow 1_0_182_1, all fine"() {
-        given:
-        SessionUtils.withNewSession {
-            MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
-            createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
-            createFirstRoddyBamFile(false)
-            createSeqTrack("readGroup2")
-        }
-
-        when:
-        execute()
-
-        then:
-        checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
-    }
-
 
     void "test, alignBaseBam and new lanes, all fine"() {
         given:
@@ -224,7 +189,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
             checkWorkPackageState()
 
             List<RoddyBamFile> bamFiles = RoddyBamFile.findAll().sort { it.id }
-            assert 2 == bamFiles.size()
+            assert bamFiles.size() == 2
             assert roddyBamFile == bamFiles.first()
             assert !bamFiles[1].baseBamFile
             checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
@@ -232,14 +197,5 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
             checkFileSystemState(bamFiles[1])
             return true
         }
-    }
-
-    private void createProjectConfigForQualityControlWorkflow(MergingWorkPackage mergingWorkPackage) {
-        createProjectConfig(mergingWorkPackage, [
-                pluginName       : "QualityControlWorkflows",
-                programVersion   : "1.2.182",
-                baseProjectConfig: "otpPanCanAlignmentWorkflow-1.3",
-                configVersion    : "v2_0",
-        ])
     }
 }

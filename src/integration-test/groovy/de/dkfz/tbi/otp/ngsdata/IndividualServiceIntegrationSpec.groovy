@@ -24,31 +24,37 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.joda.time.DateTime
-import org.joda.time.DateTimeUtils
 import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.util.TimeFormats
 
 @Rollback
 @Integration
-class IndividualServiceIntegrationSpec extends Specification implements UserAndRoles {
+class IndividualServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
     IndividualService individualService
-    private static final long ARBITRARY_TIMESTAMP = 1337
+
+    TestConfigService configService
 
     void setupData() {
         createUserAndRoles()
+    }
+
+    void cleanup() {
+        configService.clean()
     }
 
     @Unroll
     void "getIndividual by #identifier as #role"() {
         given:
         setupData()
-        Individual individual = DomainFactory.createIndividual()
+        Individual individual = createIndividual()
         Map<String, Object> searchProperty = [id: individual.id, name: individual.mockFullName]
         Individual returnedIndividual
 
@@ -80,7 +86,7 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
     void "getIndividual by #identifier with permission granted via project membership"() {
         given:
         setupData()
-        Individual individual = DomainFactory.createIndividual()
+        Individual individual = createIndividual()
         Map<String, Object> searchProperty = [id: individual.id, name: individual.mockFullName]
 
         when: "an unauthorized user requests an available individual"
@@ -125,13 +131,12 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
         String operation = "operation"
         Map mapA = [a: 1, b: 2, c: 3]
         Map mapB = [a: 1, b: 3, c: 4]
-        Date date = new Date()
 
         when:
-        String result = individualService.createCommentString(operation, mapA, mapB, date, null)
+        String result = individualService.createCommentString(operation, mapA, mapB, null)
 
         then:
-        result == """== operation - ${date.format("yyyy-MM-dd HH:mm")} ==
+        result == """== operation - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
 Old:
 b: 2
 c: 3
@@ -148,14 +153,13 @@ c: 4
         String operation = "operation"
         Map mapA = [a: 1]
         Map mapB = [a: 2]
-        Date date = new Date()
         String additionalInformation = "additional information"
 
         when:
-        String result = individualService.createCommentString(operation, mapA, mapB, date, additionalInformation)
+        String result = individualService.createCommentString(operation, mapA, mapB, additionalInformation)
 
         then:
-        result == """== operation - ${date.format("yyyy-MM-dd HH:mm")} ==
+        result == """== operation - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
 ${additionalInformation}
 Old:
 a: 1
@@ -170,19 +174,19 @@ a: 2
         setupData()
 
         Closure<Individual> createIndividualWithComment = { boolean hasComment ->
-            return DomainFactory.createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
+            return createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
         }
 
         String operation = "operation"
         Individual oldIndividual = createIndividualWithComment(oldHasComment)
         Individual newIndividual = createIndividualWithComment(newHasComment)
 
-        DateTimeUtils.currentMillisFixed = ARBITRARY_TIMESTAMP
+        configService.fixClockTo()
 
         String expected = """\
             |${newHasComment ? newIndividual.comment.comment : ""}
             |
-            |== ${operation} - ${new DateTime().toDate().format("yyyy-MM-dd HH:mm")} ==
+            |== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
             |Old:
             |individual: ${oldIndividual}
             |New:
@@ -199,9 +203,6 @@ a: 2
         then:
         newIndividual.comment.comment == expected
 
-        cleanup:
-        DateTimeUtils.setCurrentMillisSystem()
-
         where:
         oldHasComment | newHasComment
         false         | false
@@ -216,14 +217,14 @@ a: 2
         setupData()
 
         String operation = "operation"
-        Individual individual = DomainFactory.createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
+        Individual individual = createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
 
-        DateTimeUtils.currentMillisFixed = ARBITRARY_TIMESTAMP
+        configService.fixClockTo()
 
         String expected = """\
             |${hasComment ? individual.comment.comment : ""}
             |
-            |== ${operation} - ${new DateTime().toDate().format("yyyy-MM-dd HH:mm")} ==
+            |== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
             |Old:
             |diff: A
             |New:
@@ -236,9 +237,6 @@ a: 2
 
         then:
         individual.comment.comment == expected
-
-        cleanup:
-        DateTimeUtils.setCurrentMillisSystem()
 
         where:
         hasComment | _
@@ -262,7 +260,7 @@ a: 2
         setupData()
 
         when:
-        individualService.createComment(null, [individual: DomainFactory.createIndividual(), a: 1], [individual: DomainFactory.createIndividual()])
+        individualService.createComment(null, [individual: createIndividual(), a: 1], [individual: createIndividual()])
 
         then:
         thrown(AssertionError)

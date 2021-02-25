@@ -21,12 +21,13 @@
  */
 package de.dkfz.tbi.otp.gorm.mapper
 
-import org.jadira.usertype.dateandtime.shared.spi.AbstractSingleColumnUserType
-import org.joda.time.DateTime
+import org.jadira.usertype.spi.shared.AbstractSingleColumnUserType
+
+import java.time.ZonedDateTime
 
 /**
- * Converts joda-time {@link org.joda.time.DateTime} objects to long and vice versa
+ * Converts java-time {@link ZonedDateTime} objects to long and vice versa
  * using {@link LongColumnDateTimeMapper}
  */
-class PersistentDateTimeAsMillis extends AbstractSingleColumnUserType<DateTime, Long, LongColumnDateTimeMapper> {
+class PersistentDateTimeAsMillis extends AbstractSingleColumnUserType<ZonedDateTime, Long, LongColumnDateTimeMapper> {
 }

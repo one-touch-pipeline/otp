@@ -77,13 +77,10 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
     }
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
-
-    protected TestConfigService configService
+    TemporaryFolder temporaryFolder
 
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
-
         // Services
         Path path = temporaryFolder.newFile().toPath()
         service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
@@ -95,11 +92,12 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             _ * getWellAllFileViewByPidPath(_) >> path
         }
         service.seqTrackService = new SeqTrackService()
+
         Realm realm = createRealm()
-        service.configService = configService = new TestConfigService([
+        service.configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.root.toString(),
         ])
-        configService.processingOptionService = Mock(ProcessingOptionService) {
+        service.configService.processingOptionService = Mock(ProcessingOptionService) {
             _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
         }
         service.fileService = Mock(FileService) {
@@ -110,7 +108,8 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         }
         service.commentService = mockedCommendService
         service.individualService = new IndividualService([
-                commentService: mockedCommendService
+                commentService: mockedCommendService,
+                configService: service.configService,
         ])
 
         service.deletionService = Mock(DeletionService) {

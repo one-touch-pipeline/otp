@@ -177,8 +177,7 @@ dependencies {
     compile 'com.github.samtools:htsjdk:2.12.0'
 
     // general dependencies
-    compile "joda-time:joda-time:2.3"
-    compile "org.jadira.usertype:usertype.jodatime:2.0.1"
+    compile "org.jadira.usertype:usertype.core:5.0.0.GA"
     compile "com.opencsv:opencsv:4.4"
 
     compile "org.grails:grails-async-gpars:3.3.2"

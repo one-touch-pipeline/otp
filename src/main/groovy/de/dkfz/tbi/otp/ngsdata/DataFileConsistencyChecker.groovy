@@ -33,9 +33,9 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
-import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.util.TimeUtils
 
 @Scope("singleton")
 @Component
@@ -92,7 +92,7 @@ class DataFileConsistencyChecker {
                 }
             }
             log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: " +
-                    "${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
+                    "${TimeUtils.getFormattedDurationWithDays(startDate, new Date())}")
         }
     }
 

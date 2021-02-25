@@ -50,6 +50,8 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimeUtils
 
 import java.nio.file.FileSystem
 import java.util.regex.Matcher
@@ -195,6 +197,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             new MetaDataFileWrapper(
                     metaDataFile: it,
                     fullPath    : metadataImportService.getMetaDataFileFullPath(it),
+                    dateCreated : TimeFormats.DATE_TIME.getFormatted(TimeUtils.toZonedDateTime(it.dateCreated)),
             )
         }
 
@@ -424,6 +427,7 @@ class RemoveBlackListedIlseCommand {
 class MetaDataFileWrapper {
     MetaDataFile metaDataFile
     String fullPath
+    String dateCreated
 }
 
 @Immutable

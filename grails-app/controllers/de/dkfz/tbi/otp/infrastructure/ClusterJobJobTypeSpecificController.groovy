@@ -23,11 +23,13 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.joda.time.LocalDate
-import org.joda.time.Period
-import org.joda.time.format.PeriodFormat
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimeUtils
+
+import java.time.Duration
+import java.time.LocalDate
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobJobTypeSpecificController {
@@ -37,9 +39,13 @@ class ClusterJobJobTypeSpecificController {
     ClusterJobService clusterJobService
 
     def index() {
-        LocalDate date = clusterJobService.getLatestJobDate() ?: new LocalDate()
+        LocalDate date = clusterJobService.getLatestJobDate()?.toLocalDate() ?: LocalDate.now()
         def jobClasses = clusterJobService.findAllJobClassesByDateBetween(date, date)
-        return [jobClasses: jobClasses, latestDate: date?.toString("yyyy-MM-dd")]
+        return [
+                jobClasses: jobClasses,
+                beginDate : TimeFormats.DATE.getFormatted(date.minusWeeks(1)),
+                latestDate: TimeFormats.DATE.getFormatted(date),
+        ]
     }
 
     def getJobTypeSpecificAvgCoreUsage() {
@@ -61,8 +67,8 @@ class ClusterJobJobTypeSpecificController {
 
         def data = clusterJobService.findSpecificAvgStatesTimeDistribution(params.jobClass, seqType, startDate, endDate, basesToBeNormalized)
         dataToRender.data = [
-                'avgQueue'  : PeriodFormat.getDefault().print(new Period(data.avgQueue)),
-                'avgProcess': PeriodFormat.getDefault().print(new Period(data.avgProcess)),
+                'avgQueue'  : TimeUtils.getFormattedDuration(Duration.ofMillis(data.avgQueue)),
+                'avgProcess': TimeUtils.getFormattedDuration(Duration.ofMillis(data.avgProcess)),
         ]
 
         render dataToRender as JSON
@@ -89,7 +95,7 @@ class ClusterJobJobTypeSpecificController {
     def getJobClassesByDate() {
         Map dataToRender = [:]
 
-        dataToRender.data = clusterJobService.findAllJobClassesByDateBetween(new LocalDate(params.from), new LocalDate(params.to))
+        dataToRender.data = clusterJobService.findAllJobClassesByDateBetween(LocalDate.parse(params.from), LocalDate.parse(params.to))
 
         render dataToRender as JSON
     }

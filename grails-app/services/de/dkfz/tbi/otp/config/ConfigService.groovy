@@ -156,12 +156,12 @@ class ConfigService implements ApplicationContextAware {
         return Clock.system(timeZoneId)
     }
 
-    ZonedDateTime getZonedLocalDateTime() {
+    ZonedDateTime getZonedDateTime() {
         return ZonedDateTime.now(clock)
     }
 
     Date getCurrentDate() {
-        return Date.from(Instant.from(zonedLocalDateTime))
+        return Date.from(Instant.from(zonedDateTime))
     }
 
     boolean useBackdoor() {

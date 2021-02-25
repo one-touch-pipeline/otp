@@ -23,10 +23,11 @@ package de.dkfz.tbi.otp.tracking
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.joda.time.LocalDate
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.DataTableCommand
+
+import java.time.LocalDate
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ProcessingTimeStatisticsController {

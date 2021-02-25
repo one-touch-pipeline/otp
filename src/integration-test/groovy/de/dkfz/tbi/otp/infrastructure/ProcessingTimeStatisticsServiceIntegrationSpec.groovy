@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.joda.time.LocalDate
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
 import spock.lang.Specification
@@ -33,6 +32,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
+import de.dkfz.tbi.util.TimeUtils
+
+import java.time.LocalDate
 
 @Rollback
 @Integration
@@ -52,10 +54,10 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
 
     void "findAllOtrsTicketsByDateBetweenAndSearch, when no search, ignore search"() {
         given:
-        LocalDate dateFrom = new LocalDate()
-        LocalDate dateTo = new LocalDate().plusDays(1)
+        LocalDate dateFrom = LocalDate.now()
+        LocalDate dateTo = LocalDate.now().plusDays(1)
 
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(dateCreated: dateFrom.toDate())
+        OtrsTicket ticket = DomainFactory.createOtrsTicket(dateCreated: TimeUtils.toDate(dateTo))
 
         expect:
         [ticket] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, null)
@@ -63,10 +65,10 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
 
     void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search for is too small, throw Exception"() {
         given:
-        LocalDate dateFrom = new LocalDate()
-        LocalDate dateTo = new LocalDate().plusDays(1)
+        LocalDate dateFrom = LocalDate.now()
+        LocalDate dateTo = LocalDate.now().plusDays(1)
 
-        createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()])
+        createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom)])
 
         when:
         processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, "56")
@@ -77,16 +79,16 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
     }
 
     void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search in ILSe ID, return ticket with searched ILSe ID"() {
-        LocalDate dateFrom = new LocalDate()
-        LocalDate dateTo = new LocalDate().plusDays(1)
+        LocalDate dateFrom = LocalDate.now()
+        LocalDate dateTo = LocalDate.now().plusDays(1)
 
         // values that are searched for are set explicitly, otherwise they could contain the search term depending on the order tests are executed
-        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate(), ticketNumber: "2016122411111111",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
+        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122411111111",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
         seqTrackA.sample.individual.project.name = "proj_1"
         seqTrackA.sample.individual.project.save(flush: true)
         seqTrackA.run.name = "run_1"
         seqTrackA.run.save(flush: true)
-        SeqTrack seqTrackB = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate(), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])[1] as SeqTrack
+        SeqTrack seqTrackB = createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])[1] as SeqTrack
         seqTrackB.sample.individual.project.name = "proj_2"
         seqTrackB.sample.individual.project.save(flush: true)
         seqTrackB.run.name = "run_2"
@@ -98,11 +100,11 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
 
     @Ignore('Fails with H2, succeeds with PostgreSQL -> OTP-1874')
     void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search in project name, return ticket with searched project name"() {
-        LocalDate dateFrom = new LocalDate()
-        LocalDate dateTo = new LocalDate().plusDays(1)
+        LocalDate dateFrom = LocalDate.now()
+        LocalDate dateTo = LocalDate.now().plusDays(1)
 
-        def (ticketA, projectA) = createOtrsTicketWithProject([dateCreated: dateFrom.toDate()])
-        createOtrsTicketWithProject([dateCreated: dateFrom.toDate()])
+        def (ticketA, projectA) = createOtrsTicketWithProject([dateCreated: TimeUtils.toDate(dateFrom)])
+        createOtrsTicketWithProject([dateCreated: TimeUtils.toDate(dateFrom)])
 
         expect:
         [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, projectA.name)
@@ -154,25 +156,25 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
                 [sampleA.displayName, sampleB.displayName],
                 ["${seqTrackA.run}, lane: ${seqTrackA.laneId}", "${seqTrackB.run}, lane: ${seqTrackB.laneId}"],
                 ticket.submissionReceivedNotice.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.submissionReceivedNotice, ticket.ticketCreated),
+                TimeUtils.getFormattedDurationWithDays(ticket.submissionReceivedNotice, ticket.ticketCreated),
                 ticket.ticketCreated.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.ticketCreated, ticket.installationStarted),
+                TimeUtils.getFormattedDurationWithDays(ticket.ticketCreated, ticket.installationStarted),
                 ticket.installationStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.installationStarted, ticket.installationFinished),
+                TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.installationFinished),
                 ticket.installationFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.installationFinished, ticket.fastqcStarted),
+                TimeUtils.getFormattedDurationWithDays(ticket.installationFinished, ticket.fastqcStarted),
                 ticket.fastqcStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.fastqcStarted, ticket.fastqcFinished),
+                TimeUtils.getFormattedDurationWithDays(ticket.fastqcStarted, ticket.fastqcFinished),
                 ticket.fastqcFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.fastqcFinished, ticket.alignmentStarted),
+                TimeUtils.getFormattedDurationWithDays(ticket.fastqcFinished, ticket.alignmentStarted),
                 ticket.alignmentStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.alignmentStarted, ticket.alignmentFinished),
+                TimeUtils.getFormattedDurationWithDays(ticket.alignmentStarted, ticket.alignmentFinished),
                 ticket.alignmentFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.alignmentFinished, ticket.snvStarted),
+                TimeUtils.getFormattedDurationWithDays(ticket.alignmentFinished, ticket.snvStarted),
                 ticket.snvStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.snvStarted, ticket.snvFinished),
+                TimeUtils.getFormattedDurationWithDays(ticket.snvStarted, ticket.snvFinished),
                 ticket.snvFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
-                ProcessingTimeStatisticsService.getFormattedPeriod(ticket.installationStarted, ticket.snvFinished),
+                TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.snvFinished),
                 comment.comment,
                 ticket.finalNotificationSent,
                 ticket.id,

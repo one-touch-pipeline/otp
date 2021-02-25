@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="org.joda.time.DateTime" contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -106,7 +106,7 @@
         <g:each in="${metaDataDetails.metaDataFileWrapper}" var="file">
             <li>
                 ${file.fullPath}<br>
-                <g:message code="metadataImport.details.dateCreated"/>: ${new DateTime(file.metaDataFile.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}<br>
+                <g:message code="metadataImport.details.dateCreated"/>: ${file.dateCreated}<br>
                 <g:message code="metadataImport.details.md5"/>: ${file.metaDataFile.md5sum ?: "-"}
             </li>
         </g:each>
@@ -155,7 +155,7 @@
                             </li>
                         </g:each>
                         <g:each in="${seqTrack.seqTrack.logMessages}" var="msg">
-                            <li>${new DateTime(msg.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}: ${msg.message}</li>
+                            <li>${de.dkfz.tbi.util.TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(msg.dateCreated)}: ${msg.message}</li>
                         </g:each>
                     </ul>
                 </li>

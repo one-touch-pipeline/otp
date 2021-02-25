@@ -35,7 +35,7 @@
     <div class="body">
         <h1><g:message code="jobstats.general.title"></g:message></h1>
         <div class="rounded-page-header-box">
-            <span>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></span>
+            <span>from: <input type="text" class="datePicker" id="dpFrom" value="${beginDate}"></span>
             <span>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></span>
         </div>
         <div id="clusterJobGeneralTableContainer">

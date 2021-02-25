@@ -22,26 +22,30 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.test.mixin.Mock
-import org.joda.time.LocalDate
 import org.junit.Test
 
 import de.dkfz.tbi.otp.ngsdata.Realm
+
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Mock([
         Realm, //It is necessary to mock a class to have the needed configured GORM
 ])
 class ClusterJobServiceUnitTests {
 
-    static final LocalDate SDATE_LOCALDATE = new LocalDate()
-    static final LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
+    static final LocalDate START_DATE = LocalDate.now()
+    static final LocalDate END_DATE = START_DATE.plusDays(1)
 
     ClusterJobService clusterJobService = new ClusterJobService()
 
     @Test
     void test_DateTimeIntervalWithHourBuckets_hourBuckets_WhenInputIs24_hours_ThenShouldReturnListOfTwentyFiveDates() {
-        List dates = (0..24).collect { SDATE_LOCALDATE.toDateTimeAtStartOfDay().plusHours(it) }
+        List dates = (0..48).collect {
+            START_DATE.atStartOfDay(ZoneId.systemDefault()).plusHours(it)
+        }
 
-        assert dates == new ClusterJobService.DateTimeIntervalWithHourBuckets(SDATE_LOCALDATE, SDATE_LOCALDATE).hourBuckets
+        assert dates == new ClusterJobService.DateTimeIntervalWithHourBuckets(START_DATE, END_DATE).hourBuckets
     }
 
     @Test

@@ -23,19 +23,22 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.joda.time.DateTime
-import org.joda.time.Duration
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
+import java.time.Duration
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Rollback
 @Integration
-class ClusterJobIntegrationSpec extends Specification {
+class ClusterJobIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
     static final int REQUESTED_MEMORY = 1000
     static final int USED_MEMORY = 800
@@ -44,16 +47,16 @@ class ClusterJobIntegrationSpec extends Specification {
     static final int USED_CORES = 10
     static final int REQUESTED_WALLTIME = 24 * 60 * 60 * 1000
     static final int ELAPSED_WALLTIME = 24 * 60 * 60 * 1000
-    static final DateTime QUEUED = new DateTime(1993, 5, 15, 12, 0, 0)
-    static final DateTime STARTED = QUEUED.plusDays(1)
-    static final DateTime ENDED = STARTED.plusDays(1)
+    static final ZonedDateTime QUEUED = ZonedDateTime.of(1993, 5, 15, 12, 0, 0, 0, ZoneId.systemDefault())
+    static final ZonedDateTime STARTED = QUEUED.plusDays(1)
+    static final ZonedDateTime ENDED = STARTED.plusDays(1)
 
     TestConfigService configService
     ProcessingOptionService processingOptionService
 
     void setupData() {
         configService = new TestConfigService()
-        DomainFactory.createProcessingOptionLazy([name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, value: "1.0"])
+        findOrCreateProcessingOption([name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, value: "1.0"])
     }
 
     void cleanupData() {
@@ -64,28 +67,28 @@ class ClusterJobIntegrationSpec extends Specification {
         given:
         setupData()
 
-        ClusterJob clusterJob = DomainFactory.createClusterJob(
+        ClusterJob clusterJob = createClusterJob(
                 queued: QUEUED,
                 started: STARTED,
                 ended: ENDED,
-                requestedWalltime: new Duration(REQUESTED_WALLTIME),
+                requestedWalltime: Duration.ofMillis(REQUESTED_WALLTIME),
                 requestedCores: REQUESTED_CORES,
                 usedCores: USED_CORES,
-                cpuTime: new Duration(CPU_TIME),
+                cpuTime: Duration.ofMillis(CPU_TIME),
                 requestedMemory: REQUESTED_MEMORY,
                 usedMemory: USED_MEMORY
         )
 
         expect:
-        Closure<Boolean> doublesEqual = { double d1, double d2, int p=5 ->
+        Closure<Boolean> doublesEqual = { double d1, double d2, int p = 5 ->
             return d1.round(p) == d2.round(p)
         }
 
-        doublesEqual(clusterJob.memoryEfficiency,       USED_MEMORY / REQUESTED_MEMORY)
-        doublesEqual(clusterJob.cpuTimePerCore,         CPU_TIME / USED_CORES)
-        doublesEqual(clusterJob.cpuAvgUtilised,         CPU_TIME / ELAPSED_WALLTIME)
-        doublesEqual(clusterJob.elapsedWalltime.millis, ELAPSED_WALLTIME)
-        doublesEqual(clusterJob.walltimeDiff.millis,    REQUESTED_WALLTIME - ELAPSED_WALLTIME)
+        doublesEqual(clusterJob.memoryEfficiency, USED_MEMORY / REQUESTED_MEMORY)
+        doublesEqual(clusterJob.cpuTimePerCore, CPU_TIME / USED_CORES)
+        doublesEqual(clusterJob.cpuAvgUtilised, CPU_TIME / ELAPSED_WALLTIME)
+        doublesEqual(clusterJob.elapsedWalltime.toMillis(), ELAPSED_WALLTIME)
+        doublesEqual(clusterJob.walltimeDiff.toMillis(), REQUESTED_WALLTIME - ELAPSED_WALLTIME)
     }
 
     @Unroll
@@ -93,32 +96,32 @@ class ClusterJobIntegrationSpec extends Specification {
         given:
         setupData()
 
-        ClusterJob clusterJob = DomainFactory.createClusterJob([
-                seqType: null,
-                nBases: null,
-                nReads: null,
-                fileSize: null,
-                basesPerBytesFastq: null,
-                xten: null,
-                jobLog: null,
-                exitStatus: null,
-                exitCode: null,
-                eligible: null,
-                started: null,
-                ended: null,
-                requestedWalltime: null,
-                requestedCores: null,
-                usedCores: null,
-                cpuTime: null,
-                requestedMemory: null,
-                usedMemory: null,
-                node: null,
-                usedSwap: null,
-                accountName: null,
+        ClusterJob clusterJob = createClusterJob([
+                seqType                   : null,
+                nBases                    : null,
+                nReads                    : null,
+                fileSize                  : null,
+                basesPerBytesFastq        : null,
+                xten                      : null,
+                jobLog                    : null,
+                exitStatus                : null,
+                exitCode                  : null,
+                eligible                  : null,
+                started                   : null,
+                ended                     : null,
+                requestedWalltime         : null,
+                requestedCores            : null,
+                usedCores                 : null,
+                cpuTime                   : null,
+                requestedMemory           : null,
+                usedMemory                : null,
+                node                      : null,
+                usedSwap                  : null,
+                accountName               : null,
                 systemSuspendStateDuration: null,
-                userSuspendStateDuration: null,
-                startCount: null,
-                individual: null,
+                userSuspendStateDuration  : null,
+                startCount                : null,
+                individual                : null,
         ])
 
         when:
@@ -128,7 +131,7 @@ class ClusterJobIntegrationSpec extends Specification {
         clusterJob.validate()
 
         then:
-        clusterJob.getErrors().getAllErrors().isEmpty() == (notNullableProperty == null)
+        clusterJob.errors.allErrors.empty == (notNullableProperty == null)
 
         where:
         notNullableProperty << [null, "realm", "clusterJobId", "userName", "clusterJobName", "jobClass", "queued"]

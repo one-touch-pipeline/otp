@@ -23,11 +23,13 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.joda.time.Period
-import org.joda.time.format.PeriodFormat
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimeUtils
+
+import java.time.Duration
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobDetailController {
@@ -47,6 +49,9 @@ class ClusterJobDetailController {
 
         return [
                 'job'       : clusterJob,
+                'jobQueued' : TimeFormats.DATE_TIME.getFormatted(clusterJob.queued),
+                'jobStarted': TimeFormats.DATE_TIME.getFormatted(clusterJob.started),
+                'jobEnded'  : TimeFormats.DATE_TIME.getFormatted(clusterJob.ended),
                 'individual': individual,
                 'project'   : project,
                 'NA'        : ClusterJob.NOT_AVAILABLE,
@@ -79,6 +84,6 @@ class ClusterJobDetailController {
     }
 
     private String applyPeriodFormat(Long ms) {
-        return PeriodFormat.getDefault().print(new Period(ms))
+        return TimeUtils.getFormattedDuration(Duration.ofMillis(ms))
     }
 }

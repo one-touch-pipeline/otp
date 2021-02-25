@@ -22,8 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.acl.*
-import org.joda.time.DateTime
-import org.joda.time.Duration
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
@@ -57,6 +55,9 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+
+import java.time.Duration
+import java.time.ZonedDateTime
 
 import static de.dkfz.tbi.otp.project.ProjectRequest.Status.PROJECT_CREATED
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -1992,8 +1993,8 @@ class DomainFactory {
             final Map myProps = [
                     clusterJobName   : "testName_${processingStep.nonQualifiedJobClass}",
                     jobClass         : processingStep.nonQualifiedJobClass,
-                    queued           : new DateTime(),
-                    requestedWalltime: Duration.standardMinutes(5),
+                    queued           : ZonedDateTime.now(),
+                    requestedWalltime: Duration.ofMinutes(5),
                     requestedCores   : 10,
                     requestedMemory  : 1000,
             ]) {

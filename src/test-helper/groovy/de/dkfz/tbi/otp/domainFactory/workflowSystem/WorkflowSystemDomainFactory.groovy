@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import org.joda.time.DateTime
-
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -32,6 +30,8 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
+
+import java.time.ZonedDateTime
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
@@ -116,7 +116,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 jobClass      : "jobClass",
                 processingStep: { oldSystem ? DomainFactory.createProcessingStep() : null },
                 workflowStep  : { oldSystem ? null : createWorkflowStep() },
-                queued        : new DateTime(),
+                queued        : ZonedDateTime.now(),
         ], properties)
     }
 

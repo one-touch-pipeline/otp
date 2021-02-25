@@ -22,18 +22,16 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.gorm.transactions.Transactional
-import org.joda.time.*
-import org.joda.time.format.PeriodFormatter
-import org.joda.time.format.PeriodFormatterBuilder
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.util.TimeUtils
 
 import javax.sql.DataSource
-import java.sql.Timestamp
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 
 @Transactional
 class ProcessingTimeStatisticsService {
@@ -69,9 +67,9 @@ ${search ? """
  ORDER BY otrsTicket.dateCreated DESC
 """
 
-        Map queryOptions = [
-            dateFrom: new Timestamp(dateFrom.toDateTimeAtStartOfDay().getMillis()),
-            dateTo: new Timestamp(dateTo.plusDays(1).toDateTimeAtStartOfDay().getMillis()),
+        Map<String, ?> queryOptions = [
+            dateFrom: TimeUtils.toDate(dateFrom),
+            dateTo: TimeUtils.toDate(dateTo.plusDays(1)),
         ]
 
         if (search) {
@@ -100,7 +98,7 @@ ${search ? """
                 sampleNames,
                 seqTracks.collect { return "${it.run}, lane: ${it.laneId}" },
                 ticket.submissionReceivedNotice?.format(DATE_FORMAT) ?: "",
-                getFormattedPeriod(ticket.submissionReceivedNotice, ticket.ticketCreated),
+                TimeUtils.getFormattedDurationWithDays(ticket.submissionReceivedNotice as Date, ticket.ticketCreated as Date),
                 ticket.ticketCreated?.format(DATE_FORMAT) ?: "",
         ]
 
@@ -112,18 +110,18 @@ ${search ? """
             OtrsTicket.ProcessingStep.SNV,
         ].each {
             if (previousProcessingStep) {
-                data << getFormattedPeriod(ticket."${previousProcessingStep}Finished", ticket."${it}Started")
+                data << TimeUtils.getFormattedDurationWithDays(ticket."${previousProcessingStep}Finished" as Date, ticket."${it}Started" as Date)
             } else {
-                data << getFormattedPeriod(ticket.ticketCreated, ticket."${it}Started")
+                data << TimeUtils.getFormattedDurationWithDays(ticket.ticketCreated as Date, ticket."${it}Started" as Date)
             }
             data << ticket."${it}Started"?.format(DATE_FORMAT)
-            data << getFormattedPeriod(ticket."${it}Started", ticket."${it}Finished")
+            data << TimeUtils.getFormattedDurationWithDays(ticket."${it}Started" as Date, ticket."${it}Finished" as Date)
             data << ticket."${it}Finished"?.format(DATE_FORMAT)
             previousProcessingStep = it
         }
 
-        data << getFormattedPeriod(ticket.installationStarted, ticket.snvFinished ?: ticket.alignmentFinished ?: ticket.fastqcFinished ?:
-                ticket.installationFinished)
+        data << TimeUtils.getFormattedDurationWithDays(ticket.installationStarted as Date,
+                (ticket.snvFinished ?: ticket.alignmentFinished ?: ticket.fastqcFinished ?: ticket.installationFinished) as Date)
 
         if (ticket.comment?.comment) {
             data << ticket.comment.comment
@@ -136,31 +134,6 @@ ${search ? """
         data << ticket.ticketNumber
 
         return data
-    }
-
-    static String getFormattedPeriod(Date d1, Date d2) {
-        if (!d1 || !d2) {
-            return ""
-        }
-
-        PeriodFormatter formatter = new PeriodFormatterBuilder()
-                .printZeroAlways()
-                .minimumPrintedDigits(2)
-                .appendDays()
-                .appendSeparator("d ")
-                .appendHours()
-                .appendSeparator("h ")
-                .appendMinutes()
-                .appendSuffix("m")
-                .toFormatter()
-
-        Period period = new Period(new DateTime(d1), new DateTime(d2), PeriodType.dayTime())
-        String periodString = formatter.print(period)
-
-        if (periodString.contains("-")) {
-            return "-${periodString.replace("-", "")}"
-        }
-        return periodString
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

@@ -49,10 +49,12 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
+import de.dkfz.tbi.util.TimeFormats
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem
 import java.time.Duration
+import java.time.ZonedDateTime
 import java.util.concurrent.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -407,7 +409,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         if (!baseDirectory) {
             String mkDirs = """\
 TEMP_DIR=`mktemp -d -p ${resultRootDirectory.absolutePath} ${this.class.simpleName[0..-6]}-${System.getProperty('user.name')}-${
-                HelperUtils.formatter.print(new org.joda.time.DateTime())
+                TimeFormats.DATE_TIME_WITH_ZONE.getFormatted(ZonedDateTime.now())
             }-XXXXXXXXXXXXXXXX`
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR

@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
-import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -35,9 +34,11 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @Transactional
 class ErrorNotificationService {
@@ -224,10 +225,10 @@ class ErrorNotificationService {
             workflowStep.clusterJobs.sort { it.id }.each { ClusterJob clusterJob ->
                 message << "ID: ${clusterJob.clusterJobId}"
                 message << "Name: ${clusterJob.clusterJobName}"
-                message << "Queued time: ${dateString(clusterJob.queued)}"
-                message << "Eligible time: ${dateString(clusterJob.eligible)}"
-                message << "Start time: ${dateString(clusterJob.started)}"
-                message << "End time: ${dateString(clusterJob.ended)}"
+                message << "Queued time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.queued)}"
+                message << "Eligible time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.eligible)}"
+                message << "Start time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.started)}"
+                message << "End time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.ended)}"
                 message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na'}"
                 message << "Requested walltime: ${clusterJob.requestedWalltime}"
                 message << "Log file: ${clusterJob.jobLog}"
@@ -256,10 +257,6 @@ class ErrorNotificationService {
 
     private String header(String s) {
         return "\n${s}\n${"=" * s.length()}"
-    }
-
-    private String dateString(DateTime date) {
-        return dateString(date?.toDate())
     }
 
     private String dateString(Date date) {

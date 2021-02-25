@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,31 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.gorm.mapper
+package de.dkfz.tbi.util
 
-import org.jadira.usertype.spi.shared.AbstractLongColumnMapper
+import java.time.LocalDate
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-import java.time.*
+enum TimeFormats {
+    DATE('yyyy-MM-dd'),
+    TIME ('HH:mm:ss'),
+    DATE_TIME ('yyyy-MM-dd HH:mm:ss'),
+    DATE_TIME_WITHOUT_SECONDS('yyyy-MM-dd HH:mm'),
+    MONTH_YEAR ('MMM yyyy'),
+    DATE_TIME_WITH_ZONE('yyyy-MM-dd-HH-mm-ss-SSSZ'),
 
-class LongColumnDateTimeMapper extends AbstractLongColumnMapper<ZonedDateTime> {
+    final String format
 
-    @Override
-    Long toNonNullValue(ZonedDateTime dateTime) {
-        return dateTime.toInstant().toEpochMilli()
+    final DateTimeFormatter formatter
+
+    private TimeFormats(String format) {
+        this.format = format
+        formatter = DateTimeFormatter.ofPattern(format)
     }
 
-    @Override
-    String toNonNullString(ZonedDateTime dateTime) {
-        return toNonNullValue(dateTime).toString()
+    String getFormatted(ZonedDateTime date) {
+        return date ? date.format(formatter) : 'na'
     }
 
-    @Override
-    ZonedDateTime fromNonNullValue(Long millis) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault())
+    String getFormatted(LocalDate date) {
+        return date ? date.format(formatter) : 'na'
     }
 
-    @Override
-    ZonedDateTime fromNonNullString(String millisAsString) {
-        return fromNonNullValue(millisAsString as long)
+    String getFormatted(Date date) {
+        return date ? TimeUtils.toZonedDateTime(date).format(formatter) : 'na'
     }
 }

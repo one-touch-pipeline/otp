@@ -24,9 +24,12 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.TupleConstructor
-import org.joda.time.LocalDate
 
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.util.TimeFormats
+
+import java.time.LocalDate
+import java.time.ZonedDateTime
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobGeneralController {
@@ -56,10 +59,11 @@ class ClusterJobGeneralController {
     ClusterJobService clusterJobService
 
     Map index() {
-        LocalDate date = clusterJobService.latestJobDate ?: new LocalDate()
+        LocalDate date = (clusterJobService.latestJobDate ?: ZonedDateTime.now()).toLocalDate()
         return [
                 tableHeader: GeneralClusterJobsColumns.values()*.message,
-                latestDate: date,
+                beginDate  : date.minusWeeks(1),
+                latestDate : date,
         ]
     }
 
@@ -79,15 +83,15 @@ class ClusterJobGeneralController {
                 sortColumnName,
                 cmd.sSortDir_0
         )
-        List<String> data = clusterJobs.collect {
+        List<String> data = clusterJobs.collect { ClusterJob job ->
             return [
-                    it.clusterJobId,
-                    it.clusterJobName,
-                    it.exitStatus?.toString(),
-                    it.queued?.toString(FORMAT_STRING),
-                    it.started?.toString(FORMAT_STRING),
-                    it.ended?.toString(FORMAT_STRING),
-                    it.id,
+                    job.clusterJobId,
+                    job.clusterJobName,
+                    job.exitStatus?.toString(),
+                    TimeFormats.DATE_TIME.getFormatted(job.queued),
+                    TimeFormats.DATE_TIME.getFormatted(job.started),
+                    TimeFormats.DATE_TIME.getFormatted(job.ended),
+                    job.id,
             ]
         }
         dataToRender.iTotalRecords = clusterJobService.countAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch)

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import org.joda.time.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
@@ -56,10 +55,12 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.util.TimeUtils
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.file.*
+import java.time.LocalDate
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -170,7 +171,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     @Unroll
     void "validateAndImportWithAuth, when there are no problems, calls importMetadataFile and returns created MetaDataFile"() {
         given:
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
+        SeqCenter seqCenter = createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
@@ -180,10 +181,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         File runDirectory = new File(testDirectory, 'run')
         assert runDirectory.mkdir()
         Path metadataFile = testDirectory.toPath().resolve('metadata.tsv')
-        metadataFile.bytes = (
-                "${RUN_ID}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${CENTER_NAME}\n" +
-                        ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)
-        ).getBytes(MetadataValidationContext.CHARSET)
+        metadataFile.bytes = ("${RUN_ID}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${CENTER_NAME}\n" +
+                        ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)).getBytes(MetadataValidationContext.CHARSET)
 
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
@@ -240,7 +239,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
-        DomainFactory.createSeqCenter(autoImportable: false)
+        createSeqCenter(autoImportable: false)
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import1_meta.tsv")])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
         MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import2_meta.tsv")])
@@ -287,7 +286,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
     void "validateAndImportMultiple when all are valid, returns import results"() {
         given:
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
+        SeqCenter seqCenter = createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext(
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv")])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
@@ -316,7 +315,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
     void "validateAndImportMultiple when some are invalid, throws AutoImportFailedException"() {
         given:
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
+        SeqCenter seqCenter = createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         Problems problems = new Problems()
@@ -464,7 +463,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         def (String single, String paired) = [SequencingReadType.SINGLE, SequencingReadType.PAIRED]
         def (String parse, String scParse, String get) = ["parse_me", "sc_parse_me", "in_db"]
 
-        def (Date run1Date, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { new LocalDate(it[0], it[1], it[2]).toDate() }
+        def (Date run1Date, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { TimeUtils.toDate(LocalDate.of(it[0], it[1], it[2])) }
         def (String date1, String date2) = [run1Date, run2Date].collect { it.format("yyyy-MM-dd") }
 
         def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.getRandomMd5sum() }
@@ -474,28 +473,28 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         String scMaterial = SeqType.SINGLE_CELL_DNA
 
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(name: center1)
-        SeqCenter seqCenter2 = DomainFactory.createSeqCenter(name: center2)
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+        SeqCenter seqCenter = createSeqCenter(name: center1)
+        SeqCenter seqCenter2 = createSeqCenter(name: center2)
+        SeqPlatform seqPlatform = createSeqPlatformWithSeqPlatformGroup(
                 name: platform1,
-                seqPlatformModelLabel: DomainFactory.createSeqPlatformModelLabel(name: model1),
+                seqPlatformModelLabel: createSeqPlatformModelLabel(name: model1),
         )
-        SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+        SeqPlatform seqPlatform2 = createSeqPlatformWithSeqPlatformGroup(
                 name: platform2,
-                seqPlatformModelLabel: DomainFactory.createSeqPlatformModelLabel(name: model2),
+                seqPlatformModelLabel: createSeqPlatformModelLabel(name: model2),
         )
 
         if (runExists) {
-            DomainFactory.createRun(
+            createRun(
                     name: runName1,
                     dateExecuted: run1Date,
                     seqCenter: seqCenter,
                     seqPlatform: seqPlatform,
             )
         }
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(automaticNotification: true)
+        OtrsTicket otrsTicket = createOtrsTicket(automaticNotification: true)
         SeqType mySeqType = DomainFactory.createWholeGenomeSeqType(SequencingReadType.SINGLE)
-        SeqType mySeqTypeTag = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: SequencingReadType.SINGLE)
+        SeqType mySeqTypeTag = createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: SequencingReadType.SINGLE)
         SeqType exomeSingle = DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
         SeqType exomePaired = DomainFactory.createExomeSeqType(SequencingReadType.PAIRED)
         SeqType chipSeqSingle = DomainFactory.createChipSeqType(SequencingReadType.SINGLE)
@@ -505,18 +504,18 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         Sample sample2
         def (SoftwareTool pipeline1, SoftwareTool pipeline2, SoftwareTool unknownPipeline) =
         ['pipeline1', 'pipeline2', 'unknown'].collect {
-            DomainFactory.createSoftwareToolIdentifier(
+            createSoftwareToolIdentifier(
                     name: it,
-                    softwareTool: DomainFactory.createSoftwareTool(
+                    softwareTool: createSoftwareTool(
                             type: SoftwareTool.Type.BASECALLING,
                     ),
             ).softwareTool
         }
-        LibraryPreparationKit libraryPreparationKit1 = DomainFactory.createLibraryPreparationKit(name: kit1)
-        LibraryPreparationKit libraryPreparationKit2 = DomainFactory.createLibraryPreparationKit(name: kit2)
-        AntibodyTarget antibodyTarget1 = DomainFactory.createAntibodyTarget(name: target1)
-        AntibodyTarget antibodyTarget2 = DomainFactory.createAntibodyTarget(name: target2)
-        FileType fileType = DomainFactory.createFileType(
+        LibraryPreparationKit libraryPreparationKit1 = createLibraryPreparationKit(name: kit1)
+        LibraryPreparationKit libraryPreparationKit2 = createLibraryPreparationKit(name: kit2)
+        AntibodyTarget antibodyTarget1 = createAntibodyTarget(name: target1)
+        AntibodyTarget antibodyTarget2 = createAntibodyTarget(name: target2)
+        FileType fileType = createFileType(
                 type: FileType.Type.SEQUENCE,
                 signature: '_',
         )
@@ -871,7 +870,7 @@ ${ILSE_NO}                      -             1234          1234          -     
     void "importMetadataFile imports correctly data withAntibodyTarget"() {
         given:
         String runName = 'run'
-        Date date = new LocalDate(2000, 1, 1).toDate()
+        Date date = TimeUtils.toDate(LocalDate.of(2000, 1, 1))
         String dateString = date.format("yyyy-MM-dd")
         String fastq1 = "fastq_1.gz"
         String fastq2 = "fastq_2.gz"
@@ -880,20 +879,20 @@ ${ILSE_NO}                      -             1234          1234          -     
 
         DomainFactory.createAllAnalysableSeqTypes()
 
-        SeqType seqTypeWithAntibodyTarget = DomainFactory.createSeqType([
+        SeqType seqTypeWithAntibodyTarget = createSeqType([
                 libraryLayout    : SequencingReadType.PAIRED,
                 hasAntibodyTarget: true,
         ])
-        SeqCenter seqCenter = DomainFactory.createSeqCenter()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqCenter seqCenter = createSeqCenter()
+        SeqPlatform seqPlatform = createSeqPlatform()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
-        AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
-        SoftwareToolIdentifier softwareToolIdentifier = DomainFactory.createSoftwareToolIdentifier([
-                softwareTool: DomainFactory.createSoftwareTool([
+        AntibodyTarget antibodyTarget = createAntibodyTarget()
+        SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
+                softwareTool: createSoftwareTool([
                         type: SoftwareTool.Type.BASECALLING,
                 ]),
         ])
-        FileType fileType = DomainFactory.createFileType(
+        FileType fileType = createFileType(
                 type: FileType.Type.SEQUENCE,
                 signature: '_',
         )
@@ -1044,7 +1043,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
     void "importMetadataFile imports correctly data index files"() {
         given:
         String runName = 'run'
-        Date date = new LocalDate(2000, 1, 1).toDate()
+        Date date = TimeUtils.toDate(LocalDate.of(2000, 1, 1))
         String dateString = date.format("yyyy-MM-dd")
         String fastq1 = "fastq_r1.gz"
         String fastq2 = "fastq_r2.gz"
@@ -1057,15 +1056,15 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
 
         DomainFactory.createAllAnalysableSeqTypes()
         SeqType seqType = DomainFactory.createSeqTypePaired()
-        SeqCenter seqCenter = DomainFactory.createSeqCenter()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqCenter seqCenter = createSeqCenter()
+        SeqPlatform seqPlatform = createSeqPlatform()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
-        SoftwareToolIdentifier softwareToolIdentifier = DomainFactory.createSoftwareToolIdentifier([
-                softwareTool: DomainFactory.createSoftwareTool([
+        SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
+                softwareTool: createSoftwareTool([
                         type: SoftwareTool.Type.BASECALLING,
                 ]),
         ])
-        FileType fileType = DomainFactory.createFileType(
+        FileType fileType = createFileType(
                 type: FileType.Type.SEQUENCE,
                 signature: '_',
         )
@@ -1457,7 +1456,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
     private Map setupForCopyMetaDataFileIfRequested(String contextContent, boolean returnValidPath = true) {
         String ilseId = '1234'
         String fileName = 'metadataFile.tsv'
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(copyMetadataFile: true)
+        SeqCenter seqCenter = createSeqCenter(copyMetadataFile: true)
         String content = """\
                 ${ILSE_NO.name()}\t${CENTER_NAME.name()}
                 ${ilseId}\t${seqCenter.name}
@@ -1601,7 +1600,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
 
     void "test getIlseFolder, invalid input, should return null"() {
         given:
-        SeqCenter seqCenter = DomainFactory.createSeqCenter()
+        SeqCenter seqCenter = createSeqCenter()
         Path output
 
         when:
@@ -1616,7 +1615,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
 
     void "test getIlseFolder, valid input"() {
         given:
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(dirName: "SEQ_FACILITY")
+        SeqCenter seqCenter = createSeqCenter(dirName: "SEQ_FACILITY")
         MetadataImportService service = new MetadataImportService()
         service.configService = new TestConfigService((OtpProperty.PATH_SEQ_CENTER_INBOX): "/test")
         service.configService.metaClass.getDefaultRealm = {
@@ -1637,8 +1636,8 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
     void "test getConfiguredSeqTracks"() {
         given:
         MetadataImportService service = new MetadataImportService()
-        SeqTrack seqTrackWithWorkflowConfig = DomainFactory.createSeqTrack()
-        SeqTrack seqTrackWithoutWorkflowConfig = DomainFactory.createSeqTrack()
+        SeqTrack seqTrackWithWorkflowConfig = createSeqTrack()
+        SeqTrack seqTrackWithoutWorkflowConfig = createSeqTrack()
 
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrackWithWorkflowConfig.project,

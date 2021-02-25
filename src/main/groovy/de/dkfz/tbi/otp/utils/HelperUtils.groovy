@@ -21,18 +21,16 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
+import de.dkfz.tbi.util.TimeFormats
 
 import java.security.SecureRandom
+import java.time.ZonedDateTime
 
 class HelperUtils {
     static Random random = new SecureRandom()
-    static DateTimeFormatter formatter = DateTimeFormat.forPattern('yyyy-MM-dd-HH-mm-ss-SSSZ')
 
     static String getUniqueString() {
-        return "${formatter.print(new DateTime())}-${sprintf('%016X', random.nextLong())}"
+        return "${TimeFormats.DATE_TIME_WITH_ZONE.getFormatted(ZonedDateTime.now())}-${sprintf('%016X', random.nextLong())}"
     }
 
     static String getRandomMd5sum() {
@@ -42,7 +40,6 @@ class HelperUtils {
     static String getRandomEmail() {
         return sprintf('%016x.%016x@%016x.com', random.nextLong(), random.nextLong(), random.nextLong())
     }
-
 
     static String byteArrayToHexString(byte[] bytes) {
         assert bytes

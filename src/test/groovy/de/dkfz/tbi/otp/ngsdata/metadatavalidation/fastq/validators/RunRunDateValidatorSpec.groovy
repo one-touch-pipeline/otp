@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
-import org.joda.time.format.ISODateTimeFormat
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -30,8 +29,11 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.util.TimeUtils
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
+import java.time.LocalDate
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
@@ -40,7 +42,7 @@ class RunRunDateValidatorSpec extends Specification implements DataTest, DomainF
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Run,
                 SeqCenter,
                 SeqPlatform,
@@ -64,7 +66,7 @@ class RunRunDateValidatorSpec extends Specification implements DataTest, DomainF
                         "\tRunWithDateInDataBaseButNotInSheet\n"
 
         )
-        Date date = ISODateTimeFormat.date().parseDateTime("2016-01-01").toDate()
+        Date date = TimeUtils.toDate(LocalDate.of(2016, 1, 1))
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(name: "Illumina")
         createRun(name: 'InconsistentDatabaseAndMetadata', dateExecuted: date)
         createRun(name: 'ConsistentDatabaseAndMetadata', dateExecuted: date)

@@ -1,7 +1,7 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <option name="RIGHT_MARGIN" value="160" />
-    <option name="SOFT_MARGINS" value="242" />
+    <option name="SOFT_MARGINS" value="160,242" />
     <DB2CodeStyleSettings version="5">
       <option name="USE_GENERAL_STYLE" value="false" />
       <option name="KEYWORD_CASE" value="2" />

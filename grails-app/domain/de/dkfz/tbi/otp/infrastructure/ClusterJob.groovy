@@ -21,9 +21,6 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
-import org.joda.time.*
-import org.joda.time.format.*
-
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
@@ -32,8 +29,11 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.util.TimeUtils
 
 import java.nio.file.Paths
+import java.time.Duration
+import java.time.ZonedDateTime
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -46,27 +46,13 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * Other information are stored as soon as the cluster job is finished. Depending on
  * the used cluster job scheduler, not all values may be be available.
  *
- * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
+ * all timestamps using java-time, e.g. DateTime queued, get saved as UTC-timezone
  */
 class ClusterJob implements Entity {
 
     static final String NOT_AVAILABLE = "N/A"
 
     static final int DIGIT_COUNT = 2
-
-    static final PeriodFormatter HH_MM_SS = new PeriodFormatterBuilder()
-            .printZeroAlways()
-            .minimumPrintedDigits(DIGIT_COUNT)
-            .appendHours()
-            .appendLiteral(":")
-            .printZeroAlways()
-            .minimumPrintedDigits(DIGIT_COUNT)
-            .appendMinutes()
-            .appendLiteral(":")
-            .printZeroAlways()
-            .minimumPrintedDigits(DIGIT_COUNT)
-            .appendSeconds()
-            .toFormatter()
 
     /**
      * @deprecated old workflow system
@@ -180,17 +166,17 @@ class ClusterJob implements Entity {
     /**
      * date, job was submitted
      */
-    DateTime queued
+    ZonedDateTime queued
     /** date, job became eligible to run */
-    DateTime eligible
+    ZonedDateTime eligible
     /**
      * date, job started
      */
-    DateTime started
+    ZonedDateTime started
     /**
      * date, job ended
      */
-    DateTime ended
+    ZonedDateTime ended
     /**
      * requested walltime for the job
      */
@@ -279,7 +265,7 @@ class ClusterJob implements Entity {
         eligible nullable: true
         started(nullable: true)
         ended(nullable: true)
-        requestedWalltime(nullable: true, min: new Duration(1))
+        requestedWalltime(nullable: true, min: Duration.ofMillis(1))
         requestedCores(nullable: true, min: 1)
         usedCores(nullable: true, min: 1)
         cpuTime(nullable: true)
@@ -316,7 +302,6 @@ class ClusterJob implements Entity {
         systemSuspendStateDuration type: PersistentDurationAsMillis
         userSuspendStateDuration type: PersistentDurationAsMillis
         jobLog type: 'text'
-
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"
         workflowStep index: "cluster_job_workflow_step_idx"
@@ -354,7 +339,7 @@ class ClusterJob implements Entity {
      */
     Double getCpuTimePerCore() {
         if (cpuTime != null && usedCores != null) {
-            return cpuTime.millis / usedCores
+            return cpuTime.toMillis() / usedCores
         }
         return null
     }
@@ -363,8 +348,8 @@ class ClusterJob implements Entity {
      * average cpu cores utilized
      */
     Double getCpuAvgUtilised() {
-        if (cpuTime != null && elapsedWalltime != null && elapsedWalltime.millis != 0) {
-            return ((double) cpuTime.millis) / elapsedWalltime.millis
+        if (cpuTime != null && elapsedWalltime != null && elapsedWalltime.toMillis() != 0) {
+            return ((double) cpuTime.toMillis()) / elapsedWalltime.toMillis()
         }
         return null
     }
@@ -374,7 +359,7 @@ class ClusterJob implements Entity {
      */
     Duration getElapsedWalltime() {
         if (ended != null && started != null) {
-            return new Duration(started, ended)
+            return Duration.between(started, ended)
         }
         return null
     }
@@ -390,31 +375,27 @@ class ClusterJob implements Entity {
     }
 
     String getRequestedWalltimeAsISO() {
-        return formatPeriodAsISOString(requestedWalltime)
+        return TimeUtils.getFormattedDuration(requestedWalltime)
     }
 
     String getElapsedWalltimeAsISO() {
-        return formatPeriodAsISOString(elapsedWalltime)
+        return TimeUtils.getFormattedDuration(elapsedWalltime)
     }
 
     String getElapsedWalltimeAsHhMmSs() {
-        return formatPeriodAsHhMmSs(elapsedWalltime)
+        return formatPeriodAsHhMmSs()
     }
 
     String getWalltimeDiffAsISO() {
-        return formatPeriodAsISOString(walltimeDiff)
+        return TimeUtils.getFormattedDuration(walltimeDiff)
     }
 
     String getCpuTimeAsISO() {
-        return formatPeriodAsISOString(cpuTime)
+        return TimeUtils.getFormattedDuration(cpuTime)
     }
 
-    private String formatPeriodAsISOString(Duration value) {
-        return value ? PeriodFormat.default.print(new Period(value.millis)) : NOT_AVAILABLE
-    }
-
-    private String formatPeriodAsHhMmSs(Duration value) {
-        return value ? HH_MM_SS.print(new Period(value.millis)) : NOT_AVAILABLE
+    private String formatPeriodAsHhMmSs() {
+        return TimeUtils.getFormattedDuration(started, ended) ?: NOT_AVAILABLE
     }
 
     static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {

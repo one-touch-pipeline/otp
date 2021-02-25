@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.job
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
-import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -34,8 +33,10 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
+import java.time.ZonedDateTime
 
 @Transactional
 class JobMailService {
@@ -117,14 +118,13 @@ class JobMailService {
             Map clusterProperties = [
                     clusterId          : clusterJob.clusterJobId,
                     jobName            : clusterJob.clusterJobName,
-
-                    queue              : dateString(clusterJob.queued),
-                    eligible           : dateString(clusterJob.eligible), //time when job is ready for start (no hold anymore)
-                    start              : dateString(clusterJob.started),
-                    ended              : dateString(clusterJob.ended),
-                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na',
+                    queue              : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.queued),
+                    //time when job is ready for start (no hold anymore)
+                    eligible           : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.eligible),
+                    start              : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.started),
+                    ended              : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.ended),
+                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.toHours() : 'na',
                     logFile            : clusterJob.jobLog,
-
                     exitStatus         : clusterJob.exitStatus,
                     exitCode           : clusterJob.exitCode,
                     node               : clusterJob.node,
@@ -153,10 +153,6 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
 
             mailHelperService.sendEmail(subject, message.toString(), recipients)
         }
-    }
-
-    private String dateString(DateTime date) {
-        return dateString(date?.toDate())
     }
 
     private String dateString(Date date) {

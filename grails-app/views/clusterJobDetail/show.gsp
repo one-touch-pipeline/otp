@@ -20,7 +20,6 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -136,7 +135,6 @@ on the general cluster job page
                     <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.time"/></span>
                 </div>
                 <br>
-                <g:set var="formatDateString" value="${"yyyy-MM-dd HH:mm:ss"}"/>
                 <table>
                     <col class="columnColors">
                     <col class="columnSpace">
@@ -146,19 +144,19 @@ on the general cluster job page
                         <td></td>
                         <td></td>
                         <td><g:message code="jobstats.jobSpecific.detail.table.attribute.queued"/></td>
-                        <td>${job.queued.toString(formatDateString)}</td>
+                        <td>${jobQueued ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td></td>
                         <td><g:message code="jobstats.jobSpecific.detail.table.attribute.started"/></td>
-                        <td>${job.started?.toString(formatDateString) ?: NA}</td>
+                        <td>${jobStarted ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td></td>
                         <td><g:message code="jobstats.jobSpecific.detail.table.attribute.ended"/></td>
-                        <td>${job.ended?.toString(formatDateString) ?: NA}</td>
+                        <td>${jobEnded ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>

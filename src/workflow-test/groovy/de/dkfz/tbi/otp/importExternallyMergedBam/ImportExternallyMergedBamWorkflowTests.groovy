@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.importExternallyMergedBam
 
-
 import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore

@@ -21,9 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import org.joda.time.IllegalFieldValueException
-import org.joda.time.LocalDate
-import org.joda.time.format.ISODateTimeFormat
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -32,15 +29,28 @@ import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 
 @Component
 class RunDateValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
+    /**
+     * The date format used in the run names.
+     *
+     * Since it is part of the interface, it is hardcoded here directly instead of referencing to another place.
+     */
+    static final String RUN_DATE_FORMAT = "yyyy-MM-dd"
+
+    static final DateTimeFormatter RUN_DATE_FORMATTER = DateTimeFormatter.ofPattern(RUN_DATE_FORMAT)
+
     @Override
     Collection<String> getDescriptions() {
         return [
-                "The run date has the yyyy-MM-dd format.",
+                "The run date has the ${RUN_DATE_FORMAT} format.",
                 "The run date must not be from the future.",
         ]
     }
@@ -53,12 +63,15 @@ class RunDateValidator extends SingleValueValidator<MetadataValidationContext> i
     @Override
     void validateValue(MetadataValidationContext context, String runDate, Set<Cell> cells) {
         try {
-            LocalDate date = ISODateTimeFormat.date().parseLocalDate(runDate)
+            LocalDate date = LocalDate.parse(runDate, RUN_DATE_FORMATTER)
             if (date > LocalDate.now().plusDays(1)) {
-                context.addProblem(cells, LogLevel.ERROR, "The run date '${runDate}' must not be from the future.", "No run date may be from the future.")
+                context.addProblem(cells, LogLevel.ERROR, "The run date '${runDate}' must not be from the future.",
+                        "No run date may be from the future.")
             }
-        } catch (IllegalFieldValueException | IllegalArgumentException e) {
-            context.addProblem(cells, LogLevel.ERROR, "The format of the run date '${runDate}' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd.")
+        } catch (DateTimeParseException | IllegalArgumentException e) {
+            context.addProblem(cells, LogLevel.ERROR,
+                    "The format of the run date '${runDate}' is invalid, it must match ${RUN_DATE_FORMAT}.",
+                    "The format of at least one run date is invalid, it must match ${RUN_DATE_FORMAT}.")
         }
     }
 }

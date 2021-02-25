@@ -26,20 +26,12 @@
 
 package initializations.demoImports
 
-import org.joda.time.DateTime
-
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.ArtefactType
-import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRunInputArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.time.ZonedDateTime
 
 Project project1 = Project.findByName('Example project 1')
 
@@ -284,9 +276,9 @@ workflowSteps1.each { step ->
                 clusterJobId: "job-" + step.id,
                 clusterJobName: "Cluster Job " + step.id,
                 jobClass: "test",
-                queued: new DateTime(),
-            	started: new DateTime(),
-            	ended: new DateTime(),
+                queued: ZonedDateTime.now().minusDays(2),
+                started: ZonedDateTime.now().minusDays(1),
+                ended: ZonedDateTime.now(),
                 userName: "Test User",
                 checkStatus: ClusterJob.CheckStatus.CREATED,
                 oldSystem: false,

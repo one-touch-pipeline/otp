@@ -22,31 +22,37 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import org.joda.time.*
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.util.TimeFormats
+
+import java.time.*
 
 @Transactional
 class StatisticService {
 
+    private String createDateTimeFormatString(String entity) {
+        return "TO_CHAR(${entity}.dateCreated, 'YYYY-MM-DD')"
+    }
+
     ProjectService projectService
 
-    private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yyyy").withLocale(Locale.ENGLISH)
-
     List projectCountPerDay(ProjectGroup projectGroup) {
-        return Project.withCriteria {
-            projections {
-                if (projectGroup) {
-                    'in'("id", projectService.projectByProjectGroup(projectGroup)*.id)
-                }
-                groupProperty("dateCreated")
-                count("name")
-            }
-            order("dateCreated")
-        }
+        String dateTimeFormatString = createDateTimeFormatString('project')
+        String hql = """\
+            |SELECT
+            |    ${dateTimeFormatString},
+            |    COUNT(DISTINCT project.id)
+            |FROM
+            |    Project project
+            |${projectGroup == null ? "" : "WHERE project.projectGroup.id = ${projectGroup.id}"}
+            |GROUP BY
+            |    ${dateTimeFormatString}
+            |ORDER BY
+            |    ${dateTimeFormatString}""".stripMargin()
+
+        return Project.findAll(hql)
     }
 
     List sampleCountPerSequenceType(ProjectGroup projectGroup) {
@@ -96,10 +102,10 @@ class StatisticService {
      * @return a List of Lists, with [0] being the date and [1] being the grouped value
      */
     private List seqTrackPropertyGroupedByDayAndFilteredByProjects(String selectAggregateHql, List<Project> projectList) {
-        String dataFileTimeStamp = "TO_CHAR(st.dateCreated, 'YYYY-MM-DD')"
+        String dateTimeFormatString = createDateTimeFormatString('st')
         String hql = """\
             |SELECT
-            |    ${dataFileTimeStamp},
+            |    ${dateTimeFormatString},
             |    ${selectAggregateHql}
             |FROM
             |    SeqTrack st
@@ -115,9 +121,9 @@ class StatisticService {
             |    )
             |    ${projectList == null ? "" : "AND st.sample.individual.project.id IN (${projectList*.id?.join(", ")})"}
             |GROUP BY
-            |    ${dataFileTimeStamp}
+            |    ${dateTimeFormatString}
             |ORDER BY
-            |    ${dataFileTimeStamp}""".stripMargin()
+            |    ${dateTimeFormatString}""".stripMargin()
         return DataFile.findAll(hql)
     }
 
@@ -165,7 +171,7 @@ class StatisticService {
      * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
      */
     Map dataPerDate(List data) {
-        getCountPerDate(data, true)
+        return getCountPerDate(data, true)
     }
 
     /**
@@ -173,21 +179,24 @@ class StatisticService {
      * @param data A list containing lists with one element which is a date
      */
     Map projectCountPerDate(List data) {
-        getCountPerDate(data, true)
+        return getCountPerDate(data, true)
     }
 
     private Map getCountPerDate(List data, boolean multiple = false) {
         List<Integer> values = []
 
-        YearMonth firstDate = new YearMonth(data[0][0])
-        YearMonth lastDate = new YearMonth(data[-1][0]).plusMonths(1)
-        Days daysCount = Days.daysBetween(firstDate, lastDate)
+        LocalDate firstDate = LocalDate.parse(data[0][0])
+        LocalDate lastDate = LocalDate.parse(data[-1][0]).plusMonths(1)
+
+        LocalDateTime firstDateTime = firstDate.atStartOfDay()
+        LocalDateTime lastDateTime = lastDate.atStartOfDay()
+
+        Duration daysCount = Duration.between(firstDateTime, lastDateTime)
 
         int count = 0
-        LocalDate firstDateLocal = firstDate.toLocalDate(1)
         data.each {
             values << [
-                    Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
+                    Duration.between(firstDateTime, LocalDate.parse(it[0]).atStartOfDay()).toDays(),
                     count += multiple ? (it[1] ?: 0) : 1,
             ]
         }
@@ -196,16 +205,18 @@ class StatisticService {
                 labels   : monthLabels(firstDate, lastDate),
                 data     : values,
                 count    : count,
-                daysCount: daysCount.days,
+                daysCount: daysCount.toDays(),
         ]
         return dataToRender
     }
 
-    private List<String> monthLabels(YearMonth firstDate, YearMonth lastDate) {
-        List<String> labels = []
-        YearMonth cal = firstDate
+    @SuppressWarnings('DuplicateNumberLiteral')
+    private List<String> monthLabels(LocalDate firstDate, LocalDate lastDate) {
         List<Integer> validMonths
-        switch (Months.monthsBetween(cal, lastDate).months) {
+        Period period = Period.between(firstDate, lastDate)
+        int months = period.toTotalMonths()
+
+        switch (months) {
             case 0..20:
                 validMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
                 break
@@ -219,13 +230,14 @@ class StatisticService {
                 validMonths = [1]
                 break
         }
-        while (cal < lastDate) {
-            if (validMonths.contains(cal.monthOfYear)) {
-                labels << simpleDateFormatter.print(cal)
+
+        List<String> labels = []
+        for (LocalDate currentDate = firstDate; currentDate < lastDate; currentDate = currentDate.plusMonths(1)) {
+            if (validMonths.contains(currentDate.month.value)) {
+                labels << TimeFormats.MONTH_YEAR.getFormatted(currentDate)
             } else {
                 labels << ""
             }
-            cal = cal.plusMonths(1)
         }
         return labels
     }

@@ -22,16 +22,19 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import org.joda.time.DateTime
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.util.TimeFormats
 
 @Transactional
 class IndividualService {
+
+    ConfigService configService
     SampleIdentifierService sampleIdentifierService
     ProjectService projectService
     CommentService commentService
@@ -343,9 +346,7 @@ class IndividualService {
         Individual newIndividual = assertAndGetIndividual(newProperties)
         assert oldProperties.keySet() == newProperties.keySet()
 
-        Date date = new DateTime().toDate()
-
-        String output = createCommentString(operation, oldProperties, newProperties, date, additionalInformation)
+        String output = createCommentString(operation, oldProperties, newProperties, additionalInformation)
         boolean sameIndividual = (oldIndividual == newIndividual)
 
         /* The target of the comment is the new individual, the old individual remains unchanged.
@@ -370,14 +371,13 @@ class IndividualService {
      * @param operation a String that describes the specific operation, e.g. "sample-swap"
      * @param oldProperties a Map that contains the old properties of the individual/sample/lane
      * @param newProperties a Map that contains the new properties of the individual/sample/lane
-     * @param date a Date-object
      * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
      * @return the comment-String
      */
-    private String createCommentString(String operation, Map oldProperties, Map newProperties, Date date, String additionalInformation) {
+    String createCommentString(String operation, Map oldProperties, Map newProperties, String additionalInformation) {
         Map diff = oldProperties - newProperties
 
-        String output = "== ${operation} - ${date.format("yyyy-MM-dd HH:mm")} ==\n"
+        String output = "== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==\n"
         if (additionalInformation) {
             output += "${additionalInformation}\n"
         }

@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.infrastructure
 
 import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
-import org.joda.time.*
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.roddy.execution.jobs.GenericJobInfo
@@ -33,10 +32,13 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimeUtils
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem
 import java.nio.file.Files
+import java.time.*
 
 import static java.util.concurrent.TimeUnit.HOURS
 
@@ -45,10 +47,9 @@ class ClusterJobService {
 
     FileSystemService fileSystemService
     DataSource dataSource
-    static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
 
     static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
-    static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.millis(9)
+    static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.ofMillis(9)
     // we assume that jobs with an elapsed walltime under 10ms "obviously failed"
 
     static private final int FACTOR_2 = 2
@@ -96,7 +97,7 @@ class ClusterJobService {
                 clusterJobName: clusterJobName,
                 jobClass: jobClass,
                 seqType: seqType,
-                queued: new DateTime(),
+                queued: ZonedDateTime.now(),
         ).save(flush: true)
         assert job != null
         return job
@@ -117,7 +118,7 @@ class ClusterJobService {
                 userName      : userName,
                 clusterJobName: clusterJobName,
                 jobClass      : jobClass,
-                queued        : new DateTime(),
+                queued        : ZonedDateTime.now(),
         ]).save(flush: true)
         return job
     }
@@ -128,7 +129,7 @@ class ClusterJobService {
     void amendClusterJob(ClusterJob job, GenericJobInfo jobInfo) {
         job.with {
             requestedCores = jobInfo.askedResources?.cores
-            requestedWalltime = convertFromJava8DurationToJodaDuration(jobInfo?.askedResources?.walltime)
+            requestedWalltime = jobInfo?.askedResources?.walltime
             requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
 
             jobLog = jobInfo.logFile
@@ -151,14 +152,14 @@ class ClusterJobService {
         job.with {
             exitStatus = status
             exitCode = jobInfo.exitCode
-            queued = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.submitTime) ?: job.queued
-            eligible = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.eligibleTime)
-            started = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.startTime)
-            ended = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.endTime)
-            systemSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeSystemSuspState)
-            userSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeUserSuspState)
+            queued = jobInfo.submitTime ?: job.queued
+            eligible = jobInfo.eligibleTime
+            started = jobInfo.startTime
+            ended = jobInfo.endTime
+            systemSuspendStateDuration = jobInfo.timeSystemSuspState
+            userSuspendStateDuration = jobInfo.timeUserSuspState
 
-            cpuTime = convertFromJava8DurationToJodaDuration(jobInfo.cpuTime)
+            cpuTime = jobInfo.cpuTime
             usedCores = jobInfo.usedResources?.cores
             usedMemory = jobInfo.usedResources?.mem?.toLong(BufferUnit.k)
             usedSwap = jobInfo.usedResources?.swap?.toLong(BufferUnit.k) as Integer
@@ -175,17 +176,6 @@ class ClusterJobService {
         }
 
         handleObviouslyFailedClusterJob(job)
-    }
-
-    private static DateTime convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime dateTime) {
-        return dateTime ?
-                new DateTime(dateTime.year, dateTime.monthValue, dateTime.dayOfMonth, dateTime.hour,
-                        dateTime.minute, dateTime.second, DateTimeZone.forID(dateTime.zone.id))
-                : null
-    }
-
-    private static Duration convertFromJava8DurationToJodaDuration(java.time.Duration duration) {
-        return duration ? Duration.millis(duration.toMillis()) : null
     }
 
     /**
@@ -400,7 +390,7 @@ SELECT
 
         List jobClasses = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
+        sql.eachRow(query, startEndDateTime.asMillis()) {
             jobClasses << it.jobclass
         }
 
@@ -429,7 +419,7 @@ SELECT
 
         List exitCodeOccurenceList = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
+        sql.eachRow(query, startEndDateTime.asMillis()) {
             exitCodeOccurenceList << [it.exitCode, it.exitCodeCount]
         }
 
@@ -457,7 +447,7 @@ SELECT
 
         List exitStatusOccurenceList = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
+        sql.eachRow(query, startEndDateTime.asMillis()) {
             exitStatusOccurenceList << [it.exitStatus as ClusterJob.Status, it.exitStatusCount]
         }
 
@@ -487,15 +477,18 @@ SELECT
 
         Map hours = [:]
 
-        sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
-            hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
+        sql.eachRow(query, startEndDateTimeWithHourBuckets.asMillis()) {
+            hours[TimeUtils.fromMillis(it.hour * HOURS_TO_MILLIS)] = it.count
         }
 
         List data = startEndDateTimeWithHourBuckets.hourBuckets.collect {
             it in hours ? hours[it] : 0
         }
 
-        return [days: startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), data: data]
+        return [
+                days: startEndDateTimeWithHourBuckets.formattedHourBuckets(),
+                data: data,
+        ]
     }
 
     /**
@@ -524,8 +517,8 @@ SELECT
 
             Map hours = [:]
 
-            sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
-                hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
+            sql.eachRow(query, startEndDateTimeWithHourBuckets.asMillis()) {
+                hours[TimeUtils.fromMillis(it.hour * HOURS_TO_MILLIS)] = it.count
             }
 
             data."${it}" = startEndDateTimeWithHourBuckets.hourBuckets.collect {
@@ -533,7 +526,7 @@ SELECT
             }
         }
 
-        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.formattedHourBuckets(), "data": data]
     }
 
     /**
@@ -559,16 +552,16 @@ SELECT
 
         List<Map<String, ?>> results = []
 
-        sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
+        sql.eachRow(query, startEndDateTimeWithHourBuckets.asMillis()) {
             results << [
-                    startDate : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
-                    endDate   : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
+                    startDate : TimeUtils.fromMillis(it.hourStarted * HOURS_TO_MILLIS),
+                    endDate   : TimeUtils.fromMillis(it.hourEnded * HOURS_TO_MILLIS),
                     cpuAvgUsed: it.sumAvgCpuTime,
             ]
         }
 
         List<Integer> data = startEndDateTimeWithHourBuckets.hourBuckets.collect { currentHour ->
-            DateTime nextHour = currentHour.plusHours(1)
+            ZonedDateTime nextHour = currentHour.plusHours(1)
 
             List jobsThisHour = results.findAll {
                 it.startDate < nextHour && currentHour <= it.endDate
@@ -579,7 +572,7 @@ SELECT
             return cpuAvgUsedSum ? cpuAvgUsedSum as Integer : 0
         }
 
-        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.formattedHourBuckets(), "data": data]
     }
 
     /**
@@ -605,16 +598,16 @@ SELECT
 
         List<Map<String, ?>> results = []
 
-        sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis]) {
+        sql.eachRow(query, startEndDateTimeWithHourBuckets.asMillis()) {
             results << [
-                    startDate    : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
-                    endDate      : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
+                    startDate    : TimeUtils.fromMillis(it.hourStarted * HOURS_TO_MILLIS),
+                    endDate      : TimeUtils.fromMillis(it.hourEnded * HOURS_TO_MILLIS),
                     memoryAvgUsed: it.sumAvgMemoryUsed / (FACTOR_1024 * FACTOR_1024),
             ]
         }
 
         List<Integer> data = startEndDateTimeWithHourBuckets.hourBuckets.collect { currentHour ->
-            DateTime nextHour = currentHour.plusHours(1)
+            ZonedDateTime nextHour = currentHour.plusHours(1)
 
             List jobsThisHour = results.findAll {
                 currentHour <= it.endDate && it.endDate < nextHour || it.startDate < nextHour && nextHour < it.endDate
@@ -625,7 +618,7 @@ SELECT
             return memoryAvgUsedSum ? memoryAvgUsedSum as Integer : 0
         }
 
-        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.formattedHourBuckets(), "data": data]
     }
 
     /**
@@ -648,7 +641,7 @@ SELECT
 
         Long queue, process, pQueue, pProcess
 
-        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis]) {
+        sql.query(query, startEndDateTime.asMillis()) {
             it.next()
             queue = it.getLong('queueTime') ?: 0
             process = it.getLong('processingTime') ?: 0
@@ -657,7 +650,7 @@ SELECT
         pQueue = queue ? ((FACTOR_100 / (queue + process) * queue) as double).round() : 0
         pProcess = queue ? FACTOR_100 - pQueue : 0
 
-        return [queue: [pQueue, new Period(queue).hours.toString()], process: [pProcess, new Period(process).hours.toString()]]
+        return [queue: [pQueue, Duration.ofMillis(queue).toHours().toString()], process: [pProcess, Duration.ofMillis(process).toHours().toString()]]
     }
 
     /**
@@ -682,7 +675,7 @@ SELECT
 
         List seqTypes = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass]) {
+        sql.eachRow(query, startEndDateTime.asMillis() + [jobClass]) {
             seqTypes << SeqType.get(it.seqType)
         }
 
@@ -714,7 +707,7 @@ SELECT
 
         List exitCodeOccurenceList = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
+        sql.eachRow(query, startEndDateTime.asMillis() + [jobClass, seqType?.id]) {
             exitCodeOccurenceList << [it.exitCode, it.exitCodeCount]
         }
 
@@ -746,7 +739,7 @@ SELECT
 
         List exitStatusOccurenceList = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
+        sql.eachRow(query, startEndDateTime.asMillis() + [jobClass, seqType?.id]) {
             exitStatusOccurenceList << [it.exitStatus as ClusterJob.Status, it.exitStatusCount]
         }
 
@@ -781,8 +774,8 @@ SELECT
 
             Map hours = [:]
 
-            sql.eachRow(query, [startEndDateTimeWithHourBuckets.startDate.millis, startEndDateTimeWithHourBuckets.endDate.millis, jobClass, seqType?.id]) {
-                hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
+            sql.eachRow(query, startEndDateTimeWithHourBuckets.asMillis() + [jobClass, seqType?.id]) {
+                hours[TimeUtils.fromMillis(it.hour * HOURS_TO_MILLIS)] = it.count
             }
 
             data."${it}" = startEndDateTimeWithHourBuckets.hourBuckets.collect {
@@ -790,7 +783,7 @@ SELECT
             }
         }
 
-        return ["days": startEndDateTimeWithHourBuckets.hourBuckets*.toString(FORMAT_STRING), "data": data]
+        return ["days": startEndDateTimeWithHourBuckets.formattedHourBuckets(), "data": data]
     }
 
     /**
@@ -816,7 +809,7 @@ SELECT
 
         List<List> walltimeData = []
 
-        sql.eachRow(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
+        sql.eachRow(query, startEndDateTime.asMillis() + [jobClass, seqType?.id]) {
             walltimeData << [it.reads, it.elapsedWalltime, it.xten ? 'blue' : 'black', it.id]
         }
 
@@ -846,7 +839,7 @@ SELECT
 
         Double avgCpu
 
-        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
+        sql.query(query, startEndDateTime.asMillis() + [jobClass, seqType?.id]) {
             it.next()
             Long avgCpuTime = it.getLong('avgCpuTime')
             Long avgWalltime = it.getLong('avgWalltime')
@@ -875,7 +868,7 @@ SELECT
 
         Integer avgMemory
 
-        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
+        sql.query(query, startEndDateTime.asMillis() + [jobClass, seqType?.id]) {
             it.next()
             avgMemory = it.getLong('avgMemory')
         }
@@ -907,12 +900,7 @@ SELECT
 
         // prevents negative values that could appear cause of rounding errors with milliseconds values
         // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
-        sql.query(query, [
-                startEndDateTime.startDate.millis,
-                startEndDateTime.endDate.millis,
-                jobClass,
-                seqType?.id,
-        ]) {
+        sql.query(query, startEndDateTime.asMillis() + [jobClass, seqType?.id,]) {
             it.next()
             avgBases = it.getLong('basesCount')
             avgQueue = Math.max(0, it.getLong('avgQueue') ?: 0)
@@ -952,7 +940,7 @@ WHERE
  AND n_bases IS NOT NULL
 """
 
-        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType?.id]) {
+        sql.query(query, startEndDateTime.asMillis() + [jobClass, seqType?.id]) {
             it.next()
             jobCount = it.getLong('jobCount')
             if (jobCount) {
@@ -996,7 +984,7 @@ WHERE
 
         int medianOffset = Math.round(jobCount / FACTOR_2) - 1
 
-        sql.query(query, [startEndDateTime.startDate.millis, startEndDateTime.endDate.millis, jobClass, seqType.id, medianOffset]) {
+        sql.query(query, startEndDateTime.asMillis() + [jobClass, seqType.id, medianOffset]) {
             it.next()
             coverageStatistic.put('medianCov', it.getLong('medianBases') / referenceGenomeSizeInBases)
         }
@@ -1015,11 +1003,11 @@ WHERE
             return null
         }
 
-        Duration queue = new Duration(job.queued, job.started)
-        Duration process = new Duration(job.started, job.ended)
+        Duration queue = Duration.between(job.queued, job.started)
+        Duration process = Duration.between(job.started, job.ended)
 
-        Long processMillis = Math.max(0, process.millis)
-        Long queueMillis = Math.max(0, queue.millis)
+        Long processMillis = Math.max(0, process.toMillis())
+        Long queueMillis = Math.max(0, queue.toMillis())
 
         Long total = queueMillis + processMillis
         Long percentageProcess = Math.round(FACTOR_100 / total * processMillis)
@@ -1028,11 +1016,11 @@ WHERE
         return [
                 "process": [
                         percentage: percentageProcess,
-                        ms        : process.millis,
+                        ms        : process.toMillis(),
                 ],
                 "queue"  : [
                         percentage: percentageQueue,
-                        ms        : queue.millis,
+                        ms        : queue.toMillis(),
                 ],
         ]
     }
@@ -1041,7 +1029,7 @@ WHERE
      * returns the latest Job Date
      * @return latest Job Date (queued)
      */
-    LocalDate getLatestJobDate() {
+    ZonedDateTime getLatestJobDate() {
         Sql sql = new Sql(dataSource)
 
         String query = """
@@ -1052,13 +1040,13 @@ SELECT
  LIMIT 1
 """
 
-        Long latestJobDateAsLong
+        Long latestJobDateAsLong = null
 
         sql.eachRow(query) {
             latestJobDateAsLong = it.latestQueued
         }
 
-        return latestJobDateAsLong ? new LocalDate(latestJobDateAsLong) : null
+        return latestJobDateAsLong ? TimeUtils.fromMillis(latestJobDateAsLong) : null
     }
 
     /**
@@ -1079,12 +1067,19 @@ SELECT
      * Helper to convert dates and use it
      */
     static class DateTimeInterval {
-        final DateTime startDate
-        final DateTime endDate
+        final ZonedDateTime startDate
+        final ZonedDateTime endDate
 
         DateTimeInterval(LocalDate startDate, LocalDate endDate) {
-            this.startDate = startDate.toDateTimeAtStartOfDay()
-            this.endDate = endDate.plusDays(1).toDateTimeAtStartOfDay()
+            this.startDate = startDate.atStartOfDay(ZoneId.systemDefault())
+            this.endDate = endDate.atStartOfDay(ZoneId.systemDefault()).plusDays(1)
+        }
+
+        List<Long> asMillis() {
+            return [
+                    TimeUtils.toMillis(startDate),
+                    TimeUtils.toMillis(endDate),
+            ]
         }
     }
 
@@ -1093,7 +1088,7 @@ SELECT
         @Delegate
         final DateTimeInterval dateTimeInterval
 
-        final List<DateTime> hourBuckets
+        final List<ZonedDateTime> hourBuckets
 
         DateTimeIntervalWithHourBuckets(LocalDate startDate, LocalDate endDate) {
             dateTimeInterval = new DateTimeInterval(startDate, endDate)
@@ -1101,14 +1096,14 @@ SELECT
         }
 
         /**
-         * returns all dates and hours between the two given dates as DateTime
+         * returns all dates and hours between the two given dates as ZonedDateTime
          * e.g startDate = 2000-01-01, endDate = 2000-01-02
          * result = [2000-01-01 00:00:00, 2000-01-01 01:00:00, 2000-01-01 02:00:00, ... , 2000-03-01 00:00:00]
          */
-        private List<DateTime> getDaysAndHoursBetween(DateTimeInterval startEndDateTime) {
-            List<DateTime> daysArr = []
-            DateTime date = startEndDateTime.startDate
-            DateTime endDate = startEndDateTime.endDate.plusHours(1)
+        private List<ZonedDateTime> getDaysAndHoursBetween(DateTimeInterval startEndDateTime) {
+            List<ZonedDateTime> daysArr = []
+            ZonedDateTime date = startEndDateTime.startDate
+            ZonedDateTime endDate = startEndDateTime.endDate.plusHours(1)
 
             while (date < endDate) {
                 daysArr << date
@@ -1116,6 +1111,12 @@ SELECT
             }
 
             return daysArr
+        }
+
+        List<String> formattedHourBuckets() {
+            return hourBuckets.collect {
+                TimeFormats.DATE_TIME.getFormatted(it)
+            }
         }
     }
 }

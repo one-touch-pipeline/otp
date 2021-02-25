@@ -26,7 +26,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
@@ -36,6 +35,8 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.time.*
 
 @Rollback
 @Integration
@@ -69,12 +70,12 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         SpringSecurityUtils.doWithAuth(USER) {
             actionLog = auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
         }
-        DateTime stamp = new DateTime(actionLog.timestamp)
+        ZonedDateTime stamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(actionLog.timestamp.time), ZoneId.systemDefault())
 
         then:
-        stamp.hourOfDay == 0
-        stamp.minuteOfHour == 0
-        stamp.secondOfMinute == 0
+        stamp.hour == 0
+        stamp.minute == 0
+        stamp.second == 0
     }
 
     void "logAction uses the original user, even if switched to another one"() {
