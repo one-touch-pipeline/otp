@@ -72,7 +72,8 @@ abstract class AbstractClusterJobMonitor {
                     finishedClusterJobIds.add(clusterJob.clusterJobId)
                 }
             }
-            log.debug("${name}: Finshed ${finishedClusterJobIds.size()} cluster jobs on ${realm}: ${finishedClusterJobIds.sort().join(', ')}")
+            log.debug("${name}: Finshed ${finishedClusterJobIds.size()} cluster jobs on ${realm}" +
+                    "${finishedClusterJobIds ? ": ${finishedClusterJobIds.sort().join(', ')}" : ""}")
         }
     }
 
@@ -96,5 +97,6 @@ abstract class AbstractClusterJobMonitor {
     }
 
     abstract protected List<ClusterJob> findAllClusterJobsToCheck()
+
     abstract protected void handleFinishedClusterJobs(final ClusterJob clusterJob)
 }
