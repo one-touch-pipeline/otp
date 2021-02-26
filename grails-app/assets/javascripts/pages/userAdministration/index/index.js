@@ -23,12 +23,18 @@
 /*global $: false
  */
 $.otp.userAdministration = {};
-$.otp.userAdministration.changeUser = function (userId, field, target) {
+$.otp.userAdministration.enableUser = function (userId, field) {
     "use strict";
     $.ajax({
-        url: target + "/?user.id=" + userId,
+        url: $.otp.createLink({
+            controller: "userAdministration",
+            action: "enable",
+            parameters: {
+                "user.id": userId,
+                flag: $("#" + field).is(':checked'),
+            }
+        }),
         dataType: 'json',
-        data: { flag: $("#" + field).is(':checked') },
         cache: 'false',
         success: function (data) {
             // redraw the dataTable to reset all changes
@@ -47,16 +53,6 @@ $.otp.userAdministration.changeUser = function (userId, field, target) {
 
 $.otp.userAdministration.loadUserList = function () {
     "use strict";
-    var createUserChangeMarkup = function (id, target, enabled) {
-        var html, checkboxId;
-        checkboxId = "user-change-" + id + "-" + target;
-        html = '<input type="checkbox" id="' + checkboxId + '" ';
-        if (enabled) {
-            html += 'checked';
-        }
-        html += '/><input type="button" value="Update" onclick="$.otp.userAdministration.changeUser(' + id + ', \'' + checkboxId + '\', \'' + target + '\')"/>';
-        return html;
-    };
     $('#userTable').dataTable({
         aoColumns: [
             {
@@ -80,7 +76,15 @@ $.otp.userAdministration.loadUserList = function () {
                     if (type === "sort") {
                         return source.enabled
                     }
-                    return createUserChangeMarkup(source.id, 'enable', source.enabled);
+                        var html, checkboxId;
+                        checkboxId = "user-change-" + source.id;
+                        html = '<input type="checkbox" id="' + checkboxId + '" ';
+                        if (source.enabled) {
+                            html += 'checked';
+                        }
+                        html += '/><input type="button" value="Update" onclick="$.otp.userAdministration.enableUser(' + source.id + ', \'' + checkboxId + '\')"/>';
+                        return html;
+
                 }
             },
             {
