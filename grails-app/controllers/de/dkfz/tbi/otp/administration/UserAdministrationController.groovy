@@ -46,6 +46,7 @@ class UserAdministrationController implements CheckAndCall {
 
     static allowedMethods = [
             index: "GET",
+            enable: "POST",
     ]
 
     /**

@@ -34,6 +34,7 @@ $.otp.userAdministration.enableUser = function (userId, field) {
                 flag: $("#" + field).is(':checked'),
             }
         }),
+        type: "POST",
         dataType: 'json',
         cache: 'false',
         success: function (data) {
