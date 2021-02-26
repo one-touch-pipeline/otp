@@ -88,7 +88,11 @@ $.otp.userAdministration.loadUserList = function () {
                     if (type === "sort") {
                         return source.acceptedPrivacyPolicy;
                     }
-                    return createUserChangeMarkup(source.id, 'enable', source.acceptedPrivacyPolicy);
+                    var checked = "";
+                    if (source.acceptedPrivacyPolicy) {
+                        checked = "checked";
+                    }
+                    return "<input type='checkbox' disabled " +  checked + "/>";
                 }
             },
             {

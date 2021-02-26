@@ -97,10 +97,6 @@ class UserAdministrationController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, { userService.enableUser(cmd.user, cmd.flag) })
     }
 
-    JSON acceptedPrivacyPolicy(UpdateUserFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.setAcceptPrivacyPolicy(cmd.user, cmd.flag) })
-    }
-
     def show(SelectUserCommand cmd) {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("An error occurred", cmd.errors)
