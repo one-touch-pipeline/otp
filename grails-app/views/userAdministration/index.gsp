@@ -33,9 +33,6 @@
 
         <h1><g:message code="user.administration.index.header"/></h1>
         <div>
-            <form id="switch-user-form" action="${request.contextPath}/login/impersonate" method="POST">
-                <input type="hidden" name="username"/>
-            </form>
             <div class="otpDataTables">
                 <otp:dataTable codes="${[
                     'user.administration.user.fields.username',

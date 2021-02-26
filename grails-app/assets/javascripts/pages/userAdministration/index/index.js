@@ -104,7 +104,10 @@ $.otp.userAdministration.loadUserList = function () {
                 'mData': function (source, type, data) {
                     var result = "";
                     if (source.username) {
-                        result = '<input type="hidden" value="' + source.username + '"/><button class="changeUserButton">Switch to ' + source.username + '</button>';
+                        result = '<form action="' + $.otp.createLink({controller: "login", action: "impersonate"}) +'" method="POST">' +
+                            '<input type="hidden" name="username" value="' + source.username + '"/>' +
+                            '<button>Switch to ' + source.username + '</button>' +
+                        '</form>'
                     }
                     return result
                 }
@@ -137,16 +140,6 @@ $.otp.userAdministration.loadUserList = function () {
                     fnCallback(json);
                 }
             });
-        },
-        fnRowCallback: function (nRow) {
-            $("button.changeUserButton", nRow).click(function (event) {
-                var form;
-                event.preventDefault();
-                form = $("#switch-user-form");
-                $("input:hidden", form).val($("input:hidden", $(this).parent()).val());
-                form.submit();
-            });
-            return nRow;
         },
     });
     $.otp.resizeBodyInit('#userTable', 180);
