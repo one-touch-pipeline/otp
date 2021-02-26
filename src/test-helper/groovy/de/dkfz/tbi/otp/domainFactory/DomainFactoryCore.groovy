@@ -178,6 +178,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         properties.dataFiles.each { DataFile dataFile ->
             fastqImportInstance.addToDataFiles(dataFile)
         }
+        fastqImportInstance.save(flush: true)
         return fastqImportInstance
     }
 

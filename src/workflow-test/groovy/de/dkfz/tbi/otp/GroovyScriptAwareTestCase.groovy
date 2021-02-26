@@ -73,7 +73,7 @@ trait GroovyScriptAwareTestCase {
      *
      * @see #runScript(File)
      */
-    List runScript(List scripts) {
-        return scripts?.collect { runScript(it) }
+    void runScript(List scripts) {
+        scripts?.each { runScript(it) }
     }
 }

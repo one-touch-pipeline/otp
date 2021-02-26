@@ -102,7 +102,7 @@ class ClusterJobHelperService {
         }
         String stepId = step.id
         String beanName = step.beanName
-        String workflowName = step.workflowRun.workflow.name
+        String workflowName = step.workflowRun.workflow.name.replaceAll('[^a-zA-Z0-9\\-_]', '_')
         return [
                 'otp',
                 env,

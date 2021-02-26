@@ -71,7 +71,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
 
         then:
         workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == "SYSTEM"
+        workflowStep.logs[0].createdBy == LogService.SYSTEM_USER
     }
 
     void "addSimpleLogEntry, when the user is set then log it with the username"() {
@@ -121,7 +121,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
 
         then:
         workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == "SYSTEM"
+        workflowStep.logs[0].createdBy == LogService.SYSTEM_USER
     }
 
     void "addSimpleLogEntryWithException, when the user is set then log it with the username"() {

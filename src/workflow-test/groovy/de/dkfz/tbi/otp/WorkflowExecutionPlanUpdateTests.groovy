@@ -27,7 +27,10 @@ import de.dkfz.tbi.otp.dataInstallation.DataInstallationWorkflowTests
  * The idea of the test is that with the old jobExecutionPlan the test would fail since the outputParameter "Realm"
  * would be missing. Since the test do not fail it is shown that the old jobExecutionPlan was updated to the newer one
  * which provides "Realm" as outputParameter.
+ *
+ * @Deprecated no replacement
  */
+@Deprecated
 class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
 
     @Override

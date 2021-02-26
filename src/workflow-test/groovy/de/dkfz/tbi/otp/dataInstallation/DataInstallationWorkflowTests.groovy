@@ -30,11 +30,16 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.workflowTest.dataInstallation.DataInstallationWorkflowSpec
 
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 
+/**
+ * @Deprecated replaces by {@link DataInstallationWorkflowSpec}
+ */
+@Deprecated
 class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFactoryCore {
 
     LsdfFilesService lsdfFilesService
@@ -284,6 +289,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
 
     @Override
     Duration getTimeout() {
-        Duration.ofMinutes(30)
+        return Duration.ofMinutes(30)
     }
 }

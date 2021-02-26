@@ -36,6 +36,8 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 @Transactional
 class LogService {
 
+    static final String SYSTEM_USER = "SYSTEM"
+
     SpringSecurityService springSecurityService
 
     /**
@@ -46,7 +48,7 @@ class LogService {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : message,
-                    createdBy : springSecurityService.currentUser?.username ?: "SYSTEM",
+                    createdBy : springSecurityService.currentUser?.username ?: SYSTEM_USER,
             ]).save(flush: true)
         }
     }
@@ -60,7 +62,7 @@ class LogService {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : "${message}\n\n${stacktrace}",
-                    createdBy : springSecurityService.currentUser?.username ?: "SYSTEM",
+                    createdBy : springSecurityService.currentUser?.username ?: SYSTEM_USER,
             ]).save(flush: true)
         }
     }
@@ -78,6 +80,7 @@ class LogService {
                 exitCode = processOutput.exitCode
                 stdout = processOutput.stdout
                 stderr = processOutput.stderr
+                createdBy = springSecurityService.currentUser?.username ?: SYSTEM_USER
                 save(flush: true)
             }
         }
