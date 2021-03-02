@@ -527,4 +527,6 @@ databaseChangeLog = {
     changeSet(author: "borufka", id: "otp-596") {
         sqlFile(path: 'changelogs/2021/otp-596-use-text-for-workdirectory.sql')
     }
+
+    include file: "changelogs/2021/otp-985-delete-deletionDate.groovy"
 }

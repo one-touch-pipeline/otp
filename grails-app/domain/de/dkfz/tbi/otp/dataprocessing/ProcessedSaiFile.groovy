@@ -25,14 +25,15 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+/**
+ * @deprecated Old otp alignment workflow
+ */
+@Deprecated
 class ProcessedSaiFile implements Entity {
 
     boolean fileExists
     Date dateFromFileSystem
     long fileSize = -1
-
-    /** Time stamp of deletion */
-    Date deletionDate
 
     AlignmentPass alignmentPass
     DataFile dataFile
@@ -44,7 +45,6 @@ class ProcessedSaiFile implements Entity {
 
     static constraints = {
         dateFromFileSystem(nullable: true)
-        deletionDate(nullable: true)
     }
 
     Project getProject() {

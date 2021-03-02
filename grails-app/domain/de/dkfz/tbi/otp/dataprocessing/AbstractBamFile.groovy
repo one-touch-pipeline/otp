@@ -85,9 +85,6 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
      */
     Double coverageWithN
 
-    /** Time stamp of deletion */
-    Date deletionDate
-
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
 
     /**
@@ -121,7 +118,6 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
             }
             return true
         }
-        deletionDate(nullable: true)
         coverage(nullable: true)
         coverageWithN(nullable: true)
         comment nullable: true

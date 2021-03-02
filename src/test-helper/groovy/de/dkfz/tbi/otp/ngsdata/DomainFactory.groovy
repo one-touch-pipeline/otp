@@ -750,7 +750,6 @@ class DomainFactory {
                 dateCreated       : { new Date() },
                 dateFromFileSystem: { new Date() },
                 fileSize          : { counter++ },
-                deletionDate      : null,
                 alignmentPass     : { createAlignmentPass() },
                 dataFile          : { createDataFile() },
         ], properties, saveAndValidate)
