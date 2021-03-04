@@ -24,6 +24,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.utils.logging.*
 
 // INPUT
@@ -44,6 +46,12 @@ List<String> analyses = [
         //"runYapsa",
 ]
 
+//************ Select witch seqTypes should be triggered ************//
+List<SeqType> seqTypes = [
+        SeqTypeService.exomePairedSeqType,
+        SeqTypeService.wholeGenomePairedSeqType,
+]
+
 //************ Trigger analyses for disabled sample pairs. otherwise they will be ignored. ************//
 boolean runDisabledPairs = false
 
@@ -59,6 +67,7 @@ def samplePairs = SamplePair.withCriteria {
                 })
             }
         }
+        'in'('seqType', seqTypes)
     }
 }
 
@@ -101,6 +110,13 @@ LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
         samplePairs.each { SamplePair samplePair ->
             List<String> output = []
+            List<String> withdrawnBam = [
+                    samplePair.mergingWorkPackage1.bamFileInProjectFolder?.withdrawn? 'DISEASE':'',
+                    samplePair.mergingWorkPackage2.bamFileInProjectFolder?.withdrawn? 'CONTROL':'',
+            ].findAll()
+            if (withdrawnBam) {
+                output << "  * The samplePair won't run, since the ${withdrawnBam.join(' and ')} bam file ${withdrawnBam.size()>1?'are':'is'} withdrawn"
+            }
             analyses.each { String analysis ->
                 List<String> actions = []
                 Map<String, Object> analysisObjects = analysesObjectMapping[analysis]
