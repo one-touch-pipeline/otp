@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 /**
  * One object of FastqcProcessedFile represents one output file
@@ -31,7 +32,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * and if it content was uploaded to data base.
  */
 
-class FastqcProcessedFile implements Entity {
+class FastqcProcessedFile implements Artefact, Entity {
 
     boolean fileExists = false
     boolean contentUploaded = false
@@ -48,6 +49,7 @@ class FastqcProcessedFile implements Entity {
     static constraints = {
         dateFromFileSystem(nullable: true)
         dataFile(unique: true)
+        workflowArtefact nullable: true
     }
 
     static mapping = {
