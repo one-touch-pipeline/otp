@@ -83,7 +83,7 @@
                                 </g:else>
                             </td>
                             <td>
-                                ${runs[new Pair(WorkflowRun.State.RUNNING, workflow)] ?: "0"} running
+                                ${runs[new Pair(WorkflowRun.State.RUNNING_OTP, workflow)] ?: "0"} running
                                 <g:link controller="workflowRunOverview" action="index" params="${["workflow.id": workflow.id]}">Show</g:link>
                             </td>
                             <td>

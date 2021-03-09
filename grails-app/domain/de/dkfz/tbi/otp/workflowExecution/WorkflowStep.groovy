@@ -31,10 +31,13 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
 class WorkflowStep implements Commentable, Entity {
 
+    /**
+     * @see {@link WorkflowRun.State} for descriptions
+     */
     enum State {
         CREATED,
         RUNNING,
-        SKIPPED,
+        OMITTED,
         SUCCESS,
         FAILED,
     }

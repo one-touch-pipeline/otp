@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.utils.Entity
 
-class SkippedMessage implements Entity {
+class OmittedMessage implements Entity {
 
     enum Category {
         PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,

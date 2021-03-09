@@ -31,10 +31,13 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class WorkflowArtefact implements Withdrawable, Entity {
 
+    /**
+     * @see {@link WorkflowRun.State} for descriptions
+     */
     enum State {
         PLANNED_OR_RUNNING,
         SUCCESS,
-        SKIPPED,
+        OMITTED,
         FAILED,
         LEGACY,
     }

@@ -42,7 +42,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "test changeStateToSkipped"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        SkippedMessage skippedMessage = new SkippedMessage(message: "asdf", category: SkippedMessage.Category.WORKFLOW_COVERAGE_REJECTION)
+        OmittedMessage skippedMessage = new OmittedMessage(message: "asdf", category: OmittedMessage.Category.WORKFLOW_COVERAGE_REJECTION)
         WorkflowArtefact wa1 = createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "asdf")
 
         WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED)
@@ -54,20 +54,20 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
-        service.changeStateToSkipped(workflowStep, skippedMessage)
+        service.changeStateToOmitted(workflowStep, skippedMessage)
 
         then:
-        workflowStep.state == WorkflowStep.State.SKIPPED
-        workflowStep.workflowRun.state == WorkflowRun.State.SKIPPED
-        workflowStep.workflowRun.skippedMessage == skippedMessage
-        wa1.state == WorkflowArtefact.State.SKIPPED
+        workflowStep.state == WorkflowStep.State.OMITTED
+        workflowStep.workflowRun.state == WorkflowRun.State.OMITTED_MISSING_PRECONDITION
+        workflowStep.workflowRun.omittedMessage == skippedMessage
+        wa1.state == WorkflowArtefact.State.OMITTED
 
         wa2.state == WorkflowArtefact.State.FAILED
         wr2.state == WorkflowRun.State.FAILED
 
-        wa3.state == WorkflowArtefact.State.SKIPPED
-        wr3.state == WorkflowRun.State.SKIPPED
-        wr3.skippedMessage == skippedMessage
+        wa3.state == WorkflowArtefact.State.OMITTED
+        wr3.state == WorkflowRun.State.OMITTED_MISSING_PRECONDITION
+        wr3.omittedMessage == skippedMessage
     }
 
     void "test changeStateToWaitingOnUser"() {
@@ -79,7 +79,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
         then:
         workflowStep.state == WorkflowStep.State.SUCCESS
-        workflowStep.workflowRun.state == WorkflowRun.State.WAITING_ON_USER
+        workflowStep.workflowRun.state == WorkflowRun.State.WAITING_FOR_USER
     }
 
     void "test changeStateToWaitingOnSystem"() {
@@ -91,7 +91,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
         then:
         workflowStep.state == WorkflowStep.State.SUCCESS
-        workflowStep.workflowRun.state == WorkflowRun.State.WAITING_ON_SYSTEM
+        workflowStep.workflowRun.state == WorkflowRun.State.RUNNING_WES
     }
 
     void "test changeStateToFinalFailed"() {
@@ -118,10 +118,10 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         wa2.state == WorkflowArtefact.State.FAILED
         wr2.state == WorkflowRun.State.FAILED
 
-        wa3.state == WorkflowArtefact.State.SKIPPED
-        wr3.state == WorkflowRun.State.SKIPPED
-        wr3.skippedMessage.category == SkippedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL
-        wr3.skippedMessage.message == "Previous run failed"
+        wa3.state == WorkflowArtefact.State.OMITTED
+        wr3.state == WorkflowRun.State.OMITTED_MISSING_PRECONDITION
+        wr3.omittedMessage.category == OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL
+        wr3.omittedMessage.message == "Previous run failed"
     }
 
     void "test changeStateToFailed"() {
@@ -189,6 +189,6 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
         then:
         workflowStep.state == WorkflowStep.State.RUNNING
-        workflowStep.workflowRun.state == WorkflowRun.State.RUNNING
+        workflowStep.workflowRun.state == WorkflowRun.State.RUNNING_OTP
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
-
-class WorkflowStepService {
-
-    List<WorkflowStep> runningWorkflowSteps() {
-        return WorkflowStep.withCriteria {
-            eq('state', WorkflowStep.State.RUNNING)
-            workflowRun {
-                eq('state', WorkflowRun.State.RUNNING_OTP)
-            }
-        } as List<WorkflowStep>
-    }
-}
+ALTER TABLE skipped_message RENAME TO omitted_message;
+ALTER TABLE workflow_run RENAME COLUMN skipped_message_id TO omitted_message_id;

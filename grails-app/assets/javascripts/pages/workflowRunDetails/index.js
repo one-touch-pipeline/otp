@@ -158,6 +158,4 @@ $(function () {
             $('[title]').tooltip();
         }
     });
-
-    $("#runStatus").addClass(statusToClassName($("#runStatus").data("status")));
 });

@@ -58,8 +58,8 @@ class WorkflowRunService {
         """
 
     final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
-            WorkflowRun.State.RUNNING,
-            WorkflowRun.State.WAITING_ON_SYSTEM,
+            WorkflowRun.State.RUNNING_OTP,
+            WorkflowRun.State.RUNNING_WES,
     ].asImmutable()
 
     int countOfRunningWorkflows() {
@@ -98,7 +98,7 @@ class WorkflowRunService {
                 combinedConfig: combinedConfig,
                 priority      : priority,
                 restartedFrom : null,
-                skippedMessage: null,
+                omittedMessage: null,
                 workflowSteps : [],
                 workflow      : workflow,
                 displayName   : name,

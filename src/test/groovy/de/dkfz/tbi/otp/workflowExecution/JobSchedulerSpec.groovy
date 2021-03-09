@@ -97,7 +97,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
                     [execute: { WorkflowStep st ->
                             st.state = WorkflowStep.State.SUCCESS
                             st.save(flush: true)
-                            st.workflowRun.state = WorkflowRun.State.RUNNING
+                            st.workflowRun.state = WorkflowRun.State.RUNNING_OTP
                             st.workflowRun.save(flush: true)
                     }] as Job }
         ] as ApplicationContext

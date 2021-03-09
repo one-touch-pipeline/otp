@@ -76,7 +76,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run.workflow == workflow
         run.state == WorkflowRun.State.PENDING
         run.restartedFrom == null
-        run.skippedMessage == null
+        run.omittedMessage == null
         run.workflowSteps == []
         run.displayName == name
     }

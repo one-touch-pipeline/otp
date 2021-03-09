@@ -76,7 +76,7 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     @Unroll
     void "nextWaitingWorkflow, if more workflows allow and state is PENDING and state of artefact is #state, then return null"() {
         given:
-        createWorkflowRunHelper(WorkflowRun.State.RUNNING, state)
+        createWorkflowRunHelper(WorkflowRun.State.RUNNING_OTP, state)
         WorkflowRunService service = new WorkflowRunService()
 
         when:

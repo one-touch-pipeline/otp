@@ -25,6 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <asset:stylesheet src="pages/workflowArtefact/index/styles.less"/>
+    <asset:javascript src="pages/workflowRunList/common.js"/>
     <title><g:message code="workflowArtefact.title" args="[artefact?.displayName ?: 'Artefact']"/></title>
 </head>
 
@@ -35,8 +36,7 @@
 
             <div class="container-fluid">
                 <g:if test="${artefact}">
-                    <span class="badge rounded-pill workflow-run-${artefact.state.toString().toLowerCase()}-color text-white workflow-artefact-status">${artefact.state}</span>
-                    <h4>${artefact.displayName}</h4>
+                    <h1><div id="statusDot" title="${artefact.state}" data-status="${artefact.state}" style="display: inline-block"></div> ${artefact.displayName}</h1>
 
                     <ul class="list-group list-group-horizontal">
                         <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.project"/>:</li>

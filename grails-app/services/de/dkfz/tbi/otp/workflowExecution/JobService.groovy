@@ -46,7 +46,7 @@ class JobService {
                 state: WorkflowStep.State.CREATED,
                 previous: workflowRun.workflowSteps ? workflowRun.workflowSteps.last() : null,
         ).save(flush: true)
-        workflowRun.state = WorkflowRun.State.RUNNING
+        workflowRun.state = WorkflowRun.State.RUNNING_OTP
         workflowRun.save(flush: true)
     }
 
@@ -114,7 +114,7 @@ class JobService {
             throw new WorkflowJobIsNotRestartableException("Cannot restart unknown workflow step.")
         }
 
-        if (workflowStep.state != WorkflowStep.State.RUNNING || workflowStep.workflowRun.state != WorkflowRun.State.RUNNING) {
+        if (workflowStep.state != WorkflowStep.State.RUNNING || workflowStep.workflowRun.state != WorkflowRun.State.RUNNING_OTP) {
             throw new WorkflowJobIsNotRestartableException("Cannot restart workflow step which is not RUNNING.")
         }
 

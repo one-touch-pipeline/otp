@@ -33,7 +33,7 @@
     <div class="container-fluid">
     <div class="row">
         <div class="col-7">
-            <h1><div id="runStatus" title="${workflowRun.state}" data-status="${workflowRun.state}" style="display: inline-block"></div> ${g.message(code: "workflowRun.details.title")} ${workflowRun.displayName}</h1>
+            <h1><div id="statusDot" title="${workflowRun.state}" data-status="${workflowRun.state}" style="display: inline-block"></div> ${g.message(code: "workflowRun.details.title")} ${workflowRun.displayName}</h1>
             <g:form method="POST">
                 <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
                 <input type="hidden" name="redirect" value="${uriWithParams}"/>
@@ -67,13 +67,11 @@
                 </g:if>
             </div>
             <div>
-                <g:if test="${workflowRun.skippedMessage}">
-                    ${g.message(code: "workflowRun.details.skipped", args: [workflowRun.skippedMessage?.category, workflowRun.skippedMessage?.message])}
-                </g:if>
+                ${workflowRun.state.description}
             </div>
             <div>
-                <g:if test="${workflowRun.state == WorkflowRun.State.WAITING_ON_USER}">
-                    ${g.message(code: "workflowRun.details.inputRequired")}
+                <g:if test="${workflowRun.omittedMessage}">
+                    ${g.message(code: "workflowRun.details.omitted", args: [workflowRun.omittedMessage?.category, workflowRun.omittedMessage?.message])}
                 </g:if>
             </div>
             </p>

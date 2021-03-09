@@ -22,28 +22,30 @@
 var statusToClassName = function (status) {
     "use strict";
     switch (status) {
-        case "WAITING_ON_USER":
-            return "dot orange";
+        case "WAITING_FOR_USER":
+            return "dot blue";
         case "FAILED":
         case "FINISHED/FAILED":
             return "dot red";
         case "PENDING":
         case "CREATED":
             return "dot grey";
-        case "WAITING_ON_SYSTEM":
+        case "RUNNING_WES":
             return "sm-loader grey";
         case "RUNNING":
+        case "RUNNING_OTP":
         case "CHECKING":
             return "sm-loader green";
         case "SUCCESS":
         case "FINISHED/COMPLETED":
             return "dot green";
-        case "SKIPPED":
-            return "dot black";
-        case "FAILED_FINAL":
-            return "dot blue";
-        case "KILLED":
+        case "OMITTED":
+        case "OMITTED_MISSING_PRECONDITION":
             return "dot purple";
+        case "FAILED_FINAL":
+            return "dot orange";
+        case "KILLED":
+            return "dot black";
     }
     return "";
 };
@@ -53,3 +55,7 @@ var button = function (action, value, title, buttonsDisabled, icon) {
         "<i class='bi-" + icon + "'></i>" +
         "</button>"
 };
+
+$(function () {
+    $("#statusDot").addClass(statusToClassName($("#statusDot").data("status")));
+})

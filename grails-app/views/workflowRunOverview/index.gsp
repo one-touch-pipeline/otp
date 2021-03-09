@@ -52,7 +52,7 @@
             <g:each in="${states}" var="stateAndSubStates">
                 <th>${stateAndSubStates.key}</th>
                 <g:each in="${stateAndSubStates.value}" var="subState">
-                    <th>${subState}</th>
+                    <th title="${subState.description}">${subState}</th>
                 </g:each>
             </g:each>
             <th>${g.message(code: "workflowRun.overview.lastRun")}</th>

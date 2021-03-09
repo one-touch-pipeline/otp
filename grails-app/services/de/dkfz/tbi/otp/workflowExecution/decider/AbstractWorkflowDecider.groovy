@@ -47,7 +47,8 @@ abstract class AbstractWorkflowDecider implements Decider {
      * Search in database for additional required WorkflowArtefacts.
      * That are workflowArtefacts created by an earlier import and therefore not in the input list.
      * Will be implemented in concreate Deciders, since the decider per workflows knows what is needed
-     * Make sure that in the search for the other required workflow artefacts no artefacts in state FAILED or SKIPPED or withdrawn artefacts are considered)
+     * Make sure that in the search for the other required workflow artefacts no artefacts in state FAILED or OMITTED_MISSING_PRECONDITION or
+     * withdrawn artefacts are considered)
     */
     abstract Collection<WorkflowArtefact> findAdditionalRequiredWorkflowArtefacts(Collection<WorkflowArtefact> artefacts)
 

@@ -37,17 +37,17 @@ class WorkflowRunOverviewController {
 
     static final Map<String, List<WorkflowRun.State>> STATES = [
             ("Input required"): [
-                    WorkflowRun.State.WAITING_ON_USER,
+                    WorkflowRun.State.WAITING_FOR_USER,
                     WorkflowRun.State.FAILED,
             ].asImmutable(),
             ("Not finished")  : [
                     WorkflowRun.State.PENDING,
-                    WorkflowRun.State.WAITING_ON_SYSTEM,
-                    WorkflowRun.State.RUNNING,
+                    WorkflowRun.State.RUNNING_WES,
+                    WorkflowRun.State.RUNNING_OTP,
             ].asImmutable(),
             ("Finished")      : [
                     WorkflowRun.State.SUCCESS,
-                    WorkflowRun.State.SKIPPED,
+                    WorkflowRun.State.OMITTED_MISSING_PRECONDITION,
                     WorkflowRun.State.FAILED_FINAL,
                     WorkflowRun.State.KILLED,
             ].asImmutable(),

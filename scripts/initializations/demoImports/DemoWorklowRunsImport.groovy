@@ -50,7 +50,7 @@ int workflowNumber = 0
  * Create FASTQ installation workflow runs.
  */
 WorkflowRun wr1 = new WorkflowRun(
-        state: WorkflowRun.State.RUNNING,
+        state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
@@ -70,7 +70,7 @@ new WorkflowRun(
 ).save(flush: true)
 
 WorkflowRun wr2 = new WorkflowRun(
-        state: WorkflowRun.State.RUNNING,
+        state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
@@ -81,7 +81,7 @@ WorkflowRun wr2 = new WorkflowRun(
 ).save(flush: true)
 
 new WorkflowRun(
-        state: WorkflowRun.State.SKIPPED,
+        state: WorkflowRun.State.OMITTED_MISSING_PRECONDITION,
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
@@ -95,7 +95,7 @@ new WorkflowRun(
  */
 
 new WorkflowRun(
-        state: WorkflowRun.State.RUNNING,
+        state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
@@ -105,7 +105,7 @@ new WorkflowRun(
 ).save(flush: true)
 
 WorkflowRun wr3 = new WorkflowRun(
-        state: WorkflowRun.State.RUNNING,
+        state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
@@ -130,7 +130,7 @@ new WorkflowRun(
  */
 
 new WorkflowRun(
-        state: WorkflowRun.State.RUNNING,
+        state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,

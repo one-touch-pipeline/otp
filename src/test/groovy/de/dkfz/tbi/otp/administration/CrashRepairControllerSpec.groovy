@@ -54,7 +54,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test restartWorkflowStep_ShouldReturnStatusOkAndContentTypeJSON"() {
         given:
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: true,
         ])
 
@@ -81,7 +81,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
         }
 
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: false,
         ])
 
@@ -103,7 +103,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test restartWorkflowRun_ShouldReturnStatusOkAndContentTypeJSON"() {
         given:
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: true,
         ])
 
@@ -130,7 +130,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
         }
 
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: false,
         ])
 
@@ -152,7 +152,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test markWorkflowStepAsFailed_ShouldReturnStatusOkAndContentTypeJSON"() {
         given:
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: true,
         ])
 
@@ -179,7 +179,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
         }
 
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: true,
         ])
 
@@ -201,7 +201,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test markWorkflowRunAsFinalFailed_ShouldReturnStatusOkAndContentTypeJSON"() {
         given:
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: true,
         ])
 
@@ -228,7 +228,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
         }
 
         WorkflowRun run = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
                 jobCanBeRestarted: true,
         ])
 

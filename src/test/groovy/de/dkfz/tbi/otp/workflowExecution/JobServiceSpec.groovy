@@ -62,7 +62,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         service.createNextJob(workflowRun)
 
         then:
-        workflowRun.state == WorkflowRun.State.RUNNING
+        workflowRun.state == WorkflowRun.State.RUNNING_OTP
         WorkflowStep.all.size() == 1
         WorkflowStep.first() == workflowRun.workflowSteps.last()
         WorkflowStep.first().state == WorkflowStep.State.CREATED
@@ -86,7 +86,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         service.createNextJob(workflowRun)
 
         then:
-        workflowRun.state == WorkflowRun.State.RUNNING
+        workflowRun.state == WorkflowRun.State.RUNNING_OTP
         WorkflowStep.all.size() == 2
         WorkflowStep newStep = (WorkflowStep.all - existingStep).find()
         existingStep == workflowRun.workflowSteps.first()
@@ -203,7 +203,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
     void "test createRestartedJobAfterSystemRestart"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun([
-                state: WorkflowRun.State.RUNNING,
+                state: WorkflowRun.State.RUNNING_OTP,
         ])
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: workflowRun,
@@ -254,7 +254,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         where:
         stepState                  | runState
         WorkflowStep.State.RUNNING | WorkflowRun.State.SUCCESS
-        WorkflowStep.State.SUCCESS | WorkflowRun.State.RUNNING
+        WorkflowStep.State.SUCCESS | WorkflowRun.State.RUNNING_OTP
         WorkflowStep.State.SUCCESS | WorkflowRun.State.SUCCESS
     }
 

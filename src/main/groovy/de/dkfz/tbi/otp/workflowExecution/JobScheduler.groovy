@@ -103,14 +103,14 @@ class JobScheduler {
     @Transactional
     private void checkResult(WorkflowStep workflowStep) {
         workflowStep.refresh()
-        if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING) {
+        if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING_OTP) {
             jobService.createNextJob(workflowStep.workflowRun)
         } else if (workflowStep.state == WorkflowStep.State.SUCCESS && workflowStep.workflowRun.state == WorkflowRun.State.SUCCESS) {
             notifyUsers(workflowStep)
         } else if (workflowStep.state == WorkflowStep.State.FAILED && workflowStep.workflowRun.state != WorkflowRun.State.FAILED) {
             throw new JobSchedulerException("Workflow step is in state `FAILED`, but the run is in state `${workflowStep.workflowRun.state}")
         } else if (workflowStep.state == WorkflowStep.State.RUNNING) {
-            throw new JobSchedulerException("Workflow step is still in state `RUNNING` after the job finished")
+            throw new JobSchedulerException("Workflow step is still in state `RUNNING_OTP` after the job finished")
         } else if (workflowStep.state == WorkflowStep.State.FAILED) {
             autoRestartHandlerService.handleRestarts(workflowStep)
         }

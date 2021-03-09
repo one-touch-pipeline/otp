@@ -45,7 +45,7 @@ class WorkflowRunOverviewServiceIntegrationSpec extends Specification implements
         Workflow workflow1 = createWorkflow()
         createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.SUCCESS)
         createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.FAILED)
-        createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.RUNNING)
+        createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.RUNNING_OTP)
         Workflow workflow2 = createWorkflow()
         createWorkflowRun(workflow: workflow2, state: WorkflowRun.State.FAILED)
         createWorkflowRun(workflow: workflow2, state: WorkflowRun.State.FAILED)
@@ -56,7 +56,7 @@ class WorkflowRunOverviewServiceIntegrationSpec extends Specification implements
         then:
         result[new Pair(WorkflowRun.State.SUCCESS, workflow1)] == 1
         result[new Pair(WorkflowRun.State.FAILED, workflow1)] == 1
-        result[new Pair(WorkflowRun.State.RUNNING, workflow1)] == 1
+        result[new Pair(WorkflowRun.State.RUNNING_OTP, workflow1)] == 1
         result[new Pair(WorkflowRun.State.FAILED, workflow2)] == 2
     }
 
@@ -88,7 +88,7 @@ class WorkflowRunOverviewServiceIntegrationSpec extends Specification implements
         createWorkflowStep(workflowRun: run2)
         WorkflowStep step = createWorkflowStep(workflowRun: run2)
 
-        WorkflowRun run3 = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING)
+        WorkflowRun run3 = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
         createWorkflowStep(workflowRun: run3)
         createWorkflowStep(workflowRun: run3)
 

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
+import groovy.transform.TupleConstructor
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONObject
 
@@ -32,20 +33,23 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class WorkflowRun implements Commentable, Entity {
 
+    @TupleConstructor
     enum State {
         //unfinished
-        PENDING,
-        WAITING_ON_SYSTEM,
-        WAITING_ON_USER,
-        RUNNING,
-        FAILED,
+        PENDING("The run was created and is waiting to be executed."),
+        WAITING_FOR_USER("The run is waiting for user input."),
+        RUNNING_WES("The run is running on an external system."),
+        RUNNING_OTP("The run is running within OTP."),
+        FAILED("The run failed and is waiting for an operator decision how to continue."),
         //finished
-        SKIPPED,
-        SUCCESS,
-        FAILED_FINAL,
-        KILLED,
+        OMITTED_MISSING_PRECONDITION("The run was omitted because preconditions are missing."),
+        SUCCESS("The run succeeded."),
+        FAILED_FINAL("The run failed, and an operator decided not to restart it."),
+        KILLED("The run was killed by an operator."),
         //other
-        LEGACY,
+        LEGACY("The run is part of the old workflow system."),
+
+        final String description
     }
 
     Project project
@@ -62,7 +66,7 @@ class WorkflowRun implements Commentable, Entity {
 
     WorkflowRun restartedFrom
 
-    SkippedMessage skippedMessage
+    OmittedMessage omittedMessage
 
     List<WorkflowStep> workflowSteps
 
@@ -104,7 +108,7 @@ class WorkflowRun implements Commentable, Entity {
                 return 'workflowRun.restartedFrom.workflow.differ'
             }
         }
-        skippedMessage nullable: true
+        omittedMessage nullable: true
         comment nullable: true
         displayName blank: false, nullable: false
     }

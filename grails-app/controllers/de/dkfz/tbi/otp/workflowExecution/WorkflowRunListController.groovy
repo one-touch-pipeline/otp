@@ -67,8 +67,8 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         }.collect { WorkflowRun r ->
             String duration = r.workflowSteps.empty ? "-" :
                     r.state in [WorkflowRun.State.PENDING,
-                                WorkflowRun.State.WAITING_ON_SYSTEM,
-                                WorkflowRun.State.RUNNING,] ?
+                                WorkflowRun.State.RUNNING_WES,
+                                WorkflowRun.State.RUNNING_OTP,] ?
                             getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated), convertDateToLocalDateTime(new Date())) :
                             getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated),
                                     convertDateToLocalDateTime(r.workflowSteps.last().lastUpdated))
@@ -77,6 +77,7 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
             WorkflowStep lastStep = steps ? steps.last() : null
             return [
                     state      : r.state,
+                    stateDesc  : r.state.description,
                     comment    : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
                     workflow   : r.workflow.toString(),
                     name       : r.displayName,
@@ -97,7 +98,7 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         int running = WorkflowRun.createCriteria().count {
             criteria.delegate = delegate
             criteria()
-            "in"("state", [WorkflowRun.State.RUNNING, WorkflowRun.State.WAITING_ON_SYSTEM])
+            "in"("state", [WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES])
         }
         int failed = WorkflowRun.createCriteria().count {
             criteria.delegate = delegate

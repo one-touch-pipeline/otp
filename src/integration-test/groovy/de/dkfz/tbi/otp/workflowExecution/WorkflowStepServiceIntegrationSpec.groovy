@@ -36,11 +36,11 @@ class WorkflowStepServiceIntegrationSpec extends Specification implements Workfl
     void "runningWorkflowSteps, return only runningWorkflows"() {
         given:
         List<WorkflowStep> runningState = (1..3).collect {
-            create(WorkflowStep.State.RUNNING, WorkflowRun.State.RUNNING)
+            create(WorkflowStep.State.RUNNING, WorkflowRun.State.RUNNING_OTP)
         }
         WorkflowStep.State.values().each { WorkflowStep.State stepState ->
             WorkflowRun.State.values().each { WorkflowRun.State runState ->
-                if (stepState != WorkflowStep.State.RUNNING && runState != WorkflowRun.State.RUNNING) {
+                if (stepState != WorkflowStep.State.RUNNING && runState != WorkflowRun.State.RUNNING_OTP) {
                     create(stepState, runState)
                 }
             }

@@ -28,29 +28,29 @@ import de.dkfz.tbi.otp.utils.StackTraceUtils
 
 @Transactional
 class WorkflowStateChangeService {
-    void changeStateToSkipped(WorkflowStep step, SkippedMessage message) {
+    void changeStateToOmitted(WorkflowStep step, OmittedMessage message) {
         assert step
         assert message
-        step.state = WorkflowStep.State.SKIPPED
+        step.state = WorkflowStep.State.OMITTED
         step.save(flush: true)
 
-        step.workflowRun.state = WorkflowRun.State.SKIPPED
-        step.workflowRun.skippedMessage = message
+        step.workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
+        step.workflowRun.omittedMessage = message
         step.workflowRun.save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
-            workflowArtefact.state = WorkflowArtefact.State.SKIPPED
+            workflowArtefact.state = WorkflowArtefact.State.OMITTED
             workflowArtefact.save(flush: true)
         }
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
             if (workflowRun.state == WorkflowRun.State.PENDING) {
-                workflowRun.state = WorkflowRun.State.SKIPPED
-                workflowRun.skippedMessage = message
+                workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
+                workflowRun.omittedMessage = message
                 workflowRun.save(flush: true)
                 workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
-                        workflowArtefact.state = WorkflowArtefact.State.SKIPPED
+                        workflowArtefact.state = WorkflowArtefact.State.OMITTED
                         workflowArtefact.save(flush: true)
                     }
                 }
@@ -60,7 +60,7 @@ class WorkflowStateChangeService {
 
     void changeStateToWaitingOnUser(WorkflowStep step) {
         assert step
-        step.workflowRun.state = WorkflowRun.State.WAITING_ON_USER
+        step.workflowRun.state = WorkflowRun.State.WAITING_FOR_USER
         step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.SUCCESS
@@ -69,7 +69,7 @@ class WorkflowStateChangeService {
 
     void changeStateToWaitingOnSystem(WorkflowStep step) {
         assert step
-        step.workflowRun.state = WorkflowRun.State.WAITING_ON_SYSTEM
+        step.workflowRun.state = WorkflowRun.State.RUNNING_WES
         step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.SUCCESS
@@ -94,16 +94,16 @@ class WorkflowStateChangeService {
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
             if (workflowRun.state == WorkflowRun.State.PENDING) {
-                workflowRun.state = WorkflowRun.State.SKIPPED
-                workflowRun.skippedMessage = new SkippedMessage(
+                workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
+                workflowRun.omittedMessage = new OmittedMessage(
                         message: "Previous run failed",
-                        category: SkippedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+                        category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
                 ).save(flush: true)
                 workflowRun.save(flush: true)
 
                 workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
-                        workflowArtefact.state = WorkflowArtefact.State.SKIPPED
+                        workflowArtefact.state = WorkflowArtefact.State.OMITTED
                         workflowArtefact.save(flush: true)
                     }
                 }
@@ -153,7 +153,7 @@ class WorkflowStateChangeService {
 
     void changeStateToRunning(WorkflowStep step) {
         assert step
-        step.workflowRun.state = WorkflowRun.State.RUNNING
+        step.workflowRun.state = WorkflowRun.State.RUNNING_OTP
         step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.RUNNING

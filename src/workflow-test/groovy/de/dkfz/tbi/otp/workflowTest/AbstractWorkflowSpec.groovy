@@ -87,8 +87,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     static private final List<WorkflowRun.State> RUNNING_AND_WAITING_STATES = [
             WorkflowRun.State.PENDING,
-            WorkflowRun.State.RUNNING,
-            WorkflowRun.State.WAITING_ON_SYSTEM,
+            WorkflowRun.State.RUNNING_OTP,
+            WorkflowRun.State.RUNNING_WES,
     ].asImmutable()
 
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
@@ -586,7 +586,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * Starts the workflow system and wait then for starting and ending of the given  count of {@link WorkflowRun}.
      * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING} are considered as started.
-     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING},{@link WorkflowRun.State#RUNNING} or {@link WorkflowRun.State#WAITING_ON_SYSTEM}
+     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING},{@link WorkflowRun.State#RUNNING_OTP} or {@link WorkflowRun.State#RUNNING_WES}
      * are considered as finish.
      *
      * The waiting time is limited by the timeouts {@link #getStartWorkflowTimeout()} and {@link #getRunningTimeout()}.
@@ -667,7 +667,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
     /**
      * Wait until the given count of workflows ends or the timeout {@link #getRunningTimeout()} is reached.
-     * All  {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING},{@link WorkflowRun.State#RUNNING} or {@link WorkflowRun.State#WAITING_ON_SYSTEM}
+     * All  {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING},{@link WorkflowRun.State#RUNNING_OTP} or {@link WorkflowRun.State#RUNNING_WES}
      * are considered as finished.
      *
      * It is no problem if additional workflows exist.
