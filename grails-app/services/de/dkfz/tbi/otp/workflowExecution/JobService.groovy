@@ -110,8 +110,14 @@ class JobService {
     }
 
     void createRestartedJobAfterSystemRestart(WorkflowStep workflowStep) {
-        assert workflowStep
-        assert workflowStep.state == WorkflowStep.State.RUNNING && workflowStep.workflowRun.state == WorkflowRun.State.RUNNING
+        if (!workflowStep) {
+            throw new WorkflowJobIsNotRestartableException("Cannot restart unknown workflow step.")
+        }
+
+        if (workflowStep.state != WorkflowStep.State.RUNNING || workflowStep.workflowRun.state != WorkflowRun.State.RUNNING) {
+            throw new WorkflowJobIsNotRestartableException("Cannot restart workflow step which is not RUNNING.")
+        }
+
         workflowStep.state = WorkflowStep.State.FAILED
         logService.addSimpleLogEntry(workflowStep, "OTP restarted")
         createRestartedJob(workflowStep)

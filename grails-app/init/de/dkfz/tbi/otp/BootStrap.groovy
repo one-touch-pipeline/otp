@@ -34,12 +34,15 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 class BootStrap {
     ConfigService configService
     GrailsApplication grailsApplication
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
+    WorkflowSystemService workflowSystemService
     SeedService seedService
 
     def init = { servletContext ->
@@ -54,9 +57,17 @@ class BootStrap {
         }
 
         if (configService.isJobSystemEnabled()) {
-            // startup the scheduler
             log.info("JobSystem is enabled")
+
+            // start the old workflow system (deprecated)
             schedulerService.startup()
+
+            try {
+                // start the new workflow system
+                workflowSystemService.startWorkflowSystem()
+            } catch (WorkflowException we) {
+                log.error("Failed to start the workflow system.", we)
+            }
         } else {
             log.info("JobSystem is disabled")
         }

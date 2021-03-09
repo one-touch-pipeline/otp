@@ -43,6 +43,12 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         ]
     }
 
+    void setup() {
+        service.logService = Mock(LogService) {
+            _ * addSimpleLogEntry(_, _)
+        }
+    }
+
     void "test createNextJob, first step"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun()
@@ -204,10 +210,6 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 state      : WorkflowStep.State.RUNNING,
         ])
 
-        service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(_, _)
-        }
-
         when:
         service.createRestartedJobAfterSystemRestart(workflowStep)
 
@@ -219,8 +221,25 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         workflowRun.workflowSteps.last().restartedFrom == workflowStep
     }
 
+    void "test createRestartedJobAfterSystemRestart should fail when workflowStep state is not RUNNING"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun([
+                state: WorkflowRun.State.FAILED,
+        ])
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: workflowRun,
+                state      : WorkflowStep.State.RUNNING,
+        ])
+
+        when:
+        service.createRestartedJobAfterSystemRestart(workflowStep)
+
+        then:
+        thrown(WorkflowJobIsNotRestartableException)
+    }
+
     @Unroll
-    void "test createRestartedJobAfterSystemRestart, when workflow system not running, then throw assertion"() {
+    void "test createRestartedJobAfterJobFailure, when workflow system not running, then throw assertion"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(state: stepState)
         workflowStep.workflowRun.state = runState
