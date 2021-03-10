@@ -42,14 +42,18 @@ script part
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 
 def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile df, def script) {
-    def md5 = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
-    String md5summe = md5.text.split(" ")[0]
+    File md5 = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
     Long size = orginialPathResolved.size().toLong()
     script << "cp ${orginialPathResolved} ${finalPath}.tmp && mv ${finalPath}.tmp ${finalPath} && chgrp ${df.project.unixGroup} ${finalPath} && chmod 440 ${finalPath}"
-    script << "cp ${orginialPathResolved}.md5sum ${finalPath}.md5sum.tmp && mv ${finalPath}.md5sum.tmp ${finalPath}.md5sum && chgrp ${df.project.unixGroup} ${finalPath}.md5sum && chmod 440 ${finalPath}.md5sum"
-    script << ""
-    df.md5sum = md5summe
     df.fileSize = size
+
+    if (md5.exists()) {
+        script << "cp ${orginialPathResolved}.md5sum ${finalPath}.md5sum.tmp && mv ${finalPath}.md5sum.tmp ${finalPath}.md5sum && chgrp ${df.project.unixGroup} ${finalPath}.md5sum && chmod 440 ${finalPath}.md5sum"
+        String md5summe = md5.text.split(" ")[0]
+        df.md5sum = md5summe
+    }
+
+    script << ""
     assert df.save(flush: true)
 }
 
@@ -103,9 +107,14 @@ SeqTrack.withTransaction {
                         }
                     } else {
                         if (finalPath.exists() && orginialPathResolved.exists() && orginialPathResolved.canRead()) {
-                            if (new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum").text.contains(df.md5sum)) {
+                            File md5sum = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
+                            if (!md5sum.exists()) {
                                 if (overview) {
-                                    println "SKIP SINCE FILE EXISTS: copy ${orginialPathResolved}* to ${finalPath.parent}"
+                                    println "SKIP SINCE FILE EXISTS with unknown md5sum: copy ${orginialPathResolved}* to ${finalPath.parent}"
+                                }
+                            } else if (md5sum.text.contains(df.md5sum)) {
+                                if (overview) {
+                                    println "SKIP SINCE FILE EXISTS with correct md5sum: copy ${orginialPathResolved}* to ${finalPath.parent}"
                                 }
                             } else {
                                 if (overview) {
