@@ -46,8 +46,6 @@ class Workflow implements Commentable, Entity {
 
     LocalDate deprecatedDate
 
-    WesServer wesServer
-
     Set<ReferenceGenome> allowedReferenceGenomes
 
     Set<SeqType> supportedSeqTypes
@@ -56,7 +54,6 @@ class Workflow implements Commentable, Entity {
         name unique: true
         beanName nullable: true
         deprecatedDate nullable: true
-        wesServer nullable: true
         comment nullable: true
     }
 

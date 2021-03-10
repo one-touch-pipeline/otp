@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.utils.Entity
+drop index workflow_wes_server_idx;
 
-@SuppressWarnings("EmptyClass")
-class WesServer implements Entity {
+alter table workflow drop constraint workflow_wes_server_id_fkey;
 
-}
+alter table workflow drop column wes_server_id;
+
+drop table wes_server;
