@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.Canonical
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -42,16 +43,27 @@ class WorkflowArtefactService {
      * @param name A name for the artefact. It is used in the GUI to show and also for filtering
      * @return the created, saved but not flushed WorkflowArtefact
      */
-    WorkflowArtefact buildWorkflowArtefact(WorkflowRun run, String role, Individual individual, SeqType seqType, String name) {
+    WorkflowArtefact buildWorkflowArtefact(WorkflowArtefactValues values) {
         return new WorkflowArtefact([
-                producedBy      : run,
-                outputRole      : role,
+                producedBy      : values.run,
+                outputRole      : values.role,
                 withdrawnDate   : null,
                 withdrawnComment: null,
                 state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
-                individual      : individual,
-                seqType         : seqType,
-                displayName     : name,
+                artefactType    : values.artefactType,
+                individual      : values.individual,
+                seqType         : values.seqType,
+                displayName     : values.name,
         ]).save(flush: false)
     }
+}
+
+@Canonical
+class WorkflowArtefactValues {
+    WorkflowRun run
+    String role
+    ArtefactType artefactType
+    Individual individual
+    SeqType seqType
+    String name
 }

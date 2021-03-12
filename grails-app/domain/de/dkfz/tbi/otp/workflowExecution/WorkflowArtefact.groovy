@@ -46,6 +46,8 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     State state = State.LEGACY
 
+    ArtefactType artefactType
+
     Individual individual
 
     SeqType seqType

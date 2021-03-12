@@ -42,18 +42,20 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         given:
         WorkflowRun run = createWorkflowRun()
         String role = "role ${nextId}"
+        ArtefactType type = ArtefactType.FASTQ
         Individual individual = createIndividual()
         SeqType seqType = createSeqType()
         String name = "asdf"
 
         when:
-        WorkflowArtefact artefact = service.buildWorkflowArtefact(run, role, individual, seqType, name)
+        WorkflowArtefact artefact = service.buildWorkflowArtefact(new WorkflowArtefactValues(run, role, type, individual, seqType, name))
 
         then:
         artefact
         artefact.producedBy == run
         artefact.outputRole == role
         artefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING
+        artefact.artefactType == type
         artefact.individual == individual
         artefact.seqType == seqType
         artefact.withdrawnDate == null

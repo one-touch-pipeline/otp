@@ -70,7 +70,9 @@ class DataInstallationInitializationService {
         List<ExternalWorkflowConfigFragment> configFragments = getConfigFragments(seqTrack, workflow)
         WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}",
                 configFragments)
-        WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(run, OUTPUT_ROLE, seqTrack.individual, seqTrack.seqType, name)
+        WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
+                run, OUTPUT_ROLE, ArtefactType.FASTQ, seqTrack.individual, seqTrack.seqType, name
+        ))
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
         return run

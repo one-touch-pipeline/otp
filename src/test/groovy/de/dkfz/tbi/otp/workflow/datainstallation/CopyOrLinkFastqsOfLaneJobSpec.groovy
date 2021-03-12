@@ -69,8 +69,9 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
                 workflowRun: run,
         ])
         artefact = createWorkflowArtefact([
-                producedBy: run,
-                outputRole: DataInstallationInitializationService.OUTPUT_ROLE,
+                producedBy  : run,
+                outputRole  : DataInstallationInitializationService.OUTPUT_ROLE,
+                artefactType: ArtefactType.FASTQ,
         ])
         seqTrack = createSeqTrack([
                 workflowArtefact: artefact,
