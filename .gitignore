@@ -45,3 +45,5 @@ out
 ## config files for docker build
 *.otp.properties
 *.env
+##sprint review
+review/
