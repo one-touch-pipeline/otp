@@ -170,6 +170,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 createProcessingOptionLazy(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
                 createProcessingOptionLazy(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
                 createProcessingOptionLazy(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
+                createProcessingOptionLazy(name: OptionName.EMAIL_MONTHLY_KPI_RECEIVER, value: HelperUtils.randomEmail)
             }
 
             createUserAndRoles()
