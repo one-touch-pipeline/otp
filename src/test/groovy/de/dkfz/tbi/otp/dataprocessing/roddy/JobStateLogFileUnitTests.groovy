@@ -26,7 +26,7 @@ import org.junit.*
 import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.FileNotFoundException
+import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper

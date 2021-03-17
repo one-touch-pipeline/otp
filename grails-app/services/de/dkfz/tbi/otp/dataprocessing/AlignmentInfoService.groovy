@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
+import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*

@@ -37,6 +37,10 @@ import java.nio.file.*
 
 import static org.springframework.util.Assert.*
 
+/**
+ * @deprecated will be replaced with de.dkfz.tbi.otp.dataswap.DataSwapService
+ */
+@Deprecated
 @SuppressWarnings(['JavaIoPackageAccess', 'Println'])
 //This class is written for scripts, so it needs the output in stdout
 @Transactional

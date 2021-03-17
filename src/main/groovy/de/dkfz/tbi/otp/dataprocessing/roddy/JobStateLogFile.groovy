@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddy
 
 import groovy.transform.*
 
-import de.dkfz.tbi.otp.dataprocessing.FileNotFoundException
+import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.dataprocessing.ParsingException
 import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import de.dkfz.tbi.otp.utils.WaitingFileUtils

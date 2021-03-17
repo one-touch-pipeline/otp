@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp
 
 /*
  * Copyright 2011-2021 The OTP authors
@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing
  */
 
 import groovy.transform.InheritConstructors
-
-import de.dkfz.tbi.otp.OtpRuntimeException
 
 @InheritConstructors
 class FileNotFoundException extends OtpRuntimeException {

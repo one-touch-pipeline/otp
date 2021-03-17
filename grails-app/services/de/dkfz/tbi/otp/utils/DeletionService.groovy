@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
