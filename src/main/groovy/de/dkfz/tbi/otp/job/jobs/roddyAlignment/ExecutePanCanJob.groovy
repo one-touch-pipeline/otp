@@ -100,6 +100,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             vbpDataFiles.collate(2).each {
                 MetaDataService.ensurePairedSequenceFileNameConsistency(it.first().path, it.last().path)
             }
+            MetaDataService.ensurePairedSequenceFileNameOrder(vbpDataFiles)
         }
 
         return vbpDataFiles

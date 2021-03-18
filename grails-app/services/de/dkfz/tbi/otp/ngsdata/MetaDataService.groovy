@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PostAuthorize
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 
 @Transactional
@@ -58,7 +59,21 @@ class MetaDataService {
         if (!differentCharacters ||
                 differentCharacters.get(mate1FileName) != '1' ||
                 differentCharacters.get(mate2FileName) != '2') {
-            throw new RuntimeException("${mate1FileName} and ${mate2FileName} are not consistent as paired sequence file names.")
+            throw new IllegalFileNameException("${mate1FileName} and ${mate2FileName} are not consistent as paired sequence file names.")
+        }
+    }
+
+    /**
+     * For paired/mate-paired files, OTP passes the files to roddy in a list so that pairs are grouped together consecutively.
+     * However roddy reorders the file list which may cause wrong pairs, depending on the file names. This method checks whether that would happen.
+     */
+    static void ensurePairedSequenceFileNameOrder(List<File> vbpDataFiles) {
+        List<File> sortedFiles = vbpDataFiles.iterator().sort { o1, o2 ->
+            return o1.absolutePath <=> o2.absolutePath
+        }.toList()
+
+        if (!CollectionUtils.containSame(vbpDataFiles.collate(2), sortedFiles.collate(2))) {
+            throw new IllegalFileNameException("The file names would cause Roddy to reorder the files in the wrong way.")
         }
     }
 }
