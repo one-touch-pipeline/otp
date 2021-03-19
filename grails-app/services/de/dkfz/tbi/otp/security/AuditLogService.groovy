@@ -23,24 +23,37 @@ package de.dkfz.tbi.otp.security
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.AuditLog.Action
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class AuditLogService {
 
     SecurityService securityService
 
+    ProcessingOptionService processingOptionService
+
     private AuditLog createActionLog(User user, Action action, String description) {
-        AuditLog actionLog = new AuditLog(
+        AuditLog actionLog = new AuditLog([
                 user       : user,
                 action     : action,
                 description: description,
-        )
+        ])
         actionLog.save(flush: true)
         return actionLog
     }
 
     AuditLog logAction(Action action, String description) {
         return createActionLog(securityService.trueCurrentUserAsUser, action, description)
+    }
+
+    AuditLog logActionWithSystemUser(Action action, String description) {
+        String userName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER)
+        assert userName: "no system user is defined"
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(userName),
+                "Could not find user '${userName}' in the database")
+        return createActionLog(user, action, description)
     }
 }

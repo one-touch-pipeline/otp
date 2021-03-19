@@ -38,6 +38,7 @@ class AuditLog implements Entity {
         PROJECT_USER_SENT_MAIL,
         PROJECT_USER_CREATED_PROJECT_USER,
         PROJECT_REQUEST,
+        LDAP_BASED_CHANGED_ACCESS_TO_FILES,
         /**
          * In the beginning permissions were granted via roles. Therefore it was logged. Now the permissions are no longer
          * connected to a role but defined per user. The value is still needed for the data logged before this time. But

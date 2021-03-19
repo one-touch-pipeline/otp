@@ -106,15 +106,16 @@ class WorkflowRunService {
     }
 
     /**
-     * Method to change {@link WorkflowRun#jobCanBeRestarted} to true using a seperate transaction to ensure that this info doesn't get lost on
+     * Method to change {@link WorkflowRun#jobCanBeRestarted} to true using a separate transaction to ensure that this info doesn't get lost on
      * rollback of the current transaction.
      */
     void markJobAsNotRestartableInSeparateTransaction(WorkflowRun workflowRun) {
         assert workflowRun
         TransactionUtils.withNewTransaction {
-            workflowRun.refresh()
-            workflowRun.jobCanBeRestarted = false
-            workflowRun.save(flush: true)
+            //needs to fetch it new, otherwise a "illegally attempted to associate a proxy with two open Sessions" exception occurred
+            WorkflowRun workflowRun2 = WorkflowRun.get(workflowRun.id)
+            workflowRun2.jobCanBeRestarted = false
+            workflowRun2.save(flush: true)
         }
         workflowRun.refresh()
     }

@@ -462,6 +462,10 @@ class ProcessingOption implements Entity {
                 "Local time zone",
                 Necessity.OPTIONAL, "Europe/Berlin", TypeValidators.TIME_ZONE
         ),
+        OTP_SYSTEM_USER(
+                "reference to an existing user to use for system work",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
         OTP_USER_LINUX_GROUP(
                 "linux group of the otp user",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL

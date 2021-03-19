@@ -356,8 +356,14 @@ class UserProjectRoleService {
             upr.accessToFiles = value
             upr.fileAccessChangeRequested = !force
             assert upr.save(flush: true)
-            String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
-            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
+            if (force) {
+                String message = getFlagChangeLogMessage("Take the state over of file access over from the ldap",
+                        upr.accessToFiles, upr.user.username, upr.project.name)
+                auditLogService.logActionWithSystemUser(AuditLog.Action.LDAP_BASED_CHANGED_ACCESS_TO_FILES, message)
+            } else {
+                String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
+                auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
+            }
         }
         if (!force) {
             if (userProjectRole.accessToFiles) {

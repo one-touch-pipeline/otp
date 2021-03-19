@@ -41,6 +41,7 @@ import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -80,7 +81,7 @@ import java.util.concurrent.*
  */
 @Slf4j
 @Integration
-abstract class AbstractWorkflowSpec extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, WorkflowSystemDomainFactory {
+abstract class AbstractWorkflowSpec extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, WorkflowSystemDomainFactory, UserDomainFactory {
 
     /**
      * state considered as running or not started
@@ -513,37 +514,37 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void initProcessingOption() {
         log.debug("creating processingOptions")
-        DomainFactory.with {
-            //emails addresses
-            createProcessingOptionLazy(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.EMAIL_OTP_MAINTENANCE, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_NOTIFICATION, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
-            createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
+        //emails addresses
+        findOrCreateProcessingOption(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_OTP_MAINTENANCE, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_RECIPIENT_NOTIFICATION, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
 
-            //roddy and other paths
-            createProcessingOptionLazy(name: OptionName.RODDY_APPLICATION_INI, value: roddyApplicationPropertyFile.toString())
-            createProcessingOptionLazy(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
-            createProcessingOptionLazy(name: OptionName.BASE_PATH_REFERENCE_GENOME, value: referenceGenomeDirectory.toString())
+        //roddy and other paths
+        findOrCreateProcessingOption(name: OptionName.RODDY_APPLICATION_INI, value: roddyApplicationPropertyFile.toString())
+        findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
+        findOrCreateProcessingOption(name: OptionName.BASE_PATH_REFERENCE_GENOME, value: referenceGenomeDirectory.toString())
 
-            //cluster and file system
-            createProcessingOptionLazy(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
-            createProcessingOptionLazy(name: OptionName.FILESYSTEM_BAM_IMPORT, value: realm.name)
-            createProcessingOptionLazy(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: realm.name)
-            createProcessingOptionLazy(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
-            createProcessingOptionLazy(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
-            createProcessingOptionLazy(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
-            createProcessingOptionLazy(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
-            createProcessingOptionLazy(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
+        //cluster and file system
+        findOrCreateProcessingOption(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
+        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_BAM_IMPORT, value: realm.name)
+        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: realm.name)
+        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
+        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
+        findOrCreateProcessingOption(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
+        findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
+        findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
+        findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
 
-            //other values
-            createProcessingOptionLazy(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
-            createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_URL, value: "url ${nextId}")
-            createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix${nextId}")
-        }
+        //other values
+        findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
+        findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "url ${nextId}")
+        findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix${nextId}")
+        findOrCreateProcessingOption(name: OptionName.EMAIL_MONTHLY_KPI_RECEIVER, value: HelperUtils.randomEmail)
     }
 
     /**

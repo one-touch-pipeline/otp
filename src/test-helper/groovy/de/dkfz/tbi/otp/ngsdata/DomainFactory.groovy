@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
@@ -185,14 +186,9 @@ class DomainFactory {
         ])
     }
 
+    @Deprecated
     static User createUser(Map properties = [:]) {
-        return createDomainObject(User, [
-                username: "user_${counter++}",
-                password: "password_${counter++}",
-                email   : "user${counter++}@dummy.de",
-                realName: "realName_${counter++}",
-                enabled : true,
-        ], properties)
+        return UserDomainFactoryInstance.INSTANCE.createUser(properties)
     }
 
     /**
@@ -213,47 +209,46 @@ class DomainFactory {
     }
 
     static Pipeline createRoddyRnaPipeline() {
-        createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+        return createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
     static Pipeline createRnaPipeline() {
-        createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+        return createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
     @Deprecated
     static Pipeline createDefaultOtpPipeline() {
-        createPipeline(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
+        return createPipeline(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
     }
 
     @Deprecated
     static Pipeline createOtpSnvPipelineLazy() {
-        createPipeline(Pipeline.Name.OTP_SNV, Pipeline.Type.SNV)
+        return createPipeline(Pipeline.Name.OTP_SNV, Pipeline.Type.SNV)
     }
 
     static Pipeline createRoddySnvPipelineLazy() {
-        createPipeline(Pipeline.Name.RODDY_SNV, Pipeline.Type.SNV)
+        return createPipeline(Pipeline.Name.RODDY_SNV, Pipeline.Type.SNV)
     }
 
     static Pipeline createIndelPipelineLazy() {
-        createPipeline(Pipeline.Name.RODDY_INDEL, Pipeline.Type.INDEL)
+        return createPipeline(Pipeline.Name.RODDY_INDEL, Pipeline.Type.INDEL)
     }
 
     static Pipeline createAceseqPipelineLazy() {
-        createPipeline(Pipeline.Name.RODDY_ACESEQ, Pipeline.Type.ACESEQ)
+        return createPipeline(Pipeline.Name.RODDY_ACESEQ, Pipeline.Type.ACESEQ)
     }
 
     static Pipeline createSophiaPipelineLazy() {
-        createPipeline(Pipeline.Name.RODDY_SOPHIA, Pipeline.Type.SOPHIA)
+        return createPipeline(Pipeline.Name.RODDY_SOPHIA, Pipeline.Type.SOPHIA)
     }
 
     static Pipeline createExternallyProcessedPipelineLazy() {
-        createPipeline(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
+        return createPipeline(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
     }
 
     static Pipeline createRunYapsaPipelineLazy() {
-        createPipeline(Pipeline.Name.RUN_YAPSA, Pipeline.Type.MUTATIONAL_SIGNATURE)
+        return createPipeline(Pipeline.Name.RUN_YAPSA, Pipeline.Type.MUTATIONAL_SIGNATURE)
     }
-
 
     static Pipeline returnOrCreateAnyPipeline() {
         return (atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
@@ -392,24 +387,14 @@ class DomainFactory {
         ] + properties)
     }
 
+    @Deprecated
     static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {
-        ProcessingOption processingOption = findOrCreateDomainObject(ProcessingOption,
-                [value: properties.containsKey("value") ? properties['value'] : "processingOptionValue_${counter++}"],
-                properties.findAll { it.key != "value" },
-        )
-        if (properties.containsKey("value")) {
-            processingOption.value = properties.value
-        }
-        processingOption.save(flush: true)
-        return processingOption
+        return proxyCore.findOrCreateProcessingOption(properties)
     }
 
+    @Deprecated
     static ProcessingOption createProcessingOptionLazy(OptionName optionName, String value, String type = null) {
-        return createProcessingOptionLazy([
-                name : optionName,
-                value: value,
-                type : type,
-        ])
+        return proxyCore.findOrCreateProcessingOption(optionName, value, type)
     }
 
     static JobErrorDefinition createJobErrorDefinition(Map properties = [:]) {
@@ -1518,30 +1503,19 @@ class DomainFactory {
         return proxyCore.createProject(projectProperties, saveAndValidate)
     }
 
+    @Deprecated
     static UserProjectRole createUserProjectRole(Map properties = [:]) {
-        return createDomainObject(UserProjectRole, [
-                user                  : { createUser() },
-                project               : { createProject() },
-                projectRoles          : { [createProjectRole()] },
-                accessToOtp           : true,
-                accessToFiles         : false,
-                manageUsers           : false,
-                manageUsersAndDelegate: false,
-                receivesNotifications : true,
-        ], properties)
+        return UserDomainFactoryInstance.INSTANCE.createUserProjectRole(properties)
     }
 
+    @Deprecated
     static ProjectRole createProjectRole(Map properties = [:]) {
-        return createDomainObject(ProjectRole, [
-                name: 'roleName_' + (counter++),
-        ], properties)
+        return UserDomainFactoryInstance.INSTANCE.createProjectRole(properties)
     }
 
+    @Deprecated
     static ProjectRole createOrGetAuthorityProjectRole(Map properties = [:]) {
-        String projectRoleName = ProjectRole.AUTHORITY_PROJECT_ROLES.first()
-        return ProjectRole.findByName(projectRoleName) ?: createDomainObject(ProjectRole, [
-                name: projectRoleName,
-        ], properties)
+        return UserDomainFactoryInstance.INSTANCE.createOrGetAuthorityProjectRole(properties)
     }
 
     @Deprecated

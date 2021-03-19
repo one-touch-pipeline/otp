@@ -27,12 +27,17 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
-class LogServiceSpec extends Specification implements ServiceUnitTest<LogService>, DataTest, WorkflowSystemDomainFactory {
+class LogServiceSpec extends Specification implements ServiceUnitTest<LogService>, DataTest, WorkflowSystemDomainFactory, UserDomainFactory {
+
+    private static final String SYSTEM_USER = "SYSTEM"
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -43,6 +48,9 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
 
     void setup() {
         service.springSecurityService = Mock(SpringSecurityService)
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            0 * _
+        }
     }
 
     void "addSimpleLogEntry, when adding two messages, then the messages are connected to the processing step and return in the creation order"() {
@@ -56,6 +64,8 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         service.addSimpleLogEntry(workflowStep, message2)
 
         then:
+        2 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
+
         workflowStep.logs.size() == 2
         (workflowStep.logs[0] as WorkflowMessageLog).message == message1
         (workflowStep.logs[1] as WorkflowMessageLog).message == message2
@@ -70,15 +80,17 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         service.addSimpleLogEntry(workflowStep, message)
 
         then:
+        1 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
+
         workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == LogService.SYSTEM_USER
+        workflowStep.logs[0].createdBy == SYSTEM_USER
     }
 
     void "addSimpleLogEntry, when the user is set then log it with the username"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         String message = "message ${nextId}"
-        User testUser = DomainFactory.createUser()
+        User testUser = createUser()
 
         service.springSecurityService = Mock(SpringSecurityService) {
             getCurrentUser() >> testUser
@@ -103,6 +115,8 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         service.addSimpleLogEntryWithException(workflowStep, message, otpRuntimeException)
 
         then:
+        1 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
+
         workflowStep.logs.size() == 1
         WorkflowMessageLog log = workflowStep.logs[0] as WorkflowMessageLog
         log.message.startsWith(message)
@@ -120,8 +134,10 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         service.addSimpleLogEntryWithException(workflowStep, message, otpRuntimeException)
 
         then:
+        1 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
+
         workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == LogService.SYSTEM_USER
+        workflowStep.logs[0].createdBy == SYSTEM_USER
     }
 
     void "addSimpleLogEntryWithException, when the user is set then log it with the username"() {

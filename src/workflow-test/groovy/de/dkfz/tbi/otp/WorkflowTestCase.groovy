@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -67,7 +68,7 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
 @Deprecated
 @Slf4j
 @Integration
-abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore {
+abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore, UserDomainFactory {
 
     ErrorLogService errorLogService
     CreateClusterScriptService createClusterScriptService
@@ -148,30 +149,29 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             DomainFactory.createAllAlignableSeqTypes()
             createTestProcessingPriority()
 
-            DomainFactory.with {
-                createProcessingOptionForNotificationRecipient()
-                createProcessingOptionLazy(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
-                createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
-                createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
-                createProcessingOptionLazy(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
-                createProcessingOptionLazy(name: OptionName.FILESYSTEM_BAM_IMPORT, value: "")
-                createProcessingOptionLazy(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
-                createProcessingOptionLazy(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
-                createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
-                createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.EMAIL_OTP_MAINTENANCE, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
-                createProcessingOptionLazy(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
-                createProcessingOptionLazy(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
-                createProcessingOptionLazy(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
-                createProcessingOptionLazy(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
-                createProcessingOptionLazy(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
-                createProcessingOptionLazy(name: OptionName.EMAIL_MONTHLY_KPI_RECEIVER, value: HelperUtils.randomEmail)
-            }
+            DomainFactory.createProcessingOptionForNotificationRecipient()
+            findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
+            findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
+            findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
+            findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
+            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
+            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_BAM_IMPORT, value: "")
+            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
+            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
+            findOrCreateProcessingOption(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_OTP_MAINTENANCE, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
+            findOrCreateProcessingOption(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
+            findOrCreateProcessingOption(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
+            findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
+            findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
+            findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
+            findOrCreateProcessingOption(name: OptionName.EMAIL_MONTHLY_KPI_RECEIVER, value: HelperUtils.randomEmail)
 
             createUserAndRoles()
             loadWorkflow()
@@ -184,7 +184,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 }
             }
 
-            DomainFactory.createProcessingOptionLazy(
+            findOrCreateProcessingOption(
                     name: OptionName.RODDY_APPLICATION_INI,
                     value: new File(inputRootDirectory, "applicationProperties-test.ini").absolutePath
             )
@@ -387,7 +387,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     protected static boolean areAllProcessesFinished(int numberOfProcesses) {
-        Collection<Process> processes = Process.list()
+        Collection<Process> processes = Process.all
         assert processes.size() <= numberOfProcesses
         return processes.size() == numberOfProcesses && processes.every {
             it.refresh(); it.finished

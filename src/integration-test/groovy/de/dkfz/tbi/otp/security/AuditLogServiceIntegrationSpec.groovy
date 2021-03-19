@@ -31,9 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 @Rollback
 @Integration
-class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles {
+class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, UserDomainFactory {
 
     @Autowired
     GrailsApplication grailsApplication
@@ -42,7 +48,9 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
 
     void setupData() {
         createUserAndRoles()
-        auditLogService = new AuditLogService()
+        auditLogService = new AuditLogService([
+                processingOptionService: new ProcessingOptionService()
+        ])
         auditLogService.securityService = new SecurityService()
         auditLogService.securityService.springSecurityService = new SpringSecurityService()
         auditLogService.securityService.springSecurityService.grailsApplication = grailsApplication
@@ -64,9 +72,9 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         DateTime stamp = new DateTime(actionLog.timestamp)
 
         then:
-        0 == stamp.getHourOfDay()
-        0 == stamp.getMinuteOfHour()
-        0 == stamp.getSecondOfMinute()
+        stamp.hourOfDay == 0
+        stamp.minuteOfHour == 0
+        stamp.secondOfMinute == 0
     }
 
     void "logAction uses the original user, even if switched to another one"() {
@@ -74,7 +82,7 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         setupData()
 
         AuditLog actionLog = null
-        User admin = User.findByUsername(ADMIN)
+        User admin = CollectionUtils.exactlyOneElement(User.findAllByUsername(ADMIN))
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -85,5 +93,21 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
 
         then:
         actionLog.user == admin
+    }
+
+    void "logActionWithSystemUser, when log a message, then the AuditLog should use the user defined in the ProcessingOption"() {
+        given:
+        setupData()
+        User user = createUser()
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, user.username)
+        AuditLog actionLog
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            actionLog = auditLogService.logActionWithSystemUser(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
+        }
+
+        then:
+        actionLog.user == user
     }
 }

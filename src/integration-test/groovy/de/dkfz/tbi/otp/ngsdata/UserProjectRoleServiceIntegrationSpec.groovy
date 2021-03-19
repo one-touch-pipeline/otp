@@ -41,13 +41,14 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 
 @Rollback
 @Integration
-class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
+class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, UserDomainFactory {
 
     private final static String UNIX_GROUP = "UNIX_GROUP"
     private final static String OTHER_GROUP = "OTHER_GROUP"
@@ -67,7 +68,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     UserProjectRoleService userProjectRoleService
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     void setupData() {
         createUserAndRoles()
@@ -86,34 +87,41 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.securityService = new SecurityService()
         userProjectRoleService.auditLogService.securityService.springSecurityService = springSecurityService
+        userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         userProjectRoleService.userService = new UserService()
 
-        DomainFactory.createProcessingOptionLazy(
+        findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION,
                 type: null,
                 project: null,
                 value: EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
-        DomainFactory.createProcessingOptionLazy(
+        findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION,
                 type: null,
                 project: null,
                 value: EMAIL_SENDER_SALUTATION,
         )
-        DomainFactory.createProcessingOptionLazy(
+        findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.CLUSTER_NAME,
                 type: null,
                 project: null,
                 value: CLUSTER_NAME,
         )
-        DomainFactory.createProcessingOptionLazy(
+        findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION,
                 type: null,
                 project: null,
                 value: EMAIL_CLUSTER_ADMINISTRATION,
+        )
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.OTP_SYSTEM_USER,
+                type: null,
+                project: null,
+                value: SYSTEM_USER,
         )
     }
 
@@ -241,7 +249,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(ADMIN))
         User switchedUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(OPERATOR))
 
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
+        UserProjectRole userProjectRole = createUserProjectRole()
         String formattedAction = operatorAction.toString().toLowerCase()
 
         String scriptCommand = "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
@@ -372,7 +380,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         expect:
-        User.findByUsernameAndEmail(ldapUserDetails.username, ldapUserDetails.mail) == null
+        User.findAllByUsernameAndEmail(ldapUserDetails.username, ldapUserDetails.mail).empty
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -582,7 +590,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.userService = new UserService()
 
         expect:
-        User.findByEmail(email) == null
+        User.findAllByEmail(email).empty
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -927,12 +935,67 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "enabled"                | 0
     }
 
+    @Unroll
+    void "setAccessToFiles, when oldFile Access is #oldFileAccess and new is #newFileAccess and force is #force, then create expected AuditLog"() {
+        given:
+        setupData()
+        createUser([username: SYSTEM_USER])
+
+        UserProjectRole userProjectRole = createUserProjectRole(
+                project: createProject(unixGroup: UNIX_GROUP),
+                accessToFiles: oldFileAccess,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            userProjectRoleService.setAccessToFiles(userProjectRole, newFileAccess, force)
+        }
+
+        then:
+        AuditLog.count() == auditLogCount
+        CollectionUtils.exactlyOneElement(AuditLog.findAllByAction(action)).user.username == user
+
+        where:
+        oldFileAccess | newFileAccess | force || auditLogCount | action                                               | user
+        false         | true          | false || 2             | AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES | USER
+        true          | false         | false || 2             | AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES | USER
+        false         | true          | true  || 1             | AuditLog.Action.LDAP_BASED_CHANGED_ACCESS_TO_FILES   | SYSTEM_USER
+        true          | false         | true  || 1             | AuditLog.Action.LDAP_BASED_CHANGED_ACCESS_TO_FILES   | SYSTEM_USER
+    }
+
+    @Unroll
+    void "setAccessToFiles, when old and new File Access is the same (#fileAccess) and force is #forse, then create no AuditLog"() {
+        given:
+        setupData()
+        createUser([username: SYSTEM_USER])
+
+        UserProjectRole userProjectRole = createUserProjectRole(
+                project: createProject(unixGroup: UNIX_GROUP),
+                accessToFiles: fileAccess,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            userProjectRoleService.setAccessToFiles(userProjectRole, fileAccess, force)
+        }
+
+        then:
+        AuditLog.count == 0
+
+        where:
+        fileAccess | force
+        false      | false
+        true       | false
+        false      | true
+        true       | true
+    }
+
     void "test setAccessToFilesWithUserNotification"() {
         given:
         setupData()
 
         List<UserProjectRole> userProjectRoles = (1..2).collect {
-            DomainFactory.createUserProjectRole(
+            createUserProjectRole(
                     project: createProject(unixGroup: UNIX_GROUP),
                     accessToFiles: false,
             )
@@ -959,7 +1022,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    @SuppressWarnings("LineLength")
     void "test #flag access as project user with #role rights; userProjectRole contains ProjectRole #projectRole; initialized with #flagInit; expect success"() {
         given:
         setupData()
@@ -1078,7 +1140,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    @SuppressWarnings("LineLength")
     void "test #flag access as project user with #role rights; userProjectRole contains ProjectRole #projectRole; initialized with #flagInit; expect failure "() {
         given:
         setupData()

@@ -49,6 +49,7 @@ trait UserAndRoles {
     static final String OPERATOR = "operator"
     static final String TESTUSER = "testuser"
     static final String USER = "user"
+    static final String SYSTEM_USER = "systemuser"
 
     static ProjectRole coordinator, other, pi, leadBioinformatician, bioinformatician, submitter
 

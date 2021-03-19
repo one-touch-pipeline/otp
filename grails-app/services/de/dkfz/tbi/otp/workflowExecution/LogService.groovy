@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.utils.TransactionUtils
@@ -36,9 +38,9 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 @Transactional
 class LogService {
 
-    static final String SYSTEM_USER = "SYSTEM"
-
     SpringSecurityService springSecurityService
+
+    ProcessingOptionService processingOptionService
 
     /**
      * Add the massage as {@link WorkflowMessageLog} to {@link WorkflowStep} in a new transaction, so it is added persistently
@@ -48,7 +50,7 @@ class LogService {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : message,
-                    createdBy : springSecurityService.currentUser?.username ?: SYSTEM_USER,
+                    createdBy   : userName(),
             ]).save(flush: true)
         }
     }
@@ -62,7 +64,7 @@ class LogService {
             new WorkflowMessageLog([
                     workflowStep: workflowStep,
                     message     : "${message}\n\n${stacktrace}",
-                    createdBy : springSecurityService.currentUser?.username ?: SYSTEM_USER,
+                    createdBy   : userName(),
             ]).save(flush: true)
         }
     }
@@ -80,9 +82,14 @@ class LogService {
                 exitCode = processOutput.exitCode
                 stdout = processOutput.stdout
                 stderr = processOutput.stderr
-                createdBy = springSecurityService.currentUser?.username ?: SYSTEM_USER
+                createdBy = userName()
                 save(flush: true)
             }
         }
+    }
+
+    private String userName() {
+        return springSecurityService.currentUser?.username ?:
+                processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER)
     }
 }

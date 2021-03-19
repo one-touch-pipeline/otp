@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.domainFactory
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
@@ -407,5 +408,25 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 ilseNumber: { nextId % 999999 },
                 warning   : false,
         ], properties, saveAndValidate)
+    }
+
+    ProcessingOption findOrCreateProcessingOption(Map properties = [:]) {
+        ProcessingOption processingOption = findOrCreateDomainObject(ProcessingOption,
+                [value: properties.containsKey("value") ? properties['value'] : "processingOptionValue_${counter++}"],
+                properties.findAll { it.key != "value" },
+        )
+        if (properties.containsKey("value")) {
+            processingOption.value = properties.value
+        }
+        processingOption.save(flush: true)
+        return processingOption
+    }
+
+    ProcessingOption findOrCreateProcessingOption(ProcessingOption.OptionName optionName, String value, String type = null) {
+        return findOrCreateProcessingOption([
+                name : optionName,
+                value: value,
+                type : type,
+        ])
     }
 }
