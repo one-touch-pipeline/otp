@@ -52,6 +52,18 @@
         </div>
     </div>
 
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">QC status changes</h4>
+        <div id="mail-info-text">
+            <p>To accept the QC issues, please write an mail with the following information to <a href="mailto:${supportEmail}">${supportEmail}</a>
+                (one line per sample):</p>
+            <p style="margin-bottom: 0;">1. PIDs that should be accepted</p>
+            <p style="margin-bottom: 0;">2. Sample Types that should be accepted</p>
+            <p style="margin-bottom: 0;">3. Sequencing Type of these samples</p>
+            <p style="margin-bottom: 0;">4. Acceptance comment</p>
+        </div>
+    </div>
+
     <h5><strong><g:message code="otp.menu.alignmentQuality"/></strong></h5>
 
     <div id="sample" data-sample="${sample?.id}">

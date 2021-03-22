@@ -282,7 +282,8 @@ $(function () {
     };
 
     $("#overviewTableProcessedMergedBMF").on("change", ".qcDropdown", function (e) {
-        changeQcStatus(e.target, $(e.target).data("id"))
+        $.otp.toaster.showErrorToast("Changing QC status is disabled", $("#mail-info-text").html())
+        // changeQcStatus(e.target, $(e.target).data("id"))
     })
 
     initializeTable();

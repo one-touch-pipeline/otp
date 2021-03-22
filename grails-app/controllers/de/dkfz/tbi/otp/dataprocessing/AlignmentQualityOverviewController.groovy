@@ -168,6 +168,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     ProjectSelectionService projectSelectionService
     QcThresholdService qcThresholdService
     QcTrafficLightService qcTrafficLightService
+    ProcessingOptionService processingOptionService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -213,11 +214,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         }
 
         return [
-                seqTypes: seqTypes,
-                seqType : seqType,
-                header  : header,
-                columns : columns,
-                sample  : cmd.sample,
+                seqTypes    : seqTypes,
+                seqType     : seqType,
+                header      : header,
+                columns     : columns,
+                sample      : cmd.sample,
+                supportEmail: processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL),
         ]
     }
 
