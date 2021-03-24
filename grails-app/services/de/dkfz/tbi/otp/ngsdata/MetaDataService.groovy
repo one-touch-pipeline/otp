@@ -72,7 +72,8 @@ class MetaDataService {
             return o1.absolutePath <=> o2.absolutePath
         }.toList()
 
-        if (!CollectionUtils.containSame(vbpDataFiles.collate(2), sortedFiles.collate(2))) {
+        final int mateCount = 2
+        if (!CollectionUtils.containSame(vbpDataFiles.collate(mateCount), sortedFiles.collate(mateCount))) {
             throw new IllegalFileNameException("The file names would cause Roddy to reorder the files in the wrong way.")
         }
     }
