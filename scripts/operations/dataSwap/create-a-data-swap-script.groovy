@@ -125,19 +125,16 @@ Closure<Integer> newSampleSwapScript = { StringBuilder script, Project newProjec
                                          Sample oldSample, SampleType newSampleType ->
     String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleType.displayName}"
 
-    script << "\n\tdataSwapService.moveSample( \n" +
+    script << "\n\tsampleSwapService.swap( \n" +
             "\t\t[\n" +
-            "\t\toldProjectName: '${oldIndividual.project.name}',\n" +
-            "\t\tnewProjectName: '${newProject.name}',\n" +
-            "\t\toldPid: '${oldIndividual.pid}',\n" +
-            "\t\tnewPid: '${newIndividualName}',\n" +
-            "\t\toldSampleTypeName: '${oldSample.sampleType.name}',\n" +
-            "\t\tnewSampleTypeName: '${newSampleType.name}',\n" +
-            "\t\t],\n" +
-            "\t\t[\n"
+            "\t\tprojectNameSwap: [current: '${oldIndividual.project.name}', substitute: '${newProject.name}'],\n" +
+            "\t\tpidSwap: [current: '${oldIndividual.pid}'', substitute: '${newIndividualName}'],\n" +
+            "\t\tsampleTypeSwap: [current: '${oldSample.sampleType.name}', substitute: '${newSampleType.name}'],\n" +
+            "\t\tdataFileSwaps        : [\n"
+
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            script << "\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}', \n"
+            script << "\t\t['current: ${datafile.fileName}', substitute: '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'], \n"
         }
     }
     script << "\t\t],\n\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n\t)\n"
@@ -177,7 +174,7 @@ Closure<String> createScript = { String swapLabel ->
 
         // simplest case: move entire patient
         if (newSampleType == null && seqTypeFilterList.empty && // only if we're moving entire, unfiltered patients...
-                (!newIndividual || newProject != oldIndividual.project ) // .. either into a shiny new patient, or into another project entirely
+                (!newIndividual || newProject != oldIndividual.project) // .. either into a shiny new patient, or into another project entirely
         ) {
             counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, script, newSampleTypeClosure, newDataFileNameClosure, files)
         } else { // more complex case: moving partial source, or into non-empty destination
@@ -355,7 +352,7 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
 ) {
     String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
 
-    script << "\n\tdataSwapService.moveIndividual(\n" +
+    script << "\n\tde.dkfz.tbi.otp.ngsdata.DataSwapService.moveIndividual(\n" +
             "\t\t[\n" +
             "\t\t'oldProjectName' :'${oldIndividual.project.name}',\n" +
             "\t\t'newProjectName' : '${newProject.name}',\n" +
@@ -384,104 +381,107 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
     return counter
 }
 
-
-
 class Snippets {
     static String databaseFixingHeader(String swapLabel) {
         return """
-/****************************************************************
- * DATABASE FIXING
- *
- * OTP console script to move the database-side of things
- ****************************************************************/
-
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-
-import java.nio.file.*
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
-
-import static org.springframework.util.Assert.*
-
-ConfigService configService = ctx.configService
-FileSystemService fileSystemService = ctx.fileSystemService
-FileService fileService = ctx.fileService
-DataSwapService dataSwapService = ctx.dataSwapService
-
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
-StringBuilder log = new StringBuilder()
-
-// create a container dir for all output of this swap;
-// group-editable so non-server users can also work with it
-String swapLabel = "${swapLabel}"
-final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
-fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
-
-/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
-boolean verifiedLinkedFiles = false
-
-/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
-boolean failOnMissingFiles = true
-
-try {
-    Individual.withTransaction {
-"""
+               |/****************************************************************
+               | * DATABASE FIXING
+               | *
+               | * OTP console script to move the database-side of things
+               | ****************************************************************/
+               |
+               |import de.dkfz.tbi.otp.ngsdata.*
+               |import de.dkfz.tbi.otp.dataprocessing.*
+               |import de.dkfz.tbi.otp.utils.*
+               |import de.dkfz.tbi.otp.config.*
+               |import de.dkfz.tbi.otp.infrastructure.FileService
+               |import de.dkfz.tbi.otp.job.processing.FileSystemService
+               |import de.dkfz.tbi.otp.dataswap.SampleSwapService
+               |import de.dkfz.tbi.otp.dataswap.Swap
+               |import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
+               |
+               |import java.nio.file.*
+               |import java.nio.file.attribute.PosixFilePermission
+               |import java.nio.file.attribute.PosixFilePermissions
+               |
+               |import static org.springframework.util.Assert.*
+               |
+               |ConfigService configService = ctx.configService
+               |FileSystemService fileSystemService = ctx.fileSystemService
+               |FileService fileService = ctx.fileService
+               |de.dkfz.tbi.otp.ngsdata.DataSwapService dataSwapService = ctx.dataSwapService
+               |SampleSwapService sampleSwapService = ctx.createSwapComments
+               |
+               |Realm realm = configService.defaultRealm
+               |FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+               |
+               |StringBuilder log = new StringBuilder()
+               |
+               |// create a container dir for all output of this swap;
+               |// group-editable so non-server users can also work with it
+               |String swapLabel = "${swapLabel}"
+               |final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
+               |fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
+               |fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+               |
+               |/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
+               |boolean verifiedLinkedFiles = false
+               |
+               |/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
+               |boolean failOnMissingFiles = true
+               |
+               |try {
+               |    Individual.withTransaction {
+               |""".stripMargin()
     }
 
     static String createIndividual(String newIndividualName, String newProjectName) {
         return """
-assert new Individual(
-\tpid: '${newIndividualName}',
-\tmockPid: '${newIndividualName}',
-\tmockFullName: '${newIndividualName}',
-\ttype: Individual.Type.REAL,
-\tproject: Project.findByName('${newProjectName}'),
-).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"
-"""
+               assert new Individual(
+               \tpid: '${newIndividualName}',
+               \tmockPid: '${newIndividualName}',
+               \tmockFullName: '${newIndividualName}',
+               \ttype: Individual.Type.REAL,
+               \tproject: Project.findByName('${newProjectName}'),
+               ).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"
+               """.stripIndent()
     }
 
     static String createSample(String newIndividualName, String newSampleTypeName) {
         return """
-assert new Sample(
-\tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${newIndividualName}')),
-\tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
-).save(flush: true, failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
-"""
+               assert new Sample(
+               \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${newIndividualName}')),
+               \tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
+               ).save(flush: true, failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
+               """.stripIndent()
     }
 
 
     static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newDataFileNameClosure,
                            Project newProject,
                            Individual oldIndividual, String newIndividual,
-                           SampleType oldSampleType, SampleType newSampleType) {
+                           SampleType oldSampleType, SampleType newSampleType
+    ) {
         StringBuilder snippet = new StringBuilder()
         snippet << """
-\tdataSwapService.swapLane([
-\t\t'oldProjectName'   : ['${oldIndividual.project.name}'],
-\t\t'newProjectName'   : ['${newProject.name}'],
-\t\t'oldPid'           : ['${oldIndividual.pid}'],
-\t\t'newPid'           : ['${newIndividual}'],
-\t\t'oldSampleTypeName': ['${oldSampleType.name}'],
-\t\t'newSampleTypeName': ['${newSampleType.name}'],
-\t\t'oldSeqTypeName'   : ['${seqTrack.seqType.name}'],
-\t\t'newSeqTypeName'   : ['${seqTrack.seqType.name}'],
-\t\t'oldSingleCell'    : ['${seqTrack.seqType.singleCell}'],
-\t\t'newSingleCell'    : ['${seqTrack.seqType.singleCell}'],
-\t\t'oldLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
-\t\t'newLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
-\t\t'runName'          : ['${seqTrack.run.name}'],
-\t\t'lane'             : ['${seqTrack.laneId}'],
-\t\t'sampleNeedsToBeCreated': ['false'],
-\t\t], [
-"""
+                   \tde.dkfz.tbi.otp.ngsdata.DataSwapService.swapLane([
+                   \t\t'oldProjectName'   : ['${oldIndividual.project.name}'],
+                   \t\t'newProjectName'   : ['${newProject.name}'],
+                   \t\t'oldPid'           : ['${oldIndividual.pid}'],
+                   \t\t'newPid'           : ['${newIndividual}'],
+                   \t\t'oldSampleTypeName': ['${oldSampleType.name}'],
+                   \t\t'newSampleTypeName': ['${newSampleType.name}'],
+                   \t\t'oldSeqTypeName'   : ['${seqTrack.seqType.name}'],
+                   \t\t'newSeqTypeName'   : ['${seqTrack.seqType.name}'],
+                   \t\t'oldSingleCell'    : ['${seqTrack.seqType.singleCell}'],
+                   \t\t'newSingleCell'    : ['${seqTrack.seqType.singleCell}'],
+                   \t\t'oldLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
+                   \t\t'newLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
+                   \t\t'runName'          : ['${seqTrack.run.name}'],
+                   \t\t'lane'             : ['${seqTrack.laneId}'],
+                   \t\t'sampleNeedsToBeCreated': ['false'],
+                   \t\t], [
+                   """.stripIndent()
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
             snippet << "\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual)}',\n"
         }

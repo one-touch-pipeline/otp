@@ -21,43 +21,22 @@
  */
 package de.dkfz.tbi.otp.dataswap.parameters
 
-import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataswap.Swap
 
-import java.nio.file.Path
-
 @TupleConstructor
-class DataSwapParameters implements Validateable {
+class SampleSwapParameters extends DataSwapParameters {
 
     static Closure constraints = {
-        projectNameSwap nullable: false, validator: {
+        importFrom DataSwapParameters
+
+        sampleTypeSwap nullable: false, validator: {
             if (!it.old || !it.new) {
-                return "neither the old nor the new project name may be null or blank"
+                return "neither the old nor the new sampleType name may be null or blank"
             }
         }
-        pidSwap nullable: false, validator: {
-            if (!it.old || !it.new) {
-                return "neither the old nor the new pid name may be null or blank"
-            }
-        }
-        dataFileSwaps nullable: false, validator: {
-            if (it*.old.any { !it }) {
-                return "None of the old file names may be null or blank"
-            }
-        }
-        bashScriptName nullable: false, blank: false
-        log nullable: false
-        scriptOutputDirectory nullable: false
     }
 
-    Swap<String> projectNameSwap
-    Swap<String> pidSwap
-    List<Swap<String>> dataFileSwaps
-    String bashScriptName
-    StringBuilder log
-    boolean failOnMissingFiles = false
-    Path scriptOutputDirectory
-    boolean linkedFilesVerified = false
+    Swap<String> sampleTypeSwap
 }

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataswap
 
 import grails.testing.gorm.DataTest
+import grails.validation.Validateable
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
@@ -66,17 +67,117 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
     DataSwapService service
 
     void setupSpec() {
-        service = new DataSwapService<DataSwapParameters, DataSwapData>() {
+        service = Spy(DataSwapService)
+    }
+
+    DataSwapService setupServiceWithAbstractMethods() {
+        return Spy(type: new DataSwapService<DataSwapParameters, DataSwapData<DataSwapParameters>>() {
             @Override
-            void swap(DataSwapParameters parameters) throws IOException, AssertionError {
-                // not tested here
+            protected void logSwapParameters(DataSwapParameters params) {
+                // Is not functionally tested here
             }
 
             @Override
-            void swap(DataSwapData data) throws IOException, AssertionError {
-                // not tested here
+            protected void completeOmittedNewSwapValuesAndLog(DataSwapParameters params) {
+                // Is not functionally tested here
             }
+
+            @Override
+            protected DataSwapData<DataSwapParameters> buildDataDTO(DataSwapParameters params) {
+                // Is not functionally tested here
+                return null
+            }
+
+            @Override
+            protected void logSwapData(DataSwapData<DataSwapParameters> data) {
+                // Is not functionally tested here
+            }
+
+            @Override
+            protected void performDataSwap(DataSwapData<DataSwapParameters> data) {
+                // Is not functionally tested here
+            }
+
+            @Override
+            protected void createSwapComments(DataSwapData<DataSwapParameters> data) {
+                // Is not functionally tested here
+            }
+        }.class) as DataSwapService
+    }
+
+    void "swap(P parameters), calls methods in the right order"() {
+        given:
+        DataSwapService service = setupServiceWithAbstractMethods()
+
+        final DataSwapParameters parameters = new DataSwapParameters()
+
+        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>()
+
+        when:
+        service.swap(parameters)
+
+        then:
+        1 * service.validateDTO(_ as Validateable) >> null
+
+        then:
+        1 * service.logSwapParameters(_ as DataSwapParameters) >> _
+
+        then:
+        1 * service.completeOmittedNewSwapValuesAndLog(_ as DataSwapParameters) >> _
+
+        then:
+        1 * service.buildDataDTO(_ as DataSwapParameters) >> dataSwapData
+
+        then:
+        1 * service.swap(dataSwapData) >> null
+    }
+
+    void "swap(D data), calls methods in the right order"() {
+        given:
+        DataSwapService service = setupServiceWithAbstractMethods()
+
+        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>()
+
+        when:
+        service.swap(dataSwapData)
+
+        then:
+        1 * service.validateDTO(_ as Validateable) >> null
+
+        then:
+        1 * service.logSwapData(_ as DataSwapData<DataSwapParameters>) >> _
+
+        then:
+        1 * service.performDataSwap(_ as DataSwapData<DataSwapParameters>) >> _
+
+        then:
+        1 * service.createSwapComments(_ as DataSwapData<DataSwapParameters>) >> _
+    }
+
+    void "validateDTO, when validateable is valid should not throw an exception"() {
+        given:
+        Validateable validateable = Mock(Validateable) {
+            _ * validate(*_) >> true
         }
+
+        when:
+        service.validateDTO(validateable)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "validateDTO, when validateable is not valid should not throw an AssertionError"() {
+        given:
+        Validateable validateable = Mock(Validateable) {
+            _ * validate(*_) >> false
+        }
+
+        when:
+        service.validateDTO(validateable)
+
+        then:
+        thrown(AssertionError)
     }
 
     @Unroll

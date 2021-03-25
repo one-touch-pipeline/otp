@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataswap.data
 
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
-
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -38,7 +37,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
 
     static Closure constraints = {
         parameters nullable: false
-        individualSwap validator: { individualSwap, obj ->
+        individualSwap nullable: false, validator: { individualSwap, obj ->
             if (individualSwap.old.project != obj.projectSwap.old) {
                 return "old individual ${individualSwap.old.pid} should be in project" +
                         " ${obj.projectSwap.old.name}, but was in ${individualSwap.old.project}"
@@ -48,13 +47,12 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
                         "  ${obj.projectSwap.new.name}, but was in ${individualSwap.new.project}"
             }
         }
-        seqTrackList nullable: false
-        dataFiles nullable: false, minSize: 1, validator: { dataFiles, obj ->
+        dataFiles minSize: 1, validator: { dataFiles, obj, err ->
             List<String> dataFilesGiven = obj.dataFileSwaps*.old.sort()
             List<String> dataFilesFound = dataFiles*.fileName.sort()
             List<String> difference = dataFilesGiven - dataFilesFound
             if (dataFilesGiven != dataFilesFound) {
-                return "DataFiles: ${difference} not found, but found: ${dataFilesFound}"
+                return "DataFiles: ${difference} not found in database, and ${dataFilesFound} were missed in map"
             }
         }
     }
@@ -64,19 +62,10 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     Swap<Project> projectSwap
     Swap<Individual> individualSwap
     List<SeqTrack> seqTrackList
-    List<DataFile> fastqDataFiles
     List<DataFile> dataFiles
     Map<DataFile, Map<String, String>> oldDataFileNameMap
     List<String> oldFastQcFileNames
     List<File> dirsToDelete = []
-
-    Swap<String> getProjectNameSwap() {
-        return parameters.projectNameSwap
-    }
-
-    Swap<String> getPidSwap() {
-        return parameters.pidSwap
-    }
 
     List<Swap<String>> getDataFileSwaps() {
         return parameters.dataFileSwaps
@@ -89,8 +78,6 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     StringBuilder getLog() {
         return parameters.log
     }
-
-    void setLog(StringBuilder log) { parameters.log = log }
 
     boolean getFailOnMissingFiles() {
         return parameters.failOnMissingFiles

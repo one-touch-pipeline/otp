@@ -19,45 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataswap.parameters
+package de.dkfz.tbi.otp.dataswap.data
 
-import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataswap.Swap
-
-import java.nio.file.Path
+import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 @TupleConstructor
-class DataSwapParameters implements Validateable {
+class SampleSwapData extends DataSwapData<SampleSwapParameters> {
 
     static Closure constraints = {
-        projectNameSwap nullable: false, validator: {
-            if (!it.old || !it.new) {
-                return "neither the old nor the new project name may be null or blank"
+        importFrom DataSwapData
+
+        seqTrackList validator: { seqTrackList, obj ->
+            List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = obj.seqTrackService.returnExternallyProcessedMergedBamFiles(seqTrackList)
+            if (!externallyProcessedMergedBamFiles.empty) {
+                return "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
+            }
+            int linkedSeqTracks = seqTrackList.findAll { SeqTrack seqTrack -> seqTrack.linkedExternally
+            }.size()
+            if (!obj.linkedFilesVerified && linkedSeqTracks) {
+                return "There are ${linkedSeqTracks} seqTracks only linked"
             }
         }
-        pidSwap nullable: false, validator: {
-            if (!it.old || !it.new) {
-                return "neither the old nor the new pid name may be null or blank"
-            }
-        }
-        dataFileSwaps nullable: false, validator: {
-            if (it*.old.any { !it }) {
-                return "None of the old file names may be null or blank"
-            }
-        }
-        bashScriptName nullable: false, blank: false
-        log nullable: false
-        scriptOutputDirectory nullable: false
     }
 
-    Swap<String> projectNameSwap
-    Swap<String> pidSwap
-    List<Swap<String>> dataFileSwaps
-    String bashScriptName
-    StringBuilder log
-    boolean failOnMissingFiles = false
-    Path scriptOutputDirectory
-    boolean linkedFilesVerified = false
+    Swap<SampleType> sampleTypeSwap
+
+    Sample sample
+
+    List<DataFile> fastqDataFiles
+
+    SeqTrackService seqTrackService
 }

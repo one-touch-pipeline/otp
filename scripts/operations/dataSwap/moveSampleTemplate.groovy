@@ -21,6 +21,9 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataswap.SampleSwapService
+import de.dkfz.tbi.otp.dataswap.Swap
+import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataSwapService
@@ -51,7 +54,7 @@ import java.nio.file.Path
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
-DataSwapService dataSwapService = ctx.dataSwapService
+SampleSwapService sampleSwapService = ctx.createSwapComments
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
@@ -70,28 +73,25 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-        dataSwapService.moveSample(
-                [
-                        'oldProjectName'   : 'oldProjectName',
-                        'newProjectName'   : 'newProjectName',
-                        'oldPid'           : 'oldPid',
-                        'newPid'           : 'newPid',
-                        'oldSampleTypeName': 'oldSampleTypeName',
-                        'newSampleTypeName': 'newSampleTypeName',
-                ],
-                [
-                        'oldFileName1': 'newFileName1',
-                        'oldFileName2': 'newFileName2',
-                        'oldFileName3': '',
-                        'oldFileName4': '',
-                ],
-                'uniqueScriptName',
-                outputStringBuilder,
-                failOnMissingFiles,
-                scriptOutputDirectory,
-                linkedFilesVerified
-        )
 
+        sampleSwapService.swap(
+                new SampleSwapParameters([
+                        projectNameSwap      : [current: 'oldProjectName', substitute: 'newProjectName'],
+                        pidSwap              : [current: 'oldPid', substitute: 'newPid'],
+                        sampleTypeSwap       : [current: 'oldSampleTypeName', substitute: 'newSampleTypeName'],
+                        dataFileSwaps        : [
+                                [current: 'oldFileName1', substitute: 'newFileName1'],
+                                [current: 'oldFileName2', substitute: 'newFileName2'],
+                                [current: 'oldFileName3', substitute: ''],
+                                [current: 'oldFileName4', substitute: ''],
+                        ],
+                        bashScriptName       : 'uniqueScriptName',
+                        log                  : outputStringBuilder,
+                        failOnMissingFiles   : failOnMissingFiles,
+                        scriptOutputDirectory: scriptOutputDirectory,
+                        linkedFilesVerified  : linkedFilesVerified,
+                ])
+        )
         assert false
     }
 } finally {
