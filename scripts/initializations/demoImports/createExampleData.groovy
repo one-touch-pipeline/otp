@@ -54,6 +54,11 @@ class ExampleData {
     int individualCount = 2
 
     /**
+     * The count of lanes to create for each sample and SeqType combination
+     */
+    int lanesPerSampleAndSeqType = 1
+
+    /**
      * Should dummy files and links are created for the {@link DataFile}s?
      * Please ensure that otp has the necessary write permissions remotely for the project directory
      * (or any parent directory in which the directories needs to be created)
@@ -141,20 +146,23 @@ class ExampleData {
     void createObjects() {
         (1..individualCount).each {
             String pid = "example_${Individual.count() + 1}"
-            println "pid: ${pid}"
+            println "- pid: ${pid}"
             Individual individual = createIndividual(project, pid)
-            println "individual: ${individual}"
+            println "- individual: ${individual}"
             sampleTypes.each { SampleType sampleType ->
                 Sample sample = createSample(individual, sampleType)
-                println "  sample: ${sample}"
+                println "  - sample: ${sample}"
                 seqTypes.each { SeqType seqType ->
-                    println "    use: ${seqType}"
-                    SeqTrack seqTrack = createSeqTrack(fastqImportInstance, sample, seqType)
-                    println "    seqtrack: ${seqTrack}"
-                    MergingWorkPackage mergingWorkPackage = createMergingWorkPackage(seqTrack)
-                    println "      mwp: ${mergingWorkPackage}"
+                    println "    - for: ${seqType}"
+                    List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
+                        SeqTrack seqTrack = createSeqTrack(fastqImportInstance, sample, seqType)
+                        println "      - seqtrack: ${seqTrack}"
+                        return seqTrack
+                    }
+                    MergingWorkPackage mergingWorkPackage = createMergingWorkPackage(seqTracks)
+                    println "      - mwp: ${mergingWorkPackage}"
                     RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage)
-                    println "      roddy: ${roddyBamFile}"
+                    println "      - roddy: ${roddyBamFile}"
                 }
             }
         }
@@ -456,12 +464,13 @@ class ExampleData {
         return fastqcProcessedFile
     }
 
-    MergingWorkPackage createMergingWorkPackage(SeqTrack seqTrack) {
+    MergingWorkPackage createMergingWorkPackage(List<SeqTrack> seqTracks) {
+        SeqTrack seqTrack = seqTracks.first()
         Pipeline pipeline = Pipeline.Name.forSeqType(seqTrack.seqType).pipeline
         return new MergingWorkPackage([
                 sample               : seqTrack.sample,
                 seqType              : seqTrack.seqType,
-                seqTracks            : [seqTrack] as Set,
+                seqTracks            : seqTracks as Set,
                 referenceGenome      : referenceGenome,
                 pipeline             : pipeline,
                 statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? referenceGenome.statSizeFileNames.first().name : null,
