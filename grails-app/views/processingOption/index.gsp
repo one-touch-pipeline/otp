@@ -47,7 +47,7 @@
         </thead>
         <tbody>
         <g:each status="rowIndex" in="${options}" var="option">
-            <tr>
+            <tr class="processing-options-row">
                 <th scope="row">${rowIndex+1}</th>
                 <td data-toggle="tooltip" data-placement="top" title="${option.name?.tooltip}">${option.name.value}</td>
                 <td class="${option.type.warnColor == TableCellValue.WarnColor.ERROR ? 'table-danger' : ''}">${option.type.value}</td>
@@ -80,13 +80,11 @@
                                 <i class="bi bi-save"></i>
                                 <g:message code="processingOption.button.save"/>
                             </button>
-                            <button class="btn btn-outline-secondary btn-sm otp-background-white" type="button" id="button-edit-${rowIndex}" onclick="onEdit(${rowIndex})">
+                            <button class="btn btn-outline-secondary btn-sm otp-background-white" type="button" id="button-edit-${rowIndex}" onclick="onEdit(${rowIndex})" title="${g.message(code: "processingOption.button.edit")}">
                                 <i class="bi bi-pencil"></i>
-                                <g:message code="processingOption.button.edit"/>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm otp-background-white" type="button" onclick="onObsolete('${rowIndex}', '${option.name.value}', '${option.type.value}', '${option.project?.id}')">
+                            <button class="btn btn-outline-danger btn-sm otp-background-white" type="button" onclick="onObsolete('${rowIndex}', '${option.name.value}', '${option.type.value}', '${option.project?.id}')" title="${g.message(code: "processingOption.button.obsolete")}">
                                 <i class="bi bi-trash"></i>
-                                <g:message code="processingOption.button.obsolete"/>
                             </button>
                         </div>
                     </div>
