@@ -94,4 +94,13 @@ enum ProjectFieldType {
             "${it[0]}${it[1..-1].toLowerCase()}"
         }.join('')
     }
+
+    /**
+     * Returns only the values currently supported: Text and Integer
+     * and all others are ignored (until they are implemented)
+     * This method replaces the build-in values() for GSP page
+     */
+    static ProjectFieldType[] getSupportedValues() {
+        return [ProjectFieldType.TEXT, ProjectFieldType.INTEGER]
+    }
 }

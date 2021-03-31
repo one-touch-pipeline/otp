@@ -60,7 +60,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="projectFieldType" name="projectFieldType" class="use-select-2" required="true" from="${ProjectFieldType.values()}"
+                    <g:select id="projectFieldType" name="projectFieldType" class="use-select-2" required="true" from="${ProjectFieldType.supportedValues}"
                               value="${cmd.projectFieldType}" onChange="submit();"/>
                 </td>
                 <td>

@@ -91,6 +91,8 @@ class ProjectFieldsController extends AbstractGeneralDomainPropertyUpdateControl
 
     def create() {
         ProjectFieldsCreateCommand cmd = flash.cmd ?: new ProjectFieldsCreateTextCommand()
+        // set the default value to true, so that this checkBox is checked in create.gsp
+        cmd.changeOnlyByOperator = true
         return [
                 cmd                 : cmd,
                 validators          : VALIDATORS,

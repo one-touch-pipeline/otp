@@ -23,5 +23,5 @@ package de.dkfz.tbi.otp.project.additionalField
 
 enum ProjectCardinalityType {
     SINGLE,
-    SET,
+//    SET,
 }

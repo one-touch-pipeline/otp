@@ -23,6 +23,6 @@ package de.dkfz.tbi.otp.project.additionalField
 
 enum ProjectSourceOfData {
     REQUESTER,
-    PI,
+//    PI,
     OPERATOR,
 }
