@@ -92,8 +92,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         roddyExecutionDirectoryNames nullable: true
         workDirectoryName nullable: true, validator: { val, obj ->
             (val == null || (OtpPath.isValidPathComponent(val) &&
-                    !RoddyBamFile.findAllByWorkDirectoryName(val).any {
-                        it != obj && it.workPackage == obj.workPackage
+                    !RoddyBamFile.findAllByWorkPackageAndWorkDirectoryName(obj.workPackage, val).any {
+                        it != obj
                     }))
         } //needs to be nullable for objects created before link structure was used
         md5sum validator: { val, obj ->
