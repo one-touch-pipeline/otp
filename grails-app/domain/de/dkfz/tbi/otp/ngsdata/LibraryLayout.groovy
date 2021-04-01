@@ -23,6 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.TupleConstructor
 
+/**
+ * Also known as Sequencing Read Type, which is the new name.
+ */
 @TupleConstructor
 enum LibraryLayout {
 

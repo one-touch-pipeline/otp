@@ -39,7 +39,7 @@
                 <th><g:message code="egaSubmission.experimentalMetadata.designName"/></th>
                 <th><g:message code="egaSubmission.experimentalMetadata.instrumentModel"/></th>
                 <th><g:message code="egaSubmission.experimentalMetadata.LibraryName"/></th>
-                <th><g:message code="egaSubmission.experimentalMetadata.libraryLayout"/></th>
+                <th><g:message code="egaSubmission.experimentalMetadata.sequencingReadType"/></th>
                 <th><g:message code="egaSubmission.experimentalMetadata.librarySource"/></th>
                 <th><g:message code="egaSubmission.experimentalMetadata.librarySelection"/></th>
                 <th><g:message code="egaSubmission.experimentalMetadata.libraryStrategy"/></th>

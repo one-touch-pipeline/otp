@@ -541,7 +541,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
-                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with library layout '${LibraryLayout.PAIRED}'.", "A mate is missing for at least one seqTrack."),
+                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${LibraryLayout.PAIRED}'.", "A mate is missing for at least one seqTrack."),
         ]
 
         when:
@@ -565,7 +565,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
-                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with library layout '${LibraryLayout.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
+                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${LibraryLayout.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
         ]
 
         when:
@@ -575,7 +575,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate, when library layout column is missing, does not complain about missing mates'() {
+    void 'validate, when sequencing read type column is missing, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
                 "${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +
@@ -589,7 +589,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         context.problems.isEmpty()
     }
 
-    void 'validate, when library layout is not unique for a SeqTrack, does not complain about missing mates'() {
+    void 'validate, when sequencing read type is not unique for a SeqTrack, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
                 "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO} ${INDEX} UNRELATED_COLUMN\n" +
@@ -608,7 +608,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate, when library layout is not known to OTP, does not complain about missing mates'() {
+    void 'validate, when sequencing read type is not known to OTP, does not complain about missing mates'() {
         given:
         MetadataValidationContext context = createContext((
                 "${SEQUENCING_READ_TYPE} ${FASTQ_FILE} ${READ} ${RUN_ID} ${LANE_NO}\n" +

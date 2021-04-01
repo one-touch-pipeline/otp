@@ -208,7 +208,7 @@ class DataSwapService {
 
     /**
      * function for a lane swap: Allow to move to another sample (defined by Individual & SampleType),
-     * change SeqType, library layout, rename data files using function renameDataFiles.
+     * change SeqType, sequencing read type, rename data files using function renameDataFiles.
      *
      * The DB is changed automatically.
      * For the filesystem changes a script is written to ${scriptOutputDirectory} on the server running otp
@@ -605,7 +605,7 @@ class DataSwapService {
             it.fileName = it.vbpFileName = dataFileMap[it.fileName]
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 log << "\n====> set mate number for withdrawn data file"
-                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "library layout is not ${LibraryLayout.SINGLE}"
+                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "sequencing read type is not ${LibraryLayout.SINGLE}"
                 it.mateNumber = 1
             }
             it.save(flush: true)

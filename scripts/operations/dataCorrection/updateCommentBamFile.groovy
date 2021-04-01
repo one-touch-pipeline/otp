@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Script to create/update a bam comment.
  *
- * The bam files are specified by pid, sampleType, seqType and library layout.
+ * The bam files are specified by pid, sampleType, seqType and sequencing read type.
  *
  * If the bam file has already a comment, only the text is updated. Author and time stay the same.
  * Otherwise a new comment is created with current user and creation date.

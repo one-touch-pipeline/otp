@@ -62,15 +62,15 @@
         <div class="otpDataTables" data-csv-title="sequences_of_samples">
             <otp:dataTable
                 codes="${[
-                    'projectOverview.index.PID',
-                    'projectOverview.index.sampleType',
-                    'projectOverview.index.sequenceTypeName',
-                    'projectOverview.index.sequenceTypeLibraryLayout',
-                    'projectOverview.index.singleCell',
-                    'projectOverview.index.centerName',
-                    'projectOverview.index.platformId',
-                    'projectOverview.index.laneCount',
-                    'projectOverview.index.gigaBase'
+                        'projectOverview.index.PID',
+                        'projectOverview.index.sampleType',
+                        'projectOverview.index.sequenceTypeName',
+                        'projectOverview.index.sequencingReadType',
+                        'projectOverview.index.singleCell',
+                        'projectOverview.index.centerName',
+                        'projectOverview.index.platformId',
+                        'projectOverview.index.laneCount',
+                        'projectOverview.index.gigaBase'
                 ]}"
                 id="projectOverviewTable" />
         </div>

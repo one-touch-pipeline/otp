@@ -47,7 +47,7 @@
             <th class="export_column"><g:message code="dataFields.seqType.singleCell"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.usesAntibodyTarget"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.directory"/></th>
-            <th class="export_column"><g:message code="dataFields.seqType.libraryLayouts"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.sequencingReadTypes"/></th>
             <th></th>
             <th class="export_column"><g:message code="dataFields.seqType.displayNames"/></th>
             <th class="export_column"><g:message code="dataFields.seqType.importAlias"/></th>

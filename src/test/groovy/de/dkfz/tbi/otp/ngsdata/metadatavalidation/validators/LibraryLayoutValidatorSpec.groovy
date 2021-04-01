@@ -79,6 +79,6 @@ class LibraryLayoutValidatorSpec extends Specification implements DomainFactoryC
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
-        problem.message.contains("Library layout 'invalidLayout' is not registered in OTP.")
+        problem.message.contains("sequencing read type 'invalidLayout' is not registered in OTP.")
     }
 }

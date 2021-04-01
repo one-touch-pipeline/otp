@@ -205,12 +205,12 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             }
             if (missingMateNumbers.size() == 1) {
                 context.addProblem(mateCells(seqTrackRows) + libraryLayoutCells,
-                        Level.ERROR, "Mate ${exactlyOneElement(missingMateNumbers)} is missing for ${seqTrackRows.first().seqTrackString} with library layout '${libraryLayoutName}'.",
+                        Level.ERROR, "Mate ${exactlyOneElement(missingMateNumbers)} is missing for ${seqTrackRows.first().seqTrackString} with sequencing read type '${libraryLayoutName}'.",
                         "A mate is missing for at least one seqTrack."
                 )
             } else if (missingMateNumbers) {
                 context.addProblem(mateCells(seqTrackRows) + libraryLayoutCells,
-                        Level.ERROR, "The following mates are missing for ${seqTrackRows.first().seqTrackString} with library layout '${libraryLayoutName}': ${missingMateNumbers.join(', ')}",
+                        Level.ERROR, "The following mates are missing for ${seqTrackRows.first().seqTrackString} with sequencing read type '${libraryLayoutName}': ${missingMateNumbers.join(', ')}",
                         "Mates are missing for at least one seqTrack."
                 )
             }

@@ -234,7 +234,7 @@ List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
     int valueSize = values.size()
     assert valueSize == 3: "A seqtype is defined by three parts"
     LibraryLayout libraryLayout = LibraryLayout.findByName(values[1])
-    assert libraryLayout: "${values[1]} is no valid library layout"
+    assert libraryLayout: "${values[1]} is no valid sequencing read type"
     boolean singleCell = Boolean.parseBoolean(values[2])
 
     SeqType seqType = seqTypeService.findByNameOrImportAlias(values[0], [

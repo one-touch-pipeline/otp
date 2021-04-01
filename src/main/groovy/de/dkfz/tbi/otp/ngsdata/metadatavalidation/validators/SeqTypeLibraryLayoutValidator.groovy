@@ -41,7 +41,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The combination of sequencing type, library layout and single cell is registered in the OTP database.']
+        return ['The combination of sequencing type, sequencing read type and single cell is registered in the OTP database.']
     }
 
     @Override
@@ -86,8 +86,8 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
                 if (seqType) {
                     seqTypes << seqType
                 } else {
-                    String msgStart = "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayout}' and"
-                    String msgDefaultStart = "At least one combination of sequencing type and library layout and"
+                    String msgStart = "The combination of sequencing type '${seqTypeName}' and sequencing read type '${libraryLayout}' and"
+                    String msgDefaultStart = "At least one combination of sequencing type and sequencing read type and"
                     if (isSingleCell) {
                         context.addProblem(it.cells, Level.ERROR, "${msgStart} Single Cell is not registered in the OTP database.",
                                 "${msgDefaultStart} Single Cell is not registered in the OTP database.")

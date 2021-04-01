@@ -186,7 +186,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         thrown(AssertionError)
     }
 
-    void "getReadGroupName, when library layout is paired, then return name consist of: 'run', runname, common file name till underscore"() {
+    void "getReadGroupName, when sequencing read type is paired, then return name consist of: 'run', runname, common file name till underscore"() {
         given:
         MergingWorkPackage mwp = DomainFactory.createMergingWorkPackage(seqType: DomainFactory.createRnaPairedSeqType())
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(mwp)
@@ -200,7 +200,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         "run${seqTrack.run.name}_4_NoIndex_L004" == seqTrack.getReadGroupName()
     }
 
-    void "getReadGroupName, when library layout is single, then return file name consist of: 'run', runname, file name till first dot"() {
+    void "getReadGroupName, when sequencing read type is single, then return file name consist of: 'run', runname, file name till first dot"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [vbpFileName: "fileName.fastq.gz"])
 

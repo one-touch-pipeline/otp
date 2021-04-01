@@ -250,7 +250,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType &&
                     it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 data.log << "\n====> set mate number for withdrawn data file"
-                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "library layout is not ${LibraryLayout.SINGLE}"
+                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "sequencing read type is not ${LibraryLayout.SINGLE}"
                 it.mateNumber = 1
             }
             it.save(flush: true)

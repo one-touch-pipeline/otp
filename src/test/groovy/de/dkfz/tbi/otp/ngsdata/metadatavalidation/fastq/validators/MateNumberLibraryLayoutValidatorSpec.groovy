@@ -101,13 +101,13 @@ i\t${LibraryLayout.PAIRED}
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
-                        "OTP does not know the library layout 'UnknownLibrary' and can therefore not validate the mate number.", "OTP does not know at least one library layout and can therefore not validate the mate number."),
+                        "OTP does not know the sequencing read type 'UnknownLibrary' and can therefore not validate the mate number.", "OTP does not know at least one sequencing read type and can therefore not validate the mate number."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The mate number '3' is bigger then the allowed value for the library layout '${LibraryLayout.PAIRED}' of '2'.", "At least one mate number is bigger then the allowed value for the library layout."),
+                        "The mate number '3' is bigger then the allowed value for the sequencing read type '${LibraryLayout.PAIRED}' of '2'.", "At least one mate number is bigger then the allowed value for the sequencing read type."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The mate number '3' is bigger then the allowed value for the library layout '${LibraryLayout.MATE_PAIR}' of '2'.", "At least one mate number is bigger then the allowed value for the library layout."),
+                        "The mate number '3' is bigger then the allowed value for the sequencing read type '${LibraryLayout.MATE_PAIR}' of '2'.", "At least one mate number is bigger then the allowed value for the sequencing read type."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The mate number '2' is bigger then the allowed value for the library layout '${LibraryLayout.SINGLE}' of '1'.", "At least one mate number is bigger then the allowed value for the library layout."),
+                        "The mate number '2' is bigger then the allowed value for the sequencing read type '${LibraryLayout.SINGLE}' of '1'.", "At least one mate number is bigger then the allowed value for the sequencing read type."),
         ] as Set
 
         when:

@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.MetadataField
 
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Sequencing Type" (or "Seq. Type" where little space is
- * available), no matter if the library layout is included in the displayed value or not.
+ * available), no matter if the sequencing read type is included in the displayed value or not.
  * Decided by the OTP Product Owner on 2020-08-20.
  */
 /** This table is used externally. Please discuss a change in the team */
