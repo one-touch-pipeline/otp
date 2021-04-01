@@ -30,6 +30,7 @@
     <meta name="uriWithParams" content="${uriWithParams}">
     <meta name="projectName" content="${selectedProject?.name}">
     <meta name="projectParameter" content="${projectParameter}">
+    <asset:stylesheet src="mainmenu.less"/>
     <otp:favicon/>
     <g:layoutHead/>
 </head>
@@ -55,7 +56,7 @@
                         <li class="menuContainerItem"><g:link controller="sampleOverview"><g:message code="otp.menu.sampleOverview"/></g:link></li>
                         <li class="menuContainerItem"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
                         <li class="menuContainerItem"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
-                        <li class="navigation menuContainerItem project">
+                        <li class="navigation menuContainerItem projectMenu">
                             <ul>
                                 <li class="nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</a>
                                     <ul>
@@ -87,7 +88,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="navigation menuContainerItem results">
+                        <li class="navigation menuContainerItem resultsMenu">
                             <ul>
                                 <li class="nav_container"><a class="menuLinkContainer"><g:message
                                         code="otp.menu.results"/> &#9661;</a>
@@ -107,7 +108,7 @@
                         </li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                             <li class="menuContainerItem"><g:link controller="egaSubmission" action="overview"><g:message code="otp.menu.ega"/></g:link></li>
-                            <li class="navigation menuContainerItem statistic">
+                            <li class="navigation menuContainerItem statisticMenu">
                                 <ul>
                                     <li class="allGranted nav_container"><a class="menuLinkContainer"><g:message
                                             code="otp.menu.statistics"/> &#9661;</a>
@@ -123,7 +124,7 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="navigation menuContainerItem operator">
+                            <li class="navigation menuContainerItem operatorMenu">
                                 <ul>
                                     <li class="allGranted nav_container"><a class="menuLinkContainer"><g:message
                                             code="otp.menu.operatorSection"/> &#9661;</a>
@@ -150,24 +151,25 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="navigation menuContainerItem workflow">
+                            <li class="navigation menuContainerItem workflowMenu">
                                 <ul>
                                     <li class="allGranted nav_container"><a class="menuLinkContainer"><g:message
                                             code="otp.menu.newWorkflow"/> &#9661;</a>
                                         <ul>
                                             <li><g:link controller="systemStatus" action="index"><g:message code="otp.menu.systemStatus"/></g:link></li>
-                                            <li><g:link controller="workflowRunOverview" action="index"><g:message
-                                                    code="otp.menu.workflowRunOverview"/></g:link></li>
+                                            <li><g:link controller="workflowRunOverview" action="index"><g:message code="otp.menu.workflowRunOverview"/></g:link></li>
                                             <li><g:link controller="workflowRunList" action="index"><g:message code="otp.menu.workflowRunList"/></g:link></li>
                                             <li><g:link controller="workflowConfig" action="index"><g:message code="otp.menu.workflowConfig"/></g:link></li>
                                             <li><g:link controller="workflowConfigViewer" action="index"><g:message code="otp.menu.workflowConfigViewer"/></g:link></li>
+                                            <li><g:link controller="crashRepair" action="index"><g:message code="otp.menu.workflowCrashRepair"/></g:link></li>
+                                            <li><g:link controller="workflowJobErrorDefinition" action="index"><g:message code="otp.menu.workflowRestartHandler"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
                         </sec:ifAnyGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
-                            <li class="navigation menuContainerItem admin">
+                            <li class="navigation menuContainerItem adminMenu">
                                 <ul>
                                     <li class="allGranted nav_container"><a class="menuLinkContainer"><g:message
                                             code="otp.menu.adminSection"/> &#9661;</a>
@@ -197,7 +199,7 @@
                 <ul>
                     <sec:ifLoggedIn>
                         <li class="menuContainerItem"><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
-                        <li class="navigation menuContainerItem info">
+                        <li class="navigation menuContainerItem infoMenu">
                             <ul>
                                 <li class="nav_container"><a class="menuLinkContainer"><g:message code="info.info.link"/> &#9661;</a>
                                     <ul>

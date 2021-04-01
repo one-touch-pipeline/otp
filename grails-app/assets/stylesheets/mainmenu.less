@@ -1,0 +1,169 @@
+/*
+ * Copyright 2011-2021 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+@import "colors";
+
+.navigation {
+  margin-left: 1px;
+}
+
+.navigation ul li {
+  display: block;
+  position: relative;
+  float: left;
+}
+
+.navigation li ul {
+  display: none;
+  margin-top: 36px;
+}
+
+.navigation ul li a {
+  display: block;
+  position: relative;
+  float: left;
+  background-color: @otpBlack;
+  z-index: 10;
+}
+
+.navigation li:hover ul {
+  display: block;
+  position: absolute;
+}
+
+.menuContainerItem {
+  border-right: 1px solid @otpBlack;
+  box-shadow: 1px 0 0 #444;
+}
+
+.testGranted {
+  border-top: 3px solid #0d4d9a;
+  z-index:5;
+}
+
+.menuContainer {
+  height: 40px;
+}
+
+.menuContainerL {
+  float: left;
+}
+
+.menuContainerR {
+  float: right;
+}
+
+.menuContainer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  height: 40px;
+  width: 100%;
+  background-color: @otpBlack;
+}
+
+.menuContainer ul:before, .menuContainer ul:after {
+  content: "";
+  display: table;
+}
+
+.menuContainer ul:after {
+  clear: both;
+}
+
+.menuContainer ul {
+  zoom: 1;
+}
+
+.menuContainer li {
+  position: relative;
+}
+
+.menuContainer a {
+  float: left;
+  padding: 1em 0.9em;
+  color: #999;
+  text-transform: uppercase;
+  font: bold 12px Arial, Helvetica;
+  text-decoration: none;
+  text-shadow: 0 1px 0 #000;
+}
+
+.menuLinkContainer {
+  text-align: center;
+}
+
+.menuContainer li:hover > a {
+  color: #fafafa;
+}
+
+.menuContainerL li {
+  float:left;
+}
+
+.menuContainerR li {
+  float: right;
+}
+
+.allGranted {
+  border-top: 3px solid #9A1200;
+  z-index:5;
+}
+
+.allGranted_general {
+  border-top: 5px solid #9A1200;
+  z-index:5;
+}
+
+.allGranted > a {
+  padding-top: 10px;
+  z-index:5;
+}
+
+.menu {
+  background-color: @otpBlack;
+  float: left;
+  width: 100%;
+  height: 41.5px;
+  margin-top: 1px;
+
+  .projectMenu a {
+    width: 100px;
+  }
+  .resultsMenu a {
+    width: 100px;
+  }
+  .statisticMenu a {
+    width: 130px;
+  }
+  .operatorMenu a {
+    width: 110px;
+  }
+  .workflowMenu a {
+    width: 180px;
+  }
+  .adminMenu a {
+    width: 110px;
+  }
+  .infoMenu a {
+    width: 80px;
+  }
+}
