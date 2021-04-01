@@ -35,9 +35,9 @@
 
         <g:if test="${hideSampleIdentifier}">
             <otp:annotation type="warning">
-                <g:message code="sampleIdentifierOverview.index.sampleIdentifiersHidden"/>
+                <g:message code="sampleIdentifierOverview.index.sampleNamesHidden"/>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
-                    <g:message code="sampleIdentifierOverview.index.sampleIdentifiersHidden.authorized"/>
+                    <g:message code="sampleIdentifierOverview.index.sampleNamesHidden.authorized"/>
                 </sec:ifAllGranted>
             </otp:annotation>
         </g:if>
@@ -47,7 +47,7 @@
                     'sampleIdentifierOverview.index.pid',
                     'sampleIdentifierOverview.index.sampleType',
                     'sampleIdentifierOverview.index.seqType',
-                    'sampleIdentifierOverview.index.sampleIdentifier',
+                    'sampleIdentifierOverview.index.sampleName',
             ]}" id="sampleIdentifierOverviewTable" />
         </div>
     </div>

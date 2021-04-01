@@ -150,7 +150,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
 
     //save is controller method, no domain
     @SuppressWarnings(['ExplicitFlushForSaveRule'])
-    void "save, when input for sample identifier is invalid, then show error message"() {
+    void "save, when input for sample name is invalid, then show error message"() {
         given:
         Project project = createProject()
         SampleType sampleType = createSampleType()
@@ -240,7 +240,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         controller.flash.message.message == "individual.update.create.success"
     }
 
-    void "editNewSampleIdentifier, when the sample identifier already exist, then show error message"() {
+    void "editNewSampleIdentifier, when the sample name already exist, then show error message"() {
         given:
         Sample sample = createSample()
         SampleIdentifier sampleIdentifier = createSampleIdentifier()

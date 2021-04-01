@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 //=============================================
 // input area
 
-//The map of old sample identifier to the new one.
+//The map of old sample name to the new one.
 //Two columns, separated by space, tab, comma or semicolon
 String mapping = """
 #oldSampleName1, newSampleName1

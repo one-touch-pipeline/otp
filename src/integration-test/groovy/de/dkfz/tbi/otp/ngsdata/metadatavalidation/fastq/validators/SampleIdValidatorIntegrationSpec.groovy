@@ -150,7 +150,7 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
         containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "C2"])
-        problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
+        problem.message.contains("Sample Name '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 
     void 'validate, fails when parsed sampleIdentifier is already registered' () {
@@ -183,6 +183,6 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
         containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "C2"])
-        problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
+        problem.message.contains("Sample Name '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 }

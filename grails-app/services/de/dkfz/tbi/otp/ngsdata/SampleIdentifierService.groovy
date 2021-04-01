@@ -129,17 +129,17 @@ class SampleIdentifierService {
 
     void checkSampleIdentifier(ParsedSampleIdentifier identifier, SampleIdentifier sampleIdentifier) {
         if (sampleIdentifier.individual.pid != identifier.pid) {
-            throw new OtpRuntimeException("The sample identifier already exist, but is connected to individual '${sampleIdentifier.individual.pid}' " +
+            throw new OtpRuntimeException("The sample name already exist, but is connected to individual '${sampleIdentifier.individual.pid}' " +
                     "and not '${identifier.pid}'")
         }
         if (sampleIdentifier.project.name != identifier.projectName) {
-            throw new OtpRuntimeException("The sample identifier already exist, but is connected to project '${sampleIdentifier.project}' " +
+            throw new OtpRuntimeException("The sample name already exist, but is connected to project '${sampleIdentifier.project}' " +
                     "and not '${identifier.projectName}'")
         }
         String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(identifier.sampleTypeDbName)
         if (!sampleIdentifier.sampleType.name.equalsIgnoreCase(identifier.sampleTypeDbName) &&
                 !sampleIdentifier.sampleType.name.equalsIgnoreCase(sanitizedSampleTypeDbName)) {
-            throw new OtpRuntimeException("The sample identifier already exist, but is connected to sample type '${sampleIdentifier.sampleType}' " +
+            throw new OtpRuntimeException("The sample name already exist, but is connected to sample type '${sampleIdentifier.sampleType}' " +
                     "and not '${identifier.sampleTypeDbName}'")
         }
     }

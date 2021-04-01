@@ -29,6 +29,9 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
+ * RENAMED TO SAMPLE NAME.
+ * The new name should be used on the GUI.
+ *
  * Semi-temporary domain object to specify the proper import target (Project, Individual, Sample) for new data.
  *
  * When the destination for new fastq files can't automatically be parsed by a {@link SampleIdentifierParser},

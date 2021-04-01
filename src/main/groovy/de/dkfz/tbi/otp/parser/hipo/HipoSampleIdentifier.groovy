@@ -160,7 +160,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
     String getSampleTypeDbName() {
         String dbName = tissueType
         // In project 59 "1" and "01" have different meanings, so use
-        // the sample number exactly as given in the sample identifier.
+        // the sample number exactly as given in the sample name.
         if (projectNumber == '059') {
             dbName += sampleNumber
         } else {

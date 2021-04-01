@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.parser.pedion.PedionParser
 //input area
 
 
-//sample identifier
+//sample name
 //lines are trimmed, lines starting with # are ignored
 String input = """
 #identifier1

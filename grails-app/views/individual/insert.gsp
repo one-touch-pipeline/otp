@@ -100,7 +100,7 @@
                         </tr>
                         <tr class="sampleIdentifier hidden template">
                             <td>
-                                <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
+                                <label for="sampleIdentifier"><g:message code="individual.insert.sampleName"/></label>
                             </td>
                             <td class="multi-input-field">
                                 <div class="field">
@@ -132,7 +132,7 @@
                                 </tr>
                                 <tr class="sampleIdentifier">
                                     <td>
-                                        <label for="samples[${sampleCounter}].sampleIdentifier]"><g:message code="individual.insert.sampleIdentifier"/></label>
+                                        <label for="samples[${sampleCounter}].sampleIdentifier]"><g:message code="individual.insert.sampleName"/></label>
                                     </td>
                                     <td class="multi-input-field">
                                         <g:each in="${sample.sampleIdentifiers ?: [""]}" var="sampleIdentifier" status="i">

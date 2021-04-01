@@ -48,13 +48,13 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
     }
 
     @Test
-    void 'testParseSampleIdentifier, when HIPO1 sample identifier, uses HIPO1 parser'() {
+    void 'testParseSampleIdentifier, when HIPO1 sample name, uses HIPO1 parser'() {
         Project project = createProject(name: 'hipo_123', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.HIPO)
         assert sampleIdentifierService.parseSampleIdentifier('H12A-ABCDEF-T1-D1', project).sampleTypeDbName == 'tumor'
     }
 
     @Test
-    void 'testParseSampleIdentifier, when HIPO2 sample identifier, uses HIPO2 parser'() {
+    void 'testParseSampleIdentifier, when HIPO2 sample name, uses HIPO2 parser'() {
         Project project = createProject(name: 'hipo_123', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.HIPO2)
         assert sampleIdentifierService.parseSampleIdentifier('K12A-ABCDEF-T1-D1', project).sampleTypeDbName == 'tumor1-01'
     }

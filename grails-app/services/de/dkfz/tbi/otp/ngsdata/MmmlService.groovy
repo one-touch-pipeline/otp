@@ -42,7 +42,7 @@ class MmmlService {
     ].asImmutable()
 
     /**
-     * determine, if the column sample identifier should be hidden in the view
+     * determine, if the column sample name should be hidden in the view
      */
     static boolean hideSampleIdentifier(Project project) {
         return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project?.name)

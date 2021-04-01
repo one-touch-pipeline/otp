@@ -56,7 +56,7 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The Sample Identifier has not been registered yet."]
+        return ["The Sample Name has not been registered yet."]
     }
 
     @Override
@@ -96,8 +96,8 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
                 context.addProblem(
                         valueTuple.cells,
                         Level.WARNING,
-                        "Sample Identifier '${sampleName}' is already registered for another sample with the same pid and seq type.",
-                        "At least one Sample Identifier is already registered for another sample.")
+                        "Sample Name '${sampleName}' is already registered for another sample with the same pid and seq type.",
+                        "At least one Sample Name is already registered for another sample.")
             }
         }
     }

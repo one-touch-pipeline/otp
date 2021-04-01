@@ -60,9 +60,9 @@ class SampleOverviewController {
      * Retrieves the data shown in the table of projectOverview/laneOverview.
      * The data structure is:
      * <pre>
-     * [[mockPid1, sampleTypeName1, one sample identifier for mockPid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
-     * [mockPid1, sampleTypeName2, one sample identifier for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
-     * [mockPid2, sampleTypeName2, one sample identifier for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
+     * [[mockPid1, sampleTypeName1, one sample name for mockPid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
+     * [mockPid1, sampleTypeName2, one sample name for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
+     * [mockPid2, sampleTypeName2, one sample name for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
      * ...]
      * </pre>
      * The available seqTypes are depend on the selected Project.

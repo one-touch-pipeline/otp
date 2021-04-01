@@ -158,7 +158,7 @@
                 <td class="myKey">${metaDataEntry.key.name}</td>
                 <td class="myValue">
                     <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_NAME.name() && MmmlService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
-                        <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
+                        <g:message code="datafile.showDetails.hiddenSampleName"/>
                     </g:if>
                     <g:else>
                         ${metaDataEntry.value}

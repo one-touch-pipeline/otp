@@ -116,7 +116,7 @@
                                 <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
                                     ${sample.sampleIdentifierObjects.join(", ")}
                                 </sec:access>
-                                <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
+                                <otp:expandable value="${g.message(code: 'individual.show.updateSampleName')}" collapsed="true">
                                     <g:render template="editorSampleIdentifier" model="[sample: sample]"/>
                                 </otp:expandable>
                             </td>

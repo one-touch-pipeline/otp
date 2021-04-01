@@ -24,8 +24,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
-Sample identifier input
-The following sample identifier shall be deleted in case no data is connected ("identifier1", "identifier2", "identifier3", ...).
+Sample name input
+The following sample name shall be deleted in case no data is connected ("identifier1", "identifier2", "identifier3", ...).
 The connected sample shall be deleted
  */
 def sampleIdentifierToDelete = []
@@ -48,7 +48,7 @@ def deleteSample(Sample sample) {
 
 //script
 SampleIdentifier.withTransaction {
-    assert (sampleIdentifierToDelete || sampleToDelete) : "Please provide sample identifier or sample to delete"
+    assert (sampleIdentifierToDelete || sampleToDelete) : "Please provide sample name or sample to delete"
 
     def notFoundSampleIdentifier = []
     def samplesToDelete = []
@@ -59,7 +59,7 @@ SampleIdentifier.withTransaction {
         } else {
             samplesToDelete << si.sample
             si.delete(flush: true)
-            println "The following sample identifier was deleted: ${si}"
+            println "The following sample name was deleted: ${si}"
         }
     }
 
@@ -72,7 +72,7 @@ SampleIdentifier.withTransaction {
     }
 
     if (notFoundSampleIdentifier) {
-        println "The following sample identifier could not be found in OTP: "
+        println "The following sample name could not be found in OTP: "
     }
     notFoundSampleIdentifier.each {
         println it

@@ -24,7 +24,7 @@ import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
- * Script checks if the given sample identifiers are known to OTP.
+ * Script checks if the given sample names are known to OTP.
  *
  * SampleIdentifiers can exist either as 'raw' SampleIdentifier, meant as a preparation for import,
  * or as label on a SeqTrack.

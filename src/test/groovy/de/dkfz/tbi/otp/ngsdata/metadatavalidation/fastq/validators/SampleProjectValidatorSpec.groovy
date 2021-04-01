@@ -86,9 +86,9 @@ class SampleProjectValidatorSpec extends Specification implements DataTest {
         ] as SampleIdentifierService
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>, Level.WARNING,
-                        "Sample identifier 'project_D' is already registered in OTP with project 'Z', not with project 'D'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project 'Z' and ignore the value 'D' in the '${PROJECT}' column.", "At least one sample identifier is already registered in OTP but with another project."),
+                        "Sample name 'project_D' is already registered in OTP with project 'Z', not with project 'D'. If you ignore this warning, OTP will keep the assignment of the sample name to project 'Z' and ignore the value 'D' in the '${PROJECT}' column.", "At least one sample name is already registered in OTP but with another project."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set<Cell>, Level.WARNING,
-                        "Sample identifier 'noProject_W' can not be parsed with the sampleIdentifierParser '${SampleIdentifierParserBeanName.HIPO}' given by project 'G'.", "At least one sample identifier looks like it does not belong to the project in the '${PROJECT}' column."),
+                        "Sample name 'noProject_W' can not be parsed with the sampleIdentifierParser '${SampleIdentifierParserBeanName.HIPO}' given by project 'G'.", "At least one sample name looks like it does not belong to the project in the '${PROJECT}' column."),
         ]
 
         when:

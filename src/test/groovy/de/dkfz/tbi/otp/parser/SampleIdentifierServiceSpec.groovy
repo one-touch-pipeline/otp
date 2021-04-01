@@ -378,7 +378,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         assert containSame(SampleIdentifier.list(), [result])
     }
 
-    void "test findOrSaveSampleIdentifier, when sample identifier exist, then should return it"() {
+    void "test findOrSaveSampleIdentifier, when sample name exist, then should return it"() {
         given:
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
@@ -392,7 +392,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         callAndAssertFindOrSaveSampleIdentifier(identifier)
     }
 
-    void "test findOrSaveSampleIdentifier, when sample identifier does not exist, should create it"() {
+    void "test findOrSaveSampleIdentifier, when sample name does not exist, should create it"() {
         given:
         Project project = createProject()
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
@@ -607,12 +607,12 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
         where:
         property           | value             || message
-        'projectName'      | 'otherProject'    || 'The sample identifier already exist, but is connected to project'
-        'pid'              | 'otherPid'        || 'The sample identifier already exist, but is connected to individual'
-        'sampleTypeDbName' | 'otherSampleType' || 'The sample identifier already exist, but is connected to sample type'
+        'projectName'      | 'otherProject'    || 'The sample name already exist, but is connected to project'
+        'pid'              | 'otherPid'        || 'The sample name already exist, but is connected to individual'
+        'sampleTypeDbName' | 'otherSampleType' || 'The sample name already exist, but is connected to sample type'
     }
 
-    void "check if updateSampleIdentifierName, save new name of sample identifier"() {
+    void "check if updateSampleIdentifierName, save new name of sample name"() {
         given:
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
@@ -624,7 +624,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         sampleIdentifier.name == SAMPLE_IDENTIFIER_NAME
     }
 
-    void "check if deleteSampleIdentifier, deletes sample identifier"() {
+    void "check if deleteSampleIdentifier, deletes sample name"() {
         given:
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
@@ -636,7 +636,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         sampleIdentifier.findAll().size() == 0
     }
 
-    void "check if createSampleIdentifier, creates a new sample identifier with sample and name"() {
+    void "check if createSampleIdentifier, creates a new sample name with sample and name"() {
         given:
         Sample sample = createSample()
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
@@ -649,7 +649,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         newSampleIdentifier.sample == sample
     }
 
-    void "check if getOrCreateSampleIdentifier, creates a new sample identifier when params not don't match"() {
+    void "check if getOrCreateSampleIdentifier, creates a new sample name when params not don't match"() {
         given:
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
         Sample sample = createSample()
@@ -662,7 +662,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         newSampleIdentifier.sample == sample
     }
 
-    void "check if getOrCreateSampleIdentifier, returns the existing sample identifier when params match"() {
+    void "check if getOrCreateSampleIdentifier, returns the existing sample name when params match"() {
         given:
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
         SampleIdentifier existingSampleIdentifier = createSampleIdentifier()

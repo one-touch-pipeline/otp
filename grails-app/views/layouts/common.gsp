@@ -67,7 +67,7 @@
                                                 code="otp.menu.alignmenAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
                                         <li><g:link controller="sampleIdentifierOverview" action="index"><g:message
-                                                code="otp.menu.sampleIdentifierOverview"/></g:link></li>
+                                                code="otp.menu.sampleNameOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message
                                                     code="projectOverview.projectInfos" /></g:link></li>
