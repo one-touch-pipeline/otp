@@ -25,8 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -98,6 +97,38 @@ class MergingConflictsValidatorSpec extends Specification implements DataTest, D
                 libraryPreparationKit.name,
         ].join('\t')
 
+        // test with project-specific seq platform group
+        Sample sample4 = createSample()
+        sample4.individual.project = project
+        sample4.individual.save(flush: true)
+        SeqType seqType4 = DomainFactory.proxyRoddy.createSeqType()
+        DomainFactory.createSampleIdentifier(sample: sample4, name: "sample4")
+
+        SeqPlatform seqPlatform4 = createSeqPlatform()
+        SeqPlatform seqPlatform5 = createSeqPlatform()
+        MergingCriteria mergingCriteria = createMergingCriteria(
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
+                seqType: seqType4,
+                project: sample4.project,
+        )
+        createSeqPlatformGroup(mergingCriteria: mergingCriteria, seqPlatforms: [seqPlatform4, seqPlatform5])
+
+        // test with default seq platform group
+        Sample sample6 = createSample()
+        sample6.individual.project = project
+        sample6.individual.save(flush: true)
+        SeqType seqType6 = DomainFactory.proxyRoddy.createSeqType()
+        DomainFactory.createSampleIdentifier(sample: sample6, name: "sample6")
+
+        SeqPlatform seqPlatform6 = createSeqPlatform()
+        SeqPlatform seqPlatform7 = createSeqPlatform()
+        createMergingCriteria(
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+                seqType: seqType6,
+                project: sample6.project,
+        )
+        createSeqPlatformGroup(mergingCriteria: mergingCriteria, seqPlatforms: [seqPlatform6, seqPlatform7])
+
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\t${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${PROJECT}\t${BASE_MATERIAL}\t${ANTIBODY_TARGET}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${LIB_PREP_KIT}\n" +
                         "sample1\t${seqType1.name}\t${seqType1.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n" +
@@ -106,7 +137,11 @@ class MergingConflictsValidatorSpec extends Specification implements DataTest, D
                         "sample2\t${seqType2.name}\t${seqType2.libraryLayout.name()}\t\t\t\t${furtherValues}\n" +
                         "sample2\t${seqType2.name}\t${seqType2.libraryLayout.name()}\t\t\t\t${seqPlatform1.name}\t${seqPlatform1.seqPlatformModelLabel}\t\t\n" +
                         "${project.name}#${individual3}#${sampleType3}\t${seqType3.name}\t${seqType3.libraryLayout.name()}\t${project.name}\t\t\t${furtherValues}\n" +
-                        "${project.name}#${individual3}#${sampleType3}\t${seqType3.name}\t${seqType3.libraryLayout.name()}\t${project.name}\t\t\t${seqPlatform1.name}\t${seqPlatform1.seqPlatformModelLabel}\t\t\n"
+                        "${project.name}#${individual3}#${sampleType3}\t${seqType3.name}\t${seqType3.libraryLayout.name()}\t${project.name}\t\t\t${seqPlatform1.name}\t${seqPlatform1.seqPlatformModelLabel}\t\t\n" +
+                        "sample4\t${seqType4.name}\t${seqType4.libraryLayout.name()}\t\t\t\t${seqPlatform4.name}\t${seqPlatform4.seqPlatformModelLabel}\t\t\n" +
+                        "sample4\t${seqType4.name}\t${seqType4.libraryLayout.name()}\t\t\t\t${seqPlatform5.name}\t${seqPlatform5.seqPlatformModelLabel}\t\t\n" +
+                        "sample6\t${seqType6.name}\t${seqType6.libraryLayout.name()}\t\t\t\t${seqPlatform6.name}\t${seqPlatform6.seqPlatformModelLabel}\t\t\n" +
+                        "sample6\t${seqType6.name}\t${seqType6.libraryLayout.name()}\t\t\t\t${seqPlatform7.name}\t${seqPlatform7.seqPlatformModelLabel}\t\t\n"
         )
 
         Validator<MetadataValidationContext> validator = new MergingConflictsValidator([

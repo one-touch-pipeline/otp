@@ -58,7 +58,9 @@ class MergingConflictsValidator extends MergingPreventionValidator {
         }.findAll { key, values ->
             key.individual && key.sampleType && key.seqType
         }.findAll { key, values ->
-            values.collect { ValueTuple valueTuple -> findSeqPlatform(valueTuple) }.unique().size() > 1
+            values.collect { ValueTuple valueTuple ->
+                findSeqPlatformGroup(valueTuple, key.seqType) ?: findSeqPlatform(valueTuple)
+            }.unique().size() > 1
         }.each { key, values ->
             context.addProblem(values*.cells.flatten() as Set<Cell>, Level.WARNING,
                     "Sample ${key.individual} ${key.sampleType} with sequencing type ${key.seqType.displayNameWithLibraryLayout} cannot be merged with itself, " +
@@ -66,6 +68,13 @@ class MergingConflictsValidator extends MergingPreventionValidator {
                     "Sample can not be merged with itself, since it uses incompatible seq platforms."
             )
         }
+    }
+
+    SeqPlatformGroup findSeqPlatformGroup(ValueTuple valueTuple, SeqType seqType) {
+        findSeqPlatform(valueTuple).getSeqPlatformGroupForMergingCriteria(
+                metadataImportService.getProjectFromMetadata(valueTuple),
+                seqType,
+        )
     }
 
     String getSampleIdentifier(ValueTuple valueTuple) {
