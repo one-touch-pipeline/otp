@@ -61,7 +61,7 @@ class SamplePairSpec extends Specification implements DataTest {
                 project: project,
         )
         SeqType seqType = DomainFactory.createSeqType(
-                libraryLayout: LibraryLayout.PAIRED
+                libraryLayout: SequencingReadType.PAIRED
         )
         SampleType sampleType1 = DomainFactory.createSampleType(
                 name: "tumor",

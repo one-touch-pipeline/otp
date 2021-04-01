@@ -97,7 +97,7 @@ trait IsRoddy implements IsPipeline {
                 displayName  : 'WGS',
                 dirName      : 'whole_genome_sequencing',
                 roddyName    : 'WGS',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 singleCell   : false,
         ]
     }

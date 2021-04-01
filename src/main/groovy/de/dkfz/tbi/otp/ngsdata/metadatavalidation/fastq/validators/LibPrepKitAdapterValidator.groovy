@@ -72,7 +72,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (seqTypeName.isEmpty()) {
                 return
             }
-            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+            SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
             if (!libraryLayout) {
                 return
             }

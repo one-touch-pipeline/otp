@@ -65,12 +65,12 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
         validator.libraryPreparationKitService = new LibraryPreparationKitService()
 
         validator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.exomePairedSeqType
-            5 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.rnaPairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.chipSeqPairedSeqType
-            1 * findByNameOrImportAlias('WHOLE_UNKNOWN_SEQUENCING', [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> null
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false])  >> SeqTypeService.exomePairedSeqType
+            5 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false])  >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false])  >> SeqTypeService.rnaPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false])  >> SeqTypeService.chipSeqPairedSeqType
+            1 * findByNameOrImportAlias('WHOLE_UNKNOWN_SEQUENCING', [libraryLayout: SequencingReadType.PAIRED, singleCell: false])  >> null
         }
 
         LibraryPreparationKit kitWithoutAdapterFileAndSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file_and_sequence')
@@ -113,26 +113,26 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE.name()}\t${LIB_PREP_KIT.name()}\t${PROJECT.name()}\t${SEQUENCING_READ_TYPE.name()}\n" +
-                        "${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project1.name}\t${LibraryLayout.PAIRED}\n" +
-                        "${SeqTypeNames.EXOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project1.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project1.name}\t${SequencingReadType.PAIRED}\n" +
+                        "${SeqTypeNames.EXOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project1.name}\t${SequencingReadType.PAIRED}\n" +
                         // project config -> adapter file missing
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${project2.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${project2.name}\t${SequencingReadType.PAIRED}\n" +
                         // individual config -> adapter file missing
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${project3.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${project3.name}\t${SequencingReadType.PAIRED}\n" +
                         // RNA project config -> adapter sequence missing
-                        "${SeqTypeNames.RNA.seqTypeName}\t${kitWithoutAdapterSequence.name}\t${project4.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.RNA.seqTypeName}\t${kitWithoutAdapterSequence.name}\t${project4.name}\t${SequencingReadType.PAIRED}\n" +
                         // using OTP alignment
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project5.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project5.name}\t${SequencingReadType.PAIRED}\n" +
                         // unknown lib prep kit
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tunknown_kit\t${project3.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tunknown_kit\t${project3.name}\t${SequencingReadType.PAIRED}\n" +
                         // empty lib prep kit
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\t${project3.name}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\t${project3.name}\t${SequencingReadType.PAIRED}\n" +
                         // unknown seq type
-                        "WHOLE_UNKNOWN_SEQUENCING\t${kitWithoutAdapterFileAndSequence.name}\t${project3.name}\t${LibraryLayout.PAIRED}\n" +
+                        "WHOLE_UNKNOWN_SEQUENCING\t${kitWithoutAdapterFileAndSequence.name}\t${project3.name}\t${SequencingReadType.PAIRED}\n" +
                         // empty seq type
-                        "\t${kitWithoutAdapterFileAndSequence.name}\t${project3.name}\t${LibraryLayout.PAIRED}\n" +
+                        "\t${kitWithoutAdapterFileAndSequence.name}\t${project3.name}\t${SequencingReadType.PAIRED}\n" +
                         // non roddy seq type
-                        "${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project3.name}\t${LibraryLayout.PAIRED}\n"
+                        "${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${project3.name}\t${SequencingReadType.PAIRED}\n"
         )
 
         when:

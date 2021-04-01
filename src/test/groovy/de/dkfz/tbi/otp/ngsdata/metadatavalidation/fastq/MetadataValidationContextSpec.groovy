@@ -101,10 +101,10 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
         DomainFactory.createAllAlignableSeqTypes()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE}\t${SAMPLE_NAME}\t${TAGMENTATION_LIBRARY}\t${SEQUENCING_READ_TYPE}
-${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttestSampleLib\tlib\t${LibraryLayout.PAIRED}
-${SeqTypeNames.EXOME.seqTypeName}\ttestSample1Lib\tlib\t${LibraryLayout.PAIRED}
-${SeqTypeNames.RNA.seqTypeName}\ttest2SampleLib\t\t${LibraryLayout.SINGLE}
-${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${LibraryLayout.PAIRED}
+${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttestSampleLib\tlib\t${SequencingReadType.PAIRED}
+${SeqTypeNames.EXOME.seqTypeName}\ttestSample1Lib\tlib\t${SequencingReadType.PAIRED}
+${SeqTypeNames.RNA.seqTypeName}\ttest2SampleLib\t\t${SequencingReadType.SINGLE}
+${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${SequencingReadType.PAIRED}
 """)
         new SampleLibraryValidator().validate(context)
 

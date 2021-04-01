@@ -97,7 +97,7 @@ trait CellRangerFactory implements IsAlignment {
                 displayName  : '10x_scRNA',
                 dirName      : '10x_scRNA_sequencing',
                 roddyName    : null,
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 singleCell   : true,
         ]
     }

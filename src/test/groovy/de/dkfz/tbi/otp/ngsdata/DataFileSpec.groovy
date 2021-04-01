@@ -81,7 +81,7 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         expect:
         createDataFile(
                 seqTrack: createSeqTrack(
-                        seqType: createSeqType(libraryLayout: LibraryLayout.PAIRED)
+                        seqType: createSeqType(libraryLayout: SequencingReadType.PAIRED)
                 ),
                 fileType: fileType,
                 mateNumber: 2,

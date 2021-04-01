@@ -33,8 +33,8 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.LibraryLayout.PAIRED
-import static de.dkfz.tbi.otp.ngsdata.LibraryLayout.SINGLE
+import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.PAIRED
+import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.SINGLE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
@@ -541,7 +541,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
-                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${LibraryLayout.PAIRED}'.", "A mate is missing for at least one seqTrack."),
+                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${SequencingReadType.PAIRED}'.", "A mate is missing for at least one seqTrack."),
         ]
 
         when:
@@ -565,7 +565,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
-                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${LibraryLayout.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
+                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${SequencingReadType.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
         ]
 
         when:

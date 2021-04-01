@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 String pid = ""
 String sampleTypeName = ""
 String seqTypeName = ""
-String libraryLayout = LibraryLayout.PAIRED
+String libraryLayout = SequencingReadType.PAIRED
 
 //-----------------
 

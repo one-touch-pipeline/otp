@@ -23,8 +23,8 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
@@ -47,7 +47,7 @@ class LibraryLayoutValidator extends SingleValueValidator<AbstractMetadataValida
 
     @Override
     void validateValue(AbstractMetadataValidationContext context, String libraryLayoutName, Set<Cell> cells) {
-        LibraryLayout libraryLayout = LibraryLayout.findByName(libraryLayoutName)
+        SequencingReadType libraryLayout = SequencingReadType.findByName(libraryLayoutName)
         if (!libraryLayout) {
             context.addProblem(cells, Level.ERROR, "sequencing read type '${libraryLayoutName}' is not registered in OTP.", "At least one sequencing read type is not registered in OTP.")
         }

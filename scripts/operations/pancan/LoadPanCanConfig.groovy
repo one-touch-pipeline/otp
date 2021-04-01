@@ -57,7 +57,7 @@ String configVersion = 'v1_0'
  */
 String seqTypeRoddyName = ''
 
-String libraryLayout = LibraryLayout.PAIRED
+String libraryLayout = SequencingReadType.PAIRED
 
 /**
  * the complete path to the config file.

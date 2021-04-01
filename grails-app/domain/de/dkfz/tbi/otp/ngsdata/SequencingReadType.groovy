@@ -23,11 +23,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.TupleConstructor
 
-/**
- * Also known as Sequencing Read Type, which is the new name.
- */
 @TupleConstructor
-enum LibraryLayout {
+enum SequencingReadType {
 
     SINGLE(1),
     PAIRED(2),
@@ -35,7 +32,7 @@ enum LibraryLayout {
 
     final int mateCount
 
-    static LibraryLayout findByName(String name) {
+    static SequencingReadType findByName(String name) {
         return values().find {
             it.name().equalsIgnoreCase(name)
         }

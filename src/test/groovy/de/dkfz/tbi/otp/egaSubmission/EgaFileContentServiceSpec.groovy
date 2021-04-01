@@ -79,10 +79,10 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
 
         where:
         seqTypeDisplayName | libraryLayout        | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
-        'seqType'          | LibraryLayout.SINGLE | 'platform'      | 'model'                   | 'kit'                     || 'seqType-SINGLE-seqType-model-kit'
-        'seqType'          | LibraryLayout.SINGLE | 'platform'      | 'model'                   | null                      || 'seqType-SINGLE-seqType-model-unspecified'
-        'seqType'          | LibraryLayout.SINGLE | 'platform'      | null                      | 'kit'                     || 'seqType-SINGLE-seqType-unspecified-kit'
-        'seqType'          | LibraryLayout.PAIRED | 'platform'      | 'model'                   | 'kit'                     || 'seqType-PAIRED-seqType-model-kit'
+        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | 'kit' || 'seqType-SINGLE-seqType-model-kit'
+        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | null  || 'seqType-SINGLE-seqType-model-unspecified'
+        'seqType'          | SequencingReadType.SINGLE | 'platform' | null    | 'kit' || 'seqType-SINGLE-seqType-unspecified-kit'
+        'seqType'          | SequencingReadType.PAIRED | 'platform' | 'model' | 'kit' || 'seqType-PAIRED-seqType-model-kit'
     }
 
     @Unroll
@@ -120,17 +120,17 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
 
         where:
         seqTypeDisplayName | libraryLayout        | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
-        'seqType'          | LibraryLayout.SINGLE | 'platform'      | 'model'                   | 'kit'                     || 'seqType-SINGLE-seqType-model-kit'
-        'seqType'          | LibraryLayout.SINGLE | 'platform'      | 'model'                   | null                      || 'seqType-SINGLE-seqType-model-unspecified'
-        'seqType'          | LibraryLayout.SINGLE | 'platform'      | null                      | 'kit'                     || 'seqType-SINGLE-seqType-unspecified-kit'
-        'seqType'          | LibraryLayout.PAIRED | 'platform'      | 'model'                   | 'kit'                     || 'seqType-PAIRED-seqType-model-kit'
+        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | 'kit' || 'seqType-SINGLE-seqType-model-kit'
+        'seqType'          | SequencingReadType.SINGLE | 'platform' | 'model' | null  || 'seqType-SINGLE-seqType-model-unspecified'
+        'seqType'          | SequencingReadType.SINGLE | 'platform' | null    | 'kit' || 'seqType-SINGLE-seqType-unspecified-kit'
+        'seqType'          | SequencingReadType.PAIRED | 'platform' | 'model' | 'kit' || 'seqType-PAIRED-seqType-model-kit'
     }
 
     void "createKeyForBamFile, when bamFileSubmissionObject with multiple seqplatform is given, then create expected key #expectedKey"() {
         given:
         SeqType seqType = createSeqType([
                 displayName  : 'seqtype',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
         Sample sample = createSample()
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit([
@@ -176,7 +176,7 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         given:
         SeqType seqType = createSeqType([
                 displayName  : 'seqtype',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
         Sample sample = createSample()
         SeqPlatform seqPlatform = createSeqPlatform([
@@ -222,15 +222,15 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         Sample sample = createSample()
         SeqType seqTypeSingle1 = createSeqType([
                 displayName  : 'seqtype1',
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
         ])
         SeqType seqTypeSingle2 = createSeqType([
                 displayName  : 'seqtype2',
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
         ])
         SeqType seqTypePaired = createSeqType([
                 displayName  : 'seqtype3',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
         SeqPlatform seqPlatform1 = createSeqPlatform([
                 name                 : 'platform1',
@@ -336,15 +336,15 @@ sampleAlias2,fileAlias-222-1,,
         Sample sample = createSample()
         SeqType seqTypePaired1 = createSeqType([
                 displayName  : 'seqtype1',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
         SeqType seqTypePaired2 = createSeqType([
                 displayName  : 'seqtype2',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
         SeqType seqTypeSingle = createSeqType([
                 displayName  : 'seqtype3',
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
         ])
         SeqPlatform seqPlatform1 = createSeqPlatform([
                 name                 : 'platform1',
@@ -459,19 +459,19 @@ sampleAlias2,fileAlias-222-1-r1,,,fileAlias-222-1-r2,,
         given:
         SeqType seqTypeSingle1 = createSeqType([
                 displayName  : 'seqtypeSingle1',
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
         ])
         SeqType seqTypeSingle2 = createSeqType([
                 displayName  : 'seqtypeSingle2',
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
         ])
         SeqType seqTypePaired1 = createSeqType([
                 displayName  : 'seqtypePaired1',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
         SeqType seqTypePaired2 = createSeqType([
                 displayName  : 'seqtypePaired2',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ])
 
         SeqPlatform seqPlatform1 = createSeqPlatform([

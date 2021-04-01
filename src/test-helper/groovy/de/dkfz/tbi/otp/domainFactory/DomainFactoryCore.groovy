@@ -120,7 +120,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 displayName  : properties.displayName ?: properties.name ?: defaultName,
                 dirName      : "seqTypeDirName_${nextId}",
                 roddyName    : null,
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
                 singleCell   : false,
                 importAlias  : [],
         ]

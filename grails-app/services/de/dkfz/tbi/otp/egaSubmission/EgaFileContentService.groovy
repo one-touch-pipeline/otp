@@ -153,7 +153,7 @@ class EgaFileContentService {
         log.debug("creating single fastq mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
         egaSubmission.dataFilesToSubmit.findAll { DataFileSubmissionObject dataFileSubmissionObject ->
-            dataFileSubmissionObject.dataFile.seqType.libraryLayout == LibraryLayout.SINGLE
+            dataFileSubmissionObject.dataFile.seqType.libraryLayout == SequencingReadType.SINGLE
         }.groupBy { DataFileSubmissionObject dataFileSubmissionObject ->
             createKeyForFastq(dataFileSubmissionObject)
         }.each { String key, List<DataFileSubmissionObject> dataFileSubmissionObjects ->
@@ -187,7 +187,7 @@ class EgaFileContentService {
         log.debug("creating paired fastq mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
         egaSubmission.dataFilesToSubmit.findAll { DataFileSubmissionObject dataFileSubmissionObject ->
-            dataFileSubmissionObject.dataFile.seqType.libraryLayout == LibraryLayout.PAIRED
+            dataFileSubmissionObject.dataFile.seqType.libraryLayout == SequencingReadType.PAIRED
         }.groupBy { DataFileSubmissionObject dataFileSubmissionObject ->
             createKeyForFastq(dataFileSubmissionObject)
         }.each { String key, List<DataFileSubmissionObject> dataFileSubmissionObjects ->

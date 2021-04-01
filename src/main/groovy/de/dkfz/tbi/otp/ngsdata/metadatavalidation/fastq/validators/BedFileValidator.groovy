@@ -44,7 +44,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the sequencing layout is '${LibraryLayout.PAIRED}', the correct BED file for the used library preparation kit should be configured in OTP."]
+        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the sequencing layout is '${SequencingReadType.PAIRED}', the correct BED file for the used library preparation kit should be configured in OTP."]
     }
 
     @Override
@@ -79,9 +79,9 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
         boolean singleCell = SeqTypeService.isSingleCell(valueTuple.getValue(BASE_MATERIAL.name()))
 
-        LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+        SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
 
-        if (seqType != SeqTypeNames.EXOME.seqTypeName || libraryLayout != LibraryLayout.PAIRED || singleCell) {
+        if (seqType != SeqTypeNames.EXOME.seqTypeName || libraryLayout != SequencingReadType.PAIRED || singleCell) {
             return
         }
 

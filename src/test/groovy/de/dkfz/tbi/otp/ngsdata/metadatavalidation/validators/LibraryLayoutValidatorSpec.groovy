@@ -58,10 +58,10 @@ class LibraryLayoutValidatorSpec extends Specification implements DomainFactoryC
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SEQUENCING_READ_TYPE}\n" +
                 "invalidLayout\n" +
-                "${LibraryLayout.PAIRED}\n" +
+                "${SequencingReadType.PAIRED}\n" +
                 "invalidLayout\n" +
-                "${LibraryLayout.SINGLE}\n" +
-                "${LibraryLayout.MATE_PAIR}\n" +
+                "${SequencingReadType.SINGLE}\n" +
+                "${SequencingReadType.MATE_PAIR}\n" +
                 "paired\n" +
                 "single\n" +
                 "mate_pair\n" +
@@ -69,8 +69,8 @@ class LibraryLayoutValidatorSpec extends Specification implements DomainFactoryC
                 "Single\n" +
                 "Mate_pair\n"
         )
-        createSeqType(libraryLayout: LibraryLayout.PAIRED)
-        createSeqType(libraryLayout: LibraryLayout.PAIRED)
+        createSeqType(libraryLayout: SequencingReadType.PAIRED)
+        createSeqType(libraryLayout: SequencingReadType.PAIRED)
 
         when:
         new LibraryLayoutValidator().validate(context)

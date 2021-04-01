@@ -46,16 +46,16 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
 
     static final String VALID_METADATA =
             "${LIB_PREP_KIT}\t${SEQUENCING_READ_TYPE}\t${SEQUENCING_TYPE}\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
-                    "lib_prep_kit\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.RNA.seqTypeName}\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n"
+                    "lib_prep_kit\t${SequencingReadType.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SequencingReadType.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
+                    "lib_prep_kit\t${SequencingReadType.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SequencingReadType.PAIRED}\t${SeqTypeNames.RNA.seqTypeName}\n" +
+                    "lib_prep_kit\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                    "lib_prep_kit\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
+                    "lib_prep_kit\t${SequencingReadType.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SequencingReadType.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n"
 
     void setup() {
         DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit')
@@ -72,12 +72,12 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
-            2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
         }
         libPrepKitSeqTypeValidator.validate(context)
 
@@ -89,22 +89,22 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
-                        "\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n"
+                        "\t${SequencingReadType.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
+                        "\t${SequencingReadType.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\n" +
+                        "\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
+                        "\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                        "\t${SequencingReadType.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n"
         )
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
-            3 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
-            3 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
-            3 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
-            3 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
         }
         libPrepKitSeqTypeValidator.validate(context)
 
@@ -135,18 +135,18 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME.seqTypeName}\n"
+                        "\t${SequencingReadType.PAIRED}\t${SeqTypeNames.WHOLE_GENOME.seqTypeName}\n"
         )
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
-            2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
-            2 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
         }
         libPrepKitSeqTypeValidator.validate(context)
 
@@ -174,24 +174,24 @@ CHIPSEQ
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}
-${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.EXOME.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.EXOME.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.RNA.seqTypeName}\t${LibraryLayout.PAIRED}
-${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${LibraryLayout.PAIRED}
+${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.EXOME.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.EXOME.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.RNA.seqTypeName}\t${SequencingReadType.PAIRED}
+${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${SequencingReadType.PAIRED}
 """)
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.rnaPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
         }
         libPrepKitSeqTypeValidator.validate(context)
 

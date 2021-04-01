@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 
 @Component('WgbsAlignmentStartJob')
 @Scope('singleton')
@@ -37,7 +37,7 @@ class WgbsAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return SeqType.findAllByNameInListAndLibraryLayout(SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName, LibraryLayout.PAIRED)
+        return SeqType.findAllByNameInListAndLibraryLayout(SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName, SequencingReadType.PAIRED)
     }
 
     /**

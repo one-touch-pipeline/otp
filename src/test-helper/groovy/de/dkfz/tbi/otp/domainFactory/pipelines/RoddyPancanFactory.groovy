@@ -39,7 +39,7 @@ trait RoddyPancanFactory implements IsAlignment, IsRoddy {
                 displayName  : 'WGS',
                 dirName      : 'whole_genome_sequencing',
                 roddyName    : 'WGS',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 singleCell   : false,
         ]
     }

@@ -196,7 +196,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
         Collection<Cell> libraryLayoutCells = seqTrackRows*.row*.getCell(libraryLayoutColumn)
         Collection<String> libraryLayoutNames = libraryLayoutCells*.text.unique()
         String libraryLayoutName = libraryLayoutNames.size() == 1 ? libraryLayoutNames.first() : null
-        LibraryLayout libraryLayout = LibraryLayout.values().find {
+        SequencingReadType libraryLayout = SequencingReadType.values().find {
             it.name() == libraryLayoutName
         }
         if (seqTrackRows.every { it.mateNumber } && libraryLayout) {

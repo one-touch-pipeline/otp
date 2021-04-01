@@ -53,7 +53,7 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
     ].asImmutable()
 
     /** This attribute is used externally. Please discuss a change in the team */
-    LibraryLayout libraryLayout
+    SequencingReadType libraryLayout
     String dirName
 
     /** This attribute is used externally. Please discuss a change in the team */

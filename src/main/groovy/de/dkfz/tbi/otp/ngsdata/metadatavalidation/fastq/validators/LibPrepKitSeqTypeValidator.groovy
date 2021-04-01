@@ -64,7 +64,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
         List<SeqType> seqTypes = SeqTypeService.getSeqTypesRequiredLibPrepKit()
         valueTuples.each { ValueTuple valueTuple ->
             String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+            SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
             if (!libraryLayout) {
                 return
             }

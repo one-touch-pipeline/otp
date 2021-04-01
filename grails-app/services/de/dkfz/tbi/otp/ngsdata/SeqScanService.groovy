@@ -207,8 +207,8 @@ class SeqScanService {
     }
 
     private String getNewLibrary(String oldType, String newType) {
-        final String lower = LibraryLayout.SINGLE
-        final String higher = LibraryLayout.PAIRED
+        final String lower = SequencingReadType.SINGLE
+        final String higher = SequencingReadType.PAIRED
         if (oldType == lower && newType == higher) {
             return higher
         }

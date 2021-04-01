@@ -174,7 +174,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         SessionUtils.withNewSession {
             seqTrack = createSeqTrack([
                     seqType            : createSeqType([
-                            libraryLayout: LibraryLayout.PAIRED,
+                            libraryLayout: SequencingReadType.PAIRED,
                             singleCell   : true,
                     ]),
                     singleCellWellLabel: null,
@@ -194,7 +194,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         List<SeqTrack> seqTracks
         SessionUtils.withNewSession {
             SeqType seqType = createSeqType([
-                    libraryLayout: LibraryLayout.PAIRED,
+                    libraryLayout: SequencingReadType.PAIRED,
                     singleCell   : true,
             ])
             Run run = createRun()

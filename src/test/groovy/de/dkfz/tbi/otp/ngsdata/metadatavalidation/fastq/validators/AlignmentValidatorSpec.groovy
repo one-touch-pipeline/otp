@@ -97,7 +97,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout}
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType.name},${createProject().name},,DNA,${LibraryLayout.SINGLE}
+${seqType.name},${createProject().name},,DNA,${SequencingReadType.SINGLE}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
@@ -122,8 +122,8 @@ ${seqType.name},${createProject().name},,DNA,${LibraryLayout.SINGLE}
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType1.name},${project.name},,DNA,${LibraryLayout.PAIRED}
-${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
+${seqType1.name},${project.name},,DNA,${SequencingReadType.PAIRED}
+${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadType.PAIRED}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
@@ -154,8 +154,8 @@ ${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAI
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType1.name},${project.name},,DNA,${LibraryLayout.PAIRED}
-${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
+${seqType1.name},${project.name},,DNA,${SequencingReadType.PAIRED}
+${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadType.PAIRED}
 """.replaceAll(',', '\t'))
 
         when:

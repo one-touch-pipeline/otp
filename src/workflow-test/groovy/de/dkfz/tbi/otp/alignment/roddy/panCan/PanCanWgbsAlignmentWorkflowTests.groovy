@@ -90,7 +90,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
     SeqType findSeqType() {
         return exactlyOneElement(SeqType.findAllWhere(
                 name: SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName,
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ))
     }
 

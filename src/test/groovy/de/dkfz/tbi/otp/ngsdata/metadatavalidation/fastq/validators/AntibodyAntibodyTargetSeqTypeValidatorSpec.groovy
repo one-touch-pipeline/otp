@@ -43,7 +43,7 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification implement
         SeqType seqType = new SeqType([
                 name             : 'seqType',
                 displayName      : 'seqType',
-                libraryLayout    : LibraryLayout.PAIRED,
+                libraryLayout    : SequencingReadType.PAIRED,
                 hasAntibodyTarget: hasAntibodyTarget,
         ])
 
@@ -77,7 +77,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         SeqType seqType = new SeqType([
                 name             : 'seqType',
                 displayName      : 'seqType',
-                libraryLayout    : LibraryLayout.PAIRED,
+                libraryLayout    : SequencingReadType.PAIRED,
                 hasAntibodyTarget: hasAntibodyTarget,
         ])
 
@@ -159,7 +159,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         when:
         new AntibodyAntibodyTargetSeqTypeValidator([
                 seqTypeService: Mock(SeqTypeService) {
-                    1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true, displayName: 'seqType', libraryLayout: LibraryLayout.PAIRED)
+                    1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true, displayName: 'seqType', libraryLayout: SequencingReadType.PAIRED)
                 }
         ]).validate(context)
 

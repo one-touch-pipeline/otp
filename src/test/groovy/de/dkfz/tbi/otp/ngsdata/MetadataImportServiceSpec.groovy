@@ -459,7 +459,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         def (String model1, String model2) = ["model1", "model2"]
         def (String kit1, String kit2) = ["kit1", "kit2"]
         def (String target1, String target2) = ["target1", "target2"]
-        def (String single, String paired) = [LibraryLayout.SINGLE, LibraryLayout.PAIRED]
+        def (String single, String paired) = [SequencingReadType.SINGLE, SequencingReadType.PAIRED]
         def (String parse, String scParse, String get) = ["parse_me", "sc_parse_me", "in_db"]
 
         def (Date run1Date, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { new LocalDate(it[0], it[1], it[2]).toDate() }
@@ -492,13 +492,13 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             )
         }
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(automaticNotification: true)
-        SeqType mySeqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
-        SeqType mySeqTypeTag = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: LibraryLayout.SINGLE)
-        SeqType exomeSingle = DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
-        SeqType exomePaired = DomainFactory.createExomeSeqType(LibraryLayout.PAIRED)
-        SeqType chipSeqSingle = DomainFactory.createChipSeqType(LibraryLayout.SINGLE)
-        SeqType chipSeqPaired = DomainFactory.createChipSeqType(LibraryLayout.PAIRED)
-        SeqType scExomeSingle = DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
+        SeqType mySeqType = DomainFactory.createWholeGenomeSeqType(SequencingReadType.SINGLE)
+        SeqType mySeqTypeTag = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: SequencingReadType.SINGLE)
+        SeqType exomeSingle = DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
+        SeqType exomePaired = DomainFactory.createExomeSeqType(SequencingReadType.PAIRED)
+        SeqType chipSeqSingle = DomainFactory.createChipSeqType(SequencingReadType.SINGLE)
+        SeqType chipSeqPaired = DomainFactory.createChipSeqType(SequencingReadType.PAIRED)
+        SeqType scExomeSingle = DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
         Sample sample1 = DomainFactory.createSampleIdentifier(name: 'in_db').sample
         Sample sample2
         def (SoftwareTool pipeline1, SoftwareTool pipeline2, SoftwareTool unknownPipeline) =
@@ -549,13 +549,13 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             findByNameOrImportAlias(libraryPreparationKit2.name) >> libraryPreparationKit2
         }
         service.seqTypeService = Mock(SeqTypeService) {
-            findByNameOrImportAlias(WG, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> mySeqType
-            findByNameOrImportAlias(WGBS_T, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> mySeqTypeTag
-            findByNameOrImportAlias(EXON, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> exomeSingle
-            findByNameOrImportAlias(EXON, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> exomePaired
-            findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> chipSeqSingle
-            findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> chipSeqPaired
-            findByNameOrImportAlias(SC_EXON, [libraryLayout: LibraryLayout.SINGLE, singleCell: true]) >> scExomeSingle
+            findByNameOrImportAlias(WG, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> mySeqType
+            findByNameOrImportAlias(WGBS_T, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> mySeqTypeTag
+            findByNameOrImportAlias(EXON, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> exomeSingle
+            findByNameOrImportAlias(EXON, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> exomePaired
+            findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> chipSeqSingle
+            findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> chipSeqPaired
+            findByNameOrImportAlias(SC_EXON, [libraryLayout: SequencingReadType.SINGLE, singleCell: true]) >> scExomeSingle
         }
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             findByNameOrImportAlias(target1) >> antibodyTarget1
@@ -879,7 +879,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         DomainFactory.createAllAnalysableSeqTypes()
 
         SeqType seqTypeWithAntibodyTarget = DomainFactory.createSeqType([
-                libraryLayout    : LibraryLayout.PAIRED,
+                libraryLayout    : SequencingReadType.PAIRED,
                 hasAntibodyTarget: true,
         ])
         SeqCenter seqCenter = DomainFactory.createSeqCenter()

@@ -61,17 +61,17 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("WGS ${LibraryLayout.PAIRED} not found")
+        e.message.contains("WGS ${SequencingReadType.PAIRED} not found")
     }
 
     void "test get WGS Paired SeqType, no WGS Paired SeqType in DB, should fail"() {
         when:
-        DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
+        DomainFactory.createWholeGenomeSeqType(SequencingReadType.SINGLE)
         SeqTypeService.wholeGenomePairedSeqType
 
         then:
         AssertionError e = thrown()
-        e.message.contains("WGS ${LibraryLayout.PAIRED} not found")
+        e.message.contains("WGS ${SequencingReadType.PAIRED} not found")
     }
 
     void "test get WGS Paired SeqType, All Fine"() {
@@ -89,17 +89,17 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("WES ${LibraryLayout.PAIRED} not found")
+        e.message.contains("WES ${SequencingReadType.PAIRED} not found")
     }
 
     void "test get Exome Paired SeqType, no Exome Paired SeqType in DB, should fail"() {
         when:
-        DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
+        DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
         SeqTypeService.exomePairedSeqType
 
         then:
         AssertionError e = thrown()
-        e.message.contains("WES ${LibraryLayout.PAIRED} not found")
+        e.message.contains("WES ${SequencingReadType.PAIRED} not found")
     }
 
     void "test get Exome Paired SeqType, AllFine"() {
@@ -114,17 +114,17 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         when:
         DomainFactory.createSeqType(
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 dirName      : "name1",
         )
         DomainFactory.createSeqType(
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
                 dirName      : "name1",
         )
         DomainFactory.createSeqType(
                 name: "seqTypeName2",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         )
 
         then:
@@ -135,12 +135,12 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         when:
         DomainFactory.createSeqType(
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 dirName      : "name1",
         )
         SeqType seqType = DomainFactory.createSeqType([
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 dirName      : "name1",
         ], false)
 
@@ -153,12 +153,12 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         when:
         DomainFactory.createSeqType(
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 dirName      : "name1",
         )
         SeqType seqType = DomainFactory.createSeqType([
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
                 dirName      : "name2",
         ], false)
 
@@ -170,13 +170,13 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         when:
         DomainFactory.createSeqType(
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 singleCell   : true,
                 dirName      : "name1",
         )
         SeqType seqType = DomainFactory.createSeqType([
                 name         : "seqTypeName2",
-                libraryLayout: LibraryLayout.SINGLE,
+                libraryLayout: SequencingReadType.SINGLE,
                 singleCell   : false,
                 dirName      : "name1",
         ], false)
@@ -189,7 +189,7 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         when:
         SeqType seqType = DomainFactory.createSeqType([
                 name         : "seqTypeName1",
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 dirName      : "name1\\",
         ], false)
 
@@ -205,10 +205,10 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         expect:
         2 == alignableSeqTypes.size()
         alignableSeqTypes.find {
-            it.name == SeqTypeNames.EXOME.seqTypeName && it.libraryLayout == LibraryLayout.PAIRED && !it.singleCell
+            it.name == SeqTypeNames.EXOME.seqTypeName && it.libraryLayout == SequencingReadType.PAIRED && !it.singleCell
         }
         alignableSeqTypes.find {
-            it.name == SeqTypeNames.WHOLE_GENOME.seqTypeName && it.libraryLayout == LibraryLayout.PAIRED && !it.singleCell
+            it.name == SeqTypeNames.WHOLE_GENOME.seqTypeName && it.libraryLayout == SequencingReadType.PAIRED && !it.singleCell
         }
     }
 }

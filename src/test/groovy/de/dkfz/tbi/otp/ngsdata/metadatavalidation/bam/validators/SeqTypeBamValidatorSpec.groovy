@@ -103,7 +103,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
                         displayName  : SEQ_TYPE_NAME,
                         dirName      : "seqTypeDirName",
                         roddyName    : null,
-                        libraryLayout: LibraryLayout.SINGLE,
+                        libraryLayout: SequencingReadType.SINGLE,
                         singleCell   : false,
         ])
 

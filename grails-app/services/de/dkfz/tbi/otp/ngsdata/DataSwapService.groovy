@@ -605,7 +605,7 @@ class DataSwapService {
             it.fileName = it.vbpFileName = dataFileMap[it.fileName]
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 log << "\n====> set mate number for withdrawn data file"
-                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "sequencing read type is not ${LibraryLayout.SINGLE}"
+                assert it.seqTrack.seqType.libraryLayout == SequencingReadType.SINGLE: "sequencing read type is not ${SequencingReadType.SINGLE}"
                 it.mateNumber = 1
             }
             it.save(flush: true)
@@ -949,8 +949,8 @@ ${getFixGroupCommand(neww)}
         SeqType oldSeqType
         SeqType newSeqType
 
-        LibraryLayout oldLibraryLayout
-        LibraryLayout newLibraryLayout
+        SequencingReadType oldLibraryLayout
+        SequencingReadType newLibraryLayout
 
         boolean oldSingleCell
         boolean newSingleCell
@@ -1006,10 +1006,10 @@ ${getFixGroupCommand(neww)}
                 newSample = CollectionUtils.exactlyOneElement(sampleList, "The new Sample (${newIndividual} ${newSampleType}) does not exist")
             }
 
-            oldLibraryLayout = LibraryLayout.findByName(extractSingleElement(inputInformationOTP.oldLibraryLayout))
+            oldLibraryLayout = SequencingReadType.findByName(extractSingleElement(inputInformationOTP.oldLibraryLayout))
             notNull(oldLibraryLayout, "The old LibraryLayout ${inputInformationOTP.oldLibraryLayout} does not exists")
 
-            newLibraryLayout = LibraryLayout.findByName(extractSingleElement(inputInformationOTP.newLibraryLayout))
+            newLibraryLayout = SequencingReadType.findByName(extractSingleElement(inputInformationOTP.newLibraryLayout))
             notNull(oldLibraryLayout, "The new LibraryLayout ${inputInformationOTP.newLibraryLayout} does not exists")
 
             oldSingleCell = Boolean.parseBoolean(extractSingleElement(inputInformationOTP.oldSingleCell))

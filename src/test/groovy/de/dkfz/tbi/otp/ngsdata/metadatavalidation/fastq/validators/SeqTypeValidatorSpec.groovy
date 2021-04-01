@@ -59,8 +59,8 @@ class SeqTypeValidatorSpec extends Specification {
                         "SeqType1\n" +
                         "SeqType2\n" +
                         "SeqType1\n")
-        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: LibraryLayout.SINGLE)
-        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: LibraryLayout.PAIRED)
+        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SequencingReadType.SINGLE)
+        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SequencingReadType.PAIRED)
 
         when:
         SeqTypeValidator validator = new SeqTypeValidator()

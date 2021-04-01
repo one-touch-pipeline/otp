@@ -139,7 +139,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
         SessionUtils.withNewSession {
             seqTrack = createSeqTrack([
                     seqType            : createSeqType([
-                            libraryLayout: LibraryLayout.PAIRED,
+                            libraryLayout: SequencingReadType.PAIRED,
                             singleCell   : true,
                     ]),
                     singleCellWellLabel: null,
@@ -159,7 +159,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFa
         List<SeqTrack> seqTracks
         SessionUtils.withNewSession {
             SeqType seqType = createSeqType([
-                    libraryLayout: LibraryLayout.PAIRED,
+                    libraryLayout: SequencingReadType.PAIRED,
                     singleCell   : true,
             ])
             Run run = createRun()

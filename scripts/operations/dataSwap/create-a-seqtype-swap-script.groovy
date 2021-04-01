@@ -59,7 +59,7 @@ List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
                 'seqType1',
                 'seqType2',
                 ])
-        eq('libraryLayout', LibraryLayout.PAIRED)
+        eq('libraryLayout', SequencingReadType.PAIRED)
         eq('singleCell', 'TRUE OR FALSE')
     }
     order('id')

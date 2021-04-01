@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -57,7 +57,7 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
             String libraryLayoutName = it.getValue(SEQUENCING_READ_TYPE.name())
             String mateNumber = it.getValue(READ.name())
             if (libraryLayoutName && mateNumber && mateNumber.isInteger()) {
-                LibraryLayout libraryLayout = LibraryLayout.values().find {
+                SequencingReadType libraryLayout = SequencingReadType.values().find {
                     it.toString() == libraryLayoutName
                 }
                 if (!libraryLayout) {

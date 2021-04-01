@@ -481,16 +481,16 @@ abstract class CreateWithLayoutCommand implements Validateable {
         })
     }
 
-    List<LibraryLayout> getLibraryLayouts() {
-        List<LibraryLayout> libraryLayouts = []
+    List<SequencingReadType> getLibraryLayouts() {
+        List<SequencingReadType> libraryLayouts = []
         if (this.single) {
-            libraryLayouts.add(LibraryLayout.SINGLE)
+            libraryLayouts.add(SequencingReadType.SINGLE)
         }
         if (this.paired) {
-            libraryLayouts.add(LibraryLayout.PAIRED)
+            libraryLayouts.add(SequencingReadType.PAIRED)
         }
         if (this.mate_pair) {
-            libraryLayouts.add(LibraryLayout.MATE_PAIR)
+            libraryLayouts.add(SequencingReadType.MATE_PAIR)
         }
         return libraryLayouts
     }
@@ -548,17 +548,17 @@ class CreateLayoutCommand extends CreateWithLayoutCommand {
 
     static constraints = {
         single(validator: { val, obj ->
-            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.SINGLE, singleCell: obj.singleCell])) {
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SequencingReadType.SINGLE, singleCell: obj.singleCell])) {
                 return 'default.not.unique.message'
             }
         })
         paired(validator: { val, obj ->
-            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.PAIRED, singleCell: obj.singleCell])) {
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SequencingReadType.PAIRED, singleCell: obj.singleCell])) {
                 return 'default.not.unique.message'
             }
         })
         mate_pair(validator: { val, obj ->
-            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: obj.singleCell])) {
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SequencingReadType.MATE_PAIR, singleCell: obj.singleCell])) {
                 return 'default.not.unique.message'
             }
         })

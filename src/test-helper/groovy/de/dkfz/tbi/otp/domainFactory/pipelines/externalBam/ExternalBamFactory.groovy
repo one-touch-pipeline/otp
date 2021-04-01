@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.externalBam
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 trait ExternalBamFactory implements IsAlignment {
@@ -76,7 +76,7 @@ trait ExternalBamFactory implements IsAlignment {
                 displayName  : "${seqTrackName}_alias",
                 dirName      : "${seqTrackName}_sequencing",
                 roddyName    : null,
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 singleCell   : false,
         ]
     }

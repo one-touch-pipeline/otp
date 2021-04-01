@@ -471,7 +471,7 @@ class MetadataImportService {
             String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
-            LibraryLayout libLayout = LibraryLayout.findByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
+            SequencingReadType libLayout = SequencingReadType.findByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeRaw,
                     [libraryLayout: libLayout, singleCell: isSingleCell],
@@ -680,7 +680,7 @@ class MetadataImportService {
 
     SeqType getSeqTypeFromMetadata(ValueTuple tuple) {
         boolean isSingleCell = seqTypeService.isSingleCell(tuple.getValue(BASE_MATERIAL.name()))
-        LibraryLayout libLayout = LibraryLayout.findByName(tuple.getValue(SEQUENCING_READ_TYPE.name()))
+        SequencingReadType libLayout = SequencingReadType.findByName(tuple.getValue(SEQUENCING_READ_TYPE.name()))
         if (!libLayout) {
             return null
         }

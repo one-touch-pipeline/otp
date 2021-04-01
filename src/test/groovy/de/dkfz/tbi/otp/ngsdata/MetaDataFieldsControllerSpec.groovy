@@ -441,9 +441,9 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/metaDataFields/seqTypes"
-        !single || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.SINGLE, singleCell)
-        !paired || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.PAIRED, singleCell)
-        !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.MATE_PAIR, singleCell)
+        !single || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.SINGLE, singleCell)
+        !paired || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.PAIRED, singleCell)
+        !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SequencingReadType.MATE_PAIR, singleCell)
 
         where:
         single | paired | mate_pair | singleCell
@@ -473,7 +473,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
                 dirName      : 'seqtype',
                 displayName  : 'SEQ TYPE',
                 importAlias  : ['importAlias'],
-                libraryLayout: LibraryLayout.SINGLE
+                libraryLayout: SequencingReadType.SINGLE
         )
 
         when:
@@ -544,10 +544,10 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         given:
         setupData()
 
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: LibraryLayout.PAIRED, singleCell: true)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SequencingReadType.SINGLE, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: SequencingReadType.PAIRED, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: SequencingReadType.MATE_PAIR, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: SequencingReadType.PAIRED, singleCell: true)
 
         when:
         controller.params.name = name
@@ -562,9 +562,9 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == SC_OK
         controller.response.json.success
-        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.SINGLE, singleCell)
-        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.PAIRED, singleCell)
-        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.MATE_PAIR, singleCell)
+        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.SINGLE, singleCell)
+        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.PAIRED, singleCell)
+        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.MATE_PAIR, singleCell)
 
         where:
         name       | single | paired | mate_pair | singleCell
@@ -587,10 +587,10 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         given:
         setupData()
 
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: LibraryLayout.PAIRED, singleCell: true)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SequencingReadType.SINGLE, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: SequencingReadType.PAIRED, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: SequencingReadType.MATE_PAIR, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: SequencingReadType.PAIRED, singleCell: true)
 
         when:
         controller.params.name = name
@@ -626,8 +626,8 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         given:
         setupData()
 
-        SeqType seqTypeSingle = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE)
-        SeqType seqTypePaired = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.PAIRED)
+        SeqType seqTypeSingle = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SequencingReadType.SINGLE)
+        SeqType seqTypePaired = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SequencingReadType.PAIRED)
 
         when:
         controller.params.id = seqTypeSingle.id
@@ -649,8 +649,8 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         List<SeqType> seqTypes = [
-                DomainFactory.createSeqType(name: "SEQTYPE0", dirName: "SEQTYPE0", libraryLayout: LibraryLayout.SINGLE),
-                DomainFactory.createSeqType(name: "SEQTYPE1", dirName: "SEQTYPE1", importAlias: ['importAlias1'], libraryLayout: LibraryLayout.SINGLE),
+                DomainFactory.createSeqType(name: "SEQTYPE0", dirName: "SEQTYPE0", libraryLayout: SequencingReadType.SINGLE),
+                DomainFactory.createSeqType(name: "SEQTYPE1", dirName: "SEQTYPE1", importAlias: ['importAlias1'], libraryLayout: SequencingReadType.SINGLE),
         ]
 
         SeqType seqType = seqTypes[suffix]

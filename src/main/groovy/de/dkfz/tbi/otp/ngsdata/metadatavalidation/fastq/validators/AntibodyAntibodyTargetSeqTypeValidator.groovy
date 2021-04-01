@@ -76,7 +76,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
             String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
 
-            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+            SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])
 

@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
@@ -207,9 +207,9 @@ class RnaQualityAssessment extends RoddyQualityAssessment implements QcTrafficLi
     }
 
     static def nullIfAndOnlyIfLayoutIsSingle = { val, RnaQualityAssessment obj ->
-        if (obj.roddyBamFile.seqType.libraryLayout == LibraryLayout.PAIRED && val == null) {
+        if (obj.roddyBamFile.seqType.libraryLayout == SequencingReadType.PAIRED && val == null) {
             return "required"
-        } else if (obj.roddyBamFile.seqType.libraryLayout == LibraryLayout.SINGLE && val != null) {
+        } else if (obj.roddyBamFile.seqType.libraryLayout == SequencingReadType.SINGLE && val != null) {
             return "not.allowed"
         }
     }

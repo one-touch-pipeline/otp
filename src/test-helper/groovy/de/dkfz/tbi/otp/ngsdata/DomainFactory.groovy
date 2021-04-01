@@ -1546,7 +1546,7 @@ class DomainFactory {
     }
 
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
-        return createSeqType([libraryLayout: LibraryLayout.PAIRED] + seqTypeProperties, saveAndValidate)
+        return createSeqType([libraryLayout: SequencingReadType.PAIRED] + seqTypeProperties, saveAndValidate)
     }
 
     @Deprecated
@@ -1831,7 +1831,7 @@ class DomainFactory {
                 kitInfoReliability: mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
         ] + seqTrackProperties
         SeqTrack seqTrack
-        if (mergingWorkPackage.seqType.libraryLayout == LibraryLayout.PAIRED) {
+        if (mergingWorkPackage.seqType.libraryLayout == SequencingReadType.PAIRED) {
             seqTrack = createSeqTrackWithTwoDataFiles(map, dataFileProperties, dataFileProperties)
         } else {
             seqTrack = createSeqTrackWithOneDataFile(map, dataFileProperties)
@@ -1869,7 +1869,7 @@ class DomainFactory {
                 fileType   : fileType,
                 mateNumber : 2,
         ]
-        SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType(libraryLayout: LibraryLayout.PAIRED)] + seqTrackProperties, defaultMap1 + dataFileProperties1)
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType(libraryLayout: SequencingReadType.PAIRED)] + seqTrackProperties, defaultMap1 + dataFileProperties1)
         createSequenceDataFile(defaultMap2 + dataFileProperties2 + [seqTrack: seqTrack])
         return seqTrack
     }
@@ -2006,7 +2006,7 @@ class DomainFactory {
      */
     @Deprecated
     private static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName,
-                                             String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED,
+                                             String roddyName = null, SequencingReadType libraryLayout = SequencingReadType.PAIRED,
                                              boolean singleCell = false, boolean hasAntibodyTarget = false) {
         findOrCreateDomainObject(SeqType, [:], [
                 name             : seqTypeNames.seqTypeName,
@@ -2019,11 +2019,11 @@ class DomainFactory {
         ]).refresh()
     }
 
-    static SeqType createWholeGenomeSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
+    static SeqType createWholeGenomeSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
         createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS', libraryLayout)
     }
 
-    static SeqType createExomeSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
+    static SeqType createExomeSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
         createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout)
     }
 
@@ -2035,7 +2035,7 @@ class DomainFactory {
         createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
     }
 
-    static SeqType createChipSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
+    static SeqType createChipSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
         createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout, false, true)
     }
 
@@ -2044,7 +2044,7 @@ class DomainFactory {
     }
 
     static SeqType createRnaSingleSeqType() {
-        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", LibraryLayout.SINGLE)
+        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", SequencingReadType.SINGLE)
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
@@ -2328,7 +2328,7 @@ class DomainFactory {
         createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
-    static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, LibraryLayout libraryName = null) {
+    static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, SequencingReadType libraryName = null) {
         bamFile.mergingWorkPackage.seqType = seqType
         if (seqType.isWgbs()) {
             bamFile.mergingWorkPackage.libraryPreparationKit = null
@@ -2551,7 +2551,7 @@ class DomainFactory {
                 seqTypeName            : "seqTypeName${counter++}",
                 seqTypeDisplayName     : "seqTypeDisplayName${counter}",
                 dirName                : "dirName${counter++}",
-                libraryLayout          : LibraryLayout.PAIRED,
+                libraryLayout          : SequencingReadType.PAIRED,
                 sampleTypeName         : "sample-type-name${counter}",
                 pid                    : "pid${counter++}",
                 mockPid                : "mockPid${counter++}",

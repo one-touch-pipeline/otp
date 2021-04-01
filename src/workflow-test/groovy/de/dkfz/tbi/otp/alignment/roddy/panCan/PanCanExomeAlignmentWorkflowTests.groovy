@@ -30,7 +30,7 @@ class PanCanExomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {
     SeqType findSeqType() {
         return CollectionUtils.exactlyOneElement(SeqType.findAllWhere(
                 name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
         ))
     }
 }

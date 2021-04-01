@@ -25,8 +25,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 
 trait RoddyRnaFactory implements IsAlignment, IsRoddy {
 
@@ -42,7 +42,7 @@ trait RoddyRnaFactory implements IsAlignment, IsRoddy {
                 displayName  : 'RNA',
                 dirName      : 'rna_sequencing',
                 roddyName    : 'RNA',
-                libraryLayout: LibraryLayout.PAIRED,
+                libraryLayout: SequencingReadType.PAIRED,
                 singleCell   : false,
         ]
     }

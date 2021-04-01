@@ -80,7 +80,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
 
         seqType = DomainFactory.createSeqType(
                         name: "seq-type",
-                        libraryLayout: LibraryLayout.PAIRED,
+                        libraryLayout: SequencingReadType.PAIRED,
                         dirName: "seq-type-dir"
                         )
         assertNotNull(seqType.save([flush: true]))

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component
@@ -53,9 +53,9 @@ class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
         cValues.add("ALIGNMENT_DIR:${roddyBamFile.workDirectory}")
         cValues.add("outputBaseDirectory:${roddyBamFile.workDirectory}")
 
-        if (roddyBamFile.seqType.libraryLayout == LibraryLayout.SINGLE) {
+        if (roddyBamFile.seqType.libraryLayout == SequencingReadType.SINGLE) {
             cValues.add("useSingleEndProcessing:true")
-        } else if (roddyBamFile.seqType.libraryLayout == LibraryLayout.PAIRED) {
+        } else if (roddyBamFile.seqType.libraryLayout == SequencingReadType.PAIRED) {
             cValues.add("useSingleEndProcessing:false")
         }
 

@@ -367,7 +367,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         TestData testData = new TestData()
         testData.createObjects()
 
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.MATE_PAIR)
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType(SequencingReadType.MATE_PAIR)
 
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
         seqTrack.save(flush: true)

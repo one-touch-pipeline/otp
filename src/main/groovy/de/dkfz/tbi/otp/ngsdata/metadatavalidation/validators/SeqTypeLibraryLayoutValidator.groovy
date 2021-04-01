@@ -76,7 +76,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             String baseMaterial = it.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
 
-            LibraryLayout libraryLayout = LibraryLayout.findByName(it.getValue(SEQUENCING_READ_TYPE.name()))
+            SequencingReadType libraryLayout = SequencingReadType.findByName(it.getValue(SEQUENCING_READ_TYPE.name()))
 
             if (seqTypeName &&
                     libraryLayout &&

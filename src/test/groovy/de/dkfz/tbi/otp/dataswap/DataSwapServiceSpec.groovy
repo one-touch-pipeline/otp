@@ -620,7 +620,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         final String newDataFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType([libraryLayout: LibraryLayout.PAIRED])])
+        final SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType([libraryLayout: SequencingReadType.PAIRED])])
         DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
         dataFile.fileType.vbpPath = "/sequence/"
         dataFile.mateNumber = null
