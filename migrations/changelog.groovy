@@ -543,4 +543,12 @@ databaseChangeLog = {
     changeSet(author: "", id: "otp-661") {
         sqlFile(path: 'changelogs/2021/otp-661.sql')
     }
+
+    include file: 'changelogs/2021/otp-919-1-new-dta-data-structure.groovy'
+
+    changeSet(author: "gabkol", id: "otp-919-2-dta-data-migration") {
+        sqlFile(path: 'changelogs/2021/otp-919-2-dta-data-migration.sql')
+    }
+
+    include file: 'changelogs/2021/otp-919-3-dta-delete-old-structure.groovy'
 }

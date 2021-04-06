@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
+package de.dkfz.tbi.otp.project
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
@@ -40,8 +39,8 @@ import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.project.dta.AddTransferCommand
+import de.dkfz.tbi.otp.project.dta.DataTransfer
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -76,9 +75,6 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
                             }
                         }
                 ]),
-                springSecurityService : Mock(SpringSecurityService) {
-                    _ * getCurrentUser() >> getUser(ADMIN)
-                },
         )
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
@@ -90,31 +86,27 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         configService.clean()
     }
 
-    void "getAllProjectInfosSortedByDateDescAndGroupedByDta, properly groups and sorts projectInfos"() {
+    void "getAllProjectInfosSortedByDateDesc, properly sorts projectInfos"() {
         given:
         setupData()
         Project project = createProject()
         List<ProjectInfo> projectInfos = [
-                createProjectInfo(project: project, peerInstitution: null),
-                createProjectInfo(project: project, peerInstitution: "peerA", dateCreated: new Date(2)),
-                createProjectInfo(project: project, peerInstitution: "peerB", dateCreated: new Date(1)),
+                createProjectInfo(project: project),
+                createProjectInfo(project: project, dateCreated: new Date(2)),
+                createProjectInfo(project: project, dateCreated: new Date(1)),
         ]
         project.projectInfos = projectInfos as Set<ProjectInfo>
         project.save(flush: true)
 
-        Map<String, List<ProjectInfo>> expected = [
-                "Dta": [projectInfos[2], projectInfos[1]],
-                "NonDta": [projectInfos[0]],
-        ]
-        Map<String, List<ProjectInfo>> result
+        List<ProjectInfo> expected = [projectInfos[2], projectInfos[1], projectInfos[0]]
+        List<ProjectInfo> result = []
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = projectInfoService.getAllProjectInfosSortedByDateDescAndGroupedByDta(project)
+            result = projectInfoService.getAllProjectInfosSortedByDateDesc(project)
         }
 
         then:
-
         TestCase.assertContainSame(result, expected)
     }
 
@@ -221,12 +213,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         projectInfo.refresh()
         projectInfo.project == project
         projectInfo.fileName == cmd.projectInfoFile.originalFilename
-        projectInfo.dtaId == cmd.dtaId
-        projectInfo.peerInstitution == cmd.peerInstitution
-        projectInfo.legalBasis == cmd.legalBasis
-        projectInfo.validityDate == cmd.validityDate
         projectInfo.comment == cmd.comment
-        projectInfo.transfers == [] as Set<DataTransfer>
     }
 
     @Unroll
@@ -246,12 +233,6 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         where:
         property          | value
-        'validityDate'    | null
-        'dtaId'           | null
-        'dtaId'           | ''
-        'legalBasis'      | null
-        'peerInstitution' | null
-        'peerInstitution' | ''
         'comment'         | null
         'comment'         | ''
     }
@@ -308,18 +289,6 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         then:
         projectInfoContent == file.bytes
         project.projectInfos.size() == 1
-
-        //TODO: otp-163
-        /*
-        when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.deleteProjectInfo(new ProjectInfoCommand(projectInfo: CollectionUtils.exactlyOneElement(project.projectInfos)))
-        }
-
-        then:
-        project.projectInfos.size() == 0
-        ProjectInfo.count == 0
-        */
     }
 
     @Ignore("TODO: otp-163, cannot test this until we have a postgres DB instead of H2") // TODO otp-163
@@ -370,66 +339,6 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         file.bytes == content
     }
 
-    void "addTransferToProjectInfo, creates DataTransfer and links it to ProjectInfo"() {
-        given:
-        setupData()
-        DataTransfer dataTransferA
-        DataTransfer dataTransferB
-        ProjectInfo projectInfo = createProjectInfo()
-
-        AddTransferCommand transferCmdA = createAddTransferCommand(parentDocument: projectInfo)
-        AddTransferCommand transferCmdB = createAddTransferCommand(parentDocument: projectInfo)
-
-        when: "adding a first transfer"
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dataTransferA = projectInfoService.addTransferToProjectInfo(transferCmdA)
-        }
-        projectInfo.refresh()
-
-        then:
-        projectInfo.transfers == [dataTransferA] as Set<DataTransfer>
-        dataTransferA.projectInfo == projectInfo
-
-        when: "adding a second transfer"
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            dataTransferB = projectInfoService.addTransferToProjectInfo(transferCmdB)
-        }
-        projectInfo.refresh()
-
-        then:
-        projectInfo.transfers == [dataTransferA, dataTransferB] as Set<DataTransfer>
-        dataTransferB.projectInfo == projectInfo
-    }
-
-    void "markTransferAsCompleted, completes uncompleted transfer"() {
-        given:
-        setupData()
-        DataTransfer dataTransfer = createDataTransfer(completionDate: null)
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfoService.markTransferAsCompleted(dataTransfer)
-        }
-
-        then:
-        dataTransfer.completionDate != null
-    }
-
-    void "markTransferAsCompleted, fails when completing an already completed transfer"() {
-        given:
-        setupData()
-        DataTransfer dataTransfer = createDataTransfer(completionDate: new Date())
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfoService.markTransferAsCompleted(dataTransfer)
-        }
-
-        then:
-        AssertionError e = thrown(AssertionError)
-        e.message.contains("DataTransfer already completed")
-    }
-
     void "updateProjectInfoComment, updates comment"() {
         given:
         setupData()
@@ -444,29 +353,11 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         projectInfo.comment == "updated"
     }
 
-    void "updateDataTransferComment, updates comment"() {
-        given:
-        setupData()
-        DataTransfer dataTransfer = createDataTransfer(comment: "outdated")
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            projectInfoService.updateDataTransferComment(dataTransfer, "updated")
-        }
-
-        then:
-        dataTransfer.comment == "updated"
-    }
-
     AddProjectInfoCommand createAddProjectInfoCommand(Map properties = [:]) {
         return new AddProjectInfoCommand([
                 projectSelectionService: [getRequestedProject: { -> }] as ProjectSelectionService,
                 projectInfoFile        : createMultipartFile(),
                 comment                : "comment_${nextId}",
-                dtaId                  : "dtaId_${nextId}",
-                legalBasis             : ProjectInfo.LegalBasis.DTA,
-                peerInstitution        : "peerInstitution_${nextId}",
-                validityDate           : new Date(),
         ] + properties)
     }
 

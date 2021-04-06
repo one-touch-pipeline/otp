@@ -21,7 +21,7 @@
  */
 
 
-import de.dkfz.tbi.otp.administration.ProjectInfo
+import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project

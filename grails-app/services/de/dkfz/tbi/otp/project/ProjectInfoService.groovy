@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,18 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
+package de.dkfz.tbi.otp.project
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.security.User
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
@@ -39,7 +35,6 @@ import java.nio.file.attribute.PosixFilePermission
 @Transactional
 class ProjectInfoService {
 
-    SpringSecurityService springSecurityService
     ExecutionHelperService executionHelperService
     FileSystemService fileSystemService
     FileService fileService
@@ -50,8 +45,8 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, List<ProjectInfo>> getAllProjectInfosSortedByDateDescAndGroupedByDta(Project project) {
-        return project.projectInfos.sort(SORT_DATE_CREATED_DESC).groupBy { it.dta ? "Dta" : "NonDta" }
+    List<ProjectInfo> getAllProjectInfosSortedByDateDesc(Project project) {
+        return project.projectInfos.sort(SORT_DATE_CREATED_DESC)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -63,13 +58,6 @@ class ProjectInfoService {
                 fileName: cmd.projectInfoFile.originalFilename,
                 comment : cmd.comment,
         )
-        // if this is a DTA document, see also ProjectInfo.isDta()
-        if (cmd.peerInstitution) {
-            projectInfo.dtaId = cmd.dtaId
-            projectInfo.legalBasis = cmd.legalBasis
-            projectInfo.peerInstitution = cmd.peerInstitution
-            projectInfo.validityDate = cmd.validityDate
-        }
 
         project.addToProjectInfos(projectInfo)
         project.save(flush: true)
@@ -133,40 +121,8 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    DataTransfer addTransferToProjectInfo(AddTransferCommand cmd) {
-        DataTransfer xfer = new DataTransfer(
-                projectInfo   : cmd.parentDocument,
-                requester     : cmd.requester,
-                ticketID      : cmd.ticketID,
-                performingUser: springSecurityService.currentUser as User,
-                direction     : cmd.direction,
-                transferMode  : cmd.transferMode,
-                peerPerson    : cmd.peerPerson,
-                peerAccount   : cmd.peerAccount,
-                transferDate  : cmd.transferDate,
-                completionDate: cmd.completionDate,
-                comment       : cmd.comment,
-        )
-        xfer.save(flush: true)
-        return xfer
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void markTransferAsCompleted(DataTransfer xfer) {
-        assert !xfer.completionDate: "DataTransfer already completed"
-        xfer.completionDate = new Date()
-        xfer.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProjectInfo updateProjectInfoComment(ProjectInfo projectInfo, String comment) {
         projectInfo.comment = comment
         projectInfo.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    DataTransfer updateDataTransferComment(DataTransfer dataTransfer, String comment) {
-        dataTransfer.comment = comment
-        dataTransfer.save(flush: true)
     }
 }

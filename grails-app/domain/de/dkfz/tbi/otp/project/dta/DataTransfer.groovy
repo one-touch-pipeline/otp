@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
+package de.dkfz.tbi.otp.project.dta
 
 import groovy.transform.TupleConstructor
 
@@ -59,7 +59,9 @@ class DataTransfer implements Entity {
     /**
      * The DTA document authorising this transfer.
      */
-    ProjectInfo projectInfo
+    DataTransferAgreement dataTransferAgreement
+
+    Set<DataTransferDocument> dataTransferDocuments
 
     /** Person asking for the data to be moved */
     String requester
@@ -82,8 +84,16 @@ class DataTransfer implements Entity {
 
     String comment
 
+    static hasMany = [
+            dataTransferDocuments: DataTransferDocument,
+    ]
+
     static belongsTo = [
-            projectInfo: ProjectInfo,
+            dataTransferAgreement: DataTransferAgreement,
+    ]
+
+    static mappedBy = [
+            dataTransferDocuments: "dataTransfer",
     ]
 
     @Override
@@ -104,14 +114,14 @@ class DataTransfer implements Entity {
                 "\nNotes: ${comment ?: "n/a"}"
     }
 
-    static constraints = {
+    static Closure constraints = {
         completionDate nullable: true
         peerAccount blank: false, nullable: true
         ticketID blank: false, nullable: true
         comment blank: false, nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
         comment type: "text"
     }
 

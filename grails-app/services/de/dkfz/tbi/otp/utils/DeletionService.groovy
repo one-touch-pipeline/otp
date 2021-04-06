@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FileNotFoundException
-import de.dkfz.tbi.otp.administration.ProjectInfo
+import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 
 import java.nio.file.Path
@@ -401,7 +402,7 @@ class DeletionService {
         }
     }
 
-    private void deleteProjectDependencies(Project project) {
+    void deleteProjectDependencies(Project project) {
         // Deletes the connection of the project to the reference genome
         ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete(flush: true)
 
@@ -421,6 +422,8 @@ class DeletionService {
         UserProjectRole.findAllByProject(project)*.delete(flush: true)
         QcThreshold.findAllByProject(project)*.delete(flush: true)
         ProjectInfo.findAllByProject(project)*.delete(flush: true)
+
+        DataTransferAgreement.findAllByProject(project)*.delete(flush: true)
     }
 
     private void deleteProcess(Process process) {

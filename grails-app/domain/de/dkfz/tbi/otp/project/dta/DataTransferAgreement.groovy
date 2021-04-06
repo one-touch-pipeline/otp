@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
+package de.dkfz.tbi.otp.project.dta
 
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.project.ProjectInfoService
 import de.dkfz.tbi.otp.utils.Entity
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import de.dkfz.tbi.otp.project.Project
 
-class ProjectInfo implements Entity {
+class DataTransferAgreement implements Entity {
 
     /**
      * Types of legal basis on which data transfers can be executed.
@@ -48,54 +46,51 @@ class ProjectInfo implements Entity {
         UNKNOWN,
     }
 
-    /** filename of the document represented by this instance */
-    String fileName
-
     Project project
+
     String comment
 
-    /** if this document is a data transfer, under what label is it filed? */
+    /** Under what label is it filed? */
     String dtaId
 
-    /** if this document is a data transfer, with which external party are we transferring? */
+    /** With which external party are we transferring? */
     String peerInstitution
 
-    /** if this document is a data transfer, which legal justification does it have? */
+    /** Legal justification */
     LegalBasis legalBasis
 
-    /** if this document is a data transfer, until when does the usage-right exist? */
+    /** Until when does the usage-right exist? */
     Date validityDate
+
+    Set<DataTransferAgreementDocument> dataTransferAgreementDocuments
 
     Set<DataTransfer> transfers
 
     static hasMany = [
+            dataTransferAgreementDocuments: DataTransferAgreementDocument,
             transfers: DataTransfer,
     ]
 
-    static constraints = {
-        fileName blank: false, unique: 'project', shared: "pathComponent"
-        dtaId blank: false, nullable: true
-        peerInstitution blank: false, nullable: true
-        legalBasis nullable: true
-        validityDate nullable: true
-        comment blank: false, nullable: true
-    }
+    static belongsTo = [
+            project: Project,
+    ]
 
-    static mapping = {
-        fileName type: "text"
+    static Closure mapping = {
         comment type: "text"
+        dataTransferAgreementDocuments lazy: false
         transfers lazy: false
     }
 
-    String getPath() {
-        return "${project.projectDirectory}/${ProjectService.PROJECT_INFO}/${fileName}"
-    }
+    static mappedBy = [
+            dataTransferAgreementDocuments: "dataTransferAgreement",
+            transfers: "dataTransferAgreement",
+    ]
 
-    /** is this document a Data Transfer Agreement? */
-    boolean isDta() {
-        // DTA's always need an institute to/from which to transfer data.
-        // NOTE: keep this in sync with the Service: ProjectInfoService.createProjectInfoAndUploadFile
-        return peerInstitution != null
+    static Closure constraints = {
+        comment blank: false, nullable: true
+        dtaId blank: false, nullable: true
+        peerInstitution blank: false
+        validityDate nullable: true
     }
 
     List<DataTransfer> getTransfersSortedByDateCreatedDesc() {
@@ -104,21 +99,16 @@ class ProjectInfo implements Entity {
 
     @Override
     String toString() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd" , Locale.ENGLISH)
-
-        String result = "ProjectInfo ${id}, file: ${path}"
-        if (peerInstitution) {
-            result += [
-                    "dtaId: ${dtaId ?: '-'}",
-                    "peerInstitution: ${peerInstitution}",
-                    "legalBasis: ${legalBasis}",
-                    "validityDate: ${validityDate ? dateFormat.format(validityDate) : '-'}",
-                    "\nComment: ${comment}",
-            ].join(" | ")
-        }
-        transfers.each {
-            result += it.toString()
-        }
-        return result
+        return "DataTransferAgreement(" +
+                "id=${id}" +
+                ", project=${project}" +
+                ", comment='${comment}'" +
+                ", dtaId='${dtaId}'" +
+                ", peerInstitution='${peerInstitution}'" +
+                ", legalBasis=${legalBasis}" +
+                ", validityDate=${validityDate}" +
+                ", dataTransferAgreementDocuments=${dataTransferAgreementDocuments}" +
+                ", transfers=${transfers}" +
+                ")"
     }
 }

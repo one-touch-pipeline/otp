@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName

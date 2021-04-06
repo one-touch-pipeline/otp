@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.project
 
 import de.dkfz.tbi.otp.CommentableWithProject
-import de.dkfz.tbi.otp.administration.ProjectInfo
+import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.*
@@ -95,6 +95,8 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     Set<ProjectInfo> projectInfos
 
+    Set<DataTransferAgreement> dataTransferAgreements
+
     ProjectGroup projectGroup
 
     String unixGroup
@@ -112,6 +114,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     static hasMany = [
             projectInfos : ProjectInfo,
+            dataTransferAgreements: DataTransferAgreement,
             keywords     : Keyword,
             projectFields: AbstractFieldValue,
     ]
@@ -123,6 +126,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     static mappedBy = [
             projectInfos: "project",
+            dataTransferAgreements: "project",
     ]
 
     static constraints = {

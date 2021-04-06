@@ -71,6 +71,8 @@
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message
                                                     code="projectOverview.projectInfos" /></g:link></li>
+                                            <li class="allGranted"><g:link controller="dataTransfer" action="index"><g:message
+                                                    code="dataTransfer.menu.title" /></g:link></li>
                                         </sec:ifAnyGranted>
                                         <sec:ifAnyGranted roles="ROLE_TEST_PI">
                                             <li class="testGranted"><g:link controller="projectRequest" action="index"><g:message

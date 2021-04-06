@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.project.dta
 
-/*
-*= require /webjars/jquery-ui/1.10.4/themes/base/jquery-ui.css
-*= require /webjars/bootstrap/4.6.0/css/bootstrap.css
-*= require /webjars/bootstrap-icons/1.4.0/font/bootstrap-icons.css
-*= require /webjars/datatables/1.10.23/css/dataTables.bootstrap4.css
-*= require /webjars/datatables-fixedcolumns/3.0.2/css/dataTables.fixedColumns.css
-*= require /webjars/datatables-fixedheader/2.1.2/css/dataTables.fixedHeader.css
-*= require /webjars/datatables-buttons/1.3.1-1/css/buttons.bootstrap4.css
-*= require /webjars/datatables.net-scroller-bs4/css/scroller.bootstrap4.css
-*= require /webjars/select2/4.0.12/css/select2.css
-*= require /webjars/ttskch__select2-bootstrap4-theme/1.4.0/dist/select2-bootstrap4.css
+import de.dkfz.tbi.otp.utils.Entity
 
-*= require otp.less
-*= require toaster.less
-*= require ../bootstrapped.less
-*/
+class DataTransferAgreementDocument implements Entity {
+
+    String fileName
+
+    DataTransferAgreement dataTransferAgreement
+
+    static belongsTo = [
+            dataTransferAgreement: DataTransferAgreement,
+    ]
+
+    static Closure constraints = {
+        fileName blank: false, unique: "dataTransferAgreement"
+    }
+
+    static Closure mapping = {
+        fileName type: "text"
+    }
+
+    @Override
+    String toString() {
+        return "DataTransferAgreementDocument(" +
+                "id=${id}" +
+                ", fileName='${fileName}'" +
+                ")"
+    }
+}

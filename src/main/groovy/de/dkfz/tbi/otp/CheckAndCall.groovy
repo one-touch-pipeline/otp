@@ -70,7 +70,7 @@ trait CheckAndCall {
             }
         }
         render data as JSON
-        return data
+        return data as JSON
     }
 
     def <T> T checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure<T> method) {

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.administration.ProjectInfo
+import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.project.Project
 
 /**

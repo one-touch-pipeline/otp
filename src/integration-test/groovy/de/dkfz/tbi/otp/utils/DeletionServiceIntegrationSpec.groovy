@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
@@ -39,10 +40,14 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.dta.DataTransfer
+import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
+import de.dkfz.tbi.otp.project.dta.DataTransferAgreementDocument
+import de.dkfz.tbi.otp.project.dta.DataTransferDocument
 
 @Rollback
 @Integration
-class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy {
+class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DocumentFactory {
 
     DeletionService deletionService
 
@@ -261,6 +266,40 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
         then:
         ConfigPerProjectAndSeqType.count() == 0
+        Project.count() == 0
+    }
+
+    void "deleteProject with dataTransferAgreement and dataTransfer"() {
+        given:
+        setupData()
+        Project project = createProject()
+
+        DataTransferAgreement dataTransferAgreement = createDataTransferAgreement([
+                project: project,
+        ])
+
+        dataTransferAgreement.addToDataTransferAgreementDocuments(createDataTransferAgreementDocument([
+                dataTransferAgreement: dataTransferAgreement,
+        ]))
+
+        DataTransfer dataTransfer = createDataTransfer([
+                dataTransferAgreement: dataTransferAgreement,
+        ])
+
+        dataTransferAgreement.addToTransfers(dataTransfer)
+
+        dataTransfer.addToDataTransferDocuments(createDataTransferDocument([
+                dataTransfer: dataTransfer,
+        ]))
+
+        when:
+        deletionService.deleteProject(project)
+
+        then:
+        DataTransferDocument.count() == 0
+        DataTransfer.count() == 0
+        DataTransferAgreementDocument.count() == 0
+        DataTransferAgreement.count() == 0
         Project.count() == 0
     }
 
