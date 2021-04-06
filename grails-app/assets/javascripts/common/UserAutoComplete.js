@@ -31,19 +31,38 @@ $.ui.autocomplete.prototype._renderMenu = function (ul, items) {
         self._renderItemData(ul, ul.find("table"), item);
     });
 };
+
 $.ui.autocomplete.prototype._renderItemData = function (ul, table, item) {
     return this._renderItem(table, item).data("ui-autocomplete-item", item);
 };
+
 $.ui.autocomplete.prototype._renderItem = function (table, item) {
+    let autocompleteContent = "<td class='ui-state-disabled'>" + item.placeholder + "</td>";
+
+    if (item.user) {
+        autocompleteContent = "<td style='display: none'><a>"+item.value+"</a></td>"+   // the a-tag allows the select callback without destroying the table and serves as a search-column
+            "<td>"+(item.user.realName || '-')+"</td>"+
+            "<td>"+(item.user.username || '-')+"</td>"+
+            "<td>"+(item.user.email || '-')+"</td>"+
+            "<td>"+(item.user.department || '-')+"</td>"
+    }
+
     return $("<tr class='ui-menu-item'></tr>")
-    // the a-tag allows the select callback without destroying the table and serves as a search-column
-        .append("<td style='display: none'><a>"+item.value+"</a></td>"+
-            "<td>"+(item.realName || '-')+"</td>"+
-            "<td>"+(item.username || '-')+"</td>"+
-            "<td>"+(item.email || '-')+"</td>"+
-            "<td>"+(item.department || '-')+"</td>")
+        .append(autocompleteContent)
         .appendTo(table);
 };
+
+const renderPlaceholder = function (searchElement, placeholderContent) {
+    searchElement.autocomplete({
+        minLength: 1,
+        delay: 0,
+        source: [{
+            value: searchElement.val(),
+            placeholder: placeholderContent
+        }],
+    });
+    searchElement.data("uiAutocomplete").search(searchElement.val());
+}
 
 $(function () {
     var failure = function(title, message) {
@@ -56,56 +75,66 @@ $(function () {
 
     $(".user-auto-complete").on("input", "input", function (e) {
         "use strict";
-        var searchElement = $(e.target);
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'ldap',
-                action: 'getUserSearchSuggestions',
-                parameters: {
-                    "searchString": searchElement.val()
-                }
-            }),
-            dataType: 'json',
-            success: function (data) {
-                var suggestionMap = [];
-                var focused = "";
-                var result = data;
-                for (var i = 0; i < result.length; i++) {
-                    suggestionMap.push({
-                        // autocomplete completes with the 'value' column
-                        'value'      : [result[i].username, result[i].realName, result[i].mail].join(";"),
-                        'username'   : result[i].username,
-                        'realName'   : result[i].realName,
-                        'email'      : result[i].mail,
-                        'department' : result[i].department
-                    });
-                }
-                searchElement.autocomplete({
-                    minLength: 3,
-                    delay: 0,
-                    source: suggestionMap,
+        const searchElement = $(e.target);
+        const searchLength = searchElement.val().length;
 
-                    select: function (event, ui) {
-                        event.stopPropagation();
-                        if (ui.item !== undefined) {
-                            $(this).val(ui.item.username);
-                        } else {
-                            $(this).val(focused); // needed to prevent missing focus on first selected item
-                        }
-                        return false;
-                    },
-                    focus: function (event, ui) {
-                        if (ui.item !== undefined) {
-                            focused = ui.item.username;
-                        }
+        if (searchLength < 3) {
+            renderPlaceholder(searchElement, "Please enter " + (3 - searchLength) + " more letter" + (3 - searchLength > 1 ? "s" : "") + "...");
+        } else {
+            renderPlaceholder(searchElement, "Loading...");
+
+            $.ajax({
+                type: 'GET',
+                url: $.otp.createLink({
+                    controller: 'ldap',
+                    action: 'getUserSearchSuggestions',
+                    parameters: {
+                        "searchString": searchElement.val()
                     }
-                });
-                searchElement.data("uiAutocomplete").search(searchElement.val());
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data.", "Reason: " + errorThrown)
-            }
-        });
+                }),
+                dataType: 'json',
+                success: function (result) {
+                    var suggestionMap = [];
+                    var focused = "";
+
+                    for (var i = 0; i < result.length; i++) {
+                        suggestionMap.push({
+                            // autocomplete completes with the 'value' column
+                            value: [result[i].username, result[i].realName, result[i].mail].join(";"),
+                            user: {
+                                username: result[i].username,
+                                realName: result[i].realName,
+                                email: result[i].mail,
+                                department: result[i].department
+                            }
+                        });
+                    }
+                    searchElement.autocomplete({
+                        minLength: 3,
+                        delay: 0,
+                        source: suggestionMap,
+
+                        select: function (event, ui) {
+                            event.stopPropagation();
+                            if (ui.item && ui.item.user) {
+                                $(this).val(ui.item.user.username);
+                            } else {
+                                $(this).val(focused); // needed to prevent missing focus on first selected item
+                            }
+                            return false;
+                        },
+                        focus: function (event, ui) {
+                            if (ui.item && ui.item.user) {
+                                focused = ui.item.user.username;
+                            }
+                        }
+                    });
+                    searchElement.data("uiAutocomplete").search(searchElement.val());
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    failure(textStatus + " occurred while processing the data.", "Reason: " + errorThrown)
+                }
+            });
+        }
     });
 });

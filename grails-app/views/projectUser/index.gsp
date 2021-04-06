@@ -30,7 +30,7 @@
     <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
-<div class="body">
+<div class="container-fluid otp-main-container">
     <g:set var="sharesUnixGroup" value="${projectsOfUnixGroup.size() > 1}"/>
     <g:set var="projectsWithSharedUnixGroupListing" value="${projectsOfUnixGroup.sort { it.name }.collect { "\n  - " + it }.join("")}"/>
     <g:set var="projectsWithSharedUnixGroupListingHtml" value="${projectsOfUnixGroup.sort { it.name }.collect { "- " + it + "<br />" }.join("")}"/>
@@ -149,8 +149,8 @@
                 </div>
             </sec:access>
             <div class="submit-container">
-                <div>
-                    <input class="btn btn-primary" id="add-button" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
+                <div style="padding-right: 10px;">
+                    <input type="submit" class="btn btn-primary" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
                 </div>
                 <div>
                     <otp:annotation type="info" variant="inline"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
