@@ -27,6 +27,9 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.ldap.core.AttributesMapper
 import org.springframework.ldap.core.LdapTemplate
 import org.springframework.ldap.core.support.LdapContextSource
+import org.springframework.ldap.filter.AndFilter
+import org.springframework.ldap.filter.EqualsFilter
+import org.springframework.ldap.filter.OrFilter
 import org.springframework.ldap.query.ContainerCriteria
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -74,6 +77,28 @@ class LdapService implements InitializingBean {
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                         .and(configService.ldapSearchAttribute).is(username),
                 new LdapUserDetailsAttributesMapper(ldapService: this))[0]
+    }
+
+    /**
+     * Get a list of LdapUserDetails for every otp user who is given.
+     *
+     * @param otpUsers, for those the ldap details are wanted
+     * @return List of LdapUserDetails for the given users
+     */
+    List<LdapUserDetails> getLdapUserDetailsByUserList(List<User> otpUsers) {
+        OrFilter innerFilter = new OrFilter()
+
+        otpUsers.each { User user ->
+            innerFilter.or(new EqualsFilter(configService.ldapSearchAttribute, user?.username))
+        }
+
+        AndFilter outerFilter = new AndFilter()
+        outerFilter.and(new EqualsFilter(LdapKey.OBJECT_CATEGORY, LdapKey.USER)).and(innerFilter)
+
+        return ldapTemplate.search(
+                "",
+                outerFilter.encode(),
+                new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
     List<LdapUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {

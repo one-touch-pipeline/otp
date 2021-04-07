@@ -49,6 +49,7 @@ abstract class ScheduledJob {
             ScheduleUsersForDeactivationJob,
             UnknownLdapUsersJob,
             GenerateAndSendKPIsForNBI,
+            FetchUserDataFromLdapJob,
     ]
 
     @Autowired
