@@ -79,7 +79,11 @@ $(function () {
 
                 },
                 error: function (error) {
-                    $.otp.toaster.showErrorToast('Error while processing', error.responseJSON?.message);
+                    if (error && error.responseJSON && error.responseJSON.message) {
+                        $.otp.toaster.showErrorToast('Error while processing', error.responseJSON.message);
+                    } else {
+                        $.otp.toaster.showErrorToast('Error while processing', "Unknown error");
+                    }
                 }
             });
         } else {
