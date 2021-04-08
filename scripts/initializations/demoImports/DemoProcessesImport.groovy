@@ -22,12 +22,16 @@
 
 package initializations.demoImports
 
+import org.joda.time.DateTime
+
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 JobExecutionPlan jobExecutionPlan1 = new JobExecutionPlan(
         name: 'Test Plan',
@@ -62,3 +66,20 @@ new ProcessingStepUpdate(
         processingStep: processingStep1,
         version: 0,
 ).save(flush: true)
+
+Realm realm = Realm.findAll().first()
+
+new ClusterJob([
+        validated: true,
+        realm: realm,
+        clusterJobId: "oldJob-" + processingStep1.id,
+        clusterJobName: "Cluster Job " + processingStep1.id,
+        jobClass: "test",
+        queued: new DateTime(),
+        started: new DateTime(),
+        ended: new DateTime(),
+        userName: "Test User",
+        checkStatus: ClusterJob.CheckStatus.CREATED,
+        oldSystem: true,
+        processingStep: processingStep1,
+]).save(flush: true)

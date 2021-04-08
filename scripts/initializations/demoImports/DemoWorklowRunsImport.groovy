@@ -26,13 +26,17 @@
 
 package initializations.demoImports
 
+import org.joda.time.DateTime
+
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-Project project1 = Project.findByName('testProject1')
+Project project1 = Project.findByName('Example project 1')
 
 ProcessingPriority normalPriority = ProcessingPriority.findByName('NORMAL')
 ProcessingPriority fasttrackPriority = ProcessingPriority.findByName('FASTTRACK')
@@ -213,3 +217,22 @@ wr2.save(flush: true)
 
 wr3.workflowSteps = workflowSteps3
 wr3.save(flush: true)
+
+Realm realm = Realm.findAll().first()
+
+workflowSteps1.each { step ->
+        new ClusterJob([
+                validated: true,
+                realm: realm,
+                clusterJobId: "job-" + step.id,
+                clusterJobName: "Cluster Job " + step.id,
+                jobClass: "test",
+                queued: new DateTime(),
+            	started: new DateTime(),
+            	ended: new DateTime(),
+                userName: "Test User",
+                checkStatus: ClusterJob.CheckStatus.CREATED,
+                oldSystem: false,
+                workflowStep: step,
+        ]).save(flush: true)
+}
