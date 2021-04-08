@@ -59,7 +59,7 @@ class SeqTypeLibraryLayoutValidatorSpec extends Specification {
         List<String> columns = validator.getRequiredColumnTitles(context) + validator.getOptionalColumnTitles(context)
 
         then:
-        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.SEQUENCING_READ_TYPE.name(), MetaDataColumn.BASE_MATERIAL.name(), MetaDataColumn.TAGMENTATION.name()]
+        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.SEQUENCING_READ_TYPE.name(), MetaDataColumn.BASE_MATERIAL.name()]
     }
 
     void 'validate, when column(s) is/are missing, adds error(s)'() {
@@ -76,24 +76,24 @@ value1\tvalue2
         containSame(context.problems*.message, messages)
 
         where:
-        header || messages
-        "${MetaDataColumn.SEQUENCING_TYPE.name()}\tlayout" || ["Required column 'SEQUENCING_READ_TYPE' is missing."]
+        header                                                   || messages
+        "${MetaDataColumn.SEQUENCING_TYPE.name()}\tlayout"       || ["Required column 'SEQUENCING_READ_TYPE' is missing."]
         "seqtype\t${MetaDataColumn.SEQUENCING_READ_TYPE.name()}" || ["Required column 'SEQUENCING_TYPE' is missing."]
-        "seqtype\t${MetaDataColumn.BASE_MATERIAL.name()}" || ["Required column 'SEQUENCING_TYPE' is missing.", "Required column 'SEQUENCING_READ_TYPE' is missing."]
-        "seqtype\tlayout" || ["Required column 'SEQUENCING_TYPE' is missing.", "Required column 'SEQUENCING_READ_TYPE' is missing."]
+        "seqtype\t${MetaDataColumn.BASE_MATERIAL.name()}"        || ["Required column 'SEQUENCING_TYPE' is missing.", "Required column 'SEQUENCING_READ_TYPE' is missing."]
+        "seqtype\tlayout"                                        || ["Required column 'SEQUENCING_TYPE' is missing.", "Required column 'SEQUENCING_READ_TYPE' is missing."]
     }
 
     void 'validate, when combinations are in database, adds no problem'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.BASE_MATERIAL}
-SeqType1\t${LibraryLayout.SINGLE}\t
-SeqType1\t${LibraryLayout.PAIRED}\t
-SeqType2\t${LibraryLayout.SINGLE}\t
-SeqType2\t${LibraryLayout.PAIRED}\t
-SeqType2\t${LibraryLayout.PAIRED}\ttrue
-SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_RNA}
-SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_DNA}
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.BASE_MATERIAL}
+SeqType1\t${LibraryLayout.SINGLE}
+SeqType1\t${LibraryLayout.PAIRED}
+SeqType2\t${LibraryLayout.SINGLE}
+SeqType2\t${LibraryLayout.PAIRED}
+SeqType2_TAGMENTATION\t${LibraryLayout.PAIRED}
+SeqType3\t${LibraryLayout.MATE_PAIR}\t${SeqType.SINGLE_CELL_RNA}
+SeqType3\t${LibraryLayout.MATE_PAIR}\t${SeqType.SINGLE_CELL_DNA}
 """)
         SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
         SeqType seqType1ll2 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
@@ -137,12 +137,12 @@ SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_DNA}
     void 'validate, when precondition are not valid, add no problems'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.BASE_MATERIAL}
-SeqTypeUnknown\t${LibraryLayout.SINGLE}\t\twer
-SeqType1\tLibraryLayoutUnknown\t\twer
-\t${LibraryLayout.SINGLE}\t\twer
-SeqType1\t\t\twer
-SeqType1\t${LibraryLayout.SINGLE}\t\twer
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.BASE_MATERIAL}
+SeqTypeUnknown\t${LibraryLayout.SINGLE}\twer
+SeqType1\tLibraryLayoutUnknown\twer
+\t${LibraryLayout.SINGLE}\twer
+SeqType1\t\twer
+SeqType1\t${LibraryLayout.SINGLE}\twer
 """)
         SeqType seqType = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: LibraryLayout.SINGLE)
 
@@ -167,19 +167,19 @@ SeqType1\t${LibraryLayout.SINGLE}\t\twer
     void 'validate, when combinations are not in database, adds expected errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.BASE_MATERIAL}
-SeqType1\t${LibraryLayout.SINGLE}\t\twer
-SeqType1\t${LibraryLayout.PAIRED}\t\twer
-SeqType1\t${LibraryLayout.MATE_PAIR}\t\twer
-SeqType2\t${LibraryLayout.SINGLE}\t\twer
-SeqType2\t${LibraryLayout.PAIRED}\t\twer
-SeqType2\t${LibraryLayout.MATE_PAIR}\t\trt
-SeqType3\t${LibraryLayout.SINGLE}\t\tert
-SeqType3\t${LibraryLayout.PAIRED}\t\tewer
-SeqType3\t${LibraryLayout.MATE_PAIR}\t\twer
-SeqType3\t${LibraryLayout.MATE_PAIR}\ttrue\terwr
-SeqType3\t${LibraryLayout.PAIRED}\ttrue\t${SeqType.SINGLE_CELL_DNA}
-SeqType2\t${LibraryLayout.PAIRED}\t\t${SeqType.SINGLE_CELL_RNA}
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.BASE_MATERIAL}
+SeqType1\t${LibraryLayout.SINGLE}\twer
+SeqType1\t${LibraryLayout.PAIRED}\twer
+SeqType1\t${LibraryLayout.MATE_PAIR}\twer
+SeqType2\t${LibraryLayout.SINGLE}\twer
+SeqType2\t${LibraryLayout.PAIRED}\twer
+SeqType2\t${LibraryLayout.MATE_PAIR}\trt
+SeqType3\t${LibraryLayout.SINGLE}\tert
+SeqType3\t${LibraryLayout.PAIRED}\tewer
+SeqType3\t${LibraryLayout.MATE_PAIR}\twer
+SeqType3_TAGMENTATION\t${LibraryLayout.MATE_PAIR}\terwr
+SeqType3_TAGMENTATION\t${LibraryLayout.PAIRED}\t${SeqType.SINGLE_CELL_DNA}
+SeqType2\t${LibraryLayout.PAIRED}\t${SeqType.SINGLE_CELL_RNA}
 """)
 
         SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: LibraryLayout.SINGLE)

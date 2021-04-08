@@ -469,13 +469,11 @@ class MetadataImportService {
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
-            String tagmentationRaw = uniqueColumnValue(rows, TAGMENTATION)?.toLowerCase()
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
             LibraryLayout libLayout = LibraryLayout.findByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
 
-            SeqType seqType = seqTypeService.findByNameOrImportAlias(
-                    seqTypeMaybeTagmentationName(seqTypeRaw, tagmentationRaw),
+            SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeRaw,
                     [libraryLayout: libLayout, singleCell: isSingleCell],
             )
             String pipelineVersionString = uniqueColumnValue(rows, FASTQ_GENERATOR) ?: 'unknown'
@@ -662,9 +660,7 @@ class MetadataImportService {
     }
 
     static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
-        String tagmentation = tuple.getValue(TAGMENTATION.name())?.toLowerCase()
-        String seqType = tuple.getValue(SEQUENCING_TYPE.name())
-        return seqTypeMaybeTagmentationName(seqType, tagmentation)
+        return tuple.getValue(SEQUENCING_TYPE.name()) + ''
     }
 
     static Project getProjectFromMetadata(ValueTuple tuple) {
@@ -693,12 +689,6 @@ class MetadataImportService {
                 getSeqTypeNameFromMetadata(tuple),
                 [libraryLayout: libLayout, singleCell: isSingleCell],
         )
-    }
-
-    /** small helper to parse seqtypes and boolean-like uservalues into a proper OTP name */
-    static String seqTypeMaybeTagmentationName(String seqType, String tagmentationRawValue) {
-        boolean isTagmentation = tagmentationRawValue in ["1", "true"]
-        return seqType + (isTagmentation && !seqType.endsWith(SeqType.TAGMENTATION_SUFFIX) ? SeqType.TAGMENTATION_SUFFIX : '')
     }
 }
 

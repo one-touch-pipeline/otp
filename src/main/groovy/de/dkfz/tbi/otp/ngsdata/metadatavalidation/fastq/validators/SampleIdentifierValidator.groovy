@@ -43,7 +43,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
@@ -73,7 +72,6 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
     List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
         return [
                 BASE_MATERIAL,
-                TAGMENTATION,
                 PROJECT,
         ]*.name()
     }
@@ -126,7 +124,7 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
 
         if (sampleIdentifier) {
             return [
-                    pid: sampleIdentifier.sample.individual.pid,
+                    pid           : sampleIdentifier.sample.individual.pid,
                     fullSampleName: sampleName,
             ] as DefaultParsedSampleIdentifier
         }

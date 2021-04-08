@@ -59,7 +59,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [ANTIBODY_TARGET, ANTIBODY, TAGMENTATION, BASE_MATERIAL]*.name()
+        return [ANTIBODY_TARGET, ANTIBODY, BASE_MATERIAL]*.name()
     }
 
     @Override

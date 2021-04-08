@@ -93,35 +93,4 @@ class SeqTypeValidatorSpec extends Specification {
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("Sequencing type must not be empty.")
     }
-
-    void 'validate, when column TAGMENTATION_BASED_LIBRARY exists, adds expected error'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION}\n" +
-                        "SeqType1\t\n" +
-                        "SeqType1\ttrue\n" +
-                        "SeqType2\t\n" +
-                        "SeqType2\ttrue\n" +
-                        "SeqType2\tfalse\n")
-        SeqType seqType1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: LibraryLayout.SINGLE)
-        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: LibraryLayout.PAIRED)
-        SeqType seqType1Tag = DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: LibraryLayout.PAIRED)
-
-        when:
-        SeqTypeValidator validator = new SeqTypeValidator()
-        validator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias('SeqType1') >> seqType1
-            1 * findByNameOrImportAlias('SeqType1_TAGMENTATION') >> seqType1Tag
-            2 * findByNameOrImportAlias('SeqType2') >> seqType2
-            1 * findByNameOrImportAlias('SeqType2_TAGMENTATION') >> null
-        }
-        validator.validate(context)
-
-
-        then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
-        containSame(problem.affectedCells*.cellAddress, ['A5', 'B5'])
-        problem.message.contains("Sequencing type 'SeqType2_TAGMENTATION' is not registered in the OTP database.")
-    }
 }

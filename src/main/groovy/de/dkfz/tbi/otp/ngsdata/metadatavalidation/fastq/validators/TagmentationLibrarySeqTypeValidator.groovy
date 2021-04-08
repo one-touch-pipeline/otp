@@ -49,7 +49,7 @@ class TagmentationLibrarySeqTypeValidator extends ValueTuplesValidator<MetadataV
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [TAGMENTATION_LIBRARY, SEQUENCING_TYPE, TAGMENTATION]*.name()
+        return [TAGMENTATION_LIBRARY, SEQUENCING_TYPE]*.name()
     }
 
     @Override

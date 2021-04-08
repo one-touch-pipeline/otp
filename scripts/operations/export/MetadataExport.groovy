@@ -424,12 +424,7 @@ class MetaDataExport {
         put(LANE_NO, laneId[0])
         put(INDEX, laneId.length > 1 ? laneId[1] : null)
         String seqType = seqTrack.seqType.name
-        if (seqType.endsWith(SeqType.TAGMENTATION_SUFFIX)) {
-            put(SEQUENCING_TYPE, seqType.substring(0, seqType.length() - SeqType.TAGMENTATION_SUFFIX.length()))
-            put(TAGMENTATION, '1')
-        } else {
-            put(SEQUENCING_TYPE, seqType)
-        }
+        put(SEQUENCING_TYPE, seqType)
         put(SEQUENCING_READ_TYPE, seqTrack.seqType.libraryLayout.toString())
         properties.put('OTP_PID', seqTrack.individual.pid)
         properties.put('OTP_PID_ALIAS', seqTrack.individual.mockPid)

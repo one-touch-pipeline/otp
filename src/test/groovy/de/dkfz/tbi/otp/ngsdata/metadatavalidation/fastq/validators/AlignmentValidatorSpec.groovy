@@ -96,8 +96,8 @@ ${seqType.seqTypeName},${seqType.libraryLayout}
         SeqType seqType = createSeqType()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${TAGMENTATION},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType.name},${createProject().name},,,DNA,${LibraryLayout.SINGLE}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
+${seqType.name},${createProject().name},,DNA,${LibraryLayout.SINGLE}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
@@ -121,9 +121,9 @@ ${seqType.name},${createProject().name},,,DNA,${LibraryLayout.SINGLE}
         Project project = createProject()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${TAGMENTATION},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType1.name},${project.name},,1,DNA,${LibraryLayout.PAIRED}
-${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
+${seqType1.name},${project.name},,DNA,${LibraryLayout.PAIRED}
+${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
@@ -153,9 +153,9 @@ ${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PA
         DomainFactory.proxyCellRanger.createConfig(project: project)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${TAGMENTATION},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqType1.name},${project.name},,1,DNA,${LibraryLayout.PAIRED}
-${seqType2.name},${project.name},,,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
+${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
+${seqType1.name},${project.name},,DNA,${LibraryLayout.PAIRED}
+${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${LibraryLayout.PAIRED}
 """.replaceAll(',', '\t'))
 
         when:

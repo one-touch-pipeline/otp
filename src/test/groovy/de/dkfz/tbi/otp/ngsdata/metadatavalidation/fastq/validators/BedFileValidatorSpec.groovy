@@ -65,7 +65,6 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
             MetaDataColumn.SEQUENCING_READ_TYPE,
             MetaDataColumn.LIB_PREP_KIT,
             MetaDataColumn.SAMPLE_NAME,
-            MetaDataColumn.TAGMENTATION,
             MetaDataColumn.PROJECT,
     ]*.name().asImmutable()
 
@@ -110,8 +109,8 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         }
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext([
-                [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.SEQUENCING_READ_TYPE, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_NAME, MetaDataColumn.TAGMENTATION, MetaDataColumn.PROJECT]*.name(),
-                [seqTypeName, libraryLayout, libPrepKitName, sampleName, tagmentationBasedLibrary, sampleName == PARSE_SAMPLE_NAME_NEW_PROJECT ? 'noProject' : project.name],
+                [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.SEQUENCING_READ_TYPE, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_NAME, MetaDataColumn.PROJECT]*.name(),
+                [seqTypeName, libraryLayout, libPrepKitName, sampleName, sampleName == PARSE_SAMPLE_NAME_NEW_PROJECT ? 'noProject' : project.name],
         ]*.join('\t').join('\n'))
 
         Collection<Problem> expectedProblems = expectError ? [
@@ -133,34 +132,33 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         assertContainSame(context.problems, expectedProblems)
 
         where:
-        seqTypeName                    | libraryLayout        | libPrepKitName    | sampleName                        | createSample | alignmentDeciderBeanName | connectProjectToReferenceGenome | createBedFile | tagmentationBasedLibrary || expectError
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | true          | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || true
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | 'true'                   || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | false                           | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | NO_ALIGNMENT             | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | ''                | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | 'unknown'         | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | ''                   | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'          | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        ''                             | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        'nonExome'                     | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         | ''                       || false
+        seqTypeName                    | libraryLayout        | libPrepKitName    | sampleName                        | createSample | alignmentDeciderBeanName | connectProjectToReferenceGenome | createBedFile || expectError
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | true          || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || true
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | false                           | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | NO_ALIGNMENT             | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | ''                | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | 'unknown'         | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | ''                   | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'          | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
+        ''                             | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
+        'nonExome'                     | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
 
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | ''                                | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | 'unknown'                         | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | ''                                | false        | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | 'unknown'                         | false        | OTP_ALIGNMENT            | true                            | false         || false
 
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | true          | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || true
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | false                           | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | NO_ALIGNMENT             | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | ''                | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | 'unknown'         | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | ''                   | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'          | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        ''                             | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        'nonExome'                     | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_PROJECT     | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
-        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE | false        | OTP_ALIGNMENT            | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | true          || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || true
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | false                           | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | NO_ALIGNMENT             | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | ''                | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | 'unknown'         | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | ''                   | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'          | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
+        ''                             | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
+        'nonExome'                     | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_PROJECT     | false        | OTP_ALIGNMENT            | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE | false        | OTP_ALIGNMENT            | true                            | false         || false
     }
 
     @Unroll

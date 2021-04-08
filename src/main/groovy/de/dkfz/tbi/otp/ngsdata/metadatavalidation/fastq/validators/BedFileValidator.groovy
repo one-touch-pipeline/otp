@@ -54,7 +54,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [TAGMENTATION, BASE_MATERIAL]*.name()
+        return [BASE_MATERIAL.name()]
     }
 
     @Override

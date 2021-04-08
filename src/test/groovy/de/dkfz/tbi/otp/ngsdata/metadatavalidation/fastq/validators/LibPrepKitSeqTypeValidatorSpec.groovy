@@ -45,17 +45,17 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     }
 
     static final String VALID_METADATA =
-            "${LIB_PREP_KIT}\t${SEQUENCING_READ_TYPE}\t${SEQUENCING_TYPE}\t${TAGMENTATION}\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
-                    "lib_prep_kit\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n" +
-                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\t\n"
+            "${LIB_PREP_KIT}\t${SEQUENCING_READ_TYPE}\t${SEQUENCING_TYPE}\n" +
+                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
+                    "lib_prep_kit\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.RNA.seqTypeName}\n" +
+                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
+                    "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n"
 
     void setup() {
         DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit')
@@ -89,11 +89,11 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
-                        "\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\t\n"
+                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\n" +
+                        "\t${LibraryLayout.SINGLE}\t${SeqTypeNames.RNA.seqTypeName}\n" +
+                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\n" +
+                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\n"
         )
 
         when:
@@ -127,6 +127,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(14).cells.get(2).text} ${context.spreadsheet.dataRows.get(14).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
         ]
+
         containSame(context.problems, expectedProblems)
     }
 
@@ -134,8 +135,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t\n" +
-                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.EXOME.seqTypeName}\ttrue\n"
+                        "\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME.seqTypeName}\n"
         )
 
         when:

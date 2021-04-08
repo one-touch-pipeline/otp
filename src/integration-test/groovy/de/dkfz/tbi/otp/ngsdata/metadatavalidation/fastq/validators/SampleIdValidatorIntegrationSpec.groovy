@@ -95,8 +95,8 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
-                        "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.PROJECT}\n" +
-                        "aBrandNewSampleId\taBrandNewSeqType\tsomeValue\tsomeValue\tsomeValue\tsomeValue"
+                        "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.PROJECT}\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType\tsomeValue\tsomeValue\tsomeValue"
         )
 
         when:
@@ -112,9 +112,9 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
-                "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\t${MetaDataColumn.PROJECT}\n" +
-                        "${seqTrack.sampleIdentifier}\taBrandNewSeqType\tsomeValue\tsomevalue\tsomeValue\tsomeValue\n" +
-                        "aBrandNewSampleId\taBrandNewSeqType2\tsomeValue2\tsomeValue\tsomeValue\tsomeValue"
+                "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.PROJECT}\n" +
+                        "${seqTrack.sampleIdentifier}\taBrandNewSeqType\tsomeValue\tsomevalue\tsomeValue\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType2\tsomeValue2\tsomeValue\tsomeValue"
         )
 
         when:
@@ -138,9 +138,9 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.PROJECT}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
-                "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\n" +
-                        "${seqTrack.sampleIdentifier}\t${seqTrack.seqType.name}\t${seqTrack.project.name}\t${seqTrack.seqType.libraryLayout}\tsomeValue\tsomeValue\n" +
-                        "aBrandNewSampleId\taBrandNewSeqType\taBrandNewProject\taBrandNewReadType\tsomeValue\tsomeValue"
+                "\t${MetaDataColumn.BASE_MATERIAL}\n" +
+                        "${seqTrack.sampleIdentifier}\t${seqTrack.seqType.name}\t${seqTrack.project.name}\t${seqTrack.seqType.libraryLayout}\tsomeValue\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType\taBrandNewProject\taBrandNewReadType\tsomeValue"
         )
 
         when:
@@ -149,7 +149,7 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
-        containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "F2", "C2"])
+        containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "C2"])
         problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 
@@ -171,9 +171,9 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.PROJECT}\t${MetaDataColumn.SEQUENCING_READ_TYPE}" +
-                        "\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.TAGMENTATION}\n" +
-                        "${project.name}#${seqTrack.individual.pid}#${seqTrack.sampleType.name}\t${seqTrack.seqType.name}\t${seqTrack.project.name}\t${seqTrack.seqType.libraryLayout}\tsomeValue\tsomeValue\n" +
-                        "aBrandNewSampleId\taBrandNewSeqType\taBrandNewProject\taBrandNewReadType\tsomeValue\tsomeValue"
+                        "\t${MetaDataColumn.BASE_MATERIAL}\n" +
+                        "${project.name}#${seqTrack.individual.pid}#${seqTrack.sampleType.name}\t${seqTrack.seqType.name}\t${seqTrack.project.name}\t${seqTrack.seqType.libraryLayout}\tsomeValue\n" +
+                        "aBrandNewSampleId\taBrandNewSeqType\taBrandNewProject\taBrandNewReadType\tsomeValue"
         )
 
         when:
@@ -182,7 +182,7 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
-        containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "F2", "C2"])
+        containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "C2"])
         problem.message.contains("Sample Identifier '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 }
