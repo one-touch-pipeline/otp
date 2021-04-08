@@ -45,6 +45,7 @@ class WorkflowRun implements Commentable, Entity {
         OMITTED_MISSING_PRECONDITION("The run was omitted because preconditions are missing."),
         SUCCESS("The run succeeded."),
         FAILED_FINAL("The run failed, and an operator decided not to restart it."),
+        RESTARTED("The run was restarted after it failed."),
         KILLED("The run was killed by an operator."),
         //other
         LEGACY("The run is part of the old workflow system."),

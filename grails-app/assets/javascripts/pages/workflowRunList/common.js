@@ -43,6 +43,8 @@ var statusToClassName = function (status) {
         case "OMITTED_MISSING_PRECONDITION":
             return "dot purple";
         case "FAILED_FINAL":
+            return "dot darkorange";
+        case "RESTARTED":
             return "dot orange";
         case "KILLED":
             return "dot black";

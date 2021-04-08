@@ -62,7 +62,7 @@ class WorkflowService {
             oldArtefact.save(flush: true)
         }
 
-        step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
+        step.workflowRun.state = WorkflowRun.State.RESTARTED
         step.workflowRun.save(flush: true)
 
         if (startDirectly) {

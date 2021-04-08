@@ -59,6 +59,7 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         service.createRestartedWorkflow(workflowStep, startDirectly)
 
         then:
+        workflowStep.workflowRun.state == WorkflowRun.State.RESTARTED
         [wa1, wa2].every { it.state == WorkflowArtefact.State.FAILED }
         WorkflowArtefact.count == 4
         WorkflowRun.count == 4
