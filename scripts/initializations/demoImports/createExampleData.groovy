@@ -54,19 +54,36 @@ class ExampleData {
     int individualCount = 2
 
     /**
-     * Should dummy files and other required directories be created for the generated bam files?
+     * Should dummy files and links are created for the {@link DataFile}s?
      * Please ensure that otp has the necessary write permissions remotely for the project directory
      * (or any parent directory in which the directories needs to be created)
      */
-    boolean shouldFilesCreated = false
+    boolean shouldDataFilesCreatedOnFilesystem = false
 
+    /**
+     * Should dummy files are created for the {@link FastqcProcessedFile}s?
+     * Please ensure that otp has the necessary write permissions remotely for the project directory
+     * (or any parent directory in which the directories needs to be created)
+     */
+    boolean shouldFastqcFilesCreatedOnFilesystem = false
+
+    /**
+     * Should dummy files and other required directories be created for the generated {@link RoddyBamFile}s?
+     * Please ensure that otp has the necessary write permissions remotely for the project directory
+     * (or any parent directory in which the directories needs to be created)
+     */
+    boolean shouldBamFilesCreatedOnFilesystem = false
 
 //------------------------------
 //work
 
+    FastqcDataFilesService fastqcDataFilesService
+
     FileService fileService
 
     FileSystemService fileSystemService
+
+    LsdfFilesService lsdfFilesService
 
     static final List<String> chromosomeXY = [
             "X",
@@ -88,6 +105,8 @@ class ExampleData {
     SoftwareTool softwareTool
 
     List<RoddyBamFile> roddyBamFiles = []
+    List<DataFile> dataFiles = []
+    List<FastqcProcessedFile> fastqcProcessedFiles = []
 
     void init() {
         seqTypes = [
@@ -142,10 +161,59 @@ class ExampleData {
     }
 
     void createFiles() {
-        if (!shouldFilesCreated) {
-            println "Skipp creating files on file system"
+        createDataFilesFilesOnFilesystem()
+        createFastqcFilesOnFilesystem()
+        createBamFilesOnFilesystem()
+    }
+
+    void createDataFilesFilesOnFilesystem() {
+        if (!shouldDataFilesCreatedOnFilesystem) {
+            println "Skipp creating dummy datafiles on file system"
             return
         }
+        println "creating dummy datafiles on file system"
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+        dataFiles.each { DataFile dataFile ->
+            Path directPath = lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem)
+            Path directPathMd5sum = directPath.resolveSibling("${dataFile.fileName}.md5sum")
+            Path vbpPath = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fileSystem)
+            [
+                    directPath,
+                    directPathMd5sum,
+            ].each {
+                fileService.createFileWithContent(it, it.toString(), realm)
+            }
+            fileService.createLink(vbpPath, directPath, realm)
+        }
+    }
+
+    void createFastqcFilesOnFilesystem() {
+        if (!shouldFastqcFilesCreatedOnFilesystem) {
+            println "Skipp creating dummy fastqc reports on file system"
+            return
+        }
+        println "creating dummy fastqc reports on file system"
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
+        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
+            Path fastqcPath = fileSystem.getPath(fastqcDataFilesService.fastqcOutputFile(fastqcProcessedFile.dataFile))
+            Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.getFileName()}.md5sum")
+            [
+                    fastqcPath,
+                    fastqcMd5Path,
+            ].each {
+                fileService.createFileWithContent(it, it.toString(), realm)
+            }
+        }
+    }
+
+    void createBamFilesOnFilesystem() {
+        if (!shouldBamFilesCreatedOnFilesystem) {
+            println "Skipp creating dummy bam files on file system"
+            return
+        }
+        println "creating dummy bam files on file system"
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         roddyBamFiles.each { RoddyBamFile bam ->
@@ -357,8 +425,8 @@ class ExampleData {
     }
 
     DataFile createDataFile(SeqTrack seqTrack, int mateNumber) {
-        String fileName = "file_${DataFile.count()}"
-        return new DataFile([
+        String fileName = "file_${DataFile.count()}_L${seqTrack.laneId}_R${mateNumber}.fastq.gz"
+        DataFile dataFile = new DataFile([
                 seqTrack           : seqTrack,
                 mateNumber         : mateNumber,
                 fastqImportInstance: fastqImportInstance,
@@ -370,7 +438,22 @@ class ExampleData {
                 md5sum             : "0" * 32,
                 run                : seqTrack.run,
                 project            : seqTrack.project,
+                used               : true,
         ]).save(flush: true)
+
+        dataFiles << dataFile
+        createFastqcProcessedFiles(dataFile)
+
+        return dataFile
+    }
+
+    FastqcProcessedFile createFastqcProcessedFiles(DataFile dataFile) {
+        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
+                dataFile: dataFile,
+        ]).save(flush: true)
+
+        fastqcProcessedFiles << fastqcProcessedFile
+        return fastqcProcessedFile
     }
 
     MergingWorkPackage createMergingWorkPackage(SeqTrack seqTrack) {
@@ -420,7 +503,6 @@ class ExampleData {
         }
         roddyBamFiles << roddyBamFile
         return roddyBamFile
-
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
@@ -483,8 +565,10 @@ class ExampleData {
 
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
-            fileService      : ctx.fileService,
-            fileSystemService: ctx.fileSystemService,
+            fastqcDataFilesService: ctx.fastqcDataFilesService,
+            fileService           : ctx.fileService,
+            fileSystemService     : ctx.fileSystemService,
+            lsdfFilesService      : ctx.lsdfFilesService,
     ])
     exampleData.init()
     exampleData.createObjects()
