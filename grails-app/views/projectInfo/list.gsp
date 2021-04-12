@@ -60,8 +60,13 @@
     <h2><g:message code="projectInfo.document.header"/></h2>
     <div>
         <ul>
-            <g:if test="${!projectInfos}">
+            <g:if test="${!projectInfos && !projectRequest}">
                 <li><g:message code="projectInfo.noDocuments"/></li>
+            </g:if>
+            <g:if test="${projectRequest}">
+                <li>
+                    <g:link controller="projectRequest" action="view" params='["id": projectRequest.id]'>Project request</g:link>
+                </li>
             </g:if>
             <g:each var="doc" in="${projectInfos}">
                 <li id="doc${doc.id}">

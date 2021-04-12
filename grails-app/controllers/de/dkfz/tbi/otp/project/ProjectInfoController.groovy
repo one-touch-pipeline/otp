@@ -43,16 +43,19 @@ class ProjectInfoController implements CheckAndCall {
             updateProjectInfoComment                : 'POST',
     ]
 
-    ProjectSelectionService projectSelectionService
     ProjectInfoService projectInfoService
+    ProjectRequestService projectRequestService
+    ProjectSelectionService projectSelectionService
 
     def list() {
         Project project = projectSelectionService.selectedProject
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectInfos: 'join']]))
+        ProjectRequest projectRequest = projectRequestService.findProjectRequestByProject(project)
 
         return [
                 project            : project,
                 projectInfos       : projectInfoService.getAllProjectInfosSortedByDateDesc(project),
+                projectRequest     : projectRequest,
                 docCmd             : flash.docCmd as AddProjectInfoCommand,
         ]
     }
