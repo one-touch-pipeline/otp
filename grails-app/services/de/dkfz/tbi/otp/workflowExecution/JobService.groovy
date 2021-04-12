@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 class JobService {
 
     LogService logService
+    WorkflowStateChangeService workflowStateChangeService
 
     void createNextJob(WorkflowRun workflowRun) {
         assert workflowRun
@@ -118,7 +119,7 @@ class JobService {
             throw new WorkflowJobIsNotRestartableException("Cannot restart workflow step which is not RUNNING.")
         }
 
-        workflowStep.state = WorkflowStep.State.FAILED
+        workflowStateChangeService.changeStateToFailedAfterRestart(workflowStep)
         logService.addSimpleLogEntry(workflowStep, "OTP restarted")
         createRestartedJob(workflowStep)
     }

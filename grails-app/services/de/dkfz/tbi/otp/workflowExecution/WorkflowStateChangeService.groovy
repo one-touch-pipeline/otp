@@ -121,6 +121,16 @@ class WorkflowStateChangeService {
         step.save(flush: true)
     }
 
+    void changeStateToFailedAfterRestart(WorkflowStep step) {
+        assert step
+        step.workflowRun.state = WorkflowRun.State.FAILED
+        step.workflowRun.save(flush: true)
+
+        step.workflowError = new WorkflowError(message: "The step was still running while OTP was shut down. ", stacktrace: "")
+        step.state = WorkflowStep.State.FAILED
+        step.save(flush: true)
+    }
+
     /**
      * Change the state of a workflow step to failed and save it with a default workflow error message.
      * @param step which should be changed to failed

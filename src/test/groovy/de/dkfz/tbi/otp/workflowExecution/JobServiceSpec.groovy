@@ -209,6 +209,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
                 workflowRun: workflowRun,
                 state      : WorkflowStep.State.RUNNING,
         ])
+        service.workflowStateChangeService = new WorkflowStateChangeService()
 
         when:
         service.createRestartedJobAfterSystemRestart(workflowStep)
