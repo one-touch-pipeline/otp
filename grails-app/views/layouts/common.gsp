@@ -66,6 +66,8 @@
                                         <li><g:link controller="alignmentConfigurationOverview" action="index"><g:message
                                                 code="otp.menu.alignmenAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
+                                        <li><g:link controller="projectRequest" action="index"><g:message
+                                                code="otp.menu.projectRequest"/></g:link></li>
                                         <li><g:link controller="sampleIdentifierOverview" action="index"><g:message
                                                 code="otp.menu.sampleNameOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
@@ -73,10 +75,6 @@
                                                     code="projectOverview.projectInfos" /></g:link></li>
                                             <li class="allGranted"><g:link controller="dataTransfer" action="index"><g:message
                                                     code="dataTransfer.menu.title" /></g:link></li>
-                                        </sec:ifAnyGranted>
-                                        <sec:ifAnyGranted roles="ROLE_TEST_PI">
-                                            <li class="testGranted"><g:link controller="projectRequest" action="index"><g:message
-                                                    code="otp.menu.projectRequest"/></g:link></li>
                                         </sec:ifAnyGranted>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectFields" action="index"><g:message

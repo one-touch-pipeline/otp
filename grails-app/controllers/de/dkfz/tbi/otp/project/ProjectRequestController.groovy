@@ -39,7 +39,7 @@ import de.dkfz.tbi.util.MultiObjectValueSource
 
 import java.time.LocalDate
 
-@Secured(['ROLE_OPERATOR', 'ROLE_TEST_PI'])
+@Secured('isFullyAuthenticated()')
 class ProjectRequestController {
 
     static allowedMethods = [

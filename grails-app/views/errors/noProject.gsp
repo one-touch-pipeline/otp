@@ -31,7 +31,10 @@
         <sec:ifNotGranted roles="ROLE_ADMIN">
             <h1><g:message code="default.no.project"/></h1>
             <p>${g.message(code: "default.no.project.explain")}</p>
-            <p>${g.message(code: "default.no.project.gain.access")}</p>
+            <ul>
+                <li>${g.message(code: "default.no.project.gain.access")}</li>
+                <li><g:link controller="projectRequest">${g.message(code: "default.no.project.request")}</g:link></li>
+            </ul>
         </sec:ifNotGranted>
 
         <sec:ifAnyGranted roles="ROLE_ADMIN">

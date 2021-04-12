@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 
-@Secured(['ROLE_ADMIN'])
+@Secured("hasRole('ROLE_ADMIN')")
 class WorkflowConfigViewerController implements BaseWorkflowConfigController {
 
     ConfigSelectorService configSelectorService

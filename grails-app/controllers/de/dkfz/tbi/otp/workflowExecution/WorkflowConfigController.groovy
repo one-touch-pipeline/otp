@@ -27,7 +27,7 @@ import grails.validation.Validateable
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-@Secured(['ROLE_ADMIN'])
+@Secured("hasRole('ROLE_ADMIN')")
 class WorkflowConfigController implements BaseWorkflowConfigController {
 
     static allowedMethods = [
