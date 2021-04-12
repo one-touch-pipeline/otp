@@ -202,6 +202,9 @@ class MetadataImportService {
                 Path targetDirectory = getIlseFolder(ilse, seqCenter)
                 Path targetFile = targetDirectory.resolve(source.fileName.toString())
                 if (!Files.exists(targetFile)) {
+                    //create the directory and set the permission with owner and group access (setgid bit) explicitly
+                    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetDirectory, configService.getDefaultRealm(),
+                        "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
                     fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
                 }
 

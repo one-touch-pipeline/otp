@@ -77,6 +77,11 @@ class FileService {
     static final String OWNER_DIRECTORY_PERMISSION_STRING = "2700"
 
     /**
+     * The directory permissions accessible for owner and group members (2770) with setgid bit
+     */
+    static final String OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING = "2770"
+
+    /**
      * Owner and Group read/write (770)
      */
     static final Set<PosixFilePermission> OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION = [
