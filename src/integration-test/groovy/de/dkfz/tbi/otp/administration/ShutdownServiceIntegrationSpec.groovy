@@ -28,6 +28,7 @@ import org.springframework.validation.Errors
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpException
+import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -61,6 +62,9 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
     void "test cancelShutdown, when planned"() {
         given:
         setupData()
+        shutdownService.workflowSystemService.propertiesValidationService = Mock(PropertiesValidationService) {
+            1 * validateProcessingOptions() >> []
+        }
         Errors errors
 
         when:

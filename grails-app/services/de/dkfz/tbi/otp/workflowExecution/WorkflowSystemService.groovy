@@ -23,12 +23,16 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.config.OptionProblem
+import de.dkfz.tbi.otp.config.PropertiesValidationService
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+
 @Transactional
 class WorkflowSystemService {
 
-    WorkflowStepService workflowStepService
-
     JobService jobService
+    PropertiesValidationService propertiesValidationService
+    WorkflowStepService workflowStepService
 
     private boolean firstStart = true
 
@@ -39,6 +43,12 @@ class WorkflowSystemService {
             log.info("job system already started, ignoring")
             return
         }
+
+        List<OptionProblem> validationResult = propertiesValidationService.validateProcessingOptions()
+        if (!validationResult.isEmpty()) {
+            throw new WorkflowException(validationResult.join("\n"))
+        }
+
         if (firstStart) {
             List<WorkflowStep> runningSteps = workflowStepService.runningWorkflowSteps()
             runningSteps.each {

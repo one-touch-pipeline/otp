@@ -26,6 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
 class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest<WorkflowSystemService>, DataTest, WorkflowSystemDomainFactory {
@@ -103,6 +104,9 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
 
     void "when starting or stopping the WorkflowSystem, then the flags should show the correct state and restart only for the first start running workflowSteps"() {
         given:
+        service.propertiesValidationService = Mock(PropertiesValidationService) {
+            _ * validateProcessingOptions() >> []
+        }
         service.jobService = Mock(JobService)
         service.workflowStepService = Mock(WorkflowStepService)
         WorkflowStep workflowStep = createWorkflowStep()
@@ -139,6 +143,9 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
     }
 
     private void createEmptyMockedServices() {
+        service.propertiesValidationService = Mock(PropertiesValidationService) {
+            _ * validateProcessingOptions() >> []
+        }
         service.jobService = Mock(JobService) {
             _ * createRestartedJobAfterSystemRestart(_)
         }
@@ -148,6 +155,9 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
     }
 
     private void setupWithFailedStart() {
+        service.propertiesValidationService = Mock(PropertiesValidationService) {
+            _ * validateProcessingOptions() >> []
+        }
         final String FAILED = 'failed to start'
         service.jobService = Mock(JobService) {
             _ * createRestartedJobAfterSystemRestart(_)
