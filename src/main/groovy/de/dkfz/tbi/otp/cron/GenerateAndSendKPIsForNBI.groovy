@@ -85,12 +85,12 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
                         it.count,
                         userCount,
                         it.projectCount,
-                ].join('\t')
+                ].join(',')
             }.join('\n')
 
             return [
                     "Workflow: ${workflow}",
-                    "WorkflowCount\tUserCount\tProjectCount",
+                    "WorkflowCount,UserCount,ProjectCount",
                     dataOfWorkflow,
             ].join('\n')
         }.join('\n\n')
