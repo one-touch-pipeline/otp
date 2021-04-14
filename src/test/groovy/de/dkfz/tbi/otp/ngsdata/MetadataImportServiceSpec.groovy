@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
@@ -52,6 +53,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -1570,6 +1572,35 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
 
         then:
         FileService.isFileReadableAndNotEmpty(data.targetFile)
+    }
+
+    //Helper class to mock methods using remote shell by override the productive method
+    class RemoteShellHelperMock extends RemoteShellHelper {
+        String cmdString
+        @Override
+        ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
+            cmdString = command
+            return new ProcessOutput(command, "", 0)
+        }
+    }
+
+    void "copyMetaDataFileIfRequested, if metadata is copied, check the permission string must be 2770"() {
+        given:
+        Map data = setupForCopyMetaDataFileIfRequested(null)
+        data.service.fileService.remoteShellHelper = new RemoteShellHelperMock()
+
+        //remove the folder where the metadata should be copied (part of the setup)
+        //if the directory exists, nothing will be done. Permission won't be changed
+        Path targetDirectory = temporaryFolder.folder.toPath().resolve("target")
+        if(Files.exists(targetDirectory)) {
+            targetDirectory.deleteDir()
+        }
+
+        when:
+        data.service.copyMetadataFileIfRequested(data.context)
+
+        then:
+        data.service.fileService.remoteShellHelper.cmdString.indexOf("chmod 2770") >= 0
     }
 
     void "test getIlseFolder, invalid input, should return null"() {
