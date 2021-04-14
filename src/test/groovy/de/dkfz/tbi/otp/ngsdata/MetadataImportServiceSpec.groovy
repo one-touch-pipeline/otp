@@ -1592,7 +1592,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         //remove the folder where the metadata should be copied (part of the setup)
         //if the directory exists, nothing will be done. Permission won't be changed
         Path targetDirectory = temporaryFolder.folder.toPath().resolve("target")
-        if(Files.exists(targetDirectory)) {
+        if (Files.exists(targetDirectory)) {
             targetDirectory.deleteDir()
         }
 
