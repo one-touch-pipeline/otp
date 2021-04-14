@@ -1574,23 +1574,19 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         FileService.isFileReadableAndNotEmpty(data.targetFile)
     }
 
-    //Helper class to mock methods using remote shell by override the productive method
-    class RemoteShellHelperMock extends RemoteShellHelper {
-        String cmdString
-        @Override
-        ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
-            cmdString = command
-            return new ProcessOutput(command, "", 0)
-        }
-    }
-
     void "copyMetaDataFileIfRequested, if metadata is copied, check the permission string must be 2770"() {
         given:
         Map data = setupForCopyMetaDataFileIfRequested(null)
-        data.service.fileService.remoteShellHelper = new RemoteShellHelperMock()
+
+        data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                assert command.contains("chmod 2770")
+                return new ProcessOutput(command, '', 0)
+            }
+        }
 
         //remove the folder where the metadata should be copied (part of the setup)
-        //if the directory exists, nothing will be done. Permission won't be changed
+        //if the directory exists, nothing should be done. Permission won't be changed
         Path targetDirectory = temporaryFolder.folder.toPath().resolve("target")
         if (Files.exists(targetDirectory)) {
             targetDirectory.deleteDir()
@@ -1600,7 +1596,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         data.service.copyMetadataFileIfRequested(data.context)
 
         then:
-        data.service.fileService.remoteShellHelper.cmdString.indexOf("chmod 2770") >= 0
+        Files.exists(targetDirectory)
     }
 
     void "test getIlseFolder, invalid input, should return null"() {
