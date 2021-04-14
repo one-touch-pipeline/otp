@@ -143,6 +143,9 @@ class DataFile implements CommentableWithProject,  Entity {
 
         mateNumber nullable: true,  // Shall not be null, but legacy data exists
                 min: 1, validator: { val, obj ->
+            if (obj.indexFile) {
+                return val != null // no value restriction for indexFile, except that it is given
+            }
             if (val != null) {
                 Integer mateCount = obj.seqTrack?.seqType?.libraryLayout?.mateCount
                 if (mateCount != null && val > mateCount) {

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -66,35 +67,53 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         createDataFile(fileType: fileType)
     }
 
-    void "test validate, when mateNumber is 1 and file type is sequence (fastq)"() {
+    @Unroll
+    void "test validate, when fileType is file type is sequence (fastq) and mateNumber is #matNumber and sequenceType is #sequencingReadType and indexFile is :indexFile, then it should be valid"() {
         given:
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = createDataFile([
+                seqTrack  : createSeqTrack([
+                        seqType: createSeqType([
+                                libraryLayout: sequencingReadType,
+                        ]),
+                ]),
+                fileType  : fileType,
+                mateNumber: matNumber,
+                indexFile : indexFile,
+        ], false)
 
         expect:
-        createDataFile(fileType: fileType, mateNumber: 1)
+        dataFile.validate()
+
+        where:
+        sequencingReadType        | matNumber | indexFile
+        SequencingReadType.SINGLE | 1         | false
+        SequencingReadType.PAIRED | 1         | false
+        SequencingReadType.PAIRED | 2         | false
+        SequencingReadType.SINGLE | 1         | true
+        SequencingReadType.PAIRED | 1         | true
+        SequencingReadType.SINGLE | 2         | true
+        SequencingReadType.PAIRED | 2         | true
+        SequencingReadType.SINGLE | 3         | true
+        SequencingReadType.PAIRED | 3         | true
+        SequencingReadType.SINGLE | 9         | true
+        SequencingReadType.PAIRED | 9         | true
     }
 
-    void "test validate, when mateNumber is 2 and file type is sequence (fastq)"() {
+    @Unroll
+    void "test validate, when mateNumber is null and indexFile is #indexFile, should fail"() {
         given:
         FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-
-        expect:
-        createDataFile(
-                seqTrack: createSeqTrack(
-                        seqType: createSeqType(libraryLayout: SequencingReadType.PAIRED)
-                ),
-                fileType: fileType,
-                mateNumber: 2,
-        )
-    }
-
-    void "test validate, when mateNumber is null, should fail"() {
-        given:
-        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: null], false)
+        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: null, indexFile: indexFile], false)
 
         expect:
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
+
+        where:
+        indexFile << [
+                false,
+                true,
+        ]
     }
 
     void "test validate, when mateNumber is zero, should fail"() {
