@@ -304,7 +304,7 @@ class ProjectService {
     }
 
     Set<ProjectInfo> getSelectableBaseProjectInfos(Project baseProject) {
-        return (baseProject ? baseProject.projectInfos.findAll { !it.isDta() } : []) as Set<ProjectInfo>
+        return (baseProject ? baseProject.projectInfos : []) as Set<ProjectInfo>
     }
 
     private void createProjectDirectoryIfNeeded(Project project) {
