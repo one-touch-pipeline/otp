@@ -23,48 +23,32 @@
 <html>
 <head>
     <title><g:message code="otp.menu.alignmentQuality"/></title>
-    <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
+    <asset:javascript src="pages/alignmentQualityOverview/index/alignmentQualityOverview.js"/>
     <asset:stylesheet src="pages/alignmentQualityOverview/index.css"/>
 </head>
 
 <body>
-<div class="body">
+<div class="container-fluid otp-main-container">
     <g:render template="/templates/messages"/>
 
-    <div class="project-selection-header-container">
-        <div class="grid-element">
-            <g:render template="/templates/projectSelection"/>
-        </div>
+    <g:render template="/templates/bootstrap/projectSelection"/>
 
-        <div class="grid-element">
-            <g:if test="${seqType}">
-                <div class="rounded-page-header-box">
-                    <span><g:message code="alignment.quality.seqType"/>:</span>
-
-                    <form style="display: inline">
-                        <g:hiddenField name="project" value="${selectedProject.name}"/>
-                        <g:select id="seqType" name='seqType' class="use-select-2" style="width: 40ch;"
-                                  data-columns="${columns}"
-                                  from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
-                    </form>
+    <g:if test="${seqType}">
+        <form>
+            <div class="input-group mb-3" style="max-width: 500px;">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="seqType"><g:message code="alignment.quality.seqType"/></label>
                 </div>
-            </g:if>
-        </div>
-    </div>
 
-    <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">QC status changes</h4>
-        <div id="mail-info-text">
-            <p>To accept or reject the QC issues, please write an mail with the following information to <a href="mailto:${supportEmail}">${supportEmail}</a>
-                (one line per sample):</p>
-            <p style="margin-bottom: 0;">1. PIDs that should be accepted/rejected</p>
-            <p style="margin-bottom: 0;">2. Sample Types that should be accepted/rejected</p>
-            <p style="margin-bottom: 0;">3. Sequencing Type of these samples</p>
-            <p style="margin-bottom: 0;">4. Acceptance comment</p>
-        </div>
-    </div>
+                <g:hiddenField name="project" value="${selectedProject.name}"/>
+                <g:select id="seqType" name='seqType' class="custom-select use-select-2"
+                          data-columns="${columns}"
+                          from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit()'/>
+            </div>
+        </form>
+    </g:if>
 
-    <h1><g:message code="otp.menu.alignmentQuality"/></h1>
+    <h5><g:message code="otp.menu.alignmentQuality"/></h5>
 
     <div id="sample" data-sample="${sample?.id}">
         <g:if test="${sample}">
@@ -75,26 +59,30 @@
         </g:if>
     </div>
 
-    <div class="otpDataTables alignmentQualityOverviewTable">
-        <table id="overviewTableProcessedMergedBMF">
-            <thead>
-                <tr>
-                    <g:each in="${header}" var="it" status="i">
-                        <g:if test="${i == 2}">
-                            <th><g:message code="${it}"/></th>
-                        </g:if>
-                        <g:else>
-                            <th class="export_column"><g:message code="${it}"/></th>
-                        </g:else>
-                    </g:each>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <table id="overviewTableProcessedMergedBMF" class="table-sm table-striped">
+        <thead>
+            <tr>
+                <g:each in="${header}" var="it" status="i">
+                    <th><g:message code="${it}"/></th>
+                </g:each>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div id="alignmentQualityOverviewSpinner" class="text-center" style="display: none">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
     </div>
 </div>
-<otp:otpModal modalId="waitModal">
-    <div class="modal-wait-message"><g:message code="alignment.quality.modal.message"/></div>
+
+<otp:otpModal modalId="confirmModal" title="QC status change" type="dialog" closeText="Cancel" confirmText="Confirm" closable="false">
+    <label for="modalInput" style="margin-bottom: 10px;">
+        <g:message code="alignment.quality.modal.message"/>
+    </label>
+    <input id="modalInput" data-mode="" type="text" class="form-control" placeholder="Comment...">
 </otp:otpModal>
+
 </body>
 </html>

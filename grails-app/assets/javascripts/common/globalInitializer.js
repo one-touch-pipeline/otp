@@ -20,33 +20,8 @@
  * SOFTWARE.
  */
 
-/**
-Global style definitions which are relevant for all bootstrap pages.
-*/
-
-.otp-main-container {
-    margin-bottom: 60px;
-    margin-top: 60px;
-}
-
-.quick-navigation-bar {
-    .navigation-text {
-        margin-bottom: 0;
-        line-height: 42px;
-    }
-}
-
-/**
-Override unnecessary styles of otp.less
- */
-.input-group {
-    z-index: 0;
-}
-
-label {
-    margin: unset;
-}
-
-option {
-    font-size: unset;
-}
+$(document).ready(function () {
+    $('select.use-select-2').select2({
+        theme: 'bootstrap4'
+    });
+});
