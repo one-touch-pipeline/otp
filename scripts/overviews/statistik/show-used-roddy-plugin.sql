@@ -18,19 +18,17 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-/*
-Show all currently used roddy plugins inclusive count of using.
-Plugins not used anymore are not shown.
-*/
-SELECT DISTINCT
-    c.program_version,
-    COUNT(id)
-FROM
-     config_per_project_and_seq_type c
-WHERE
-    c.obsolete_date IS NULL
-    AND c.individual_id is null
-GROUP BY
-    c.program_version
-ORDER BY
-    c.program_version
+/**
+ * Show all currently configured roddy plugins inclusive count of using, grouped also by closed flag.
+ * Plugins not used anymore are not shown.
+ */
+SELECT c.program_version,
+       p.closed,
+       COUNT(c.id)
+FROM config_per_project_and_seq_type c
+         JOIN project p ON c.project_id = p.id
+WHERE c.obsolete_date IS NULL
+  AND c.individual_id IS NULL
+GROUP BY c.program_version, p.closed
+ORDER BY c.program_version,
+         p.closed;
