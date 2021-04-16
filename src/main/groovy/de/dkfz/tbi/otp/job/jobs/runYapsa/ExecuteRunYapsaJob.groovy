@@ -55,16 +55,16 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
-        final RunYapsaInstance RUN_YAPSA_INSTANCE = processParameterObject
-        final Realm REALM = RUN_YAPSA_INSTANCE.project.realm
+        final RunYapsaInstance runYapsaInstance = processParameterObject as RunYapsaInstance
+        final Realm realm = runYapsaInstance.project.realm
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
-                fileService.toPath(RUN_YAPSA_INSTANCE.workDirectory, fileSystemService.getRemoteFileSystem(REALM)),
-                REALM, "", FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+                fileService.toPath(runYapsaInstance.workDirectory, fileSystemService.getRemoteFileSystem(realm)),
+                realm, "", FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
 
-        String jobScript = createScript(RUN_YAPSA_INSTANCE)
+        String jobScript = createScript(runYapsaInstance)
 
-        clusterJobSchedulerService.executeJob(REALM, jobScript)
+        clusterJobSchedulerService.executeJob(realm, jobScript)
 
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
@@ -110,8 +110,16 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
     @Override
     protected final void validate() throws Throwable {
-        final RunYapsaInstance RUN_YAPSA_INSTANCE = processParameterObject
-        RUN_YAPSA_INSTANCE.processingState = AnalysisProcessingStates.FINISHED
-        RUN_YAPSA_INSTANCE.save(flush: true)
+        final RunYapsaInstance runYapsaInstance = processParameterObject as RunYapsaInstance
+        final Realm realm = runYapsaInstance.project.realm
+
+        fileService.correctPathPermissionAndGroupRecursive(
+                fileService.toPath(runYapsaInstance.workDirectory, fileSystemService.getRemoteFileSystem(realm)),
+                realm,
+                runYapsaInstance.project.unixGroup,
+        )
+
+        runYapsaInstance.processingState = AnalysisProcessingStates.FINISHED
+        runYapsaInstance.save(flush: true)
     }
 }
