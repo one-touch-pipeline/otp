@@ -50,7 +50,10 @@ class WorkflowService {
                     state: WorkflowArtefact.State.PLANNED_OR_RUNNING,
                     producedBy: run,
                     outputRole: oldArtefact.outputRole,
-                    displayName: oldArtefact.displayName
+                    displayName: oldArtefact.displayName,
+                    individual: oldArtefact.individual,
+                    artefactType: oldArtefact.artefactType,
+                    seqType: oldArtefact.seqType,
             ).save(flush: true)
 
             WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->
