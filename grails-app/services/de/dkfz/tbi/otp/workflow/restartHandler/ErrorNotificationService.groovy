@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
+import grails.web.mapping.LinkGenerator
 import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -47,6 +48,8 @@ class ErrorNotificationService {
     OtrsTicketService otrsTicketService
 
     ProcessingOptionService processingOptionService
+
+    LinkGenerator grailsLinkGenerator
 
     void sendMaintainer(WorkflowStep workflowStep, Throwable exceptionInJob, Throwable exceptionInExceptionHandling) {
         String subject = [
@@ -154,6 +157,7 @@ class ErrorNotificationService {
         }
         message << "Submission IDs (Ilse): ${getSubmissionIds(seqTracks) ?: "None"}"
         message << "Tickets: ${getTicketUrls(seqTracks).join(', ') ?: "None"}"
+        message << "Link: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'index', id: workflowStep.workflowRun.id, absolute: 'true')}"
 
         return message.join("\n")
     }
@@ -211,9 +215,10 @@ class ErrorNotificationService {
 
         message << header("OTP message")
         message << workflowStep.workflowError.message ?: "None"
+        message << "Error page: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showError', id: workflowStep.id, absolute: 'true')}"
 
         message << header("Logs")
-        //TODO: add link to logs
+        message << "Log page: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showLogs', id: workflowStep.id, absolute: 'true')}"
 
         message << header("Cluster jobs")
         if (workflowStep.clusterJobs) {
@@ -226,6 +231,7 @@ class ErrorNotificationService {
                 message << "End time: ${dateString(clusterJob.ended)}"
                 message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na'}"
                 message << "Log file: ${clusterJob.jobLog}"
+                message << "Log page: ${grailsLinkGenerator.link(controller: 'clusterJobDetail', action: 'show', id: clusterJob.id, absolute: 'true')}"
                 message << "Exit status: ${clusterJob.exitStatus}"
                 message << "Exit code: ${clusterJob.exitCode}"
                 message << "Node: ${clusterJob.node}"

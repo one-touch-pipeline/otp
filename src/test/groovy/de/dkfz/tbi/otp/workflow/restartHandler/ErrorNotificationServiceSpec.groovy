@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpRuntimeException
@@ -131,6 +132,10 @@ class ErrorNotificationServiceSpec extends Specification
             getSeqTracks(_) >> { s -> [] }
         }
 
+        service.grailsLinkGenerator = Mock(LinkGenerator) {
+            1 * link(_) >> { return "link" }
+        }
+
         WorkflowStep step = createWorkflowStep()
         step.workflowError = createWorkflowError()
 
@@ -146,6 +151,7 @@ class ErrorNotificationServiceSpec extends Specification
                 "Restart count: ${step.workflowRun.restartCount}",
                 "Submission IDs \\(Ilse\\): ",
                 "Tickets: None",
+                "Link: link",
         ].join('(?:.*\\n)+') + "[.\\n]*\$"
 
         when:
@@ -209,6 +215,10 @@ class ErrorNotificationServiceSpec extends Specification
         given:
         ErrorNotificationService service = new ErrorNotificationService()
 
+        service.grailsLinkGenerator = Mock(LinkGenerator) {
+            2 * link(_) >> { return "link" }
+        }
+
         WorkflowStep step = createWorkflowStep()
         step.workflowError = createWorkflowError()
 
@@ -216,9 +226,11 @@ class ErrorNotificationServiceSpec extends Specification
                 "^(?:.*\\n)*OTP message",
                 "=+",
                 step.workflowError.message,
+                "Error page: link",
                 "",
                 "Logs",
                 "=+",
+                "Log page: link",
                 "",
                 "Cluster jobs",
                 "=+",
@@ -240,6 +252,10 @@ class ErrorNotificationServiceSpec extends Specification
         given:
         ErrorNotificationService service = new ErrorNotificationService()
 
+        service.grailsLinkGenerator = Mock(LinkGenerator) {
+            _ * link(_) >> { return "link" }
+        }
+
         WorkflowStep step = createWorkflowStep()
         step.workflowError = createWorkflowError()
 
@@ -255,9 +271,6 @@ class ErrorNotificationServiceSpec extends Specification
                 "=+",
                 step.workflowError.message,
                 "",
-                "Logs",
-                "=+",
-                "",
                 "Cluster jobs",
                 "=+",
                 clusterJobs.collect { ClusterJob clusterJob ->
@@ -266,6 +279,7 @@ class ErrorNotificationServiceSpec extends Specification
                             "Name: ${clusterJob.clusterJobName}",
                             "Running hours: ",
                             "Log file: ",
+                            "Log page: link",
                             "Exit status: ",
                             "Exit code: ",
                             "Node: ",
