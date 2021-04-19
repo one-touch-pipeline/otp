@@ -24,7 +24,6 @@
  * The script executes a chosen SampleIdentifierParser for all given SampleIdentifiers and
  * returns the extracted values project, individual, sampleType and the identifier itself.
  */
-
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.*
@@ -87,7 +86,7 @@ try {
             line && !line.startsWith('#')
         }.each { String line ->
             output << "parse: ${line}"
-            DefaultParsedSampleIdentifier identifier = parser.tryParse(line)
+            ParsedSampleIdentifier identifier = parser.tryParse(line)
             if (identifier) {
                 table << [
                         identifier.projectName,
