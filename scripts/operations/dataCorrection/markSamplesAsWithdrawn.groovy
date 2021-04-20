@@ -19,8 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -34,7 +32,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
  *
  * A Comment is added to the DataFile with the reason for withdrawing. Also it is marked in the MetaDataEntry of the datafile.
  */
-
 
 String comment = """
 """
@@ -53,16 +50,15 @@ List<SeqTrack> seqTracks = """
     List<SeqTrack> seqTracks = SeqTrack.findAllBySampleAndSeqType(sample, seqType)
 }.flatten()
 
-
-
-
+List dirsToDelete = []
 assert comment: 'Please provide a comment why the data are set to withdrawn'
 SeqTrack.withTransaction {
     Withdrawer.ctx = ctx
     Withdrawer.comment = comment.trim()
     seqTracks.each {
-        Withdrawer.withdraw(it)
+        Withdrawer.withdraw(it, dirsToDelete)
     }
+    println dirsToDelete.join("\n")
     assert false
 }
 
@@ -73,7 +69,7 @@ class Withdrawer {
     static String comment
     static Date date = new Date()
 
-    static void withdraw(final SeqTrack seqTrack) {
+    static void withdraw(final SeqTrack seqTrack, List dirsToDelete) {
         println "\n\nwithdraw $seqTrack"
 
         LogThreadLocal.withThreadLog(System.out) {
@@ -103,11 +99,12 @@ class Withdrawer {
             assert mwp.save(flush: true)
         }
 
-        DataFile.findAllBySeqTrack(seqTrack).each { withdraw(it) }
+        DataFile.findAllBySeqTrack(seqTrack).each { withdraw(it, dirsToDelete) }
     }
 
-    static void withdraw(final DataFile dataFile) {
+    static void withdraw(final DataFile dataFile, List dirsToDelete) {
         println "Withdrawing DataFile ${dataFile}"
+        dirsToDelete.add("rm ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
         dataFile.withdrawnDate = date
         if (!dataFile.withdrawnComment?.contains(comment)) {
             dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"

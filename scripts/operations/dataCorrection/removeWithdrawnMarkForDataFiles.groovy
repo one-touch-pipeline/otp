@@ -20,15 +20,8 @@
  * SOFTWARE.
  */
 
-
-import org.joda.time.LocalDate
-
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 
 /**
  * Script to remove the mark as withdrawn.
@@ -39,13 +32,11 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * Also the withdraw MetadataEntries are adapted.
  */
 
-
 String comment = """
 """
 
 //PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT SINGLE_CELL
 List<SeqTrack> seqTracks = """
-
 
 
 """.split('\n').findAll().collect {
@@ -58,16 +49,16 @@ List<SeqTrack> seqTracks = """
     SeqTrack.findAllBySampleAndSeqType(sample, seqType)
 }.flatten()
 
-
-
-
+List dirsToLink = []
 assert comment: 'Please provide a comment why the data are set to withdrawn'
 SeqTrack.withTransaction {
     UnWithdrawer.ctx = ctx
     UnWithdrawer.comment = comment.trim()
     seqTracks.each {
-        UnWithdrawer.unwithdraw(it)
+        UnWithdrawer.unwithdraw(it, dirsToLink)
     }
+    println dirsToLink.join("\n")
+
     assert false: 'Fail for debug reason, remove if the output is okay'
 }
 
@@ -77,14 +68,15 @@ class UnWithdrawer {
 
     static String comment
 
-    static void unwithdraw(final SeqTrack seqTrack) {
+    static void unwithdraw(final SeqTrack seqTrack, List dirsToLink) {
         println "\n\nunwithdraw $seqTrack"
 
-        DataFile.findAllBySeqTrack(seqTrack).each { unwithdraw(it) }
+        DataFile.findAllBySeqTrack(seqTrack).each { unwithdraw(it, dirsToLink) }
     }
 
-    static void unwithdraw(final DataFile dataFile) {
+    static void unwithdraw(final DataFile dataFile, List dirsToLink) {
         println "Unwithdrawing DataFile ${dataFile}"
+        dirsToLink.add("ln -s ${ctx.lsdfFilesService.getFileFinalPath(dataFile)} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
         dataFile.withdrawnDate = null
         if (!dataFile.withdrawnComment?.contains(comment)) {
             dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"
