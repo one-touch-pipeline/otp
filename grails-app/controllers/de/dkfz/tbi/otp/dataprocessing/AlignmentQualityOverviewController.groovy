@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
-import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
@@ -47,21 +46,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Secured('isFullyAuthenticated()')
 class AlignmentQualityOverviewController implements CheckAndCall {
 
-    static allowedMethods = [
-            index                : "GET",
-            changeQcStatus       : "POST",
-            dataTableSource      : "POST",
-            viewCellRangerSummary: "GET",
-            renderPDF            : "GET",
-    ]
-
     static final String CHR_X_HG19 = 'chrX'
     static final String CHR_Y_HG19 = 'chrY'
 
     private static final List<String> CHROMOSOMES = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
     private static final List<String> HEADER_COMMON = [
-            'alignment.quality.rowId',
             'alignment.quality.individual',
             'alignment.quality.sampleType',
             'alignment.quality.qcStatus',
@@ -164,11 +154,17 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     ].asImmutable()
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
+
     ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
+
     ReferenceGenomeService referenceGenomeService
+
     SeqTypeService seqTypeService
+
     CellRangerService cellRangerService
+
     FileSystemService fileSystemService
+
     ProjectSelectionService projectSelectionService
     QcThresholdService qcThresholdService
     QcTrafficLightService qcTrafficLightService
@@ -178,7 +174,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         Project project = projectSelectionService.selectedProject
 
         if (cmd.sample && cmd.sample.project != project) {
-            return response.sendError(HttpStatus.NOT_FOUND.value())
+            response.sendError(404)
+            return []
         }
 
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
@@ -188,7 +185,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
 
         List<String> header
-        String columnsSelectionKey = ""
+        String columns = ""
         switch (seqType?.name) {
             case null:
                 header = ['alignment.quality.noSeqType']
@@ -198,19 +195,19 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
             case SeqTypeNames.CHIP_SEQ.seqTypeName:
                 header = HEADER_WHOLE_GENOME
-                columnsSelectionKey = "WHOLE_GENOME"
+                columns = "WHOLE_GENOME"
                 break
             case SeqTypeNames.EXOME.seqTypeName:
                 header = HEADER_EXOME
-                columnsSelectionKey = "EXOME"
+                columns = "EXOME"
                 break
             case SeqTypeNames.RNA.seqTypeName:
                 header = HEADER_RNA
-                columnsSelectionKey = "RNA"
+                columns = "RNA"
                 break
             case SeqTypeNames._10X_SCRNA.seqTypeName:
                 header = HEADER_CELL_RANGER
-                columnsSelectionKey = "CELL_RANGER"
+                columns = "CELL_RANGER"
                 break
             default:
                 throw new NotSupportedException("How should ${seqType.naturalId} be handled")
@@ -220,34 +217,27 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 seqTypes    : seqTypes,
                 seqType     : seqType,
                 header      : header,
-                columns     : columnsSelectionKey,
+                columns     : columns,
                 sample      : cmd.sample,
                 supportEmail: processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL),
         ]
     }
 
-    /**
-     * Change the QC status of a single row.
-     *
-     * @param cmd QcStatusCommand
-     * @return render JSON response
-     */
-    def changeQcStatus(QcStatusCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+    JSON changeQcStatus(QcStatusCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
             qcTrafficLightService.setQcTrafficLightStatusWithComment(
-                    cmd.abstractBamFile as AbstractMergedBamFile,
+                    cmd.abstractBamFile,
                     cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus,
                     cmd.comment
             )
-
-            render generateQcStatusCell(cmd.abstractBamFile as AbstractMergedBamFile) as JSON
         }
     }
 
-    def dataTableSource(AlignmentQcDataTableCommand cmd) {
+    @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity', 'MethodSize'])
+    JSON dataTableSource(AlignmentQcDataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        Project project = projectSelectionService.requestedProject
 
+        Project project = projectSelectionService.requestedProject
         if (!cmd.seqType) {
             dataToRender.iTotalRecords = 0
             dataToRender.iTotalDisplayRecords = 0
@@ -257,67 +247,26 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         }
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, cmd.seqType, cmd.sample)
-
-        dataToRender.iTotalRecords = dataOverall.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = generateAlignmentQcTableRows(dataOverall, project, cmd.seqType)
-        render dataToRender as JSON
-    }
-
-    def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
-        try {
-            String content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
-            render text: content, contentType: "text/html", encoding: "UTF-8"
-        } catch (NoSuchFileException e) {
-            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
-            redirect(action: "index")
-        } catch (AccessDeniedException e) {
-            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.accessDenied") as String, e.message)
-            redirect(action: "index")
-        }
-    }
-
-    def renderPDF(AbstractMergedBamFileCommand cmd) {
-        if (cmd.hasErrors()) {
-            return response.sendError(HttpStatus.NOT_FOUND.value())
-        }
-
-        if (!(cmd.abstractMergedBamFile instanceof RnaRoddyBamFile)) {
-            return response.sendError(HttpStatus.NOT_FOUND.value())
-        }
-
-        // This page is semi-generic over AbstractMergedBamFile, with lots of SeqType-specific handling sprinkled all over.
-        // This link is only generated for seqType RNA, so this cast is probably safe.
-        RnaRoddyBamFile rrbf = cmd.abstractMergedBamFile as RnaRoddyBamFile
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractMergedBamFile.realm)
-        Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
-
-        if (Files.isReadable(file)) {
-            render file: file.bytes, contentType: "application/pdf"
-        } else {
-            render text: "no plot available", contentType: "text/plain"
-        }
-    }
-
-    @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity', 'MethodSize'])
-    private List<Map<String, TableCellValue>> generateAlignmentQcTableRows(List<AbstractQualityAssessment> dataOverall, Project project, SeqType seqType) {
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(CHROMOSOMES,
                 dataOverall*.qualityAssessmentMergedPass)
-        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy([
+        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY
+        chromosomeMapXY = dataChromosomeXY.groupBy([
                 { it.qualityAssessmentMergedPass.id },
                 { it.chromosomeName },
         ])
 
         QcThresholdService.ThresholdColorizer thresholdColorizer
         if (dataOverall) {
-            thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, dataOverall.first().class as Class<QcTrafficLightValue>)
+            thresholdColorizer = qcThresholdService.createThresholdColorizer(project, cmd.seqType, dataOverall.first().class)
         }
 
         Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
-                overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(CHROMOSOMES, dataOverall)
-                        .groupBy([{ it.referenceGenome.id }, { it.alias }])
+                overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(CHROMOSOMES, dataOverall).
+                        groupBy([{ it.referenceGenome.id }, { it.alias }])
 
-        return dataOverall.collect { AbstractQualityAssessment it ->
+        dataToRender.iTotalRecords = dataOverall.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it ->
             QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
             AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
             Set<SeqTrack> seqTracks = abstractMergedBamFile.mergingWorkPackage.seqTracks
@@ -327,7 +276,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             */
             Double readLength = null
             if (seqTracks) {
-                DataFile dataFile = DataFile.findAllBySeqTrack(seqTracks.first()).first()
+                DataFile dataFile = DataFile.findBySeqTrack(seqTracks.first())
                 String readLengthString = dataFile.sequenceLength
                 if (readLengthString) {
                     readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
@@ -337,9 +286,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             }
 
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique()
-
-            Map<String, TableCellValue> qcTableRow = [
-                    rowId             : abstractMergedBamFile.id,
+            TableCellValue.Icon icon = [
+                    (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) : TableCellValue.Icon.WARNING,
+                    (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED): TableCellValue.Icon.ERROR,
+            ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
+            String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
+            Map<String, TableCellValue> map = [
                     pid               : new TableCellValue(
                             value: abstractMergedBamFile.individual.displayName,
                             link: g.createLink(
@@ -352,15 +304,20 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     dateFromFileSystem: abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                     withdrawn         : abstractMergedBamFile.withdrawn,
                     pipeline          : abstractMergedBamFile.workPackage.pipeline.displayName,
-                    qcStatus          : generateQcStatusCell(abstractMergedBamFile),
+                    qcStatus          : new TableCellValue(
+                            abstractMergedBamFile.comment ?
+                                    "${abstractMergedBamFile.comment?.comment?.take(10)}" :
+                                    "",
+                            null, null,
+                            "Status: ${(abstractMergedBamFile.qcTrafficLightStatus)} ${comment}",
+                            icon, (abstractMergedBamFile.qcTrafficLightStatus).toString(), abstractMergedBamFile.id
+                    ),
                     qcStatusOnly: abstractMergedBamFile.qcTrafficLightStatus,
                     qcComment: abstractMergedBamFile.comment?.comment,
                     qcAuthor: abstractMergedBamFile.comment?.author,
                     kit               : new TableCellValue(
-                            value: kit*.shortDisplayName.join(", ") ?: "-",
-                            warnColor: null,
-                            link: null,
-                            tooltip: kit*.name.join(", ") ?: ""
+                            kit*.shortDisplayName.join(", ") ?: "-", null, null,
+                            kit*.name.join(", ") ?: ""
                     ),
             ]
 
@@ -375,7 +332,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     "percentSingletons",
             ]
 
-            switch (seqType.name) {
+            switch (cmd.seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
@@ -394,7 +351,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                         coverageY = qcBasesMappedYChromosome / chromosomeLengthY
                     }
 
-                    qcTableRow << [
+                    map << [
                             coverageWithoutN: FormatHelper.formatNumber(abstractMergedBamFile.coverage), //Coverage w/o N
                             coverageX       : FormatHelper.formatNumber(coverageX), //ChrX Coverage w/o N
                             coverageY       : FormatHelper.formatNumber(coverageY), //ChrY Coverage w/o N
@@ -402,7 +359,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     break
 
                 case SeqTypeNames.EXOME.seqTypeName:
-                    qcTableRow << [
+                    map << [
                             targetCoverage: FormatHelper.formatNumber(abstractMergedBamFile.coverage),
                     ]
                     qcKeys += [
@@ -411,7 +368,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     break
 
                 case SeqTypeNames.RNA.seqTypeName:
-                    qcTableRow << [
+                    map << [
                             arribaPlots: new TableCellValue(
                                     value: "PDF",
                                     linkTarget: "_blank",
@@ -446,7 +403,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     break
 
                 case SeqTypeNames._10X_SCRNA.seqTypeName:
-                    qcTableRow << [
+                    map << [
                             summary          : new TableCellValue(
                                     value: "summary",
                                     linkTarget: "_blank",
@@ -483,42 +440,55 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     break
 
                 default:
-                    throw new NotSupportedException("${seqType.name} cannot be handled")
+                    throw new NotSupportedException("${cmd.seqType.name} cannot be handled")
             }
 
-            qcTableRow += thresholdColorizer.colorize(qcKeysMap, it)
-            qcTableRow += thresholdColorizer.colorize(qcKeys, it)
-            return qcTableRow
+            map += thresholdColorizer.colorize(qcKeysMap, it)
+            map += thresholdColorizer.colorize(qcKeys, it)
+            return map
         }
+        render dataToRender as JSON
     }
 
-    /**
-     * Generate the QC Status info in a DataTable cell format.
-     *
-     * @param abstractMergedBamFile containing the infos to display
-     * @return TableCellValue for the DataTable
-     */
-    private static TableCellValue generateQcStatusCell(AbstractMergedBamFile abstractMergedBamFile) {
-        TableCellValue.Icon icon = [
-                (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) : TableCellValue.Icon.WARNING,
-                (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED): TableCellValue.Icon.ERROR,
-        ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
-        String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
-
-        return new TableCellValue(
-                value: abstractMergedBamFile.comment ? "${abstractMergedBamFile.comment?.comment?.take(10)}" : "",
-                warnColor: null,
-                link: null,
-                tooltip: "Status: ${(abstractMergedBamFile.qcTrafficLightStatus)} ${comment}",
-                icon: icon,
-                status: (abstractMergedBamFile.qcTrafficLightStatus).toString(),
-                id: abstractMergedBamFile.id
-        )
+    def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
+        String content
+        try {
+            content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+        } catch (NoSuchFileException e) {
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
+            redirect(action: "index")
+        } catch (AccessDeniedException e) {
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.accessDenied") as String, e.message)
+            redirect(action: "index")
+        }
+        render text: content, contentType: "text/html", encoding: "UTF-8"
     }
 
     private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String,
             List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
+    }
+
+    def renderPDF(AbstractMergedBamFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
+
+        // This page is semi-generic over AbstractMergedBamFile, with lots of SeqType-specific handling sprinkled all over.
+        // This link is only generated for seqType RNA, so this cast is probably safe.
+        if (cmd.abstractMergedBamFile instanceof RnaRoddyBamFile) {
+            RnaRoddyBamFile rrbf = cmd.abstractMergedBamFile as RnaRoddyBamFile
+            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractMergedBamFile.realm)
+            Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
+            if (Files.isReadable(file)) {
+                render file: file.bytes, contentType: "application/pdf"
+            } else {
+                render text: "no plot available", contentType: "text/plain"
+            }
+        } else {
+            render status: 404
+        }
     }
 }
 
@@ -526,7 +496,7 @@ class AlignmentQcCommand {
     SeqType seqType
     Sample sample
 
-    static Closure constraints = {
+    static constraints = {
         sample nullable: true
     }
 }
@@ -535,7 +505,7 @@ class AlignmentQcDataTableCommand extends DataTableCommand {
     SeqType seqType
     Sample sample
 
-    static Closure constraints = {
+    static constraints = {
         sample nullable: true
     }
 }
@@ -551,7 +521,7 @@ class QcStatusCommand implements Validateable {
     String newValue
 
     @SuppressWarnings('Instanceof')
-    static Closure constraints = {
+    static constraints = {
         comment(blank: false, nullable: false, validator: { val, obj ->
             if (val == obj.abstractBamFile?.comment?.comment) {
                 return "not.changed"

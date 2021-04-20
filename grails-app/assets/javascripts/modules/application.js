@@ -36,4 +36,3 @@
 
 //= require otp.js
 //= require common/toaster.js
-//= require common/globalInitializer.js

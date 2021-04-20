@@ -90,8 +90,8 @@ function onFileAccessEditClick(context){
 function openConfirmationModal(text, confirmCallback, cancelCallback) {
     const modal = $("#confirmationModal");
     const modalBody = $(".modal-body", modal);
-    const confirmButton = modal.find("#confirmModal");
-    const cancelButtons = modal.find(".closeModal");
+    const confirmButton = modal.find("#confirm");
+    const cancelButton = modal.find("#close");
 
     confirmButton.unbind("click");
     confirmButton.on("click", function () {
@@ -99,8 +99,8 @@ function openConfirmationModal(text, confirmCallback, cancelCallback) {
         confirmCallback();
     });
 
-    cancelButtons.unbind("click");
-    cancelButtons.on("click", function () {
+    cancelButton.unbind("click");
+    cancelButton.on("click", function () {
         modal.hide();
 
         if (cancelCallback) {
