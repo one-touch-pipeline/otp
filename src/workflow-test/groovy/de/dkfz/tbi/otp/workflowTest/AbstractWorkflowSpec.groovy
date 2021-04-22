@@ -34,10 +34,7 @@ import org.junit.rules.TestName
 import spock.lang.Specification
 
 import de.dkfz.roddy.BEException
-import de.dkfz.roddy.execution.jobs.BEJob
-import de.dkfz.roddy.execution.jobs.BEJobID
-import de.dkfz.roddy.execution.jobs.BEJobResult
-import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
+import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -576,11 +573,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 try {
                     testCronJob.execute()
                 } catch (Throwable t) {
-                    exceptionInScheduler = new OtpRuntimeException("Crone job '${testCronJob.name}' failed for: ${t.message}", t)
+                    exceptionInScheduler = new OtpRuntimeException("Cron job '${testCronJob.name}' failed for: ${t.message}", t)
                     AbstractWorkflowSpec.log.error(exceptionInScheduler.message, t)
                 }
-            } as Runnable, 0, testCronJob.delay, TimeUnit.SECONDS)
-            log.debug("  - Started cron job: ${testCronJob.name} with delay ${testCronJob.delay}")
+            } as Runnable, 0, testCronJob.delay, testCronJob.timeUnit)
+            log.debug("  - Started cron job: ${testCronJob.name} with delay ${testCronJob.delay} ${testCronJob.timeUnit}")
         }
     }
 
@@ -712,31 +709,31 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     @TupleConstructor
     enum TestCronJob {
-        WORKFLOW_STARTING("starting workflows", 5){
+        WORKFLOW_STARTING("starting workflows", 5, TimeUnit.SECONDS){
             @Override
             void execute() {
                 Holders.applicationContext.getBean(WorkflowRunScheduler).scheduleWorkflowRun()
             }
         },
-        JOB_STARTING("starting jobs", 1){
+        JOB_STARTING("starting jobs", 1, TimeUnit.SECONDS){
             @Override
             void execute() {
                 Holders.applicationContext.getBean(JobScheduler).scheduleJob()
             }
         },
-        CHECK_CLUSTER("check cluster", 5){
+        CHECK_CLUSTER("check cluster", 5, TimeUnit.SECONDS){
             @Override
             void execute() {
                 Holders.applicationContext.getBean(ClusterJobMonitor).check()
             }
         },
-        KEEP_ALIVE_REMOTE_SHELL_HELPER("keep alive for RemoteShellHelper", 60){
+        KEEP_ALIVE_REMOTE_SHELL_HELPER("keep alive for RemoteShellHelper", 1, TimeUnit.MINUTES){
             @Override
             void execute() {
                 Holders.applicationContext.getBean(RemoteShellHelper).keepAlive()
             }
         },
-        KEEP_ALIVE_REMOTE_SFTP("keep alive for FileSystemService", 60){
+        KEEP_ALIVE_REMOTE_SFTP("keep alive for FileSystemService", 1, TimeUnit.MINUTES){
             @Override
             void execute() {
                 Holders.applicationContext.getBean(FileSystemService).keepAlive()
@@ -752,6 +749,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
          * the delay used for the cron job
          */
         final int delay
+
+        final TimeUnit timeUnit
 
         /**
          * the job to execute regularly

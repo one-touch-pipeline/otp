@@ -149,8 +149,8 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
         where:
         linkedExternally | _
-        true   | _
-        false  | _
+        true             | _
+        false            | _
     }
 
     void "test ChipSeq DataInstallation"() {
@@ -198,6 +198,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
                     singleCell   : true,
             ])
             Run run = createRun()
+            SoftwareTool softwareTool = createSoftwareTool()
             Sample sample = createSample()
 
             seqTracks = (1..3).collect {
@@ -210,6 +211,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
                         run                : run,
                         seqType            : seqType,
                         sample             : sample,
+                        pipelineVersion    : softwareTool,
                         singleCellWellLabel: "well_${it}",
                 ])
 

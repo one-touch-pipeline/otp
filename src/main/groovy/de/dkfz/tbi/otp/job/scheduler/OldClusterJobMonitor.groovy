@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * This service is able to track the execution of jobs on the cluster.
@@ -62,9 +61,7 @@ class OldClusterJobMonitor extends AbstractClusterJobMonitor {
             return //job system is inactive
         }
 
-        SessionUtils.withNewSession {
-            doCheck()
-        }
+        doCheck()
     }
 
     @Override
@@ -75,7 +72,7 @@ class OldClusterJobMonitor extends AbstractClusterJobMonitor {
     @Override
     protected void handleFinishedClusterJobs(final ClusterJob clusterJob) {
         MonitoringJob monitoringJob = schedulerService.getJobForProcessingStep(clusterJob.processingStep)
-        assert monitoringJob : """\n\n-----------------------------------------------
+        assert monitoringJob: """\n\n-----------------------------------------------
 No monitor job found for ${clusterJob.processingStep}
 Only following monitors available:
 ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\n')}
