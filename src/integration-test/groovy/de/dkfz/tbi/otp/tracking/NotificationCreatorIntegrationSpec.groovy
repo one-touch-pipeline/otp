@@ -154,10 +154,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketB), fileLinked: true])
 
             DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
-
-            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
-                notification(_, _, _, _) >> 'Something'
-            }
             DomainFactory.createProcessingOptionForNotificationRecipient()
         }
 
@@ -278,7 +274,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
             String otrsRecipient = HelperUtils.randomEmail
-            String notificationText = HelperUtils.uniqueString
             DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
             String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
@@ -288,13 +283,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
                     assert content.contains(expectedStatus.toString())
                 }
-                1 * sendEmail(expectedEmailSubjectCustomer, notificationText, [otrsRecipient])
+                1 * sendEmail(expectedEmailSubjectCustomer, _, [otrsRecipient])
                 0 * _
-            }
-
-            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
-                1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack.project) >> notificationText
-                0 * notification(_, _, _, _)
             }
         }
 
@@ -394,6 +384,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             }
 
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
+                getMessageSourceService() >> Mock(MessageSourceService)
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack1.project) >> notificationText1
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT, seqTrack1.project) >> notificationText2
                 0 * notification(_, _, _, _)

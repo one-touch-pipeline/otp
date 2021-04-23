@@ -214,6 +214,9 @@ class NotificationCreator {
             appendSeqTrackString(content, seqTrack)
             content.append('\n')
         }
+        content.append('\n')
+        content.append(createNotificationTextService.messageSourceService.createMessage("notificationCreator.ticket.link", [link : ticket.url]))
+
         mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
     }
 

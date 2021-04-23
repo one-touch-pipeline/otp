@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
@@ -56,7 +58,9 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
         notificationCreator.processingOptionService = new ProcessingOptionService()
         notificationCreator.userProjectRoleService = new UserProjectRoleService()
         notificationCreator.otrsTicketService = new OtrsTicketService()
-
+        notificationCreator.createNotificationTextService = Stub(CreateNotificationTextService) {
+            getMessageSourceService() >> Mock(MessageSourceService)
+        }
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
     }
 
@@ -170,7 +174,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
                 callCount++
                 assert "${ticket.prefixedTicketNumber} Processing Status Update".toString() == emailSubject
                 assert [notificationRecipient] == recipient
-                assert expectedContent == content
+                assert content.startsWith(expectedContent)
             }
         }
 
@@ -231,6 +235,32 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
         expect:
         notificationCreator.sendProcessingStatusOperatorNotification(ticket, seqTracks as Set, new ProcessingStatus(), true)
+    }
+
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the ticket in OTRS'() {
+        given:
+        OtrsTicket ticket = createOtrsTicket()
+        String recipient = HelperUtils.randomEmail
+        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+
+        final String otrsSystemUrl = "https://example.com"  // example of an base URL of a ticketing system
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.TICKET_SYSTEM_URL, value: otrsSystemUrl)
+
+        notificationCreator.mailHelperService = Mock(MailHelperService)
+
+        when:
+        notificationCreator.sendProcessingStatusOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
+
+        then:
+        1 * notificationCreator.createNotificationTextService.messageSourceService.createMessage(_, _) >> { String templateName, Map properties ->
+            assert templateName.contains("notificationCreator.ticket.link")
+            assert properties["link"].contains(otrsSystemUrl)
+            return "Link to ticketing system: " + otrsSystemUrl
+        }
+        1 * notificationCreator.mailHelperService.sendEmail(_, _, _) >> { String subject, String content, _ ->
+            assert content.endsWith(otrsSystemUrl)
+            assert content.contains(ticket.ticketNumber)
+        }
     }
 
     void "getProcessingStatus returns expected status"() {
