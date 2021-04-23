@@ -130,33 +130,29 @@ Closure<ScriptOutput> createSwapScript = { String swapLabel ->
         }
     }
 
-    scriptOutput.script << """\n
-\t\tassert false : "DEBUG: transaction intentionally failed to rollback changes"
-\t}
-} finally {
-\tprintln log
-}
-
-"""
-
     scriptOutput.script << """
-/****************************************************************
- * FILESYSTEM FIXING
- *
- * meta-Bash script; calls all generated bash-scripts to fix
- * the filesystem-side of things.
- *
- * execute this after the database-side of things has been updated
- ****************************************************************/
+                           |        assert false : "DEBUG: transaction intentionally failed to rollback changes"
+                           |    }
+                           |} finally {
+                           |    println log
+                           |}
+                           |
+                           |""".stripMargin()
 
-/*
-${
-    DataSwapService.BASH_HEADER + files.collect {
-        "bash ${it}.sh"
-    }.join('\n')
-}
-*/
-"""
+    scriptOutput.script << """|
+                           |/****************************************************************
+                           | * FILESYSTEM FIXING
+                           | *
+                           | * meta-Bash script; calls all generated bash-scripts to fix
+                           | * the filesystem-side of things.
+                           | *
+                           | * execute this after the database-side of things has been updated
+                           | ****************************************************************/
+                           |
+                           |/*
+                           |${de.dkfz.tbi.otp.dataswap.DataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n')}
+                           |*/
+                           |""".stripMargin()
 
     return scriptOutput
 }
@@ -171,7 +167,6 @@ if (samplesAndTypesScriptOutput.containsChanges) {
     samplesAndTypesScriptOutput.printToStdout()
     return
 }
-
 createSwapScript(swapLabel).printToStdout()
 
 
@@ -277,65 +272,68 @@ class Snippets {
     }
 
     static String databaseFixingBanner() {
-        return """\
-/****************************************************************
- * DATABASE FIXING
- *
- * OTP console script to move the database-side of things
- ****************************************************************/
-"""
+        return """\n
+               /****************************************************************
+                * DATABASE FIXING
+                *
+                * OTP console script to move the database-side of things
+                ****************************************************************/
+               """.stripIndent()
     }
 
     static String databaseFixingHeader(String swapLabel) {
-        return """
-${databaseFixingBanner()}
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-
-import java.nio.file.*
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
-
-import static org.springframework.util.Assert.*
-
-ConfigService configService = ctx.configService
-FileSystemService fileSystemService = ctx.fileSystemService
-FileService fileService = ctx.fileService
-DataSwapService dataSwapService = ctx.dataSwapService
-
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
-StringBuilder log = new StringBuilder()
-
-// create a container dir for all output of this swap;
-// group-editable so non-server users can also work with it
-String swapLabel = "${swapLabel}"
-final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
-fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
-
-/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
-boolean verifiedLinkedFiles = false
-
-/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
-boolean failOnMissingFiles = true
-
-try {
-\tIndividual.withTransaction {
-"""
+        return """|
+               |${databaseFixingBanner()}
+               |import de.dkfz.tbi.otp.dataswap.LaneSwapService
+               |import de.dkfz.tbi.otp.dataswap.Swap
+               |import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
+               |import de.dkfz.tbi.otp.ngsdata.*
+               |import de.dkfz.tbi.otp.dataprocessing.*
+               |import de.dkfz.tbi.otp.utils.*
+               |import de.dkfz.tbi.otp.config.*
+               |import de.dkfz.tbi.otp.infrastructure.FileService
+               |import de.dkfz.tbi.otp.job.processing.FileSystemService
+               |
+               |import java.nio.file.*
+               |import java.nio.file.attribute.PosixFilePermission
+               |import java.nio.file.attribute.PosixFilePermissions
+               |
+               |import static org.springframework.util.Assert.*
+               |
+               |ConfigService configService = ctx.configService
+               |FileSystemService fileSystemService = ctx.fileSystemService
+               |FileService fileService = ctx.fileService
+               |LaneSwapService laneSwapService = ctx.laneSwapService
+               |
+               |Realm realm = configService.defaultRealm
+               |FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+               |
+               |StringBuilder log = new StringBuilder()
+               |
+               |// create a container dir for all output of this swap;
+               |// group-editable so non-server users can also work with it
+               |String swapLabel = "${swapLabel}"
+               |final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
+               |fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
+               |fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+               |
+               |/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
+               |boolean verifiedLinkedFiles = false
+               |
+               |/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
+               |boolean failOnMissingFiles = true
+               |
+               |try {
+               |    Individual.withTransaction {
+               |""".stripMargin()
     }
 
     static String createSample(String pid, String sampleTypeName) {
         return """\
-assert new Sample(
-\tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${pid}')),
-\tsampleType: SampleType.findSampleTypeByName('${sampleTypeName}')
-).save(flush: true, failOnError: true) : \"Error creating new Sample '${pid} ${sampleTypeName}'\""""
+               assert new Sample(
+               \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${pid}')),
+               \tsampleType: SampleType.findSampleTypeByName('${sampleTypeName}')
+               ).save(flush: true, failOnError: true) : \"Error creating new Sample '${pid} ${sampleTypeName}'\"""".stripIndent()
     }
 
     static String createSampleType(String name) {
@@ -344,46 +342,44 @@ assert new Sample(
 
     static String swapLane(SeqTrack seqTrack, String fileName, Sample newSample) {
         StringBuilder snippet = new StringBuilder()
-        snippet << """\
-dataSwapService.swapLane(
-\t[
-\t\t'oldProjectName'        : ['${seqTrack.sample.individual.project.name}'],
-\t\t'newProjectName'        : ['${seqTrack.sample.individual.project.name}'],
-\t\t'oldPid'                : ['${seqTrack.sample.individual.pid}'],
-\t\t'newPid'                : ['${newSample.individual.pid}'],
-\t\t'oldSampleTypeName'     : ['${seqTrack.sample.sampleType.name}'],
-\t\t'newSampleTypeName'     : ['${newSample.sampleType.name}'],
-\t\t'oldSeqTypeName'        : ['${seqTrack.seqType.name}'],
-\t\t'newSeqTypeName'        : ['${seqTrack.seqType.name}'],
-\t\t'oldSingleCell'         : ['${seqTrack.seqType.singleCell.toString()}'],
-\t\t'newSingleCell'         : ['${seqTrack.seqType.singleCell.toString()}'],
-\t\t'oldLibraryLayout'      : ['${seqTrack.seqType.libraryLayout}'],
-\t\t'newLibraryLayout'      : ['${seqTrack.seqType.libraryLayout}'],
-\t\t'runName'               : ['${seqTrack.run.name}'],
-\t\t'lane'                  : ['${seqTrack.laneId}'],
-\t\t'sampleNeedsToBeCreated': ['false'],
-\t], [
-"""
+
+        snippet << "\n\tlaneSwapService.swap( \n" +
+                "\t\tnew LaneSwapParameters(\n" +
+                "\t\tprojectNameSwap: new Swap('${seqTrack.sample.individual.project.name}', '${seqTrack.sample.individual.project.name}'),\n" +
+                "\t\tpidSwap: new Swap('${seqTrack.sample.individual.pid}', '${newSample.individual.pid}'),\n" +
+                "\t\tsampleTypeSwap: new Swap('${seqTrack.sample.sampleType.name}', '${newSample.sampleType.name}'),\n" +
+                "\t\tseqTypeSwap: new Swap('${seqTrack.seqType.name}', '${seqTrack.seqType.name}'),\n" +
+                "\t\tsingleCellSwap: new Swap('${seqTrack.seqType.singleCell.toString()}', '${seqTrack.seqType.singleCell.toString()}'),\n" +
+                "\t\tsequencingReadTypeSwap: new Swap('${seqTrack.seqType.libraryLayout}', '${seqTrack.seqType.libraryLayout}'),\n" +
+                "\t\trunName: '${seqTrack.run.name}',\n" +
+                "\t\tlanes: ['${seqTrack.laneId}',],\n" +
+                "\t\tsampleNeedsToBeCreated: false,\n" +
+                "\t\tdataFileSwaps        : [\n"
+
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            snippet << "\t\t'${datafile.fileName}': '',\n"
+            snippet << "\t\t\tnew Swap('${datafile.fileName}', ''),\n"
         }
 
-        snippet << "\t],\n\t'${fileName}',\n" +
-                "\tlog, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY\n)\n"
+        snippet << "\t\t],\n" +
+                "\t\tbashScriptName: '${fileName}',\n" +
+                "\t\tlog: log,\n" +
+                "\t\tfailOnMissingFiles: failOnMissingFiles,\n" +
+                "\t\tscriptOutputDirectory: SCRIPT_OUTPUT_DIRECTORY,\n" +
+                "\t))\n"
 
         return snippet.toString()
     }
 
     static String encloseInMetaDescription(String enclosedContent) {
-        return """
-/****************************************************************
- * META DESCRIPTION
- *
- * What will change?
- ****************************************************************/
-/*
-${enclosedContent}
-*/
-"""
+        return """|
+               |/****************************************************************
+               | * META DESCRIPTION
+               | *
+               | * What will change?
+               | ****************************************************************/
+               |/*
+               |${enclosedContent}
+               |*/
+               |""".stripMargin()
     }
 }

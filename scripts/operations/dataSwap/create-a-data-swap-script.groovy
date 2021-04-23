@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
@@ -51,10 +52,10 @@ import de.dkfz.tbi.otp.utils.*
 
 swapLabel = 'OTRS-________________-something-descriptive'
 
-def swapMapDelimitor = " "
+def swapMapDelimiter = " "
 def swapMap = """
 #oldPid newPid
-#pid oldSampleType pid newSampleType
+#oldPid oldSampleType newPid newSampleType
 #oldPid oldSampleType newPid newSampleType
 #oldPid sampleType newPid sampleType
 
@@ -62,7 +63,7 @@ def swapMap = """
 """.split("\n")*.trim().findAll {
     it && !it.startsWith('#')
 }.collectEntries {
-    def entries = it.split(swapMapDelimitor)
+    def entries = it.split(swapMapDelimiter)
     if (entries.size() == 4) {
         return ["${entries[0]} ${entries[1]}", "${entries[2]} ${entries[3]}"]
     } else {
@@ -126,18 +127,25 @@ Closure<Integer> newSampleSwapScript = { StringBuilder script, Project newProjec
     String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleType.displayName}"
 
     script << "\n\tsampleSwapService.swap( \n" +
-            "\t\t[\n" +
-            "\t\tprojectNameSwap: [current: '${oldIndividual.project.name}', substitute: '${newProject.name}'],\n" +
-            "\t\tpidSwap: [current: '${oldIndividual.pid}'', substitute: '${newIndividualName}'],\n" +
-            "\t\tsampleTypeSwap: [current: '${oldSample.sampleType.name}', substitute: '${newSampleType.name}'],\n" +
+            "\t\tnew SampleSwapParameters(\n" +
+            "\t\tprojectNameSwap: new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
+            "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
+            "\t\tsampleTypeSwap: new Swap('${oldSample.sampleType.name}', '${newSampleType.name}'),\n" +
             "\t\tdataFileSwaps        : [\n"
 
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            script << "\t\t['current: ${datafile.fileName}', substitute: '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'], \n"
+            script << "\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'), \n"
         }
     }
-    script << "\t\t],\n\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n\t)\n"
+
+    script << "\t\t],\n" +
+            "\t\tbashScriptName: '${fileName}',\n" +
+            "\t\tlog: log,\n" +
+            "\t\tfailOnMissingFiles: failOnMissingFiles,\n" +
+            "\t\tscriptOutputDirectory: SCRIPT_OUTPUT_DIRECTORY,\n" +
+            "\t\tlinkedFilesVerified: verifiedLinkedFiles,\n" +
+            "\t)\n)\n"
 
     files << fileName
 
@@ -151,12 +159,12 @@ Closure<String> createScript = { String swapLabel ->
     Set<String> createdSamples = [] as Set
 
     // prepare the console script that fixes the DB-side of things
-    println """
-/****************************************************************
- * META DESCRIPTION
- *
- * What will change?
- ****************************************************************/"""
+    println """|
+            |/****************************************************************
+            | * META DESCRIPTION
+            | *
+            | * What will change?
+            | ****************************************************************/""".stripMargin()
     println "/*"
 
     script << Snippets.databaseFixingHeader(swapLabel)
@@ -206,33 +214,29 @@ Closure<String> createScript = { String swapLabel ->
         }
     }
     println "*/\n"
+    script << """|
+              |        assert false : "DEBUG: transaction intentionally failed to rollback changes"
+              |    }
+              |} finally {
+              |    println log
+              |}
+              |
+              |""".stripMargin()
+
     script << """
-\t\tassert false : "DEBUG: transaction intentionally failed to rollback changes"
-\t}
-} finally {
-\tprintln log
-}
-
-"""
-
-    script << """
-/****************************************************************
- * FILESYSTEM FIXING
- *
- * meta-Bash script; calls all generated bash-scripts to fix
- * the filesystem-side of things.
- *
- * execute this after the database-side of things has been updated
- ****************************************************************/
-
-/*
-${
-        DataSwapService.BASH_HEADER + files.collect {
-            "bash ${it}.sh"
-        }.join('\n')
-    }
-*/
-"""
+              |/****************************************************************
+              | * FILESYSTEM FIXING
+              | *
+              | * meta-Bash script; calls all generated bash-scripts to fix
+              | * the filesystem-side of things.
+              | *
+              | * execute this after the database-side of things has been updated
+              | ****************************************************************/
+              |
+              |/*
+              |${de.dkfz.tbi.otp.dataswap.DataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n')}
+              |*/
+              |""".stripMargin()
     println "\n"
     return script as String
 }
@@ -399,6 +403,8 @@ class Snippets {
                |import de.dkfz.tbi.otp.dataswap.SampleSwapService
                |import de.dkfz.tbi.otp.dataswap.Swap
                |import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
+               |import de.dkfz.tbi.otp.dataswap.LaneSwapService
+               |import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
                |
                |import java.nio.file.*
                |import java.nio.file.attribute.PosixFilePermission
@@ -411,6 +417,7 @@ class Snippets {
                |FileService fileService = ctx.fileService
                |de.dkfz.tbi.otp.ngsdata.DataSwapService dataSwapService = ctx.dataSwapService
                |SampleSwapService sampleSwapService = ctx.createSwapComments
+               |LaneSwapService laneSwapService = ctx.laneSwapService
                |
                |Realm realm = configService.defaultRealm
                |FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
@@ -463,30 +470,31 @@ class Snippets {
                            SampleType oldSampleType, SampleType newSampleType
     ) {
         StringBuilder snippet = new StringBuilder()
-        snippet << """
-                   \tde.dkfz.tbi.otp.ngsdata.DataSwapService.swapLane([
-                   \t\t'oldProjectName'   : ['${oldIndividual.project.name}'],
-                   \t\t'newProjectName'   : ['${newProject.name}'],
-                   \t\t'oldPid'           : ['${oldIndividual.pid}'],
-                   \t\t'newPid'           : ['${newIndividual}'],
-                   \t\t'oldSampleTypeName': ['${oldSampleType.name}'],
-                   \t\t'newSampleTypeName': ['${newSampleType.name}'],
-                   \t\t'oldSeqTypeName'   : ['${seqTrack.seqType.name}'],
-                   \t\t'newSeqTypeName'   : ['${seqTrack.seqType.name}'],
-                   \t\t'oldSingleCell'    : ['${seqTrack.seqType.singleCell}'],
-                   \t\t'newSingleCell'    : ['${seqTrack.seqType.singleCell}'],
-                   \t\t'oldLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
-                   \t\t'newLibraryLayout' : ['${seqTrack.seqType.libraryLayout}'],
-                   \t\t'runName'          : ['${seqTrack.run.name}'],
-                   \t\t'lane'             : ['${seqTrack.laneId}'],
-                   \t\t'sampleNeedsToBeCreated': ['false'],
-                   \t\t], [
-                   """.stripIndent()
+
+        snippet << "\n\tlaneSwapService.swap( \n" +
+                "\t\tnew LaneSwapParameters(\n" +
+                "\t\tprojectNameSwap: new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
+                "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividual}'),\n" +
+                "\t\tsampleTypeSwap: new Swap('${oldSampleType.name}', '${newSampleType.name}'),\n" +
+                "\t\tseqTypeSwap: new Swap('${seqTrack.seqType.name}', '${seqTrack.seqType.name}'),\n" +
+                "\t\tsingleCellSwap: new Swap('${seqTrack.seqType.singleCell}', '${seqTrack.seqType.singleCell}'),\n" +
+                "\t\tsequencingReadTypeSwap: new Swap('${seqTrack.seqType.libraryLayout}', '${seqTrack.seqType.libraryLayout}'),\n" +
+                "\t\trunName: '${seqTrack.run.name}',\n" +
+                "\t\tlanes: ['${seqTrack.laneId}',],\n" +
+                "\t\tsampleNeedsToBeCreated: false,\n" +
+                "\t\tdataFileSwaps        : [\n"
+
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            snippet << "\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual)}',\n"
+            snippet << "\t\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual)}'),\n"
         }
-        snippet << "\t\t],\n\t\t'${fileName}',\n" +
-                "\t\tlog, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY\n\t)\n"
+
+        snippet << "\t\t],\n" +
+                "\t\tbashScriptName: '${fileName}',\n" +
+                "\t\tlog: log,\n" +
+                "\t\tfailOnMissingFiles: failOnMissingFiles,\n" +
+                "\t\tscriptOutputDirectory: SCRIPT_OUTPUT_DIRECTORY,\n" +
+                "\t\tlinkedFilesVerified: verifiedLinkedFiles,\n" +
+                "\t)\n)\n"
 
         return snippet.toString()
     }

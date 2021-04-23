@@ -238,7 +238,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * It is also checked, that the files and the view by pid links do not exist anymore in the old directory, but exist in
      * the new directory.
      */
-    String renameDataFiles(D data) throws AssertionError{
+    String renameDataFiles(D data) throws AssertionError {
         assert data.dataFiles*.id as Set == data.oldDataFileNameMap.keySet()*.id as Set
 
         String bashScriptToMoveFiles = ""
@@ -352,7 +352,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * create a bash script to delete files from roddy,
      * the script must be executed as other user
      *
-     * @deprecated can be deleted in otp-921
+     * @deprecated can partially deleted in otp-921, but bashScriptToMoveFiles is still needed.
      */
     @Deprecated
     void createBashScriptRoddy(DataSwapData data, Path bashScriptToMoveFiles, Path bashScriptToMoveFilesAsOtherUser) {
@@ -485,7 +485,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * creates bash scripts to move files from roddy,
      * one for the normal user and one that must be executed as other user
      *
-     * @deprecated can potentially deleted in otp-921 but check if bashScriptToMoveFiles is still needed.
+     * @deprecated can partially deleted in otp-921, but bashScriptToMoveFiles is still needed.
      */
     @Deprecated
     List<Path> createMoveFileScript(D dataSwapData) {
@@ -515,7 +515,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @param data DTO containing all entities necessary to perform a swap.
      * @return outPutBashScript with added bash commands.
      */
-    private String createRenameDataFileCommands(String outPutBashScript, String oldFilename, DataFile dataFile, D data) throws FileNotFoundException{
+    private String createRenameDataFileCommands(String outPutBashScript, String oldFilename, DataFile dataFile, D data) throws FileNotFoundException {
         // fill local variables
         String oldDirectFileName = data.oldDataFileNameMap[dataFile][DIRECT_FILE_NAME]
         String oldVbpFileName = data.oldDataFileNameMap[dataFile][VBP_FILE_NAME]
@@ -569,6 +569,20 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         }
         outPutBashScript += '\n\n'
         return outPutBashScript
+    }
+
+    /**
+     * Get all AlignmentPasses for found SeqTracks from data DTO and logs them.
+     * @deprecated this function uses deprecated entities from the old workflow system.
+     *
+     * @param data DTO containing all entities necessary to perform a swap.
+     */
+    @Deprecated
+    protected void logAlignments(D data) {
+        List<AlignmentPass> alignmentPassList = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
+        if (data.seqTrackList && alignmentPassList) {
+            data.log << "\n -->     found alignments for seqtracks (${alignmentPassList*.seqTrack.unique()}): "
+        }
     }
 
     /**

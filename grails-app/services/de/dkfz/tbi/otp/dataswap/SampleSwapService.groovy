@@ -83,10 +83,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
 
     @Override
     protected void logSwapData(SampleSwapData data) {
-        List<AlignmentPass> alignmentPassList = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
-        if (data.seqTrackList && alignmentPassList) {
-            data.log << "\n -->     found alignments for seqtracks (${alignmentPassList*.seqTrack.unique()}): "
-        }
+        logAlignments(data)
     }
 
     @Override

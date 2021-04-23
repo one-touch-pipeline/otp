@@ -21,6 +21,9 @@
  */
 
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.dataswap.LaneSwapService
+import de.dkfz.tbi.otp.dataswap.Swap
+import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -56,7 +59,7 @@ import java.nio.file.Path
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
-DataSwapService dataSwapService = ctx.dataSwapService
+LaneSwapService laneSwapService = ctx.laneSwapService
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
@@ -75,39 +78,35 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-        dataSwapService.swapLane(
-                [
-                        'oldProjectName'   : ['oldProject'],
-                        'newProjectName'   : ['newProject'],
-                        'oldPid'           : ['oldPid'],
-                        'newPid'           : ['newPid'],
-                        'oldSampleTypeName': ['oldSampleType'],
-                        'newSampleTypeName': ['newSampleType'],
-                        'oldSeqTypeName'   : ['oldSeqTypeName'],
-                        'newSeqTypeName'   : ['newSeqTypeName'],
-                        'oldSingleCell'    : ['oldSingleCell'],
-                        'newSingleCell'    : ['newSingleCell'],
-                        'oldLibraryLayout' : ['oldLibraryLayout'],
-                        'newLibraryLayout' : ['newLibraryLayout'],
-                        'runName'          : ['runName'],
-                        'lane'             : [
-                                'lane1',
-                                'lane2',
-                                //...
-                        ],
-                        'sampleNeedsToBeCreated': ['sampleNeedsToBeCreated'],
-                ],
-                [
-                        'oldFileName1': 'newFileName1',
-                        'oldFileName2': 'newFileName2',
-                        'oldFileName3': '',
-                        'oldFileName4': '',
-                ],
-                'uniqueScriptName',
-                outputStringBuilder,
-                failOnMissingFiles,
-                scriptOutputDirectory,
-                linkedFilesVerified
+        laneSwapService.swap(
+                new LaneSwapParameters(
+                        [
+                                projectNameSwap       : new Swap('oldProjectName', 'newProjectName'),
+                                pidSwap               : new Swap('oldPid', 'newPid'),
+                                sampleTypeSwap        : new Swap('oldSampleTypeName', 'newSampleTypeName'),
+                                seqTypeSwap           : new Swap('oldSeqTypeName', 'newSeqTypeName'),
+                                singleCellSwap        : new Swap('oldSingleCell', 'newSingleCell'),
+                                sequencingReadTypeSwap: new Swap('sequencingReadType', 'sequencingReadType'),
+                                runName               : 'runName',
+                                lanes                 : [
+                                        'lane1',
+                                        'lane2',
+                                        //...
+                                ],
+                                sampleNeedsToBeCreated: 'sampleNeedsToBeCreated',
+                                dataFileSwaps         : [
+                                        new Swap('oldFileName1', 'newFileName1'),
+                                        new Swap('oldFileName2', 'newFileName2'),
+                                        new Swap('oldFileName3', ''),
+                                        new Swap('oldFileName4', ''),
+                                ],
+                                bashScriptName        : 'uniqueScriptName',
+                                log                   : outputStringBuilder,
+                                failOnMissingFiles    : failOnMissingFiles,
+                                scriptOutputDirectory : scriptOutputDirectory,
+                                linkedFilesVerified   : linkedFilesVerified,
+                        ]
+                )
         )
 
         assert false

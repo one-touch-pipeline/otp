@@ -402,7 +402,25 @@ class DeletionService {
         }
     }
 
-    void deleteProjectDependencies(Project project) {
+    /**
+     * Delete all MergingAssignments, MergedAlignmentDataFiles and seqScans.
+     *
+     * @param mergingAssignments to be deleted.
+     */
+    void deleteAllMergingAssignmentsWithAlignmentDataFilesAndSeqScans(List<MergingAssignment> mergingAssignments) {
+        List<SeqScan> seqScans = mergingAssignments*.seqScan.unique()
+        if (seqScans) {
+            List<MergingLog> mergingLogs = MergingLog.findAllBySeqScanInList(seqScans)
+            MergingAssignment.findAllBySeqScanInList(seqScans)*.delete()
+            if (mergingLogs) {
+                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete()
+                mergingLogs*.delete()
+            }
+            seqScans*.delete()
+        }
+    }
+
+    private void deleteProjectDependencies(Project project) {
         // Deletes the connection of the project to the reference genome
         ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete(flush: true)
 

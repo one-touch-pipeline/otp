@@ -21,39 +21,48 @@
  */
 package de.dkfz.tbi.otp.dataswap.data
 
-import groovy.transform.TupleConstructor
-
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataswap.Swap
-import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
+import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 
-@TupleConstructor
-class SampleSwapData extends DataSwapData<SampleSwapParameters> {
+class LaneSwapData extends DataSwapData<LaneSwapParameters> {
 
     static Closure constraints = {
-        seqTrackList validator: { seqTrackList, obj ->
-            List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = obj.seqTrackService.returnExternallyProcessedMergedBamFiles(seqTrackList)
-            if (!externallyProcessedMergedBamFiles.empty) {
-                return "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
+        sequencingReadTypeSwap nullable: false, validator: {
+            if (!it.old) {
+                return "The old SequencingReadType does not exists"
             }
-            int linkedSeqTracks = seqTrackList.findAll { SeqTrack seqTrack -> seqTrack.linkedExternally
-            }.size()
-            if (!obj.linkedFilesVerified && linkedSeqTracks) {
-                return "There are ${linkedSeqTracks} seqTracks only linked"
+            if (!it.new) {
+                return "The new SequencingReadType does not exists"
+            }
+        }
+
+        seqTrackList validator: { seqTrackList, obj ->
+            if (seqTrackList*.seqType.unique().size() != 1) {
+                return "SeqTrack of different SeqTypes found!"
+            }
+            if (seqTrackList*.seqType.first() != obj.seqTypeSwap.old) {
+                return "expected '${obj.seqTypeSwap.old}' but found '${seqTrackList*.seqType.first()}'"
+            }
+            if (seqTrackList.size() != obj.lanes.size()) {
+                return "Given lane(s) ${obj.lanes} and found SeqTracks differ!"
             }
         }
     }
 
+    Run run
+
     Swap<SampleType> sampleTypeSwap
+    Swap<SeqType> seqTypeSwap
+    Swap<SequencingReadType> sequencingReadTypeSwap
+    Swap<Sample> sampleSwap
 
-    Sample sample
+    List<String> getLanes() {
+        return parameters.lanes
+    }
 
-    List<DataFile> fastqDataFiles
-
-    SeqTrackService seqTrackService
 }

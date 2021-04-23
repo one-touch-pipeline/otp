@@ -19,41 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataswap.data
+package de.dkfz.tbi.otp.dataswap.parameters
 
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataswap.Swap
-import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 @TupleConstructor
-class SampleSwapData extends DataSwapData<SampleSwapParameters> {
+class LaneSwapParameters extends DataSwapParameters {
 
     static Closure constraints = {
-        seqTrackList validator: { seqTrackList, obj ->
-            List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = obj.seqTrackService.returnExternallyProcessedMergedBamFiles(seqTrackList)
-            if (!externallyProcessedMergedBamFiles.empty) {
-                return "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
-            }
-            int linkedSeqTracks = seqTrackList.findAll { SeqTrack seqTrack -> seqTrack.linkedExternally
-            }.size()
-            if (!obj.linkedFilesVerified && linkedSeqTracks) {
-                return "There are ${linkedSeqTracks} seqTracks only linked"
+        sampleTypeSwap nullable: false, validator: {
+            if (!it.old || !it.new) {
+                return "neither the old nor the new sampleType name may be null or blank"
             }
         }
+        seqTypeSwap nullable: false, validator: {
+            if (!it.old || !it.new) {
+                return "neither the old nor the new seqType name may be null or blank"
+            }
+        }
+        singleCellSwap nullable: false, validator: {
+            if ((it.old == null) || (it.new == null)) {
+                return "neither the old nor the new singleCell may be null"
+            }
+        }
+        sequencingReadTypeSwap nullable: false, validator: {
+            if (!it.old || !it.new) {
+                return "neither the old nor the new sequencingReadType name may be null or blank"
+            }
+        }
+        runName nullable: false, blank: false
+        lanes nullable: false, minSize: 1
     }
 
-    Swap<SampleType> sampleTypeSwap
-
-    Sample sample
-
-    List<DataFile> fastqDataFiles
-
-    SeqTrackService seqTrackService
+    Swap<String> sampleTypeSwap
+    Swap<String> seqTypeSwap
+    Swap<Boolean> singleCellSwap
+    Swap<String> sequencingReadTypeSwap
+    String runName
+    List<String> lanes
+    boolean sampleNeedsToBeCreated = false
 }

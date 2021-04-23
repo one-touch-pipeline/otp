@@ -29,8 +29,6 @@ import de.dkfz.tbi.otp.dataswap.Swap
 class SampleSwapParameters extends DataSwapParameters {
 
     static Closure constraints = {
-        importFrom DataSwapParameters
-
         sampleTypeSwap nullable: false, validator: {
             if (!it.old || !it.new) {
                 return "neither the old nor the new sampleType name may be null or blank"

@@ -58,7 +58,7 @@ List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
         'in'('name', [
                 'seqType1',
                 'seqType2',
-                ])
+        ])
         eq('libraryLayout', SequencingReadType.PAIRED)
         eq('singleCell', 'TRUE OR FALSE')
     }
@@ -89,46 +89,49 @@ StringBuilder script = new StringBuilder()
 List<String> all_swaps = []
 
 script << """
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-
-import java.nio.file.*
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
-
-import static org.springframework.util.Assert.*
-
-ConfigService configService = ctx.configService
-FileSystemService fileSystemService = ctx.fileSystemService
-FileService fileService = ctx.fileService
-DataSwapService dataSwapService = ctx.dataSwapService
-
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
-StringBuilder log = new StringBuilder()
-
-// create a container dir for all output of this swap;
-// group-editable so non-server users can also work with it
-String swapLabel = "${swapLabel}"
-final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
-fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
-
-/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
-boolean linkedFilesVerified = false
-
-/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
-boolean failOnMissingFiles = true
-
-
-try {
-    Individual.withTransaction {[
-"""
+          import de.dkfz.tbi.otp.dataswap.LaneSwapService
+          import de.dkfz.tbi.otp.dataswap.Swap
+          import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
+          import de.dkfz.tbi.otp.ngsdata.*
+          import de.dkfz.tbi.otp.dataprocessing.*
+          import de.dkfz.tbi.otp.utils.*
+          import de.dkfz.tbi.otp.config.*
+          import de.dkfz.tbi.otp.infrastructure.FileService
+          import de.dkfz.tbi.otp.job.processing.FileSystemService
+          
+          import java.nio.file.*
+          import java.nio.file.attribute.PosixFilePermission
+          import java.nio.file.attribute.PosixFilePermissions
+          
+          import static org.springframework.util.Assert.*
+          
+          ConfigService configService = ctx.configService
+          FileSystemService fileSystemService = ctx.fileSystemService
+          FileService fileService = ctx.fileService
+          LaneSwapService laneSwapService = ctx.laneSwapService
+          
+          Realm realm = configService.defaultRealm
+          FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+          
+          StringBuilder log = new StringBuilder()
+          
+          // create a container dir for all output of this swap;
+          // group-editable so non-server users can also work with it
+          String swapLabel = "${swapLabel}"
+          final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap').resolve(swapLabel)
+          fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
+          fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+          
+          /** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
+          boolean linkedFilesVerified = false
+          
+          /** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
+          boolean failOnMissingFiles = true
+          
+          
+          try {
+              Individual.withTransaction {[
+          """.stripIndent()
 
 seqTracks.each { seqTrack ->
     Map newValues = adaptValues(seqTrack)
@@ -137,60 +140,51 @@ seqTracks.each { seqTrack ->
     String swapOrderedName = "swap_${String.valueOf(counter++).padLeft(4, '0')}_${swapName}"
     all_swaps << swapOrderedName
 
-    script << """
-    {
-        dataSwapService.swapLane([
-                "oldProjectName"        : ["${seqTrack.project.name}"],
-                "newProjectName"        : ["${newValues.newProjectName}"],
-                "oldPid"                : ["${seqTrack.individual.pid}"],
-                "newPid"                : ["${newValues.newPid}"],
-                "oldSampleTypeName"     : ["${seqTrack.sampleType.name}"],
-                "newSampleTypeName"     : ["${newValues.newSampleTypeName}"],
-                "oldSeqTypeName"        : ["${seqTrack.seqType.name}"],
-                "newSeqTypeName"        : ["${newValues.newSeqTypeName}"],
-                "oldSingleCell"         : ["${seqTrack.seqType.singleCell}"],
-                "newSingleCell"         : ["${newValues.newSingleCell}"],
-                "oldLibraryLayout"      : ["${seqTrack.seqType.libraryLayout}"],
-                "newLibraryLayout"      : ["${newValues.newLibraryLayout}"],
-                "runName"               : ["${seqTrack.run.name}"],
-                "lane"                  : [ "${seqTrack.laneId}", ],
-                "sampleNeedsToBeCreated": ['false'],
-            ],
-            ["""
+    script <<
+            "\n{\n" +
+            "\n\tlaneSwapService.swap( \n" +
+            "\t\tnew LaneSwapParameters(\n" +
+            "\t\tprojectNameSwap: new Swap('${seqTrack.project.name}', '${newValues.newProjectName}'),\n" +
+            "\t\tpidSwap: new Swap('${seqTrack.individual.pid}', '${newValues.newPid}'),\n" +
+            "\t\tsampleTypeSwap: new Swap('${seqTrack.sampleType.name}', '${newValues.newSampleTypeName}'),\n" +
+            "\t\tseqTypeSwap: new Swap('${seqTrack.seqType.name}', '${newValues.newSeqTypeName}'),\n" +
+            "\t\tsingleCellSwap: new Swap('${seqTrack.seqType.singleCell}', '${newValues.newSingleCell}'),\n" +
+            "\t\tsequencingReadTypeSwap: new Swap('${seqTrack.seqType.libraryLayout}', '${newValues.newLibraryLayout}'),\n" +
+            "\t\trunName: '${seqTrack.run.name}',\n" +
+            "\t\tlanes: ['${seqTrack.laneId}',],\n" +
+            "\t\tsampleNeedsToBeCreated: false,\n" +
+            "\t\tdataFileSwaps        : [\n"
+
     seqTrack.dataFiles.each { dataFile ->
-        script << "\n                '${dataFile.fileName}':'',"
+        script << "\t\t\tnew Swap('${dataFile.fileName}', ''),\n"
     }
 
-    script << """
-            ],
-            '${swapOrderedName}',
-            log,
-            failOnMissingFiles,
-            SCRIPT_OUTPUT_DIRECTORY,
-            linkedFilesVerified,
-        )
-    },
-"""
+    script << "\t\t],\n" +
+            "\t\t'bashScriptName': '${swapOrderedName}',\n" +
+            "\t\t'log': log,\n" +
+            "\t\t'failOnMissingFiles': failOnMissingFiles,\n" +
+            "\t\t'scriptOutputDirectory': SCRIPT_OUTPUT_DIRECTORY,\n" +
+            "\t\t'linkedFilesVerified': linkedFilesVerified,\n" +
+            "\t))\n},\n"
 }
 
+script << """|
+          |].each { it() }
+          |    assert false : "transaction intentionally failed to rollback transaction"
+          |    }
+          |} finally {
+          |    println log
+          |}
+          |
+          |""".stripMargin()
+
 script << """
-    ].each { it() }
-    assert false : "transaction intentionally failed to rollback transaction"
-    }
-} finally {
-    println log
-}
+          |//scripts to execute
+          |/*
+          |${de.dkfz.tbi.otp.dataswap.DataSwapService.BASH_HEADER + all_swaps.collect { "bash ${it}.sh" }.join('\n')}
+          |*/
+          |
+          |""".stripMargin()
 
-"""
-
-script << """
-//scripts to execute
-/*
-${DataSwapService.BASH_HEADER + all_swaps.collect {
-    "bash ${it}.sh"
-}.join('\n')}
-*/
-
-"""
 println script
 
