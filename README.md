@@ -92,3 +92,21 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in OTP by you, shall be licensed as MIT, without any additional
 terms or conditions.
 
+## Our Partners
+
+<table><tr>
+<td><a href="https://www.denbi.de/"><img src="https://otp.dkfz.de/otp/assets/non-free/denbi-4d5d1416811ca00fcf89cf71836f0e55.png" alt="de.NBI" width="300" align="left"></a></td>
+<td>The development of OTP is supported by the 
+<a href="https://www.denbi.de/">German Network for Bioinformatic Infrastructure (de.NBI)</a>. By completing <a href="https://www.surveymonkey.de/r/denbi-service?sc=hd-hub&tool=otp">this very short survey</a> you support our efforts to improve this tool.
+<strong>Your opinion matters!</strong></td>
+</tr></table>
+
+In addition to de.NBI, thanks also go to our other partners:
+
+[<img src="https://otp.dkfz.de/otp/assets/non-free/dktk.jpg" alt="DKTK" width="190"/>](https://www.dkfz.de/en/dktk/) &nbsp; &nbsp; &nbsp; &nbsp;
+[<img src="https://otp.dkfz.de/otp/assets/non-free/hipo.png" alt="HIPO" width="150"/>](https://www.hipo-heidelberg.org/hipo2/) &nbsp; &nbsp; &nbsp; &nbsp;
+[<img src="https://otp.dkfz.de/otp/assets/non-free/nct.jpg" alt="NCT" width="360"/>](https://www.nct-heidelberg.de/) &nbsp; &nbsp; &nbsp; &nbsp;
+[<img src="https://otp.dkfz.de/otp/assets/non-free/kitz.png" alt="KiTZ" width="200"/>](https://www.kitz-heidelberg.de/) &nbsp; &nbsp; &nbsp; &nbsp;
+[<img src="https://otp.dkfz.de/otp/assets/non-free/logoDeep.png" alt="DEEP" width="100"/>](http://www.deutsches-epigenom-programm.de/) &nbsp; &nbsp; &nbsp; &nbsp;
+[<img src="https://otp.dkfz.de/otp/assets/non-free/ihec.png" alt="IHEC" width="220"/>](http://ihec-epigenomes.org/) &nbsp; &nbsp; &nbsp; &nbsp;
+[<img src="https://daco.icgc.org/assets/site/images/ICGC_Logo.svg" alt="CACO" width="600"/>](https://daco.icgc.org/)
