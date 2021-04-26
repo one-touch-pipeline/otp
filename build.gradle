@@ -360,7 +360,6 @@ war {
 task ensureDocsBuildDirs {
     doLast {
         mkdir "$buildDir/docs/users"
-        mkdir "$buildDir/docs/devel"
         mkdir "$buildDir/docs/images"
     }
 }
