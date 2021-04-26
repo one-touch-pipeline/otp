@@ -45,10 +45,12 @@ then
   git fetch --unshallow --tags
   LATEST_REVIEW_TAG=$(git describe --abbrev=0 --tags --match "sprint_review_*" HEAD^)
 fi
-echo LATEST_REVIEW_TAG
+echo $LATEST_REVIEW_TAG
 
 #get git history
 git log $LATEST_REVIEW_TAG..HEAD --pretty=format:'%s' | sed -e 's/: /;/g' > log-all.csv
+
+sed -i '/^\(Revert\|Merge\)/d' log-all.csv
 
 set +e
 
