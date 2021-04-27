@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FileNotFoundException
+import de.dkfz.tbi.otp.dataswap.DataSwapService
 import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -42,6 +43,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 import java.nio.file.Path
 
@@ -59,9 +61,9 @@ class DeletionService {
     SeqTrackService seqTrackService
     AnalysisDeletionService analysisDeletionService
     FileService fileService
-    DataSwapService dataSwapService
     RunService runService
     ConfigService configService
+    WorkflowDeletionService workflowDeletionService
 
     void deleteProjectContent(Project project) {
         assert !EgaSubmission.findAllByProject(project): "There are Ega Submissions connected to this Project, thus it can not be deleted"
@@ -122,6 +124,11 @@ class DeletionService {
 
         seqTypes.unique().each { SeqType seqType ->
             deletionScript << "rm -rf ${individual.getViewByPidPath(seqType).absoluteDataManagementPath}\n"
+        }
+
+        WorkflowArtefact workflowArtefact = CollectionUtils.atMostOneElement(WorkflowArtefact.findAllByIndividual(individual))
+        if (workflowArtefact) {
+            workflowDeletionService.deleteWorkflowArtefact(workflowArtefact)
         }
 
         deleteClusterJobs(ClusterJob.findAllByIndividual(individual))
@@ -269,7 +276,7 @@ class DeletionService {
 
         Realm realm = configService.defaultRealm
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", realm)
-        bashScriptToMoveFiles << dataSwapService.BASH_HEADER
+        bashScriptToMoveFiles << DataSwapService.BASH_HEADER
 
         (dirsToDelete - externalMergedBamFolders).each {
             bashScriptToMoveFiles << "rm -rf ${it}\n"
@@ -296,8 +303,8 @@ class DeletionService {
         List<File> dirsToDeleteWithOtherUser = []
 
         if (enableChecks) {
-            dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
-            dataSwapService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+            seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+            seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
         }
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
@@ -517,8 +524,8 @@ class DeletionService {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
 
         if (check) {
-            dataSwapService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
-            dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+            seqTrackService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+            seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
 
         List<File> dirsToDelete = []

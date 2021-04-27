@@ -23,56 +23,128 @@ package de.dkfz.tbi.otp.utils
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import spock.lang.Ignore
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
 @Rollback
 @Integration
-class WorkflowDeletionServiceIntegrationSpec extends Specification implements DomainFactoryCore, WorkflowSystemDomainFactory {
+class WorkflowDeletionServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
     WorkflowDeletionService workflowDeletionService
 
-    @Ignore
-    //TODO: unignore when domain classes implementing Artefact exist; test that Artefacts belonging to workflowArtefact are also deleted
-    void "test deleteWorkflowRun"() {
+    void "deleteWorkflowRun, should delete all a WorkflowRun and all its dependencies"() {
         given:
-        WorkflowRunInputArtefact wria = createData()
-        WorkflowRun workflowRun = createWorkflowRun()
+        WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
+        WorkflowRun workflowRun = createWorkflowRun(
+                omittedMessage: createOmittedMessage()
+        )
+        createWorkflowSteps(wria.workflowRun)
         wria.workflowArtefact.producedBy = workflowRun
+        wria.workflowArtefact.outputRole = "someOutPutRole"
         wria.save(flush: true)
 
         when:
         workflowDeletionService.deleteWorkflowRun(workflowRun)
 
         then:
-        WorkflowRun.count() == 0
-        WorkflowArtefact.count() == 0
-        WorkflowRunInputArtefact.count() == 0
+        WorkflowRun.count == 0
+        WorkflowArtefact.count == 0
+        WorkflowRunInputArtefact.count == 0
+        WorkflowStep.count == 0
+        ClusterJob.count == 0
+        WorkflowLog.count == 0
+        WorkflowError.count == 0
+        OmittedMessage.count == 0
     }
 
-    @Ignore
-    //TODO: unignore when domain classes implementing Artefact exist; test that Artefacts belonging to workflowArtefact are also deleted
     void "test deleteWorkflowArtefact"() {
         given:
-        WorkflowRunInputArtefact wria = createData()
+        WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
         createWorkflowArtefact(producedBy: wria.workflowRun)
 
         when:
         workflowDeletionService.deleteWorkflowArtefact(wria.workflowArtefact)
 
         then:
-        WorkflowRun.count() == 0
-        WorkflowArtefact.count() == 0
-        WorkflowRunInputArtefact.count() == 0
+        WorkflowRun.count == 0
+        WorkflowArtefact.count == 0
+        WorkflowRunInputArtefact.count == 0
     }
 
-    private WorkflowRunInputArtefact createData() {
+    void "deleteWorkflowStep, should delete a WorkflowStep and all its dependencies if it is last in list"() {
+        given:
+        WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
+        WorkflowStep LastWorkflowStep = createWorkflowSteps(wria.workflowRun).last()
+
+        when:
+        workflowDeletionService.deleteWorkflowStep(LastWorkflowStep)
+
+        then:
+        !WorkflowStep.get(LastWorkflowStep.id)
+        WorkflowStep.count == 2
+        ClusterJob.count == 2
+        WorkflowLog.count == 2
+        WorkflowError.count == 1
+    }
+
+    void "deleteWorkflowStep, should throw IllegalArgumentException if a WorkflowStep has already been restarted"() {
+        given:
+        WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
+        List<WorkflowStep> workflowSteps = createWorkflowSteps(wria.workflowRun)
+
+        when:
+        workflowDeletionService.deleteWorkflowStep(workflowSteps[1])
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    void "deleteWorkflowStep, should throw IllegalArgumentException if a WorkflowStep has already a following WorkflowStep"() {
+        given:
+        WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
+        List<WorkflowStep> workflowSteps = createWorkflowSteps(wria.workflowRun)
+
+        when:
+        workflowDeletionService.deleteWorkflowStep(workflowSteps.first())
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    private WorkflowRunInputArtefact createWorkflowArtefactAndRun() {
         WorkflowArtefact wa = createWorkflowArtefact()
-        WorkflowRun workflowRun2 = createWorkflowRun()
-        return createWorkflowRunInputArtefact(workflowRun: workflowRun2, role: "whatever", workflowArtefact: wa)
+        WorkflowRun workflowRun = createWorkflowRun()
+        return createWorkflowRunInputArtefact(workflowRun: workflowRun, role: "whatever", workflowArtefact: wa)
+    }
+
+    private List<WorkflowStep> createWorkflowSteps(WorkflowRun workflowRun) {
+        WorkflowStep workflowStep = createWorkflowStep(
+                workflowRun: workflowRun,
+        )
+        0..3.each {
+            createClusterJob(workflowStep: workflowStep)
+            createWorkflowMessageLog(workflowStep: workflowStep)
+        }
+        WorkflowStep followingWorkflowStep = createWorkflowStep(
+                workflowRun: workflowRun,
+                workflowError: createWorkflowError(),
+                state: WorkflowStep.State.FAILED,
+                previous: workflowStep
+        )
+        WorkflowStep restartedWorkflowStep = createWorkflowStep(
+                workflowRun: workflowRun,
+                restartedFrom: followingWorkflowStep,
+                previous: workflowStep
+        )
+        0..3.each {
+            createClusterJob(workflowStep: workflowStep)
+            createWorkflowMessageLog(workflowStep: workflowStep)
+        }
+        return [workflowStep, followingWorkflowStep, restartedWorkflowStep]
     }
 }

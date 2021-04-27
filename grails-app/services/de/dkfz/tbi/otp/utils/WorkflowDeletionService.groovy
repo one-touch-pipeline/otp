@@ -23,15 +23,28 @@ package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
 @Transactional
 class WorkflowDeletionService {
+
     void deleteWorkflowRun(WorkflowRun workflowRun) {
+        workflowRun.workflowSteps?.reverse()?.each {
+            deleteWorkflowStep(it)
+        }
+
         WorkflowArtefact.findAllByProducedBy(workflowRun).each {
             deleteWorkflowArtefact(it)
         }
+
+        OmittedMessage omittedMessage = workflowRun.omittedMessage
+
         workflowRun.delete(flush: true)
+
+        deleteOmittedMessage(omittedMessage)
     }
 
     void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {
@@ -42,5 +55,41 @@ class WorkflowDeletionService {
         }
         workflowArtefact.artefact.ifPresent { it.delete(flush: true) }
         workflowArtefact.delete(flush: true)
+    }
+
+    void deleteWorkflowStep(WorkflowStep workflowStep) {
+        if (WorkflowStep.findAllByPrevious(workflowStep) || WorkflowStep.findAllByRestartedFrom(workflowStep)) {
+            throw new IllegalArgumentException()
+        }
+        workflowStep.workflowRun.workflowSteps.remove(workflowStep)
+        workflowStep.logs.each {
+            deleteWorkflowLog(it)
+        }
+        ClusterJob.findAllByWorkflowStep(workflowStep).each {
+            it.delete(flush: true)
+        }
+        WorkflowError error = workflowStep.workflowError
+
+        workflowStep.delete(flush: true)
+
+        deleteWorkflowError(error)
+    }
+
+    void deleteWorkflowError(WorkflowError workflowError) {
+        if (workflowError) {
+            workflowError.delete(flush: true)
+        }
+    }
+
+    void deleteOmittedMessage(OmittedMessage omittedMessage) {
+        if (omittedMessage) {
+            omittedMessage.delete(flush: true)
+        }
+    }
+
+    void deleteWorkflowLog(WorkflowLog workflowLog) {
+        if (workflowLog) {
+            workflowLog.delete(flush: true)
+        }
     }
 }

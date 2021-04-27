@@ -21,6 +21,7 @@
  */
 package operations.dataSwap
 
+import de.dkfz.tbi.otp.dataswap.DataSwapService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
@@ -150,7 +151,7 @@ Closure<ScriptOutput> createSwapScript = { String swapLabel ->
                            | ****************************************************************/
                            |
                            |/*
-                           |${de.dkfz.tbi.otp.dataswap.DataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n')}
+                           |${DataSwapService.BASH_HEADER + files.collect { "bash ${it}.sh" }.join('\n')}
                            |*/
                            |""".stripMargin()
 

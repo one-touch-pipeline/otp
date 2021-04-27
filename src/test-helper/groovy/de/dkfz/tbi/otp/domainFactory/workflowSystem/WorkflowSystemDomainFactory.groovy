@@ -28,7 +28,9 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
@@ -118,31 +120,57 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowVersion createWorkflowVersion(Map properties = [:]) {
         return createDomainObject(WorkflowVersion, [
-                workflow: { createWorkflow() },
+                workflow       : { createWorkflow() },
                 workflowVersion: "${nextId}.0",
         ], properties)
     }
 
     ExternalWorkflowConfigSelector createExternalWorkflowConfigSelector(Map properties = [:]) {
         return createDomainObject(ExternalWorkflowConfigSelector, [
-                name: "externalWorkflowConfigSelectorName_${nextId}",
-                workflowVersions: { [createWorkflowVersion()] },
-                workflows: { [createWorkflow()] },
-                referenceGenomes: { [createReferenceGenome()] },
-                libraryPreparationKits: { [createLibraryPreparationKit()] },
-                seqTypes: { [createSeqType()] },
-                projects: { [createProject()] },
+                name                          : "externalWorkflowConfigSelectorName_${nextId}",
+                workflowVersions              : { [createWorkflowVersion()] },
+                workflows                     : { [createWorkflow()] },
+                referenceGenomes              : { [createReferenceGenome()] },
+                libraryPreparationKits        : { [createLibraryPreparationKit()] },
+                seqTypes                      : { [createSeqType()] },
+                projects                      : { [createProject()] },
                 externalWorkflowConfigFragment: { createExternalWorkflowConfigFragment() },
-                selectorType: { SelectorType.GENERIC },
-                customPriority: nextId,
+                selectorType                  : { SelectorType.GENERIC },
+                customPriority                : nextId,
         ], properties)
     }
 
     ExternalWorkflowConfigFragment createExternalWorkflowConfigFragment(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ExternalWorkflowConfigFragment, [
-                name: "externalWorkflowConfigFragmentName_${nextId}",
+                name        : "externalWorkflowConfigFragmentName_${nextId}",
                 configValues: '{ "OTP_CLUSTER": { "MEMORY": "1" } }',
-                previous: null,
+                previous    : null,
+        ], properties, saveAndValidate)
+    }
+
+    WorkflowMessageLog createWorkflowMessageLog(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkflowMessageLog, [
+                workflowStep: { createWorkflowStep() },
+                createdBy   : "domainFactory",
+                message     : "message_${nextId}",
+        ], properties, saveAndValidate)
+    }
+
+    WorkflowCommandLog createWorkflowCommandLog(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkflowCommandLog, [
+                workflowStep: { createWorkflowStep() },
+                createdBy   : "domainFactory",
+                command     : "command_${nextId}",
+                exitCode    : 1L,
+                stdout      : "stdout_${nextId}",
+                stderr      : "stderr_${nextId}",
+        ], properties, saveAndValidate)
+    }
+
+    OmittedMessage createOmittedMessage(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(OmittedMessage, [
+                category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+                message : "message_${nextId}",
         ], properties, saveAndValidate)
     }
 }

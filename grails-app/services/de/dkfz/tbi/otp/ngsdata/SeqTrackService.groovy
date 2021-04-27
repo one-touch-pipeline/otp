@@ -100,9 +100,9 @@ class SeqTrackService {
         List<Project> projects = projectService.allProjects
         return projects ? Sequence.findAllByProjectIdInList(projects*.id, [
                 offset: offset,
-                max: max,
-                sort: column.columnName,
-                order: sortOrder ? "asc" : "desc",
+                max   : max,
+                sort  : column.columnName,
+                order : sortOrder ? "asc" : "desc",
         ]) : []
     }
 
@@ -258,12 +258,12 @@ LIMIT 1
 
     static void setFastqcInProgress(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
-        assert(seqTrack.save(flush: true))
+        assert (seqTrack.save(flush: true))
     }
 
     void setFastqcFinished(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assert(seqTrack.save(flush: true))
+        assert (seqTrack.save(flush: true))
     }
 
     List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
@@ -315,7 +315,7 @@ LIMIT 1
      * - doesn't need adapter trimming
      */
     void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
-        assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
+        assert seqTrack: "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
         boolean importDirAllowsLinking = doesImportDirAllowLinking(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.forceCopyFiles
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
@@ -323,7 +323,7 @@ LIMIT 1
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
                 Pipeline.findByName(seqTrack.seqType.isRna() ?
                         Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
-        boolean link = willBeAligned  && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !hasIndexFiles && !adapterTrimming
+        boolean link = willBeAligned && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !hasIndexFiles && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
                 "willBeAligned=${willBeAligned}, importDirAllowsLinking=${importDirAllowsLinking}, projectAllowsLinking=${projectAllowsLinking}, " +
                 "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}, hasIndexFiles=${hasIndexFiles}")
@@ -428,5 +428,22 @@ LIMIT 1
         return seqTracks.findAll { SeqTrack seqTrack ->
             seqTrack.seqType in analysableSeqTypes
         }
+    }
+
+    /**
+     * In case there are ExternallyProcessedMergedBamFile attached to the lanes to swap, the script shall stop
+     * @param seqTracks
+     */
+    void throwExceptionInCaseOfExternalMergedBamFileIsAttached(List<SeqTrack> seqTracks) {
+        List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = returnExternallyProcessedMergedBamFiles(seqTracks)
+        assert externallyProcessedMergedBamFiles.empty: "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
+    }
+
+    /**
+     * In case the seqTracks are only linked, the script shall stop
+     */
+    void throwExceptionInCaseOfSeqTracksAreOnlyLinked(List<SeqTrack> seqTracks) {
+        int linkedSeqTracks = seqTracks.findAll { SeqTrack seqTrack -> seqTrack.linkedExternally }.size()
+        assert !linkedSeqTracks: "There are ${linkedSeqTracks} seqTracks only linked"
     }
 }

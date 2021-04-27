@@ -26,12 +26,14 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -44,17 +46,18 @@ import de.dkfz.tbi.otp.project.dta.DataTransfer
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreementDocument
 import de.dkfz.tbi.otp.project.dta.DataTransferDocument
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 @Rollback
 @Integration
-class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DocumentFactory {
+class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DocumentFactory, WorkflowSystemDomainFactory {
 
     DeletionService deletionService
+    TestConfigService configService
 
     void setupData() {
         deletionService = new DeletionService()
         deletionService.lsdfFilesService = new LsdfFilesService()
-        deletionService.dataSwapService = Mock(DataSwapService)
         deletionService.commentService = Mock(CommentService)
         deletionService.fastqcDataFilesService = Mock(FastqcDataFilesService)
         deletionService.dataProcessingFilesService = Mock(DataProcessingFilesService)
@@ -62,6 +65,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.analysisDeletionService = new AnalysisDeletionService()
         deletionService.fileService = new FileService()
         deletionService.runService = new RunService()
+        deletionService.workflowDeletionService = new WorkflowDeletionService()
     }
 
     void "assertNoEgaSubmissionsForProject, throws assertion error when there are connected EgaSubmissions"() {
@@ -217,14 +221,14 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
                 ])
         ])
         RoddyWorkflowConfig config1 = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqTrack.seqType,
+                project     : project,
+                seqType     : seqTrack.seqType,
                 obsoleteDate: new Date(),
         ])
 
         DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqTrack.seqType,
+                project       : project,
+                seqType       : seqTrack.seqType,
                 previousConfig: config1,
         ])
 
@@ -253,8 +257,8 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
 
         RoddyWorkflowConfig config2 = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqTrack.seqType,
+                project     : project,
+                seqType     : seqTrack.seqType,
                 obsoleteDate: new Date(),
         ])
 
@@ -320,56 +324,56 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
 
         Process process = DomainFactory.createProcess([
-                jobExecutionPlan:  jobExecutionPlan,
-                finished: true,
+                jobExecutionPlan: jobExecutionPlan,
+                finished        : true,
         ])
 
         ProcessingStep processingStep1 = DomainFactory.createProcessingStep([
-                process: process,
+                process      : process,
                 jobDefinition: jobDefinition1,
         ])
 
         ProcessingStep processingStep2 = DomainFactory.createProcessingStep([
-                process: process,
+                process      : process,
                 jobDefinition: jobDefinition2,
-                previous: processingStep1,
+                previous     : processingStep1,
         ])
 
         processingStep1.next = processingStep2
         processingStep1.save(flush: true)
 
         ProcessingStep processingStep3 = DomainFactory.createProcessingStep([
-                process: process,
+                process      : process,
                 jobDefinition: jobDefinition3,
-                previous: processingStep2,
+                previous     : processingStep2,
         ])
 
         processingStep2.next = processingStep3
         processingStep2.save(flush: true)
 
         DomainFactory.createRestartedProcessingStep([
-                process: process,
+                process      : process,
                 jobDefinition: jobDefinition3,
-                original: processingStep3,
-                previous: processingStep3.previous,
+                original     : processingStep3,
+                previous     : processingStep3.previous,
         ])
 
         ProcessingStepUpdate processingStepUpdate11 = DomainFactory.createProcessingStepUpdate([
                 processingStep: processingStep1,
         ])
 
-        ProcessingError processingError =  DomainFactory.createProcessingError()
+        ProcessingError processingError = DomainFactory.createProcessingError()
 
         ProcessingStepUpdate processingStepUpdate12 = DomainFactory.createProcessingStepUpdate([
                 processingStep: processingStep1,
-                previous: processingStepUpdate11,
-                state: ExecutionState.FAILURE,
-                error: processingError,
+                previous      : processingStepUpdate11,
+                state         : ExecutionState.FAILURE,
+                error         : processingError,
         ])
 
         DomainFactory.createProcessingStepUpdate([
                 processingStep: processingStep1,
-                previous: processingStepUpdate12,
+                previous      : processingStepUpdate12,
         ])
 
         ClusterJob clusterJob21 = DomainFactory.createClusterJob([
@@ -378,7 +382,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
         DomainFactory.createClusterJob([
                 processingStep: processingStep2,
-                dependencies: [clusterJob21] as Set,
+                dependencies  : [clusterJob21] as Set,
         ])
 
         when:
@@ -417,5 +421,54 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         then:
         ProcessParameter.count() == 1
         Process.count() == 1
+    }
+
+    void "deleteIndividual with Sample, SampleIdentifier, SeqTrack, ClusterJob and WorkflowArtefact and create script for data file deletion"() {
+        given:
+        setupData()
+
+        final File basePath = new File("/dev/null/otp-test/")
+        configService = new TestConfigService(basePath)
+        final String projectPath = "projectPath"
+        final Individual individual = createIndividual(
+                project: createProject(
+                        dirName: projectPath
+                )
+        )
+        final SeqTrack seqTrack = createSeqTrack(
+                sample: createSample(
+                        individual: individual
+                )
+        )
+        createClusterJob(individual: individual)
+        createWorkflowArtefact(individual: individual)
+
+        final DataFile dataFile = createDataFile(seqTrack: seqTrack)
+        createSampleIdentifier(sample: seqTrack.sample)
+
+        final String seqCenterName = dataFile.run.seqCenter.dirName
+        final String runDirName = dataFile.run.dirName
+        final String seqTypeDirName = seqTrack.seqType.dirName
+        final String sampleTypeDirName = seqTrack.sample.sampleType.dirName
+        final String vbpPath = dataFile.fileType.vbpPath
+        final String vbpFileName = dataFile.vbpFileName
+        final String expectedScriptCommand  = """rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
+rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
+rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}.md5sum
+rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqTrack.individual.pid}/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
+rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqTrack.individual.pid}
+"""
+        when:
+        // ToDo: adapt when in otp-921 WithOtherUser is deleted
+        String deletionScript = deletionService.deleteIndividual(seqTrack.individual)[0]
+
+        then:
+        deletionScript == expectedScriptCommand
+        Individual.count() == 0
+        Sample.count() == 0
+        SeqTrack.count() == 0
+        SampleIdentifier.count() == 0
+        ClusterJob.count() == 0
+        WorkflowArtefact.count() == 0
     }
 }
