@@ -83,6 +83,7 @@ class DeletionService {
         project.delete(flush: true)
     }
 
+    @SuppressWarnings('JavaIoPackageAccess')
     List<String> deleteIndividual(Individual individual, boolean check = true) {
         StringBuilder deletionScript = new StringBuilder()
         StringBuilder deletionScriptOtherUser = new StringBuilder()
@@ -149,6 +150,7 @@ class DeletionService {
      *
      * Return a list containing the affected seqTracks
      */
+    @SuppressWarnings('JavaIoPackageAccess')
     List<SeqTrack> deleteProcessingFilesOfProject(String projectName, Path scriptOutputDirectory, boolean everythingVerified = false,
                                                   boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
         Project project = Project.findByName(projectName)
@@ -507,13 +509,11 @@ class DeletionService {
     /**
      * Deletes one SeqTrack from the DB
      *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     *
      * !! Be aware that the run information are not deleted.
      * There is always more than one seqTrack which belongs to one Run, which is why the run is not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-    private Map<String, List<File>> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
+    Map<String, List<File>> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
 
         if (check) {
@@ -674,6 +674,7 @@ class DeletionService {
     /**
      * Deletes a dataFile and all corresponding information
      */
+    @SuppressWarnings('JavaIoPackageAccess')
     private List<File> deleteDataFile(DataFile dataFile) {
         notNull(dataFile, "The dataFile input of method deleteDataFile is null")
 
@@ -684,7 +685,7 @@ class DeletionService {
                 lsdfFilesService.getFileViewByPidPath(dataFile),
         ].collect { new File(it) }
 
-        deleteFastQCInformationFromDataFile(dataFile)
+        dirs.addAll(deleteFastQCInformationFromDataFile(dataFile))
         deleteMetaDataEntryForDataFile(dataFile)
         deleteConsistencyStatusInformationForDataFile(dataFile)
         dataFile.delete(flush: true)
@@ -708,13 +709,22 @@ class DeletionService {
 
     /**
      * Removes all fastQC information about the dataFile
-     *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
-    private void deleteFastQCInformationFromDataFile(DataFile dataFile) {
+    @SuppressWarnings('JavaIoPackageAccess')
+    private List<File> deleteFastQCInformationFromDataFile(DataFile dataFile) {
         notNull(dataFile, "The input dataFile is null")
         List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(dataFile)
-
-        fastqcProcessedFiles*.delete(flush: true)
+        if (fastqcProcessedFiles) {
+            String fastqFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
+            List<File> files = [
+                    fastqFile,
+                    "${fastqFile}.md5sum",
+            ].collect {
+                new File(it)
+            }
+            fastqcProcessedFiles*.delete(flush: true)
+            return files
+        }
+        return []
     }
 }

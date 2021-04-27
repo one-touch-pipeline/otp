@@ -48,6 +48,7 @@ class DeletionServiceTests implements UserAndRoles {
     DeletionService deletionService
     LsdfFilesService lsdfFilesService
     DataProcessingFilesService dataProcessingFilesService
+    FastqcDataFilesService fastqcDataFilesService
     TestConfigService configService
 
     @Rule
@@ -212,10 +213,13 @@ class DeletionServiceTests implements UserAndRoles {
         DomainFactory.createConsistencyStatus(dataFile: dataFile)
 
         String fileFinalPath = lsdfFilesService.getFileFinalPath(dataFile)
+        String fastqFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
         List<File> expected = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",
                 lsdfFilesService.getFileViewByPidPath(dataFile),
+                fastqFile,
+                "${fastqFile}.md5sum",
         ].collect { new File(it) }
 
         List<File> result = deletionService.deleteDataFile(dataFile)
