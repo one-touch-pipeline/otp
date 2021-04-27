@@ -361,8 +361,8 @@ class UpdateUserEmailCommand implements Validateable {
         newEmail(nullable: false, email: true, blank: false, validator: { val, obj ->
             if (val == obj.user?.email) {
                 return 'no.change'
-            } else if (User.findByEmail(val)) {
-                return 'default.not.unique.message'
+            } else if (!obj.user.username && User.findAllByEmailAndUsernameIsNullAndIdNotEqual(val, obj.user.id)) {
+                return 'user.email.unique.extern'
             }
         })
     }

@@ -123,28 +123,16 @@ class UserProjectRoleService {
             throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
         }
 
-        User user = CollectionUtils.atMostOneElement(User.findAllByUsernameOrEmail(ldapUserDetails.username, ldapUserDetails.mail))
-
-        if (user) {
-            if (!user.username) {
-                throw new LdapUserCreationException("There is already an external user with email '${user.email}'")
-            }
-            if (user.username != ldapUserDetails.username) {
-                throw new LdapUserCreationException("The given email address '${user.email}' is already registered for LDAP user '${user.username}'")
-            }
-        } else {
-            user = userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
-        }
-        return user
+        return CollectionUtils.atMostOneElement(User.findAllByUsername(ldapUserDetails.username)) ?:
+                userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addExternalUserToProject(Project project, String realName, String email, Set<ProjectRole> projectRoles) throws AssertionError {
         assert project: "project must not be null"
 
-        User user = CollectionUtils.atMostOneElement(User.findAllByEmail(email))
+        User user = CollectionUtils.atMostOneElement(User.findAllByEmailAndUsernameIsNull(email))
         if (user) {
-            assert !user.username: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
             assert user.realName == realName: "The given email address '${user.email}' is already registered for external user '${user.realName}'"
         } else {
             user = userService.createUser(null, email, realName)
@@ -239,7 +227,6 @@ class UserProjectRoleService {
                 "Sent mail to ${email} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} ${userProjectRole.project.name} " +
                         "at the request of ${requester.username + switchedUserAnnotation}")
     }
-
 
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
         User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))

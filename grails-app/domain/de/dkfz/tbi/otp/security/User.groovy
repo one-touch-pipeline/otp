@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.security
 
-
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.util.TimestampHelper
 
@@ -46,10 +45,14 @@ class User implements Entity {
     // the date a user should be deactivated in OTP
     Date plannedDeactivationDate
 
-    static constraints = {
+    static Closure constraints = {
         username(blank: false, unique: true, nullable: true)
         password(blank: false)
-        email(nullable: false, unique: true, email: true)
+        email(nullable: false, email: true, validator: { val, obj ->
+            if (!obj.username && User.findAllByEmailAndUsernameIsNullAndIdNotEqual(val, obj.id)) {
+                return 'user.email.unique.extern'
+            }
+        })
         realName(nullable: true, blank: false)
         plannedDeactivationDate(nullable: true)
     }
@@ -60,17 +63,19 @@ class User implements Entity {
     }
 
     Set<Role> getAuthorities() {
-        UserRole.findAllByUser(this).collect { it.role } as Set
+        return UserRole.findAllByUser(this)*.role as Set
     }
 
     def beforeInsert() {
         encodePassword()
+        return
     }
 
     def beforeUpdate() {
         if (isDirty('password')) {
             encodePassword()
         }
+        return
     }
 
     protected void encodePassword() {

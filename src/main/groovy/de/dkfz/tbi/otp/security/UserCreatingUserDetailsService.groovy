@@ -44,7 +44,7 @@ class UserCreatingUserDetailsService extends GormUserDetailsService {
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (!user) {
             LdapUserDetails ldapUserDetails = grailsApplication.mainContext.ldapService.getLdapUserDetailsByUsername(username)
-            if (!ldapUserDetails || !ldapUserDetails.mail || User.findAllByEmail(ldapUserDetails.mail)) {
+            if (!ldapUserDetails || !ldapUserDetails.mail) {
                 throw new FailedToCreateUserException("There is a problem with your account. Please contact " +
                     "${grailsApplication.mainContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")
             }
