@@ -21,6 +21,9 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataswap.IndividualSwapService
+import de.dkfz.tbi.otp.dataswap.Swap
+import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -50,7 +53,7 @@ import java.nio.file.Path
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
-DataSwapService dataSwapService = ctx.dataSwapService
+IndividualSwapService individualSwapService = ctx.individualSwapService
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
@@ -69,28 +72,26 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-        dataSwapService.moveIndividual(
-                [
-                        'oldProjectName': 'oldProject',
-                        'newProjectName': 'newProject',
-                        'oldPid'        : 'oldPid',
-                        'newPid'        : 'newPid',
-                ],
-                [
-                        'oldSampleType1': 'newSampleType1',
-                        'oldSampleType2': 'newSampleType2',
-                ],
-                [
-                        'oldFileName1': 'newFileName1',
-                        'oldFileName2': 'newFileName2',
-                        'oldFileName3': '',
-                        'oldFileName4': '',
-                ],
-                'uniqueScriptName',
-                log,
-                failOnMissingFiles,
-                scriptOutputDirectory,
-                linkedFilesVerified,
+        individualSwapService.swap(
+                new IndividualSwapParameters(
+                        projectNameSwap: new Swap('oldProjectName', 'newProjectName'),
+                        pidSwap: new Swap('oldPid', 'newPid'),
+                        sampleTypeSwaps: [
+                                new Swap('oldSampleType1', 'newSampleType1'),
+                                new Swap('oldSampleType2', 'newSampleType2'),
+                        ],
+                        dataFileSwaps: [
+                                new Swap('oldFileName1', 'newFileName1'),
+                                new Swap('oldFileName2', 'newFileName2'),
+                                new Swap('oldFileName3', ''),
+                                new Swap('oldFileName4', ''),
+                        ],
+                        bashScriptName: 'uniqueScriptName',
+                        log: log,
+                        failOnMissingFiles: failOnMissingFiles,
+                        scriptOutputDirectory: scriptOutputDirectory,
+                        linkedFilesVerified: linkedFilesVerified,
+                )
         )
 
         assert false: "DEBUG: intentionally failed transaction"

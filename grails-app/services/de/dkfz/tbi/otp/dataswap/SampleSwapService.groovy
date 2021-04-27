@@ -168,25 +168,6 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
     }
 
     /**
-     * Get dirs to delete and mark seqTrack as swapped.
-     *
-     * @param bashScriptToMoveFilesAsOtherUser which should be add with commands to delete with other user.
-     * @param seqTrack to swap.
-     * @param data DTO containing all entities necessary to perform a swap.
-     */
-    private void swapSeqTrack(Path bashScriptToMoveFilesAsOtherUser, SeqTrack seqTrack, SampleSwapData data) {
-        Map dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !data.linkedFilesVerified)
-        dirs.get("dirsToDelete").each {
-            data.dirsToDelete.push(it)
-        }
-        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
-
-        // mark as swapped
-        seqTrack.swapped = true
-        seqTrack.save(flush: true)
-    }
-
-    /**
      * Swap sample to new individual and sampleType.
      *
      * @param data DTO containing all entities necessary to perform a swap.

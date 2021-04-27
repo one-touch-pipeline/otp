@@ -38,7 +38,7 @@ import java.nio.file.*
 import static org.springframework.util.Assert.*
 
 /**
- * @deprecated will be replaced with de.dkfz.tbi.otp.dataswap.DataSwapService
+ * @deprecated will be replaced with de.dkfz.tbi.otp.dataswap.DataSwapService and this will be deleted in otp-976
  */
 @Deprecated
 @SuppressWarnings(['JavaIoPackageAccess', 'Println'])
@@ -105,26 +105,10 @@ class DataSwapService {
             Path scriptOutputDirectory,
             boolean linkedFilesVerified = false
     ) {
-        log << "\n\nmove ${inputInformationOTP.oldPid} of ${inputInformationOTP.oldProjectName} to" +
-                " ${inputInformationOTP.newPid} of ${inputInformationOTP.newProjectName} "
-
-        completeOmittedNewValuesAndLog(sampleTypeMap, 'samples', log)
-        completeOmittedNewValuesAndLog(dataFileMap, 'datafiles', log)
-
-        notNull(dataFileMap, "parameter dataFileMap may not be null")
-
-        MoveIndividualHelper moveIndividualHelper = new MoveIndividualHelper(inputInformationOTP, sampleTypeMap, dataFileMap, log)
-
         String processingPathToOldIndividual = dataProcessingFilesService.getOutputDirectory(
                 moveIndividualHelper.oldIndividual,
                 DataProcessingFilesService.OutputDirectories.BASE
         )
-
-        // now the changing process(procedure) starts
-        if (moveIndividualHelper.seqTracks && AlignmentPass.findBySeqTrackInList(moveIndividualHelper.seqTracks)) {
-            log << "\n -->     found alignments for seqtracks (${AlignmentPass.findAllBySeqTrackInList(moveIndividualHelper.seqTracks)*.seqTrack.unique()}): "
-        }
-
         Realm realm = configService.defaultRealm
 
         // RestartAlignmentScript
@@ -191,19 +175,6 @@ class DataSwapService {
         bashScriptToMoveFiles << "\n\n\n ################ delete old Individual ################ \n"
         bashScriptToMoveFiles << "# rm -rf ${moveIndividualHelper.oldProject.projectSequencingDirectory}/*/view-by-pid/${inputInformationOTP.oldPid}/\n"
         bashScriptToMoveFiles << "# rm -rf ${processingPathToOldIndividual}\n"
-
-        // Comment
-        individualService.createComment("Individual swap", [
-                individual: moveIndividualHelper.oldIndividual,
-                project   : moveIndividualHelper.oldProject.name,
-                pid       : inputInformationOTP.oldPid,
-        ], [
-                individual: moveIndividualHelper.oldIndividual,
-                project   : moveIndividualHelper.newProject.name,
-                pid       : inputInformationOTP.newPid,
-        ])
-
-        createCommentForSwappedDatafiles(moveIndividualHelper.dataFiles)
     }
 
     /**
@@ -348,31 +319,6 @@ class DataSwapService {
                 'fi',
                 '',
         ].join('\n')
-    }
-
-    /**
-     * When an item of the swapMap should not change, the 'new' value can be left empty (i.e. empty string: '') for readability.
-     *
-     * This function fills in empty values of the swapMap with their corresponding key, thus creating a full map, which enables
-     * us to proceed the same way for changing and un-changing entries.
-     *
-     * Note that this function mutates the swapMap in-place!
-     */
-    private static void completeOmittedNewValuesAndLog(Map<String, String> swapMap, String label, StringBuilder log) {
-        log << "\n  swapping ${label}:"
-
-        swapMap.each { String old, String neww ->
-            String newValue
-            // was the value omitted?
-            if ((old.size() != 0) && !neww) {
-                swapMap.put(old, old)
-                newValue = old
-            } else {
-                newValue = neww
-            }
-
-            log << "\n    - ${old} --> ${newValue}"
-        }
     }
 
     /**
@@ -573,19 +519,6 @@ ln -s '${newDirectFileName}' \\
     }
 
     /**
-     * Create a warning comment in case the datafile is swapped
-     */
-    private void createCommentForSwappedDatafiles(List<DataFile> datafiles) {
-        datafiles.each { DataFile dataFile ->
-            if (dataFile.comment?.comment) {
-                commentService.saveComment(dataFile, dataFile.comment.comment + "\nAttention: Datafile swapped!")
-            } else {
-                commentService.saveComment(dataFile, "Attention: Datafile swapped!")
-            }
-        }
-    }
-
-    /**
      * Helper method to create a groovy script to restart the alignment for all SeqTracks of the old sample.
      * Returns all SeqTracks to restart.
      */
@@ -669,81 +602,6 @@ ${getFixGroupCommand(neww)}
         }
 
         return mvFastqCommand + "\n" + mvCheckSumCommand
-    }
-
-    class MoveIndividualHelper {
-        Project oldProject
-        Project newProject
-
-        Individual oldIndividual
-        Individual newIndividual
-
-        List<Sample> samples
-        List<SeqTrack> seqTracks
-
-        List<DataFile> fastqDataFiles
-        List<DataFile> bamDataFiles
-        List<DataFile> dataFiles
-        Map<DataFile, Map<String, String>> oldDataFileNameMap
-        List<String> oldFastqcFileNames
-
-        List<File> dirsToDelete = []
-
-        boolean sameLsdf
-
-        MoveIndividualHelper(Map<String, String> inputInformationOTP, Map<String, String> sampleTypeMap, Map<String, String> dataFileMap, StringBuilder log) {
-            checkInputInformation(inputInformationOTP)
-
-            oldProject = CollectionUtils.exactlyOneElement(Project.findAllByName(inputInformationOTP.oldProjectName),
-                    "old project ${inputInformationOTP.oldProjectName} not found")
-
-            newProject = CollectionUtils.exactlyOneElement(Project.findAllByName(inputInformationOTP.newProjectName),
-                    "new project ${inputInformationOTP.newProjectName} not found")
-
-            sameLsdf = oldProject.realm == newProject.realm
-
-            oldIndividual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(inputInformationOTP.oldPid),
-                    "old pid ${inputInformationOTP.oldPid} not found")
-
-            newIndividual = CollectionUtils.atMostOneElement(Individual.findAllByPid(inputInformationOTP.newPid))
-            if (inputInformationOTP.oldPid != inputInformationOTP.newPid) {
-                isNull(newIndividual, "new pid ${inputInformationOTP.newPid} already exist")
-            }
-
-            samples = Sample.findAllByIndividual(oldIndividual)
-            log << "\n  samples (${samples.size()}): ${samples}"
-
-            notEmpty(samples, "no samples found for ${oldIndividual}")
-            isTrue(samples.size() == sampleTypeMap.size(), "Given Sample map different in size than found samples!")
-            samples.each { Sample sample ->
-                isTrue(sampleTypeMap.containsKey(sample.sampleType.name), "${sample.sampleType.name} missed in map")
-                notNull(SampleType.findByName(sampleTypeMap.get(sample.sampleType.name)), "${sampleTypeMap.get(sample.sampleType.name)} " +
-                        "not found in database")
-            }
-
-            isTrue(oldIndividual.project == oldProject, "old individual ${inputInformationOTP.oldPid} should be in project" +
-                    " ${inputInformationOTP.oldProjectName}, but was in ${oldIndividual.project}")
-
-            seqTracks = samples ? SeqTrack.findAllBySampleInList(samples) : []
-            log << "\n  seqtracks (${seqTracks.size()}): "
-            seqTracks.each { log << "\n    - ${it}" }
-
-            fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, log)
-            bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, log)
-            dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
-            oldDataFileNameMap = collectFileNamesOfDataFiles(dataFiles)
-            oldFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-        }
-
-        private void checkInputInformation(Map<String, String> inputInformationOTP) {
-            notNull(inputInformationOTP.oldProjectName, "parameter oldProjectName may not be null")
-
-            notNull(inputInformationOTP.newProjectName, "parameter newProjectName may not be null")
-
-            notNull(inputInformationOTP.oldPid, "parameter oldPid may not be null")
-
-            notNull(inputInformationOTP.newPid, "parameter newPid may not be null")
-        }
     }
 
     /**

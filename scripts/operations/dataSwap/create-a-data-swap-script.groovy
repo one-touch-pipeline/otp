@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
@@ -356,30 +355,31 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
 ) {
     String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
 
-    script << "\n\tde.dkfz.tbi.otp.ngsdata.DataSwapService.moveIndividual(\n" +
-            "\t\t[\n" +
-            "\t\t'oldProjectName' :'${oldIndividual.project.name}',\n" +
-            "\t\t'newProjectName' : '${newProject.name}',\n" +
-            "\t\t'oldPid' : '${oldIndividual.pid}',\n" +
-            "\t\t'newPid' : '${newIndividualName}',\n" +
-            "\t\t],\n" +
-            "\t\t[\n"
-    samples.each { sample ->
-        script << "\t\t'${sample.sampleType.name}': '${newSampleTypeClosure(sample.sampleType).name}', \n"
-    }
-    script << "\t\t],"
+    script << "\n\t individualSwapService.swap(\n" +
+            "\t\tnew IndividualSwapParameters(\n" +
+            "\t\tprojectNameSwap : new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
+            "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
+            "\t\tsampleTypeSwaps : [\n"
 
-    script << "\n\t\t[\n"
+    samples.each { sample ->
+        script << "\t\tnew Swap('${sample.sampleType.name}', '${newSampleTypeClosure(sample.sampleType).name}'), \n"
+    }
+    script << "\t\t],\n" +
+            "\t\tdataFileSwaps : [\n"
     samples.each { sample ->
         SeqTrack.findAllBySample(sample, [sort: 'id']).each { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-                script << "\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}',\n"
+                script << "\t\tnew Swap('${datafile.fileName}', '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'),\n"
             }
         }
     }
-    script << "\t\t],\n"
-    script << "\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n" +
-            "\t)\n"
+    script << "\t\t],\n" +
+            "\t\tbashScriptName: '${fileName}',\n" +
+            "\t\tlog: log,\n" +
+            "\t\tfailOnMissingFiles: failOnMissingFiles,\n" +
+            "\t\tscriptOutputDirectory: SCRIPT_OUTPUT_DIRECTORY,\n" +
+            "\t\tlinkedFilesVerified: verifiedLinkedFiles,\n" +
+            "\t)\n)\n"
     files << fileName
 
     return counter
@@ -403,6 +403,8 @@ class Snippets {
                |import de.dkfz.tbi.otp.dataswap.SampleSwapService
                |import de.dkfz.tbi.otp.dataswap.Swap
                |import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
+               |import de.dkfz.tbi.otp.dataswap.IndividualSwapService
+               |import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
                |import de.dkfz.tbi.otp.dataswap.LaneSwapService
                |import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
                |
@@ -415,9 +417,9 @@ class Snippets {
                |ConfigService configService = ctx.configService
                |FileSystemService fileSystemService = ctx.fileSystemService
                |FileService fileService = ctx.fileService
-               |de.dkfz.tbi.otp.ngsdata.DataSwapService dataSwapService = ctx.dataSwapService
-               |SampleSwapService sampleSwapService = ctx.createSwapComments
+               |SampleSwapService sampleSwapService = ctx.sampleSwapService
                |LaneSwapService laneSwapService = ctx.laneSwapService
+               |IndividualSwapService individualSwapService = ctx.individualSwapService
                |
                |Realm realm = configService.defaultRealm
                |FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)

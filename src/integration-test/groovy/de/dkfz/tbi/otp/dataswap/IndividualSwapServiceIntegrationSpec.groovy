@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,18 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataswap
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.*
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
@@ -39,14 +44,14 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class DataSwapServiceTests implements UserAndRoles {
+class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles {
 
-    DataSwapService dataSwapService
+    IndividualSwapService individualSwapService
     LsdfFilesService lsdfFilesService
     TestConfigService configService
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder
 
     Path outputFolder
 
@@ -59,13 +64,12 @@ class DataSwapServiceTests implements UserAndRoles {
         ])
     }
 
-    @After
-    void tearDown() {
+    void cleanup() {
         configService.clean()
     }
 
-    @Test
-    void test_moveIndividual() {
+    void "swap, succeed if parameters match existing entities and data files"() {
+        given:
         setupData()
         DomainFactory.createDefaultRealmWithProcessingOption()
         DomainFactory.createAllAlignableSeqTypes()
@@ -98,43 +102,49 @@ class DataSwapServiceTests implements UserAndRoles {
 
         StringBuilder outputLog = new StringBuilder()
 
+        when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            dataSwapService.moveIndividual(
-                    [
-                            'oldProjectName': bamFile.project.name,
-                            'newProjectName': newProject.name,
-                            'oldPid'        : bamFile.individual.pid,
-                            'newPid'        : bamFile.individual.pid,
-                    ],
-                    [(bamFile.sampleType.name): ""],
-                    ['DataFileFileName_R1.gz': '', 'DataFileFileName_R2.gz': ''],
-                    scriptName,
-                    outputLog,
-                    false,
-                    scriptFolder,
-                    false
+            individualSwapService.swap(
+                    new IndividualSwapParameters(
+                            projectNameSwap: new Swap(bamFile.project.name, newProject.name),
+                            pidSwap: new Swap(bamFile.individual.pid, bamFile.individual.pid),
+                            sampleTypeSwaps: [
+                                    new Swap((bamFile.sampleType.name), ""),
+                            ],
+                            dataFileSwaps: [
+                                    new Swap('DataFileFileName_R1.gz', ""),
+                                    new Swap('DataFileFileName_R2.gz', ""),
+                            ],
+                            bashScriptName: scriptName,
+                            log: outputLog,
+                            failOnMissingFiles: false,
+                            scriptOutputDirectory: scriptFolder,
+                            linkedFilesVerified: false,
+                    )
             )
         }
-        String output = outputLog
-        assert output.contains("${DataSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
-        assert output.contains("${DataSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
 
-        assert scriptFolder.toFile().listFiles().length != 0
+        then:
+        String output = outputLog
+        output.contains("${DataSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
+        output.contains("${DataSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
+
+        scriptFolder.toFile().listFiles().length != 0
 
         File alignmentScript = scriptFolder.resolve("restartAli_${scriptName}.groovy").toFile()
-        assert alignmentScript.exists()
+        alignmentScript.exists()
 
         File copyScriptOtherUser = scriptFolder.resolve("${scriptName}-otherUser.sh").toFile()
-        assert copyScriptOtherUser.exists()
+        copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
         roddyFilesToDelete.each {
             assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
         }
 
         File copyScript = scriptFolder.resolve("${scriptName}.sh").toFile()
-        assert copyScript.exists()
+        copyScript.exists()
         String copyScriptContent = copyScript.text
-        assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
+        copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).parent}'")
             assert copyScriptContent.contains("mv '${dataFilePaths[i]}' \\\n   '${lsdfFilesService.getFileFinalPath(it)}'")
@@ -143,102 +153,6 @@ class DataSwapServiceTests implements UserAndRoles {
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
-        }
-    }
-
-    @Test
-    void test_getSingleSampleForIndividualAndSampleType_singleSample() {
-        setupData()
-        Individual individual = DomainFactory.createIndividual()
-        SampleType sampleType = DomainFactory.createSampleType()
-        Sample sample = DomainFactory.createSample(individual: individual, sampleType: sampleType)
-
-        assert sample == dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
-    }
-
-    @Test
-    void test_getSingleSampleForIndividualAndSampleType_noSample() {
-        setupData()
-        Individual individual = DomainFactory.createIndividual()
-        SampleType sampleType = DomainFactory.createSampleType()
-
-        TestCase.shouldFail(IllegalArgumentException) {
-            dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
-        }
-    }
-
-    @Test
-    void test_getAndShowSeqTracksForSample() {
-        setupData()
-        Sample sample = DomainFactory.createSample()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
-
-        assert [seqTrack] == dataSwapService.getAndShowSeqTracksForSample(sample, new StringBuilder())
-    }
-
-    @Test
-    void test_getAndValidateAndShowDataFilesForSeqTracks_noDataFile_shouldFail() {
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        List<SeqTrack> seqTracks = [seqTrack]
-        Map<String, String> dataFileMap = [:]
-
-        TestCase.shouldFail(IllegalArgumentException) {
-            dataSwapService.getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
-        }
-    }
-
-    @Test
-    void test_getAndValidateAndShowDataFilesForSeqTracks() {
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        List<SeqTrack> seqTracks = [seqTrack]
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        Map<String, String> dataFileMap = [(dataFile.fileName): ""]
-
-        assert [dataFile] == dataSwapService.getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
-    }
-
-    @Test
-    void test_getAndValidateAndShowAlignmentDataFilesForSeqTracks() {
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        List<SeqTrack> seqTracks = [seqTrack]
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        Map<String, String> dataFileMap = [(dataFile.fileName): ""]
-
-        assert [] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
-
-        AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
-        DataFile dataFile2 = DomainFactory.createDataFile(alignmentLog: alignmentLog)
-        dataFileMap = [(dataFile2.fileName): ""]
-        assert [dataFile2] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
-    }
-
-    @Test
-    void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() {
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createExternallyProcessedMergedBamFile(
-                workPackage: DomainFactory.createExternalMergingWorkPackage(
-                        sample: seqTrack.sample,
-                        seqType: seqTrack.seqType,
-                )
-        ).save(flush: true)
-
-        final shouldFail = new GroovyTestCase().&shouldFail
-        shouldFail AssertionError, {
-            dataSwapService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
-        }
-    }
-
-    @Test
-    void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() {
-        setupData()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
-            dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
     }
 

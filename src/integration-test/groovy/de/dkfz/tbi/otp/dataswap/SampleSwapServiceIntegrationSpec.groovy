@@ -68,7 +68,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         configService.clean()
     }
 
-    void "test_moveSample, succeed if parameters match existing entities and data files"() {
+    void "swap, succeed if parameters match existing entities and data files"() {
         given:
         setupData()
         DomainFactory.createDefaultRealmWithProcessingOption()

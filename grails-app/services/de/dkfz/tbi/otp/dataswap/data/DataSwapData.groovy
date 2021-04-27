@@ -67,6 +67,10 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     List<String> oldFastQcFileNames
     List<File> dirsToDelete = []
 
+    Swap<String> getPidSwap() {
+        return parameters.pidSwap
+    }
+
     List<Swap<String>> getDataFileSwaps() {
         return parameters.dataFileSwaps
     }

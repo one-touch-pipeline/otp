@@ -54,7 +54,7 @@ import java.nio.file.Path
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
-SampleSwapService sampleSwapService = ctx.createSwapComments
+SampleSwapService sampleSwapService = ctx.sampleSwapService
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)

@@ -44,8 +44,8 @@ import java.nio.file.*
  * Abstract class for an data swap service. Defines basic steps necessary to perform some sort of an data swap.
  * Used as base of {@link SampleSwapService}.
  *
- * @param < P >    of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
- * @param < D >    of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
+ * @param <P >     of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
+ * @param <D >     of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
  *        necessary to perform swap.
  */
 @SuppressWarnings("JavaIoPackageAccess")
@@ -583,6 +583,23 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         if (data.seqTrackList && alignmentPassList) {
             data.log << "\n -->     found alignments for seqtracks (${alignmentPassList*.seqTrack.unique()}): "
         }
+    }
+
+    /**
+     * Get dirs to delete and mark seqTrack as swapped.
+     *
+     * @param bashScriptToMoveFilesAsOtherUser which should be add with commands to delete with other user.
+     * @param seqTrack to swap.
+     * @param data DTO containing all entities necessary to perform a swap.
+     */
+    protected void swapSeqTrack(Path bashScriptToMoveFilesAsOtherUser, SeqTrack seqTrack, D data) {
+        Map dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !data.linkedFilesVerified)
+        data.dirsToDelete.addAll(dirs.get("dirsToDelete"))
+        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
+
+        // mark as swapped
+        seqTrack.swapped = true
+        seqTrack.save(flush: true)
     }
 
     /**
