@@ -387,7 +387,15 @@ $.otp.resizeBodyInit = function (table, margin) {
     });
 };
 
-$.otp.getDownloadButton = function (columnSelector, fileName) {
+/**
+ * Generates a button for a CSV download in the DataTables.
+ *
+ * @param columnSelector, css selector for the columns to download
+ * @param fileName, name of the file to download
+ * @param beforeDownload, optional a function which should be performed before the download is started. (requires a callback)
+ * @returns {[{extend: string, exportOptions: {columns: string}, footer: boolean, action: action, text: string, title: string}]}
+ */
+$.otp.getDownloadButton = function (columnSelector, fileName, beforeDownload = (callback) => {callback()}) {
     const defaultFileName = document.title.replaceAll(" ", "_");
     const date = new Date();
     const formattedDate = date.getUTCFullYear() + '-' + (date.getUTCMonth()+1) + '-' + date.getUTCDate();
@@ -395,7 +403,13 @@ $.otp.getDownloadButton = function (columnSelector, fileName) {
     return [{
         extend: 'csvHtml5',
         text: 'Download CSV',
+        className: 'btn btn-primary',
         title: (fileName || defaultFileName) + '_' + formattedDate,
+        action: function (e, dt, button, config) {
+            beforeDownload(() => {
+                $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+            });
+        },
         footer: false,
         exportOptions: {
             columns: columnSelector || ':visible'
@@ -417,6 +431,20 @@ $.otp.getDownloadButtonServerSide = function (downloadLink) {
             document.body.appendChild(iframe);
         }
     }]
+}
+
+/**
+ * Copies a given text to the clipboard.
+ */
+$.otp.copyToClipboard = function (text) {
+    const body = document.getElementsByTagName('body')[0];
+    const $tempInput = document.createElement('INPUT');
+
+    body.appendChild($tempInput);
+    $tempInput.setAttribute('value', text)
+    $tempInput.select();
+    document.execCommand('copy');
+    body.removeChild($tempInput);
 }
 
 /**

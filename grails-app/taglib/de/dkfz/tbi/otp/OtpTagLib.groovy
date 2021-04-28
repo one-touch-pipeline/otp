@@ -191,14 +191,12 @@ class OtpTagLib {
     }
 
     /**
-     * Boostrap Modal
+     * Boostrap modal dialog
      *
-     * needs bootstrap dependencies to work:
-     * <asset:javascript src="/webjars/bootstrap/4.5.3/js/bootstrap.bundle.js"/>
-     * <asset:stylesheet src="/webjars/bootstrap/4.5.3/css/bootstrap.css"/>
+     * Works on the bootstrap pages only.
      */
     def otpModal = { attrs, body ->
-        String backdrop = attrs.closable ? "" : 'data-backdrop="static"'
+        String backdrop = attrs.closable == "true" ? "" : 'data-backdrop="static"'
         String confirmText = attrs.confirmText ?: "Confirm"
         String closeText = attrs.closeText ?: "Close"
 
@@ -211,7 +209,7 @@ class OtpTagLib {
                 out << "<h3 class='modal-title'>${attrs.title}</h3>"
             }
             if (attrs.closable) {
-                out << "<button class='close' type='button' data-dismiss='modal'>&times;</button>"
+                out << "<button class='close closeModal' onclick='${attrs.onClose}' type='button' data-dismiss='modal'>&times;</button>"
             }
             out << "</div>"
         }
@@ -220,8 +218,8 @@ class OtpTagLib {
         out << "</div>"
         if (attrs.type == "dialog") {
             out << "<div class='modal-footer'>"
-            out << "<button id='close' type='button' class='btn btn-secondary' data-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
-            out << "<button id='confirm' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>" +
+            out << "<button type='button' class='btn btn-secondary closeModal' data-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
+            out << "<button id='confirmModal' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>" +
                     "${confirmText}</button>"
             out << "</div>"
         }

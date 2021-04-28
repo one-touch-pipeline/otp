@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,31 +20,8 @@
  * SOFTWARE.
  */
 
-.modal {
-    text-align: center;
-    padding: 0!important;
-}
-
-.modal:before {
-    content: '';
-    display: inline-block;
-    height: 100%;
-    vertical-align: middle;
-    margin-right: -4px;
-}
-
-.modal-dialog {
-    display: inline-block;
-    text-align: left;
-    vertical-align: middle;
-    width: 100%;
-}
-
-.qcDropdown {
-    width: 130px;
-}
-
-.maxWidth230 {
-    text-overflow: ellipsis;
-    max-width: 230px;
-}
+$(document).ready(function () {
+    $('select.use-select-2').select2({
+        theme: 'bootstrap4'
+    });
+});
