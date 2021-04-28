@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<div class="input-group mb-3" style="max-width: 500px;">
+<div class="input-group mb-3" style="width: 500px;">
     <div class="input-group-prepend">
         <label class="input-group-text" for="project"><g:message code="projectSelection.project"/></label>
     </div>

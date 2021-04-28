@@ -47,6 +47,9 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsInvalidException
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupNotFoundException
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
@@ -1828,6 +1831,81 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort() + [EMAIL_RECIPIENT])
+    }
+
+    void "updateUnixGroup, should fail with UnixGroupIsInvalidException when it contains invalid chars"() {
+        given:
+        setupData()
+        Project project = createProject()
+        String invalidUnixGroup = "%group"
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateUnixGroup(project, invalidUnixGroup)
+        }
+
+        then:
+        thrown(UnixGroupIsInvalidException)
+    }
+
+    void "updateUnixGroup, should fail with UnixGroupNotFoundException when it is not found on cluster"() {
+        given:
+        setupData()
+        Project project = createProject()
+        String unixGroup = "unknownGroup"
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateUnixGroup(project, unixGroup)
+        }
+
+        then:
+        thrown(UnixGroupNotFoundException)
+    }
+
+    void "updateUnixGroup, should fail with UnixGroupIsSharedException when it is already used in another project"() {
+        given:
+        setupData()
+        Project project = createProject()
+        String unixGroup = createProject().unixGroup
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateUnixGroup(project, unixGroup)
+        }
+
+        then:
+        thrown(UnixGroupIsSharedException)
+    }
+
+    void "updateUnixGroup, should succeed when unixGroup is valid and unshared"() {
+        given:
+        setupData()
+        Project project = createProject()
+        String unixGroup = configService.testingGroup
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateUnixGroup(project, unixGroup)
+        }
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "updateUnixGroup, should succeed in force mode when unixGroup is valid and shared"() {
+        given:
+        setupData()
+        Project project = createProject()
+        String unixGroup = configService.testingGroup
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            projectService.updateUnixGroup(project, unixGroup, true)
+        }
+
+        then:
+        noExceptionThrown()
     }
 
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {

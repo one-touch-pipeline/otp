@@ -25,6 +25,7 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
+import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
@@ -53,6 +55,29 @@ class ProjectConfigController implements CheckAndCall {
     ProjectService projectService
 
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
+
+    static allowedMethods = [
+            index                               : "GET",
+            updateProjectField                  : "POST",
+            updateAbstractField                 : "POST",
+            updateProjectFieldDate              : "POST",
+            updateProcessingPriority            : "POST",
+            updateSpeciesWithStrain             : "POST",
+            updateTumorEntity                   : "POST",
+            updateProjectGroup                  : "POST",
+            updateSampleIdentifierParserBeanName: "POST",
+            updateQcThresholdHandling           : "POST",
+            updateCopyFiles                     : "POST",
+            updatePubliclyAvailable             : "POST",
+            updateClosed                        : "POST",
+            updateRequestAvailable              : "POST",
+            saveProjectComment                  : "POST",
+            updateUnixGroup                     : "POST",
+            updateFingerPrinting                : "POST",
+            updateProcessingNotification        : "POST",
+            updateQcTrafficLightNotification    : "POST",
+            updateCustomFinalNotification       : "POST",
+    ]
 
     @Secured('isFullyAuthenticated()')
     Map index() {
@@ -86,43 +111,43 @@ class ProjectConfigController implements CheckAndCall {
         ]
     }
 
-    JSON updateProjectField(UpdateProjectCommand cmd) {
+    def updateProjectField(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateAbstractField(UpdateProjectCommand cmd) {
+    def updateAbstractField(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateAbstractFieldValueForProject(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateProjectFieldDate(UpdateProjectCommand cmd) {
+    def updateProjectFieldDate(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateProcessingPriority(UpdateProjectCommand cmd) {
+    def updateProcessingPriority(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(ProcessingPriority.get(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateSpeciesWithStrain(UpdateProjectCommand cmd) {
+    def updateSpeciesWithStrain(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateTumorEntity(UpdateProjectCommand cmd) {
+    def updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateProjectGroup(UpdateProjectCommand cmd) {
+    def updateProjectGroup(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(
                     CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, projectSelectionService.requestedProject
@@ -130,69 +155,81 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
-    JSON updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
+    def updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateQcThresholdHandling(UpdateProjectCommand cmd) {
+    def updateQcThresholdHandling(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(QcThresholdHandling.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateCopyFiles(UpdateProjectCommand cmd) {
+    def updateCopyFiles(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updatePubliclyAvailable(UpdateProjectCommand cmd) {
+    def updatePubliclyAvailable(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateClosed(UpdateProjectCommand cmd) {
+    def updateClosed(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
-    JSON updateRequestAvailable(UpdateProjectCommand cmd) {
+    def updateRequestAvailable(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
         }
     }
 
     @Secured('isFullyAuthenticated()')
-    JSON saveProjectComment(CommentCommand cmd) {
+    def saveProjectComment(CommentCommand cmd) {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)
         Map dataToRender = [date: project.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: project.comment.author]
         render dataToRender as JSON
     }
 
-    JSON updateFingerPrinting(String value) {
+    def updateUnixGroup(UpdateUnixGroupCommand cmd) {
+        try {
+            projectService.updateUnixGroup(projectSelectionService.requestedProject, cmd.unixGroup, cmd.force)
+            Map map = [unixGroup: cmd.unixGroup]
+            render map as JSON
+        } catch (UnixGroupIsSharedException sharedException) {
+            return response.sendError(HttpStatus.CONFLICT.value(), sharedException.message)  // needs a different status for the UI to handle the modal
+        } catch (OtpRuntimeException e) {
+            return response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), e.message)
+        }
+    }
+
+    def updateFingerPrinting(String value) {
         projectService.updateFingerPrinting(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateProcessingNotification(String value) {
+    def updateProcessingNotification(String value) {
         projectService.updateProcessingNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateQcTrafficLightNotification(String value) {
+    def updateQcTrafficLightNotification(String value) {
         projectService.updateQcTrafficLightNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }
 
-    JSON updateCustomFinalNotification(String value) {
+    def updateCustomFinalNotification(String value) {
         projectService.updateCustomFinalNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render map as JSON
@@ -220,4 +257,9 @@ class UpdateProjectCommand implements Validateable {
     static constraints = {
         fieldName(nullable: true)
     }
+}
+
+class UpdateUnixGroupCommand implements Validateable {
+    String unixGroup
+    boolean force = false
 }

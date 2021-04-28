@@ -40,12 +40,11 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
-import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
-import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
-import de.dkfz.tbi.otp.project.additionalField.IntegerFieldValue
-import de.dkfz.tbi.otp.project.additionalField.ProjectFieldType
-
-import de.dkfz.tbi.otp.project.additionalField.TextFieldValue
+import de.dkfz.tbi.otp.project.additionalField.*
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupException
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsInvalidException
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupNotFoundException
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -950,6 +949,52 @@ echo 'OK'
         }
     }
 
+    /**
+     * Performs a small bash script on the cluster to check if the unixGroup is available.
+     *
+     * @param unixGroup to check
+     * @return true if the unixGroup exists, otherwise false
+     */
+    private boolean isUnixGroupOnCluster(Realm realm, String unixGroup) {
+        String script = """\
+        #!/bin/bash
+        if
+            getent group ${unixGroup} > /dev/null 2>&1;
+        then
+            echo 'true';
+        else
+            echo 'false';
+        fi
+        """.stripIndent()
+
+        return Boolean.valueOf(remoteShellHelper.executeCommandReturnProcessOutput(realm, script).stdout?.trim())
+    }
+
+    /**
+     * Validates if the UnixGroup is valid. Throws an exception if not.
+     * It checks
+     *      - whether a unixGroup has invalid chars
+     *      - whether a unixGroup exists on the cluster
+     *      - whether a unixGroup is shared by another project
+     *
+     * @param unixGroup to check
+     * @param realm to check if the unixGroup exists on it
+     * @throws UnixGroupException if a validation fails
+     */
+    private void validateUnixGroup(String unixGroup, Realm realm) throws UnixGroupException {
+        if (!OtpPath.isValidPathComponent(unixGroup)) {
+            throw new UnixGroupIsInvalidException("The unixGroup '${unixGroup}' contains invalid characters.")
+        }
+
+        if (Project.countByUnixGroup(unixGroup) > 0) {
+            throw new UnixGroupIsSharedException("Unix group ${unixGroup} is already used in another project.")
+        }
+
+        if (!isUnixGroupOnCluster(realm, unixGroup)) {
+            throw new UnixGroupNotFoundException("Unix group ${unixGroup} does not exist on the cluster.")
+        }
+    }
+
     private void deprecateAllReferenceGenomesByProject(Project project) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
@@ -975,6 +1020,31 @@ echo 'OK'
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes) : []
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true)
+    }
+
+    /**
+     * Update the unixGroup to a new value. Before the update it will validate the unixGroup.
+     *
+     * If the unixGroup is used by another project, the validation will throw an exception.
+     * You can force to update the unixGroup in this case by the force parameter.
+     *
+     * @param project for which the unixGroup is
+     * @param unixGroup, the new value
+     * @param force, default is false
+     * @throws UnixGroupException when validation fails
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateUnixGroup(Project project, String unixGroup, boolean force = false) throws UnixGroupException {
+        try {
+            validateUnixGroup(unixGroup, project.realm)
+        } catch (UnixGroupIsSharedException isSharedException) {
+            if (!force) {
+                throw isSharedException
+            }
+        }
+
+        project.unixGroup = unixGroup
+        assert project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

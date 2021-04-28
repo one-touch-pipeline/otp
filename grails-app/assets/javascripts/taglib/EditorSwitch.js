@@ -24,19 +24,19 @@
  */
 
 $(function() {
-    var success = function(title, message) {
+    var success = function(title = "Operation completed", message = "The change was successful.") {
         if ($.otp.toaster) {
             $.otp.toaster.showSuccessToast(title, message);
         } else {
-            $.otp.infoMessage(title + message);
+            $.otp.infoMessage(title + ": " + message);
         }
     }
 
-    var failure = function(title, message) {
+    var failure = function(title = "Unknown error", message = "An unknown error occurred.") {
         if ($.otp.toaster) {
             $.otp.toaster.showErrorToast(title, message);
         } else {
-            $.otp.warningMessage(title + message);
+            $.otp.warningMessage(title + ". " + message);
         }
     }
 
@@ -112,7 +112,7 @@ $(function() {
             data: {value: inputField.val()},
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("input[name=value]", container).val());
                 } else {
                     failure("Data could not be stored", data.error);
@@ -120,7 +120,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
                 $("input[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -141,7 +145,7 @@ $(function() {
             data: {value: $("textarea", container).val()},
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("textarea", container).val());
                     if (data.updateMap) {
                         for (var key in data.updateMap) {
@@ -155,7 +159,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
                 $("textarea", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -176,13 +184,20 @@ $(function() {
             data: { value: $("input:text[name=value]", container).val() },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     failure("Data could not be stored", data.error);
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Data could not be stored", jqXHR.responseJSON.message);
+                } else {
+                    failure("Data could not be stored", "Reason: " + errorThrown);
+                }
+            }
         });
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
@@ -211,7 +226,7 @@ $(function() {
             data: { value: $("input:hidden[name=targetDeleteValue]", container).attr("value") },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $(outerContainer).remove();
                     var submitContainer = $("div[class=submit-container]", outerOuterContainer)
                     var selectRoles = $("select[name=newRoles]", submitContainer);
@@ -223,7 +238,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
                 $("p.edit-switch-editor", outerContainer).hide();
                 $("p.edit-switch-label", outerContainer).show();
             }
@@ -261,7 +280,7 @@ $(function() {
             data: { value: JSON.stringify(selectedNewRoles) },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     // Update drop down menue
                     for (let i=0; i<selectNewRoles.length; i++) {
                         for (let j=0; j<data.currentProjectRole.length; j++) {
@@ -283,7 +302,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
             }
         });
     });
@@ -312,7 +335,7 @@ $(function() {
             data: { value: $("select option:selected", container).attr("value") },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("select option:selected", container).text());
                     if (successCallback) {
                         window[successCallback](container, data.additionalData)
@@ -322,7 +345,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -341,14 +368,18 @@ $(function() {
             data: { value: $('input[type="date"]', container).val() },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($('input[type="date"]', container).val());
                 } else {
                     failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -372,7 +403,7 @@ $(function() {
             data: value,
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     var names = [];
                     $("input:checkbox", container).each(function () {
                         if (this.checked) {
@@ -389,7 +420,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
                 resetCheckboxes(container);
             }
         });
@@ -416,7 +451,7 @@ $(function() {
             data: { value: $("select option:selected", container).text() },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     failure("Data could not be stored", data.error);
@@ -424,7 +459,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -446,7 +485,7 @@ $(function() {
             data: { value: $("input:text[name=value]", container).val() },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     failure("Data could not be stored", data.error);
@@ -454,7 +493,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -485,14 +528,18 @@ $(function() {
             data: data,
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     window.setTimeout(function() { location.reload() }, 300);
                 } else {
                     failure("Data could not be stored", data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
             }
         });
         $("span.edit-switch-editor", outerContainer).hide();
@@ -522,7 +569,7 @@ $(function() {
             data: { "value": invVal },
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $.each(["label", "editor"], function () {
                         $("p.edit-switch-" + this + " span", outerContainer).removeClass("icon-" + orgVal).addClass("icon-" + invVal);
                     });
@@ -539,7 +586,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -621,7 +672,7 @@ $(function() {
             data: dataValues,
             success: function (data) {
                 if (data.success) {
-                    success("Data stored successfully", "");
+                    success("Success", "Data stored successfully");
                     $(".edit-switch-label span", outerContainer).text(displayValue);
                     multiInputField.data('values', dataValues);
                 } else {
@@ -629,7 +680,11 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
             }
         });
         $(".edit-switch-editor", outerContainer).hide();
