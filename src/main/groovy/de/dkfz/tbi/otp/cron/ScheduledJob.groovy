@@ -50,6 +50,7 @@ abstract class ScheduledJob {
             UnknownLdapUsersJob,
             GenerateAndSendKPIsForNBI,
             FetchUserDataFromLdapJob,
+            EmailOTRSFilesystemInconsistencies,
     ]
 
     @Autowired
