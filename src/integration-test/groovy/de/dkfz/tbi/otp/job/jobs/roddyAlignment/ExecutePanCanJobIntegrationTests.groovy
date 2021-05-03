@@ -141,7 +141,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
                 "TARGET_REGIONS_FILE:BedFilePath",
                 "TARGETSIZE:1",
                 "fastq_list:${fastqFilesAsString(roddyBamFile)}",
-                "BWA_MEM_THREADS:14",
         ]
 
         List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
@@ -168,7 +167,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
                 "runFingerprinting:true",
                 "fingerprintingSitesFile:${fingerPrintingFile}",
                 "fastq_list:${fastqFilesAsString(roddyBamFile)}",
-                "BWA_MEM_THREADS:14",
         ]
 
         List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
@@ -188,7 +186,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
                 "possibleTumorSampleNamePrefixes:",
                 "runFingerprinting:false",
                 "fastq_list:${fastqFilesAsString(roddyBamFile)}",
-                "BWA_MEM_THREADS:14",
         ]
 
         List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
@@ -222,7 +219,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
                 "runFingerprinting:false",
                 "fastq_list:${fastqFilesAsString(roddyBamFile2)}",
                 "bam:${roddyBamFile.workBamFile.path}",
-                "BWA_MEM_THREADS:14",
         ]
 
         List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile2)

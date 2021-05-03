@@ -66,9 +66,6 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
         if (baseBamFile) {
             cValues.add("bam:${baseBamFile.getPathForFurtherProcessing()}")
         }
-        if (roddyBamFile.seqType.name in [SeqTypeNames.EXOME.seqTypeName, SeqTypeNames.WHOLE_GENOME.seqTypeName]) {
-            cValues.add("BWA_MEM_THREADS:14")
-        }
 
         return cValues
     }
