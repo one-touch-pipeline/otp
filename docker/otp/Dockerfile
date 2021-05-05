@@ -18,19 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM gradle:4.10.3-jdk8-alpine
+FROM registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci:latest
 
-USER root
-
-RUN mkdir -m 2777 -p /otp
-
-ARG APP_HOME=/usr/app/
+ARG APP_HOME=/home/otp/app
+RUN mkdir -p $GRADLE_USER_HOME $APP_HOME
 ARG GRADLE_PROXY_ENABLED=false
 ARG GRADLE_PROXY_HOST
 ARG GRADLE_PROXY_PORT
 
 ENV GRADLE_COMMAND=bootRun
-ENV OTP_PROPERTIES=$APP_HOME.otp.properties
+ENV OTP_PROPERTIES=$APP_HOME/.otp.properties
 
 WORKDIR $APP_HOME
 
@@ -43,8 +40,6 @@ RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
     echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties \
     ; fi
 
-USER 1000
-
-ENTRYPOINT gradle $GRADLE_COMMAND
+ENTRYPOINT ./gradlew $GRADLE_COMMAND --stacktrace
 
 EXPOSE 8080

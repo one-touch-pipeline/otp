@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+mkdir -p /home/otp/filesystem && chown otp:otp /home/otp/filesystem
+
 if [[ "$USER_GROUPS" ]]; then
   for USER_GROUP in $USER_GROUPS; do
     addgroup $USER_GROUP

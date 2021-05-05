@@ -32,11 +32,11 @@ RUN yum -y update && \
     yum clean all
 
 # Configure system via environment variables
-ENV JAVA_HOME   /usr/lib/jvm/zulu-8
+ENV JAVA_HOME /usr/lib/jvm/zulu8
 ENV GRADLE_USER_HOME /home/otp/.gradle
 
 # User management
-RUN useradd --system --create-home --shell /bin/bash otp
+RUN useradd -u 911 --system --create-home --shell /bin/bash otp
 RUN groupadd othergroup
 RUN usermod --append --groups othergroup otp
 
