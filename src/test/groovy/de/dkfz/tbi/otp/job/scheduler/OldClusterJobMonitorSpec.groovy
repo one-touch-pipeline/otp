@@ -43,7 +43,7 @@ import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
 class OldClusterJobMonitorSpec extends Specification implements DataTest {
 
-    OldClusterJobMonitor clusterJobMonitor
+    private OldClusterJobMonitor clusterJobMonitor
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -77,10 +77,6 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
                 ]),
                 schedulerService: schedulerService,
         ])
-    }
-
-    void cleanup() {
-        clusterJobMonitor?.schedulerService?.running?.clear()
     }
 
     /**

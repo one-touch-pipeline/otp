@@ -78,7 +78,7 @@ abstract class AbstractClusterJobMonitor {
      * Helper to get the clusterJob states from the cluster and do checks using {@link #checkClusterJobs(Realm, List, Map)}
      */
     @SuppressWarnings('CatchThrowable')
-    private void checkClusterAndClusterJobs(Realm realm, List<ClusterJob> clusterJobs) {
+    protected void checkClusterAndClusterJobs(Realm realm, List<ClusterJob> clusterJobs) {
         Map<ClusterJobIdentifier, ClusterJobStatus> jobStates
         try {
             LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs state from cluster on realm ${realm.name}") {
@@ -98,7 +98,7 @@ abstract class AbstractClusterJobMonitor {
     /**
      * Helper to do the finish checking of each job and handler finished jobs via {@link #handleFinishedClusterJobWrapper(ClusterJob)}
      */
-    private void checkClusterJobs(Realm realm, List<ClusterJob> clusterJobs, Map<ClusterJobIdentifier, ClusterJobStatus> jobStates) {
+    protected void checkClusterJobs(Realm realm, List<ClusterJob> clusterJobs, Map<ClusterJobIdentifier, ClusterJobStatus> jobStates) {
         List<String> finishedClusterJobIds = []
         clusterJobs.each { ClusterJob clusterJob ->
             ClusterJobStatus status = jobStates.get(new ClusterJobIdentifier(clusterJob), ClusterJobStatus.COMPLETED)
@@ -120,7 +120,7 @@ abstract class AbstractClusterJobMonitor {
      * Transactional wrapper for {@link #saveJobFinishedInformation(ClusterJob)} and the callback {@link #handleFinishedClusterJobs(ClusterJob)}.
      */
     @Transactional
-    private void handleFinishedClusterJobWrapper(ClusterJob clusterJob) {
+    protected void handleFinishedClusterJobWrapper(ClusterJob clusterJob) {
         LogUsedTimeUtils.logUsedTime("${name}: handle finished cluster job ${clusterJob.clusterJobId}") {
             saveJobFinishedInformation(clusterJob)
             handleFinishedClusterJobs(clusterJob)
@@ -132,7 +132,7 @@ abstract class AbstractClusterJobMonitor {
      */
     @SuppressWarnings('CatchThrowable')
     @Transactional
-    private void saveJobFinishedInformation(ClusterJob clusterJob) {
+    protected void saveJobFinishedInformation(ClusterJob clusterJob) {
         clusterJob.refresh()
         try {
             clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
