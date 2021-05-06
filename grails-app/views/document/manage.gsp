@@ -23,25 +23,23 @@
 <%@ page import="de.dkfz.tbi.otp.administration.DocumentController; de.dkfz.tbi.otp.administration.Document" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="main"/>
     <title><g:message code="otp.menu.documents"/></title>
 </head>
 
 <body>
 <div class="body">
-    <g:render template="/templates/messages"/>
-
     <div>
         <h1><g:message code="otp.menu.documents"/></h1>
         <otp:annotation type="info">
             <g:message code="document.notice"/>
         </otp:annotation>
-        <table>
+        <table class="table-sm table-striped table-hover">
             <tr>
                 <th><g:message code="document.name"/></th>
                 <th><g:message code="document.type"/></th>
                 <th><g:message code="document.document"/></th>
                 <th><g:message code="document.update"/></th>
+                <th></th>
                 <th><g:message code="document.delete"/></th>
 
             </tr>
@@ -66,13 +64,20 @@
                             <g:select id="formatType-${document.key.title}" class="use-select-2" style="min-width: 20ch;"
                                       name="formatType" from="${Document.FormatType}" optionValue="displayName"
                                       noSelection="${[(""): "Select format type"]}" />
-                            <g:submitButton name="${g.message(code: "document.update")}"/>
+                            <g:submitButton class="btn btn-primary" name="${g.message(code: "document.update")}"/>
                         </g:uploadForm>
+                    </td>
+                    <td>
+                        <g:form action="updateDescription" useToken="true">
+                            <input type="hidden" name="documentType.id" value="${document.key.id}"/>
+                            <textarea name="description" rows="1">${document.key.description}</textarea>
+                            <g:submitButton class="btn btn-primary" name="${g.message(code: "document.update")}"/>
+                        </g:form>
                     </td>
                     <td>
                         <g:uploadForm action="delete" useToken="true">
                             <input type="hidden" name="documentType.id" value="${document.key.id}"/>
-                            <g:submitButton name="${g.message(code: "document.delete")}"/>
+                            <g:submitButton class="btn btn-danger" name="${g.message(code: "document.delete")}"/>
                         </g:uploadForm>
                     </td>
                 </tr>
@@ -84,7 +89,7 @@
             <input id="title_input" type="text" name="title">
             <label for="description_input"><g:message code="document.description"/></label>
             <input id="description_input" type="text" name="description" style="width: 700px">
-            <g:submitButton name="${g.message(code: "document.createType")}"/>
+            <g:submitButton class="btn btn-primary" name="${g.message(code: "document.createType")}"/>
         </g:form>
     </div>
 </div>

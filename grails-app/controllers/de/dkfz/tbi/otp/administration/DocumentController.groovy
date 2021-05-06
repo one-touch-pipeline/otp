@@ -30,10 +30,11 @@ import de.dkfz.tbi.otp.FlashMessage
 class DocumentController {
 
     static allowedMethods = [
-            manage: "GET",
-            upload: "POST",
-            download: "GET",
-            delete: "POST",
+            manage            : "GET",
+            upload            : "POST",
+            updateDescription : "POST",
+            download          : "GET",
+            delete            : "POST",
             createDocumentType: "POST",
     ]
 
@@ -55,6 +56,20 @@ class DocumentController {
     def upload(UploadCommand cmd) {
         withForm {
             Errors errors = documentService.updateDocument(cmd.documentType, cmd.content, cmd.formatType)
+            if (errors) {
+                flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
+            } else {
+                flash.message = new FlashMessage(g.message(code: "document.store.succ") as String)
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "document.store.fail") as String)
+        }
+        redirect(action: "manage")
+    }
+
+    def updateDescription(UpdateDescriptionCommand cmd) {
+        withForm {
+            Errors errors = documentService.updateDescription(cmd.documentType, cmd.description)
             if (errors) {
                 flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
             } else {
@@ -125,6 +140,11 @@ class UploadCommand {
     DocumentType documentType
     Document.FormatType formatType
     byte[] content
+}
+
+class UpdateDescriptionCommand {
+    DocumentType documentType
+    String description
 }
 
 class CreateTypeCommand {

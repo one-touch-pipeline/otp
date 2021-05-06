@@ -86,4 +86,15 @@ class DocumentService {
         }
         return null
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors updateDescription(DocumentType documentType, String description) {
+        documentType.description = description
+        try {
+            documentType.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
 }
