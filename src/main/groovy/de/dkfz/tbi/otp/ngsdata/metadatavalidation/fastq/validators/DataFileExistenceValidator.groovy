@@ -64,29 +64,32 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
         Object sync = new Object()
 
         GParsPool.withPool(16) {
-            allValueTuples.groupBy { context.directoryStructure.getDataFilePath(context, it)
+            allValueTuples.groupBy {
+                context.directoryStructure.getDataFilePath(context, it)
             }.findAll { it.key != null }.eachParallel { Path path, List<ValueTuple> valueTuples ->
                 if (valueTuples*.cells.sum()*.row.unique().size() != 1) {
                     synchronized (sync) {
                         addDirectoryStructureInfo()
-                        context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.WARNING,
+                        context.addProblem((Set<Cell>) valueTuples*.cells.sum(), Level.WARNING,
                                 "Multiple rows reference the same file '${path}'.", "Multiple rows reference the same file.")
                     }
                 }
                 String message = null
                 if (!Files.isRegularFile(path)) {
-                    if (!Files.exists(path)) {
-                        message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
-                    } else {
+                    if (Files.exists(path)) {
                         message = "${pathForMessage(path)} is not a file."
+                    } else {
+                        message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
                     }
+                } else if (!Files.isReadable(path)) {
+                    message = "File ${pathForMessage(path)} is not readable by OTP."
                 } else if (Files.size(path) == 0L) {
                     message = "${pathForMessage(path)} is empty."
                 }
                 if (message) {
                     synchronized (sync) {
                         addDirectoryStructureInfo()
-                        context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.ERROR, message, "At least one file can not be access by OTP, does not exist, is empty or is not a file.")
+                        context.addProblem((Set<Cell>) valueTuples*.cells.sum(), Level.ERROR, message, "At least one file can not be accessed by OTP, does not exist, is empty or is not a file.")
                     }
                 }
             }
