@@ -148,14 +148,14 @@ UserProjectRole.findAll().sort {
     boolean fileAccessInOtp = userProjectRole.accessToFiles
     boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUser(userProjectRole.user)
     boolean ldapDeactivated = ldapService.isUserDeactivated(userProjectRole.user)
-    if (fileAccessInOtp && !fileAccessInLdap) {
+    if (fileAccessInOtp && !fileAccessInLdap && !userProjectRole.fileAccessChangeRequested) {
         uprs.setAccessToFiles(userProjectRole, false, true)
         fileAccessInOtp = false
     }
     if (fileAccessInOtp != fileAccessInLdap) {
         output << sprintf(
                 format,
-                [fileAccessInLdap, fileAccessInOtp, ldapDeactivated, userProjectRole.user.plannedDeactivationDate as boolean, userProjectRole.enabled,
+                [fileAccessInLdap, fileAccessInOtp, ldapDeactivated, userProjectRole.user.plannedDeactivationDate as boolean, userProjectRole.user.enabled,
                  userProjectRole.user.username, userProjectRole.project.name, userProjectRole.project.unixGroup]
         )
     }
