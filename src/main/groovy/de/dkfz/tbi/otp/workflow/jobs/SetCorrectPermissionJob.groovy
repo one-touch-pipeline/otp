@@ -22,9 +22,14 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 /**
  * Sets the permission and groups of result files
@@ -33,8 +38,12 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 @Slf4j
 class SetCorrectPermissionJob extends AbstractJob {
 
+    @Autowired
+    FileService fileService
+
     @Override
     void execute(WorkflowStep workflowStep) {
+        correctPermission(workflowStep)
     }
 
     @Override
@@ -42,7 +51,9 @@ class SetCorrectPermissionJob extends AbstractJob {
         return JobStage.CORRECT_PERMISSION
     }
 
-    @SuppressWarnings("UnusedMethodParameter")
     void correctPermission(WorkflowStep workflowStep) {
+        FileSystem fileSystem = getFileSystem(workflowStep)
+        Path workDirectory = fileSystem.getPath(workflowStep.workflowRun.workDirectory)
+        fileService.correctPathPermissionAndGroupRecursive(workDirectory, workflowStep.realm, workflowStep.workflowRun.project.unixGroup)
     }
 }
