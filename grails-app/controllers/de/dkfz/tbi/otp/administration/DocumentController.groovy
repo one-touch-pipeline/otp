@@ -67,6 +67,20 @@ class DocumentController {
         redirect(action: "manage")
     }
 
+    def updateSortOrder(UpdateSortOrderCommand cmd) {
+        withForm {
+            Errors errors = documentService.updateSortOrder(cmd.documentType, cmd.sortOrder)
+            if (errors) {
+                flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
+            } else {
+                flash.message = new FlashMessage(g.message(code: "document.store.succ") as String)
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "document.store.fail") as String)
+        }
+        redirect(action: "manage")
+    }
+
     def updateDescription(UpdateDescriptionCommand cmd) {
         withForm {
             Errors errors = documentService.updateDescription(cmd.documentType, cmd.description)
@@ -140,6 +154,11 @@ class UploadCommand {
     DocumentType documentType
     Document.FormatType formatType
     byte[] content
+}
+
+class UpdateSortOrderCommand {
+    DocumentType documentType
+    int sortOrder
 }
 
 class UpdateDescriptionCommand {

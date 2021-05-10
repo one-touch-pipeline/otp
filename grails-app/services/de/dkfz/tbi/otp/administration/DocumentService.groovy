@@ -42,8 +42,8 @@ class DocumentService {
 
     @CompileDynamic
     List<Document> listDocuments() {
-        Document.all.sort {
-            it.documentType.title
+        Document.all.sort { a, b ->
+            a.documentType.sortOrder <=> b.documentType.sortOrder ?: a.documentType.title <=> b.documentType.title
         }
     }
 
@@ -81,6 +81,17 @@ class DocumentService {
         document.formatType = formatType
         try {
             document.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors updateSortOrder(DocumentType documentType, int sortOrder) {
+        documentType.sortOrder = sortOrder
+        try {
+            documentType.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }

@@ -38,8 +38,9 @@
                 <th><g:message code="document.name"/></th>
                 <th><g:message code="document.type"/></th>
                 <th><g:message code="document.document"/></th>
-                <th><g:message code="document.update"/></th>
-                <th></th>
+                <th><g:message code="document.update.file"/></th>
+                <th><g:message code="document.update.sortOder"/></th>
+                <th><g:message code="document.update.description"/></th>
                 <th><g:message code="document.delete"/></th>
 
             </tr>
@@ -68,6 +69,19 @@
                         </g:uploadForm>
                     </td>
                     <td>
+                        <g:form class="form-inline" action="updateSortOrder" useToken="true">
+                            <div class="input-group">
+                                <input type="hidden" name="documentType.id" value="${document.key.id}"/>
+                                <div class="input-group-prepend">
+                                    <input type="text" name="sortOrder" size="3" value="${document.key.sortOrder}">
+                                </div>
+                                <div class="input-group-append">
+                                    <g:submitButton class="btn btn-primary" name="${g.message(code: "document.update")}"/>
+                                </div>
+                            </div>
+                        </g:form>
+                    </td>
+                    <td>
                         <g:form action="updateDescription" useToken="true">
                             <input type="hidden" name="documentType.id" value="${document.key.id}"/>
                             <textarea name="description" rows="1">${document.key.description}</textarea>
@@ -83,6 +97,7 @@
                 </tr>
             </g:each>
         </table>
+
         <h2><g:message code="document.documentType"/></h2>
         <g:form action="createDocumentType" useToken="true">
             <label for="title_input"><g:message code="document.title"/></label>

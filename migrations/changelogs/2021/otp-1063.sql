@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,23 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
-
-import de.dkfz.tbi.otp.utils.Entity
-
-class DocumentType implements Entity {
-
-    String title
-    String description
-    int sortOrder
-
-    static mapping = {
-        title index: "document_type_title_idx"
-        description type: "text"
-    }
-
-    static constraints = {
-        title blank: false, unique: true
-        description blank: false
-    }
-}
+ALTER TABLE document_type ADD COLUMN sort_order int4;
+UPDATE document_type SET sort_order = 0;
+ALTER TABLE document_type ALTER COLUMN sort_order SET NOT NULL;
