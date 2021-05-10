@@ -65,7 +65,7 @@ $(function () {
                     const selectorHtml = (response.selectors);
                     relatedSelectors.html(selectorHtml);
 
-                    $(".expandable-button").click(function () {
+                    $(".expandable-button").on("click", function () {
                         $(this).siblings(".expandable-container").toggleClass("collapsed");
                         $(this).siblings(".expandable-container").toggleClass("expanded");
                     });

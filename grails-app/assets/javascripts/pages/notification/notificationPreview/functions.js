@@ -26,11 +26,11 @@
 $(function() {
     var sendButton = $("#send-button");
 
-    sendButton.click(function () {
+    sendButton.on("click", function () {
         return confirm('Really send the notification?');
     });
 
-    $("div#notification-selection-container").find("input[type=checkbox]").click(function () {
+    $("div#notification-selection-container").find("input[type=checkbox]").on("click", function () {
         sendButton.prop("disabled", true);
     });
 });

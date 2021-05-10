@@ -23,12 +23,12 @@
 $(function () {
     "use strict";
 
-    $('#start').change(function () {
+    $('#start').on("change", function () {
         var date = $("#start").val();
         $('#end').attr("min", date);
     });
 
-    $('#end').change(function () {
+    $('#end').on("change", function () {
         var date = $("#end").val();
         $('#start').attr("max", date);
     });

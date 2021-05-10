@@ -22,7 +22,7 @@
 
 $(function () {
     "use strict";
-    $(".clone-add").click(function (e) {
+    $(".clone-add").on("click", function (e) {
         e.preventDefault();
         var target = $(".clone-target");
         target.data("highest-index", target.data("highest-index") + 1);
@@ -51,7 +51,7 @@ $(function () {
         return false;
     });
 
-    $(".clone-remove").click(function (e) {
+    $(".clone-remove").on("click", function (e) {
         e.preventDefault();
         $(this).closest('.clone-remove-target').remove();
     });

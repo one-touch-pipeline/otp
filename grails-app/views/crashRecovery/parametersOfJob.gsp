@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<div title="Output parameters">
+<div id="output-params-wrapper">
     <p>
         Please specify the output parameters of the failed Jobs.
     </p>

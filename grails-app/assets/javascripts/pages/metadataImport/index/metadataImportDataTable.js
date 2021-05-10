@@ -195,7 +195,7 @@ $(function() {
             setPositionAndSize();
             repositionStickyHead();
         })
-        .resize(function () {
+        .on("resize", function () {
             setPositionAndSize();
             repositionStickyHead();
         })

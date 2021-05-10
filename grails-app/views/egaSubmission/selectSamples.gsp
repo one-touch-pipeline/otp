@@ -85,7 +85,7 @@
                 let table = $.otp.selectSamplesTable.selectableSampleList([${raw("\"" + dataTableHeaders.join("\",\"") + "\"")}], "${samplesWithSeqType}");
                 $.otp.selectSamplesTable.applySeqTypeFilter(table, "${seqTypeColumnIndex}");
 
-                $('#${nextButton}').click(function() {
+                $('#${nextButton}').on("click", function() {
                     $.otp.selectSamplesTable.removeFilterOnColumn(table, "${seqTypeColumnIndex}");
                 });
             });

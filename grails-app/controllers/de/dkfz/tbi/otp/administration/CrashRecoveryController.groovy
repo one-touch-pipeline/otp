@@ -54,7 +54,6 @@ class CrashRecoveryController {
         dataToRender.iTotalRecords = crashedJobs.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        // TODO: sorting
         crashedJobs.each { ProcessingStep step ->
             boolean resumable = isJobResumable(step)
             dataToRender.aaData << [

@@ -22,7 +22,7 @@
 
 $(function(){
     "use strict";
-    $('input:radio[name=expectedOrEnforcedCells]').change(function() {
+    $('input:radio[name=expectedOrEnforcedCells]').on("change", function() {
         if($('input:radio[name=expectedOrEnforcedCells]:checked').val() == 'neither') {
             $('input[name=expectedOrEnforcedCellsValue]').prop("disabled", true);
             $('label[id=expectedOrEnforcedCellsValue]').hide();
@@ -30,5 +30,5 @@ $(function(){
             $('input[name=expectedOrEnforcedCellsValue]').prop("disabled", false);
             $('label[id=expectedOrEnforcedCellsValue]').show();
         }
-    }).change();
+    }).trigger("change");
 });

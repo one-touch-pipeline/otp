@@ -63,6 +63,6 @@ $(function () {
 $.otp.multiInputField = {
     cancel: function (target) {
         "use strict";
-        target.find($(".remove-field").click());
+        target.find($(".remove-field").trigger("click"));
     }
 };

@@ -143,6 +143,10 @@ task workflowTest(type: Test) {
     systemProperty "grails.env", "WORKFLOW_TEST" // change to TEST??
 }
 
+configurations.all {
+    exclude group: 'org.webjars', module:'popper.js'    // exclude popper.js, since the correct version is already imported within bootstrap.bundle
+}
+
 dependencies {
     swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.3' // swagger 2.x codegen
     implementation 'io.swagger:swagger-annotations:1.6.0'
@@ -252,20 +256,20 @@ dependencies {
     testCompile "org.grails:grails-test-mixins:3.3.0"
 
     // JS and CSS libraries
-    compile 'org.webjars:jquery:1.11.1'
+    compile 'org.webjars:jquery:3.6.0'
     compile 'org.webjars:bootstrap:4.6.0'
     compile 'org.webjars.npm:bootstrap-icons:1.4.0'
-    compile 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.4.0'
+    compile 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
     compile 'org.webjars:rgraph:4.66-stable'
-    compile 'org.webjars:jquery-ui:1.10.4-1'
-    compile 'org.webjars:select2:4.0.12'
-    compile 'org.webjars:datatables:1.10.23'
-    compile 'org.webjars:datatables-buttons:1.3.1-1'
+    compile 'org.webjars:jquery-ui:1.12.1'
+    compile 'org.webjars:select2:4.0.13'
+    compile 'org.webjars:datatables:1.10.24'
+    compile 'org.webjars:datatables-buttons:1.7.0'
     compile 'org.webjars:datatables-fixedcolumns:3.0.2'
     compile 'org.webjars:datatables-fixedheader:2.1.2-1'
     compile 'org.webjars.bowergithub.datatables:dist-datatables-scroller:2.0.1'
     compile 'org.webjars.bowergithub.datatables:dist-datatables-scroller-bootstrap4:2.0.1'
-    compile 'org.webjars:datatables-plugins:1.10.20'
+    compile 'org.webjars:datatables-plugins:1.10.24'
 }
 
 bootRun {

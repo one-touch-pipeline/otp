@@ -80,27 +80,33 @@ $.otp.projectOverviewTable = {
 
     updatePatientCount: function () {
         "use strict";
-        $.getJSON($.otp.createLink({
-            controller: 'projectOverview',
-            action: 'individualCountByProject'
-        }), function (data) {
-            var message, i;
-            if (data.individualCount >= 0) {
-                $('#patient-count').html(data.individualCount);
-            } else if (data.error) {
-                $.otp.warningMessage(data.error);
-                $('#patient-count').html("");
-            } else if (data.errors) {
-                $('#patient-count').html("");
-                message = "<ul>";
-                for (i = 0; i < data.errors.length; i += 1) {
-                    message += "<li>" + data.errors[i].message + "</li>";
+        $.ajax({
+            url: $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'individualCountByProject'
+            }),
+            dataType: 'json',
+            type: 'GET',
+            success: function (data) {
+                var message, i;
+                if (data.individualCount >= 0) {
+                    $('#patient-count').html(data.individualCount);
+                } else if (data.error) {
+                    $.otp.warningMessage(data.error);
+                    $('#patient-count').html("");
+                } else if (data.errors) {
+                    $('#patient-count').html("");
+                    message = "<ul>";
+                    for (i = 0; i < data.errors.length; i += 1) {
+                        message += "<li>" + data.errors[i].message + "</li>";
+                    }
+                    message += "</ul>";
+                    $.otp.warningMessage(message);
                 }
-                message += "</ul>";
-                $.otp.warningMessage(message);
+            },
+            error: function (jqXHR) {
+                $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
             }
-        }).error(function (jqXHR) {
-            $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
         });
     },
 

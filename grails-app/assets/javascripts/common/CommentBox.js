@@ -37,7 +37,7 @@ $(function () {
         "use strict";
         $.setDisableForControls(false);
     });
-    $("#button-save").click(function() {
+    $("#button-save").on("click", function() {
         "use strict";
         var controller = $(this).data('controller');
         var action = $(this).data('action');
@@ -58,7 +58,7 @@ $(function () {
             }
         });
     });
-    $("#button-cancel").click(function() {
+    $("#button-cancel").on("click", function() {
         "use strict";
         $.setDisableForControls(true);
         commentContent.val(lastSavedComment);

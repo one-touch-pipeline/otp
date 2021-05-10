@@ -26,7 +26,7 @@
 $(function(){
     "use strict";
 
-    $(".add-button").click(function (event) {
+    $(".add-button").on("click", function (event) {
         event.preventDefault();
         // Subtract the hidden element
         var existingSamples = $("tr.sample").not(".hidden");
@@ -41,7 +41,7 @@ $(function(){
     });
 
     var lastPid = $("#identifier").val();
-    $("#identifier").keyup(function() {
+    $("#identifier").on("keyup", function() {
         var pid = $("#identifier").val();
         var mockPid = $("#alias").val();
         var mockFullName = $("#displayedIdentifier").val();

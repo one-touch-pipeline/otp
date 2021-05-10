@@ -35,6 +35,6 @@ $(function () {
             $('#beanToRestart').val('').trigger('change');
         }
     };
-    $('#restartAction').change(update);
+    $('#restartAction').on("change", update);
     update()
 });

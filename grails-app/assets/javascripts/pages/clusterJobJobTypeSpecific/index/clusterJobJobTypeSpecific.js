@@ -48,18 +48,18 @@ $.otp.clusterJobJobTypeSpecific = {
                 minDate: $('#dpFrom').val(),
                 maxDate: $('#dpTo').val()
         });
-        $('#jobClassSelect').change(function () {
+        $('#jobClassSelect').on("change", function () {
             $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
         });
-        $('#seqTypeSelect').change(function () {
+        $('#seqTypeSelect').on("change", function () {
             $.otp.clusterJobJobTypeSpecificGraph.update();
             $.otp.clusterJobJobTypeSpecific.updateAvgValues();
         });
-        $('#basesInput').change(function () {
+        $('#basesInput').on("change", function () {
             $.otp.clusterJobJobTypeSpecificGraph.update();
             $.otp.clusterJobJobTypeSpecific.updateAvgValues();
         });
-        $('#coverageInput').change(function () {
+        $('#coverageInput').on("change", function () {
             $.otp.clusterJobJobTypeSpecificGraph.update();
             $.otp.clusterJobJobTypeSpecific.updateAvgValues();
         });

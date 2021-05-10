@@ -39,6 +39,7 @@
             <p>Please provide an error message why the Job has ben set to failed.</p>
             <input type="text"/>
         </div>
+        <div id="dialog-parameters-of-job" title="Output parameters" style="display: none"></div>
         <h1><g:message code="crashRecovery.title"/></h1>
 
         <g:render template="/templates/quickNavigationBar" model="[

@@ -26,7 +26,7 @@
 $.otp.resultsTable = {
 
     registerDataTable: function (tableElement, source, columnDefs, convertRowData) {
-        const fileName = tableElement.context.title.replaceAll(" ", "_") + "-" + $(".selected-project-value strong").text();
+        const fileName = document.title.replaceAll(" ", "_") + "-" + $(".selected-project-value strong").text();
 
         "use strict";
         var oTable = tableElement.dataTable({

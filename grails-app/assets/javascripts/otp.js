@@ -166,7 +166,7 @@ $.otp.message = function (message, warning) {
         classes += " errors";
     }
     button = $("<div class=\"close-info-box\"><button></button></div>");
-    $("button", button).click(function () {
+    $("button", button).on("click", function () {
         $(this).parent().parent().remove();
     });
     divCode = $("<div class=\"" + classes + "\"><p>" + message + "</p></div>");
@@ -331,7 +331,7 @@ $.otp.autorefresh = {
      */
     setup: function (enabled) {
         "use strict";
-        $("#refreshBox a").click($.otp.autorefresh.handleClick);
+        $("#refreshBox a").on("click", $.otp.autorefresh.handleClick);
         $.otp.autorefresh.enabled = enabled;
     },
     /**
@@ -341,7 +341,12 @@ $.otp.autorefresh = {
     handleClick: function (event) {
         "use strict";
         event.preventDefault();
-        $.getJSON($(this).attr("href"), $.otp.autorefresh.ajaxHandler);
+        $.ajax({
+            "dataType": 'json',
+            "url": $(this).attr("href"),
+            "type": "GET",
+            "success": $.otp.autorefresh.ajaxHandler
+        });
     },
     /**
      * Callback for AJAX request to enable/diasble auto-refresh
@@ -382,7 +387,7 @@ $.otp.highlight = function (path) {
 /** used for data tables */
 $.otp.resizeBodyInit = function (table, margin) {
     "use strict";
-    $(window).resize(function () {
+    $(window).on("resize", function () {
         $(table + '_wrapper' + ' .dataTables_scrollBody').height(($('.body').height() - margin));
     });
 };
@@ -489,8 +494,10 @@ $.otp.applySelect2 = function (jqSelection) {
          */
         width: 'computedstyle',
         containerCssClass: 'select-2-otp-theme'
-    }).change(function (ev) { // handler to keep html5 validity-state and -visuals synced between 'real' select and select2 elements.
+    }).on("change", function (ev) { // handler to keep html5 validity-state and -visuals synced between 'real' select and select2 elements.
         syncValidity(ev.target);
+    }).on("select2:open", () => {
+        document.querySelector(".select2-search input").focus();
     }).each(function (i, e) { // initial sync when first applying, to match other fields (:invalid style is shown immediately on page load.)
         syncValidity(e);
     });
@@ -504,27 +511,6 @@ $(document).ready(function() {
     // Since there are some cases where select2 doesn't integrate nicely we also provide
     // an opt-out class. If you use the opt-out, please leave a comment explaining why!
     $.otp.applySelect2($('.use-select-2').not('.dont-use-select-2'));
-
-    var t = $('[title]');
-    if ($.fn.tooltip.Constructor === undefined) {
-        // use jQueryUI
-        t.tooltip();
-        t.on('click', function () {
-            $(this)
-                .tooltip({
-                    open: function (event, ui) {
-                        var $element = $(event.target);
-                        ui.tooltip.click(function () {
-                            $element.tooltip('close');
-                        });
-                    },
-                })
-                .tooltip('open');
-        });
-    } else {
-        // use Bootstrap
-        t.tooltip();
-    }
 
     // close toasts that are not added with js
     $('body').on('click', '[data-dismiss="toast"]', function () {

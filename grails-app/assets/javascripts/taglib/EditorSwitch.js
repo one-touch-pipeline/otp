@@ -40,7 +40,7 @@ $(function() {
         }
     }
 
-    $("td.add-table-buttons button.add").click(function (event) {
+    $("td.add-table-buttons button.add").on("click", function (event) {
         "use strict";
         event.preventDefault();
         var p = $(this).parent();
@@ -50,7 +50,7 @@ $(function() {
         $(".add-table-fields", p.parent().parent()).show();
     });
 
-    $("td.add-table-buttons button.cancel").click(function (event) {
+    $("td.add-table-buttons button.cancel").on("click", function (event) {
         "use strict";
         event.preventDefault();
         var p = $(this).parent();
@@ -60,7 +60,7 @@ $(function() {
         $(".add-table-fields", p.parent().parent()).hide();
     });
 
-    $("tr.edit-table-buttons button.button-edit").click(function (event) {
+    $("tr.edit-table-buttons button.button-edit").on("click", function (event) {
         "use strict";
         event.preventDefault();
         var p = $(this).parent();
@@ -71,7 +71,7 @@ $(function() {
         $(".show-fields", p.parent()).hide();
     });
 
-    $("tr.edit-table-buttons button.cancel").click(function (event) {
+    $("tr.edit-table-buttons button.cancel").on("click", function (event) {
         "use strict";
         event.preventDefault();
         var p = $(this).parent();
@@ -83,9 +83,9 @@ $(function() {
     });
 
     $.otp.editorswitch = {};
-    $("div.edit-switch .edit-switch-label button.js-edit").click(function () { outerContainerSwitch($(this)) });
+    $("div.edit-switch .edit-switch-label button.js-edit").on("click", function () { outerContainerSwitch($(this)) });
 
-    $("div.edit-switch .edit-switch-label button.js-remove").click(function() { outerContainerSwitch($(this)) });
+    $("div.edit-switch .edit-switch-label button.js-remove").on("click", function() { outerContainerSwitch($(this)) });
 
     function outerContainerSwitch (that) {
         "use strict";
@@ -95,7 +95,7 @@ $(function() {
     }
 
     /*jslint unparam: true */
-    $("div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer, inputField;
         container = $(this).parent();
@@ -133,7 +133,7 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-text-area p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-text-area p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
@@ -172,7 +172,7 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-url p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-url p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
@@ -203,7 +203,7 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     });
 
-    $("div.edit-switch-drop-down p.edit-switch-editor button.delete").click(function () {deleteRole($(this))});
+    $("div.edit-switch-drop-down p.edit-switch-editor button.delete").on("click", function () {deleteRole($(this))});
 
     function deleteRole(that) {
         "use strict";
@@ -249,7 +249,7 @@ $(function() {
         });
     }
 
-    $("div.submit-container button.addRole").click(function () {
+    $("div.submit-container button.addRole").on("click", function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
@@ -293,9 +293,9 @@ $(function() {
                     for (let j=0; j<data.newProjectRolesNodes.length; j++) {
                         outerContainer.prepend(data.newProjectRolesNodes[j])
                         // update event listener for added object only
-                        $(outerContainer.children()[0]).find("button.js-remove").click(function() { outerContainerSwitch($(this)) });
-                        $(outerContainer.children()[0]).find("button.delete").click(function () {deleteRole($(this))});
-                        $(outerContainer.children()[0]).find("button.cancel").click(function () {cancelAddRoleCommand($(this))});
+                        $(outerContainer.children()[0]).find("button.js-remove").on("click", function() { outerContainerSwitch($(this)) });
+                        $(outerContainer.children()[0]).find("button.delete").on("click", function () {deleteRole($(this))});
+                        $(outerContainer.children()[0]).find("button.cancel").on("click", function () {cancelAddRoleCommand($(this))});
                     }
                 } else {
                     failure("Data could not be stored", data.error);
@@ -311,7 +311,7 @@ $(function() {
         });
     });
 
-    $("div.edit-switch-drop-down p.edit-switch-editor button.save").click(function () {saveRole($(this))});
+    $("div.edit-switch-drop-down p.edit-switch-editor button.save").on("click", function () {saveRole($(this))});
 
     function saveRole (that) {
         "use strict";
@@ -356,7 +356,7 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     }
 
-    $("div.edit-switch-date p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-date p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
@@ -387,7 +387,7 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-checkboxes p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-checkboxes p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer, value;
         container = $(this).parent();
@@ -439,7 +439,7 @@ $(function() {
     }
 
     /*jslint unparam: true */
-    $("div.edit-switch-new-value p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-new-value p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
@@ -473,7 +473,7 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-new-free-text-value p.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-new-free-text-value p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer;
         container = $(this).parent();
@@ -507,7 +507,7 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-new-free-text-values span.edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-new-free-text-values span.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer, data = {};
         container = $(this).parent();
@@ -546,7 +546,7 @@ $(function() {
         $("span.edit-switch-label", outerContainer).show();
     });
 
-    $("div.edit-switch-toggle p.edit-switch-editor button.toggle").click(function () {
+    $("div.edit-switch-toggle p.edit-switch-editor button.toggle").on("click", function () {
         "use strict";
         var container, outerContainer, orgVal, invVal;
         container = $(this).parent();
@@ -597,7 +597,7 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     });
 
-    $("div.edit-switch .edit-switch-editor button.cancel").click(function () {cancelAddRoleCommand($(this))});
+    $("div.edit-switch .edit-switch-editor button.cancel").on("click", function () {cancelAddRoleCommand($(this))});
 
     function cancelAddRoleCommand(that) {
         "use strict";
@@ -610,7 +610,7 @@ $(function() {
         }
     }
 
-    $("div.multi-edit-switch .edit-switch-label button.js-edit").click(function () {
+    $("div.multi-edit-switch .edit-switch-label button.js-edit").on("click", function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
         var multiInputField = $(".multi-input-field", outerContainer);
@@ -636,7 +636,7 @@ $(function() {
         $(".edit-switch-label", outerContainer).hide();
     });
 
-    $("div.multi-edit-switch .edit-switch-editor button.cancel").click(function () {
+    $("div.multi-edit-switch .edit-switch-editor button.cancel").on("click", function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
         $(".edit-switch-editor", outerContainer).hide();
@@ -645,7 +645,7 @@ $(function() {
     });
 
     /*jslint unparam: true */
-    $("div.edit-switch-multi-input .edit-switch-editor button.save").click(function () {
+    $("div.edit-switch-multi-input .edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer, dataValues = {}, i=0, displayValue = '';
         container = $(this).parent();

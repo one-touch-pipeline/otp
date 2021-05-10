@@ -125,19 +125,19 @@ function hideEditorAndShowLabel(context) {
 }
 
 $(function () {
-    $('input[type=radio][name=addViaLdap]').change(function () {
+    $('input[type=radio][name=addViaLdap]').on("change", function () {
         var ldapUserChecked = (this.value === "true");
         $('.inputField.ldapUser').prop("disabled", !ldapUserChecked);
         $('.inputField.nonLdapUser').prop("disabled", ldapUserChecked);
     }).filter(":checked").trigger("change");
 
-    $('#listEmails').click(function () {
+    $('#listEmails').on("click", function () {
         var project = $(this).data('project');
         var emails = $(this).data('emails');
         prompt("Emails for " + project, emails);
     });
 
-    $('#add-button').click(function () {
+    $('#add-button').on("click", function () {
         const modalText = $("input:hidden[name=confirmationTextHtml]").val();
 
         //This is needed to prevent multiple submits
@@ -155,7 +155,7 @@ $(function () {
         }
     });
 
-    $("div.submit-container button.changeProjectAccess").click(function () {
+    $("div.submit-container button.changeProjectAccess").on("click", function () {
         "use strict";
         let container;
         container = $(this).parent();

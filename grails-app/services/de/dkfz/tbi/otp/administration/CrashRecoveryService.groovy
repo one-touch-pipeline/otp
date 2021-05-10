@@ -130,7 +130,6 @@ class CrashRecoveryService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingStep> crashedJobs() {
         if (!isCrashRecovery()) {
-            // TODO throw proper exception
             throw new RuntimeException("Not in Crash Recovery")
         }
         return schedulerService.retrieveRunningProcessingSteps()

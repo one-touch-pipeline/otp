@@ -101,7 +101,7 @@ $(function () {
                 });
             }
         });
-        $('#display').click(function () {
+        $('#display').on("click", function () {
             var oSettings1 = oTableProgress.fnSettings();
             oSettings1.oFeatures.bServerSide = true;
             oTableProgress.dataTable().fnDraw();

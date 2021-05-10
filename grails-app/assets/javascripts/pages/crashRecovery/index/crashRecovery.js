@@ -87,31 +87,39 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
         action: 'parametersOfJob',
         parameters: {ids: ids}
     }), function (data) {
-        $(data).dialog({
+        let dialogContainer = $("#dialog-parameters-of-job");
+        dialogContainer.append($("#output-params-wrapper", data))
+        dialogContainer.dialog({
             width: '500px',
-            buttons: {
-                Ok: function () {
-                    var parameters = [];
-                    $("ul li input", $(this)).each(function () {
-                        parameters[parameters.length] = {
-                            key: $(this).attr("name"),
-                            value: $(this).val()
-                        };
-                    });
-                    $.getJSON($.otp.createLink({
-                        controller: target.controller,
-                        action: target.action,
-                        parameters: {ids: ids}
-                    }), 'parameters=' + JSON.stringify(parameters), function (data) {
-                        $("#crashRecoveryTable").dataTable().fnDraw();
-                        $.otp.infoMessage(data.success);
-                    });
-                    $(this).dialog("close");
+            buttons: [
+                {
+                    text: "OK",
+                    click: function () {
+                        var parameters = [];
+                        $("ul li input", $(this)).each(function () {
+                            parameters[parameters.length] = {
+                                key: $(this).attr("name"),
+                                value: $(this).val()
+                            };
+                        });
+                        $.getJSON($.otp.createLink({
+                            controller: target.controller,
+                            action: target.action,
+                            parameters: {ids: ids}
+                        }), 'parameters=' + JSON.stringify(parameters), function (data) {
+                            $("#crashRecoveryTable").dataTable().fnDraw();
+                            $.otp.infoMessage(data.success);
+                        });
+                        $(this).dialog("close");
+                    }
                 },
-                Cancel: function () {
-                    $(this).dialog("close");
+                {
+                    text: "Cancel",
+                    click: function () {
+                        $(this).dialog("close");
+                    }
                 }
-            }
+            ]
         });
     });
 };
@@ -210,9 +218,9 @@ $.otp.crashRecovery.startSchedulerButton = function () {
 $.otp.crashRecovery.setupView = function () {
     "use strict";
     $.otp.crashRecovery.createListView();
-    $("#markFinished").click($.otp.crashRecovery.finishedButton);
-    $("#markSucceeded").click($.otp.crashRecovery.succeededButton);
-    $("#markFailed").click($.otp.crashRecovery.failedButton);
-    $("#restart").click($.otp.crashRecovery.restartButton);
-    $("#startScheduler").click($.otp.crashRecovery.startSchedulerButton);
+    $("#markFinished").on("click", $.otp.crashRecovery.finishedButton);
+    $("#markSucceeded").on("click", $.otp.crashRecovery.succeededButton);
+    $("#markFailed").on("click", $.otp.crashRecovery.failedButton);
+    $("#restart").on("click", $.otp.crashRecovery.restartButton);
+    $("#startScheduler").on("click", $.otp.crashRecovery.startSchedulerButton);
 };

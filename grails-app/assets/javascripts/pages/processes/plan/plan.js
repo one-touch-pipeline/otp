@@ -98,7 +98,7 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
         bScrollCollapse: false,
         sDom:'<i>prtp<"clear">',
     });
-    $("#enable-workflow-button").click(function () {
+    $("#enable-workflow-button").on("click", function () {
         $.get($.otp.createLink({
             controller: 'processes',
             action: 'enablePlan',
@@ -114,7 +114,7 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
             $("#workflow-status").removeClass("grey").addClass("green");
         });
     });
-    $("#disable-workflow-button").click(function () {
+    $("#disable-workflow-button").on("click", function () {
         $.get($.otp.createLink({
             controller: 'processes',
             action: 'disablePlan',

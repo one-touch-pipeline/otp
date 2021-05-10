@@ -118,7 +118,7 @@ $(function() {
         });
     };
 
-    $('#referenceGenome').change(function() {
+    $('#referenceGenome').on("change", function() {
         setStatSizeFileNames();
         setGeneModels();
         setToolVersion();
