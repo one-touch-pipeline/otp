@@ -553,8 +553,4 @@ databaseChangeLog = {
     include file: 'changelogs/2021/otp-919-3-dta-delete-old-structure.groovy'
 
     include file: 'changelogs/2021/otp-1050-drop-unique-mail-constraint.groovy'
-
-    changeSet(author: "nlangh", id: "otp-874") {
-        sqlFile(path: 'changelogs/2021/otp-874-deactivate-old-data-installation-workflows.sql')
-    }
 }
