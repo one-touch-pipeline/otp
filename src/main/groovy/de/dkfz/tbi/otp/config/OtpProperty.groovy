@@ -71,10 +71,9 @@ enum OtpProperty {
 
     WES_SERVER('otp.wes.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
     WES_PORT('otp.wes.port', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
-    WES_AUTH_SERVER('otp.wes.auth.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
-    WES_AUTH_PORT('otp.wes.auth.port', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
-    WES_AUTH_CLIENT_ID('otp.wes.auth.client.id', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
-    WES_AUTH_CLIENT_SECRET('otp.wes.auth.client.secret', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
+    WES_AUTH_BASE_URL('otp.wes.auth.baseUrl', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
+    WES_AUTH_CLIENT_ID('otp.wes.auth.clientId', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
+    WES_AUTH_CLIENT_SECRET('otp.wes.auth.clientSecret', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.WORKFLOW_TEST)),
 
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),

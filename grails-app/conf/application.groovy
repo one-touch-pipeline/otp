@@ -232,6 +232,9 @@ environments {
     }
 }
 
+// disable auto config of the grails oauth2 plugin. the plugin is configured manually and used to handle the wes server to server communication.
+grails.plugin.springsecurity.oauthProvider.active=false
+
 //configure groovy web console
 grails.plugin.console.enabled = true
 environments {
