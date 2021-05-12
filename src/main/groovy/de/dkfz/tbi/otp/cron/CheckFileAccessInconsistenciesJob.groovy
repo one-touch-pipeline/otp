@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.SystemUserUtils
 
 @SuppressWarnings("AnnotationsForJobs")
 @Scope("singleton")
@@ -93,7 +94,9 @@ class CheckFileAccessInconsistenciesJob extends ScheduledJob {
             boolean ldapDeactivated = ldapService.isUserDeactivated(user)
 
             if (fileAccessInOtp && !fileAccessInLdap && !userProjectRole.fileAccessChangeRequested) {
-                userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
+                SystemUserUtils.useSystemUser {
+                    userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
+                }
             } else if (fileAccessInOtp != fileAccessInLdap) {
                 content << [
                         fileAccessInLdap,

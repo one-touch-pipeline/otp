@@ -28,6 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
@@ -49,6 +50,9 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
     @Unroll
     void "wrappedExecute, when #name, then #mailSending"() {
         given:
+        User systemUser = createUser()
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, systemUser.username)
+
         User testUser = createUser([
                 username: USER_ACCOUNT,
                 realName: USER_REAL_NAME,
@@ -115,7 +119,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         //some special cases
         'send mail also if disabled in otp'                     | false        | true           | true                      | false      | true           | false        || 1         | 0
         'send mail also if disabled in project'                 | false        | true           | true                      | true       | false          | false        || 1         | 0
-        'send mail also, if disabled in ldap'                   | false        | true           | true                      | true       | true           | true         || 1         | 0
+        'send mail also if disabled in ldap'                    | false        | true           | true                      | true       | true           | true         || 1         | 0
 
         mailSending = mailCount ? 'send mail' : 'do not send mail'
     }
