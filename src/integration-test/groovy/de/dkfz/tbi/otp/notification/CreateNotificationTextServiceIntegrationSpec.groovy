@@ -325,4 +325,21 @@ faq:
         ALIGNMENT      | ''
         ALIGNMENT      | 'Some comment'
     }
+
+    void "test LinkGenerator.link() method, when input valid, return well formed otp URL"() {
+        given:
+        Map linkProperties = [
+                (LinkGenerator.ATTRIBUTE_CONTROLLER) : "metadataImport",
+                (LinkGenerator.ATTRIBUTE_ACTION)     : "details",
+                (LinkGenerator.ATTRIBUTE_ID)         : 12345,
+        ]
+
+        String baseUrl = createNotificationTextService.linkGenerator.getServerBaseURL()
+        String expected = "${baseUrl}/${linkProperties.values().join('/')}"
+
+        linkProperties.put(LinkGenerator.ATTRIBUTE_ABSOLUTE, true)
+
+        expect:
+        expected == createNotificationTextService.linkGenerator.link(linkProperties)
+    }
 }

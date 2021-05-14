@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.testing.gorm.DataTest
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,11 +31,9 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
-import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
@@ -62,6 +61,8 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
             getMessageSourceService() >> Mock(MessageSourceService)
         }
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
+
+        GroovyMock([global : true], GrailsArtefactCheckHelper)
     }
 
     @Unroll
@@ -237,29 +238,57 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendProcessingStatusOperatorNotification(ticket, seqTracks as Set, new ProcessingStatus(), true)
     }
 
-    void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the ticket in OTRS'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the import detail page'() {
         given:
-        OtrsTicket ticket = createOtrsTicket()
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
 
-        final String otrsSystemUrl = "https://example.com"  // example of an base URL of a ticketing system
-        findOrCreateProcessingOption(name: ProcessingOption.OptionName.TICKET_SYSTEM_URL, value: otrsSystemUrl)
+        //one ticket with three imports
+        OtrsTicket ticket = createOtrsTicket()
+        List<FastqImportInstance> fastqImportInstances = [
+            createFastqImportInstance([otrsTicket : ticket]),
+            createFastqImportInstance([otrsTicket : ticket]),
+            createFastqImportInstance([otrsTicket : ticket]),
+        ]
+
+        final Map linkProperties = [
+            (LinkGenerator.ATTRIBUTE_CONTROLLER) : "metadataImport",
+            (LinkGenerator.ATTRIBUTE_ACTION)     : "details",
+        ]
+
+        //url path to the details page of metadata import
+        final String pathMetadataImportDetail = linkProperties.values().join('/')
+
+        notificationCreator.createNotificationTextService = new CreateNotificationTextService(
+            messageSourceService : Mock(MessageSourceService),
+            linkGenerator: Mock(LinkGenerator) {
+                3 * link(_) >> { Map params ->
+                    assert params.size() == 4
+                    assert params.get(LinkGenerator.ATTRIBUTE_CONTROLLER) == linkProperties.get(LinkGenerator.ATTRIBUTE_CONTROLLER)
+                    assert params.get(LinkGenerator.ATTRIBUTE_ACTION)     == linkProperties.get(LinkGenerator.ATTRIBUTE_ACTION)
+                    assert params.get(LinkGenerator.ATTRIBUTE_ABSOLUTE)
+                    return "http://dummy.com/${pathMetadataImportDetail}/${params.get(LinkGenerator.ATTRIBUTE_ID)}"
+                }
+            },
+        )
 
         notificationCreator.mailHelperService = Mock(MailHelperService)
+        GroovyMock([global : true], GrailsArtefactCheckHelper)
 
         when:
         notificationCreator.sendProcessingStatusOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
 
         then:
-        1 * notificationCreator.createNotificationTextService.messageSourceService.createMessage(_, _) >> { String templateName, Map properties ->
-            assert templateName.contains("notificationCreator.ticket.link")
-            assert properties["link"].contains(otrsSystemUrl)
-            return "Link to ticketing system: " + otrsSystemUrl
+        1 * GrailsArtefactCheckHelper.check(_, _, _)
+        1 * notificationCreator.createNotificationTextService.messageSourceService.createMessage(_) >> { String templateName ->
+            assert templateName.contains("notification.import.detail.link")
+            return "Details about metadata import can be found"
         }
         1 * notificationCreator.mailHelperService.sendEmail(_, _, _) >> { String subject, String content, _ ->
-            assert content.endsWith(otrsSystemUrl)
             assert content.contains(ticket.ticketNumber)
+            fastqImportInstances.each {
+                assert content.contains(pathMetadataImportDetail + "/${it.id}")
+            }
         }
     }
 

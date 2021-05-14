@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.tracking
 
+import grails.core.GrailsApplication
+import grails.web.mapping.LinkGenerator
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -39,6 +42,9 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation implements DomainFactoryCore {
+
+    @Autowired
+    GrailsApplication grailsApplication
 
     NotificationCreator notificationCreator
     MailHelperService mailHelperService
@@ -99,6 +105,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 processingOptionService: processingOptionService,
                 userProjectRoleService: userProjectRoleService,
                 otrsTicketService: otrsTicketService,
+                grailsApplication: grailsApplication,
         )
         SessionUtils.withNewSession {
             DomainFactory.createAllAnalysableSeqTypes()
@@ -388,6 +395,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack1.project) >> notificationText1
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT, seqTrack1.project) >> notificationText2
                 0 * notification(_, _, _, _)
+                getLinkGenerator() >> Mock(LinkGenerator)
             }
         }
         when:

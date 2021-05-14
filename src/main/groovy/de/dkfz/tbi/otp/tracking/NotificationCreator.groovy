@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.tracking
 
+import grails.core.GrailsApplication
+import grails.web.mapping.LinkGenerator
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -34,8 +36,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -80,6 +81,9 @@ class NotificationCreator {
 
     @Autowired
     UserProjectRoleService userProjectRoleService
+
+    @Autowired
+    GrailsApplication grailsApplication
 
     void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         setStarted(otrsTicketService.findAllOtrsTickets(seqTracks), step)
@@ -215,9 +219,33 @@ class NotificationCreator {
             content.append('\n')
         }
         content.append('\n')
-        content.append(createNotificationTextService.messageSourceService.createMessage("notificationCreator.ticket.link", [link : ticket.url]))
+
+        //include the links to import detail pages
+        content.append(createNotificationTextService.messageSourceService.createMessage("notification.import.detail.link"))
+        content.append(createLinksToImportDetailPage(ticket))
 
         mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
+    }
+
+    private StringBuilder createLinksToImportDetailPage(OtrsTicket ticket) {
+        StringBuilder content = new StringBuilder()
+
+        final String metadataImportController = "metadataImport"
+        final String metadataImportAction     = "details"
+
+        GrailsArtefactCheckHelper.check(grailsApplication, metadataImportController, metadataImportAction)
+
+        ticket.fastqImportInstances.each {
+            content.append('\n')
+            content.append(createNotificationTextService.linkGenerator.link([
+                    (LinkGenerator.ATTRIBUTE_CONTROLLER) : metadataImportController,
+                    (LinkGenerator.ATTRIBUTE_ACTION)     : metadataImportAction,
+                    (LinkGenerator.ATTRIBUTE_ID)         : it.id,
+                    (LinkGenerator.ATTRIBUTE_ABSOLUTE)   : true,
+            ]))
+        }
+
+        return content
     }
 
     void sendImportSourceOperatorNotification(OtrsTicket ticket) {
