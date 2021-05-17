@@ -1,4 +1,4 @@
-# Copyright 2011-2020 The OTP authors
+# Copyright 2011-2021 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,52 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-docker/
-README.md
-.gitignore
-.gitlab*
-
-## Log files
-logs/
-*.log
-
-## Temporary files
-*~
-\#*\#
-
-## Stale NFS handles
-.nfs*
-
-### Grails
-.groovy/*
-.asscache
-.slcache
-
-### Gradle
-.gradle/
-build/
-
-### Third-party tools
-## CodeNarc
-CodeNarcReport.html
-## Codertura
-cobertura.ser
-
-### IDEs
-## Eclipse
-.classpath
-.project
-.settings
-.link_to_grails_plugins
-target-eclipse
-
-## IntelliJ
-.idea/
-*.iml
-*.ipr
-*.iws
-out
-
-###others
-## metrics file produced by bashScripts/gitlab-ci/codenarc-informations.sh
-/metrics.txt
+# This file can be used only together with the main composition file.
+# To use it execute the following command: docker-compose -f docker-compose.yml -f docker-compose.source.yml up
+version: '3.0'
+services:
+  otp:
+    volumes:
+      # the LOCAL_SOURCE_PATH has to be set in the .env file
+      - $LOCAL_SOURCE_PATH/src:/home/otp/app/src
+      - $LOCAL_SOURCE_PATH/grails-app:/home/otp/app/grails-app
+      - $LOCAL_SOURCE_PATH/scripts:/home/otp/app/scripts
+      - $LOCAL_SOURCE_PATH/docs:/home/otp/app/docs
+      - $LOCAL_SOURCE_PATH/workflows:/home/otp/app/workflows
+      - $LOCAL_SOURCE_PATH/migrations:/home/otp/app/migrations
+      - $LOCAL_SOURCE_PATH/.otp.properties:/home/otp/app/.otp.properties

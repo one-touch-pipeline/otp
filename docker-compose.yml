@@ -40,8 +40,6 @@ services:
     volumes:
       - gradle_dependencies:/home/otp/.gradle
       - filesystem:/home/otp/filesystem
-      # the LOCAL_SOURCE_PATH has to be set in the .env file
-      - $LOCAL_SOURCE_PATH:/usr/app
     depends_on:
       - postgres
     links:
