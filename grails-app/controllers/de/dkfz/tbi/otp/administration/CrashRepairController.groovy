@@ -30,6 +30,7 @@ import org.hibernate.sql.JoinType
 import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.CheckAndCall
+import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.JobService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
@@ -54,10 +55,14 @@ class CrashRepairController implements CheckAndCall {
     JobService jobService
     WorkflowService workflowService
     WorkflowSystemService workflowSystemService
+    PropertiesValidationService propertiesValidationService
 
     def index() {
+        boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()
+
         return [
-                workflowSystemEnabled: workflowSystemService.isEnabled()
+                workflowSystemEnabled: workflowSystemService.isEnabled(),
+                processingOptionsValid: processingOptionsValid,
         ]
     }
 

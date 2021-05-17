@@ -25,40 +25,46 @@
 <head>
     <asset:javascript src="pages/crashRepair/index/crashRepair.js"/>
     <asset:stylesheet src="pages/crashRepair/styles.less"/>
-    <title>Crash Recovery</title>
+    <title><g:message code="crashRepair.title"/></title>
 </head>
 
 <body>
     <div class="container-fluid otp-main-container">
-        <h2>Crash Recovery</h2>
-        <p>Overview about the crashed jobs.</p>
+        <h2><g:message code="crashRepair.title"/></h2>
+        <p><g:message code="crashRepair.description"/></p>
 
         <g:if test="${workflowSystemEnabled}">
             <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> The workflow system is already running. There are no problems to fix.
+                <i class="bi bi-info-circle"></i> <g:message code="crashRepair.noProblemInfo"/>
             </div>
         </g:if>
         <g:else>
             <g:render template="/templates/quickNavigationBar" model="[
-                    linkText : 'Crash Recovery (old workflow system)',
-                    link : g.createLink(controller: 'crashRecovery', action: 'index'),
-                    tooltip : 'Navigate to the crash recovery page of the old workflow system'
+                    linkText: g.message(code: 'crashRepair.navigate.linkText'),
+                    link    : g.createLink(controller: 'crashRecovery', action: 'index'),
+                    tooltip : g.message(code: 'crashRepair.navigate.tooltip'),
             ]"/>
 
+            <g:if test="${!processingOptionsValid}">
+                <otp:annotation type="danger">
+                    <g:message code="crashRepair.invalidProcessingOptions.text"/> <g:link controller="processingOption"><g:message code="crashRepair.invalidProcessingOptions.link"/></g:link>
+                </otp:annotation>
+            </g:if>
+
             <div class="btn-group float-right table-action-buttons" role="group" aria-label="table actions">
-                <button type="button" class="btn btn-primary" onclick="restartSelectedSteps()" title="Restart the selected steps." data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="restartSelectedSteps()" title="${g.message(code: 'crashRepair.button.restartSteps.tooltip')}" data-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-reply"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="restartSelectedWorkflowRuns()" title="Restart the selected workflow runs." data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="restartSelectedWorkflowRuns()" title="${g.message(code: 'crashRepair.button.restartRuns.tooltip')}" data-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-reply-all"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="markSelectedStepsAsFailed()" title="Mark the selected steps as failed." data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="markSelectedStepsAsFailed()" title="${g.message(code: 'crashRepair.button.stepsFailed.tooltip')}" data-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-x-circle"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="markSelectedRunsAsFinalFailed()" title="Mark the selected steps as final failed." data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="markSelectedRunsAsFinalFailed()" title="${g.message(code: 'crashRepair.button.stepsFinalFailed.tooltip')}" data-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-file-earmark-x"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="syncWorkflowStepData()" title="Refresh table data." data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="syncWorkflowStepData()" title="${g.message(code: 'crashRepair.button.refreshData.tooltip')}" data-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-arrow-repeat"></i>
                 </button>
             </div>
@@ -67,13 +73,13 @@
                 <thead>
                 <tr>
                     <th scope="col"></th>
-                    <th scope="col">Workflow</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Step</th>
-                    <th scope="col">ID</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Restartable</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col"><g:message code="crashRepair.table.workflow"/></th>
+                    <th scope="col"><g:message code="crashRepair.table.name"/></th>
+                    <th scope="col"><g:message code="crashRepair.table.step"/></th>
+                    <th scope="col"><g:message code="crashRepair.table.id"/></th>
+                    <th scope="col"><g:message code="crashRepair.table.date"/></th>
+                    <th scope="col"><g:message code="crashRepair.table.restartable"/></th>
+                    <th scope="col"><g:message code="crashRepair.table.actions"/></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -82,16 +88,16 @@
 
             <div id="noDataAlert" class="text-center" style="display: none">
                 <div class="alert alert-info text-center" role="alert">
-                    No crashed jobs found.
+                    <g:message code="crashRepair.noCrashedJobs"/>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="startWorkflowSystem()">
-                    <i class="bi bi-power"></i> Start Workflow System
+                <button type="button" class="btn btn-primary" onclick="startWorkflowSystem()" ${processingOptionsValid ?: "disabled"}>
+                    <i class="bi bi-power"></i> <g:message code="crashRepair.button.startWorkflowSystem"/>
                 </button>
             </div>
 
             <div id="tableLoadingSpinner" class="text-center">
                 <div class="spinner-border" role="status">
-                    <span class="sr-only">Loading...</span>
+                    <span class="sr-only"><g:message code="crashRepair.loadingText"/></span>
                 </div>
             </div>
         </g:else>

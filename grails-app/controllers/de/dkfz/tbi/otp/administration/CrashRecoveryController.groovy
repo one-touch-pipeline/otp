@@ -29,6 +29,11 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+/**
+ * @deprecated This is for the old workflow system. For the new workflow system there is the CrashRepairController with it's own view.
+ * @see de.dkfz.tbi.otp.administration.CrashRepairController
+ */
+@Deprecated
 @Secured("hasRole('ROLE_ADMIN')")
 class CrashRecoveryController {
 
