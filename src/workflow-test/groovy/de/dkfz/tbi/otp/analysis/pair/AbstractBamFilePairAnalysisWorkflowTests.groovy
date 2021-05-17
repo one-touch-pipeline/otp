@@ -181,13 +181,13 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         DomainFactory.createSampleTypePerProject(
                 project: project,
                 sampleType: sampleTypeTumor,
-                category: SampleType.Category.DISEASE,
+                category: SampleTypePerProject.Category.DISEASE,
         )
 
         DomainFactory.createSampleTypePerProject(
                 project: project,
                 sampleType: sampleTypeControl,
-                category: SampleType.Category.CONTROL,
+                category: SampleTypePerProject.Category.CONTROL,
         )
 
         samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)

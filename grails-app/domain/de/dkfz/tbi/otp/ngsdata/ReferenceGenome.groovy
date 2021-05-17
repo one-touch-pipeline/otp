@@ -21,10 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
-
-import java.util.regex.Pattern
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 class ReferenceGenome implements Entity {
 
@@ -146,9 +144,15 @@ class ReferenceGenome implements Entity {
         gcContentFile (nullable: true, blank: false, shared: "pathComponent")
         mappabilityFile (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
         replicationTimeFile (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
-        geneticMapFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
-        knownHaplotypesFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
-        knownHaplotypesLegendFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
+        geneticMapFile (nullable: true, maxSize: 500, validator: {
+            it == null || OtpPathValidator.isValidAbsolutePathContainingVariable(it)
+        })
+        knownHaplotypesFile (nullable: true, maxSize: 500, validator: {
+            it == null || OtpPathValidator.isValidAbsolutePathContainingVariable(it)
+        })
+        knownHaplotypesLegendFile (nullable: true, maxSize: 500, validator: {
+            it == null || OtpPathValidator.isValidAbsolutePathContainingVariable(it)
+        })
         geneticMapFileX (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
         knownHaplotypesFileX (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
         knownHaplotypesLegendFileX (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
@@ -161,14 +165,5 @@ class ReferenceGenome implements Entity {
     @Override
     String toString() {
         name
-    }
-
-    List<StatSizeFileName> getStatSizeFileNames() {
-        return StatSizeFileName.findAllByReferenceGenome(this, [sort: "name", order: "asc"])
-    }
-
-    static boolean isValidAbsolutePathContainingVariable(String string) {
-        String pathComponentRegex = /[a-zA-Z0-9_\-\+\.\$\{\}]+/
-        return Pattern.compile(/^(?:\/${pathComponentRegex})+$/).matcher(string).matches() && !OtpPath.ILLEGAL_IN_NORMALIZED_PATH.matcher(string).find()
     }
 }

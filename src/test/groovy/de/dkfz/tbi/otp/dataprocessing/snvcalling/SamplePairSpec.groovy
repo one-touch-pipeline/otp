@@ -72,7 +72,7 @@ class SamplePairSpec extends Specification implements DataTest {
         DomainFactory.createSampleTypePerProject(
                 project: project,
                 sampleType: sampleType1,
-                category: SampleType.Category.DISEASE,
+                category: SampleTypePerProject.Category.DISEASE,
         )
         MergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackage(
                 seqType: seqType,

@@ -21,10 +21,11 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.BamMetadataImportService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -86,7 +87,7 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     static void checkFileOrDirectory(Path furtherFile, Problems problems) {
-        if (OtpPath.isValidAbsolutePath(furtherFile.toString())) {
+        if (OtpPathValidator.isValidAbsolutePath(furtherFile.toString())) {
             if (Files.isDirectory(furtherFile)) {
                 checkFilesInDirectory(furtherFile, problems)
             } else if (Files.isRegularFile(furtherFile)) {

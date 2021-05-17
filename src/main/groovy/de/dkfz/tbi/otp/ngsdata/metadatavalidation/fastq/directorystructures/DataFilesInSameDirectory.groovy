@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
@@ -44,7 +44,7 @@ class DataFilesInSameDirectory implements DirectoryStructure {
     @Override
     Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
-        if (OtpPath.isValidPathComponent(fileName)) {
+        if (OtpPathValidator.isValidPathComponent(fileName)) {
             return context.metadataFile.resolveSibling(fileName)
         } else {
             context.addProblem(valueTuple.cells, Level.ERROR, "'${fileName}' is not a valid file name.", "At least one file name is not a valid file name.")

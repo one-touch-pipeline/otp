@@ -693,6 +693,10 @@ class MetadataImportService {
                 [libraryLayout: libLayout, singleCell: isSingleCell],
         )
     }
+
+    static Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {
+        return Paths.get("${metaDataFile.filePath}/${metaDataFile.fileName}")
+    }
 }
 
 @TupleConstructor

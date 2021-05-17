@@ -187,17 +187,17 @@ grails.gorm.default.constraints = {
         }
     }
     pathComponent validator: { val, obj ->
-        if (val && !de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidPathComponent(val)) {
+        if (val && !de.dkfz.tbi.otp.utils.validation.OtpPathValidator.isValidPathComponent(val)) {
             return "validator.path.component"
         }
     }
     relativePath validator: { val, obj ->
-        if (val && !de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidRelativePath(val)) {
+        if (val && !de.dkfz.tbi.otp.utils.validation.OtpPathValidator.isValidRelativePath(val)) {
             return "validator.relative.path"
         }
     }
     absolutePath validator: { val, obj ->
-        if (val && !de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidAbsolutePath(val)) {
+        if (val && !de.dkfz.tbi.otp.utils.validation.OtpPathValidator.isValidAbsolutePath(val)) {
             return "validator.absolute.path"
         }
     }

@@ -49,8 +49,4 @@ class MetaDataFile implements Entity {
     static mapping = {
         fastqImportInstance index: "meta_data_file_fastq_import_instance_idx"
     }
-
-    String getFullPath() {
-        return "${filePath}/${fileName}"
-    }
 }

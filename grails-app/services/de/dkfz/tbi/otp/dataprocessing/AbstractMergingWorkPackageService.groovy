@@ -53,9 +53,9 @@ class AbstractMergingWorkPackageService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<AbstractMergingWorkPackage> filterByCategory(List<AbstractMergingWorkPackage> mergingWorkPackages, SampleType.Category category) {
+    List<AbstractMergingWorkPackage> filterByCategory(List<AbstractMergingWorkPackage> mergingWorkPackages, SampleTypePerProject.Category category) {
         return mergingWorkPackages.findAll {
-            it.sampleType.getCategory(it.project) == category
+            SampleTypeService.getCategory(it.project, it.sampleType) == category
         }
     }
 }

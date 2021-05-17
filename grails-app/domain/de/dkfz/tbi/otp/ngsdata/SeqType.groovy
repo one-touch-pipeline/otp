@@ -21,10 +21,11 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MetadataField
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Sequencing Type" (or "Seq. Type" where little space is
@@ -85,7 +86,7 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
          */
         name(blank: false, unique: ['libraryLayout', 'singleCell'])
         dirName(blank: false, unique: ['libraryLayout', 'singleCell'], validator: { String val, SeqType obj ->
-            if (!OtpPath.isValidPathComponent(val)) {
+            if (!OtpPathValidator.isValidPathComponent(val)) {
                 return "validator.path.component"
             }
             if (SeqType.findByDirNameAndSingleCell(obj.dirName, !obj.singleCell)) {

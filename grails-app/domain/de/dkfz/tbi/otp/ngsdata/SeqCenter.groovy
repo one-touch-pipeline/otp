@@ -21,9 +21,10 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /** This table is used externally. Please discuss a change in the team */
 class SeqCenter implements Entity, ProjectFieldReferenceAble {
@@ -53,14 +54,14 @@ class SeqCenter implements Entity, ProjectFieldReferenceAble {
             if (obj.autoImportable && !val) {
                 return "required"
             }
-            if (val != null && !OtpPath.isValidAbsolutePath(val)) {
+            if (val != null && !OtpPathValidator.isValidAbsolutePath(val)) {
                 return "validator.absolute.path"
             }
         }
         importDirsAllowLinking nullable: true, validator: { val ->
             if (val != null) {
                 Set<String> invalidPaths = val.findAll {
-                    !OtpPath.isValidAbsolutePath(it)
+                    !OtpPathValidator.isValidAbsolutePath(it)
                 }
                 if (invalidPaths) {
                     return ["absolute.path", invalidPaths.join(", ")]

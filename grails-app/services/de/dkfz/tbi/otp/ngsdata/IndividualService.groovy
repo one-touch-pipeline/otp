@@ -314,7 +314,7 @@ class IndividualService {
      * @return the SampleType
      */
     private SampleType createSampleType(String name) {
-        SampleType sampleType = SampleType.findSampleTypeByName(name)
+        SampleType sampleType = SampleTypeService.findSampleTypeByName(name)
         if (!sampleType) {
             sampleType = new SampleType(name: name)
             sampleType.save(flush: true)

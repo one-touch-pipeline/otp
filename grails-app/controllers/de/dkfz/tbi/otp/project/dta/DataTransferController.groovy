@@ -30,11 +30,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.text.SimpleDateFormat
 
@@ -366,7 +366,7 @@ trait MultipartFilesCommand implements Validateable {
                 if (file.empty) {
                     return "empty"
                 }
-                if (!OtpPath.isValidPathComponent(file.originalFilename)) {
+                if (!OtpPathValidator.isValidPathComponent(file.originalFilename)) {
                     return "invalid.name"
                 }
                 return (file.size > ProjectService.PROJECT_INFO_MAX_SIZE) ? 'size' : true

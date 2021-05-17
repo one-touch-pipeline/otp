@@ -83,13 +83,13 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
         bamFiles = bamFiles - unknownDiseaseStatus
 
-        List<AbstractMergedBamFile> undefinedDiseaseStatus = bamFilesWithCategory(bamFiles, SampleType.Category.UNDEFINED)
+        List<AbstractMergedBamFile> undefinedDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.UNDEFINED)
         output.showUniqueList(HEADER_DISEASE_STATE_UNDEFINED, undefinedDiseaseStatus, {
             "${it.project.name} ${it.sampleType.name}"
         })
         bamFiles = bamFiles - undefinedDiseaseStatus
 
-        List<AbstractMergedBamFile> ignoredDiseaseStatus = bamFilesWithCategory(bamFiles, SampleType.Category.IGNORED)
+        List<AbstractMergedBamFile> ignoredDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.IGNORED)
         output.showUniqueList(HEADER_DISEASE_STATE_IGNORED, ignoredDiseaseStatus, {
             "${it.project.name} ${it.sampleType.name}"
         })
@@ -147,7 +147,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
-    List<AbstractMergedBamFile> bamFilesWithCategory(List<AbstractMergedBamFile> bamFiles, SampleType.Category category) {
+    List<AbstractMergedBamFile> bamFilesWithCategory(List<AbstractMergedBamFile> bamFiles, SampleTypePerProject.Category category) {
         if (!bamFiles) {
             return []
         }
@@ -276,7 +276,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                         bamFile${number}.workPackage = samplePair.mergingWorkPackage${number}
                         and sampleTypePerProject${number}.project = samplePair.mergingWorkPackage${number}.sample.individual.project
                         and sampleTypePerProject${number}.sampleType = samplePair.mergingWorkPackage${number}.sample.sampleType
-                        and sampleTypePerProject${number}.category in ('${SampleType.Category.DISEASE}', '${SampleType.Category.CONTROL}')
+                        and sampleTypePerProject${number}.category in ('${SampleTypePerProject.Category.DISEASE}', '${SampleTypePerProject.Category.CONTROL}')
                         and processingThresholds${number}.project = samplePair.mergingWorkPackage${number}.sample.individual.project
                         and processingThresholds${number}.sampleType = samplePair.mergingWorkPackage${number}.sample.sampleType
                         and processingThresholds${number}.seqType = samplePair.mergingWorkPackage${number}.seqType

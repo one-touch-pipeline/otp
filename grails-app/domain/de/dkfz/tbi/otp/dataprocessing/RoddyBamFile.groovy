@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
@@ -91,7 +92,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         }
         roddyExecutionDirectoryNames nullable: true
         workDirectoryName nullable: true, validator: { val, obj ->
-            (val == null || (OtpPath.isValidPathComponent(val) &&
+            (val == null || (OtpPathValidator.isValidPathComponent(val) &&
                     !RoddyBamFile.findAllByWorkPackageAndWorkDirectoryName(obj.workPackage, val).any {
                         it != obj
                     }))

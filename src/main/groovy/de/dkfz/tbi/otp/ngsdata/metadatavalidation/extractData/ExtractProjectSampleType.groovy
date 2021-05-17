@@ -65,7 +65,7 @@ trait ExtractProjectSampleType {
             return
         }
 
-        SampleType sampleType = SampleType.findSampleTypeByName(parsedSampleIdentifier.sampleTypeDbName)
+        SampleType sampleType = SampleTypeService.findSampleTypeByName(parsedSampleIdentifier.sampleTypeDbName)
         if (!sampleType) {
             return
         }

@@ -44,10 +44,10 @@
     </li>
     <g:each in="${availableTemplates}" var="template">
         <li>
-            ${template.documentType.description}<br>
+            ${template.document.documentType.description}<br>
             <g:link controller="document" action="download"
-                    params="['document.id': template.id, to: DocumentController.Action.DOWNLOAD]">
-                <g:message code="info.template.download" args="[template.getFileNameWithExtension()]"/>
+                    params="['document.id': template.document.id, to: DocumentController.Action.DOWNLOAD]">
+                <g:message code="info.template.download" args="[template.fullFileName]"/>
             </g:link>
         </li>
     </g:each>

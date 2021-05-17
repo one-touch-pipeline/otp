@@ -270,7 +270,7 @@ class ClusterJob implements Entity {
         basesPerBytesFastq(nullable: true)
         xten(nullable: true)
         queued(nullable: false)
-        // can't use OtpPath.isValidAbsolutePath(it) here, because path may contain ":"
+        // can't use OtpPathValidator.isValidAbsolutePath(it) here, because path may contain ":"
         jobLog nullable: true, validator: { !it || Paths.get(it).absolute }
         // the following values must be nullable because they get filled after the job is finished
         // and may not be available from every cluster job scheduler

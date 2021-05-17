@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 @SuppressWarnings('JavaIoPackageAccess')
 class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
@@ -81,7 +82,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     static constraints = {
         workDirectoryName validator: { String val, SingleCellBamFile obj ->
-            uniquePerWorkPackageAndProperties(obj, ["workDirectoryName": val]) && OtpPath.isValidRelativePath(val)
+            uniquePerWorkPackageAndProperties(obj, ["workDirectoryName": val]) && OtpPathValidator.isValidRelativePath(val)
         }
         seqTracks minSize: 1
         identifier validator: { int val, SingleCellBamFile obj ->

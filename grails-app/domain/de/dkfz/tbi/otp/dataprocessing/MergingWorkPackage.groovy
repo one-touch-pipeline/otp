@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -93,7 +94,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 case Pipeline.Name.EXTERNALLY_PROCESSED:
                     return val == null
                 case Pipeline.Name.PANCAN_ALIGNMENT:
-                    return val != null && OtpPath.isValidPathComponent(val)
+                    return val != null && OtpPathValidator.isValidPathComponent(val)
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT:
                     return val == null
                 default:

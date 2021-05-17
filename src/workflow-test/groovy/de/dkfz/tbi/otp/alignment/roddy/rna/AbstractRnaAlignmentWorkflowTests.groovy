@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RnaAlignmentReferenceGenomeConfiguration
 import de.dkfz.tbi.otp.project.RoddyConfiguration
@@ -242,7 +243,9 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                     ],
             ] + referenceGenomeConfig))
 
-            workPackage.alignmentProperties.addAll(ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(workPackage.project, workPackage.seqType, workPackage.sampleType).alignmentProperties.collect {
+            workPackage.alignmentProperties.addAll(ReferenceGenomeProjectSeqTypeService
+                    .getConfiguredReferenceGenomeProjectSeqType(workPackage.project, workPackage.seqType, workPackage.sampleType)
+                    .alignmentProperties.collect {
                 new MergingWorkPackageAlignmentProperty(name: it.name, value: it.value, mergingWorkPackage: workPackage)
             })
             workPackage.save(flush: true)

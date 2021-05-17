@@ -22,9 +22,11 @@ package ReferenceGenome
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import groovy.transform.Field
+
+import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 /*
  *  This scripts inserts a new ReferenceGenome object

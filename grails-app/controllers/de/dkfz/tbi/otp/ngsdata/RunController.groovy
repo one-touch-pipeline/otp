@@ -55,15 +55,22 @@ class RunController {
         keys[0] = MetaDataKey.findByName(MetaDataColumn.SAMPLE_NAME.name())
         keys[1] = MetaDataKey.findByName(MetaDataColumn.WITHDRAWN.name())
 
+        List<Map<String, Object>> wrappedMetaDataFiles = runService.retrieveMetaDataFiles(run).collect {
+            [
+                    metaDataFile: it,
+                    fullPath    : MetadataImportService.getMetaDataFileFullPath(it),
+            ]
+        }
+
         return [
-                run              : run,
-                finalPaths       : lsdfFilesService.getAllPathsForRun(run, true),
-                keys             : keys,
-                processParameters: runService.retrieveProcessParameters(run),
-                metaDataFiles    : runService.retrieveMetaDataFiles(run),
-                seqTracks        : runService.retrieveSequenceTrackInformation(run),
-                errorFiles       : runService.dataFilesWithError(run),
-                fastqcLinks      : fastqcResultsService.fastqcLinkMap(run),
+                run                : run,
+                finalPaths         : lsdfFilesService.getAllPathsForRun(run, true),
+                keys               : keys,
+                processParameters  : runService.retrieveProcessParameters(run),
+                metaDataFileWrapper: wrappedMetaDataFiles,
+                seqTracks          : runService.retrieveSequenceTrackInformation(run),
+                errorFiles         : runService.dataFilesWithError(run),
+                fastqcLinks        : fastqcResultsService.fastqcLinkMap(run),
         ]
     }
 

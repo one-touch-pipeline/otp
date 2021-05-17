@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
@@ -30,7 +30,12 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.ngsdata.StatSizeFileName
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -65,7 +70,7 @@ class ReferenceGenomeService {
     File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull referenceGenome, "The reference genome is not specified"
         String path = processingOptionService.findOptionAsString(OptionName.BASE_PATH_REFERENCE_GENOME)
-        assert OtpPath.isValidAbsolutePath(path)
+        assert OtpPathValidator.isValidAbsolutePath(path)
         return checkFileExistence(new File(path, referenceGenome.path), checkExistence)
     }
 
@@ -259,6 +264,10 @@ class ReferenceGenomeService {
         ].each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
         }
+    }
+
+    static List<StatSizeFileName> getStatSizeFileNames(ReferenceGenome referenceGenome) {
+        return StatSizeFileName.findAllByReferenceGenome(referenceGenome, [sort: "name", order: "asc"])
     }
 }
 

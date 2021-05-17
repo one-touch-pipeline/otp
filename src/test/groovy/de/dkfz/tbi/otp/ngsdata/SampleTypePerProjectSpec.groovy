@@ -41,7 +41,7 @@ class SampleTypePerProjectSpec extends Specification implements DataTest {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject([
                 project   : DomainFactory.createProject(),
                 sampleType: new SampleType(),
-                category  : SampleType.Category.DISEASE,
+                category  : SampleTypePerProject.Category.DISEASE,
         ])
 
         expect:

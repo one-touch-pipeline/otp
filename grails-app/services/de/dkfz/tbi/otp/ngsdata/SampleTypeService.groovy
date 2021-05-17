@@ -24,8 +24,11 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.project.Project
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Transactional
 class SampleTypeService {
@@ -74,8 +77,20 @@ class SampleTypeService {
             ]
         }.findAll { Map.Entry<List, List> entry ->
             SampleTypePerProject stp = SampleTypePerProject.findWhere(project: entry.key[0], sampleType: entry.key[1])
-            (stp == null || stp.category == SampleType.Category.UNDEFINED)
+            (stp == null || stp.category == SampleTypePerProject.Category.UNDEFINED)
         }.values().flatten()
+    }
+
+    static SampleType findSampleTypeByName(String name) {
+        atMostOneElement(SampleType.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(name)))
+    }
+
+    /**
+     * @return The category of this sample type or <code>null</code> if it is not configured.
+     */
+    static SampleTypePerProject.Category getCategory(final Project project, SampleType sampleType) {
+        assert project
+        return atMostOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: sampleType))?.category
     }
 }
 

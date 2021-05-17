@@ -22,6 +22,7 @@
 package operations.referenceGenome
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 /**
  * Create a list of possible stat size files for all registered reference genomes.

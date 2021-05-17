@@ -106,7 +106,7 @@ class DocumentController {
             render(
                     file: document.content,
                     contentType: document.formatType.mimeType,
-                    fileName: (cmd.to == Action.DOWNLOAD) ? document.getFileNameWithExtension() : null
+                    fileName: (cmd.to == Action.DOWNLOAD) ? documentService.getDocumentFileNameWithExtension(document) : null
             )
         }
     }

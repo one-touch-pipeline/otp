@@ -83,7 +83,7 @@ class ProcessingThresholdController {
         List<SeqType> seqTypes = edit ? SeqTypeService.allAnalysableSeqTypes : processingThresholds*.seqType.unique()
 
         return [
-                categories       : SampleType.Category.values(),
+                categories       : SampleTypePerProject.Category.values(),
                 sampleTypes      : sampleTypes,
                 seqTypes         : seqTypes.sort(),
                 groupedCategories: groupedCategories,
@@ -98,7 +98,7 @@ class ProcessingThresholdController {
         Project project = projectSelectionService.requestedProject
         Project.withTransaction {
             cmd.sampleTypes.each { ProcThresholdSampleTypeCommand sampleType ->
-                sampleTypePerProjectService.createOrUpdate(project, sampleType.sampleType, sampleType.category)
+                sampleTypePerProjectService.createOrUpdate(project, sampleType.sampleType, SampleTypePerProject.Category)
                 sampleType.seqTypes.each { ProcThresholdSeqTypeCommand seqType ->
                     processingThresholdsService.createUpdateOrDelete(
                             project, sampleType.sampleType, seqType.seqType, seqType.minNumberOfLanes ?: null, seqType.minCoverage ?: null
@@ -122,7 +122,7 @@ class ProcThresholdsCommand {
 
 class ProcThresholdSampleTypeCommand {
     SampleType sampleType
-    SampleType.Category category
+    SampleTypePerProject.Category category
     List<ProcThresholdSeqTypeCommand> seqTypes
 }
 

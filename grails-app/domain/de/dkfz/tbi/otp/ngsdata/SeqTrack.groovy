@@ -26,11 +26,12 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 import java.util.regex.Matcher
@@ -180,7 +181,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
             if (seqTracks) {
                 return 'default.not.unique.message'
             }
-            if (!OtpPath.isValidPathComponent(val)) {
+            if (!OtpPathValidator.isValidPathComponent(val)) {
                 return 'validator.path.component'
             }
         }
@@ -344,7 +345,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     }
 
     ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType() {
-        ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(this)
+        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(this)
     }
 
     List<DataFile> getDataFiles() {

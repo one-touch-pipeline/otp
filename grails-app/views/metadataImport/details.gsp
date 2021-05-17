@@ -103,17 +103,17 @@
 
     <h2><g:message code="metadataImport.details.metadataFiles"/></h2>
     <ul>
-        <g:each in="${data.metaDataFiles}" var="metaDataFile">
+        <g:each in="${metaDataDetails.metaDataFileWrapper}" var="file">
             <li>
-                ${metaDataFile.fullPath}<br>
-                <g:message code="metadataImport.details.dateCreated"/>: ${new DateTime(metaDataFile.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}<br>
-                <g:message code="metadataImport.details.md5"/>: ${metaDataFile.md5sum ?: "-"}
+                ${file.fullPath}<br>
+                <g:message code="metadataImport.details.dateCreated"/>: ${new DateTime(file.metaDataFile.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}<br>
+                <g:message code="metadataImport.details.md5"/>: ${file.metaDataFile.md5sum ?: "-"}
             </li>
         </g:each>
     </ul>
 
     <h2><g:message code="metadataImport.details.dataFiles"/></h2>
-    <g:each in="${data.runs}" var="run">
+    <g:each in="${metaDataDetails.runs}" var="run">
         <h3>
             <g:message code="metadataImport.details.run"/>
             <g:link controller="run" action="show" id="${run.run.id}">${run.run.name}</g:link>,
@@ -165,9 +165,9 @@
     </g:each>
 
     <h3><g:message code="metadataImport.details.notAssigned"/></h3>
-    <g:if test="${data.dataFilesNotAssignedToSeqTrack}">
+    <g:if test="${metaDataDetails.dataFilesNotAssignedToSeqTrack}">
         <ul>
-            <g:each in="${data.dataFilesNotAssignedToSeqTrack}" var="dataFile">
+            <g:each in="${metaDataDetails.dataFilesNotAssignedToSeqTrack}" var="dataFile">
                 <li><g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link></li>
             </g:each>
         </ul>

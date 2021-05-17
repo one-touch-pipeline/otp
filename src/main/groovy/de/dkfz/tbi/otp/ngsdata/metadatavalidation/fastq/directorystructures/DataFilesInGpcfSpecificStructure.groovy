@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
@@ -51,7 +51,10 @@ class DataFilesInGpcfSpecificStructure implements DirectoryStructure {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
         String runId = valueTuple.getValue(RUN_ID.name())
         Matcher matcher = fileName =~ /^(.*)_((R[12])|([Ii]\d+))\.fastq\.gz$/
-        if (!OtpPath.isValidPathComponent(fileName) || !OtpPath.isValidPathComponent(runId) || !matcher || !OtpPath.isValidPathComponent(matcher.group(1))) {
+        if (!OtpPathValidator.isValidPathComponent(fileName) ||
+                !OtpPathValidator.isValidPathComponent(runId) ||
+                !matcher ||
+                !OtpPathValidator.isValidPathComponent(matcher.group(1))) {
             context.addProblem(
                     valueTuple.cells,
                     Level.ERROR,

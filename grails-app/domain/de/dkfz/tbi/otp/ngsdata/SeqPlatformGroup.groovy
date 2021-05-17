@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentableWithHistory
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.ValidatorUtil
+import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
 
 /**
  * {@link SeqTrack}s from {@link SeqPlatform}s in the same {@link SeqPlatformGroup} can be merged.

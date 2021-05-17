@@ -123,7 +123,7 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
         model.nextRun == null
         model.previousRun == null
         model.seqTracks.isEmpty()
-        model.metaDataFiles.isEmpty()
+        model.metaDataFileWrapper.isEmpty()
         model.processParameters.isEmpty()
     }
 
@@ -149,7 +149,7 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
         model.nextRun == null
         model.previousRun == null
         model.seqTracks.isEmpty()
-        model.metaDataFiles.isEmpty()
+        model.metaDataFileWrapper.isEmpty()
         model.processParameters.isEmpty()
     }
 }

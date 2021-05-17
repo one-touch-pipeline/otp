@@ -27,8 +27,8 @@ import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -160,7 +160,7 @@ class AddProjectInfoCommand implements Validateable {
             if (val.empty) {
                 return "empty"
             }
-            if (!OtpPath.isValidPathComponent(val.originalFilename)) {
+            if (!OtpPathValidator.isValidPathComponent(val.originalFilename)) {
                 return "invalid.name"
             }
             if (ProjectInfo.findAllByProjectAndFileName(obj.project ?: obj.projectSelectionService.requestedProject, val.originalFilename).size() != 0) {

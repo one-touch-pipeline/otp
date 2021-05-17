@@ -28,6 +28,7 @@ import groovy.transform.ToString
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -318,10 +319,16 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         redirect(action: "rnaAlignment", params: ["seqType.id": cmd.seqType.id])
     }
 
-    JSON getStatSizeFileNames(String referenceGenome) {
-        Map data = [
-                data: ReferenceGenome.findByName(referenceGenome)?.statSizeFileNames*.name,
-        ]
+    JSON getStatSizeFileNames(String referenceGenomeName) {
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName(referenceGenomeName)
+        Map data = [:]
+
+        if (referenceGenome) {
+            data = [
+                    data: ReferenceGenomeService.getStatSizeFileNames(referenceGenome)*.name,
+            ]
+        }
+
         render data as JSON
     }
 

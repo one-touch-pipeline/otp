@@ -79,10 +79,10 @@
                             <input type="hidden" name="sampleTypes[${i}].sampleType.id" value="${sampleType.id}"/>
                             <g:if test="${edit}">
                                 <g:select name="sampleTypes[${i}].category" class="use-select-2" from='${categories}'
-                                          value='${groupedCategories[sampleType] ?: de.dkfz.tbi.otp.ngsdata.SampleType.Category.UNDEFINED}'
+                                          value='${groupedCategories[sampleType] ?: de.dkfz.tbi.otp.ngsdata.SampleTypePerProject.Category.UNDEFINED}'
                                           autocomplete="off"/>
                             </g:if>
-                            <g:else>${groupedCategories[sampleType] ?: de.dkfz.tbi.otp.ngsdata.SampleType.Category.UNDEFINED}</g:else>
+                            <g:else>${groupedCategories[sampleType] ?: de.dkfz.tbi.otp.ngsdata.SampleTypePerProject.Category.UNDEFINED}</g:else>
                         </td>
                         <g:each var="seqType" in="${seqTypes}" status="j">
                             <input type="hidden" name="sampleTypes[${i}].seqTypes[${j}].seqType.id" value="${seqType.id}"/>

@@ -23,10 +23,10 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -56,7 +56,7 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
         if (!filePath.endsWith(".bam")) {
             context.addProblem(cells, Level.ERROR, "Filename '${filePath}' does not end with '.bam'.", "At least one filename does not end with '.bam'.")
         }
-        if (!OtpPath.isValidAbsolutePath(filePath)) {
+        if (!OtpPathValidator.isValidAbsolutePath(filePath)) {
             context.addProblem(cells, Level.ERROR, "The path '${filePath}' is no absolute path.", "At least one path is no absolute path.")
         } else {
             try {

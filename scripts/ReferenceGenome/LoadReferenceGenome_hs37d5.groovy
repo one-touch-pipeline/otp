@@ -23,8 +23,8 @@
 
 import groovy.transform.Field
 
-import de.dkfz.tbi.otp.ngsdata.FastaEntry
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 /*

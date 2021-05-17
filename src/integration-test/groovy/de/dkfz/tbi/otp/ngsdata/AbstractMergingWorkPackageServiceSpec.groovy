@@ -119,7 +119,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
     @Unroll
     void "filterByCategory, if a list is given, return only the AbstractMergingWorkPackage for the Category #categoryToFilter"() {
         given:
-        Map<SampleType.Category, AbstractMergingWorkPackage> bamsPerCategory = SampleType.Category.values().collectEntries { SampleType.Category category ->
+        Map<SampleTypePerProject.Category, AbstractMergingWorkPackage> bamsPerCategory = SampleTypePerProject.Category.values().collectEntries { SampleTypePerProject.Category category ->
             SampleTypePerProject sampleTypePerProject = DomainFactory.createSampleTypePerProject([
                     category  : category,
             ])
@@ -156,8 +156,8 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
 
         where:
         categoryToFilter << [
-                SampleType.Category.DISEASE,
-                SampleType.Category.CONTROL,
+                SampleTypePerProject.Category.DISEASE,
+                SampleTypePerProject.Category.CONTROL,
         ]
     }
 }

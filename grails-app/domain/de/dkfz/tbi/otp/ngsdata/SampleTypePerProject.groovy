@@ -35,6 +35,45 @@ import de.dkfz.tbi.otp.utils.Entity
 @ToString(excludes=['dateCreated', 'lastUpdated'], includePackage = false)
 class SampleTypePerProject implements Entity {
 
+    /**
+     * This enum specifies if the sample type belongs to a disease or a control.
+     */
+    enum Category {
+        /**
+         * Sample types with their category configured as IGNORED should be silently ignored and not be processed by
+         * workflows for which the category is relevant.
+         * In contrast, if no category is configured (i.e. no {@link SampleTypePerProject} instance exists for a
+         * combination of project and sample type), such workflows should warn about the sample type category being
+         * unknown.
+         */
+        UNDEFINED {
+            @Override
+            Category correspondingCategory() {
+                return null
+            }
+        },
+        DISEASE {
+            @Override
+            Category correspondingCategory() {
+                return CONTROL
+            }
+        },
+        CONTROL {
+            @Override
+            Category correspondingCategory() {
+                return DISEASE
+            }
+        },
+        IGNORED {
+            @Override
+            Category correspondingCategory() {
+                return null
+            }
+        },
+
+        abstract Category correspondingCategory()
+    }
+
     Project project
 
     SampleType sampleType
@@ -42,7 +81,7 @@ class SampleTypePerProject implements Entity {
     /**
      * Holds the information if the specified sampleType is a DISEASE or a CONTROL in this project.
      */
-    SampleType.Category category
+    Category category
 
 
     static constraints = {

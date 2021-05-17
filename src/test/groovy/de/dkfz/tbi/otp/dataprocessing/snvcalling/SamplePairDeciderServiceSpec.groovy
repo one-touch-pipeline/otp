@@ -82,7 +82,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
 
         then:
         SamplePair samplePair = CollectionUtils.exactlyOneElement(samplePairs)
-        if (category1 == SampleType.Category.DISEASE) {
+        if (category1 == SampleTypePerProject.Category.DISEASE) {
             assert samplePair.mergingWorkPackage1 == mergingWorkPackage1
             assert samplePair.mergingWorkPackage2 == mergingWorkPackage2
         } else {
@@ -92,20 +92,20 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
 
         where:
         pipelineName1                      | pipelineName2                      | category1
-        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.DISEASE
-        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.DISEASE
-        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.DISEASE
-        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.DISEASE
-        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.DISEASE
-        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.DISEASE
-        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.DISEASE
-        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.CONTROL
-        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.CONTROL
-        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.CONTROL
-        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.CONTROL
-        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.CONTROL
-        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.CONTROL
-        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.CONTROL
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.PANCAN_ALIGNMENT     | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.EXTERNALLY_PROCESSED | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.DEFAULT_OTP          | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.EXTERNALLY_PROCESSED | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.EXTERNALLY_PROCESSED | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.PANCAN_ALIGNMENT     | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.DEFAULT_OTP          | SampleTypePerProject.Category.DISEASE
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.PANCAN_ALIGNMENT     | SampleTypePerProject.Category.CONTROL
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.EXTERNALLY_PROCESSED | SampleTypePerProject.Category.CONTROL
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.DEFAULT_OTP          | SampleTypePerProject.Category.CONTROL
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.EXTERNALLY_PROCESSED | SampleTypePerProject.Category.CONTROL
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.EXTERNALLY_PROCESSED | SampleTypePerProject.Category.CONTROL
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.PANCAN_ALIGNMENT     | SampleTypePerProject.Category.CONTROL
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.DEFAULT_OTP          | SampleTypePerProject.Category.CONTROL
 
         filterSeqPlatformGroup = pipelineName1 == Pipeline.Name.EXTERNALLY_PROCESSED ? 0 : 1
     }
@@ -122,13 +122,13 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
             ])
         }
         mergingWorkPackages[0..1].each {
-            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.DISEASE)
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleTypePerProject.Category.DISEASE)
         }
         mergingWorkPackages[2..4].each {
-            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.CONTROL)
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleTypePerProject.Category.CONTROL)
         }
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[5], SampleType.Category.IGNORED)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[6], SampleType.Category.UNDEFINED)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[5], SampleTypePerProject.Category.IGNORED)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[6], SampleTypePerProject.Category.UNDEFINED)
 
         SamplePairDeciderService service = new SamplePairDeciderService([
                 abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
@@ -165,8 +165,8 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                 sample : sampleControl1,
         ])
 
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpDisease1, SampleType.Category.DISEASE)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpControl1, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpDisease1, SampleTypePerProject.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpControl1, SampleTypePerProject.Category.CONTROL)
 
         SamplePairDeciderService service = new SamplePairDeciderService([
                 abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
@@ -238,8 +238,8 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
 
         where:
         category << [
-                SampleType.Category.IGNORED,
-                SampleType.Category.UNDEFINED,
+                SampleTypePerProject.Category.IGNORED,
+                SampleTypePerProject.Category.UNDEFINED,
         ]
     }
 
@@ -266,19 +266,19 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
             ])
         }
         mergingWorkPackages[0..3].each {
-            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.DISEASE)
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleTypePerProject.Category.DISEASE)
         }
         mergingWorkPackages[4..7].each {
-            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.CONTROL)
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleTypePerProject.Category.CONTROL)
         }
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[8], SampleType.Category.IGNORED)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[9], SampleType.Category.UNDEFINED)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[8], SampleTypePerProject.Category.IGNORED)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[9], SampleTypePerProject.Category.UNDEFINED)
 
         SamplePairDeciderService service = new SamplePairDeciderService([
                 abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
                     4 * findMergingWorkPackage(_, _, _) >> mergingWorkPackages
-                    2 * filterByCategory(_, SampleType.Category.DISEASE) >> mergingWorkPackages[0..3]
-                    2 * filterByCategory(_, SampleType.Category.CONTROL) >> mergingWorkPackages[4..7]
+                    2 * filterByCategory(_, SampleTypePerProject.Category.DISEASE) >> mergingWorkPackages[0..3]
+                    2 * filterByCategory(_, SampleTypePerProject.Category.CONTROL) >> mergingWorkPackages[4..7]
                 }
         ])
         List expectedCombination = [
@@ -347,8 +347,8 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                 ]),
         ])
 
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(disease, SampleType.Category.DISEASE)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(control, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(disease, SampleTypePerProject.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(control, SampleTypePerProject.Category.CONTROL)
 
         expect:
         SamplePair.count() == 0
@@ -376,8 +376,8 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                 ]),
         ])
 
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(disease, SampleType.Category.DISEASE)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(control, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(disease, SampleTypePerProject.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(control, SampleTypePerProject.Category.CONTROL)
 
         SamplePair samplePair = DomainFactory.createSamplePair([
                 mergingWorkPackage1: disease,

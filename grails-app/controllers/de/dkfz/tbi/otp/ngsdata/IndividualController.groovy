@@ -67,6 +67,12 @@ class IndividualController {
                 sampleTypeDropDown : individualService.getSampleTypeNames(),
                 projectBlacklisted : MmmlService.hideSampleIdentifier(individual.project),
                 groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.getSeqTracks()),
+                samplesWrapper     : individual.samples.collect {
+                    [
+                            sample                 : it,
+                            sampleIdentifierObjects: sampleIdentifierService.getSampleIdentifierObjects(it),
+                    ]
+                },
         ]
     }
 

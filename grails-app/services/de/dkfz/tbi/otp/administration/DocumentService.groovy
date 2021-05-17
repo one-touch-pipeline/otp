@@ -108,4 +108,8 @@ class DocumentService {
         }
         return null
     }
+
+    static String getDocumentFileNameWithExtension(Document document) {
+        return "${document.documentType.title}.${document.formatType.extension}".toLowerCase()
+    }
 }

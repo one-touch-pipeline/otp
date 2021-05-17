@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -192,7 +192,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         }
 
         MergingWorkPackage otherMwp = DomainFactory.createMergingWorkPackage(withSamplePair)
-        DomainFactory.createSampleTypePerProject(project: samplePair1.project, sampleType: otherMwp.sampleType, category: SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProject(project: samplePair1.project, sampleType: otherMwp.sampleType, category: SampleTypePerProject.Category.DISEASE)
         DomainFactory.createSamplePair(otherMwp, withoutSamplePair)
         samplePair1.delete(flush: true)
 

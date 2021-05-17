@@ -160,24 +160,35 @@ class MetadataImportController implements CheckAndCall {
     def details() {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(params.id)
         return [
-                data               : getMetadataDetails(fastqImportInstance),
+                metaDataDetails    : getMetadataDetails(fastqImportInstance),
                 fastqImportInstance: fastqImportInstance,
         ]
     }
 
     def multiDetails() {
-        List<MetaDataFile> metaDataFiles = params.metaDataFiles.collect {
-            MetaDataFile.get(it)
+        List<MetaDataFileWrapper> metaDataFiles = params.metaDataFiles.collect {
+            MetaDataFile file = MetaDataFile.get(it)
+
+            new MetaDataFileWrapper(
+                    metaDataFile: file,
+                    fullPath    : metadataImportService.getMetaDataFileFullPath(file),
+            )
         }
+
         return [
-                metaDataFiles: metaDataFiles,
+                metaDataFilesWrapper: metaDataFiles,
         ]
     }
 
     private MetadataDetails getMetadataDetails(FastqImportInstance importInstance) {
         List<DataFile> dataFilesNotAssignedToSeqTrack = []
 
-        List<MetaDataFile> metaDataFiles = MetaDataFile.findAllByFastqImportInstance(importInstance, [sort: "dateCreated", order: "desc"])
+        List<MetaDataFileWrapper> metaDataFiles = MetaDataFile.findAllByFastqImportInstance(importInstance, [sort: "dateCreated", order: "desc"]).collect {
+            new MetaDataFileWrapper(
+                    metaDataFile: it,
+                    fullPath    : metadataImportService.getMetaDataFileFullPath(it),
+            )
+        }
 
         List<DataFile> dataFiles = DataFile.createCriteria().list {
             createAlias('run', 'r')
@@ -209,7 +220,7 @@ class MetadataImportController implements CheckAndCall {
         }
 
         return new MetadataDetails(
-                metaDataFiles: metaDataFiles,
+                metaDataFileWrapper: metaDataFiles,
                 dataFilesNotAssignedToSeqTrack: dataFilesNotAssignedToSeqTrack,
                 runs: runs,
         )
@@ -400,9 +411,15 @@ class RemoveBlackListedIlseCommand {
     IlseSubmission ilseSubmission
 }
 
+@TupleConstructor
+class MetaDataFileWrapper {
+    MetaDataFile metaDataFile
+    String fullPath
+}
+
 @Immutable
 class MetadataDetails {
-    List<MetaDataFile> metaDataFiles
+    List<MetaDataFileWrapper> metaDataFileWrapper
     List<DataFile> dataFilesNotAssignedToSeqTrack
     List<RunWithSeqTracks> runs
 }

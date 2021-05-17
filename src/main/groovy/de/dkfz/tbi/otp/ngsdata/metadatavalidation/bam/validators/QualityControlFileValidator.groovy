@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 import groovy.json.JsonSlurper
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.file.Files
@@ -74,13 +74,13 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
                         "${QUALITY_CONTROL_FILE} file has to be set for Sophia")
                 return
             }
-            if (!OtpPath.isValidRelativePath(qualityControlFile)) {
+            if (!OtpPathValidator.isValidRelativePath(qualityControlFile)) {
                 context.addProblem(it.cells, Level.ERROR,
                         "The path '${qualityControlFile}' is not a relative path.",
                         "At least one path is not a relative path.")
                 return
             }
-            if (!bamFile || !OtpPath.isValidAbsolutePath(bamFile)) {
+            if (!bamFile || !OtpPathValidator.isValidAbsolutePath(bamFile)) {
                 return
             }
 

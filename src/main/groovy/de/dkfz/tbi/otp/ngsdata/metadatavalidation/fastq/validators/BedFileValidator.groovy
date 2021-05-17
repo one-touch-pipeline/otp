@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSamp
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -106,7 +107,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
             return
         }
 
-        ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
+        ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 project,
                 SeqTypeService.exomePairedSeqType,
                 sampleType,

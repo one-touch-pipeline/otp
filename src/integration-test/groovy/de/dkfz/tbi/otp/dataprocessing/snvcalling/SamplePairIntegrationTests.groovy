@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
 @Rollback
 @Integration
@@ -61,7 +61,7 @@ class SamplePairIntegrationTests {
 
     private void testSetNeedsProcessing(final ProcessingStatus processingStatus) {
         MergingWorkPackage mwp1 = DomainFactory.createMergingWorkPackage()
-        DomainFactory.createSampleTypePerProject(project: mwp1.project, sampleType: mwp1.sampleType, category: SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProject(project: mwp1.project, sampleType: mwp1.sampleType, category: SampleTypePerProject.Category.DISEASE)
         final SamplePair nonPersistedSamplePair = new SamplePair(
                 mergingWorkPackage1: mwp1,
                 mergingWorkPackage2: DomainFactory.createMergingWorkPackage(mwp1),

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
-import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypeService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -46,7 +46,7 @@ class SampleTypeValidator extends SingleValueValidator<BamMetadataValidationCont
 
     @Override
     void validateValue(BamMetadataValidationContext context, String sampleType, Set<Cell> cells) {
-        if (!SampleType.findSampleTypeByName(sampleType)) {
+        if (!SampleTypeService.findSampleTypeByName(sampleType)) {
             context.addProblem(cells, Level.ERROR, "The sample type '${sampleType}' is not registered in OTP.", "At least one sample type is not registered in OTP.")
         }
     }

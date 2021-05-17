@@ -56,22 +56,8 @@ class Sample implements Entity {
         return "${individual?.displayName} ${sampleType?.displayName}"
     }
 
-    /**
-     * @return List of SampleIdentifier objects for this Sample.
-     */
-    List<SampleIdentifier> getSampleIdentifierObjects() {
-        return SampleIdentifier.findAllBySample(this)
-    }
-
     Project getProject() {
         return individual.project
-    }
-
-    /**
-     * @return The category of this sample's type or <code>null</code> if it is not configured.
-     */
-    SampleType.Category getSampleTypeCategory() {
-        return sampleType.getCategory(project)
     }
 
     static mapping = {

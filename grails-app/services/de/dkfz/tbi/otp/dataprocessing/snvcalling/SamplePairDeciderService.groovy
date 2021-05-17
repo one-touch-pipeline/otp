@@ -57,7 +57,7 @@ class SamplePairDeciderService {
         List<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWorkPackage.executeQuery(HQL, [
                 project   : project,
                 seqTypes  : SeqTypeService.allAnalysableSeqTypes,
-                categories: SampleType.Category.values().findAll { it.correspondingCategory() },
+                categories: SampleTypePerProject.Category.values().findAll { it.correspondingCategory() },
         ])
         return findOrCreateSamplePairs(mergingWorkPackages)
     }
@@ -80,12 +80,12 @@ class SamplePairDeciderService {
             return []
         }
 
-        SampleType.Category category = mergingWorkPackage.sampleType.getCategory(mergingWorkPackage.project)
+        SampleTypePerProject.Category category = SampleTypeService.getCategory(mergingWorkPackage.project, mergingWorkPackage.sampleType)
         if (!category) {
             return []
         }
 
-        SampleType.Category correspondingCategory = category.correspondingCategory()
+        SampleTypePerProject.Category correspondingCategory = category.correspondingCategory()
         if (!correspondingCategory) {
             return []
         }
@@ -100,9 +100,9 @@ class SamplePairDeciderService {
                 correspondingCategory)
 
         switch (category) {
-            case SampleType.Category.DISEASE:
+            case SampleTypePerProject.Category.DISEASE:
                 return findOrCreateSamplePairs(mergingWorkPackage, otherMergingWorkPackages)
-            case SampleType.Category.CONTROL:
+            case SampleTypePerProject.Category.CONTROL:
                 return findOrCreateSamplePairs(otherMergingWorkPackages, mergingWorkPackage)
             default:
                 assert false: 'should never reached'

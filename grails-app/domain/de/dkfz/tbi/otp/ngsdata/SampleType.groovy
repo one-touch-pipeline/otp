@@ -21,57 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.SqlUtil
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.Legacy
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /** This table is used externally. Please discuss a change in the team */
 class SampleType implements Entity, Legacy {
-
-    /**
-     * This enum specifies if the sample type belongs to a disease or a control.
-     *
-     * @see #getCategory(Project)
-     */
-    enum Category {
-        /**
-         * Sample types with their category configured as IGNORED should be silently ignored and not be processed by
-         * workflows for which the category is relevant.
-         * In contrast, if no category is configured (i.e. no {@link SampleTypePerProject} instance exists for a
-         * combination of project and sample type), such workflows should warn about the sample type category being
-         * unknown.
-         */
-        UNDEFINED {
-            @Override
-            Category correspondingCategory() {
-                return null
-            }
-        },
-        DISEASE {
-            @Override
-            Category correspondingCategory() {
-                return CONTROL
-            }
-        },
-        CONTROL {
-            @Override
-            Category correspondingCategory() {
-                return DISEASE
-            }
-        },
-        IGNORED {
-            @Override
-            Category correspondingCategory() {
-                return null
-            }
-        },
-
-        abstract Category correspondingCategory()
-    }
 
     /**
      * enum to define, if the {@link Project} default or a {@link SampleType}-specific {@link ReferenceGenome} should be used.
@@ -105,7 +61,7 @@ class SampleType implements Entity, Legacy {
             if (obj.name != obj.name.toLowerCase()) {
                 return 'validator.obj.name.toLowerCase'
             }
-            if (!OtpPath.isValidPathComponent(val)) {
+            if (!OtpPathValidator.isValidPathComponent(val)) {
                 return 'validator.path.component'
             }
             if (!obj.id && val.contains('_')) {
@@ -113,21 +69,12 @@ class SampleType implements Entity, Legacy {
                 //But for legacy reasons the underscore should be allowed for already existing objects
                 return 'underscore'
             }
-            SampleType sampleType = findSampleTypeByName(val)
-            if (sampleType && sampleType != obj) {
-                return ["unique", sampleType.name]
-            }
         })
-    }
-
-    static SampleType findSampleTypeByName(String name) {
-        atMostOneElement(SampleType.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(name)))
     }
 
     static mapping = {
         name index: "sample_type_name_idx"
     }
-
 
     String getDirName() {
         return name.toLowerCase()
@@ -135,14 +82,6 @@ class SampleType implements Entity, Legacy {
 
     String getDisplayName() {
         return name
-    }
-
-    /**
-     * @return The category of this sample type or <code>null</code> if it is not configured.
-     */
-    Category getCategory(final Project project) {
-        assert project
-        return atMostOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: this))?.category
     }
 
     @Override

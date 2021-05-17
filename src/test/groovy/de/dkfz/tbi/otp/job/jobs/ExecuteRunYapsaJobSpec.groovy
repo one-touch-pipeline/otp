@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.job.jobs.runYapsa.ExecuteRunYapsaJob
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*

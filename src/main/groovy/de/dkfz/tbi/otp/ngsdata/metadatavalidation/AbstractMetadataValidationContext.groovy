@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -61,7 +61,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         byte[] bytes = null
         List<String> acceptedExtensions = ['.tsv', '.csv', '.txt']
 
-        if (!OtpPath.isValidAbsolutePath(metadataFile.toString())) {
+        if (!OtpPathValidator.isValidAbsolutePath(metadataFile.toString())) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
         } else if (!(acceptedExtensions.any { metadataFile.toString().endsWith(it) })) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with an accepted extension: " +

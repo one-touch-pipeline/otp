@@ -25,6 +25,10 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+/**
+ * @deprecated class is part of the old workflow system
+ */
+@Deprecated
 class ProcessParameter implements Entity {
     // suppressing because changing this would involve refactoring the code as well as the database columns
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")

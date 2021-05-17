@@ -23,10 +23,10 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -55,7 +55,7 @@ class TagmentationLibraryValidator extends SingleValueValidator<MetadataValidati
     void validateValue(MetadataValidationContext context, String library, Set<Cell> cells) {
         if (library) {
             Matcher matcher = library =~ REGEX
-            if (!OtpPath.isValidPathComponent(library)) {
+            if (!OtpPathValidator.isValidPathComponent(library)) {
                 context.addProblem(cells, Level.ERROR, "Tagmentation library '${library}' contains invalid characters.", "At least one tagmentation library contains invalid characters.")
             } else if (!matcher) {
                 context.addProblem(cells, Level.WARNING, "Tagmentation library '${library}' does not match regular expression '${REGEX}'.", "At least one tagmentation library does not match regular expression '${REGEX}'.")

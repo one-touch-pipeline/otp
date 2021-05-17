@@ -68,7 +68,12 @@ class InfoController {
 
     def templates() {
         return [
-                availableTemplates: documentService.listDocuments(),
+                availableTemplates: documentService.listDocuments().collect {
+                    [
+                            document    : it,
+                            fullFileName: documentService.getDocumentFileNameWithExtension(it),
+                    ]
+                },
         ]
     }
 

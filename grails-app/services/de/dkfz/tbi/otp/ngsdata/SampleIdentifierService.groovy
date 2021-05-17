@@ -177,12 +177,12 @@ class SampleIdentifierService {
     }
 
     SampleType findOrSaveSampleType(ParsedSampleIdentifier identifier) {
-        SampleType sampleType = SampleType.findSampleTypeByName(identifier.sampleTypeDbName)
+        SampleType sampleType = SampleTypeService.findSampleTypeByName(identifier.sampleTypeDbName)
         if (sampleType) {
             return sampleType
         }
         String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(identifier.sampleTypeDbName)
-        SampleType sanitizedSampleType = SampleType.findSampleTypeByName(sanitizedSampleTypeDbName)
+        SampleType sanitizedSampleType = SampleTypeService.findSampleTypeByName(sanitizedSampleTypeDbName)
         if (sanitizedSampleType) {
             return sanitizedSampleType
         }
@@ -270,5 +270,12 @@ class SampleIdentifierService {
             sampleIdentifier.save(flush: true)
         }
         return sampleIdentifier
+    }
+
+    /**
+     * @return List of SampleIdentifier objects for this Sample.
+     */
+    static List<SampleIdentifier> getSampleIdentifierObjects(Sample sample) {
+        return SampleIdentifier.findAllBySample(sample)
     }
 }

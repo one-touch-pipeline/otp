@@ -89,7 +89,7 @@ Closure<ScriptOutput> createSamplesAndSampleTypesCreationScript = { List<String>
     uniqueParsedSamples.each { SampleComponents components ->
         Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(components.pid), "Could not find new individual '${components.pid}")
 
-        SampleType sampleType = SampleType.findSampleTypeByName(components.sampleTypeName)
+        SampleType sampleType = SampleTypeService.findSampleTypeByName(components.sampleTypeName)
         Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
 
         if (!sample) {
@@ -257,7 +257,7 @@ class ParsedSwapMapEntry {
     private static Sample getSampleFromPidAndSampleTypeName(String pid, String sampleTypeName) {
         Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(pid))
 
-        SampleType sampleType = SampleType.findSampleTypeByName(sampleTypeName)
+        SampleType sampleType = SampleTypeService.findSampleTypeByName(sampleTypeName)
         assert sampleType: "SampleType '${sampleTypeName}' could not be found"
 
         Sample sample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))

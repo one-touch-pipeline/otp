@@ -38,7 +38,10 @@ package de.dkfz.tbi.otp.job.processing
  * is implicitly available through the instance of this class.
  *
  * @see ProcessingStep
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class RestartedProcessingStep extends ProcessingStep {
     /**
      * The original ProcessingStep from which this ProcessingStep had been created as a restart.

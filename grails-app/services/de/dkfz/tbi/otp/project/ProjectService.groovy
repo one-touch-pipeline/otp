@@ -39,14 +39,15 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.additionalField.*
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupException
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsInvalidException
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupNotFoundException
+import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
@@ -157,7 +158,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Project createProject(ProjectCreationCommand projectParams) {
-        assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
+        assert OtpPathValidator.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Path rootPath = configService.rootPath.toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
         assert rootPathElements.every { !projectParams.dirName.startsWith("${it}${File.separator}") } :
@@ -465,11 +466,11 @@ class ProjectService {
         assert panCanAlignmentConfiguration.mergeTool in MergeConstants.ALL_MERGE_TOOLS:
                 "Invalid merge tool: '${panCanAlignmentConfiguration.mergeTool}', possible values: ${MergeConstants.ALL_MERGE_TOOLS}"
 
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginName):
+        assert OtpPathValidator.isValidPathComponent(panCanAlignmentConfiguration.pluginName):
                 "pluginName '${panCanAlignmentConfiguration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.programVersion):
+        assert OtpPathValidator.isValidPathComponent(panCanAlignmentConfiguration.programVersion):
                 "programVersion '${panCanAlignmentConfiguration.programVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig):
+        assert OtpPathValidator.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig):
                 "baseProjectConfig '${panCanAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
         assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN:
                 "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
@@ -514,11 +515,11 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureRnaAlignmentConfig(RoddyConfiguration rnaAlignmentConfiguration) {
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' " +
+        assert OtpPathValidator.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' " +
                 "is an invalid path component"
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.programVersion): "programVersion '${rnaAlignmentConfiguration.programVersion}' " +
-                "is an invalid path component"
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig " +
+        assert OtpPathValidator.isValidPathComponent(rnaAlignmentConfiguration.programVersion): "programVersion '${rnaAlignmentConfiguration.programVersion}'" +
+                " is an invalid path component"
+        assert OtpPathValidator.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig " +
                 "'${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
         assert rnaAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion " +
                 "'${rnaAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
@@ -568,7 +569,8 @@ class ProjectService {
     }
 
     void deprecateReferenceGenomeProjectSeqType(Project project, SeqType seqType) {
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
+                ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
 
         if (referenceGenomeProjectSeqType) {
             referenceGenomeProjectSeqType.deprecatedDate = new Date()
@@ -709,7 +711,7 @@ class ProjectService {
     }
 
     private ReferenceGenomeProjectSeqType copyReferenceGenomeProjectSeqType(Project baseProject, Project targetProject, SeqType seqType) {
-        ReferenceGenomeProjectSeqType baseRefGenSeqType = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(baseProject, seqType)
+        ReferenceGenomeProjectSeqType baseRefGenSeqType = ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(baseProject, seqType)
         assert baseRefGenSeqType
 
         deprecateAllReferenceGenomesByProjectAndSeqType(targetProject, seqType)
@@ -820,9 +822,10 @@ class ProjectService {
     }
 
     private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {
-        assert OtpPath.isValidPathComponent(configuration.pluginName): "pluginName '${configuration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(configuration.programVersion): "programVersion '${configuration.programVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(configuration.baseProjectConfig): "baseProjectConfig '${configuration.baseProjectConfig}' " +
+        assert OtpPathValidator.isValidPathComponent(configuration.pluginName): "pluginName '${configuration.pluginName}' is an invalid path component"
+        assert OtpPathValidator.isValidPathComponent(configuration.programVersion): "programVersion '${configuration.programVersion}' " +
+                "is an invalid path component"
+        assert OtpPathValidator.isValidPathComponent(configuration.baseProjectConfig): "baseProjectConfig '${configuration.baseProjectConfig}' " +
                 "is an invalid path component"
         assert configuration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${configuration.configVersion}' " +
                 "has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
@@ -982,7 +985,7 @@ echo 'OK'
      * @throws UnixGroupException if a validation fails
      */
     private void validateUnixGroup(String unixGroup, Realm realm) throws UnixGroupException {
-        if (!OtpPath.isValidPathComponent(unixGroup)) {
+        if (!OtpPathValidator.isValidPathComponent(unixGroup)) {
             throw new UnixGroupIsInvalidException("The unixGroup '${unixGroup}' contains invalid characters.")
         }
 

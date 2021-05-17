@@ -27,7 +27,10 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * The ParameterMapping describes the mapping of an output {@link Parameter}
  * to the input Parameter of the next {@link JobDefinition}.
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class ParameterMapping implements Serializable, Entity {
     /**
      * The ParameterType of the output Parameter of the previous Job

@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.*
@@ -37,6 +36,7 @@ import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
 import de.dkfz.tbi.util.MultiObjectValueSource
@@ -291,7 +291,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
             if (Project.findByDirName(val)) {
                 return "default.not.unique.message"
             }
-            if (val && !OtpPath.isValidRelativePath(val)) {
+            if (val && !OtpPathValidator.isValidRelativePath(val)) {
                 return "validator.relative.path"
             }
         })
@@ -300,7 +300,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
             if (val == "") {
                 return "default.blank.message"
             }
-            if (!(OtpPath.isValidPathComponent(val))) {
+            if (!(OtpPathValidator.isValidPathComponent(val))) {
                 return "invalid"
             }
         })
@@ -319,7 +319,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
             if (val?.empty) {
                 return "empty"
             }
-            if (val && !OtpPath.isValidPathComponent(val.originalFilename)) {
+            if (val && !OtpPathValidator.isValidPathComponent(val.originalFilename)) {
                 return "invalid"
             }
             if (val?.size > ProjectService.PROJECT_INFO_MAX_SIZE) {

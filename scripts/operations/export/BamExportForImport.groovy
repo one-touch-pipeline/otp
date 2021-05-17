@@ -143,7 +143,7 @@ class BamExportImport {
                 newProject   : values[0],
                 newPid       : values[1],
                 oldIndividual: CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(values[2], values[2], values[2])),
-                sampleType   : SampleType.findSampleTypeByName(values[3]),
+                sampleType   : SampleTypeService.findSampleTypeByName(values[3]),
                 seqType      : getSeqTypeForIdentifier(values[4])
         ])
         assert data.sampleType: "could not find sampletype with name '${values[3]}'"

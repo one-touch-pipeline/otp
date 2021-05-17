@@ -26,6 +26,7 @@
  */
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
 import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypeService
 import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.parser.covid19.Covid19SampleIdentifierParser
 import de.dkfz.tbi.otp.parser.hipo.*
@@ -67,12 +68,12 @@ List<String> table = []
 List<String> notParsable = []
 
 static String getSanitizedSampleTypeDbName(String sampleTypeName) {
-    SampleType sampleType = SampleType.findSampleTypeByName(sampleTypeName)
+    SampleType sampleType = SampleTypeService.findSampleTypeByName(sampleTypeName)
     if (sampleType) {
         return sampleType.name
     }
     String sanitizedSampleTypeDbName = new SampleIdentifierService().getSanitizedSampleTypeDbName(sampleTypeName)
-    SampleType sanitizedSampleType = SampleType.findSampleTypeByName(sanitizedSampleTypeDbName)
+    SampleType sanitizedSampleType = SampleTypeService.findSampleTypeByName(sanitizedSampleTypeDbName)
     if (sanitizedSampleType) {
         return sanitizedSampleType.name
     }

@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
-class DataFile implements CommentableWithProject,  Entity {
+class DataFile implements CommentableWithProject, Entity {
 
     String fileName                // file name
     String pathName                // path from run folder to file

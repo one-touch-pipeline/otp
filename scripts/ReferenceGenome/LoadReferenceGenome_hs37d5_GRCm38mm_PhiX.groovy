@@ -24,9 +24,9 @@ package ReferenceGenome
 
 import groovy.transform.Field
 
-import de.dkfz.tbi.otp.ngsdata.FastaEntry
+import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 /*
  *  This scripts inserts a new ReferenceGenome object

@@ -60,8 +60,8 @@ List<List<MergingWorkPackage>> samplePairs = input.split('\n').findAll().collect
     println "parsed '${it}' into ${split as List}"
 
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(split[0]))
-    SampleType sampleType1 = SampleType.findSampleTypeByName(split[1])
-    SampleType sampleType2 = SampleType.findSampleTypeByName(split[2])
+    SampleType sampleType1 = SampleTypeService.findSampleTypeByName(split[1])
+    SampleType sampleType2 = SampleTypeService.findSampleTypeByName(split[2])
     SeqType seqType = seqTypeService.findByNameOrImportAlias(split[3], [libraryLayout: SequencingReadType.PAIRED, singleCell: false])
     Sample sample1 = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType1))
     Sample sample2 = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType2))

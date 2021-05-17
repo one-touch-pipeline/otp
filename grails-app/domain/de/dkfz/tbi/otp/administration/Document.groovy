@@ -67,8 +67,4 @@ class Document implements Entity {
     static belongsTo = [
             documentType: DocumentType,
     ]
-
-    String getFileNameWithExtension() {
-        return "${documentType.title}.${formatType.extension}".toLowerCase()
-    }
 }

@@ -45,7 +45,10 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see JobDefinition
  * @see Job
  * @see Parameter
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class ProcessingStep implements Serializable, Entity {
     /**
      * Input Parameters added to this ProcessingStep.

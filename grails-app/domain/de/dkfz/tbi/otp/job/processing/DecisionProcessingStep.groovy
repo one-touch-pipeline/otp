@@ -30,7 +30,10 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  *
  * @see JobDecision
  * @see DecidingJobDefinition
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class DecisionProcessingStep extends ProcessingStep {
     /**
      * The decision produced by the Job. It is null as long as the Job has not finished.

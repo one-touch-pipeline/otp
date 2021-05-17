@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.project.ProjectService
 
 GeneModelService geneModelService = ctx.geneModelService

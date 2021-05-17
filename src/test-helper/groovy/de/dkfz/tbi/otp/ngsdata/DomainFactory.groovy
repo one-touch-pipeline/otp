@@ -937,7 +937,7 @@ class DomainFactory {
         createSampleTypePerProjectLazy(
                 sampleType: mergingWorkPackage1.sampleType,
                 project: mergingWorkPackage1.project,
-                category: SampleType.Category.DISEASE,
+                category: SampleTypePerProject.Category.DISEASE,
         )
         return createSamplePair(mergingWorkPackage1, properties)
     }
@@ -962,7 +962,7 @@ class DomainFactory {
     private static final Map SAMPLE_TYPE_MAP = [
             project   : { createProject() },
             sampleType: { createSampleType() },
-            category  : SampleType.Category.DISEASE,
+            category  : SampleTypePerProject.Category.DISEASE,
     ].asImmutable()
 
     static SampleTypePerProject createSampleTypePerProject(Map properties = [:]) {
@@ -973,7 +973,8 @@ class DomainFactory {
         return findOrCreateDomainObject(SampleTypePerProject, SAMPLE_TYPE_MAP, properties)
     }
 
-    static SampleTypePerProject createSampleTypePerProjectForMergingWorkPackage(AbstractMergingWorkPackage mergingWorkPackage, SampleType.Category category = SampleType.Category.DISEASE) {
+    static SampleTypePerProject createSampleTypePerProjectForMergingWorkPackage(
+            AbstractMergingWorkPackage mergingWorkPackage, SampleTypePerProject.Category category = SampleTypePerProject.Category.DISEASE) {
         return createSampleTypePerProject([
                 project   : mergingWorkPackage.project,
                 sampleType: mergingWorkPackage.sampleType,
@@ -981,7 +982,8 @@ class DomainFactory {
         ])
     }
 
-    static SampleTypePerProject createSampleTypePerProjectForBamFile(AbstractMergedBamFile bamFile, SampleType.Category category = SampleType.Category.DISEASE) {
+    static SampleTypePerProject createSampleTypePerProjectForBamFile(
+            AbstractMergedBamFile bamFile, SampleTypePerProject.Category category = SampleTypePerProject.Category.DISEASE) {
         return createSampleTypePerProjectForMergingWorkPackage(bamFile.mergingWorkPackage, category)
     }
 
@@ -1040,13 +1042,13 @@ class DomainFactory {
         createSampleTypePerProject(
                 project: bamFileTumor.project,
                 sampleType: bamFileTumor.sampleType,
-                category: SampleType.Category.DISEASE,
+                category: SampleTypePerProject.Category.DISEASE,
         )
 
         createSampleTypePerProject(
                 project: bamFileControl.project,
                 sampleType: bamFileControl.sampleType,
-                category: SampleType.Category.CONTROL,
+                category: SampleTypePerProject.Category.CONTROL,
         )
 
         SamplePair samplePair = createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
@@ -1101,8 +1103,8 @@ class DomainFactory {
             assert bamFile.mergingWorkPackage.save(flush: true)
         }
 
-        createSampleTypePerProjectForMergingWorkPackage(tumorMwp, SampleType.Category.DISEASE)
-        createSampleTypePerProjectForMergingWorkPackage(controlMwp, SampleType.Category.CONTROL)
+        createSampleTypePerProjectForMergingWorkPackage(tumorMwp, SampleTypePerProject.Category.DISEASE)
+        createSampleTypePerProjectForMergingWorkPackage(controlMwp, SampleTypePerProject.Category.CONTROL)
 
         SamplePair samplePair = createSamplePair(tumorMwp, controlMwp)
 
@@ -1182,7 +1184,7 @@ class DomainFactory {
 
     static SamplePair createDisease(AbstractMergingWorkPackage controlMwp) {
         MergingWorkPackage diseaseMwp = createMergingWorkPackage(controlMwp)
-        createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)
+        createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleTypePerProject.Category.DISEASE)
         SamplePair samplePair = createSamplePair(diseaseMwp, controlMwp)
         return samplePair
     }
@@ -1272,7 +1274,7 @@ class DomainFactory {
             createSampleTypePerProjectLazy([
                     project   : diseaseWorkPackage.project,
                     sampleType: diseaseWorkPackage.sampleType,
-                    category  : SampleType.Category.DISEASE,
+                    category  : SampleTypePerProject.Category.DISEASE,
             ])
             samplePair = createSamplePair(diseaseWorkPackage, controlWorkPackage)
         }

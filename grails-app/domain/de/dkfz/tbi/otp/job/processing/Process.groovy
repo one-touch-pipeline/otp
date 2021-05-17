@@ -44,7 +44,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @see JobDefinition
  * @see Job
  * @see StartJob
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class Process implements CommentableWithProject, Serializable, Entity {
     /**
      * The Date when this process was started.

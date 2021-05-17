@@ -60,10 +60,10 @@ class SamplePairDeciderServiceIntegrationSpec extends Specification implements I
                 sample : sampleControl2,
         ])
 
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpDisease1, SampleType.Category.DISEASE)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpDisease2, SampleType.Category.DISEASE)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpControl1, SampleType.Category.CONTROL)
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpControl2, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpDisease1, SampleTypePerProject.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpDisease2, SampleTypePerProject.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpControl1, SampleTypePerProject.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mwpControl2, SampleTypePerProject.Category.CONTROL)
 
         return [
                 individual         : individual,
@@ -113,12 +113,12 @@ class SamplePairDeciderServiceIntegrationSpec extends Specification implements I
                     4 * findMergingWorkPackage(data1a.individual, _, _) >> data1a.allWorkPackages
                     4 * findMergingWorkPackage(data1b.individual, _, _) >> data1b.allWorkPackages
                     4 * findMergingWorkPackage(data1c.individual, _, _) >> data1c.allWorkPackages
-                    2 * filterByCategory(data1a.allWorkPackages, SampleType.Category.CONTROL) >> data1a.controlWorkPackages
-                    2 * filterByCategory(data1b.allWorkPackages, SampleType.Category.CONTROL) >> data1b.controlWorkPackages
-                    2 * filterByCategory(data1c.allWorkPackages, SampleType.Category.CONTROL) >> data1c.controlWorkPackages
-                    2 * filterByCategory(data1a.allWorkPackages, SampleType.Category.DISEASE) >> data1a.diseaseWorkPackages
-                    2 * filterByCategory(data1b.allWorkPackages, SampleType.Category.DISEASE) >> data1b.diseaseWorkPackages
-                    2 * filterByCategory(data1c.allWorkPackages, SampleType.Category.DISEASE) >> data1c.diseaseWorkPackages
+                    2 * filterByCategory(data1a.allWorkPackages, SampleTypePerProject.Category.CONTROL) >> data1a.controlWorkPackages
+                    2 * filterByCategory(data1b.allWorkPackages, SampleTypePerProject.Category.CONTROL) >> data1b.controlWorkPackages
+                    2 * filterByCategory(data1c.allWorkPackages, SampleTypePerProject.Category.CONTROL) >> data1c.controlWorkPackages
+                    2 * filterByCategory(data1a.allWorkPackages, SampleTypePerProject.Category.DISEASE) >> data1a.diseaseWorkPackages
+                    2 * filterByCategory(data1b.allWorkPackages, SampleTypePerProject.Category.DISEASE) >> data1b.diseaseWorkPackages
+                    2 * filterByCategory(data1c.allWorkPackages, SampleTypePerProject.Category.DISEASE) >> data1c.diseaseWorkPackages
                     0 * _
                 }
         ])

@@ -55,7 +55,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
                         (workflowProcessingStatus): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
                 ]),
         ])
-        DomainFactory.createSampleTypePerProjectForBamFile(bpa.sampleType2BamFile, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForBamFile(bpa.sampleType2BamFile, SampleTypePerProject.Category.CONTROL)
         return bpa
     }
 
@@ -109,7 +109,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
                     [ (it) : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED ]
                 }
         )
-        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(finishedSamplePair.mergingWorkPackage2, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(finishedSamplePair.mergingWorkPackage2, SampleTypePerProject.Category.CONTROL)
         // 'run' all the workflows for our all-finished samplePair
         List<BamFilePairAnalysis> analysesOfAllAnalysisFinishedSamplePair = workflowStatusFieldsAndTheirTestInstanceCreator.values()
                 .collect { Closure createTestInstance ->

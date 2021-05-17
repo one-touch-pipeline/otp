@@ -1,3 +1,4 @@
+package operations.threshold
 /*
  * Copyright 2011-2020 The OTP authors
  *
@@ -63,14 +64,14 @@ Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projec
 List<SampleType> sampleTypesDisease = sampleTypesDiseaseInput.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')
 }.collect {
-    SampleType sampleType = SampleType.findSampleTypeByName(it)
+    SampleType sampleType = SampleTypeService.findSampleTypeByName(it)
     assert sampleType : "Sample type $it not found"
     return sampleType
 }
 List<SampleType> sampleTypesControl = sampleTypesControlInput.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')
 }.collect {
-    SampleType sampleType = SampleType.findSampleTypeByName(it)
+    SampleType sampleType = SampleTypeService.findSampleTypeByName(it)
     assert sampleType : "Sample type $it not found"
     return sampleType
 }
@@ -89,12 +90,12 @@ SeqType wgs = SeqTypeService.wholeGenomePairedSeqType
 
 SampleType.withNewTransaction {
     sampleTypesDisease.each {
-        sampleTypePerProjectService.createOrUpdate(project, it, SampleType.Category.DISEASE)
+        sampleTypePerProjectService.createOrUpdate(project, it, SampleTypePerProject.Category.DISEASE)
     }
     println "create disease: ${sampleTypesDisease*.name.join(', ')}"
 
     sampleTypesControl.each {
-        sampleTypePerProjectService.createOrUpdate(project, it, SampleType.Category.CONTROL)
+        sampleTypePerProjectService.createOrUpdate(project, it, SampleTypePerProject.Category.CONTROL)
     }
     println "create control: ${sampleTypesControl*.name.join(', ')}"
 

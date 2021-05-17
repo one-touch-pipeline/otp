@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -47,7 +47,7 @@ class RunNameValidator extends SingleValueValidator<MetadataValidationContext> i
 
     @Override
     void validateValue(MetadataValidationContext context, String runName, Set<Cell> cells) {
-        if (!OtpPath.isValidPathComponent(runName)) {
+        if (!OtpPathValidator.isValidPathComponent(runName)) {
             context.addProblem(cells, Level.ERROR, "The run name '${runName}' is not a valid directory name.", "At least one run name is not a valid directory name.")
         }
     }

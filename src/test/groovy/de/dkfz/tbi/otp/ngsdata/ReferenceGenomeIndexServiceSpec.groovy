@@ -28,6 +28,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeIndexService> {
 

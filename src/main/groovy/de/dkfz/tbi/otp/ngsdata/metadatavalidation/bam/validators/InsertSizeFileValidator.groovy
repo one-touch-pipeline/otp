@@ -23,9 +23,9 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import java.nio.file.Files
@@ -73,7 +73,7 @@ class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidation
                 context.addProblem(it.cells, Level.WARNING, "${INSERT_SIZE_FILE} has to be set for Sophia",
                         "${INSERT_SIZE_FILE} file has to be set for Sophia")
             } else {
-                if (!OtpPath.isValidRelativePath(insertSizeFile)) {
+                if (!OtpPathValidator.isValidRelativePath(insertSizeFile)) {
                     context.addProblem(it.cells, Level.ERROR, "The path '${insertSizeFile}' is not a relative path.",
                             "At least one path is not a relative path.")
                 } else {
@@ -81,7 +81,7 @@ class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidation
                         if (bamFile != null && !bamFile.isEmpty()) {
                             Path bamFilePath = context.fileSystem.getPath(bamFile)
                             if (bamFilePath) {
-                                if (OtpPath.isValidAbsolutePath(bamFile)) {
+                                if (OtpPathValidator.isValidAbsolutePath(bamFile)) {
                                     Path insertSizeFilePath = bamFilePath.resolveSibling(insertSizeFile)
 
                                     if (!Files.isRegularFile(insertSizeFilePath)) {

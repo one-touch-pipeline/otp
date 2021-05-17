@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
 
 class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTest {
@@ -162,7 +163,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
 
         when:
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
-                ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
+                ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                         Project.findByName(projectName),
                         SeqType.findByName(seqTypeName),
                         SampleType.findByName(sampleTypeName)
@@ -196,9 +197,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
 
         when:
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
-                ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
-                        seqTrack,
-                )
+                ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(seqTrack)
 
         then:
         null != referenceGenomeProjectSeqType
@@ -213,7 +212,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         )
 
         when:
-        ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
+        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 null,
                 seqType,
                 sampleType
@@ -233,7 +232,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         )
 
         when:
-        ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
+        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 project,
                 null,
                 sampleType
@@ -250,7 +249,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         SeqType seqType = DomainFactory.createSeqType(name: SEQ_TYPE_NAME)
 
         when:
-        ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
+        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 project,
                 seqType,
                 null
@@ -272,7 +271,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         )
 
         when:
-        ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
+        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 project,
                 seqType,
                 sampleType,

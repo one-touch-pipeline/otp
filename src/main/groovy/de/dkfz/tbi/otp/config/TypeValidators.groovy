@@ -25,7 +25,6 @@ import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.cron.ScheduledJob
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
@@ -33,6 +32,7 @@ import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.time.DateTimeException
@@ -58,9 +58,9 @@ enum TypeValidators {
 
     MAIL({ EmailValidator.instance.isValid(it) }, null),
 
-    PATH_COMPONENT({ OtpPath.isValidPathComponent(it) }, null),
+    PATH_COMPONENT({ OtpPathValidator.isValidPathComponent(it) }, null),
 
-    ABSOLUTE_PATH({ OtpPath.isValidAbsolutePath(it) }, null),
+    ABSOLUTE_PATH({ OtpPathValidator.isValidAbsolutePath(it) }, null),
 
     PLUGIN({ it ==~ /^\d+\.\d+\.\d+(\-\d+)?$/ }, null),
 

@@ -32,7 +32,10 @@ import de.dkfz.tbi.otp.utils.Entity
  * allows to find the stack trace in the corresponding log file by an administrator.
  *
  * @see ProcessingStepUpdate
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class ProcessingError implements Entity {
 
     /**

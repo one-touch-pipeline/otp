@@ -23,10 +23,10 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -71,7 +71,7 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
         } catch (FileTypeUndefinedException e) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.", "At least one filename contains neither '_fastq' nor '.fastq'.")
         }
-        if (!(OtpPath.isValidPathComponent(filename) || OtpPath.isValidAbsolutePath(filename))) {
+        if (!(OtpPathValidator.isValidPathComponent(filename) || OtpPathValidator.isValidAbsolutePath(filename))) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.", "At least one filename contains invalid characters.")
         }
         if (!REQUIRED_CHARACTERS.every { String it -> basename.contains(it) }) {

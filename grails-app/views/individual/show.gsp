@@ -109,15 +109,16 @@
             <h2><g:message code="individual.show.samples"/></h2>
             <div id="individualSampleTbl" class="tableBlock">
                 <table>
-                    <g:each var="sample" in="${individual.samples}">
+                    <g:each var="wrappedSample" in="${samplesWrapper}">
                         <tr>
-                            <td class="myKey">${sample.sampleType.name}</td>
+                            <td class="myKey">${wrappedSample.sample.sampleType.name}</td>
                             <td class="myValue">
                                 <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                    ${sample.sampleIdentifierObjects.join(", ")}
+                                    ${wrappedSample.sampleIdentifierObjects.join(", ")}
                                 </sec:access>
                                 <otp:expandable value="${g.message(code: 'individual.show.updateSampleName')}" collapsed="true">
-                                    <g:render template="editorSampleIdentifier" model="[sample: sample]"/>
+                                    <g:render template="editorSampleIdentifier"
+                                              model="[sample: wrappedSample.sample, sampleIdentifierObjects: wrappedSample.sampleIdentifierObjects]"/>
                                 </otp:expandable>
                             </td>
                         </tr>

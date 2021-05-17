@@ -30,6 +30,7 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.validation.ValidatorUtil
 
 import java.lang.reflect.Member
 

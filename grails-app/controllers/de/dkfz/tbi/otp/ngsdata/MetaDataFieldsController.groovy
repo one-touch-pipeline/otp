@@ -28,8 +28,8 @@ import grails.validation.ValidationException
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class MetaDataFieldsController implements CheckAndCall {
@@ -333,7 +333,7 @@ class CreateAntibodyTargetCommand implements Validateable {
             if (obj.antibodyTargetService.findByNameOrImportAlias(val)) {
                 return 'default.not.unique.message'
             }
-            if (!OtpPath.isValidPathComponent(val)) {
+            if (!OtpPathValidator.isValidPathComponent(val)) {
                 return 'validator.path.component'
             }
         })
@@ -587,7 +587,7 @@ class UpdateSeqCenterAbsolutePathCommand extends SeqCenterCommand {
 
     static constraints = {
         absolutePath nullable: true, blank: true, validator: { val, obj ->
-            if (val != null && !OtpPath.isValidAbsolutePath(val)) {
+            if (val != null && !OtpPathValidator.isValidAbsolutePath(val)) {
                 return "validator.absolute.path"
             }
         }

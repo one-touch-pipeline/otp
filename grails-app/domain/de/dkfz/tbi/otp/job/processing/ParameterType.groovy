@@ -36,7 +36,10 @@ import de.dkfz.tbi.otp.utils.Entity
  *
  * @see Parameter
  * @see JobDefinition
+ *
+ * @deprecated class is part of the old workflow system
  */
+@Deprecated
 class ParameterType implements Serializable, Entity {
     /**
      * The name for this parameter

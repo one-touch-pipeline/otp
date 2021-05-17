@@ -84,11 +84,15 @@
     <div class="tableBlock">
         <h3><g:message code="run.show.metadataFiles"/></h3>
         <table>
-            <g:each var="file" in="${metaDataFiles}">
+            <g:each var="file" in="${metaDataFileWrapper}">
             <tbody>
                 <tr>
-                    <td><g:link controller="metadataImport" action="details" id="${file.fastqImportInstanceId}">${file.fullPath}</g:link></td>
-                    <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
+                    <td>
+                        <g:link controller="metadataImport" action="details" id="${file.metaDataFile.fastqImportInstanceId}">
+                            ${file.fullPath}
+                        </g:link>
+                    </td>
+                    <td>${(new Date(file.metaDataFile.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
                 </tr>
             </tbody>
             </g:each>
