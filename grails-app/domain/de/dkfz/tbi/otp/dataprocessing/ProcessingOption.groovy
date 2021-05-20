@@ -470,6 +470,10 @@ class ProcessingOption implements Entity {
                 "linux group of the otp user",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+        WITHDRAWN_UNIX_GROUP(
+                "unix group to use for withdrawn data",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
 
         //ldap
         LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD(

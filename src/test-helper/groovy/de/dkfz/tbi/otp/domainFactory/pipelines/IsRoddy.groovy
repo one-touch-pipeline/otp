@@ -45,7 +45,7 @@ trait IsRoddy implements IsPipeline {
     }
 
     public <T> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
-        MergingWorkPackage workPackage = properties.workPackage
+        MergingWorkPackage workPackage = properties.workPackage ?: properties.baseBamFile?.workPackage
         if (!workPackage) {
             Map workPackageProperties = properties.seqTracks ?
                     [

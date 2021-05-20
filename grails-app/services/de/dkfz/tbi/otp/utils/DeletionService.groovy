@@ -327,7 +327,7 @@ class DeletionService {
                 processedBamFile.delete(flush: true)
             }
             alignmentPass.delete(flush: true)
-            // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
+            // The MergingWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are already removed
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
                 analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))

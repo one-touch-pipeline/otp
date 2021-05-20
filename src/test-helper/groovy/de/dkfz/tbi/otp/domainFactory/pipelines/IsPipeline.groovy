@@ -72,7 +72,7 @@ trait IsPipeline implements DomainFactoryCore {
 
     Map<String, ?> bamFileDefaultProperties(Map properties, Collection<SeqTrack> seqTracks, AbstractMergingWorkPackage workPackage) {
         return [
-                numberOfMergedLanes: seqTracks.size(),
+                numberOfMergedLanes: seqTracks.size() + (properties.baseBamFile?.numberOfMergedLanes ?: 0),
                 seqTracks          : seqTracks as Set,
                 workPackage        : workPackage,
                 md5sum             : {

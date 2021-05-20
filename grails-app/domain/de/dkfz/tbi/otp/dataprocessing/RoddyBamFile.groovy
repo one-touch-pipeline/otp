@@ -54,7 +54,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
     static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
 
-
     RoddyBamFile baseBamFile
 
     Set<SeqTrack> seqTracks
@@ -144,7 +143,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
                     "total number of merged lanes is not equal to number of contained seq tracks: ${numberOfMergedLanes} vs ${allContainedSeqTracks.size()}"
         }
 
-
         return errors
     }
 
@@ -203,7 +201,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     @Override
     String toString() {
-        String latest = isMostRecentBamFile() ? ' (latest)' : ''
+        String latest = mergingWorkPackage ? (isMostRecentBamFile() ? ' (latest)' : '') : '?'
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
         return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }
@@ -419,7 +417,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return isOldStructureUsed() ? finalBamFile : workBamFile
     }
 
-
     @Override
     void withdraw() {
         withTransaction {
@@ -432,7 +429,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         }
     }
 
-
     Long getNumberOfReadsFromQa() {
         AbstractQualityAssessment qa = getOverallQualityAssessment()
         return qa.pairedRead1 + qa.pairedRead2
@@ -444,7 +440,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
         assert seqTracks.every { SeqTrack seqTrack ->
             seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
-        } : "Not all Fastqc workflows of all seqtracks are finished"
+        }: "Not all Fastqc workflows of all seqtracks are finished"
 
         List<Integer> numberOfReads = seqTracks.collect { SeqTrack seqTrack ->
             seqTrack.NReads

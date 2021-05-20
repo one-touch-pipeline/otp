@@ -167,6 +167,10 @@ class AbstractBamFileService {
         return basesMapped / length
     }
 
+    /**
+     * @Deprecated methods accessing the database shouldn't be static, since then the transaction proxies does not work.
+     */
+    @Deprecated
     static AbstractBamFile saveBamFile(AbstractBamFile bamFile) {
         return bamFile.save(flush: true)
     }
