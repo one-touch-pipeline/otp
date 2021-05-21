@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'FASTQ installation', TRUE, 0, now(), now())
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated)
+VALUES(nextval('hibernate_sequence'), 0, 'FASTQ installation', 'dataInstallationWorkflow', TRUE, 0, now(), now())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated)
