@@ -38,6 +38,9 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.errors.ForbiddenErrorPlainResponseException
+import de.dkfz.tbi.otp.errors.InternalServerErrorPlainResponseException
+import de.dkfz.tbi.otp.errors.PlainResponseExceptionHandler
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -53,18 +56,22 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @Secured("hasRole('ROLE_OPERATOR')")
-class MetadataImportController implements CheckAndCall {
+class MetadataImportController implements CheckAndCall, PlainResponseExceptionHandler {
 
     static allowedMethods = [
-            index                     : "GET",
-            validateOrImport          : "POST",
-            details                   : "GET",
-            multiDetails              : "GET",
-            autoImport                : "GET",
-            blacklistedIlseNumbers    : "GET",
-            addBlacklistedIlseNumbers : "POST",
-            unBlacklistIlseSubmissions: "POST",
-            saveComment               : "POST",
+            index                                : "GET",
+            validateOrImport                     : "POST",
+            details                              : "GET",
+            multiDetails                         : "GET",
+            autoImport                           : "GET",
+            blacklistedIlseNumbers               : "GET",
+            addBlacklistedIlseNumbers            : "POST",
+            unBlacklistIlseSubmissions           : "POST",
+            saveComment                          : "POST",
+            assignOtrsTicketToFastqImportInstance: "POST",
+            updateSeqCenterComment               : "POST",
+            updateAutomaticNotificationFlag      : "POST",
+            updateFinalNotificationFlag          : "POST",
     ]
 
     MetadataImportService metadataImportService
@@ -79,6 +86,7 @@ class MetadataImportController implements CheckAndCall {
 
     CommentService commentService
 
+    @SuppressWarnings("UnnecessaryGetter")
     def index(MetadataImportControllerSubmitCommand cmd) {
         boolean isValidated = false
         int problems = 0
@@ -243,8 +251,7 @@ class MetadataImportController implements CheckAndCall {
     def autoImport(String secret) {
         String expectedSecret = configService.autoImportSecret
         if (!secret || !expectedSecret || secret != expectedSecret) {
-            render text: 'authentication failed', contentType: "text/plain"
-            return
+            throw new ForbiddenErrorPlainResponseException("authentication with secret failed")
         }
         Authentication authentication = SecurityContextHolder.context.authentication
 
@@ -255,6 +262,8 @@ class MetadataImportController implements CheckAndCall {
             UserDetails userDetails = new User('TicketSystem', "", authorities)
             SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             render text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String), contentType: "text/plain"
+        } catch (Throwable t) {
+            throw new InternalServerErrorPlainResponseException(t.message, t)
         } finally {
             SecurityContextHolder.context.authentication = authentication
         }
@@ -283,7 +292,7 @@ class MetadataImportController implements CheckAndCall {
             e.failedValidations.each { MetadataValidationContext context ->
                 text.append("\n${context.metadataFile}")
                 problems.append("The following validation summary messages were returned for ${context.metadataFile.fileName}:\n")
-                problems.append("${context.problemsObject.getSortedProblemListString()}\n\n")
+                problems.append("${context.problemsObject.sortedProblemListString}\n\n")
             }
             text.append("\n\nClick here for manual import:")
             text.append("\n" + g.createLink(
@@ -302,7 +311,7 @@ class MetadataImportController implements CheckAndCall {
     }
 
     def blacklistedIlseNumbers() {
-        List<IlseSubmission> ilseSubmissions = ilseSubmissionService.getSortedBlacklistedIlseSubmissions()
+        List<IlseSubmission> ilseSubmissions = ilseSubmissionService.sortedBlacklistedIlseSubmissions
         return [
                 ilseSubmissions: ilseSubmissions,
                 command        : flash.cmd as BlackListedIlseCommand,
@@ -474,8 +483,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         Matcher matcher = ticketNumber =~ /^\s*(((${Pattern.quote(prefix)})?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             return matcher.group('number') ?: null
-        } else {
-            return ticketNumber
         }
+        return ticketNumber
     }
 }

@@ -23,6 +23,8 @@
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 
+import de.dkfz.tbi.otp.utils.ExceptionUtils
+
 import javax.servlet.http.HttpServletResponse
 
 @Secured('isFullyAuthenticated()')
@@ -52,24 +54,20 @@ class ErrorsController {
         return [method: request.method]
     }
 
-    def error500 = {
-        def exception = request.getAttribute('exception')
+    def error500() {
+        Throwable throwable = request.exception
         String stackTrace = ''
-        if (exception) {
-            StringWriter stackTraceBuffer = new StringWriter()
-            PrintWriter stackTracePrintWriter = new PrintWriter(stackTraceBuffer)
-            exception.printStackTrace(stackTracePrintWriter)
-            stackTrace = stackTraceBuffer.toString()
+        if (throwable) {
+            stackTrace = ExceptionUtils.getStackTrace(throwable)
         }
         String digest = stackTrace.encodeAsMD5()
         log.error("Displaying exception with digest ${digest}.")
         if (springSecurityService.isAjax(request)) {
             render digest
-            return
         } else {
-            [
-                    code: digest,
-                    message: exception?.message,
+            return [
+                    code      : digest,
+                    message   : throwable?.message,
                     stackTrace: stackTrace,
             ]
         }
