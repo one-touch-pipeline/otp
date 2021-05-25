@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,32 +34,32 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
 @Integration
-class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFactory {
+class FastqcJobServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
     void "getSeqTrack, when called for a FastQc step, should return the SeqTrack"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: fastqcShared.WORKFLOW,
-                ]),
+            workflow: createWorkflow([
+                name: FastqcJobService.WORKFLOW,
+            ]),
         ])
         WorkflowStep step = createWorkflowStep([
-                workflowRun: run,
+            workflowRun: run,
         ])
         WorkflowArtefact artefact = createWorkflowArtefact()
         createWorkflowRunInputArtefact(
-                workflowRun     : run,
-                role            : fastqcShared.INPUT_ROLE,
-                workflowArtefact: artefact,
+            workflowRun     : run,
+            role            : FastqcJobService.INPUT_ROLE,
+            workflowArtefact: artefact,
         )
         SeqTrack seqTrack = createSeqTrack([
-                workflowArtefact: artefact,
+            workflowArtefact: artefact,
         ])
 
         when:
-        SeqTrack returned = fastqcShared.getSeqTrack(step)
+        SeqTrack returned = service.getSeqTrack(step)
 
         then:
         returned == seqTrack
@@ -67,12 +67,12 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getSeqTrack, when called for a non FastQc step, then throw WrongWorkflowException"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowStep step = createWorkflowStep()
 
         when:
-        fastqcShared.getSeqTrack(step)
+        service.getSeqTrack(step)
 
         then:
         thrown(WrongWorkflowException)
@@ -80,28 +80,28 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getSeqTrack, when called for a FastQc step without expected role, then throw NoArtefactOfRoleException"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: fastqcShared.WORKFLOW,
-                ]),
+            workflow: createWorkflow([
+                name: FastqcJobService.WORKFLOW,
+            ]),
         ])
         WorkflowStep step = createWorkflowStep([
-                workflowRun: run,
+            workflowRun: run,
         ])
         WorkflowArtefact artefact = createWorkflowArtefact()
         createWorkflowRunInputArtefact(
-                workflowRun     : run,
-                role            : "role_${nextId}",
-                workflowArtefact: artefact,
+            workflowRun     : run,
+            role            : "role_${nextId}",
+            workflowArtefact: artefact,
         )
         createSeqTrack([
-                workflowArtefact: artefact,
+            workflowArtefact: artefact,
         ])
 
         when:
-        fastqcShared.getSeqTrack(step)
+        service.getSeqTrack(step)
 
         then:
         thrown(NoArtefactOfRoleException)
@@ -109,24 +109,24 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getSeqTrack, when called for a FastQc step with expected role, but without concrete artefact, then throw NoConcreteArtefactException"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: fastqcShared.WORKFLOW,
-                ]),
+            workflow: createWorkflow([
+                name: FastqcJobService.WORKFLOW,
+            ]),
         ])
         WorkflowStep step = createWorkflowStep([
-                workflowRun: run,
+            workflowRun: run,
         ])
         createWorkflowArtefact()
         createWorkflowRunInputArtefact(
-                workflowRun     : run,
-                role            : fastqcShared.INPUT_ROLE,
+            workflowRun     : run,
+            role            : FastqcJobService.INPUT_ROLE,
         )
 
         when:
-        fastqcShared.getSeqTrack(step)
+        service.getSeqTrack(step)
 
         then:
         thrown(NoConcreteArtefactException)
@@ -134,26 +134,26 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getFastqcProcessedFile, when called for a FastQc step, should return the FastqcProcessedFile"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: fastqcShared.WORKFLOW,
-                ]),
+            workflow: createWorkflow([
+                name: FastqcJobService.WORKFLOW,
+            ]),
         ])
         WorkflowStep step = createWorkflowStep([
-                workflowRun: run,
+            workflowRun: run,
         ])
         WorkflowArtefact artefact = createWorkflowArtefact([
-                producedBy: run,
-                outputRole: fastqcShared.OUTPUT_ROLE,
+            producedBy: run,
+            outputRole: FastqcJobService.OUTPUT_ROLE,
         ])
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile([
-                workflowArtefact: artefact,
-         ])
+            workflowArtefact: artefact,
+        ])
 
         when:
-        FastqcProcessedFile returned = fastqcShared.getFastqcProcessedFile(step)
+        FastqcProcessedFile returned = service.getFastqcProcessedFile(step)
 
         then:
         returned == fastqcProcessedFile
@@ -161,12 +161,12 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getFastqcProcessedFile, when called for a non FastQc step, then throw WrongWorkflowException"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowStep step = createWorkflowStep()
 
         when:
-        fastqcShared.getFastqcProcessedFile(step)
+        service.getFastqcProcessedFile(step)
 
         then:
         thrown(WrongWorkflowException)
@@ -174,26 +174,26 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getFastqcProcessedFile, when called for a FastQc step without expected role, then throw NoArtefactOfRoleException"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: fastqcShared.WORKFLOW,
-                ]),
+            workflow: createWorkflow([
+                name: FastqcJobService.WORKFLOW,
+            ]),
         ])
         WorkflowStep step = createWorkflowStep([
-                workflowRun: run,
+            workflowRun: run,
         ])
         WorkflowArtefact artefact = createWorkflowArtefact([
-                producedBy: run,
-                outputRole: "role_${nextId}",
+            producedBy: run,
+            outputRole: "role_${nextId}",
         ])
         DomainFactory.createFastqcProcessedFile([
-                workflowArtefact: artefact,
+            workflowArtefact: artefact,
         ])
 
         when:
-        fastqcShared.getFastqcProcessedFile(step)
+        service.getFastqcProcessedFile(step)
 
         then:
         thrown(NoArtefactOfRoleException)
@@ -201,23 +201,23 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
 
     void "getFastqcProcessedFile, when called for a FastQc step with expected role, but without concrete artefact, then throw NoConcreteArtefactException"() {
         given:
-        FastqcShared fastqcShared = new Object() as FastqcShared
+        FastqcJobService service = new FastqcJobService()
 
         WorkflowRun run = createWorkflowRun([
-                workflow: createWorkflow([
-                        name: fastqcShared.WORKFLOW,
-                ]),
+            workflow: createWorkflow([
+                name: FastqcJobService.WORKFLOW,
+            ]),
         ])
         WorkflowStep step = createWorkflowStep([
-                workflowRun: run,
+            workflowRun: run,
         ])
         createWorkflowArtefact([
-                producedBy: run,
-                outputRole: fastqcShared.OUTPUT_ROLE,
+            producedBy: run,
+            outputRole: FastqcJobService.OUTPUT_ROLE,
         ])
 
         when:
-        fastqcShared.getFastqcProcessedFile(step)
+        service.getFastqcProcessedFile(step)
 
         then:
         thrown(NoConcreteArtefactException)

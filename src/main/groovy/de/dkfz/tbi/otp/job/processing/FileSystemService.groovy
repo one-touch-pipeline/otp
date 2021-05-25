@@ -146,6 +146,10 @@ class FileSystemService {
         return getRemoteOrLocalFileSystemByProcessingOption(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE)
     }
 
+    /**
+     * @Deprecated old workflow system
+     */
+    @Deprecated
     FileSystem getFilesystemForFastqImport() throws Throwable {
         return getRealmOrLocalFileSystemByProcessingOption(FILESYSTEM_FASTQ_IMPORT)
     }

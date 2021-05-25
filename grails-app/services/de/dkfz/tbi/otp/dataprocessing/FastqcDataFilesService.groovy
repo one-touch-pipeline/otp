@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -172,13 +173,29 @@ class FastqcDataFilesService {
         return zipFile.getInputStream(zipEntry)
     }
 
+    /**
+     * @Deprecated old workflow system
+     */
+    @Deprecated
     Path pathToFastQcResultFromSeqCenter(DataFile dataFile) {
-        String fastqcFileName = this.fastqcFileName(dataFile)
-        File pathToSeqCenterFastQcFile = new File(lsdfFilesService.getFileInitialPath(dataFile)).parentFile
-        return fileSystemService.filesystemForFastqImport.getPath(pathToSeqCenterFastQcFile.path, fastqcFileName)
+        return pathToFastQcResultFromSeqCenter(fileSystemService.filesystemForFastqImport, dataFile)
     }
 
+    Path pathToFastQcResultFromSeqCenter(FileSystem fileSystem, DataFile dataFile) {
+        String fastqcFileName = fastqcFileName(dataFile)
+        File pathToSeqCenterFastQcFile = new File(lsdfFilesService.getFileInitialPath(dataFile)).parentFile
+        return fileSystem.getPath(pathToSeqCenterFastQcFile.path, fastqcFileName)
+    }
+
+    /**
+     * @Deprecated old workflow system
+     */
+    @Deprecated
     Path pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
-        return fileSystemService.filesystemForFastqImport.getPath("${pathToFastQcResultFromSeqCenter(dataFile)}.md5sum")
+        return pathToFastQcResultMd5SumFromSeqCenter(fileSystemService.filesystemForFastqImport, dataFile)
+    }
+
+    Path pathToFastQcResultMd5SumFromSeqCenter(FileSystem fileSystem, DataFile dataFile) {
+        return fileSystem.getPath("${pathToFastQcResultFromSeqCenter(fileSystem, dataFile)}.md5sum")
     }
 }

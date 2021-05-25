@@ -26,49 +26,21 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflow.shared.*
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait FastqcShared {
-
-    static final String WORKFLOW = "FastQC"
-    static final String INPUT_ROLE = "FASTQ"
-    static final String OUTPUT_ROLE = "OUTPUT"
 
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    @Autowired
+    FastqcJobService fastqcJobService
+
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        WorkflowRun run = workflowStep.workflowRun
-        if (run.workflow.name != WORKFLOW) {
-            throw new WrongWorkflowException("The step is from workflow ${run.workflow.name}, but expected is ${WORKFLOW}")
-        }
-        WorkflowArtefact artefact = run.inputArtefacts[INPUT_ROLE]
-        if (!artefact) {
-            throw new NoArtefactOfRoleException("The WorkflowRun ${run} has no input artefact of role " +
-                    "${INPUT_ROLE}, only ${run.inputArtefacts.keySet().sort()}")
-        }
-        Optional<Artefact> optionalArtefact = artefact.artefact
-        if (!optionalArtefact.isPresent()) {
-            throw new NoConcreteArtefactException("The WorkflowArtefact ${artefact} of WorkflowRun ${run} has no concrete artefact yet")
-        }
-        return optionalArtefact.get() as SeqTrack
+        return fastqcJobService.getSeqTrack(workflowStep)
     }
 
     FastqcProcessedFile getFastqcProcessedFile(WorkflowStep workflowStep) {
-        WorkflowRun run = workflowStep.workflowRun
-        if (run.workflow.name != WORKFLOW) {
-            throw new WrongWorkflowException("The step is from workflow ${run.workflow.name}, but expected is ${WORKFLOW}")
-        }
-        WorkflowArtefact artefact = run.outputArtefacts[OUTPUT_ROLE]
-        if (!artefact) {
-            throw new NoArtefactOfRoleException("The WorkflowRun ${run} has no output artefact of role " +
-                    "${OUTPUT_ROLE}, only ${run.outputArtefacts.keySet().sort()}")
-        }
-        Optional<Artefact> optionalArtefact = artefact.artefact
-        if (!optionalArtefact.isPresent()) {
-            throw new NoConcreteArtefactException("The WorkflowArtefact ${artefact} of WorkflowRun ${run} has no concrete artefact yet")
-        }
-        return optionalArtefact.get() as FastqcProcessedFile
+        return fastqcJobService.getFastqcProcessedFile(workflowStep)
     }
 }
