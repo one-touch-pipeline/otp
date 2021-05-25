@@ -85,16 +85,12 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
         config validator: { val, obj -> val?.pipeline?.id == obj.workPackage?.pipeline?.id }
         identifier validator: { val, obj ->
-            !RoddyBamFile.findAllByIdentifier(val).any {
-                it != obj && it.workPackage == obj.workPackage
-            }
+            !RoddyBamFile.findAllByWorkPackageAndIdentifierAndIdNotEqual(obj.workPackage, val, obj.id)
         }
         roddyExecutionDirectoryNames nullable: true
         workDirectoryName nullable: true, validator: { val, obj ->
             (val == null || (OtpPathValidator.isValidPathComponent(val) &&
-                    !RoddyBamFile.findAllByWorkPackageAndWorkDirectoryName(obj.workPackage, val).any {
-                        it != obj
-                    }))
+                    !RoddyBamFile.findAllByWorkPackageAndWorkDirectoryNameAndIdNotEqual(obj.workPackage, val, obj.id)))
         } //needs to be nullable for objects created before link structure was used
         md5sum validator: { val, obj ->
             return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
