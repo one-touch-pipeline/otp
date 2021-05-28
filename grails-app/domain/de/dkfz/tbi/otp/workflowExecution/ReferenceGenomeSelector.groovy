@@ -34,4 +34,12 @@ class ReferenceGenomeSelector implements Entity {
     static hasMany = [
             activeProjectWorkflows: ActiveProjectWorkflow
     ]
+
+    static Closure constraints = {
+        activeProjectWorkflows validator: {
+            if (it*.project.unique().size() > 1) {
+                return "set can only contain workflows of same project, in this case ${it.first().project}."
+            }
+        }
+    }
 }

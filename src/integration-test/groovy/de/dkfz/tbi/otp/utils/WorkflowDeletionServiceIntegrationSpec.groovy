@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
@@ -87,8 +88,8 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         then:
         !WorkflowStep.get(LastWorkflowStep.id)
         WorkflowStep.count == 2
-        ClusterJob.count == 2
-        WorkflowLog.count == 2
+        ClusterJob.count == 4
+        WorkflowLog.count == 4
         WorkflowError.count == 1
     }
 
@@ -116,6 +117,24 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         thrown(IllegalArgumentException)
     }
 
+    void "deleteActiveProjectWorkflows, should delete all activeProjectWorkflows and referenceGenomeSelector to corresponding project"() {
+        given:
+        Project project = createProject()
+
+        createReferenceGenomeSelector(activeProjectWorkflows: [
+                createActiveProjectWorkflow(project: project),
+                createActiveProjectWorkflow(project: project),
+                createActiveProjectWorkflow(project: project),
+        ])
+
+        when:
+        workflowDeletionService.deleteActiveProjectWorkflows(project)
+
+        then:
+        ActiveProjectWorkflow.count == 0
+        ReferenceGenomeSelector.count == 0
+    }
+
     private WorkflowRunInputArtefact createWorkflowArtefactAndRun() {
         WorkflowArtefact wa = createWorkflowArtefact()
         WorkflowRun workflowRun = createWorkflowRun()
@@ -126,7 +145,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         WorkflowStep workflowStep = createWorkflowStep(
                 workflowRun: workflowRun,
         )
-        0..3.each {
+        for (int i : 0..3) {
             createClusterJob(workflowStep: workflowStep)
             createWorkflowMessageLog(workflowStep: workflowStep)
         }
@@ -141,9 +160,9 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
                 restartedFrom: followingWorkflowStep,
                 previous: workflowStep
         )
-        0..3.each {
-            createClusterJob(workflowStep: workflowStep)
-            createWorkflowMessageLog(workflowStep: workflowStep)
+        for (int i : 0..3) {
+            createClusterJob(workflowStep: restartedWorkflowStep)
+            createWorkflowMessageLog(workflowStep: restartedWorkflowStep)
         }
         return [workflowStep, followingWorkflowStep, restartedWorkflowStep]
     }

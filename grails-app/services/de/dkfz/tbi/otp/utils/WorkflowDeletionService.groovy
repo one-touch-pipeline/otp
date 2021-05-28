@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
@@ -90,6 +91,29 @@ class WorkflowDeletionService {
     void deleteWorkflowLog(WorkflowLog workflowLog) {
         if (workflowLog) {
             workflowLog.delete(flush: true)
+        }
+    }
+
+    void deleteActiveProjectWorkflows(Project project) {
+        List<ActiveProjectWorkflow> activeProjectWorkflowList = ActiveProjectWorkflow.findAllByProject(project).sort { -it.id }
+        if (activeProjectWorkflowList) {
+            ReferenceGenomeSelector referenceGenomeSelector = CollectionUtils.exactlyOneElement(
+                    ReferenceGenomeSelector.findAll {
+                        activeProjectWorkflowList.contains(activeProjectWorkflows)
+                    }
+            )
+
+            activeProjectWorkflowList.each {
+                referenceGenomeSelector.activeProjectWorkflows.remove(it)
+                it.delete(flush: true)
+            }
+            deleteReferenceGenomeSelector(referenceGenomeSelector)
+        }
+    }
+
+    void deleteReferenceGenomeSelector(ReferenceGenomeSelector referenceGenomeSelector) {
+        if (referenceGenomeSelector) {
+            referenceGenomeSelector.delete(flush: true)
         }
     }
 }

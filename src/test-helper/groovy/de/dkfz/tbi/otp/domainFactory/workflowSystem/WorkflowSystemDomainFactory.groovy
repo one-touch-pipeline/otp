@@ -26,6 +26,7 @@ import org.joda.time.DateTime
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
@@ -61,7 +62,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
         //it is necessary to add the step in the list of workflowRuns before saving
         //otherwise hibernate try to save the step with null for workflow run, which will fail with sql exception
         step.workflowRun.addToWorkflowSteps(step)
-        step.save(flush: true)
+        return step.save(flush: true)
     }
 
     WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
@@ -171,6 +172,22 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
         return createDomainObject(OmittedMessage, [
                 category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
                 message : "message_${nextId}",
+        ], properties, saveAndValidate)
+    }
+
+    ActiveProjectWorkflow createActiveProjectWorkflow(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ActiveProjectWorkflow, [
+                project        : { createProject() },
+                seqType        : { createSeqType() },
+                workflowVersion: { createWorkflowVersion() },
+        ], properties, saveAndValidate)
+    }
+
+    ReferenceGenomeSelector createReferenceGenomeSelector(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ReferenceGenomeSelector, [
+                activeProjectWorkflows : { [createActiveProjectWorkflow(),] as Set<ActiveProjectWorkflow> },
+                specificReferenceGenome: SampleType.SpecificReferenceGenome.UNKNOWN,
+                referenceGenome        : { createReferenceGenome() },
         ], properties, saveAndValidate)
     }
 }

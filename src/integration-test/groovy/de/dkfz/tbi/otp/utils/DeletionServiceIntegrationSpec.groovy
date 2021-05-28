@@ -46,6 +46,9 @@ import de.dkfz.tbi.otp.project.dta.DataTransfer
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreementDocument
 import de.dkfz.tbi.otp.project.dta.DataTransferDocument
+import de.dkfz.tbi.otp.workflowExecution.ActiveProjectWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 @Rollback
@@ -106,6 +109,12 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
         createDataFile([seqTrack: seqTrack])
         createDataFile([seqTrack: seqTrack])
+        createReferenceGenomeSelector(activeProjectWorkflows: [
+                createActiveProjectWorkflow(project: project),
+                createActiveProjectWorkflow(project: project),
+                createActiveProjectWorkflow(project: project),
+        ])
+        createExternalWorkflowConfigSelector(projects: [project])
 
         when:
         deletionService.deleteProjectContent(project)
@@ -113,6 +122,9 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         then:
         DataFile.count() == 0
         Individual.count() == 0
+        ActiveProjectWorkflow.count == 0
+        ReferenceGenomeSelector.count == 0
+        ExternalWorkflowConfigSelector.count == 0
         Project.count() == 1
     }
 
@@ -452,7 +464,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         final String sampleTypeDirName = seqTrack.sample.sampleType.dirName
         final String vbpPath = dataFile.fileType.vbpPath
         final String vbpFileName = dataFile.vbpFileName
-        final String expectedScriptCommand  = """rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
+        final String expectedScriptCommand = """rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
 rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
 rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}.md5sum
 rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqTrack.individual.pid}/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
@@ -470,5 +482,20 @@ rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqT
         SampleIdentifier.count() == 0
         ClusterJob.count() == 0
         WorkflowArtefact.count() == 0
+    }
+
+    void "deleteProjectsExternalWorkflowConfigSelector, should remove project from ExternalWorkflowConfigSelector or delete selector completely"() {
+        given:
+        setupData()
+        final Project project = createProject()
+        createExternalWorkflowConfigSelector(projects: [project])
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector(projects: [createProject(), project, createProject()])
+
+        when:
+        deletionService.deleteProjectsExternalWorkflowConfigSelector(project)
+
+        then:
+        ExternalWorkflowConfigSelector.count == 1
+        !selector.projects.contains(project)
     }
 }

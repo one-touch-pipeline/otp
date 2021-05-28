@@ -43,6 +43,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 import java.nio.file.Path
@@ -77,6 +78,12 @@ class DeletionService {
         DataFile.findAllByProject(project).each { dataFile ->
             deleteDataFile(dataFile)
         }
+
+        // delete ActiveProjectWorkflows and ReferenceGenomeSelector
+        workflowDeletionService.deleteActiveProjectWorkflows(project)
+
+        // remove project from ExternalWorkflowConfigSelector or delete selector completely
+        deleteProjectsExternalWorkflowConfigSelector(project)
     }
 
     void deleteProject(Project project) {
@@ -733,5 +740,27 @@ class DeletionService {
             return files
         }
         return []
+    }
+
+    /**
+     * Either remove project from all dependent external workflow config selectors or delete selectors completely
+     * if selectors are only dependent on this one project.
+     *
+     * @param project which should be remove from the selectors.
+     */
+    void deleteProjectsExternalWorkflowConfigSelector(Project project) {
+        if (project) {
+            ExternalWorkflowConfigSelector.withCriteria {
+                projects {
+                    eq('id', project.id)
+                }
+            }.each {
+                if (it.projects.size() > 1) {
+                    it.projects.remove(project)
+                } else {
+                    it.delete(flush: true)
+                }
+            }
+        }
     }
 }
