@@ -35,13 +35,13 @@ abstract class AbstractSingleFieldValueSpec extends Specification implements Dat
     @Unroll
     void "test constraints #constraint for #property with #value"() {
         given:
-        AbstractFieldValue definition = createValue()
+        AbstractFieldValue fieldValue = createValue()
 
         when:
-        definition[property] = value
+        fieldValue[property] = value
 
         then:
-        TestCase.assertValidateError(definition, property, constraint, value)
+        TestCase.assertValidateError(fieldValue, property, constraint, value)
 
         where:
         property     | constraint                                               | value

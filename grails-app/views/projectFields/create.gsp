@@ -305,7 +305,7 @@
                     <td>
                         <g:select id="typeValidator" name="typeValidator" class="use-select-2" from="${validators}"
                                   noSelection="${[(""): "No Filter"]}"
-                                  value="${((ProjectFieldsCreateTextCommand) cmd).typeValidator}"/>
+                                  value="${cmd instanceof ProjectFieldsCreateTextCommand ? ((ProjectFieldsCreateTextCommand) cmd).typeValidator : ""}"/>
                     </td>
                     <td>
                         <g:message code="projectFields.header.tooltip.validator"/>
@@ -319,7 +319,7 @@
                     </td>
                     <td>
                         <g:textField id="regularExpression" name="regularExpression"
-                                     value="${((ProjectFieldsCreateTextCommand) cmd).regularExpression}"/>
+                                     value="${cmd instanceof ProjectFieldsCreateTextCommand ? ((ProjectFieldsCreateTextCommand) cmd).regularExpression : ""}"/>
                     </td>
                     <td>
                         <g:message code="projectFields.header.regularExpression"/>
