@@ -82,7 +82,7 @@ def seqTypesToCopy = [
         //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
         //SeqTypeService.rnaPairedSeqType,
         //SeqTypeService.chipSeqPairedSeqType,
-        //SeqType.findByNameAndLibraryLayoutAndSingleCell("ATAC", LibraryLayout.PAIRED, false)
+        //SeqType.findByNameAndLibraryLayoutAndSingleCell("ATAC", SequencingReadType.PAIRED, false)
 ]
 
 //************ Select sampleTypes (optional) ************//
@@ -184,6 +184,7 @@ patients.split('\n')*.trim().findAll {
                     if (!checkFileStatus) {
                         Path targetFastqFolder = Paths.get(
                                 targetFolderWithPid.toString(),
+                                seqTrack.seqType.dirName,
                                 lsdfFilesService.getFilePathInViewByPid(dataFile)
                         ).parent
                         addToOutput("echo ${currentFile}")
