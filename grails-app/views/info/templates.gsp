@@ -29,19 +29,19 @@
 
 <body>
 <br>
-<otp:annotation type="info">
+<%--<otp:annotation type="info">
     ${g.message(code: "info.template.banner1")}
     <g:link controller="projectRequest" action="index">${g.message(code: "info.template.projectRequestLink")}</g:link>${g.message(code: "info.template.banner2")}
 </otp:annotation>
-
+--%>
 <h1>${g.message(code: "info.templates.link")}</h1>
 <ul>
-    <li>
+<%--<li>
         ${g.message(code: "info.template.projectRequestDescription")}<br>
         <g:link controller="projectRequest" action="index">
             ${g.message(code: "info.template.projectRequestLink")}
         </g:link>
-    </li>
+    </li>--%>
     <g:each in="${availableTemplates}" var="template">
         <li>
             ${template.document.documentType.description}<br>

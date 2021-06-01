@@ -33,7 +33,7 @@
             <p>${g.message(code: "default.no.project.explain")}</p>
             <ul>
                 <li>${g.message(code: "default.no.project.gain.access")}</li>
-                <li><g:link controller="projectRequest">${g.message(code: "default.no.project.request")}</g:link></li>
+                <%--<li><g:link controller="projectRequest">${g.message(code: "default.no.project.request")}</g:link></li>--%>
             </ul>
         </sec:ifNotGranted>
 
