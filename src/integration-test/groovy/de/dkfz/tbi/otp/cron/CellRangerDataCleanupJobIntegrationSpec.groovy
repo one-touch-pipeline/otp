@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,16 +21,20 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.testing.gorm.DataTest
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
@@ -42,20 +46,9 @@ import java.time.ZoneId
 
 import static de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status.*
 
-class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFactory, DataTest, UserAndRoles {
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                Project,
-                CellRangerMergingWorkPackage,
-                Individual,
-                User,
-                ProjectRole,
-                UserProjectRole,
-                ProcessingOption,
-        ]
-    }
+@Rollback
+@Integration
+class CellRangerDataCleanupJobIntegrationSpec extends Specification implements CellRangerFactory, UserAndRoles, UserDomainFactory {
 
     static final int REMINDER_WEEKS = 12
     static final int REMINDER_DAYS = REMINDER_WEEKS * 7
@@ -66,21 +59,23 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
     void setupData() {
         createAllBasicProjectRoles()
 
-        DomainFactory.createProcessingOptionLazy(
-                name : ProcessingOption.OptionName.CELLRANGER_CLEANUP_WEEKS_TILL_REMINDER,
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.CELLRANGER_CLEANUP_WEEKS_TILL_REMINDER,
                 value: REMINDER_WEEKS,
         )
-        DomainFactory.createProcessingOptionLazy(
-                name : ProcessingOption.OptionName.CELLRANGER_CLEANUP_WEEKS_TILL_DELETION_AFTER_REMINDER,
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.CELLRANGER_CLEANUP_WEEKS_TILL_DELETION_AFTER_REMINDER,
                 value: DELETION_WEEKS,
         )
-        DomainFactory.createProcessingOptionLazy(
-                name : ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 value: EMAIL_RECIPIENT,
         )
     }
 
-    CellRangerMergingWorkPackage createCellRangerMwpHelper(CellRangerMergingWorkPackage.Status status, LocalDate baseDate, Integer informedOffset, Integer dateCreatedOffset, Map properties = [:]) {
+    @SuppressWarnings('ParameterCount')
+    CellRangerMergingWorkPackage createCellRangerMwpHelper(CellRangerMergingWorkPackage.Status status, LocalDate baseDate, Integer informedOffset,
+                                                           Integer dateUpdatedOffset, boolean withFinishedBamFile, Map properties = [:]) {
         Closure<Date> getBaseDateMinusDays = { Integer offset ->
             return Date.from(baseDate.minusDays(offset).atStartOfDay(ZoneId.systemDefault()).toInstant())
         }
@@ -89,11 +84,22 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         if (informedOffset) {
             mwp.informed = getBaseDateMinusDays(informedOffset)
         }
-        if (dateCreatedOffset) {
-            // can not give "dateCreated" as argument to the DomainFactory, since it is a automatically created attribute
-            mwp.dateCreated = getBaseDateMinusDays(dateCreatedOffset)
+
+        SingleCellBamFile bamFile = createBamFile([
+                workPackage        : mwp,
+                fileOperationStatus: withFinishedBamFile ? AbstractMergedBamFile.FileOperationStatus.PROCESSED : AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+        ])
+        mwp.save(flush: true)
+
+        if (dateUpdatedOffset) {
+            SingleCellBamFile.executeUpdate("update SingleCellBamFile set lastUpdated = :lastUpdated, version = version + 1 where id = :id", [
+                    lastUpdated: getBaseDateMinusDays(dateUpdatedOffset),
+                    id         : bamFile.id,
+            ])
+            bamFile.refresh()
         }
-        return mwp.save(flush: true)
+
+        return mwp
     }
 
     @Unroll
@@ -101,23 +107,23 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         given:
         setupData()
 
-        User user = DomainFactory.createUser()
-        User user2 = DomainFactory.createUser()
-        User requester = DomainFactory.createUser()
-        User requester2 = DomainFactory.createUser()
+        User user = createUser()
+        User user2 = createUser()
+        User requester = createUser()
+        User requester2 = createUser()
 
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService      : new ProcessingOptionService(),
                 messageSourceService         : Stub(MessageSourceService) {
-                    createMessage("cellRanger.notification.${type.templateName}.subject", _ as Map) >> "${type.templateName} subject"
-                    createMessage("cellRanger.notification.${type.templateName}.body", _ as Map) >> "${type.templateName} body"
+                    _ * createMessage("cellRanger.notification.${type.templateName}.subject", _ as Map) >> "${type.templateName} subject"
+                    _ * createMessage("cellRanger.notification.${type.templateName}.body", _ as Map) >> "${type.templateName} body"
                 },
                 mailHelperService            : Mock(MailHelperService),
                 createNotificationTextService: Mock(CreateNotificationTextService),
                 userProjectRoleService       : Stub(UserProjectRoleService) {
                     getEmailsOfToBeNotifiedProjectUsers(_) >> [user.email, requester.email]
                 },
-        )
+        ])
 
         Closure<CellRangerMergingWorkPackage> createMwpForProjectAsUser = { Project project, User req ->
             Sample sample = createSample(
@@ -132,22 +138,22 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         CellRangerMergingWorkPackage crmwp1 = createMwpForProjectAsUser(project1, requester)
         CellRangerMergingWorkPackage crmwp2 = createMwpForProjectAsUser(project1, requester2)
 
-        DomainFactory.createUserProjectRole(
+        createUserProjectRole(
                 project: project1,
                 user: user,
                 receivesNotifications: true,
         )
-        DomainFactory.createUserProjectRole(
+        createUserProjectRole(
                 project: project1,
                 user: user2,
                 receivesNotifications: false,
         )
-        DomainFactory.createUserProjectRole(
+        createUserProjectRole(
                 project: project1,
                 user: requester,
                 receivesNotifications: true,
         )
-        DomainFactory.createUserProjectRole(
+        createUserProjectRole(
                 project: project1,
                 user: requester2,
                 receivesNotifications: false,
@@ -177,23 +183,25 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         LocalDate baseDate = LocalDate.now()
 
         List<CellRangerMergingWorkPackage> mwps = [
-                [UNSET,      1,  1], // expected, informed and deletion date passed
-                [UNSET,     -1,  1], // informed but before reminderDeadline
-                [UNSET,   null,  1], // to be deleted but not informed yet
-                [UNSET,   null, -1], // not to be deleted and not informed yet
-                [FINAL,      1,  1], // should not be found since status is FINAL
-                [DELETED,    1,  1], // should not be found since status is DELETED
-                [FINAL,     -1,  1],
-                [FINAL,   null,  1],
-                [FINAL,   null, -1],
-                [DELETED, null,  1],
-                [DELETED, null, -1],
+                [UNSET, 1, 1, true], // expected, informed and deletion date passed
+                [UNSET, -1, 1, true], // informed but before reminderDeadline
+                [UNSET, null, 1, true], // to be deleted but not informed yet
+                [UNSET, null, -1, true], // not to be deleted and not informed yet
+                [FINAL, 1, 1, true], // should not be found since status is FINAL
+                [DELETED, 1, 1, true], // should not be found since status is DELETED
+                [FINAL, -1, 1, true],
+                [FINAL, null, 1, true],
+                [FINAL, null, -1, true],
+                [DELETED, null, 1, true],
+                [DELETED, null, -1, true],
+                [UNSET, 1, 1, false], // not expected, since workflow has not run through
         ].collect { List it ->
             createCellRangerMwpHelper(
                     it[0] as CellRangerMergingWorkPackage.Status,
                     baseDate,
                     it[1] ? DELETION_DAYS + (it[1] as Integer) : null,
-                    it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null
+                    it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null,
+                    it[3],
             )
         }
 
@@ -211,19 +219,22 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         LocalDate baseDate = LocalDate.now()
 
         List<CellRangerMergingWorkPackage> mwps = [
-                [UNSET,   null,  1], // expected, to be reminded
-                [UNSET,   null, -1], // reminder time not yet met
-                [FINAL,   null,  1], // to be reminded but already FINAL
-                [DELETED, null,  1], // to be reminded but already DELETED
-                [UNSET,      1,  1], // already reminded
-                [FINAL,   null, -1],
-                [DELETED, null, -1],
+                [UNSET, null, 1, true], // expected, to be reminded
+                [UNSET, null, -1, true], // reminder time not yet met
+                [FINAL, null, 1, true], // to be reminded but already FINAL
+                [DELETED, null, 1, true], // to be reminded but already DELETED
+                [UNSET, 1, 1, true], // already reminded
+                [FINAL, null, -1, true],
+                [DELETED, null, -1, true],
+                [UNSET, null, 1, false],
+                [UNSET, null, -1, false],
         ].collect { List it ->
             createCellRangerMwpHelper(
                     it[0] as CellRangerMergingWorkPackage.Status,
                     baseDate,
                     it[1] as Integer,
-                    it[2] ? REMINDER_DAYS + (it[2] as Integer) : null
+                    it[2] ? REMINDER_DAYS + (it[2] as Integer) : null,
+                    it[3],
             )
         }
 
@@ -235,11 +246,11 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         given:
         setupData()
 
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService      : new ProcessingOptionService(),
                 createNotificationTextService: Mock(CreateNotificationTextService),
                 messageSourceService         : Mock(MessageSourceService),
-        )
+        ])
         LocalDate baseDate = LocalDate.now()
 
         Closure<CellRangerMergingWorkPackage> createMwpToBeNotifiedForProject = { Project project ->
@@ -248,7 +259,7 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
                             project: project ?: createProject()
                     )
             )
-            return createCellRangerMwpHelper(UNSET, baseDate, null, REMINDER_DAYS + 1, [sample: sample])
+            return createCellRangerMwpHelper(UNSET, baseDate, null, REMINDER_DAYS + 1, true, [sample: sample])
         }
 
         Project project = createProject()
@@ -262,11 +273,11 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
 
         then: "message creation is called with the correct parameters"
         1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.decisionReminder.body", [
-                project                 : project.name,
-                plannedDeletionDate     : cellRangerDataCleanupJob.formattedPlannedDeletionDate,
-                formattedMwpList        : CellRangerDataCleanupJob.getFormattedMwpList(cellRangerMergingWorkPackages),
-                otpLinkCellRanger       : '[link to CellRanger]',
-                otpLinkUserManagement   : '[link to UserManagement]',
+                project              : project.name,
+                plannedDeletionDate  : cellRangerDataCleanupJob.formattedPlannedDeletionDate,
+                formattedMwpList     : CellRangerDataCleanupJob.getFormattedMwpList(cellRangerMergingWorkPackages),
+                otpLinkCellRanger    : '[link to CellRanger]',
+                otpLinkUserManagement: '[link to UserManagement]',
         ])
 
         and: "includes the links to the action pages"
@@ -274,29 +285,118 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project], 'projectUser', 'index') >> '[link to UserManagement]'
     }
 
-    void "notifyAndDeletion, uses results of getResultsToDelete"() {
+    void "deleteOfOldFailedWorkflows, call deleteMwps for old not finished mwp and send mail"() {
         given:
         setupData()
+        String header = "header ${nextId}"
+        String body = "body ${nextId}"
 
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService       : new ProcessingOptionService(),
                 cellRangerConfigurationService: Mock(CellRangerConfigurationService),
                 messageSourceService          : Mock(MessageSourceService),
                 createNotificationTextService : Mock(CreateNotificationTextService),
                 mailHelperService             : Mock(MailHelperService),
                 userProjectRoleService        : new UserProjectRoleService(),
-        )
+        ])
         LocalDate baseDate = LocalDate.now()
 
         List<CellRangerMergingWorkPackage> expectedMwps = [
-                [UNSET, 1, 1],
-                [UNSET, 1, 1],
+                [UNSET, 1, 1, false],
+                [UNSET, null, 1, false],
+                [UNSET, null, -1, false],
+                [UNSET, 1, 1, true],
+                [UNSET, 1, 1, true],
+                [UNSET, -1, 1, true],
+                [UNSET, 1, -1, true],
+                [UNSET, -1, -1, true],
         ].collect { List it ->
             createCellRangerMwpHelper(
                     it[0] as CellRangerMergingWorkPackage.Status,
                     baseDate,
                     it[1] ? REMINDER_DAYS + (it[1] as Integer) : null,
-                    it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null
+                    it[2] ? CellRangerDataCleanupJob.DELETE_AFTER_WEEKS * 7 + (it[2] as Integer) : null,
+                    it[3],
+            )
+        }[0..1]
+
+        when:
+        cellRangerDataCleanupJob.deleteOfOldFailedWorkflows()
+
+        then:
+        1 * cellRangerDataCleanupJob.cellRangerConfigurationService.deleteMwps(_) >> { List<CellRangerMergingWorkPackage> mwp ->
+            TestCase.assertContainSame(mwp[0], expectedMwps)
+        }
+        0 * cellRangerDataCleanupJob.cellRangerConfigurationService._
+        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", [:]) >> header
+        1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.body", _) >> body
+        1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(header, body, [EMAIL_RECIPIENT])
+    }
+
+    void "deleteOfOldFailedWorkflows, if no old not finished mwp exist, do not call deleteMwp and do not send mail"() {
+        given:
+        setupData()
+
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
+                processingOptionService       : new ProcessingOptionService(),
+                cellRangerConfigurationService: Mock(CellRangerConfigurationService),
+                messageSourceService          : Mock(MessageSourceService),
+                createNotificationTextService : Mock(CreateNotificationTextService),
+                mailHelperService             : Mock(MailHelperService),
+                userProjectRoleService        : new UserProjectRoleService(),
+        ])
+        LocalDate baseDate = LocalDate.now()
+
+        [
+                [UNSET, 1, 1, true],
+                [UNSET, 1, 1, true],
+                [UNSET, -1, 1, true],
+                [UNSET, 1, -1, true],
+                [UNSET, -1, -1, true],
+        ].collect { List it ->
+            createCellRangerMwpHelper(
+                    it[0] as CellRangerMergingWorkPackage.Status,
+                    baseDate,
+                    it[1] ? REMINDER_DAYS + (it[1] as Integer) : null,
+                    it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null,
+                    it[3],
+            )
+        }
+
+        when:
+        cellRangerDataCleanupJob.deleteOfOldFailedWorkflows()
+
+        then:
+        0 * cellRangerDataCleanupJob.cellRangerConfigurationService._
+        0 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", _)
+        0 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.body", _)
+        0 * cellRangerDataCleanupJob.mailHelperService.sendEmail(_, _, _)
+    }
+
+    void "notifyAndDeletion, uses results of getResultsToDelete"() {
+        given:
+        setupData()
+
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
+                processingOptionService       : new ProcessingOptionService(),
+                cellRangerConfigurationService: Mock(CellRangerConfigurationService),
+                messageSourceService          : Mock(MessageSourceService),
+                createNotificationTextService : Mock(CreateNotificationTextService),
+                mailHelperService             : Mock(MailHelperService),
+                userProjectRoleService        : new UserProjectRoleService(),
+        ])
+        LocalDate baseDate = LocalDate.now()
+
+        List<CellRangerMergingWorkPackage> expectedMwps = [
+                [UNSET, 1, 1, true],
+                [UNSET, 1, 1, true],
+        ].collect { List it ->
+            createCellRangerMwpHelper(
+                    it[0] as CellRangerMergingWorkPackage.Status,
+                    baseDate,
+                    it[1] ? REMINDER_DAYS + (it[1] as Integer) : null,
+                    it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null,
+                    it[3],
             )
         }
 
@@ -312,12 +412,12 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         given:
         setupData()
 
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService       : new ProcessingOptionService(),
                 cellRangerConfigurationService: Mock(CellRangerConfigurationService),
                 messageSourceService          : Mock(MessageSourceService),
                 createNotificationTextService : Mock(CreateNotificationTextService),
-        )
+        ])
 
         when:
         cellRangerDataCleanupJob.notifyAndDeletion()
@@ -330,10 +430,10 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         given:
         setupData()
 
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService       : new ProcessingOptionService(),
                 cellRangerConfigurationService: Mock(CellRangerConfigurationService),
-        )
+        ])
         List<CellRangerMergingWorkPackage> mwps = (1..3).collect { createMergingWorkPackage() }
 
         when:
@@ -347,14 +447,14 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
         given:
         setupData()
 
-        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob(
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService       : new ProcessingOptionService(),
                 messageSourceService          : Mock(MessageSourceService),
                 createNotificationTextService : Mock(CreateNotificationTextService),
                 cellRangerConfigurationService: Mock(CellRangerConfigurationService),
                 mailHelperService             : Mock(MailHelperService),
                 userProjectRoleService        : new UserProjectRoleService(),
-        )
+        ])
         LocalDate baseDate = LocalDate.now()
 
         Closure<CellRangerMergingWorkPackage> createMwpToBeNotifiedForProject = { Project project ->
@@ -363,7 +463,7 @@ class CellRangerDataCleanupJobSpec extends Specification implements CellRangerFa
                             project: project ?: createProject()
                     )
             )
-            return createCellRangerMwpHelper(UNSET, baseDate, null, REMINDER_DAYS + 1, [sample: sample])
+            return createCellRangerMwpHelper(UNSET, baseDate, null, REMINDER_DAYS + 1, true, [sample: sample])
         }
         Project project1 = createProject()
         CellRangerMergingWorkPackage crmwp1 = createMwpToBeNotifiedForProject(project1)

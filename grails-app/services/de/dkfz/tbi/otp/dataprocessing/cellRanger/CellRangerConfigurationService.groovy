@@ -129,7 +129,7 @@ class CellRangerConfigurationService {
             ]
         }.collectEntries { Map<String, Entity> key, List<SeqTrack> seqTracksPerPlatformGroupAndKit ->
             PlatformGroupAndKit platformGroupAndKit = new PlatformGroupAndKit(
-                    seqPlatformGroup     : key['seqPlatformGroup'] as SeqPlatformGroup,
+                    seqPlatformGroup: key['seqPlatformGroup'] as SeqPlatformGroup,
                     libraryPreparationKit: key['libraryPreparationKit'] as LibraryPreparationKit,
             )
             return [(platformGroupAndKit): seqTracksPerPlatformGroupAndKit]
@@ -189,7 +189,7 @@ class CellRangerConfigurationService {
         Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == parameter.seqType })
         constrainSeqTracksGroupedByPlatformGroupAndKit(map)
         return map.collect { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->
-            return new CellRangerMergingWorkPackage(
+            return new CellRangerMergingWorkPackage([
                     seqType              : parameter.seqType,
                     pipeline             : pipeline,
                     sample               : sample,
@@ -205,7 +205,7 @@ class CellRangerConfigurationService {
                     libraryPreparationKit: platformGroupAndKit.libraryPreparationKit,
                     needsProcessing      : true,
                     requester            : requester,
-            ).save(flush: true)
+            ]).save(flush: true)
         }
     }
 
@@ -244,7 +244,9 @@ class CellRangerConfigurationService {
         mwpToDelete.each {
             it.status = CellRangerMergingWorkPackage.Status.DELETED
             it.save(flush: true)
-            cellRangerWorkflowService.deleteOutputDirectory(it.bamFileInProjectFolder as SingleCellBamFile)
+            SingleCellBamFile.findAllByWorkPackage(it).each {
+                cellRangerWorkflowService.deleteOutputDirectory(it)
+            }
         }
     }
 

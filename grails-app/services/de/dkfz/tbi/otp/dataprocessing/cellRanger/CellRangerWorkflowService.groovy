@@ -38,14 +38,13 @@ class CellRangerWorkflowService {
 
     FileService fileService
 
-
     void linkResultFiles(SingleCellBamFile singleCellBamFile) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
         Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.absolutePath)
         String unixGroup = singleCellBamFile.project.unixGroup
 
-        singleCellBamFile.getFileMappingForLinks().each { String linkName, String resultPathName ->
+        singleCellBamFile.fileMappingForLinks.each { String linkName, String resultPathName ->
             Path link = workDirectory.resolve(linkName)
             Path target = resultDirectory.resolve(resultPathName)
             if (!Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {

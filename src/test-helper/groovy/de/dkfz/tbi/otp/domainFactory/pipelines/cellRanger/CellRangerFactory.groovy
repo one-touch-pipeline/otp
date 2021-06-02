@@ -21,7 +21,8 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
@@ -32,7 +33,7 @@ trait CellRangerFactory implements IsAlignment {
 
     @Override
     Pipeline findOrCreatePipeline() {
-        findOrCreatePipeline(Pipeline.Name.CELL_RANGER, Pipeline.Type.ALIGNMENT)
+        return findOrCreatePipeline(Pipeline.Name.CELL_RANGER, Pipeline.Type.ALIGNMENT)
     }
 
     @Override
@@ -60,7 +61,7 @@ trait CellRangerFactory implements IsAlignment {
                             project : sample.project,
                     ])
                 },
-                requester: DomainFactory.createUser(),
+                requester           : DomainFactory.createUser(),
         ], properties, saveAndValidate)
     }
 
@@ -70,9 +71,9 @@ trait CellRangerFactory implements IsAlignment {
         if (!workPackage) {
             workPackage = createMergingWorkPackage()
             DomainFactory.createReferenceGenomeProjectSeqType(
-                    referenceGenome : workPackage.referenceGenome,
-                    project         : workPackage.project,
-                    seqType         : workPackage.seqType,
+                    referenceGenome: workPackage.referenceGenome,
+                    project: workPackage.project,
+                    seqType: workPackage.seqType,
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }
@@ -87,6 +88,10 @@ trait CellRangerFactory implements IsAlignment {
                         fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                         fileSize           : 10000,
                 ], properties)
+        if (bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
+            bamFile.workPackage.bamFileInProjectFolder = bamFile
+            bamFile.workPackage.save(flush: true)
+        }
         return bamFile
     }
 
@@ -105,12 +110,12 @@ trait CellRangerFactory implements IsAlignment {
     @Override
     Map getConfigProperties(Map properties) {
         return [
-                pipeline            : findOrCreatePipeline(),
-                seqType             : { properties.seqType ?: createSeqType() },
-                project             : { properties.project ?: createProject() },
-                programVersion      : "programmVersion${nextId}",
-                dateCreated         : { new Date() },
-                lastUpdated         : { new Date() },
+                pipeline      : findOrCreatePipeline(),
+                seqType       : { properties.seqType ?: createSeqType() },
+                project       : { properties.project ?: createProject() },
+                programVersion: "programmVersion${nextId}",
+                dateCreated   : { new Date() },
+                lastUpdated   : { new Date() },
         ]
     }
 

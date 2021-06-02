@@ -28,6 +28,8 @@ import grails.validation.ValidationException
 import org.springframework.validation.Errors
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService.CellRangerMwpParameter
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -37,6 +39,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import java.sql.Timestamp
 import java.time.LocalDate
 
@@ -182,7 +185,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         setupData()
         FastqImportInstance fastqImportInstance = createFastqImportInstance(
-                dataFiles : [
+                dataFiles: [
                         createDataFile(seqTrack: seqTrackA),
                         createDataFile(seqTrack: seqTrackB),
                 ] as Set<DataFile>,
@@ -319,12 +322,12 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         setupData()
         CellRangerMergingWorkPackage oldMWP = createMergingWorkPackage(status: CellRangerMergingWorkPackage.Status.DELETED, needsProcessing: false, sample: sampleA)
-        CellRangerMwpParameter parameter = new CellRangerMwpParameter(
-                seqType              : oldMWP.seqType,
-                expectedCells        : oldMWP.expectedCells,
-                enforcedCells        : oldMWP.enforcedCells,
-                referenceGenomeIndex : oldMWP.referenceGenomeIndex,
-        )
+        CellRangerMwpParameter parameter = new CellRangerMwpParameter([
+                seqType             : oldMWP.seqType,
+                expectedCells       : oldMWP.expectedCells,
+                enforcedCells       : oldMWP.enforcedCells,
+                referenceGenomeIndex: oldMWP.referenceGenomeIndex,
+        ])
 
         expect:
         cellRangerConfigurationService.createMergingWorkPackagesForSample(oldMWP.sample, parameter, requester)
@@ -335,12 +338,12 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         setupData()
         CellRangerMergingWorkPackage oldMWP = createMergingWorkPackage(status: status, needsProcessing: false, sample: sampleA)
-        CellRangerMwpParameter parameter = new CellRangerMwpParameter(
-                seqType              : oldMWP.seqType,
-                expectedCells        : oldMWP.expectedCells,
-                enforcedCells        : oldMWP.enforcedCells,
-                referenceGenomeIndex : oldMWP.referenceGenomeIndex,
-        )
+        CellRangerMwpParameter parameter = new CellRangerMwpParameter([
+                seqType             : oldMWP.seqType,
+                expectedCells       : oldMWP.expectedCells,
+                enforcedCells       : oldMWP.enforcedCells,
+                referenceGenomeIndex: oldMWP.referenceGenomeIndex,
+        ])
 
         when:
         cellRangerConfigurationService.createMergingWorkPackagesForSample(oldMWP.sample, parameter, requester)
@@ -349,9 +352,9 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         thrown(ValidationException)
 
         where:
-        status                                      | _
-        CellRangerMergingWorkPackage.Status.UNSET   | _
-        CellRangerMergingWorkPackage.Status.FINAL   | _
+        status                                    | _
+        CellRangerMergingWorkPackage.Status.UNSET | _
+        CellRangerMergingWorkPackage.Status.FINAL | _
     }
 
     void "test createMergingWorkPackagesForSample, creates an mwp for each LibPrepKit-SeqPlatformGroup combination of the SeqTracks"() {
@@ -412,8 +415,10 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         given:
         createUserAndRoles()
         CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1)
+        createBamFile([workPackage: mwp1])
         CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType,
                 config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+        createBamFile([workPackage: mwp2])
 
         CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
         cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
@@ -485,9 +490,12 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
     void "deleteMwps, sets status and calls delete"() {
         given:
         CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService(
-            cellRangerWorkflowService: Mock(CellRangerWorkflowService)
+                cellRangerWorkflowService: Mock(CellRangerWorkflowService)
         )
-        List<CellRangerMergingWorkPackage> mwps = (1..3).collect { createMergingWorkPackage() }
+        List<CellRangerMergingWorkPackage> mwps = (1..3).collect {
+            createBamFile().workPackage
+        }
+        mwps << createBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS]).workPackage
 
         when:
         cellRangerConfigurationService.deleteMwps(mwps)
