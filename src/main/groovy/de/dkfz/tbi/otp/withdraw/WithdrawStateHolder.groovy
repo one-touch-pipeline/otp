@@ -33,8 +33,6 @@ class WithdrawStateHolder {
 
     FileSystem remoteFileSystem
 
-    String withdrawnUnixGroup
-
     List<String> summary = []
 
     List<String> pathsToDelete = []

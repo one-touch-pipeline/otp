@@ -151,6 +151,13 @@ class FileService {
     ].asImmutable()
 
     /**
+     * The default header to use for bash scripts.
+     *
+     * It mark the script as bash scripts and enable verbose and exit on error (including pipefail).
+     */
+    static final String BASH_HEADER = "#!/bin/bash\n\nset -evo pipefail\n"
+
+    /**
      * Convert a Path to a File object
      * This method is necessary because the {@link Path#toFile} method is not supported on Paths not backed
      * by the default FileSystemProvider, such as {@link com.github.robtimus.filesystems.sftp.SFTPPath}s.
@@ -158,7 +165,7 @@ class FileService {
     @SuppressWarnings(['JavaIoPackageAccess', 'UnnecessaryCollectCall'])
     File toFile(Path path) {
         assert path.absolute
-        new File(File.separator + path*.toString().join(File.separator))
+        return new File(File.separator + path*.toString().join(File.separator))
     }
 
     /**
@@ -171,11 +178,11 @@ class FileService {
         assert file.absolute
         assert fileSystem
 
-        fileSystem.getPath(file.path)
+        return fileSystem.getPath(file.path)
     }
 
     Path changeFileSystem(Path path, FileSystem fileSystem) {
-        toPath(toFile(path), fileSystem)
+        return toPath(toFile(path), fileSystem)
     }
 
     @SuppressWarnings('EmptyCatchBlock')
