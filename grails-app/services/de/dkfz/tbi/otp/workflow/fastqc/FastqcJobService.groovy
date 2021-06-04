@@ -33,7 +33,7 @@ class FastqcJobService {
 
     static final String WORKFLOW = "FastQC"
     static final String INPUT_ROLE = "FASTQ"
-    static final String OUTPUT_ROLE = "OUTPUT"
+    static final String OUTPUT_ROLE = "OUTPUT_"
 
     @Autowired
     LsdfFilesService lsdfFilesService
@@ -55,20 +55,28 @@ class FastqcJobService {
         return optionalArtefact.get() as SeqTrack
     }
 
-    FastqcProcessedFile getFastqcProcessedFile(WorkflowStep workflowStep) {
+    List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
         WorkflowRun run = workflowStep.workflowRun
         if (run.workflow.name != WORKFLOW) {
             throw new WrongWorkflowException("The step is from workflow ${run.workflow.name}, but expected is ${WORKFLOW}")
         }
-        WorkflowArtefact artefact = run.outputArtefacts[OUTPUT_ROLE]
+        List<WorkflowArtefact> artefact = run.outputArtefacts.findAll {
+            it.key.startsWith(OUTPUT_ROLE)
+        }*.value
+
         if (!artefact) {
             throw new NoArtefactOfRoleException("The WorkflowRun ${run} has no output artefact of role " +
                     "${OUTPUT_ROLE}, only ${run.outputArtefacts.keySet().sort()}")
         }
-        Optional<Artefact> optionalArtefact = artefact.artefact
-        if (!optionalArtefact.isPresent()) {
-            throw new NoConcreteArtefactException("The WorkflowArtefact ${artefact} of WorkflowRun ${run} has no concrete artefact yet")
+        List<Optional<Artefact>> optionalArtefacts = artefact*.artefact
+
+        optionalArtefacts.each {
+            if (!it.isPresent()) {
+                throw new NoConcreteArtefactException("The WorkflowArtefact ${it} of WorkflowRun ${run} has no concrete artefact yet")
+            }
         }
-        return optionalArtefact.get() as FastqcProcessedFile
+        return optionalArtefacts.collect {
+            it.get() as FastqcProcessedFile
+        }
     }
 }

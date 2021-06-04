@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,23 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.testing.gorm.DataTest
+import grails.testing.mixin.integration.Integration
 import grails.testing.services.ServiceUnitTest
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.fastqc.FastqcJobService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
-class AllDeciderSpec extends Specification implements ServiceUnitTest<AllDecider>, DataTest, WorkflowSystemDomainFactory {
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                Workflow,
-                WorkflowRun,
-                WorkflowRunInputArtefact,
-        ]
-    }
+@Rollback
+@Integration
+class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest<AllDecider>,  WorkflowSystemDomainFactory {
 
     void "test decide for Decider"() {
         given:
         AllDecider allDecider = new AllDecider()
+        createWorkflow(name: FastqcJobService.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)
         WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun)

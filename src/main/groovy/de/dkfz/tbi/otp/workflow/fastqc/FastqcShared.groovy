@@ -40,7 +40,7 @@ trait FastqcShared {
         return fastqcJobService.getSeqTrack(workflowStep)
     }
 
-    FastqcProcessedFile getFastqcProcessedFile(WorkflowStep workflowStep) {
-        return fastqcJobService.getFastqcProcessedFile(workflowStep)
+    List<FastqcProcessedFile> getFastqcProcessedFile(WorkflowStep workflowStep) {
+        return fastqcJobService.getFastqcProcessedFiles(workflowStep)
     }
 }

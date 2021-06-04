@@ -47,7 +47,9 @@ class FastqcFinishJob extends AbstractFinishJob implements FastqcShared {
     void updateDomains(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
-        fastqcDataFilesService.updateFastqcProcessedFile(getFastqcProcessedFile(workflowStep))
+        getFastqcProcessedFile(workflowStep).each {
+            fastqcDataFilesService.updateFastqcProcessedFile(it)
+        }
 
         seqTrackService.fillBaseCount(seqTrack)
         seqTrackService.markFastqcFinished(seqTrack)

@@ -153,10 +153,10 @@ class FastqcJobServiceIntegrationSpec extends Specification implements WorkflowS
         ])
 
         when:
-        FastqcProcessedFile returned = service.getFastqcProcessedFile(step)
+        List<FastqcProcessedFile> returned = service.getFastqcProcessedFiles(step)
 
         then:
-        returned == fastqcProcessedFile
+        returned[0] == fastqcProcessedFile
     }
 
     void "getFastqcProcessedFile, when called for a non FastQc step, then throw WrongWorkflowException"() {
@@ -166,7 +166,7 @@ class FastqcJobServiceIntegrationSpec extends Specification implements WorkflowS
         WorkflowStep step = createWorkflowStep()
 
         when:
-        service.getFastqcProcessedFile(step)
+        service.getFastqcProcessedFiles(step)
 
         then:
         thrown(WrongWorkflowException)
@@ -193,7 +193,7 @@ class FastqcJobServiceIntegrationSpec extends Specification implements WorkflowS
         ])
 
         when:
-        service.getFastqcProcessedFile(step)
+        service.getFastqcProcessedFiles(step)
 
         then:
         thrown(NoArtefactOfRoleException)
@@ -217,7 +217,7 @@ class FastqcJobServiceIntegrationSpec extends Specification implements WorkflowS
         ])
 
         when:
-        service.getFastqcProcessedFile(step)
+        service.getFastqcProcessedFiles(step)
 
         then:
         thrown(NoConcreteArtefactException)

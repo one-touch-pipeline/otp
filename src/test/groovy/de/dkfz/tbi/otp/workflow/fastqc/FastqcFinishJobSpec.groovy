@@ -57,7 +57,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
         }
 
         job.fastqcJobService = Mock(FastqcJobService) {
-            getFastqcProcessedFile(_) >> fastqcProcessedFile
+            getFastqcProcessedFiles(_) >> [fastqcProcessedFile]
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * updateFastqcProcessedFile(_) >> { FastqcProcessedFile file ->
@@ -86,7 +86,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
         }
 
         job.fastqcJobService = Mock(FastqcJobService) {
-            getFastqcProcessedFile(_) >> fastqcProcessedFile
+            getFastqcProcessedFiles(_) >> [fastqcProcessedFile]
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * updateFastqcProcessedFile(_) >> { FastqcProcessedFile file ->
