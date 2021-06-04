@@ -51,6 +51,18 @@
 
         <table class="table table-sm table-striped key-value-table key-help-input">
             <tr>
+                <td><g:message code="project.projectType"/></td>
+                <td></td>
+                <td>
+                    <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="dropDown"
+                            link="${g.createLink(controller: "projectConfig", action: 'updateProjectField', params: ['fieldName': 'projectType'])}"
+                            values="${projectTypes}"
+                            value="${selectedProject.projectType}"/>
+                </td>
+            </tr>
+            <tr>
                 <td><g:message code="project.individualPrefix"/></td>
                 <td></td>
                 <td>${selectedProject.individualPrefix}</td>
@@ -141,18 +153,6 @@
                             noSelection="${['': 'None']}"
                             values="${allSpeciesWithStrain}"
                             value="${selectedProject.speciesWithStrain}"/>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.projectType"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: "projectConfig", action: 'updateProjectField', params: ['fieldName': 'projectType'])}"
-                            values="${projectTypes}"
-                            value="${selectedProject.projectType}"/>
                 </td>
             </tr>
             <tr>

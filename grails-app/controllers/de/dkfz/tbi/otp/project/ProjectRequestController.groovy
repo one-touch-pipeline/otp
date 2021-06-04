@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.MultiObjectValueSource
+import de.dkfz.tbi.otp.security.*
 
 import java.time.LocalDate
 
@@ -57,6 +58,7 @@ class ProjectRequestController {
     private static final String ACTION_VIEW = "view"
 
     ProjectRequestService projectRequestService
+    SecurityService securityService
 
     private Map getSharedModel() {
         List<ProjectRequest> unresolved = projectRequestService.unresolvedRequestsOfUser
@@ -71,10 +73,12 @@ class ProjectRequestController {
 
     def index(Long id) {
         ProjectRequest projectRequest = projectRequestService.get(id)
+        ProjectRequestUser requester = new ProjectRequestUser()
+        requester.user = securityService.currentUserAsUser
         Map<String, ?> defaults = [
                 keywords         : [""],
                 seqTypes         : [null],
-                users            : [],
+                users            : [requester] as Set,
                 speciesWithStrain: [id: null],
                 projectType      : Project.ProjectType.SEQUENCING,
         ]
@@ -83,15 +87,16 @@ class ProjectRequestController {
         Map<String, String> abstractValues = [:]
         if (projectRequest) {
             projectRequestHelper << [
-                users        : projectRequest.users ?: [],
-                storagePeriod: projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
+                    users        : projectRequest.users ?: [],
+                    storagePeriod: projectRequest.storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY,
             ]
             abstractValues = projectRequestService.listAdditionalFieldValues(projectRequest)
         }
+
         MultiObjectValueSource multiObjectValueSource = new MultiObjectValueSource(flash.cmd, projectRequestHelper, projectRequest, defaults)
 
         List<AbstractFieldDefinition> fieldDefinitions = projectRequestService.listAndFetchAbstractFields(multiObjectValueSource
-                .getByFieldName("projectType") as Project.ProjectType,  ProjectPageType.PROJECT_REQUEST)
+                .getByFieldName("projectType") as Project.ProjectType, ProjectPageType.PROJECT_REQUEST)
 
         return sharedModel + [
                 cmd                 : flash.cmd as ProjectRequestCreationCommand,
@@ -132,8 +137,7 @@ class ProjectRequestController {
             } else {
                 redirect(action: ACTION_INDEX)
             }
-        }
-        else {
+        } else {
             if (!cmd.validate()) {
                 flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
                 flash.cmd = cmd
@@ -249,12 +253,12 @@ class ProjectRequestController {
                 ProjectPageType.PROJECT_REQUEST)
 
         return sharedModel + [
-                projectRequest     : projectRequest,
-                eligibleToAccept   : projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
-                eligibleToEdit     : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
-                eligibleToClose    : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
-                abstractFields     : fieldDefinitions,
-                abstractValues     : abstractValues,
+                projectRequest  : projectRequest,
+                eligibleToAccept: projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
+                eligibleToEdit  : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
+                eligibleToClose : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
+                abstractFields  : fieldDefinitions,
+                abstractValues  : abstractValues,
         ]
     }
 }

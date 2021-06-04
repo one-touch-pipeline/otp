@@ -165,6 +165,12 @@
                 <th><g:message code="project.base.values.project"/></th>
             </tr>
             <tr>
+                <td><g:message code="project.projectType"/></td>
+                <td><g:select name='projectType' class="use-select-2"
+                              from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true" onChange="submit();"/></td>
+                <g:render template="baseValueColumns" model="[fieldName: 'projectType', cmd: cmd]"/>
+            </tr>
+            <tr>
                 <td><g:message code="project.name"/></td>
                 <td><g:textField name="name" value="${source.getByFieldName("name")}" required="true"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'name', cmd: cmd]"/>
@@ -248,12 +254,6 @@
                               from="${allSpeciesWithStrains}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}" optionKey="id"
                               noSelection="${['': 'None']}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrain', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.projectType"/></td>
-                <td><g:select name='projectType' class="use-select-2"
-                              from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true" onChange="submit();"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'projectType', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.forceCopyFiles"/></td>

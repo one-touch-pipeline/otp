@@ -85,7 +85,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         SpeciesWithStrain mouseStrain1 = createSpeciesWithStrain(species: musMusculus, strain: createStrain(name: "strain 1"))
         SpeciesWithStrain mouseStrain2 = createSpeciesWithStrain(species: musMusculus, strain: createStrain(name: "strain 2"))
-        SpeciesWithStrain humanStrainNotAvailable = createSpeciesWithStrain(species: homoSapiens, strain: createStrain(name: "Not available"))
+        SpeciesWithStrain humanStrainNotAvailable = createSpeciesWithStrain(species: homoSapiens, strain: createStrain(name: "No strain available"))
 
         List<Species> expectedSortedSpecies = [homoSapiens, musMusculus]
         List<Strain> expectedSortedStrains = [humanStrainNotAvailable, mouseStrain1, mouseStrain2]*.strain

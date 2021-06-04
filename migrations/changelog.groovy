@@ -557,4 +557,8 @@ databaseChangeLog = {
     changeSet(author: "", id: "otp-1063") {
         sqlFile(path: 'changelogs/2021/otp-1063.sql')
     }
+
+    changeSet(author: "sunakshi", id: "otp-1108-update-strain.sql") {
+        sqlFile(path: 'changelogs/2021/otp-1108-update-strain.sql')
+    }
 }

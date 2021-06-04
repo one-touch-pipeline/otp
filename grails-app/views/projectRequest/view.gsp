@@ -49,7 +49,10 @@
                     <td>${g.message(code: "projectRequest.requester")}</td>
                     <td>${projectRequest.requester}</td>
                 </tr>
-
+                <tr>
+                    <td>${g.message(code: "project.projectType")}</td>
+                    <td>${projectRequest.projectType}</td>
+                </tr>
                 <tr>
                     <td>${g.message(code: "project.name")}</td>
                     <td>${projectRequest.name}</td>
@@ -103,10 +106,6 @@
                 <tr>
                     <td>${g.message(code: "project.speciesWithStrain")}</td>
                     <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.projectType")}</td>
-                    <td>${projectRequest.projectType}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "projectRequest.sequencingCenter")}</td>
