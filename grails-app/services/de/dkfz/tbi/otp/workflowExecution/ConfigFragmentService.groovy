@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import org.grails.web.json.JSONObject
+import grails.converters.JSON
 
 class ConfigFragmentService {
     ConfigSelectorService configSelectorService
@@ -32,8 +32,8 @@ class ConfigFragmentService {
         )*.externalWorkflowConfigFragment
     }
 
-    JSONObject mergeSortedFragments(List<ExternalWorkflowConfigFragment> fragments) {
-        return new JSONObject(mergeSortedMaps(fragments*.configValuesToMap()))
+    String mergeSortedFragments(List<ExternalWorkflowConfigFragment> fragments) {
+        return (mergeSortedMaps(fragments*.configValuesToMap()) as JSON).toString()
     }
 
     private Map mergeSortedMaps(List<Map> prioritySortedHashMaps) {
@@ -55,7 +55,7 @@ class ConfigFragmentService {
                         return combinedConfigurationPart
                     }
                     // if key already existing go deeper to update eventually
-                    mergeSortedFragmentsRec(combinedConfigurationPart[entry.key] as Map, [entry.value])
+                    mergeSortedFragmentsRec(combinedConfigurationPart[entry.key] as Map, [entry.value as Map])
                 } else {  // case leaf
                     // only add when key not already set
                     if (!(entry.key in combinedConfigurationPart.keySet())) {

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.converters.JSON
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
@@ -51,7 +52,7 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
         [ewcs2, ewcs3, ewcs1]*.externalWorkflowConfigFragment == service.getSortedFragments(new SingleSelectSelectorExtendedCriteria())
     }
 
-    void "test parseExternalWorkflowConfigFragmentString"() {
+    void "test mergeSortedMaps"() {
         given:
         ConfigFragmentService service = new ConfigFragmentService()
         List<Map> prioritySortedHashMaps = [
@@ -59,8 +60,29 @@ class ConfigFragmentServiceIntegrationSpec extends Specification implements Work
                 ["F": "F_ShouldAppear", "B": ["C": "C_ThisNotSinceLowerPrio", "E": ["G": "G_ThisToo"]]],
                 ["A": "A_ThisNotSinceLowerPrio", "B": ["C": "C_ThisNotSinceLowerPrio", "D": "D_ThisNotSinceLowerPrio"]],
         ]
+
         expect:
-        service.mergeSortedMaps(prioritySortedHashMaps) ==
-                ["A": "A_ShouldAppear", "B": ["D": "D_ThisToo", "E": ["G": "G_ThisToo"], "C": "C_ThisSinceHigherPrio"], "F": "F_ShouldAppear"]
+        ["A": "A_ShouldAppear", "B": ["D": "D_ThisToo", "E": ["G": "G_ThisToo"], "C": "C_ThisSinceHigherPrio"], "F": "F_ShouldAppear"] ==
+                service.mergeSortedMaps(prioritySortedHashMaps)
+    }
+
+    void "test mergeSortedFragments"() {
+        given:
+        ConfigFragmentService service = new ConfigFragmentService()
+        List<ExternalWorkflowConfigFragment> prioritySortedHashMaps = [
+                createExternalWorkflowConfigFragment(
+                        configValues: '{"WORKFLOWS": {"A": "A_ShouldAppear", "B": {"C": "C_ThisSinceHigherPrio", "D": "D_ThisToo"}}}'
+                ),
+                createExternalWorkflowConfigFragment(
+                        configValues: '{"WORKFLOWS": {"F": "F_ShouldAppear", "B": {"C": "C_ThisNotSinceLowerPrio", "E": {"G": "G_ThisToo"}}}}'
+                ),
+                createExternalWorkflowConfigFragment(
+                        configValues: '{"WORKFLOWS": {"A": "A_ThisNotSinceLowerPrio", "B": {"C": "C_ThisNotSinceLowerPrio", "D": "D_ThisNotSinceLowerPrio"}}}'
+                ),
+        ]
+
+        expect:
+        (["WORKFLOWS": ["A": "A_ShouldAppear", "B": ["C": "C_ThisSinceHigherPrio", "D": "D_ThisToo", "E": ["G": "G_ThisToo"]], "F": "F_ShouldAppear"]]
+                as JSON).toString() == service.mergeSortedFragments(prioritySortedHashMaps)
     }
 }

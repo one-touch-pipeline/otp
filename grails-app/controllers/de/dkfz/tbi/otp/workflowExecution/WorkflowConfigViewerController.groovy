@@ -79,7 +79,7 @@ class WorkflowConfigViewerController implements BaseWorkflowConfigController {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE)
 
         try {
-            String fragmentJson = configFragmentService.mergeSortedFragments(fragments) as JSON
+            String fragmentJson = configFragmentService.mergeSortedFragments(fragments)
             Map data = [
                     selectors: g.render(template: '/templates/bootstrap_selector', model: [relatedSelectors: selectors]),
                     config   : fragmentJson,

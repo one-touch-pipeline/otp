@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.grails.web.json.JSONObject
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -67,7 +66,7 @@ class DataInstallationInitializationServiceSpec extends Specification
         }
         service.workflowRunService = new WorkflowRunService()
         service.workflowRunService.configFragmentService = Mock(ConfigFragmentService) {
-            mergeSortedFragments(_) >> new JSONObject()
+            mergeSortedFragments(_) >> "{}"
         }
         service.workflowArtefactService = new WorkflowArtefactService()
 
