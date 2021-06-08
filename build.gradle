@@ -27,6 +27,7 @@ import grails.util.Environment
 buildscript {
     repositories {
         mavenLocal()
+        mavenCentral()
         maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
@@ -73,6 +74,7 @@ apply plugin: BuildScanPlugin
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
     maven { url "https://jitpack.io" }
 }
