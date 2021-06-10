@@ -473,7 +473,7 @@ class ExampleData {
                 seqTracks            : seqTracks as Set,
                 referenceGenome      : referenceGenome,
                 pipeline             : pipeline,
-                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? referenceGenome.statSizeFileNames.first().name : null,
+                statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? StatSizeFileName.findByReferenceGenome(referenceGenome).name : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
         ]).save(flush: true)
