@@ -36,7 +36,7 @@ $(function() {
             dataType: 'json',
             cache: 'false',
             data: {
-                referenceGenome: $('#referenceGenome').val()
+                referenceGenomeName: $('#referenceGenome').val()
             },
             success: function (data) {
                 $('#statSizeFileNames').empty();
