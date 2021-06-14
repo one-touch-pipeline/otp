@@ -98,7 +98,7 @@ class ProcessingThresholdController {
         Project project = projectSelectionService.requestedProject
         Project.withTransaction {
             cmd.sampleTypes.each { ProcThresholdSampleTypeCommand sampleType ->
-                sampleTypePerProjectService.createOrUpdate(project, sampleType.sampleType, SampleTypePerProject.Category)
+                sampleTypePerProjectService.createOrUpdate(project, sampleType.sampleType, sampleType.category)
                 sampleType.seqTypes.each { ProcThresholdSeqTypeCommand seqType ->
                     processingThresholdsService.createUpdateOrDelete(
                             project, sampleType.sampleType, seqType.seqType, seqType.minNumberOfLanes ?: null, seqType.minCoverage ?: null
