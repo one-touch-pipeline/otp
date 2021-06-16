@@ -26,11 +26,15 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
-class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTest<FastqcDataFilesService>, DataTest {
+class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTest<FastqcDataFilesService>, DataTest, DomainFactoryCore,
+        WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -209,6 +213,28 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
         expect:
         service.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile) == fastqcProcessedFile
+    }
+
+    void "test updateFastqcProcessedFile, with existing FastqcProcessedFile"() {
+        given:
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
+
+        expect:
+        service.updateFastqcProcessedFile(fastqcProcessedFile.dataFile, workflowArtefact) == fastqcProcessedFile
+        fastqcProcessedFile.workflowArtefact == workflowArtefact
+    }
+
+    void "test updateFastqcProcessedFile, without existing FastqcProcessedFile"() {
+        given:
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
+
+        when:
+        FastqcProcessedFile result = service.updateFastqcProcessedFile(createDataFile(), workflowArtefact)
+
+        then:
+        result.workflowArtefact == workflowArtefact
+        FastqcProcessedFile.all.size() == 1
     }
 
 

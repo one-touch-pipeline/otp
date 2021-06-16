@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -139,6 +140,13 @@ class FastqcDataFilesService {
             fastqc.dateFromFileSystem = new Date(fastqcFile.lastModified())
         }
         assert (fastqc.save(flush: true))
+    }
+
+    FastqcProcessedFile updateFastqcProcessedFile(DataFile dataFile, WorkflowArtefact workflowArtefact) {
+        FastqcProcessedFile fastqc = FastqcProcessedFile.findOrCreateWhere(dataFile: dataFile)
+        fastqc.workflowArtefact = workflowArtefact
+        updateFastqcProcessedFile(fastqc)
+        return fastqc
     }
 
     FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile) {
