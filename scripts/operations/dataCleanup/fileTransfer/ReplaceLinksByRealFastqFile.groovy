@@ -35,13 +35,15 @@ def ilseNumbers = []
 boolean overview = true
 // change to true if you are sure that the changed md5sum is okay
 boolean checked = false
+// change to true if you want to check all md5sum after copy (this will take a long time)
+boolean validateMd5 = false
 
 /*
 script part
  */
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 
-def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile df, def script) {
+def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile df, def script, boolean  validateMd5, def md5Check) {
     File md5 = new File(orginialPathResolved.parent, "${orginialPathResolved.name}.md5sum")
     Long size = orginialPathResolved.size().toLong()
     script << "cp ${orginialPathResolved} ${finalPath}.tmp && mv ${finalPath}.tmp ${finalPath} && chgrp ${df.project.unixGroup} ${finalPath} && chmod 440 ${finalPath}"
@@ -51,6 +53,9 @@ def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile
         script << "cp ${orginialPathResolved}.md5sum ${finalPath}.md5sum.tmp && mv ${finalPath}.md5sum.tmp ${finalPath}.md5sum && chgrp ${df.project.unixGroup} ${finalPath}.md5sum && chmod 440 ${finalPath}.md5sum"
         String md5summe = md5.text.split(" ")[0]
         df.md5sum = md5summe
+        if(validateMd5) {
+            md5Check << "md5sum -c ${finalPath}.md5sum"
+        }
     }
 
     script << ""
@@ -62,6 +67,7 @@ assert ilseNumbers : "Please provide at least one ilse number"
 def notRegisteredIlseNumbers = []
 def submissions = []
 def script = []
+def md5Check = []
 SeqTrack.withTransaction {
     ilseNumbers.each { ilseNumber ->
         try {
@@ -103,7 +109,7 @@ SeqTrack.withTransaction {
                         if (overview) {
                             println "copy ${orginialPathResolved}* to ${finalPath.parent}"
                         } else {
-                            transferDataAndCorrectDB(finalPath, orginialPathResolved, df, script)
+                            transferDataAndCorrectDB(finalPath, orginialPathResolved, df, script, validateMd5, md5Check)
                         }
                     } else {
                         if (finalPath.exists() && orginialPathResolved.exists() && orginialPathResolved.canRead()) {
@@ -122,7 +128,7 @@ SeqTrack.withTransaction {
                                             "(or change the flag to true)"
                                 } else {
                                     if (checked) {
-                                        transferDataAndCorrectDB(finalPath, orginialPathResolved, df, script)
+                                        transferDataAndCorrectDB(finalPath, orginialPathResolved, df, script, validateMd5, md5Check)
                                     }
                                 }
                             }
@@ -146,6 +152,9 @@ SeqTrack.withTransaction {
         println "set -e"
         println "\n\n"
         println script.join("\n")
+        if (md5Check) {
+            println md5Check.join("\n")
+        }
     } else if (!overview){
         println "nothing to copy"
     } else {
