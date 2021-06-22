@@ -388,7 +388,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                 bashScriptToMoveFilesAsOtherUser << "# delete analysis stuff\n"
                 AnalysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
                 analysisInstances.each {
-                    bashScriptToMoveFilesAsOtherUser << "#rm -rf ${AnalysisDeletionService.deleteInstance(it)}/*\n"
+                    bashScriptToMoveFilesAsOtherUser << "#rm -rf ${AnalysisDeletionService.deleteInstance(it)}/\n"
                 }
             }
 
