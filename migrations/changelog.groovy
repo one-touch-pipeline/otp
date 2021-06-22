@@ -561,4 +561,6 @@ databaseChangeLog = {
     changeSet(author: "sunakshi", id: "otp-1108-update-strain.sql") {
         sqlFile(path: 'changelogs/2021/otp-1108-update-strain.sql')
     }
+
+    include file: 'changelogs/2021/otp-1116-RoddyBamFile-extends-artefact.groovy'
 }

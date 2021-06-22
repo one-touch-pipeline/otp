@@ -20,7 +20,6 @@
 
 # This file can be used only together with the main composition file.
 # To use it execute the following command: docker-compose -f docker-compose.yml -f docker-compose.source.yml up
-
 version: '3.0'
 services:
   otp:

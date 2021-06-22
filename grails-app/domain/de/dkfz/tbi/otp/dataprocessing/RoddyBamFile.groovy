@@ -31,13 +31,14 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
  * The file is based on earlier created bam file (with the same workflow), if exists and
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
-class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject, HasIdentifier {
+class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentifier , ProcessParameterObject, RoddyResult {
 
     static final String WORK_DIR_PREFIX = ".merging"
 
@@ -77,6 +78,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
         baseBamFile nullable: true
+        workflowArtefact nullable: true
 
         workPackage validator: { val, obj ->
             [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(val?.pipeline?.name) &&
