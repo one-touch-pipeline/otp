@@ -90,6 +90,7 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         '123ABC-E0-D1'     || 'tumor_interval_debulking_surgery' | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         '123ABC-K0-D1'     || 'external_control'                 | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         '123ABC-A0-D1'     || 'lymph_nodes'                      | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-U0-D1'     || 'undefined_neoplasia'              | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //newly introduced 'P' in the sample name should append '-p' in the sample type
         '123ABC-F0-PD1'    || 'buffy_coat'                       | '0'  | '01-p' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT

@@ -43,6 +43,7 @@ enum HipoTissueType {
     TUMOR_INTERVAL_DEBULKING_SURGERY    ('E'),
     EXTERNAL_CONTROL                    ('K'),
     LYMPH_NODES                         ('A'),
+    UNDEFINED_NEOPLASIA                 ('U'),
 
     final char key
 
