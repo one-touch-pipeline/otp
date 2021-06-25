@@ -535,6 +535,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
         findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
         findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
+        findOrCreateProcessingOption(name: OptionName.WITHDRAWN_UNIX_GROUP, value: configService.testingGroup)
         findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
 
         //other values

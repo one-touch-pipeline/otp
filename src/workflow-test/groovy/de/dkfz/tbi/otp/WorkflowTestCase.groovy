@@ -153,6 +153,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             DomainFactory.createProcessingOptionForNotificationRecipient()
             findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
             findOrCreateProcessingOption(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.testingGroup)
+            findOrCreateProcessingOption(name: OptionName.WITHDRAWN_UNIX_GROUP, value: configService.testingGroup)
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
             findOrCreateProcessingOption(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
