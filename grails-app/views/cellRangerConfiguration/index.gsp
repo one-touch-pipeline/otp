@@ -91,6 +91,7 @@
     <br>
     <h2>${g.message(code: "cellRanger.select")}</h2>
     <otp:annotation type="info">${g.message(code: "cellRanger.hashedSamplesInfo")}</otp:annotation>
+    <otp:annotation type="info">${g.message(code: "cellRanger.xenograftSamplesInfo")}</otp:annotation>
     <g:if test="${configExists}">
         <g:form action="index" method="GET">
             <input type="hidden" name="${projectParameter}" value="${selectedProject.name}"/>
