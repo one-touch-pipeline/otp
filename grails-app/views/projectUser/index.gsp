@@ -43,7 +43,7 @@
 
     <div class="project-selection-header-container">
         <div class="grid-element">
-            <g:render template="/templates/projectSelection"/>
+            <g:render template="/templates/bootstrap/projectSelection"/>
         </div>
         <div class="grid-element">
             <g:if test="${sharesUnixGroup}">
