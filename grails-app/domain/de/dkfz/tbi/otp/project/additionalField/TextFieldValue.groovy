@@ -30,13 +30,13 @@ class TextFieldValue extends AbstractSingleFieldValue {
         textValue nullable: true, validator: { val, obj ->
             if (val && obj.definition instanceof TextFieldDefinition) {
                 if (obj.definition.allowedTextValues && !(val in obj.definition.allowedTextValues)) {
-                    return ["textFieldValue.textValue.notInList", obj.definition.allowedTextValues]
+                    return ["textFieldValue.textValue.notInList", obj.definition.allowedTextValues, obj.definition.name]
                 }
                 if (obj.definition.typeValidator && !obj.definition.typeValidator.validate(val)) {
-                    return ["textFieldValue.textValue.wrongType", obj.definition.typeValidator]
+                    return ["textFieldValue.textValue.wrongType", obj.definition.typeValidator, obj.definition.name]
                 }
                 if (obj.definition.regularExpression && !(val ==~ obj.definition.regularExpression)) {
-                    return ["textFieldValue.textValue.regex", obj.definition.regularExpression]
+                    return ["textFieldValue.textValue.regex", obj.definition.regularExpression, obj.definition.name, obj.definition.regularExpressionError]
                 }
                 return true
             }

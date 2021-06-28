@@ -122,6 +122,11 @@
                     </span>
                 </th>
                 <th>
+                    <span title="${g.message(code: "projectFields.header.tooltip.regularExpressionError")}">
+                        <g:message code="projectFields.header.regularExpressionError"/>
+                    </span>
+                </th>
+                <th>
                     <span title="${g.message(code: "projectFields.header.tooltip.domainReference")}">
                         <g:message code="projectFields.header.domainReference"/>
                     </span>
@@ -324,6 +329,17 @@
                                             'property': 'regularExpression',
                                     ])}"
                                     value="${((TextFieldDefinition) fieldDefinition).regularExpression}"/>
+                        </g:if>
+                    </td>
+                    <td>
+                        <g:if test="${fieldDefinition.projectFieldType == ProjectFieldType.TEXT}">
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    link="${g.createLink(controller: 'projectFields', action: 'updateField', params: [
+                                            'entityId': "${fieldDefinition.id}",
+                                            'property': 'regularExpressionError',
+                                    ])}"
+                                    value="${((TextFieldDefinition) fieldDefinition).regularExpressionError}"/>
                         </g:if>
                     </td>
                     <td>

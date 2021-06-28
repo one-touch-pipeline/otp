@@ -325,6 +325,20 @@
                         <g:message code="projectFields.header.regularExpression"/>
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <label for="regularExpressionError">
+                            <g:message code="projectFields.header.regularExpressionError"/>
+                        </label>
+                    </td>
+                    <td>
+                        <g:textField id="regularExpressionError" name="regularExpressionError"
+                                     value="${cmd instanceof ProjectFieldsCreateTextCommand ? ((ProjectFieldsCreateTextCommand) cmd).regularExpressionError : ""}"/>
+                    </td>
+                    <td>
+                        <g:message code="projectFields.header.regularExpressionError"/>
+                    </td>
+                </tr>
             </g:if>
         </table>
         <div>

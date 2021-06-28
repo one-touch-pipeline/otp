@@ -32,6 +32,8 @@ class TextFieldDefinition extends AbstractFieldDefinition {
 
     String regularExpression
 
+    String regularExpressionError
+
     List<String> allowedTextValues
 
     String defaultTextValue
@@ -52,6 +54,7 @@ class TextFieldDefinition extends AbstractFieldDefinition {
                 }
             }
         }
+        regularExpressionError nullable: true
         defaultTextValue nullable: true
         allowedTextValues validator: { value, obj ->
             if (value && obj.defaultTextValue && !value.contains(obj.defaultTextValue)) {

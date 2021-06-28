@@ -33,6 +33,8 @@ class ProjectFieldsCreateTextCommand extends ProjectFieldsCreateCommand {
 
     String regularExpression
 
+    String regularExpressionError
+
     List<String> allowedValues
 
     String defaultValue
@@ -40,6 +42,7 @@ class ProjectFieldsCreateTextCommand extends ProjectFieldsCreateCommand {
     static constraints = {
         typeValidator nullable: true
         regularExpression nullable: true
+        regularExpressionError nullable: true
         defaultValue nullable: true
     }
 

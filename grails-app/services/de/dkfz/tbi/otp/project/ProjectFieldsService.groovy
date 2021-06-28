@@ -77,6 +77,7 @@ class ProjectFieldsService {
         if (cmd.projectFieldType == ProjectFieldType.TEXT) {
             definition.typeValidator = cmd.typeValidator
             definition.regularExpression = cmd.regularExpression
+            definition.regularExpressionError = cmd.regularExpressionError
         }
         if (cmd.projectFieldType == ProjectFieldType.DOMAIN_REFERENCE) {
             definition.domainClassName = cmd.domainClassName

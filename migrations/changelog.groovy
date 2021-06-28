@@ -573,4 +573,6 @@ databaseChangeLog = {
     changeSet(author: "gabkol", id: "otp-1108-add-shortDisplayName-to-workflowRun") {
         sqlFile(path: 'changelogs/2021/otp-1106-workflowRun-shortDisplayName.sql')
     }
+
+    include file: 'changelogs/2021/otp-1107.groovy'
 }
