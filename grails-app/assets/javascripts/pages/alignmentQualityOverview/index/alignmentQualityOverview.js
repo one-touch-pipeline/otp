@@ -109,7 +109,6 @@ $(function () {
             {data: "qcStatusOnly", visible: false},
             {data: "qcComment", visible: false},
             {data: "qcAuthor", visible: false},
-            {data: "dbVersion", visible: false},
         ];
 
         // coverage
@@ -320,7 +319,6 @@ $(function () {
                         "abstractBamFile.id": abstractBamFileId,
                         "newValue": dropdownMenu.value,
                         "comment": comment,
-                        "dbVersion": rowData.dbVersion,
                     },
                     "error": function (error) {
                         if (error && error.responseJSON && error.responseJSON.message) {
