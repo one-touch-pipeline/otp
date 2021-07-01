@@ -101,6 +101,15 @@ class ProcessingThresholdsService {
                                 sampleType   : seqTrack.sampleType,
                                 numberOfLanes: defaultNumberOfLanes,)
                                 .save(flush: true))
+
+                seqTrack.individual.samples.findAll { seqTrack.seqType in it.seqTracks*.seqType }*.sampleType.each { SampleType sampleType ->
+                    generatedThresholds.add(new ProcessingThresholds(
+                            project: seqTrack.project,
+                            seqType: seqTrack.seqType,
+                            sampleType: sampleType,
+                            numberOfLanes: defaultNumberOfLanes,
+                    ).save(flush: true))
+                }
             }
         }
 

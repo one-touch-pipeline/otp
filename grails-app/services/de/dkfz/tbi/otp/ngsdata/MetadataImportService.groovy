@@ -374,13 +374,10 @@ class MetadataImportService {
      * Send an email notification with a list of the unset categories
      * and the generated default thresholds.
      *
-     * suppress line length because GString injection must not contain line feeds
-     *
      * @param seqTracks
      * @param defaultThresholds
      * @param ticket
      */
-    @SuppressWarnings("LineLength")
     protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, List<ProcessingThresholds> defaultThresholds, OtrsTicket ticket) {
         List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(seqTracks)
 
@@ -399,7 +396,10 @@ class MetadataImportService {
             }
             if (defaultThresholds) {
                 body += "\nThese thresholds have been generated automatically:\n"
-                body += "${defaultThresholds.collect { "${it.project} - ${it.sampleType.displayName} - ${it.seqType.displayName}, min. Lanes: ${it.numberOfLanes}" }.unique().join("\n")}\n"
+                body += defaultThresholds.collect {
+                    "${it.project} - ${it.sampleType.displayName} - ${it.seqType.displayName}, min. Lanes: ${it.numberOfLanes}"
+                }.unique().join("\n")
+                body += "\n"
             }
 
             mailHelperService.sendEmail(

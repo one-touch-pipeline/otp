@@ -110,4 +110,27 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
         then:
         ProcessingThresholds.all.size() == 0
     }
+
+    void "test generateDefaultThresholds"() {
+        given:
+        SeqTrack seqTrack1 = createSeqTrack()
+        SeqTrack seqTrack2 = createSeqTrack(sample: seqTrack1.sample, seqType: seqTrack1.seqType)
+        ProcessingThresholdsService service = new ProcessingThresholdsService()
+
+        when:
+        service.generateDefaultThresholds([seqTrack1])
+
+        then:
+        List<ProcessingThresholds> thresholds = ProcessingThresholds.all
+        thresholds.find {
+            it.project == seqTrack1.project &&
+                    it.seqType == seqTrack1.seqType &&
+                    it.sampleType == seqTrack1.sampleType
+        }
+        thresholds.find {
+            it.project == seqTrack2.project &&
+                    it.seqType == seqTrack2.seqType &&
+                    it.sampleType == seqTrack2.sampleType
+        }
+    }
 }
