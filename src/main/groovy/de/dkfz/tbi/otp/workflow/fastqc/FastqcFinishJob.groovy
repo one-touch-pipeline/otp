@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.fastqc
 
+import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * Base interface for all jobs
- *
- * To implement a job, the existing specialized abstract classes should be extended
- */
-interface Job {
-    void execute(WorkflowStep workflowStep) throws Throwable
+@Component
+@Slf4j
+@CompileStatic
+class FastqcFinishJob extends AbstractFinishJob implements FastqcShared {
 
-    JobStage getJobStage()
-}
+    @Autowired
+    FastqcDataFilesService fastqcDataFilesService
 
-/**
- * Name of the different steps
- */
-enum JobStage {
-    CONDITIONAL_SKIP,
-    CONDITIONAL_FAIL,
-    PREPARE,
-    EXECUTE_PIPELINE,
-    VALIDATION,
-    OUTPUT_UNIFICATION,
-    PARSE,
-    CHECK_QC,
-    CLEANUP,
-    LINK,
-    CORRECT_PERMISSION,
-    FINISH,
+    @Autowired
+    SeqTrackService seqTrackService
+
+    @Override
+    void updateDomains(WorkflowStep workflowStep) {
+        SeqTrack seqTrack = getSeqTrack(workflowStep)
+
+        fastqcDataFilesService.updateFastqcProcessedFile(getFastqcProcessedFile(workflowStep))
+
+        seqTrackService.fillBaseCount(seqTrack)
+        seqTrackService.setFastqcFinished(seqTrack)
+    }
 }

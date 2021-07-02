@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,33 +21,37 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * Base interface for all jobs
- *
- * To implement a job, the existing specialized abstract classes should be extended
- */
-interface Job {
-    void execute(WorkflowStep workflowStep) throws Throwable
+class AbstractFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
-    JobStage getJobStage()
-}
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+            WorkflowStep,
+        ]
+    }
 
-/**
- * Name of the different steps
- */
-enum JobStage {
-    CONDITIONAL_SKIP,
-    CONDITIONAL_FAIL,
-    PREPARE,
-    EXECUTE_PIPELINE,
-    VALIDATION,
-    OUTPUT_UNIFICATION,
-    PARSE,
-    CHECK_QC,
-    CLEANUP,
-    LINK,
-    CORRECT_PERMISSION,
-    FINISH,
+    void "test after running execute(), JobStage is in finished state"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        AbstractFinishJob job = Spy(AbstractFinishJob)
+
+        job.logService = Mock(LogService) {
+            1 * addSimpleLogEntry(_, _) >> { WorkflowStep step, String message ->
+                message == 'Finish the workflow.' }
+        }
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        1 * job.updateDomains(workflowStep) >> null
+        job.jobStage == JobStage.FINISH
+    }
 }
