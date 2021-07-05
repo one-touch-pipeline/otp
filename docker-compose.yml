@@ -97,6 +97,8 @@ services:
       - filesystem:/home/otp/filesystem
     ports:
       - ${SSH_PORT:-2222}:2222
+    networks:
+      otp:
 
   mailhog:
     image: mailhog/mailhog:latest
