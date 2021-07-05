@@ -235,6 +235,13 @@ class AlignmentQualityOverviewController implements CheckAndCall {
      */
     def changeQcStatus(QcStatusCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
+            //if db version has changed after loading the page -> someone else has made changes
+            //simplified way to resolve concurrent access, cheaper than explicit locking
+            if (cmd.abstractBamFile.version > cmd.dbVersion) {
+                String errorMessage = g.message(code: "alignment.quality.concurrentWrite.message")
+                return response.sendError(HttpStatus.CONFLICT.value(), errorMessage)
+            }
+
             qcTrafficLightService.setQcTrafficLightStatusWithComment(
                     cmd.abstractBamFile as AbstractMergedBamFile,
                     cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus,
@@ -354,14 +361,17 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     withdrawn         : abstractMergedBamFile.withdrawn,
                     pipeline          : abstractMergedBamFile.workPackage.pipeline.displayName,
                     qcStatus          : generateQcStatusCell(abstractMergedBamFile),
-                    qcStatusOnly: abstractMergedBamFile.qcTrafficLightStatus,
-                    qcComment: abstractMergedBamFile.comment?.comment,
-                    qcAuthor: abstractMergedBamFile.comment?.author,
+                    qcStatusOnly      : abstractMergedBamFile.qcTrafficLightStatus,
+                    qcComment         : abstractMergedBamFile.comment?.comment,
+                    qcAuthor          : abstractMergedBamFile.comment?.author,
                     kit               : new TableCellValue(
                             value: kit*.shortDisplayName.join(", ") ?: "-",
                             warnColor: null,
                             link: null,
                             tooltip: kit*.name.join(", ") ?: ""
+                    ),
+                    dbVersion         : new TableCellValue (
+                            value: abstractMergedBamFile.version
                     ),
             ]
 
@@ -550,6 +560,7 @@ class QcStatusCommand implements Validateable {
     String comment
     AbstractBamFile abstractBamFile
     String newValue
+    int dbVersion
 
     @SuppressWarnings('Instanceof')
     static Closure constraints = {
@@ -568,6 +579,7 @@ class QcStatusCommand implements Validateable {
                 return ["status", AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")]
             }
         })
+        dbVersion(blank: false, nullable: true)
     }
 
     void setComment(String comment) {
