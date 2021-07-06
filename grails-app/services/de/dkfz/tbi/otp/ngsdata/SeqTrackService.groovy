@@ -256,12 +256,12 @@ LIMIT 1
         return SeqTrack.get(seqTrack?.id)
     }
 
-    static void setFastqcInProgress(SeqTrack seqTrack) {
+    static void markFastqcInProgress(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert (seqTrack.save(flush: true))
     }
 
-    void setFastqcFinished(SeqTrack seqTrack) {
+    void markFastqcFinished(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         assert (seqTrack.save(flush: true))
     }

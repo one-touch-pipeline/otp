@@ -71,13 +71,13 @@ class LogThreadLocal {
         assert code
         assert !threadLog
 
-        setThreadLog(new SimpleLogger() {
+        threadLog = new SimpleLogger() {
             @Override
             protected void write(String buffer) {
                 out.append(buffer)
                 out.append('\n')
             }
-        })
+        }
         try {
             code()
         } finally {
@@ -90,7 +90,7 @@ class LogThreadLocal {
         assert code
         assert !threadLog
 
-        setThreadLog(logger)
+        threadLog = logger
         try {
             code()
         } finally {

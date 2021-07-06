@@ -177,7 +177,7 @@ a: 2
         Individual oldIndividual = createIndividualWithComment(oldHasComment)
         Individual newIndividual = createIndividualWithComment(newHasComment)
 
-        DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
+        DateTimeUtils.currentMillisFixed = ARBITRARY_TIMESTAMP
 
         String expected = """\
             |${newHasComment ? newIndividual.comment.comment : ""}
@@ -218,7 +218,7 @@ a: 2
         String operation = "operation"
         Individual individual = DomainFactory.createIndividual(comment: hasComment ? DomainFactory.createComment() : null)
 
-        DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
+        DateTimeUtils.currentMillisFixed = ARBITRARY_TIMESTAMP
 
         String expected = """\
             |${hasComment ? individual.comment.comment : ""}

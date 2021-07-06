@@ -63,7 +63,7 @@ class FastqcStartJobIntegrationSpec extends Specification {
             getSeqTrackReadyForFastqcProcessing(_) >> seqTrack
         }
         fastqcStartJob.notificationCreator = new NotificationCreator(otrsTicketService: new OtrsTicketService())
-        fastqcStartJob.setJobExecutionPlan(plan)
+        fastqcStartJob.jobExecutionPlan = plan
 
         when:
         fastqcStartJob.execute()
@@ -92,7 +92,7 @@ class FastqcStartJobIntegrationSpec extends Specification {
 
         when:
         Process process = fastqcStartJob.restart(failedProcess)
-        SeqTrack restartedInstance = (SeqTrack)(process.getProcessParameterObject())
+        SeqTrack restartedInstance = (SeqTrack)(process.processParameterObject)
 
         then:
         SeqTrack.list().size() == 1

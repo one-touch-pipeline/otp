@@ -115,12 +115,12 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                 FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file)
                 fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
                 fastqcDataFilesService.updateFastqcProcessedFile(fastqc)
-                fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
+                fastqcDataFilesService.fastqcProcessedFileUploaded = fastqc
             }
             assert files.findAll {
                 !it.indexFile
             }*.nReads.unique().size() == 1
-            seqTrackService.setFastqcFinished(seqTrack)
+            seqTrackService.markFastqcFinished(seqTrack)
             seqTrackService.fillBaseCount(seqTrack)
             setnBasesInClusterJobForFastqc(processingStep)
         }
@@ -201,7 +201,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
             createFastqcProcessedFileIfNotExisting(dataFile)
             FastqcProcessedFile fastqcProcessedFile = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(dataFile)
-            fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqcProcessedFile)
+            fastqcDataFilesService.fastqcProcessedFileUploaded = fastqcProcessedFile
         }
     }
 

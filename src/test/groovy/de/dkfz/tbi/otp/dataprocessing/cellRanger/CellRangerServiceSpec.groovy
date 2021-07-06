@@ -314,7 +314,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     1 * linkResultFiles(singleCellBamFile)
                 },
                 abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
-                    1 * setSamplePairStatusToNeedProcessing(singleCellBamFile)
+                    1 * updateSamplePairStatusToNeedProcessing(singleCellBamFile)
                 },
                 md5SumService               : Mock(Md5SumService) {
                     1 * extractMd5Sum(_) >> md5sum
@@ -368,7 +368,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     _ * linkResultFiles(singleCellBamFile)
                 },
                 abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
-                    0 * setSamplePairStatusToNeedProcessing(singleCellBamFile)
+                    0 * updateSamplePairStatusToNeedProcessing(singleCellBamFile)
                 },
                 md5SumService               : Mock(Md5SumService) {
                     _ * extractMd5Sum(_) >> md5sum

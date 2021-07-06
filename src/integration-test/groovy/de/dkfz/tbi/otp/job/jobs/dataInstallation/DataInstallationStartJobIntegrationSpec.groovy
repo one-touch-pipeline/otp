@@ -49,7 +49,7 @@ class DataInstallationStartJobIntegrationSpec extends Specification {
             _ * isActive() >> true
         }
 
-        dataInstallationStartJob.setJobExecutionPlan(DomainFactory.createJobExecutionPlan(enabled: true))
+        dataInstallationStartJob.jobExecutionPlan = DomainFactory.createJobExecutionPlan(enabled: true)
 
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()

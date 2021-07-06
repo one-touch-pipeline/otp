@@ -37,8 +37,8 @@ class SchedulingConfiguration {
     TaskScheduler threadPoolTaskScheduler() {
         if (Environment.current in [Environment.PRODUCTION, Environment.DEVELOPMENT]) {
             ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler()
-            threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler")
-            threadPoolTaskScheduler.setPoolSize(10)
+            threadPoolTaskScheduler.threadNamePrefix = "ThreadPoolTaskScheduler"
+            threadPoolTaskScheduler.poolSize = 10
             threadPoolTaskScheduler.initialize()
             return threadPoolTaskScheduler
         } else {

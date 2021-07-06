@@ -90,7 +90,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
 
     void "set SamplePairStatus to need processing while input is null"() {
         when:
-        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(null)
+        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(null)
 
         then:
         AssertionError error = thrown()
@@ -104,7 +104,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
 
         when:
-        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
+        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(bamFile)
 
         then:
         samplePair."${analysisName}ProcessingStatus" == ProcessingStatus.NEEDS_PROCESSING
@@ -121,7 +121,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
 
         when:
-        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
+        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(bamFile)
 
         then:
         samplePair."${analysisName}ProcessingStatus" == ProcessingStatus.NEEDS_PROCESSING
@@ -138,7 +138,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair2.mergingWorkPackage2)
 
         when:
-        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
+        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(bamFile)
 
         then:
         samplePair1."${analysisName}ProcessingStatus" == ProcessingStatus.NO_PROCESSING_NEEDED

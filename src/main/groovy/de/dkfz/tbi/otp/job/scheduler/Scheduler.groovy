@@ -162,7 +162,7 @@ class Scheduler {
             if (job instanceof ValidatingJob) {
                 ValidatingJobDefinition validator = step.jobDefinition as ValidatingJobDefinition
                 ProcessingStep validatedStep = ProcessingStep.findByProcessAndJobDefinition(step.process, validator.validatorFor)
-                (job as ValidatingJob).setValidatorFor(validatedStep)
+                (job as ValidatingJob).validatorFor = validatedStep
             }
             // add a ProcessingStepUpdate to the ProcessingStep
             processService.setOperatorIsAwareOfFailure(step.process, false)

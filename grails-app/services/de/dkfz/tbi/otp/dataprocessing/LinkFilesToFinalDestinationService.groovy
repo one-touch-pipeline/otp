@@ -108,7 +108,7 @@ class LinkFilesToFinalDestinationService {
 
     private void handleQcCheckAndSetBamFile(RoddyBamFile roddyBamFile, Closure linkCall) {
         qcTrafficLightCheckService.handleQcCheck(roddyBamFile, linkCall)
-        setBamFileValues(roddyBamFile)
+        bamFileValues = roddyBamFile
     }
 
     void setBamFileValues(RoddyBamFile roddyBamFile) {
@@ -123,7 +123,7 @@ class LinkFilesToFinalDestinationService {
             roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
 
             assert roddyBamFile.save(flush: true)
-            abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(roddyBamFile)
+            abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
         }
     }
 

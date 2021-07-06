@@ -67,6 +67,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         createTooLargeMetadataFile()                                                         || 'is larger than'
     }
 
+    @SuppressWarnings('Indentation')
     void 'readAndCheckFile, when there is a parsing problem, adds a warning'() {
         given:
         Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()

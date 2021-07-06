@@ -100,11 +100,11 @@ class NotificationCreator {
         LogThreadLocal.threadLog?.debug("evaluating processFinished for OtrsTickets: ${otrsTickets}; " +
                 "SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
-            finishedTimestampsAndNotify = ticket
+            notifyAndSetFinishedTimestamps(ticket)
         }
     }
 
-    void setFinishedTimestampsAndNotify(OtrsTicket ticket) {
+    void notifyAndSetFinishedTimestamps(OtrsTicket ticket) {
         if (ticket.finalNotificationSent) {
             return
         }

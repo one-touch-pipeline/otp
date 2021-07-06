@@ -112,7 +112,7 @@ class SchedulerServiceSpec extends Specification {
         initialize()
 
         when:
-        LogThreadLocal.setThreadLog(testJob1.log)
+        LogThreadLocal.threadLog = testJob1.log
 
         then:
         service.jobExecutedByCurrentThread == null

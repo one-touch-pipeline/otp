@@ -158,7 +158,7 @@ class SequenceController {
                 .collect { g.message(code: it.message) }
                 .join(',').replaceAll("<br/?>", " ")
         String content = "${contentHeader}\n${contentBody}\n"
-        response.setContentType("application/octet-stream")
+        response.contentType = "application/octet-stream"
         response.setHeader("Content-disposition", "filename=Sequence_Export_" + currentDate + ".csv")
         response.outputStream << content.toString().bytes
     }

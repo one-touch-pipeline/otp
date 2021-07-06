@@ -157,7 +157,7 @@ class RemoteShellHelper {
 
             ChannelExec channel = (ChannelExec) session.openChannel("exec")
             logToJob("executed command: " + command)
-            channel.setCommand(command)
+            channel.command = command
 
             ProcessOutput processOutput = getOutput(channel)
             ExecutedCommandLogCallbackThreadLocalHolder.get()?.executedCommand(command, processOutput)
@@ -209,7 +209,7 @@ class RemoteShellHelper {
                         Connector connector = ConnectorFactory.default.createConnector()
                         if (connector != null) {
                             IdentityRepository repository = new RemoteIdentityRepository(connector)
-                            jsch.setIdentityRepository(repository)
+                            jsch.identityRepository = repository
                         }
                         break
                 }
@@ -217,11 +217,11 @@ class RemoteShellHelper {
 
             session = jsch.getSession(username, realm.host, realm.port)
             if (sshAuthMethod == SshAuthMethod.PASSWORD) {
-                session.setPassword(password)
+                session.password = password
             }
-            session.setTimeout(realm.timeout)
+            session.timeout = realm.timeout
             config.put("StrictHostKeyChecking", "no")
-            session.setConfig(config)
+            session.config = config
             try {
                 session.connect()
             } catch (JSchException e) {
@@ -243,8 +243,8 @@ class RemoteShellHelper {
     private static ProcessOutput getOutput(ChannelExec channel) {
         OutputStream outputErrorStream = new ByteArrayOutputStream()
         OutputStream outputStream = new ByteArrayOutputStream()
-        channel.setOutputStream(outputStream)
-        channel.setErrStream(outputErrorStream)
+        channel.outputStream = outputStream
+        channel.errStream = outputErrorStream
 
         channel.connect(CHANNEL_TIMEOUT * MILLI_SECONDS_PER_SECOND)
         while (!channel.isClosed()) {

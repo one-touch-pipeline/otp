@@ -32,7 +32,7 @@ class ErrorsController {
     SpringSecurityService springSecurityService
 
     def error403 = {
-        response.setStatus HttpServletResponse.SC_FORBIDDEN
+        response.status = HttpServletResponse.SC_FORBIDDEN
         if (springSecurityService.isAjax(request)) {
             render springSecurityService.isLoggedIn().toString()
             return

@@ -482,7 +482,7 @@ class AbstractBamFileServiceIntegrationTests {
     }
 
     private static void changeStateOfBamFileToHavingPassedQC(AbstractBamFile bamFile) {
-        bamFile.setQualityAssessmentStatus AbstractBamFile.QaProcessingStatus.FINISHED
+        bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         assert bamFile.save([flush: true])
     }
 }

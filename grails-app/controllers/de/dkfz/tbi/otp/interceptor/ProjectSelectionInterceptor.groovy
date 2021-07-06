@@ -42,7 +42,7 @@ class ProjectSelectionInterceptor {
     @Override
     boolean before() {
         if (springSecurityService.loggedIn) {
-            projectSelectionService.setSelectedProject(params.remove(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) as String)
+            projectSelectionService.selectedProject = params.remove(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) as String
         }
         true
     }

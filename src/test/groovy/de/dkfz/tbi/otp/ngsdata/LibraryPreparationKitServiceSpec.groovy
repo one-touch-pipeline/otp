@@ -239,7 +239,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         setupServiceForAdapterFileReading()
 
         Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
-        new RandomAccessFile(adapterFile.toFile(), "rw").setLength(5242880L + 1L)
+        new RandomAccessFile(adapterFile.toFile(), "rw").length = 5242880L + 1L
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
 

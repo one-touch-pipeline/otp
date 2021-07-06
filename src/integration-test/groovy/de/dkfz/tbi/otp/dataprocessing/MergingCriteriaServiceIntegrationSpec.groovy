@@ -50,7 +50,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         when:
         MergingCriteria mergingCriteria = SpringSecurityUtils.doWithAuth(OPERATOR) {
-             mergingCriteriaService.findMergingCriteria(project, seqType)
+            mergingCriteriaService.findMergingCriteria(project, seqType)
         }
 
         then:
@@ -199,7 +199,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !group.comments.empty
     }
 
-
     void "test removePlatformFromSeqPlatformGroup, group contains only one seqPlatform"() {
         given:
         setupData()
@@ -221,7 +220,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !group.comments.empty
     }
 
-
     void "test addPlatformToExistingSeqPlatformGroup"() {
         given:
         setupData()
@@ -239,7 +237,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !group.comments.empty
     }
 
-
     void "test createNewGroupAndAddPlatform, mergingCriteria is null"() {
         given:
         setupData()
@@ -255,7 +252,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         SeqPlatformGroup.list().size() == 1
         SeqPlatformGroup.list().first().seqPlatforms.contains(seqPlatform)
     }
-
 
     void "test createNewGroupAndAddPlatform, mergingCriteria exists"() {
         given:
@@ -277,7 +273,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         SeqPlatformGroup.list().first().mergingCriteria == mergingCriteria
     }
 
-
     void "test emptySeqPlatformGroup when no seqPlatform is left"() {
         given:
         setupData()
@@ -295,7 +290,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !SeqPlatformGroup.list().first().seqPlatforms
         !group.comments.empty
     }
-
 
     void "test emptySeqPlatformGroup when seqPlatformGroup still contains seqPlatforms"() {
         given:

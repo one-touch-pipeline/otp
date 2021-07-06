@@ -49,20 +49,20 @@ class JobErrorDefinition implements Entity {
         CHECK_FURTHER,
     }
 
-   static constraints = {
-       errorExpression(validator: { val, obj ->
-           try {
-               Pattern.compile(val)
-           }
-           catch (PatternSyntaxException e) {
-               return "invalid"
-           }
-           return true
-       })
+    static constraints = {
+        errorExpression(validator: { val, obj ->
+            try {
+                Pattern.compile(val)
+            }
+            catch (PatternSyntaxException e) {
+                return "invalid"
+            }
+            return true
+        })
     }
     static hasMany = [
             checkFurtherJobErrors: JobErrorDefinition,
-            jobDefinitions: JobDefinition,
+            jobDefinitions       : JobDefinition,
     ]
 
     static mapping = {

@@ -114,7 +114,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                     1 * extractMd5Sum(_ as Path) >> md5sum
                 },
                 abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
-                    1 * setSamplePairStatusToNeedProcessing(roddyBamFile)
+                    1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
                 },
         ])
 

@@ -28,7 +28,7 @@ package de.dkfz.tbi.otp.job.processing
  */
 abstract class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements EndStateAwareJob {
 
-   private ExecutionState endState = null
+    private ExecutionState endState = null
 
     /**
      * Can be used by an implementing Job to set the Job as failed.

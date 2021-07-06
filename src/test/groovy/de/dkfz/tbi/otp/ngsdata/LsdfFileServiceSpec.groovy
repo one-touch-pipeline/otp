@@ -109,7 +109,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         given:
         File file = tempFolder.newFile()
         file << "content"
-        file.setReadable(false)
+        file.readable = false
 
         when:
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
@@ -119,7 +119,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         e.message =~ /(?i)isReadable/
 
         cleanup:
-        file.setReadable(true)
+        file.readable = true
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when file is empty, should fail"() {

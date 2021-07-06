@@ -177,7 +177,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
             1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
+            1 * updateSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
         }
 
         when:
@@ -211,7 +211,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
             0 *  createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
+            1 * updateSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
         }
 
         when:

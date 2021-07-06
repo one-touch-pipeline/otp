@@ -50,6 +50,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                 'All sample names in the metadata file should belong to the same project.',
         ]
     }
+
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
         return [SAMPLE_NAME]*.name()
@@ -63,6 +64,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     @Override
     void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
+    @SuppressWarnings('Indentation')
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         Collection<String> missingIdentifiersWithProject = []
@@ -124,13 +126,13 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
         if (byProjectName.size() == 1 && context.spreadsheet.getColumn(PROJECT.name()) == null) {
             String projectName = exactlyOneElement(byProjectName.keySet())
             if (projectName != null) {
-                context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), Level.INFO,
+                context.addProblem((Set) byProjectName.values().sum()*.cells.sum(), Level.INFO,
                         "All sample names belong to project '${projectName}'.")
             }
         }
         byProjectName.remove(null)
         if (byProjectName.size() > 1) {
-            context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), Level.WARNING,
+            context.addProblem((Set) byProjectName.values().sum()*.cells.sum(), Level.WARNING,
                     'The sample names belong to different projects:\n' +
                             byProjectName.collect { projectName, valueTuplesOfProject ->
                                 return "Project '${projectName}':\n        ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_NAME.name())}'" }.sort().join('\n        ')}"

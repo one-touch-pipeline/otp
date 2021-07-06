@@ -210,7 +210,7 @@ class CellRangerService {
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
         assert singleCellBamFile.workPackage.save(flush: true)
 
-        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(singleCellBamFile)
+        abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
     }
 
     private void updateBamFile(SingleCellBamFile singleCellBamFile) {

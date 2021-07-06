@@ -37,7 +37,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> getDisplayableMetadata() {
-                return LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
+        return LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
             [
                     id                              : it.id,
                     name                            : it.name,
@@ -90,8 +90,8 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
 
     @Override
     protected void checkProperties(Map properties) {
-        assert properties.shortDisplayName  : "the input shortDisplayName '${properties.shortDisplayName}' must not be null"
-        assert !LibraryPreparationKit.findByShortDisplayName(properties.shortDisplayName) :
+        assert properties.shortDisplayName: "the input shortDisplayName '${properties.shortDisplayName}' must not be null"
+        assert !LibraryPreparationKit.findByShortDisplayName(properties.shortDisplayName):
                 "The shortdisplayname '${properties.shortDisplayName}' exists already"
     }
 

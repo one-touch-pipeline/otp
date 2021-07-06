@@ -309,7 +309,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole setAccessToOtp(UserProjectRole userProjectRole) {
+    UserProjectRole provideAccessToOtp(UserProjectRole userProjectRole) {
         boolean accessToOtp = ldapService.isUserInLdapAndActivated(userProjectRole.user)
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == accessToOtp }) {
             return userProjectRole

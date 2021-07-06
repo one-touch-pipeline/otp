@@ -105,7 +105,7 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         given:
         File file = temporaryFolder.newFile()
         file.text = HelperUtils.randomMd5sum
-        file.setReadable(false)
+        file.readable = false
 
         when:
         new Md5SumService().extractMd5Sum(file.toPath())

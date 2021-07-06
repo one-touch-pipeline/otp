@@ -600,7 +600,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     Indentation {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     LineLength {
         priority = DEFAULT
@@ -1200,7 +1200,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     UnnecessarySetter {
-        priority = LOW
+        priority = DEFAULT
     }
     UnnecessaryStringInstantiation {
         priority = DEFAULT

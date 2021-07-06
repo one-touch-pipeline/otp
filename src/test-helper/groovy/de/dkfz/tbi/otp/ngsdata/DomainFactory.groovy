@@ -777,6 +777,9 @@ class DomainFactory {
         return bamFile
     }
 
+    /**
+     * @deprecated Use the {@link de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory#createBamFile} method from the {@link de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory} trait instead.
+     */
     @Deprecated
     static <T> T createRoddyBamFile(Map properties = [:]) {
         return proxyRoddy.createBamFile(properties)

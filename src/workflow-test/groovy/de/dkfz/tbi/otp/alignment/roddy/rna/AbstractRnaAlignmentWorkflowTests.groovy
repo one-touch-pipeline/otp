@@ -155,6 +155,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     @Override
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) { }
 
+    @SuppressWarnings('Indentation')
     void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
         createDirectories([workPackage.project.projectSequencingDirectory])
 
@@ -276,7 +277,6 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     protected String getReferenceGenomeSpecificPath() {
         'bwa06_1KGRef_PhiX'
     }
-
 
     @Override
     protected String getChromosomeStatFileName() {

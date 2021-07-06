@@ -98,7 +98,7 @@ class JobStateLogFile {
                 // only the latest entry is stored (i.e. the entry with the highest timestamp)
                 if (!existingLoFileEntry ||
                         logFileEntry.timeStamp > existingLoFileEntry.timeStamp) {
-                        entries.put(logFileEntry.clusterJobId, logFileEntry)
+                    entries.put(logFileEntry.clusterJobId, logFileEntry)
                 }
             } else {
                 throw new ParsingException("${file} contains non-matching entry: ${line}")

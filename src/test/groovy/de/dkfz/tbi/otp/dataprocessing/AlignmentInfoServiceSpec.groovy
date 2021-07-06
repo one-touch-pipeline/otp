@@ -138,10 +138,10 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
                     |STAR_VERSION=2.0
 
                     |${
-                        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-                            "STAR_PARAMS_${name}=${name}"
-                        }.join('\n')
-                    }
+                    ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                        "STAR_PARAMS_${name}=${name}"
+                    }.join('\n')
+                }
                 """.stripMargin(), '', 0)
             }
         }
@@ -173,9 +173,9 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> {
-            new ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
-        }
+                new ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
             }
+        }
         String expectedError = expectedErrorTemplate.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig)
 
         when:

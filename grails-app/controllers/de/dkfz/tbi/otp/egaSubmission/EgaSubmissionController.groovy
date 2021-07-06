@@ -187,7 +187,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map studyMetadata() {
-         getEgaSubmission params.id as Long
+        getEgaSubmission params.id as Long
     }
 
     Map sampleMetadata() {

@@ -42,7 +42,7 @@ class SeqPlatformServiceTests {
 
     void setupData() {
         checkedLogger = new CheckedLogger()
-        LogThreadLocal.setThreadLog(checkedLogger)
+        LogThreadLocal.threadLog = checkedLogger
     }
 
     @After

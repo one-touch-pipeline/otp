@@ -307,7 +307,7 @@ class MetadataImportService {
 
     protected DirectoryStructure getDirectoryStructure(DirectoryStructureBeanName name) {
         DirectoryStructure directoryStructure = applicationContext.getBean(name.beanName, DirectoryStructure)
-        directoryStructure.setFileSystem(fileSystemService?.filesystemForFastqImport)
+        directoryStructure.fileSystem = fileSystemService?.filesystemForFastqImport
         return directoryStructure
     }
 

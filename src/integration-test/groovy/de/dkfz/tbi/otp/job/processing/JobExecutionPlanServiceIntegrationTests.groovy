@@ -49,7 +49,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
 
     @After
     void tearDown() {
-        (Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob).setExecutionPlan(null)
+        (Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob).executionPlan = null
     }
 
     @Test
@@ -425,7 +425,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
         TestSingletonStartJob job = null
         job = Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob
-        job.setExecutionPlan(plan)
+        job.executionPlan = plan
         assertNotNull(job)
         // everything should be disabled now
         assertFalse(plan.enabled)
@@ -470,7 +470,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
         TestSingletonStartJob job = null
         job = Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob
-        job.setExecutionPlan(plan)
+        job.executionPlan = plan
         assertNotNull(job)
         // everything should be enabled now
         assertTrue(plan.enabled)

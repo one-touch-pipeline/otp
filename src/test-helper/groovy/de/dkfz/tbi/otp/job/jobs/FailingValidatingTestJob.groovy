@@ -35,7 +35,7 @@ import org.springframework.stereotype.*
 class FailingValidatingTestJob extends AbstractValidatingJobImpl {
     @Override
     void execute() throws Exception {
-        setValidatedSucceeded(false)
+        validatedSucceeded = false
         succeed()
     }
 }

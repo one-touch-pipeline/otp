@@ -80,7 +80,7 @@ class JobStateLogFileUnitTests {
         JobStateLogFile.metaClass.parseJobStateLogFile = { -> [:] }
         File file = tmpDir.newFile(JOB_STATE_LOG_FILE_NAME)
         file.createNewFile()
-        file.setReadable(false)
+        file.readable = false
         shouldFail(FileNotReadableException) {
             JobStateLogFile.getInstance(tmpDir.root)
         }

@@ -36,6 +36,6 @@ class DecisionTestJob extends AbstractDecisionJobImpl {
 
     @Override
     void execute() throws Exception {
-        setDecision(getAvailableDecisions().first())
+        decision = getAvailableDecisions().first()
     }
 }

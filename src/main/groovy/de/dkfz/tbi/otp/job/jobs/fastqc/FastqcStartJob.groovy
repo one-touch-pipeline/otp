@@ -59,7 +59,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
                 if (seqTrack) {
                     notificationCreator.setStartedForSeqTracks(seqTrack.containedSeqTracks, OtrsTicket.ProcessingStep.FASTQC)
                     log.debug "Creating fastqc process for seqTrack ${seqTrack}"
-                    seqTrackService.fastqcInProgress = seqTrack
+                    seqTrackService.markFastqcInProgress(seqTrack)
                     createProcess(seqTrack)
                 }
             }
@@ -73,7 +73,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
         SeqTrack seqTrack = (SeqTrack) process.processParameterObject
 
         SeqTrack.withTransaction {
-            SeqTrackService.fastqcInProgress = seqTrack
+            SeqTrackService.markFastqcInProgress(seqTrack)
             FastqcProcessedFile.withCriteria {
                 dataFile {
                     eq "seqTrack", seqTrack

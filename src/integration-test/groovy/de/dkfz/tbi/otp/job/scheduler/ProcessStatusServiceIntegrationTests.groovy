@@ -52,9 +52,9 @@ class ProcessStatusServiceIntegrationTests {
 
     @After
     void tearDown() {
-        file.setWritable(true)
-        file.setReadable(true)
-        dir.setWritable(true)
+        file.writable = true
+        file.readable = true
+        dir.writable = true
         assertTrue(file.delete())
         assertTrue(dir.delete())
     }
@@ -86,7 +86,7 @@ class ProcessStatusServiceIntegrationTests {
     @Test(expected = IllegalArgumentException)
     void testStatusSuccessfulNotReadable() {
         setupData()
-        file.setReadable(false)
+        file.readable = false
         processStatusService.statusSuccessful(LOG_FILE, "PreviousJob")
     }
 

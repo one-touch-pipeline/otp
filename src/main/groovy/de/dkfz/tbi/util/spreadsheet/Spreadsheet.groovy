@@ -69,7 +69,7 @@ class Spreadsheet {
 
             csvReader = new CSVReaderBuilder(rawReader).
                     withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter.delimiter).build()).build()
-            csvReader.setErrorLocale(Locale.ENGLISH)
+            csvReader.errorLocale = Locale.ENGLISH
             String[] line
             while ((line = csvReader.readNext()) != null) {
                 if (!header) { // intercept first line as header

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,23 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.job.jobs
+package de.dkfz.tbi.otp.workflow.panCancer
 
-import de.dkfz.tbi.otp.job.processing.*
-import groovy.util.logging.Slf4j
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * Very simple test job which sets the validated job to succeeded.
- */
-@Component
-@Scope("prototype")
-@Slf4j
-class ValidatingTestJob extends AbstractValidatingJobImpl {
-    @Override
-    void execute() throws Exception {
-        validatedSucceeded = true
-        succeed()
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+trait PanCancerShared {
+
+    @Autowired
+    PanCancerService panCancerService
+
+    List<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {
+        return panCancerService.<SeqTrack> getInputArtefacts(workflowStep, "FASTQC")
+    }
+
+    List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
+        return panCancerService.<FastqcProcessedFile> getInputArtefacts(workflowStep, "FASTQ")
+    }
+
+    RoddyBamFile getBaseRoddyBamFile(WorkflowStep workflowStep) {
+        return panCancerService.<RoddyBamFile> getInputArtefact(workflowStep, "BAM")
+    }
+
+    RoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {
+        return panCancerService.<RoddyBamFile> getOutputArtefact(workflowStep, "BAM")
     }
 }

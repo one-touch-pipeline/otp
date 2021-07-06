@@ -42,7 +42,7 @@ class AbstractMergedBamFileService {
         return bamFile.baseDirectory.absolutePath + '/'
     }
 
-    void setSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
+    void updateSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"
         SamplePair.createCriteria().list {
             or {

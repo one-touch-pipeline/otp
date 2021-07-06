@@ -124,7 +124,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
 
     private File setRootPathAndCreateWorkExecutionStoreDirectory() {
         configService.setOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tmpDir.newFolder().path)
-        File workRoddyExecutionDir =  new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+        File workRoddyExecutionDir = new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
         assert workRoddyExecutionDir.mkdirs()
         return workRoddyExecutionDir
     }
@@ -143,7 +143,7 @@ newLine"""
         return workExecutionDir
     }
 
-    private File setUpWorkDirAndMockProcessOutputWithError(String error) {
+    private File setupWorkDirAndMockProcessOutputWithError(String error) {
         File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
 
         stderr = """newLine
@@ -170,7 +170,7 @@ newLine"""
                     executeCommandCounter++
                     return outputNoClusterJobsSubmitted
                 }
-        ]  as RemoteShellHelper
+        ] as RemoteShellHelper
     }
 
     void "test maybeSubmit"() {
@@ -198,7 +198,7 @@ newLine"""
         when:
         NextAction result
         LogThreadLocal.withThreadLog(new NullWriter()) {
-             result = roddyJob.maybeSubmit()
+            result = roddyJob.maybeSubmit()
         }
 
         then:
@@ -253,7 +253,7 @@ newLine"""
         when:
         NextAction result
         LogThreadLocal.withThreadLog(System.out) {
-             result = roddyJob.execute(null)
+            result = roddyJob.execute(null)
         }
 
         then:
@@ -263,7 +263,7 @@ newLine"""
     void "test maybeSubmit, with Roddy errors"() {
         given:
         setupData()
-        setUpWorkDirAndMockProcessOutputWithError(cause)
+        setupWorkDirAndMockProcessOutputWithError(cause)
 
         when:
         LogThreadLocal.withThreadLog(System.out) {
@@ -272,7 +272,7 @@ newLine"""
 
         then:
         RuntimeException e = thrown(RuntimeException)
-        e.message ==  message
+        e.message == message
 
         where:
         cause                                             || message
@@ -284,7 +284,7 @@ newLine"""
         given:
         setupData()
         roddyJob = [
-                validate: { -> validateCounter++ },
+                validate                      : { -> validateCounter++ },
                 failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] },
         ] as AbstractRoddyJob
 
@@ -326,63 +326,63 @@ newLine"""
         containSame(result, ClusterJob.all)
         ClusterJob.all.find {
             it.clusterJobId == SNV_CALLING_META_SCRIPT_PBSID &&
-            it.clusterJobName == SNV_CALLING_META_SCRIPT_JOB_NAME &&
-            it.jobClass == SNV_CALLING_META_SCRIPT_JOB_CLASS &&
-            it.realm == realm &&
-            !it.validated &&
-            it.processingStep.id != null &&
-            it.seqType.id != null &&
-            it.queued != null &&
-            it.exitStatus == null &&
-            it.exitCode == null &&
-            it.started == null &&
-            it.ended == null &&
-            it.requestedWalltime == null &&
-            it.requestedCores == null &&
-            it.usedCores == null &&
-            it.cpuTime == null &&
-            it.requestedMemory == null &&
-            it.usedMemory == null
+                    it.clusterJobName == SNV_CALLING_META_SCRIPT_JOB_NAME &&
+                    it.jobClass == SNV_CALLING_META_SCRIPT_JOB_CLASS &&
+                    it.realm == realm &&
+                    !it.validated &&
+                    it.processingStep.id != null &&
+                    it.seqType.id != null &&
+                    it.queued != null &&
+                    it.exitStatus == null &&
+                    it.exitCode == null &&
+                    it.started == null &&
+                    it.ended == null &&
+                    it.requestedWalltime == null &&
+                    it.requestedCores == null &&
+                    it.usedCores == null &&
+                    it.cpuTime == null &&
+                    it.requestedMemory == null &&
+                    it.usedMemory == null
         }
         ClusterJob.all.find {
             it.clusterJobId == SNV_ANNOTATION_PBSID &&
-            it.clusterJobName == SNV_ANNOTATION_JOB_NAME &&
-            it.jobClass == SNV_ANNOTATION_JOB_CLASS &&
-            it.realm == realm &&
-            !it.validated &&
-            it.processingStep.id != null &&
-            it.seqType.id != null &&
-            it.queued != null &&
-            it.exitStatus == null &&
-            it.exitCode == null &&
-            it.started == null &&
-            it.ended == null &&
-            it.requestedWalltime == null &&
-            it.requestedCores == null &&
-            it.usedCores == null &&
-            it.cpuTime == null &&
-            it.requestedMemory == null &&
-            it.usedMemory == null
+                    it.clusterJobName == SNV_ANNOTATION_JOB_NAME &&
+                    it.jobClass == SNV_ANNOTATION_JOB_CLASS &&
+                    it.realm == realm &&
+                    !it.validated &&
+                    it.processingStep.id != null &&
+                    it.seqType.id != null &&
+                    it.queued != null &&
+                    it.exitStatus == null &&
+                    it.exitCode == null &&
+                    it.started == null &&
+                    it.ended == null &&
+                    it.requestedWalltime == null &&
+                    it.requestedCores == null &&
+                    it.usedCores == null &&
+                    it.cpuTime == null &&
+                    it.requestedMemory == null &&
+                    it.usedMemory == null
         }
         ClusterJob.all.find {
             it.clusterJobId == ALIGN_AND_PAIR_SLIM_PBSID &&
-            it.clusterJobName == ALIGN_AND_PAIR_SLIM_JOB_NAME &&
-            it.jobClass == ALIGN_AND_PAIR_SLIM_JOB_CLASS &&
-            it.realm == realm &&
-            !it.validated &&
-            it.processingStep.id != null &&
-            it.seqType.id != null &&
-            it.queued != null &&
-            it.exitStatus == null &&
-            it.exitCode == null &&
-            it.started == null &&
-            it.ended == null &&
-            it.requestedWalltime == null &&
-            it.requestedCores == null &&
-            it.usedCores == null &&
-            it.cpuTime == null &&
-            it.requestedMemory == null &&
-            it.usedMemory == null
+                    it.clusterJobName == ALIGN_AND_PAIR_SLIM_JOB_NAME &&
+                    it.jobClass == ALIGN_AND_PAIR_SLIM_JOB_CLASS &&
+                    it.realm == realm &&
+                    !it.validated &&
+                    it.processingStep.id != null &&
+                    it.seqType.id != null &&
+                    it.queued != null &&
+                    it.exitStatus == null &&
+                    it.exitCode == null &&
+                    it.started == null &&
+                    it.ended == null &&
+                    it.requestedWalltime == null &&
+                    it.requestedCores == null &&
+                    it.usedCores == null &&
+                    it.cpuTime == null &&
+                    it.requestedMemory == null &&
+                    it.usedMemory == null
         }
     }
 

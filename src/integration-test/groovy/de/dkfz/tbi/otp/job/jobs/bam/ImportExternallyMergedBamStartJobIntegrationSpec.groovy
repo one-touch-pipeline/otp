@@ -56,7 +56,7 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
         }
 
         importExternallyMergedBamStartJob.optionService = new ProcessingOptionService()
-        importExternallyMergedBamStartJob.setJobExecutionPlan(plan)
+        importExternallyMergedBamStartJob.jobExecutionPlan = plan
 
         when:
         importExternallyMergedBamStartJob.execute()

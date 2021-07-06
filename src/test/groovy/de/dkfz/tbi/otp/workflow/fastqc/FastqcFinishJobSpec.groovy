@@ -71,7 +71,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
         then:
         job.seqTrackService = Mock(SeqTrackService) {
             1 * fillBaseCount(seqTrack)
-            1 * setFastqcFinished(seqTrack)
+            1 * markFastqcFinished(seqTrack)
         }
         job.jobStage == JobStage.FINISH
     }
@@ -104,7 +104,7 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
         }
         job.seqTrackService = Mock(SeqTrackService) {
             1 * fillBaseCount(seqTrack)
-            1 * setFastqcFinished(seqTrack)
+            1 * markFastqcFinished(seqTrack)
         }
         job.jobStage == JobStage.FINISH
     }

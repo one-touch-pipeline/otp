@@ -248,9 +248,9 @@ class OtpTagLib {
     }
 
     def editTableButtons = { attrs ->
-       out << '<button class="button-edit">Edit</button>'
-       out << g.submitButton(class: "save", style: "display: none;", name: "Save")
-       out << '<button class="cancel" style="display: none;">Cancel</button>'
+        out << '<button class="button-edit">Edit</button>'
+        out << g.submitButton(class: "save", style: "display: none;", name: "Save")
+        out << '<button class="cancel" style="display: none;">Cancel</button>'
     }
 
 

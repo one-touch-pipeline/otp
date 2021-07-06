@@ -26,7 +26,6 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Ignore
 
-
 /**
  * This test isn't finished yet and may not working.
  */
@@ -39,20 +38,20 @@ class ProjectRequestSpec extends GebSpec {
     @Ignore
     void "Test the project request page"() {
         when:
-            go 'projectRequest/index'
+        go 'projectRequest/index'
 
-        then:"check page"
-            $('.body h1').text() == "Project requests"
+        then: "check page"
+        $('.body h1').text() == "Project requests"
 
-        then:"fill in"
-            $('#name').value("new_project")
-            $('#description').value("description")
-            $('#keyword').value("keyword")
-            $('#organizationalUnit').value("organizationalUnit")
-            $('#storagePeriod').value("TEN_YEARS")
-            $('#pi').value("pi")
+        then: "fill in"
+        $('#name').value("new_project")
+        $('#description').value("description")
+        $('#keyword').value("keyword")
+        $('#organizationalUnit').value("organizationalUnit")
+        $('#storagePeriod').value("TEN_YEARS")
+        $('#pi').value("pi")
 
-        then:"submit"
-            $('#Submit').click()
+        then: "submit"
+        $('#Submit').click()
     }
 }

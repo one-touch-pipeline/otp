@@ -57,8 +57,8 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         data.createObjects()
 
         data.referenceGenome.with {
-            setLength REFERENCE_GENOME_LENGTH_WITH_N
-            setLengthWithoutN REFERENCE_GENOME_LENGTH
+            length = REFERENCE_GENOME_LENGTH_WITH_N
+            lengthWithoutN = REFERENCE_GENOME_LENGTH
         }
         assert data.referenceGenome.save([flush: true])
         DomainFactory.createAllAlignableSeqTypes()

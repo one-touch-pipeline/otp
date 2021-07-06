@@ -42,11 +42,9 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         ]
     }
 
-
     static final int COUNT_OF_ELEMENTS = 3
 
     static final String ERROR_MESSAGE = 'Error message'
-
 
     /**
      * Counter of method service.schedulerService.createNextProcessingStep
@@ -58,13 +56,11 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
      */
     int callRestartProcessingStepCount = 0
 
-
     List<ParameterType> parameterTypeList = []
 
     List<ProcessingStep> processingSteps = []
 
     Map<Long, Map<Long, String>> parameters = [:]
-
 
     void createServices(boolean startUpOk = false, boolean allowCallOfCreateNextProcessingStep = false, boolean allowCallOfRestartProcessingStep = false) {
         service.schedulerService = [
@@ -120,7 +116,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         }
     }
 
-
     void "test isCrashRecovery, should return true"() {
         given:
         createServices(false)
@@ -136,7 +131,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         expect:
         !service.isCrashRecovery()
     }
-
 
     void "test markJobsAsFinished, processing steps given by ID should be marked as finished and not have parameters"() {
         given:
@@ -323,8 +317,8 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         createProcessingSteps(true)
         parameters.values().iterator().next().put(parameterTypeList[0].id, null)
 
-         when:
-         service.markJobsAsFinished(processingSteps*.id, parameters)
+        when:
+        service.markJobsAsFinished(processingSteps*.id, parameters)
 
         then:
         def e = thrown(RuntimeException)
@@ -343,7 +337,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         def e = thrown(ProcessingException)
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
-
 
     void "test markJobsAsSucceeded, processing steps given by ID should be marked as finished and not have parameters"() {
         given:
@@ -552,7 +545,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
 
-
     void "test markJobsAsFailed, processing steps given by ID should be marked as failed"() {
         given:
         createServices(false, false, true)
@@ -657,7 +649,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         def e = thrown(ProcessingException)
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
-
 
     void "test restartJobs, processing steps given by ID should be marked as failed"() {
         given:
@@ -766,7 +757,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
 
-
     void "test crashedJobs, should return processing steps"() {
         given:
         createProcessingSteps()
@@ -791,7 +781,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         def e = thrown(RuntimeException)
         e.message == "Not in Crash Recovery"
     }
-
 
     void "test getOutputParametersOfJobs, should return the output parameters of the given processing step IDs having no parameters"() {
         given:
@@ -854,7 +843,6 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         def e = thrown(RuntimeException)
         e.message == "The system is not in Crash Recovery"
     }
-
 
     private assertExecutionState(ProcessingStep step, List<ExecutionState> states, String errorMessage = null) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
