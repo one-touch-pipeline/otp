@@ -65,7 +65,7 @@ String bamFiles =  AbstractMergedBamFile.findAllByWithdrawn(true).findAll {
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String analysis = BamFilePairAnalysis.findAllByWithdrawn(false).collect {
+String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
     it.workDirectory
 }.findAll {
     it.exists()
