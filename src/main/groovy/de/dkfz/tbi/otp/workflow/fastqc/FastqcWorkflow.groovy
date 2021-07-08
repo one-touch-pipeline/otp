@@ -25,12 +25,26 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+
 @Component
 @Slf4j
 @CompileStatic
-class FastqcWorkflow {
+class FastqcWorkflow implements OtpWorkflow {
 
     static final String WORKFLOW = "FastQC"
     static final String INPUT_FASTQ = "FASTQ"
     static final String OUTPUT_FASTQC = "FASTQC"
+
+    @Override
+    List<String> getJobBeanNames() {
+        return [
+                FastqcPrepareJob.simpleName.uncapitalize(),
+                FastqcConditionalFailJob.simpleName.uncapitalize(),
+                FastqcExecuteClusterPipelineJob.simpleName.uncapitalize(),
+                FastqcValidationJob.simpleName.uncapitalize(),
+                FastqcParseJob.simpleName.uncapitalize(),
+                FastqcFinishJob.simpleName.uncapitalize(),
+        ]
+    }
 }
