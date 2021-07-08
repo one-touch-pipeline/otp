@@ -593,7 +593,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *
      * It is no problem if additional workflows exist, as long at least the given count of {@link WorkflowRun} are ended.
      */
-    protected void execute(int requiredWorkflowRunCount = 1, boolean ensureNoFailure = true) {
+    protected void execute(int requiredWorkflowRunCount = 1, int existingRuns  = 0, boolean ensureNoFailure = true) {
         log.debug("starting workflow system")
         SessionUtils.withNewSession {
             if (WorkflowRun.count < requiredWorkflowRunCount) {
@@ -602,11 +602,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             updateDomainValuesForTesting()
             workflowSystemService.startWorkflowSystem()
 
-            waitUntilWorkflowStarts(requiredWorkflowRunCount)
-            waitUntilWorkflowFinishes(runningTimeout, requiredWorkflowRunCount)
+            waitUntilWorkflowStarts(requiredWorkflowRunCount, existingRuns)
+            waitUntilWorkflowFinishes(runningTimeout, requiredWorkflowRunCount, existingRuns)
 
             if (ensureNoFailure) {
-                ensureThatWorkflowFinishedSuccessfully()
+                ensureThatWorkflowFinishedSuccessfully(existingRuns)
             }
         }
     }
@@ -642,7 +642,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *
      * In case the timeout is reached, a {@link TimeoutException} is thrown.
      */
-    private void waitUntilWorkflowStarts(int requiredWorkflowRunCount) {
+    private void waitUntilWorkflowStarts(int requiredWorkflowRunCount, int existingRuns) {
         Duration timeout = startWorkflowTimeout
         log.debug "Wait for starting ${requiredWorkflowRunCount} workflows, max ${timeout}"
         long lastLog = 0L
@@ -656,7 +656,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 log.debug "waiting for workflow starting (${counter += 10} seconds) ... "
                 lastLog = milliSeconds
             }
-            return WorkflowRun.countByStateNotEqual(WorkflowRun.State.PENDING) >= requiredWorkflowRunCount
+            return WorkflowRun.countByStateNotEqual(WorkflowRun.State.PENDING) >= requiredWorkflowRunCount + existingRuns
         }, timeout.toMillis(), 1000L)) {
             TimeoutException e = new TimeoutException("Workflow(s) did not started within ${timeout.toString().substring(2)}.")
             log.debug(e.message, e)
@@ -673,7 +673,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *
      * In case the timeout is reached, a {@link TimeoutException} is thrown.
      */
-    private void waitUntilWorkflowFinishes(Duration timeout, int requiredWorkflowRunCount) {
+    private void waitUntilWorkflowFinishes(Duration timeout, int requiredWorkflowRunCount, int existingRuns) {
         log.debug "Wait until ${requiredWorkflowRunCount} workflowRuns finished, max ${timeout}"
         long lastLog = 0L
         int counter = 0
@@ -686,7 +686,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 log.debug "waiting (${counter++} min) ... "
                 lastLog = milliSeconds
             }
-            return WorkflowRun.countByStateNotInList(RUNNING_AND_WAITING_STATES) >= requiredWorkflowRunCount
+            return WorkflowRun.countByStateNotInList(RUNNING_AND_WAITING_STATES) >= requiredWorkflowRunCount + existingRuns
         }, timeout.toMillis(), 1000L)) {
             TimeoutException e = new TimeoutException("Workflow did not finish within ${timeout.toString().substring(2)}.")
             log.debug(e.message, e)
@@ -697,8 +697,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * check, that workflow objects has finished successfully
      */
-    protected void ensureThatWorkflowFinishedSuccessfully() {
-        assert WorkflowRun.findAllByStateNotEqual(WorkflowRun.State.SUCCESS).empty
+    protected void ensureThatWorkflowFinishedSuccessfully(int existingRuns) {
+        assert WorkflowRun.findAllByStateNotEqual(WorkflowRun.State.SUCCESS).size() - existingRuns == 0
         assert WorkflowArtefact.findAllByStateNotEqual(WorkflowArtefact.State.SUCCESS).empty
         assert ClusterJob.findAllByCheckStatusNotEqual(ClusterJob.CheckStatus.FINISHED).empty
         assert ClusterJob.findAllByExitStatusIsNull().empty

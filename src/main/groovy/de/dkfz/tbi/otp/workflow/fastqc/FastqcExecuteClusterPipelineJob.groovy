@@ -114,14 +114,18 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
 
     private List<String> createFastQcClusterScript(List<DataFile> dataFiles, Path outDir) {
         return dataFiles.collect { dataFile ->
-            String inputFnm = lsdfFilesService.getFileFinalPath(dataFile)
+            String inputFileName = lsdfFilesService.getFileFinalPath(dataFile)
 
-            FastqcDataFilesService.CompressionFormat usedFormat = FastqcDataFilesService.CompressionFormat.getUsedFormat(inputFnm)
+            String decompressFileCommand = ""
+            String deleteDecompressedFileCommand = ""
+            FastqcDataFilesService.CompressionFormat usedFormat = FastqcDataFilesService.CompressionFormat.getUsedFormat(inputFileName)
+            if (usedFormat) {
+                String orgFileName = inputFileName
+                inputFileName = fastqcDataFilesService.inputFileNameAdaption(inputFileName)
 
-            String decompressFileCommand         = usedFormat ?
-                "{ ${usedFormat.decompressionCommand} ; } < ${inputFnm} > ${fastqcDataFilesService.inputFileNameAdaption(inputFnm)}" : ""
-            String deleteDecompressedFileCommand = usedFormat ?
-                "rm -f ${inputFnm}" : ""
+                decompressFileCommand = "{ ${usedFormat.decompressionCommand} ; } < ${orgFileName} > ${inputFileName}"
+                deleteDecompressedFileCommand = "rm -f ${inputFileName}"
+            }
 
             String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
             String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)
@@ -131,7 +135,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |${moduleLoader}
                 |${fastqcActivation}
                 |${decompressFileCommand}
-                |${fastqcCommand} ${inputFnm} --noextract --nogroup -o ${outDir}
+                |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
                 |${deleteDecompressedFileCommand}
                 |""".stripMargin()
         }

@@ -29,10 +29,11 @@ abstract class AbstractFinishJob extends AbstractJob {
     void execute(WorkflowStep workflowStep) throws Throwable {
         logService.addSimpleLogEntry(workflowStep, "Finish the workflow.")
         updateDomains(workflowStep)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override
-    JobStage getJobStage() {
+    final JobStage getJobStage() {
         return JobStage.FINISH
     }
 

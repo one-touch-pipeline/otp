@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.JobStage
 import de.dkfz.tbi.otp.workflowExecution.LogService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -115,5 +116,8 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
             1 * markFastqcFinished(seqTrack)
         }
         job.jobStage == JobStage.FINISH
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService) {
+            1 * changeStateToSuccess(workflowStep)
+        }
     }
 }

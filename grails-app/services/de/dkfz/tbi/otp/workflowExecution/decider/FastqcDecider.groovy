@@ -91,7 +91,7 @@ class FastqcDecider implements Decider {
         seqTrack.seqType.libraryLayout.mateCount.times { int i ->
             result.add(workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                     run,
-                    "${FastqcWorkflow.OUTPUT_FASTQC}${i + 1}",
+                    "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
                     seqTrack.individual,
                     seqTrack.seqType,

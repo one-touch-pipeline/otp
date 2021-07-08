@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.LogService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class AbstractFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -46,12 +47,14 @@ class AbstractFinishJobSpec extends Specification implements DataTest, WorkflowS
             1 * addSimpleLogEntry(_, _) >> { WorkflowStep step, String message ->
                 message == 'Finish the workflow.' }
         }
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
         when:
         job.execute(workflowStep)
 
         then:
         1 * job.updateDomains(workflowStep) >> null
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
         job.jobStage == JobStage.FINISH
     }
 }

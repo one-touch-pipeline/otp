@@ -50,18 +50,22 @@ class FastqcParseJob extends AbstractJob implements FastqcShared {
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {
         final SeqTrack seqTrack = getSeqTrack(workflowStep)
-        final WorkflowArtefact workflowArtefact = workflowStep.workflowRun.outputArtefacts[FastqcWorkflow.OUTPUT_FASTQC]
+
+        final List<WorkflowArtefact> workflowArtefacts = workflowStep.workflowRun.outputArtefacts.findAll {
+            it.key.startsWith(FastqcWorkflow.OUTPUT_FASTQC)
+        }*.value
 
         SeqTrack.withTransaction {
-            seqTrackService.getSequenceFilesForSeqTrack(seqTrack).each { DataFile file ->
-                FastqcProcessedFile fastqc = fastqcDataFilesService.updateFastqcProcessedFile(file, workflowArtefact)
+            seqTrackService.getSequenceFilesForSeqTrack(seqTrack).sort { it.mateNumber }.eachWithIndex { DataFile file, int i ->
+                FastqcProcessedFile fastqc = fastqcDataFilesService.updateFastqcProcessedFile(file, workflowArtefacts[i])
                 fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
             }
         }
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override
-    JobStage getJobStage() {
+    final JobStage getJobStage() {
         return JobStage.PARSE
     }
 }

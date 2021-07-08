@@ -28,7 +28,6 @@ import org.joda.time.DateTime
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -274,11 +273,10 @@ class ErrorNotificationService {
         }*.url : []).join(",")
     }
 
-    @Deprecated
     Set<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {
         assert workflowStep
         return (workflowStep.workflowRun.inputArtefacts.values() + workflowStep.workflowRun.outputArtefacts.values())
                 *.artefact.findAll { it.present }*.get()
-                .collectMany { (it as ProcessParameterObject).containedSeqTracks } as Set
+                .collectMany { it.containedSeqTracks } as Set
     }
 }

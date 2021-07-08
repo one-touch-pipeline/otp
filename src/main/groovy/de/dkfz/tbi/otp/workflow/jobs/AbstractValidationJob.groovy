@@ -38,7 +38,7 @@ import java.nio.file.Path
  * - did the pipeline finish (using the callback {@link #ensureExternalJobsRunThrough})
  * - have all expected directories been created (Directories are fetched via callback {@link #getExpectedDirectories})
  * - have all expected files been created (Files are fetched via callback {@link #getExpectedDirectories})
- * - allows to do any further checking using using the callback {@link #doFurtherValidation}
+ * - allows to do any further checking using using the callback {@link #doFurtherValidationAndReturnProblems}
  *
  * Moreover, it allows to do updates of {@link #saveResult}.
  *

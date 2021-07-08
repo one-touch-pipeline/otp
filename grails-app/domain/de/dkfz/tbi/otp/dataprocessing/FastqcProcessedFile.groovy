@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
@@ -54,5 +55,10 @@ class FastqcProcessedFile implements Artefact, Entity {
 
     static mapping = {
         dataFile index: "fastqc_processed_file_data_file_idx"
+    }
+
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return [dataFile.seqTrack] as Set
     }
 }

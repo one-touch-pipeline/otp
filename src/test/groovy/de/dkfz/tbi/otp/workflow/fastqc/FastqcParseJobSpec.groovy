@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -52,6 +53,8 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService)
         job.fastqcUploadService = Mock(FastqcUploadService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+
         job.seqTrackService = new SeqTrackService()
         job.seqTrackService.fileTypeService = new FileTypeService()
 
@@ -62,5 +65,6 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         1 * job.fastqcDataFilesService.updateFastqcProcessedFile(seqTrack.dataFiles.first(), _)
         1 * job.fastqcDataFilesService.updateFastqcProcessedFile(seqTrack.dataFiles.last(), _)
         2 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(_)
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

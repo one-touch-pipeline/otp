@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+
 /**
  * Trait for concrete artefact.
  *
@@ -31,4 +33,5 @@ package de.dkfz.tbi.otp.workflowExecution
  */
 trait Artefact {
     WorkflowArtefact workflowArtefact
+    abstract Set<SeqTrack> getContainedSeqTracks()
 }

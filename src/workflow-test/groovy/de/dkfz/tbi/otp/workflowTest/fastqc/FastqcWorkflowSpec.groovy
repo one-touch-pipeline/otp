@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,94 +19,89 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.fastqc
+package de.dkfz.tbi.otp.workflowTest.fastqc
 
-import spock.lang.Shared
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.otp.workflowTest.fastqc.FastqcWorkflowSpec
+import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
+import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
+import java.nio.file.Path
 import java.time.Duration
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-/**
- * @Deprecated replaced by {@link FastqcWorkflowSpec}
- */
-@Deprecated
-class FastqcWorkflowTests extends WorkflowTestCase {
+class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
-    LsdfFilesService lsdfFilesService
+    private static final String INPUT_FILE = "fastqFiles/fastqc/input_fastqc.fastq."
+    private static final String EXPECTED_RESULT_FILE = "fastqFiles/fastqc/asdf_fastqc.zip"
+
     FastqcDataFilesService fastqcDataFilesService
+    FastqcDecider fastqcDecider
+    LsdfFilesService lsdfFilesService
 
-    @Shared
-    File sourceFastq
-    @Shared
-    File expectedFastqc
-    @Shared
-    DataFile dataFile
-    @Shared
-    SeqCenter seqCenter
-    @Shared
-    SeqTrack seqTrack
+    private Path expectedFastqc
+    private DataFile dataFile
+    private SeqTrack seqTrack
+    private WorkflowArtefact workflowArtefact
 
     void setupWorkflow(String fileExtension) {
-        sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.${fileExtension}")
-        expectedFastqc = new File(inputRootDirectory, "fastqFiles/fastqc/asdf_fastqc.zip")
+        Path sourceFastq = inputDataDirectory.resolve("${INPUT_FILE}${fileExtension}")
+        expectedFastqc = inputDataDirectory.resolve(EXPECTED_RESULT_FILE)
 
-        Project project = DomainFactory.createProject(
-                realm: realm
-        )
+        Run run = createRun()
 
-        Individual individual = DomainFactory.createIndividual(
-                project: project,
-                type: Individual.Type.REAL,
-        )
-
-        Sample sample = DomainFactory.createSample(individual: individual)
-
-        Run run = DomainFactory.createRun()
-
-        seqCenter = run.seqCenter
-
-        seqTrack = DomainFactory.createSeqTrack(
-                sample: sample,
+        seqTrack = createSeqTrack(
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
-                seqType: SeqTypeService.wholeGenomePairedSeqType,
+                seqType: SeqTypeService.rnaSingleSeqType,
                 run: run,
         )
+        workflowArtefact = createWorkflowArtefact(
+                state: WorkflowArtefact.State.SUCCESS,
+                artefactType: ArtefactType.FASTQ,
+                individual: seqTrack.individual,
+                seqType: seqTrack.seqType,
+                displayName: "display name",
+                outputRole: "FASTQ",
+                producedBy: createWorkflowRun(priority: processingPriority),
+        )
+        seqTrack.workflowArtefact = workflowArtefact
+        seqTrack.save(flush: true)
 
-        dataFile = DomainFactory.createSequenceDataFile(
+        dataFile = createSequenceDataFile(
                 fileExists: true,
                 fileSize: 1,
                 fileName: "asdf.fastq.${fileExtension}",
                 vbpFileName: "asdf.fastq.${fileExtension}",
                 seqTrack: seqTrack,
                 run: run,
-                initialDirectory: "${ftpDir}/${run.name}",
-        )
+                initialDirectory: workflowResultDirectory.resolve("ftp").resolve(run.name),
+    )
 
-        linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
+        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile, remoteFileSystem), sourceFastq, realm)
+        fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(dataFile, remoteFileSystem), sourceFastq, realm)
     }
 
     void "test FastQcWorkflow, when FastQC result file is available"() {
         given:
         SessionUtils.withNewSession {
             setupWorkflow('gz')
-            String initialPath = new File(lsdfFilesService.getFileInitialPath(dataFile)).parent
+            Path initialPath = lsdfFilesService.getFileInitialPathAsPath(dataFile, remoteFileSystem).parent
             String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
-            linkFileUtils.createAndValidateLinks([(expectedFastqc): new File("${initialPath}/${fastqcFileName}")], realm)
+            fileService.createLink(initialPath.resolve(fastqcFileName), expectedFastqc, realm)
+            fastqcDecider.decide([workflowArtefact])
         }
 
         when:
-        execute()
+        execute(1, 1)
 
         then:
         checkExistenceOfResultsFiles()
@@ -119,10 +114,11 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         given:
         SessionUtils.withNewSession {
             setupWorkflow(extension)
+            fastqcDecider.decide([workflowArtefact])
         }
 
         when:
-        execute()
+        execute(1, 1)
 
         then:
         checkExistenceOfResultsFiles()
@@ -139,7 +135,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     private void checkExistenceOfResultsFiles() {
         SessionUtils.withNewSession {
-            ZipFile expectedResult = new ZipFile(expectedFastqc)
+            ZipFile expectedResult = new ZipFile(fileService.toFile(expectedFastqc))
             ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
 
             List<String> actualFiles = []
@@ -159,7 +155,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         SessionUtils.withNewSession {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
 
-            assert FastqcProcessedFile.all.size() == 1
             assert fastqcProcessedFile.fileExists
             assert fastqcProcessedFile.contentUploaded
             assert fastqcProcessedFile.dataFile == dataFile
@@ -177,14 +172,14 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
     @Override
-    List<String> getWorkflowScripts() {
-        return [
-                "scripts/workflows/FastqcWorkflow.groovy",
-        ]
+    Duration getRunningTimeout() {
+        return Duration.ofMinutes(20)
     }
 
     @Override
-    Duration getTimeout() {
-        Duration.ofMinutes(20)
+    String getWorkflowName() {
+        return FastqcWorkflow.WORKFLOW
     }
+
+    final Class<FastqcWorkflow> workflowComponentClass = FastqcWorkflow
 }
