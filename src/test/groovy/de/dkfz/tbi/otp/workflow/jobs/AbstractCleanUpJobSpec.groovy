@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,35 +21,43 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import org.springframework.beans.factory.annotation.Autowired
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
-/**
- * Deletes files, directories that should not be kept
- */
-abstract class AbstractCleanUpJob extends AbstractJob {
-
-    @Autowired
-    FileService fileService
+class AbstractCleanUpJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
-    final void execute(WorkflowStep workflowStep) {
-        (getFilesToDelete(workflowStep) + getDirectoriesToDelete(workflowStep)).each {
-            fileService.deleteDirectoryRecursively(it)
-        }
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
+    Class[] getDomainClassesToMock() {
+        return [
+                WorkflowStep,
+        ]
     }
 
-    abstract List<Path> getFilesToDelete(WorkflowStep workflowStep)
+    void "test execute"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        Path file = Paths.get("file")
+        Path dir = Paths.get("dir")
+        AbstractCleanUpJob job = Spy(AbstractCleanUpJob)
+        job.fileService = Mock(FileService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
-    abstract List<Path> getDirectoriesToDelete(WorkflowStep workflowStep)
+        when:
+        job.execute(workflowStep)
 
-    @Override
-    final JobStage getJobStage() {
-        return JobStage.CLEANUP
+        then:
+        1 * job.getFilesToDelete(workflowStep) >> { [file] }
+        1 * job.getDirectoriesToDelete(workflowStep) >> { [dir] }
+        1 * job.fileService.deleteDirectoryRecursively(file)
+        1 * job.fileService.deleteDirectoryRecursively(dir)
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

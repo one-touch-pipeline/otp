@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
@@ -117,6 +119,9 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                     1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
                 },
         ])
+        linkFilesToFinalDestinationService.fileSystemService = new TestFileSystemService()
+        linkFilesToFinalDestinationService.fileService = new FileService()
+
 
         when:
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)

@@ -25,11 +25,14 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
@@ -37,20 +40,15 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 @Transactional
 class LinkFilesToFinalDestinationService {
 
-    ExecuteRoddyCommandService executeRoddyCommandService
-
-    LinkFileUtils linkFileUtils
-
-    LsdfFilesService lsdfFilesService
-
-    RemoteShellHelper remoteShellHelper
-
     AbstractMergedBamFileService abstractMergedBamFileService
-
-    QcTrafficLightCheckService qcTrafficLightCheckService
-
+    ExecuteRoddyCommandService executeRoddyCommandService
+    FileService fileService
+    FileSystemService fileSystemService
+    LinkFileUtils linkFileUtils
+    LsdfFilesService lsdfFilesService
     Md5SumService md5SumService
-
+    QcTrafficLightCheckService qcTrafficLightCheckService
+    RemoteShellHelper remoteShellHelper
 
     void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
@@ -193,7 +191,7 @@ class LinkFilesToFinalDestinationService {
         linkFileUtils.createAndValidateLinks(links, realm, roddyBamFile.project.unixGroup)
     }
 
-    void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {
+    List<Path> getFilesToCleanup(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
@@ -211,12 +209,17 @@ class LinkFilesToFinalDestinationService {
         }
         List<File> foundFiles = roddyBamFile.workDirectory.listFiles() ?: []
         List<File> filesToDelete = foundFiles - expectedFiles
+        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        return filesToDelete.collect { fileService.toPath(it, fs) }
+    }
 
-        lsdfFilesService.deleteFilesRecursive(realm, filesToDelete)
+    @Deprecated
+    void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {
+        lsdfFilesService.deleteFilesRecursive(realm, getFilesToCleanup(roddyBamFile, realm).collect { fileService.toFile(it) })
     }
 
 
-    void cleanupOldResults(RoddyBamFile roddyBamFile, Realm realm) {
+    List<Path> getOldResultsToCleanup(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
@@ -251,9 +254,15 @@ class LinkFilesToFinalDestinationService {
                 }
             }
         }
+        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        return filesToDelete.collect { fileService.toPath(it, fs) }
+    }
 
+    @Deprecated
+    void cleanupOldResults(RoddyBamFile roddyBamFile, Realm realm) {
+        List<Path> filesToDelete = getOldResultsToCleanup(roddyBamFile, realm)
         if (filesToDelete) {
-            lsdfFilesService.deleteFilesRecursive(realm, filesToDelete)
+            lsdfFilesService.deleteFilesRecursive(realm, filesToDelete.collect { fileService.toFile(it) })
         }
     }
 

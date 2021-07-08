@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,37 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.panCancer
 
+import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
+import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
-/**
- * Deletes files, directories that should not be kept
- */
-abstract class AbstractCleanUpJob extends AbstractJob {
+@Component
+@Slf4j
+@CompileStatic
+class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared {
 
     @Autowired
-    FileService fileService
+    LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
     @Override
-    final void execute(WorkflowStep workflowStep) {
-        (getFilesToDelete(workflowStep) + getDirectoriesToDelete(workflowStep)).each {
-            fileService.deleteDirectoryRecursively(it)
-        }
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
+    List<Path> getFilesToDelete(WorkflowStep workflowStep) {
+        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
+                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
+                .findAll { !Files.isDirectory(it) }
     }
 
-    abstract List<Path> getFilesToDelete(WorkflowStep workflowStep)
-
-    abstract List<Path> getDirectoriesToDelete(WorkflowStep workflowStep)
-
     @Override
-    final JobStage getJobStage() {
-        return JobStage.CLEANUP
+    List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
+        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
+                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
+                .findAll { Files.isDirectory(it) }
     }
 }
