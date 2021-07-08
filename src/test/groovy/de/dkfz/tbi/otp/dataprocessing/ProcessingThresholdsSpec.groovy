@@ -21,10 +21,23 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class ProcessingThresholdsSpec extends Specification {
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
+class ProcessingThresholdsSpec extends Specification implements DataTest, DomainFactoryCore {
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                ProcessingThresholds,
+        ]
+    }
+
     @Unroll
     void "test isAboveLaneThreshold with #laneCount lanes and #threshold threshold should return #result"() {
         setup:
@@ -107,5 +120,58 @@ class ProcessingThresholdsSpec extends Specification {
         then:
         AssertionError e = thrown()
         e.message ==~ '.*property coverage of the bam has to be set.*'
+    }
+
+    @Unroll
+    void "validate, when #property is #value, then validation fail"() {
+        given:
+        ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
+
+        when:
+        processingThresholds[property] = value
+
+        then:
+        TestCase.assertValidateError(processingThresholds, property, constraint)
+
+        where:
+        property        | constraint          | value
+        'project'       | 'nullable'          | null
+        'sampleType'    | 'nullable'          | null
+        'seqType'       | 'nullable'          | null
+        'coverage'      | 'validator.invalid' | -2
+        'numberOfLanes' | 'validator.invalid' | -2
+    }
+
+    void "validate, when coverage and numberOfLanes are null, then validation fail"() {
+        given:
+        ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
+
+        when:
+        processingThresholds['coverage'] = null
+        processingThresholds['numberOfLanes'] = null
+
+        then:
+        TestCase.assertAtLeastExpectedValidateError(processingThresholds, 'coverage', 'validator.invalid', null)
+        TestCase.assertAtLeastExpectedValidateError(processingThresholds, 'numberOfLanes', 'validator.invalid', null)
+    }
+
+    @Unroll
+    void "validate, when coverage is #coverage and numberOfLanes is #numberOfLanes, then validation success"() {
+        given:
+        ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
+
+        when:
+        processingThresholds['coverage'] = coverage
+        processingThresholds['numberOfLanes'] = numberOfLanes
+        processingThresholds.validate()
+
+        then:
+        processingThresholds.errors.errorCount == 0
+
+        where:
+        coverage | numberOfLanes
+        1.2      | 2
+        1.2      | null
+        null     | 2
     }
 }

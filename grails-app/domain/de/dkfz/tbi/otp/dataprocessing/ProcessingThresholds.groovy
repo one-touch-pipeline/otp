@@ -52,19 +52,14 @@ class ProcessingThresholds implements Entity {
      */
     Integer numberOfLanes
 
-    static constraints = {
+    static Closure constraints = {
+        sampleType unique: ['seqType', 'project']
         coverage nullable: true, validator: { val, obj ->
             return (val != null && val > 0) || (val == null && obj.numberOfLanes != null)
         }
         numberOfLanes nullable: true, validator: { val, obj ->
             return (val != null && val > 0) || (val == null && obj.coverage != null)
         }
-    }
-
-    static mapping = {
-        project  index: "processing_thresholds_project_seq_type_sample_type_idx"
-        seqType  index: "processing_thresholds_project_seq_type_sample_type_idx"
-        sampleType  index: "processing_thresholds_project_seq_type_sample_type_idx"
     }
 
     boolean isAboveLaneThreshold(AbstractMergedBamFile bamFile) {

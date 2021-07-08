@@ -37,7 +37,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
     SamplePair createSamplePair(Map properties = [:]) {
         return DomainFactory.createSamplePairPanCan([
                 mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
-                        seqType: SeqTypeService.wholeGenomePairedSeqType,
+                        seqType : SeqTypeService.wholeGenomePairedSeqType,
                         pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ] + properties)
@@ -48,7 +48,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
      *
      * @return The finished variant calling analysis, with all new SamplePair behind it.
      */
-    BamFilePairAnalysis createBpaWithSingleAnalysisFinished( String workflowProcessingStatus, MethodClosure createTestInstance) {
+    BamFilePairAnalysis createBpaWithSingleAnalysisFinished(String workflowProcessingStatus, MethodClosure createTestInstance) {
         BamFilePairAnalysis bpa = createTestInstance([
                 processingState: AnalysisProcessingStates.FINISHED,
                 samplePair     : createSamplePair([
@@ -93,20 +93,20 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
         //   - the DomainFactory methods to create test instances for that workflow.
         // samplePair.workflowProcessingStatus fieldname : DomainFactory.&create${Workflow}InstanceWithRoddyBamFiles
         Map<String, Closure<BamFilePairAnalysis>> workflowStatusFieldsAndTheirTestInstanceCreator = [
-                snvProcessingStatus:      DomainFactory.&createRoddySnvInstanceWithRoddyBamFiles,
-                indelProcessingStatus:    DomainFactory.&createIndelCallingInstanceWithRoddyBamFiles,
-                sophiaProcessingStatus:   DomainFactory.&createSophiaInstanceWithRoddyBamFiles,
-                aceseqProcessingStatus:   DomainFactory.&createAceseqInstanceWithRoddyBamFiles,
+                snvProcessingStatus     : DomainFactory.&createRoddySnvInstanceWithRoddyBamFiles,
+                indelProcessingStatus   : DomainFactory.&createIndelCallingInstanceWithRoddyBamFiles,
+                sophiaProcessingStatus  : DomainFactory.&createSophiaInstanceWithRoddyBamFiles,
+                aceseqProcessingStatus  : DomainFactory.&createAceseqInstanceWithRoddyBamFiles,
                 runYapsaProcessingStatus: DomainFactory.&createRunYapsaInstanceWithRoddyBamFiles,
         ]
 
-        assert workflowNames.size() == workflowStatusFieldsAndTheirTestInstanceCreator.size() : "mismatch between workflow names and the factory-methods map"
+        assert workflowNames.size() == workflowStatusFieldsAndTheirTestInstanceCreator.size(): "mismatch between workflow names and the factory-methods map"
 
         and: 'a sample pair with all analyses completed'
         SamplePair finishedSamplePair = createSamplePair(
                 // for all workflows: set processingStatus field to "done/no-processing-needed"
                 workflowStatusFieldsAndTheirTestInstanceCreator.keySet().collectEntries {
-                    [ (it) : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED ]
+                    [(it): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED]
                 }
         )
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(finishedSamplePair.mergingWorkPackage2, SampleTypePerProject.Category.CONTROL)
@@ -127,15 +127,23 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
 
         and: 'all bam files have a processing threshold set'
         List<AbstractMergedBamFile> bamFiles = (
-                analysesOfAllAnalysisFinishedSamplePair +
+        analysesOfAllAnalysisFinishedSamplePair +
                 analysesOfSingleAnalysisFinishedSamplePairs
         ).collect {
             [it.sampleType1BamFile, it.sampleType2BamFile]
-        }.flatten().each {
-            DomainFactory.createProcessingThresholdsForBamFile(it, [coverage: null, numberOfLanes: 1])
+        }.flatten()
+
+        bamFiles.collect {
+            [
+                    project   : it.project,
+                    seqType   : it.seqType,
+                    sampleType: it.sampleType,
+            ]
+        }.unique().each {
+            DomainFactory.createProcessingThresholds(it + [coverage: null, numberOfLanes: 1])
         }
 
-        List<SamplePair> expectedSamplePairs = [ finishedSamplePair ]
+        List<SamplePair> expectedSamplePairs = [finishedSamplePair]
 
         when:
         List<SamplePair> result = checker.handle(bamFiles, output)

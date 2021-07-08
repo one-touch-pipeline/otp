@@ -45,23 +45,6 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
         ]
     }
 
-    void "test getSeqTracksWithoutProcessingThreshold"() {
-        given:
-        List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
-
-        SeqTrack st1 = createSeqTrack()
-        SeqTrack st2 = createSeqTrack(seqType: seqTypes.first())
-        SeqTrack st3 = createSeqTrack()
-        SeqTrack st4 = createSeqTrack(seqType: seqTypes.first())
-        DomainFactory.createProcessingThresholds(project: st1.project, sampleType: st1.sampleType, seqType: st1.seqType)
-        DomainFactory.createProcessingThresholds(project: st2.project, sampleType: st2.sampleType, seqType: st2.seqType)
-
-        ProcessingThresholdsService service = new ProcessingThresholdsService()
-
-        expect:
-        [st4] == service.getSeqTracksWithoutProcessingThreshold([st1, st2, st3, st4])
-    }
-
     void "test createUpdateOrDelete, test create"() {
         given:
         ProcessingThresholds processingThresholds
@@ -109,28 +92,5 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
 
         then:
         ProcessingThresholds.all.size() == 0
-    }
-
-    void "test generateDefaultThresholds"() {
-        given:
-        SeqTrack seqTrack1 = createSeqTrack()
-        SeqTrack seqTrack2 = createSeqTrack(sample: seqTrack1.sample, seqType: seqTrack1.seqType)
-        ProcessingThresholdsService service = new ProcessingThresholdsService()
-
-        when:
-        service.generateDefaultThresholds([seqTrack1])
-
-        then:
-        List<ProcessingThresholds> thresholds = ProcessingThresholds.all
-        thresholds.find {
-            it.project == seqTrack1.project &&
-                    it.seqType == seqTrack1.seqType &&
-                    it.sampleType == seqTrack1.sampleType
-        }
-        thresholds.find {
-            it.project == seqTrack2.project &&
-                    it.seqType == seqTrack2.seqType &&
-                    it.sampleType == seqTrack2.sampleType
-        }
     }
 }

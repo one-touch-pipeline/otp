@@ -55,32 +55,22 @@ class ProcessingThresholdsService {
             processingThresholds.coverage = coverage
         } else {
             processingThresholds = new ProcessingThresholds(
-                            project: project,
-                            sampleType: sampleType,
-                            seqType: seqType,
-                            numberOfLanes: numberOfLanes,
-                            coverage: coverage,
+                    project: project,
+                    sampleType: sampleType,
+                    seqType: seqType,
+                    numberOfLanes: numberOfLanes,
+                    coverage: coverage,
             )
         }
         processingThresholds.save(flush: true)
         return processingThresholds
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List<ProcessingThresholds> findAllByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
-        return ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
-    }
-
-    List<SeqTrack> getSeqTracksWithoutProcessingThreshold(List<SeqTrack> seqTracks) {
-        List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
-        seqTracks.findAll { SeqTrack seqTrack ->
-            (seqTrack.seqType in analysableSeqTypes &&
-                    findAllByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType).isEmpty())
-        }
-    }
-
     /**
-     * Generate default thresholds for all seq tracks of a given list.
+     * Generate default thresholds for all seqTracks of a given list including of corresponding thresholds.
+     *
+     * Corresponding thresholds are thresholds for other sample types of the same individual and seqType.
+     *
      * They will be saved with numberOfLanes = 1 by default.
      *
      * @param seqTracks with configured alignment
@@ -88,29 +78,49 @@ class ProcessingThresholdsService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingThresholds> generateDefaultThresholds(List<SeqTrack> seqTracks) {
+        if (!seqTracks) {
+            return []
+        }
+
         final int defaultNumberOfLanes = 1
-        List<ProcessingThresholds> generatedThresholds = []
-
-        seqTracks.forEach { seqTrack ->
-            List<ProcessingThresholds> processingThresholds = findAllByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType)
-
-            if (processingThresholds.isEmpty()) {
-                generatedThresholds.add(
-                        new ProcessingThresholds(project      : seqTrack.project,
-                                seqType      : seqTrack.seqType,
-                                sampleType   : seqTrack.sampleType,
-                                numberOfLanes: defaultNumberOfLanes,)
-                                .save(flush: true))
-
-                seqTrack.individual.samples.findAll { seqTrack.seqType in it.seqTracks*.seqType }*.sampleType.each { SampleType sampleType ->
-                    generatedThresholds.add(new ProcessingThresholds(
-                            project: seqTrack.project,
-                            seqType: seqTrack.seqType,
-                            sampleType: sampleType,
-                            numberOfLanes: defaultNumberOfLanes,
-                    ).save(flush: true))
-                }
-            }
+        List<ProcessingThresholds> generatedThresholds = SeqTrack.executeQuery("""
+            select distinct
+                project2,
+                sampleType2,
+                seqType2
+            from
+                SeqTrack seqTrack1
+                join seqTrack1.seqType seqType1
+                join seqTrack1.sample.individual individual1
+                join individual1.project project1,
+                SeqTrack seqTrack2
+                join seqTrack2.seqType seqType2
+                join seqTrack2.sample.sampleType sampleType2
+                join seqTrack2.sample.individual individual2
+                join individual2.project project2
+            where
+                seqTrack1 in (:seqTracks)
+                and individual1 = individual2
+                and seqType1 = seqType2
+                and not exists (
+                    select
+                        processingThresholds.id
+                    from
+                        ProcessingThresholds processingThresholds
+                    where
+                        processingThresholds.project = project2
+                        and processingThresholds.sampleType = sampleType2
+                        and processingThresholds.seqType = seqType2
+                )
+            """, [
+                    seqTracks: seqTracks,
+            ]).collect {
+            new ProcessingThresholds([
+                    project      : it[0],
+                    sampleType   : it[1],
+                    seqType      : it[2],
+                    numberOfLanes: defaultNumberOfLanes,
+            ]).save(flush: true)
         }
 
         return generatedThresholds

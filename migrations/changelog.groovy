@@ -567,4 +567,6 @@ databaseChangeLog = {
     changeSet(author: "nlangh", id: "otp-874") {
         sqlFile(path: 'changelogs/2021/otp-874-deactivate-old-data-installation-workflows.sql')
     }
+
+    include file: 'changelogs/2021/otp-1181-unique-constraint-for-processing-thresholds.groovy'
 }

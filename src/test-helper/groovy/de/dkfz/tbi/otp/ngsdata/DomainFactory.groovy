@@ -2329,8 +2329,16 @@ class DomainFactory {
         ] + properties)
     }
 
+    static ProcessingThresholds createProcessingThresholdsForSeqTrack(SeqTrack seqTrack, Map properties = [:]) {
+        return createProcessingThresholds([
+                project   : seqTrack.project,
+                seqType   : seqTrack.seqType,
+                sampleType: seqTrack.sampleType,
+        ] + properties)
+    }
+
     static ProcessingThresholds createProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
-        createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
+        return createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
     static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, SequencingReadType libraryName = null) {
