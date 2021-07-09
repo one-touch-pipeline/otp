@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.scheduler
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -70,16 +71,17 @@ class OldClusterJobMonitor extends AbstractClusterJobMonitor {
     }
 
     @Override
+    @Transactional
     protected void handleFinishedClusterJobs(final ClusterJob clusterJob) {
         MonitoringJob monitoringJob = schedulerService.getJobForProcessingStep(clusterJob.processingStep)
-        assert monitoringJob: """\n\n-----------------------------------------------
+        scheduler.doWithErrorHandling(monitoringJob, {
+            assert monitoringJob: """\n\n-----------------------------------------------
 No monitor job found for ${clusterJob.processingStep}
 Only following monitors available:
 ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\n')}
 
 """
 
-        scheduler.doWithErrorHandling(monitoringJob, {
             boolean jobHasFinished
             ExecutionState jobEndState
             try {

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -62,6 +63,7 @@ class ClusterJobMonitor extends AbstractClusterJobMonitor {
     }
 
     @Override
+    @Transactional
     protected void handleFinishedClusterJobs(ClusterJob clusterJob) {
         clusterJob.refresh()
         if (clusterJob.workflowStep.clusterJobs.every { it.checkStatus == ClusterJob.CheckStatus.FINISHED }) {

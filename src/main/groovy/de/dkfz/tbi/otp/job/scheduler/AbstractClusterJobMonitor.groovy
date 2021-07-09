@@ -119,7 +119,6 @@ abstract class AbstractClusterJobMonitor {
     /**
      * Transactional wrapper for {@link #saveJobFinishedInformation(ClusterJob)} and the callback {@link #handleFinishedClusterJobs(ClusterJob)}.
      */
-    @Transactional
     protected void handleFinishedClusterJobWrapper(ClusterJob clusterJob) {
         LogUsedTimeUtils.logUsedTime("${name}: handle finished cluster job ${clusterJob.clusterJobId}") {
             saveJobFinishedInformation(clusterJob)
