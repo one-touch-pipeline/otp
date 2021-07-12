@@ -70,8 +70,10 @@ class MetadataImportService {
     /**
      * flag that disable the connection to the new workflow system.
      * If change to use new one, delete this flag and disable the start job of the old workflow system.
+     * @SuppressWarnings as it should still behave like a constant in the code, but it should be changeable via cli in case of a rollback.
      */
-    static final boolean DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM = true
+     @SuppressWarnings("PropertyName")
+    static boolean DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM = false
 
     @TupleConstructor
     @ToString
