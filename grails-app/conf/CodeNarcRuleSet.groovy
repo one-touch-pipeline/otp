@@ -701,9 +701,7 @@ All the Rules that will be used for OTP
     // rulesets/grails.xml
     //GrailsDomainHasEquals //Entity provides equals()
     //GrailsDomainHasToString //we don't do this in OTP
-    GrailsDomainGormMethods {
-        priority = LOW
-    }
+    //GrailsDomainGormMethods //GORM domain method are necessary (see issue otp-1005 to replace them with data services)
     GrailsDomainReservedSqlKeywordName {
         priority = DEFAULT
     }
