@@ -27,6 +27,11 @@ import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 
 @Transactional
+@Deprecated
+/**
+ * @deprecated since only used for old workflow system.
+ * For the new workflow system checking and linking will be done in separate jobs.
+ */
 class QcTrafficLightCheckService {
 
     QcTrafficLightNotificationService qcTrafficLightNotificationService
