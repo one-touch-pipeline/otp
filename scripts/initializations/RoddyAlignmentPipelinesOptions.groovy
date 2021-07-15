@@ -43,7 +43,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
-        "1.2.73-201",
+        "1.2.73-202",
         SeqTypeService.exomePairedSeqType.roddyName,
 )
 
@@ -82,7 +82,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
-        "1.2.73-201",
+        "1.2.73-202",
         SeqTypeService.wholeGenomePairedSeqType.roddyName,
 )
 
@@ -122,7 +122,7 @@ wgbs.each { SeqType seqType ->
 
     processingOptionService.createOrUpdate(
             OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
-            "1.2.73-201",
+            "1.2.73-202",
             seqType.roddyName,
     )
 
@@ -211,7 +211,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
-        "1.2.73-201",
+        "1.2.73-202",
         SeqTypeService.chipSeqPairedSeqType.roddyName,
 )
 
