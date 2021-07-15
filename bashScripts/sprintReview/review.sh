@@ -117,7 +117,9 @@ done > yt.csv
 join -t ';' -1 1 -2 1 log-otp.csv yt.csv > otp-joined.csv
 
 #create file with issues having no commit
+set +e +o pipefail
 grep -v -F -f otp-numbers.csv  yt.csv | sed -e "s/;/; ; ;/" > otp-no-commit.csv
+set -e -o pipefail
 
 #sort joined and no commit together
 sort -f -t ';' -k 6 -k 1.5n otp-joined.csv otp-no-commit.csv > otp-combined.csv
