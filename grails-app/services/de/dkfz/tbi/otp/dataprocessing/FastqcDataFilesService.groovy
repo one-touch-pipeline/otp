@@ -131,6 +131,12 @@ class FastqcDataFilesService {
         assert (new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
     }
 
+    void updateFastqcProcessedFiles(List<FastqcProcessedFile> fastqcList) {
+        fastqcList.each {
+            updateFastqcProcessedFile(it)
+        }
+    }
+
     void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
         String path = fastqcOutputFile(fastqc.dataFile)
         File fastqcFile = new File(path)

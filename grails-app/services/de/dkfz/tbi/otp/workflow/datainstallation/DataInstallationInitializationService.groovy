@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflow.shared.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -35,10 +34,6 @@ import java.nio.file.Paths
 @Transactional
 class DataInstallationInitializationService {
 
-    static final String WORKFLOW = "FASTQ installation"
-
-    static final String OUTPUT_ROLE = "FASTQ"
-
     ConfigFragmentService configFragmentService
     LsdfFilesService lsdfFilesService
     WorkflowArtefactService workflowArtefactService
@@ -46,10 +41,10 @@ class DataInstallationInitializationService {
 
     /**
      * Create for all {@link SeqTrack}s of the {@link FastqImportInstance} a {@link WorkflowRun} and an output {@link WorkflowArtefact}
-     * with role {@link #OUTPUT_ROLE} connecting the {@link WorkflowRun} with the {@link SeqTrack}.
+     * with role {@link #{DataInstallationWorkflow.WORKFLOW}} connecting the {@link WorkflowRun} with the {@link SeqTrack}.
      */
     List<WorkflowRun> createWorkflowRuns(FastqImportInstance instance, ProcessingPriority priority = null) {
-        Workflow workflow = Workflow.getExactlyOneWorkflow(WORKFLOW)
+        Workflow workflow = Workflow.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
         List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
             it.seqTrack
         }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
@@ -71,7 +66,7 @@ class DataInstallationInitializationService {
         WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}",
                 configFragments)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
-                run, OUTPUT_ROLE, ArtefactType.FASTQ, seqTrack.individual, seqTrack.seqType, name
+                run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, seqTrack.individual, seqTrack.seqType, name
         ))
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)
@@ -87,22 +82,5 @@ class DataInstallationInitializationService {
                 null, //referenceGenome, not used for installation
                 seqTrack.libraryPreparationKit,
         ))
-    }
-
-    SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        WorkflowRun run = workflowStep.workflowRun
-        if (run.workflow.name != DataInstallationInitializationService.WORKFLOW) {
-            throw new WrongWorkflowException("The step is from workflow ${run.workflow.name}, but expected is ${WORKFLOW}")
-        }
-        WorkflowArtefact artefact = run.outputArtefacts[DataInstallationInitializationService.OUTPUT_ROLE]
-        if (!artefact) {
-            throw new NoArtefactOfRoleException("The WorkflowRun ${run} has no output artefact of role " +
-                    "${OUTPUT_ROLE}, only ${run.outputArtefacts.keySet().sort()}")
-        }
-        Optional<Artefact> optionalArtefact = artefact.artefact
-        if (!optionalArtefact.isPresent()) {
-            throw new NoConcreteArtefactException("The WorkflowArtefact ${artefact} of WorkflowRun ${run} has no concreate artefact yet")
-        }
-        return optionalArtefact.get() as SeqTrack
     }
 }

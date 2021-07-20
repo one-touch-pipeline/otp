@@ -206,7 +206,7 @@ class MetadataImportService {
                 if (!Files.exists(targetFile)) {
                     //create the directory and set the permission with owner and group access (setgid bit) explicitly
                     fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetDirectory, configService.defaultRealm,
-                        "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+                            "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
                     fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
                 }
 
@@ -356,9 +356,9 @@ class MetadataImportService {
         }
 
         MetaDataFile metaDataFile = new MetaDataFile(
-                fileName           : context.metadataFile.fileName.toString(),
-                filePath           : context.metadataFile.parent.toString(),
-                md5sum             : context.metadataFileMd5sum,
+                fileName: context.metadataFile.fileName.toString(),
+                filePath: context.metadataFile.parent.toString(),
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         )
         assert metaDataFile.save(flush: true)
@@ -438,7 +438,7 @@ class MetadataImportService {
     }
 
     protected Run getOrCreateRun(String runName, List<Row> rows) {
-        SeqCenter seqCenter =  exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME)))
+        SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME)))
         SeqPlatform seqPlatform = seqPlatformService.findSeqPlatform(
                 uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
                 uniqueColumnValue(rows, INSTRUMENT_MODEL),
@@ -448,9 +448,9 @@ class MetadataImportService {
 
         Run run = atMostOneElement(Run.findAllByName(runName))
         if (run) {
-            assert run.seqCenter == seqCenter : "The center of run (${run.seqCenter}) differ from center in sheet (${seqCenter})"
-            assert run.seqPlatform == seqPlatform : "The seqPlatform of run (${run.seqPlatform}) differ from seqPlatform in sheet (${seqPlatform})"
-            assert run.dateExecuted == dateExecuted : "The dateExecuted of run (${run.dateExecuted}) differ from dateExecuted in sheet (${dateExecuted})"
+            assert run.seqCenter == seqCenter: "The center of run (${run.seqCenter}) differ from center in sheet (${seqCenter})"
+            assert run.seqPlatform == seqPlatform: "The seqPlatform of run (${run.seqPlatform}) differ from seqPlatform in sheet (${seqPlatform})"
+            assert run.dateExecuted == dateExecuted: "The dateExecuted of run (${run.dateExecuted}) differ from dateExecuted in sheet (${dateExecuted})"
             return run
         }
 
@@ -575,20 +575,20 @@ class MetadataImportService {
             boolean indexFile = matcher.group('index')
 
             DataFile dataFile = new DataFile(
-                    pathName           : '',
-                    fileName           : file.fileName.toString(),
-                    initialDirectory   : file.parent.toString(),
-                    vbpFileName        : file.fileName.toString(),
-                    md5sum             : row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
-                    project            : seqTrack.project,
-                    dateExecuted       : seqTrack.run.dateExecuted,
-                    used               : true,
-                    mateNumber         : mate,
-                    indexFile          : indexFile,
-                    run                : seqTrack.run,
+                    pathName: '',
+                    fileName: file.fileName.toString(),
+                    initialDirectory: file.parent.toString(),
+                    vbpFileName: file.fileName.toString(),
+                    md5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
+                    project: seqTrack.project,
+                    dateExecuted: seqTrack.run.dateExecuted,
+                    used: true,
+                    mateNumber: mate,
+                    indexFile: indexFile,
+                    run: seqTrack.run,
                     fastqImportInstance: fastqImportInstance,
-                    seqTrack           : seqTrack,
-                    fileType           : FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
+                    seqTrack: seqTrack,
+                    fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
             )
             assert dataFile.save(flush: false)
 
@@ -702,7 +702,7 @@ class MetadataImportService {
 }
 
 @TupleConstructor
-@ToString(includePackage=false, includeNames=true)
+@ToString(includePackage = false, includeNames = true)
 class ExtractedValue {
 
     final String value

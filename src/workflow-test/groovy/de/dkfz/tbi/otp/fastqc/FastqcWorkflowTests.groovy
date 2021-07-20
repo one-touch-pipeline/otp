@@ -52,7 +52,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     @Shared
     SeqTrack seqTrack
 
-
     void setupWorkflow(String fileExtension) {
         sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.${fileExtension}")
         expectedFastqc = new File(inputRootDirectory, "fastqFiles/fastqc/asdf_fastqc.zip")
@@ -91,7 +90,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
     }
-
 
     void "test FastQcWorkflow, when FastQC result file is available"() {
         given:

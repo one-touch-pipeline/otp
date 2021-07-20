@@ -42,10 +42,20 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
         ]
     }
 
-    DataFile dataFile
-    FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
-            dataFile: dataFile,
+    DataFile dataFile1
+    DataFile dataFile2
+
+    FastqcProcessedFile fastqcProcessedFile1 = new FastqcProcessedFile([
+            dataFile: dataFile1,
     ])
+    FastqcProcessedFile fastqcProcessedFile2 = new FastqcProcessedFile([
+            dataFile: dataFile2,
+    ])
+
+    List<FastqcProcessedFile> fastqcProcessedFileList = [
+            fastqcProcessedFile1,
+            fastqcProcessedFile2,
+    ]
 
     void "test updateDomain method"() {
         given:
@@ -54,14 +64,13 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
 
         FastqcFinishJob job = Spy(FastqcFinishJob) {
             getSeqTrack(workflowStep) >> seqTrack
+            getFastqcProcessedFiles(_) >> fastqcProcessedFileList
         }
 
-        job.fastqcJobService = Mock(FastqcJobService) {
-            getFastqcProcessedFiles(_) >> [fastqcProcessedFile]
-        }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * updateFastqcProcessedFile(_) >> { FastqcProcessedFile file ->
-                assert file == fastqcProcessedFile
+            1 * updateFastqcProcessedFiles(fastqcProcessedFileList) >> { params ->
+                List<FastqcProcessedFile> fileList = params.flatten()
+                assert fileList == fastqcProcessedFileList
             }
         }
 
@@ -83,14 +92,12 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
 
         FastqcFinishJob job = Spy(FastqcFinishJob) {
             getSeqTrack(workflowStep) >> seqTrack
-        }
-
-        job.fastqcJobService = Mock(FastqcJobService) {
-            getFastqcProcessedFiles(_) >> [fastqcProcessedFile]
+            getFastqcProcessedFiles(workflowStep) >> fastqcProcessedFileList
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * updateFastqcProcessedFile(_) >> { FastqcProcessedFile file ->
-                assert file == fastqcProcessedFile
+            1 * updateFastqcProcessedFiles(_) >> { param ->
+                List<FastqcProcessedFile> fileList = param.flatten()
+                assert fileList == fastqcProcessedFileList
             }
         }
 
@@ -100,7 +107,8 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
         then:
         job.logService = Mock(LogService) {
             1 * addSimpleLogEntry(_, _) >> { WorkflowStep step, String message ->
-                message == 'Finish the workflow.' }
+                message == 'Finish the workflow.'
+            }
         }
         job.seqTrackService = Mock(SeqTrackService) {
             1 * fillBaseCount(seqTrack)

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -121,7 +120,6 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
         ])
         linkFilesToFinalDestinationService.fileSystemService = new TestFileSystemService()
         linkFilesToFinalDestinationService.fileService = new FileService()
-
 
         when:
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)

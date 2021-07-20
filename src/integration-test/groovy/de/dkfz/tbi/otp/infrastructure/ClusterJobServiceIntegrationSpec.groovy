@@ -61,7 +61,6 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
     SeqType seqType
 
-
     void setupData() {
         seqType = DomainFactory.createSeqType()
     }
@@ -75,13 +74,13 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
 
         ClusterJob c2 = createClusterJob([
-                seqType: seqType,
+                seqType       : seqType,
                 processingStep: job.processingStep,
         ])
 
         //case of same cluster id, but other job
         createClusterJob([
-                seqType: seqType,
+                seqType     : seqType,
                 clusterJobId: c2.clusterJobId,
         ])
 
@@ -243,7 +242,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         expect:
-        null == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(null)
+        clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(null) == null
     }
 
     void "test convertFromJava8ZonedDateTimeToJodaDateTime with value"() {
@@ -314,7 +313,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         DomainFactory.createSeqTrack([run: run, nBasePairs: 150L])
 
         expect:
-        100L == ClusterJobService.getBasesSum(job)
+        ClusterJobService.getBasesSum(job) == 100L
     }
 
     void testGetBasesSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
@@ -324,7 +323,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
-        null == ClusterJobService.getBasesSum(job)
+        ClusterJobService.getBasesSum(job) == null
     }
 
     void testGetBasesSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
@@ -349,7 +348,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
 
         expect:
-        100L == ClusterJobService.getFileSizesSum(job)
+        ClusterJobService.getFileSizesSum(job) == 100L
     }
 
     void testGetFileSizesSum_WhenNoContainedDataFiles_ShouldReturnNull() {
@@ -359,7 +358,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
-        null == ClusterJobService.getFileSizesSum(job)
+        ClusterJobService.getFileSizesSum(job) == null
     }
 
     void testGetReadsSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfReads() {
@@ -372,7 +371,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
 
         expect:
-        100L == ClusterJobService.getReadsSum(job)
+        ClusterJobService.getReadsSum(job) == 100L
     }
 
     void testGetReadsSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
@@ -382,7 +381,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
-        null == ClusterJobService.getReadsSum(job)
+        ClusterJobService.getReadsSum(job) == null
     }
 
     void testGetReadsSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
@@ -394,7 +393,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         DomainFactory.createSeqTrack([run: run])
 
         expect:
-        null == ClusterJobService.getReadsSum(job)
+        ClusterJobService.getReadsSum(job) == null
     }
 
     void testIsXten_WhenSeqTrackProcessedWithXten_ShouldReturnTrue() {
@@ -598,7 +597,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         expect:
-        0 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
+        clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "") == 0
     }
 
     void test_countAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnZero() {
@@ -611,7 +610,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         expect:
-        0 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
+        clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "") == 0
     }
 
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnTwo() {
@@ -629,7 +628,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         expect:
-        2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
+        clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "") == 2
     }
 
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsPassFilter_ShouldReturnTwo() {
@@ -656,7 +655,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         expect:
-        2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter)
+        clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter) == 2
     }
 
     @Unroll
@@ -665,7 +664,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : baseDate - startDateOffset
+        Date startDate = startDateOffset == null ? null : baseDate - startDateOffset
         Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
 
         Individual individual = createIndividual()
@@ -1064,7 +1063,6 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         [queue: [0, '0'], process: [0, '0']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
-
     void test_findAllStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingPercentagesAndAbsoluteValuesOfStatesTimeDistribution() {
         given:
         setupData()
@@ -1266,9 +1264,9 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                'queued': [0] * 25,
+                'queued' : [0] * 25,
                 'started': [0] * 25,
-                'ended': [0] * 25,
+                'ended'  : [0] * 25,
         ] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
@@ -1283,9 +1281,9 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                'queued': [0] * 25,
+                'queued' : [0] * 25,
                 'started': [0] * 25,
-                'ended': [0] * 25,
+                'ended'  : [0] * 25,
         ] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
@@ -1322,8 +1320,8 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
         expect:
-        [] == walltimeMap.data
-        0 == walltimeMap.xMax
+        walltimeMap.data == []
+        walltimeMap.xMax == 0
     }
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenJobIstOutOfTimeSpan_ShouldReturnMapInInitialState() {
@@ -1342,8 +1340,8 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
         expect:
-        [] == walltimeMap.data
-        0 == walltimeMap.xMax
+        walltimeMap.data == []
+        walltimeMap.xMax == 0
     }
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingMaximumWalltimeAndWalltimesPerHour() {
@@ -1373,8 +1371,8 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
         expect:
-        [[100, 12 * HOURS_TO_MILLIS / 1000 / 60, 'black', job1.id], [100, 6 * HOURS_TO_MILLIS / 1000 / 60, 'blue', job2.id]] == walltimeMap.data
-        100 == walltimeMap.xMax
+        walltimeMap.data == [[100, 12 * HOURS_TO_MILLIS / 1000 / 60, 'black', job1.id], [100, 6 * HOURS_TO_MILLIS / 1000 / 60, 'blue', job2.id]]
+        walltimeMap.xMax == 100
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenNoJobsFound_ShouldReturnNullValue() {
@@ -1382,7 +1380,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         expect:
-        0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE) == 0
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValue() {
@@ -1399,7 +1397,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         expect:
-        0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE) == 0
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageCoreUsage() {
@@ -1485,7 +1483,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                'avgQueue': 0,
+                'avgQueue'  : 0,
                 'avgProcess': 0,
         ] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -1495,11 +1493,11 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         createClusterJob([
-                queued: SDATE_DATETIME.minusDays(1),
-                started: SDATE_DATETIME.minusDays(1),
-                ended: SDATE_DATETIME.minusDays(1),
-                jobClass: 'jobClass1',
-                seqType: seqType,
+                queued    : SDATE_DATETIME.minusDays(1),
+                started   : SDATE_DATETIME.minusDays(1),
+                ended     : SDATE_DATETIME.minusDays(1),
+                jobClass  : 'jobClass1',
+                seqType   : seqType,
                 exitStatus: ClusterJob.Status.COMPLETED,
         ])
 
@@ -1531,7 +1529,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                'avgQueue': 15 * HOURS_TO_MILLIS,
+                'avgQueue'  : 15 * HOURS_TO_MILLIS,
                 'avgProcess': 9 * HOURS_TO_MILLIS,
         ] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -1554,7 +1552,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                'avgQueue': 12 * HOURS_TO_MILLIS,
+                'avgQueue'  : 12 * HOURS_TO_MILLIS,
                 'avgProcess': 12 * HOURS_TO_MILLIS / bases * basesToBeNormalized,
         ] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, basesToBeNormalized)
     }
@@ -1565,9 +1563,9 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                "minCov": null,
-                "maxCov": null,
-                "avgCov": null,
+                "minCov"   : null,
+                "maxCov"   : null,
+                "avgCov"   : null,
                 "medianCov": null,
         ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
@@ -1577,23 +1575,22 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         createClusterJob([
-                queued: SDATE_DATETIME.minusDays(1),
-                started: SDATE_DATETIME.minusDays(1),
-                ended: SDATE_DATETIME.minusDays(1),
-                jobClass: 'jobClass1',
-                seqType: seqType,
+                queued    : SDATE_DATETIME.minusDays(1),
+                started   : SDATE_DATETIME.minusDays(1),
+                ended     : SDATE_DATETIME.minusDays(1),
+                jobClass  : 'jobClass1',
+                seqType   : seqType,
                 exitStatus: ClusterJob.Status.COMPLETED,
         ])
 
         expect:
         [
-                "minCov": null,
-                "maxCov": null,
-                "avgCov": null,
+                "minCov"   : null,
+                "maxCov"   : null,
+                "avgCov"   : null,
                 "medianCov": null,
         ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
-
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenOddNumberOfJobsAreFound_ShouldReturnCoverageStatistics() {
         given:
@@ -1603,9 +1600,9 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                "minCov": 1.00,
-                "maxCov": 100.00,
-                "avgCov": 40.00,
+                "minCov"   : 1.00,
+                "maxCov"   : 100.00,
+                "avgCov"   : 40.00,
                 "medianCov": 10.00,
         ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
@@ -1618,9 +1615,9 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         expect:
         [
-                "minCov": 1.00,
-                "maxCov": 25.00,
-                "avgCov": 10.00,
+                "minCov"   : 1.00,
+                "maxCov"   : 25.00,
+                "avgCov"   : 10.00,
                 "medianCov": 7.00,
         ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
@@ -1674,7 +1671,6 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         expect:
         SDATE_DATETIME.plusDays(3).toLocalDate() == clusterJobService.getLatestJobDate()
     }
-
 
     private static ClusterJob createClusterJob(Map myProps = [:]) {
         Map props = [

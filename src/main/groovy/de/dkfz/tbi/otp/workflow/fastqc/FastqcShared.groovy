@@ -26,21 +26,26 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait FastqcShared {
+
+    static final String WORKFLOW = FastqcWorkflow.WORKFLOW
+    static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ
+    static final String OUTPUT_ROLE = FastqcWorkflow.OUTPUT_FASTQC
 
     @Autowired
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    FastqcJobService fastqcJobService
+    ConcreteArtefactService concreteArtefactService
 
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        return fastqcJobService.getSeqTrack(workflowStep)
+        return concreteArtefactService.<SeqTrack> getInputArtefact(workflowStep, INPUT_ROLE, WORKFLOW)
     }
 
-    List<FastqcProcessedFile> getFastqcProcessedFile(WorkflowStep workflowStep) {
-        return fastqcJobService.getFastqcProcessedFiles(workflowStep)
+    List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
+        return concreteArtefactService.<FastqcProcessedFile> getOutputArtefacts(workflowStep, OUTPUT_ROLE, WORKFLOW)
     }
 }

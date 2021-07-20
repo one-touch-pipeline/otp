@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
@@ -49,6 +50,9 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
     private Path target1
     private Path target2
 
+    static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
+    static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
+
     @Override
     Class[] getDomainClassesToMock() {
         return [
@@ -62,7 +66,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         fileSystem = FileSystems.default
         run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: DataInstallationInitializationService.WORKFLOW,
+                        name: WORKFLOW,
                 ]),
         ])
         step = createWorkflowStep([
@@ -70,7 +74,7 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         ])
         artefact = createWorkflowArtefact([
                 producedBy  : run,
-                outputRole  : DataInstallationInitializationService.OUTPUT_ROLE,
+                outputRole  : OUTPUT_ROLE,
                 artefactType: ArtefactType.FASTQ,
         ])
         seqTrack = createSeqTrack([
@@ -89,8 +93,8 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         target2 = TestCase.uniqueNonExistentPath.toPath()
 
         job = new CopyOrLinkFastqsOfLaneJob()
-        job.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
-            _ * getSeqTrack(step) >> seqTrack
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(step, OUTPUT_ROLE, WORKFLOW) >> seqTrack
             0 * _
         }
         job.fileSystemService = Mock(FileSystemService) {

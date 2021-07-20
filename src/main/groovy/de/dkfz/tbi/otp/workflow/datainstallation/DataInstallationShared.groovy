@@ -25,17 +25,21 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait DataInstallationShared {
+
+    static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
+    static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
 
     @Autowired
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    DataInstallationInitializationService dataInstallationInitializationService
+    ConcreteArtefactService concreteArtefactService
 
     SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        return dataInstallationInitializationService.getSeqTrack(workflowStep)
+        return concreteArtefactService.getOutputArtefact(workflowStep, OUTPUT_ROLE, WORKFLOW)
     }
 }

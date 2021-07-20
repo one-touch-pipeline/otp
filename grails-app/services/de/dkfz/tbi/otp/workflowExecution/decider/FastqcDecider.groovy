@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcJobService
+import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
@@ -45,7 +45,7 @@ class FastqcDecider implements Decider {
 
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
-        final Workflow workflow = Workflow.getExactlyOneWorkflow(FastqcJobService.WORKFLOW)
+        final Workflow workflow = Workflow.getExactlyOneWorkflow(FastqcWorkflow.WORKFLOW)
 
         return inputArtefacts.collectMany {
             decideEach(it, workflow)
@@ -77,13 +77,13 @@ class FastqcDecider implements Decider {
                 inputArtefact.producedBy.priority,
                 fastqcDataFilesService.fastqcOutputDirectory(seqTrack),
                 inputArtefact.project,
-                "${FastqcJobService.WORKFLOW}: ${name}",
+                "${FastqcWorkflow.WORKFLOW}: ${name}",
                 getConfigFragments(seqTrack, workflow),
         )
 
         new WorkflowRunInputArtefact(
                 workflowRun: run,
-                role: FastqcJobService.INPUT_ROLE,
+                role: FastqcWorkflow.INPUT_FASTQ,
                 workflowArtefact: inputArtefact,
         ).save(flush: true)
 
@@ -91,7 +91,7 @@ class FastqcDecider implements Decider {
         seqTrack.seqType.libraryLayout.mateCount.times { int i ->
             result.add(workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                     run,
-                    "${FastqcJobService.OUTPUT_ROLE}${i + 1}",
+                    "${FastqcWorkflow.OUTPUT_FASTQC}${i + 1}",
                     ArtefactType.FASTQC,
                     seqTrack.individual,
                     seqTrack.seqType,

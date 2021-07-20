@@ -26,26 +26,28 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait PanCancerShared {
 
     @Autowired
-    PanCancerService panCancerService
+    ConcreteArtefactService concreteArtefactService
 
     List<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {
-        return panCancerService.<SeqTrack> getInputArtefacts(workflowStep, "FASTQC")
+        return concreteArtefactService.<SeqTrack> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ, PanCancerWorkflow.WORKFLOW)
     }
 
     List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
-        return panCancerService.<FastqcProcessedFile> getInputArtefacts(workflowStep, "FASTQ")
+        return concreteArtefactService.<FastqcProcessedFile> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC, PanCancerWorkflow.WORKFLOW)
     }
 
     RoddyBamFile getBaseRoddyBamFile(WorkflowStep workflowStep) {
-        return panCancerService.<RoddyBamFile> getInputArtefact(workflowStep, "BAM")
+        return concreteArtefactService.<RoddyBamFile> getInputArtefact(workflowStep,
+                PanCancerWorkflow.INPUT_BASE_BAM_FILE, PanCancerWorkflow.WORKFLOW, false)
     }
 
     RoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {
-        return panCancerService.<RoddyBamFile> getOutputArtefact(workflowStep, "BAM")
+        return concreteArtefactService.<RoddyBamFile> getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM, PanCancerWorkflow.WORKFLOW)
     }
 }

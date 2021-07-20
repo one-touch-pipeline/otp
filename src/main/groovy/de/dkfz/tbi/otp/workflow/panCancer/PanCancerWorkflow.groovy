@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,31 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.datainstallation
+package de.dkfz.tbi.otp.workflow.panCancer
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
-
 @Component
 @Slf4j
 @CompileStatic
-class DataInstallationWorkflow implements OtpWorkflow {
+class PanCancerWorkflow {
 
-    static final String WORKFLOW = "FASTQ installation"
-    static final String OUTPUT_FASTQ = "FASTQ"
-
-    @Override
-    List<String> getJobBeanNames() {
-        return [
-                DataInstallationConditionalFailJob.simpleName.uncapitalize(),
-                DataInstallationPrepareJob.simpleName.uncapitalize(),
-                CopyOrLinkFastqsOfLaneJob.simpleName.uncapitalize(),
-                DataInstallationValidationJob.simpleName.uncapitalize(),
-                DataInstallationSingleCellLinkJob.simpleName.uncapitalize(),
-                DataInstallationPidLinkJob.simpleName.uncapitalize(),
-        ]
-    }
+    static final String WORKFLOW = "PanCancer alignment"
+    static final String INPUT_FASTQ = "FASTQ"
+    static final String INPUT_FASTQC = "FASTQC"
+    static final String INPUT_BASE_BAM_FILE = "BASE_BAM_FILE"
+    static final String OUTPUT_BAM = "BAM"
 }

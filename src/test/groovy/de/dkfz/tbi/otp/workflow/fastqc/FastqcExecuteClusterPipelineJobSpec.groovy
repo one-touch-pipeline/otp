@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
@@ -54,6 +55,9 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
     private Path target2
     private Path sourceDir
     private Path targetDir
+
+    static final String WORKFLOW = FastqcWorkflow.WORKFLOW
+    static final String INPUT_ROLE = FastqcWorkflow.INPUT_FASTQ
 
     private void createData() {
         fileSystem = FileSystems.default
@@ -83,20 +87,20 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         Files.move(tmp, target2)
 
         run = createWorkflowRun([
-            workflow: createWorkflow([
-                name : FastqcJobService.WORKFLOW
-            ]),
+                workflow: createWorkflow([
+                        name: WORKFLOW
+                ]),
         ])
         step = createWorkflowStep([
-            workflowRun: run,
+                workflowRun: run,
         ])
         artefact = createWorkflowArtefact([
-            producedBy  : run,
-            outputRole  : FastqcJobService.INPUT_ROLE, //"FASTQ"
-            artefactType: ArtefactType.FASTQ,
+                producedBy  : run,
+                outputRole  : INPUT_ROLE, //"FASTQ"
+                artefactType: ArtefactType.FASTQ,
         ])
         seqTrack = createSeqTrack([
-            workflowArtefact: artefact,
+                workflowArtefact: artefact,
         ])
         dataFile1 = createDataFile([
                 seqTrack: seqTrack,
@@ -106,8 +110,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         ])
 
         job = new FastqcExecuteClusterPipelineJob()
-        job.fastqcJobService = Mock(FastqcJobService) {
-            _ * getSeqTrack(step) >> seqTrack
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefact(step, INPUT_ROLE, WORKFLOW) >> seqTrack
             0 * _
         }
         job.fileSystemService = Mock(FileSystemService) {
@@ -135,8 +139,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(_) >> targetDir.toString()
-            1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile1) >>  target1
-            1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile2) >>  target2
+            1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile1) >> target1
+            1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile2) >> target2
             1 * fastqcOutputFile(dataFile1) >> target1
             1 * fastqcOutputFile(dataFile2) >> target2
             0 * _
@@ -176,9 +180,9 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         given:
         createData()
 
-        final String cmd_module_loader     = "cmd load module loader"
+        final String cmd_module_loader = "cmd load module loader"
         final String cmd_activation_fastqc = "cmd activate fastqc"
-        final String cmd_fastqc            = "cmd fastqc"
+        final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(_) >> targetDir.toString()
@@ -205,8 +209,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         }
         job.processingOptionService = Mock(ProcessingOptionService) {
             _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER) >> cmd_module_loader
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)  >> cmd_activation_fastqc
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)             >> cmd_fastqc
+            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC) >> cmd_activation_fastqc
+            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC) >> cmd_fastqc
         }
 
         when:
@@ -231,9 +235,9 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         Files.delete(target1)
         Files.delete(target2)
 
-        final String cmd_module_loader     = "cmd load module loader"
+        final String cmd_module_loader = "cmd load module loader"
         final String cmd_activation_fastqc = "cmd activate fastqc"
-        final String cmd_fastqc            = "cmd fastqc"
+        final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(_) >> targetDir.toString()
@@ -260,8 +264,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         }
         job.processingOptionService = Mock(ProcessingOptionService) {
             _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER) >> cmd_module_loader
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)  >> cmd_activation_fastqc
-            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)             >> cmd_fastqc
+            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC) >> cmd_activation_fastqc
+            _ * findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC) >> cmd_fastqc
         }
 
         when:

@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, IsRoddy {
@@ -53,6 +54,7 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
     void "execute, when result of threshold check is #checkSuccessful change workflow status to corresponding state, if false send mail"() {
         given:
         final String inputRoleName = "BAM"
+        final String workflow = "PanCancer alignment"
         final WorkflowStep workflowStep = createWorkflowStep()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         final RoddyMergedBamQa qa = new RoddyMergedBamQa()
@@ -60,7 +62,7 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
 
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        job.panCancerService = Mock(PanCancerService)
+        job.concreteArtefactService = Mock(ConcreteArtefactService)
         job.abstractQualityAssessmentService = Mock(AbstractQualityAssessmentService)
         job.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService)
 
@@ -68,7 +70,7 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
         job.execute(workflowStep)
 
         then:
-        1 * job.panCancerService.getOutputArtefact(workflowStep, inputRoleName) >> bamFile
+        1 * job.concreteArtefactService.getOutputArtefact(workflowStep, inputRoleName, workflow) >> bamFile
         1 * job.abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(bamFile) >> qa
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, qa) >> {
             // only blocked or not blocked are relevant for setting the workflow status

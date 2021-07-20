@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.fastqc.FastqcJobService
+import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
@@ -38,7 +38,7 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
 
     void "test decide"() {
         given:
-        Workflow workflow = createWorkflow(name: FastqcJobService.WORKFLOW)
+        Workflow workflow = createWorkflow(name: FastqcWorkflow.WORKFLOW)
 
         WorkflowArtefact wa1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun())
         SeqTrack seqTrack = createSeqTrack(workflowArtefact: wa1)

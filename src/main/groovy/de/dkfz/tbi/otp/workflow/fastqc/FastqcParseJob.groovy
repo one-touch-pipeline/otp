@@ -50,7 +50,7 @@ class FastqcParseJob extends AbstractJob implements FastqcShared {
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {
         final SeqTrack seqTrack = getSeqTrack(workflowStep)
-        final WorkflowArtefact workflowArtefact = workflowStep.workflowRun.outputArtefacts[FastqcJobService.OUTPUT_ROLE]
+        final WorkflowArtefact workflowArtefact = workflowStep.workflowRun.outputArtefacts[FastqcWorkflow.OUTPUT_FASTQC]
 
         SeqTrack.withTransaction {
             seqTrackService.getSequenceFilesForSeqTrack(seqTrack).each { DataFile file ->

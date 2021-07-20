@@ -47,7 +47,7 @@ class DataInstallationInitializationServiceSpec extends Specification
     void "createWorkflowRuns, when called, then return a WorkflowRun for each seqTrack of the datafiles of the instance"() {
         given:
         Workflow workflow = createWorkflow([
-                name: DataInstallationInitializationService.WORKFLOW,
+                name: DataInstallationWorkflow.WORKFLOW,
         ])
 
         Collection<SeqTrack> seqTracks = (1..3).collect {
