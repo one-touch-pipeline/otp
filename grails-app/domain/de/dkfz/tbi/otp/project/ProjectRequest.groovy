@@ -43,13 +43,15 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         WAITING_FOR_OPERATOR({ Map m -> "Approved" }, "#108548", false, true),
         PROJECT_CREATED({ Map m -> "Project created" }, "#108548", false, true),
         CLOSED({ Map m -> "Closed" }, "#DD2B0E", false, true),
+        SUBMITTED({ Map m -> "${m.left} of ${m.total} left" }, "#000000", true, false),
 
         final Closure<String> formatter
         final String color
         final boolean editableStatus
         final boolean resolvedStatus
     }
-    Status status = Status.WAITING_FOR_APPROVER
+    // initial status
+    Status status = Status.SUBMITTED
     Project project
 
     Set<String> keywords

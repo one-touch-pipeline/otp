@@ -127,7 +127,12 @@
                 </g:each>
                 <tr>
                     <td>${g.message(code: "projectRequest.comments")}</td>
-                    <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
+                    <sec:ifNotGranted roles="ROLE_OPERATOR">
+                        <td><div class="project-multiline-wrapper">${projectRequest.comments}</div></td>
+                    </sec:ifNotGranted>
+                    <sec:ifAnyGranted roles="ROLE_OPERATOR">
+                        <td><textarea class="resize-vertical" name="comments" id="comments">${projectRequest.comments}</textarea></td>
+                    </sec:ifAnyGranted>
                 </tr>
                 <tr>
                     <td>${g.message(code: "projectRequest.users")}</td>
@@ -139,7 +144,7 @@
                 </tr>
 
                 <g:if test="${projectRequest.status.editableStatus}">
-                    <g:if test="${eligibleToAccept}">
+                    <g:if test="${confirmationRequired}">
                         <tr>
                             <td></td>
                             <td>

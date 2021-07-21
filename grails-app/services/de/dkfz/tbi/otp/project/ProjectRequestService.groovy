@@ -33,6 +33,7 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.ProjectRequestUser.ApprovalState
@@ -63,12 +64,24 @@ class ProjectRequestService {
         return ProjectRequest.list()
     }
 
+    // Returns all requests for checking regardless which users they belong to
+    List<ProjectRequest> getSubmittedRequests() {
+        return ProjectRequest.withCriteria {
+            eq("status", ProjectRequest.Status.SUBMITTED)
+        } as List<ProjectRequest>
+    }
+
     List<ProjectRequest> getResolvedOfCurrentUser() {
-        return getRequestsHelper(true)
+        boolean isOperator = SpringSecurityUtils.ifAllGranted(Role.ROLE_OPERATOR)
+        return isOperator ? ProjectRequest.withCriteria {
+                'in'("status", ProjectRequest.Status.values().findAll { it.resolvedStatus })
+            } as List<ProjectRequest> : getRequestsHelper(true)
     }
 
     List<ProjectRequest> getUnresolvedRequestsOfUser() {
-        return getRequestsHelper(false)
+        return getRequestsHelper(false).findAll { ProjectRequest projectRequest ->
+                projectRequest.status == ProjectRequest.Status.WAITING_FOR_APPROVER
+            }
     }
 
     List<ProjectRequest> getRequestsHelper(boolean requestsAreResolved) {
@@ -148,7 +161,8 @@ class ProjectRequestService {
             }
         }
 
-        sendEmailOnCreation(req)
+        //sendEmailOnCreation(req)
+        sendEmailOnMaintenanceApproval(req)
         logAction(req, "request created")
         return req
     }
@@ -198,7 +212,9 @@ class ProjectRequestService {
             }
         }
 
-        sendEmailOnEdit(projectRequest)
+        projectRequest.status = ProjectRequest.Status.SUBMITTED
+        //send email to operators first
+        sendEmailOnMaintenanceApproval(projectRequest)
         logAction(projectRequest, "request edited")
     }
 
@@ -279,11 +295,17 @@ class ProjectRequestService {
     }
 
     boolean isUserEligibleApproverForRequest(User user, ProjectRequest request) {
-        return request.users.find { it.user == user && it.approver }
+        return request.users.find { it.user == user && it.approver } ||
+            user.authorities.any { it.authority in Role.ADMINISTRATIVE_ROLES }
     }
 
     boolean isCurrentUserEligibleApproverForRequest(ProjectRequest request) {
         return isUserEligibleApproverForRequest(securityService.currentUserAsUser, request)
+    }
+
+    boolean confirmationRequired(ProjectRequest request) {
+        return isUserEligibleApproverForRequest(securityService.currentUserAsUser, request) &&
+                request.status != ProjectRequest.Status.SUBMITTED
     }
 
     void ensureApprovalEligible(ProjectRequest request) {
@@ -302,19 +324,30 @@ class ProjectRequestService {
         return projectRequest.users.findAll { it.approver }.every { it.approvalState == state }
     }
 
-    Errors approveRequest(ProjectRequest request, boolean confirmConsent, boolean confirmRecordOfProcessingActivities) throws SwitchedUserDeniedException {
+    Errors approveRequest(ProjectRequest request, String comments, boolean confirmConsent = false, boolean confirmRecordOfProcessingActivities = false)
+        throws SwitchedUserDeniedException {
         try {
             securityService.ensureNotSwitchedUser()
             ensureApprovalEligible(request)
-            ensureTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
 
-            projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.APPROVED)
-            logAction(request, "user approves request")
+            if (comments) {
+                setComments(request, comments)
+            }
 
-            if (allProjectRequestUsersInState(request, ApprovalState.APPROVED)) {
-                setStatus(request, ProjectRequest.Status.WAITING_FOR_OPERATOR)
-                sendEmailOnCompleteApproval(request)
-                logAction(request, "request approved")
+            if (request.status == ProjectRequest.Status.SUBMITTED) {
+                setStatus(request, ProjectRequest.Status.WAITING_FOR_APPROVER)
+                sendEmailOnEdit(request)
+                logAction(request, "request approved by OTP Maintenance")
+            } else {
+                ensureTermsAndConditions(confirmConsent, confirmRecordOfProcessingActivities)
+                projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.APPROVED)
+                logAction(request, "user approves request")
+
+                if (allProjectRequestUsersInState(request, ApprovalState.APPROVED)) {
+                    setStatus(request, ProjectRequest.Status.WAITING_FOR_OPERATOR)
+                    sendEmailOnCompleteApproval(request)
+                    logAction(request, "request approved")
+                }
             }
         } catch (ValidationException e) {
             return e.errors
@@ -322,17 +355,26 @@ class ProjectRequestService {
         return null
     }
 
-    Errors denyRequest(ProjectRequest request) throws SwitchedUserDeniedException {
+    Errors denyRequest(ProjectRequest request, String comments) throws SwitchedUserDeniedException {
         try {
             securityService.ensureNotSwitchedUser()
             ensureApprovalEligible(request)
 
-            projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.DENIED)
-            logAction(request, "user denies request")
+            if (comments) {
+                setComments(request, comments)
+            }
 
-            if (allProjectRequestUsersInState(request, ApprovalState.DENIED)) {
+            if (request.status == ProjectRequest.Status.SUBMITTED) {
                 setStatus(request, ProjectRequest.Status.DENIED_BY_APPROVER)
-                logAction(request, "request denied")
+                logAction(request, "request denied by OTP Maintenance")
+            } else {
+                projectRequestUserService.setApprovalStateAsCurrentUser(request, ApprovalState.DENIED)
+                logAction(request, "user denies request")
+
+                if (allProjectRequestUsersInState(request, ApprovalState.DENIED)) {
+                    setStatus(request, ProjectRequest.Status.DENIED_BY_APPROVER)
+                    logAction(request, "request denied")
+                }
             }
         } catch (ValidationException e) {
             return e.errors
@@ -359,6 +401,11 @@ class ProjectRequestService {
             request.project = project
         }
         request.status = status
+        request.save(flush: true)
+    }
+
+    ProjectRequest setComments(ProjectRequest request, String comments) {
+        request.comments = comments
         request.save(flush: true)
     }
 
@@ -399,6 +446,27 @@ class ProjectRequestService {
             projectRequest.projectFields.add(ifv)
         }
         projectRequest.save(flush: true)
+    }
+
+
+    void sendEmailOnMaintenanceApproval(ProjectRequest request) {
+        String link = linkGenerator.link(
+                controller: "projectRequest",
+                action: "view",
+                absolute: true,
+                id: request.id,
+        )
+        String message = messageSourceService.createMessage("notification.template.projectRequest.submit.body", [
+                requester  : request.requester.realName,
+                projectName: request.name,
+                link       : link,
+        ])
+        String subject = messageSourceService.createMessage("notification.template.projectRequest.submit.subject", [
+                projectName: request.name,
+        ])
+        List<String> recipients = [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)]
+        List<String> ccs = [mailHelperService.emailRecipientNotification]
+        mailHelperService.sendEmail(subject, message, recipients, ccs)
     }
 
     void sendEmailOnCreation(ProjectRequest request) {

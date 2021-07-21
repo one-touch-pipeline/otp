@@ -145,11 +145,13 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         Map<String, List<ProjectRequest>> resultMap = [:].withDefault { [] }
         ProjectRequest.Status.values().each { ProjectRequest.Status status ->
-            resultMap[(status.resolvedStatus ? "resolved" : "unresolved")].addAll([
-                    createProjectRequestHelper(currentUser, otherUser, status),
-                    createProjectRequestHelper(otherUser, currentUser, status),
-            ])
-            createProjectRequestHelper(otherUser, otherUser, status)
+            if (status != ProjectRequest.Status.SUBMITTED) {
+                resultMap[(status.resolvedStatus ? "resolved" : "unresolved")].addAll([
+                        createProjectRequestHelper(currentUser, otherUser, status),
+                        createProjectRequestHelper(otherUser, currentUser, status),
+                ])
+                createProjectRequestHelper(otherUser, otherUser, status)
+            }
         }
 
         return resultMap
@@ -376,7 +378,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
 
         when:
-        Errors e = service.approveRequest(request, confirmConsent, confirmRecord)
+        request.status = WAITING_FOR_APPROVER
+        Errors e = service.approveRequest(request, "", confirmConsent, confirmRecord)
 
         then:
         e == null
@@ -391,6 +394,57 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         false          | true
     }
 
+    void "OTP Maintenance approves Request, user status is still pending, request sent to PI"() {
+        given:
+        ProjectRequest request = createProjectRequestWithUsersInState([
+                ProjectRequestUser.ApprovalState.PENDING,
+                ProjectRequestUser.ApprovalState.APPROVED,
+                ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
+        ])
+        request.status =  ProjectRequest.Status.SUBMITTED
+
+        ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
+        service.linkGenerator = Mock(LinkGenerator) {
+            1 * link(_) >> 'link'
+        }
+        service.messageSourceService = Mock(MessageSourceService) {
+            2 * createMessage(_, _) >> "message"
+        }
+        service.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(_, _, _, _) >> null
+        }
+
+        when:
+        service.approveRequest(request, "")
+
+        then:
+        request.status == WAITING_FOR_APPROVER
+        pendingUser.approvalState == ProjectRequestUser.ApprovalState.PENDING
+    }
+
+    void "OTP Maintenance denies Request, user remains in pending state, request is sent to PI"() {
+        given:
+        ProjectRequest request = createProjectRequestWithUsersInState([
+                ProjectRequestUser.ApprovalState.PENDING,
+                ProjectRequestUser.ApprovalState.APPROVED,
+                ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
+        ])
+        request.status =  ProjectRequest.Status.SUBMITTED
+
+        ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
+
+        when:
+        service.denyRequest(request, "denied due to formal errors found")
+
+        then:
+        request.status == DENIED_BY_APPROVER
+        pendingUser.approvalState == ProjectRequestUser.ApprovalState.PENDING
+    }
+
     void "approveRequest, user approves -> all approved, request is approved"() {
         given:
         ProjectRequest request = createProjectRequestWithUsersInState([
@@ -398,6 +452,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ProjectRequestUser.ApprovalState.APPROVED,
                 ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
         ])
+        request.status =  ProjectRequest.Status.WAITING_FOR_APPROVER
+
         ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
 
         ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
@@ -412,7 +468,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
 
         when:
-        service.approveRequest(request, true, true)
+        service.approveRequest(request, "", true, true)
 
         then:
         request.status == WAITING_FOR_OPERATOR
@@ -426,12 +482,14 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ProjectRequestUser.ApprovalState.DENIED,
                 ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
         ])
+        request.status =  ProjectRequest.Status.WAITING_FOR_APPROVER
+
         ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
 
         ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
 
         when:
-        service.denyRequest(request)
+        service.denyRequest(request, "denied due to formal errors found")
 
         then:
         request.status == DENIED_BY_APPROVER
@@ -445,19 +503,21 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ProjectRequestUser.ApprovalState.PENDING,
                 ProjectRequestUser.ApprovalState.NOT_APPLICABLE,
         ])
+        request.status =  ProjectRequest.Status.WAITING_FOR_APPROVER
+
         ProjectRequestUser pendingUser = request.users.find { it.approvalState == ProjectRequestUser.ApprovalState.PENDING }
 
         ProjectRequestService service = getServiceWithMockedCurrentUser(pendingUser.user)
 
         when: "test approve"
-        service.approveRequest(request, true, true)
+        service.approveRequest(request, "", true, true)
 
         then:
         request.status == WAITING_FOR_APPROVER
         pendingUser.approvalState == ProjectRequestUser.ApprovalState.APPROVED
 
         when: "test deny"
-        service.denyRequest(request)
+        service.denyRequest(request, "denied due to formal errors found")
 
         then:
         request.status == WAITING_FOR_APPROVER
@@ -536,6 +596,21 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         when:
         service.ensureEligibleToClose(request)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "ensureEligibleToEdit, positive case"() {
+        given:
+        ProjectRequest request = DomainFactory.createProjectRequest([
+                status   : WAITING_FOR_APPROVER,
+        ])
+
+        ProjectRequestService service = getServiceWithMockedCurrentUser(request.requester)
+
+        when:
+        service.ensureEligibleToEdit(request)
 
         then:
         noExceptionThrown()

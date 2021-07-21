@@ -45,27 +45,34 @@ class ProjectRequestController {
 
     static allowedMethods = [
             index   : "GET",
+            check   : "GET",
             open    : "GET",
             resolved: "GET",
             save    : "POST",
             edit    : "POST",
             saveEdit: "POST",
             view    : "GET",
+            all     : "GET",
+            approve : "POST",
+            deny    : "POST",
+            close   : "POST",
     ]
 
     private static final String ACTION_INDEX = "index"
-    private static final String ACTION_OPEN = "open"
+    private static final String ACTION_CHECK = "check"
     private static final String ACTION_VIEW = "view"
 
     ProjectRequestService projectRequestService
     SecurityService securityService
 
     private Map getSharedModel() {
+        List<ProjectRequest> submitted = projectRequestService.submittedRequests
         List<ProjectRequest> unresolved = projectRequestService.unresolvedRequestsOfUser
         List<ProjectRequest> resolved = projectRequestService.resolvedOfCurrentUser
 
         return [
                 actionHighlight: unresolved ? "work-but-nothing-todo" : "no-work-and-nothing-todo",
+                submitted      : submitted,
                 unresolved     : unresolved,
                 resolved       : resolved,
         ]
@@ -114,6 +121,10 @@ class ProjectRequestController {
         ]
     }
 
+    def check() {
+        return sharedModel
+    }
+
     def open() {
         return sharedModel
     }
@@ -152,7 +163,7 @@ class ProjectRequestController {
                     redirect(action: ACTION_VIEW, id: createdRequest.id)
                 } else {
                     flash.message = new FlashMessage("${baseMessage}${g.message(code: "projectRequest.store.success.waiting")}")
-                    redirect(action: ACTION_OPEN)
+                    redirect(action: ACTION_CHECK)
                 }
                 return
             } catch (ValidationException e) {
@@ -167,18 +178,18 @@ class ProjectRequestController {
     }
 
     def approve(ApproveCommand cmd) {
-        if (!cmd.validate()) {
+        if (!cmd.validate() && projectRequestService.confirmationRequired(cmd.request)) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
             redirect(action: ACTION_VIEW, id: cmd.request.id)
             return
         }
-        Errors errors = projectRequestService.approveRequest(cmd.request, cmd.confirmConsent, cmd.confirmRecordOfProcessingActivities)
+        Errors errors = projectRequestService.approveRequest(cmd.request, cmd.comments, cmd.confirmConsent, cmd.confirmRecordOfProcessingActivities)
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
         } else {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
         }
-        redirect(action: ACTION_VIEW, id: cmd.request.id)
+        redirect(action: ACTION_INDEX)
     }
 
     def deny(ProjectRequestCommand cmd) {
@@ -187,13 +198,13 @@ class ProjectRequestController {
             redirect(action: ACTION_VIEW, id: cmd.request.id)
             return
         }
-        Errors errors = projectRequestService.denyRequest(cmd.request)
+        Errors errors = projectRequestService.denyRequest(cmd.request, cmd.comments)
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, errors)
         } else {
             flash.message = new FlashMessage(g.message(code: "projectRequest.store.success") as String)
         }
-        redirect(action: ACTION_VIEW, id: cmd.request.id)
+        redirect(action: ACTION_INDEX)
     }
 
     /**
@@ -253,12 +264,13 @@ class ProjectRequestController {
                 ProjectPageType.PROJECT_REQUEST)
 
         return sharedModel + [
-                projectRequest  : projectRequest,
-                eligibleToAccept: projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
-                eligibleToEdit  : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
-                eligibleToClose : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
-                abstractFields  : fieldDefinitions,
-                abstractValues  : abstractValues,
+                projectRequest     : projectRequest,
+                eligibleToAccept   : projectRequestService.isCurrentUserEligibleApproverForRequest(projectRequest),
+                eligibleToEdit     : projectRequestService.isCurrentUserEligibleToEdit(projectRequest),
+                eligibleToClose    : projectRequestService.isCurrentUserEligibleToClose(projectRequest),
+                confirmationRequired: projectRequestService.confirmationRequired(projectRequest),
+                abstractFields     : fieldDefinitions,
+                abstractValues     : abstractValues,
         ]
     }
 }
@@ -416,6 +428,15 @@ class EditProjectRequestCommand extends ProjectRequestCreationCommand {
 
 class ProjectRequestCommand {
     ProjectRequest request
+    String comments
+
+    static constraints = {
+        comments nullable: true, blank: true
+    }
+
+    void setComments(String s) {
+        comments = StringUtils.blankToNull(s)
+    }
 }
 
 class ApproveCommand extends ProjectRequestCommand {
