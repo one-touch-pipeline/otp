@@ -575,4 +575,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2021/otp-1107.groovy'
+
+    changeSet(author: "", id: "otp-970") {
+        sqlFile(path: 'changelogs/2021/otp-970-deactivate-old-fastqc-workflow.sql')
+    }
 }

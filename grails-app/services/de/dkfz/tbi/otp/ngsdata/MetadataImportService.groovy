@@ -351,7 +351,7 @@ class MetadataImportService {
             log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
             Long timeDecider = System.currentTimeMillis()
             log.debug("decider started")
-            allDecider.decide(runs, false)
+            allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
             log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
         }
 

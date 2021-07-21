@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
+import grails.util.Holders
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -32,15 +33,18 @@ is called with a list of new/changed workflowArtefacts (see method decide in Dec
 */
 @Component
 class AllDecider implements Decider {
-    /** this list is empty for now and with each workflow migration will be filled in the correct order*/
-    List<AbstractWorkflowDecider> deciders = []
+    /** list of Deciders in the correct order */
+    List<Class<Decider>> deciders = [
+            FastqcDecider,
+    ]
 
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> allWorkflowArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
         Collection<WorkflowArtefact> newWorkflowArtefacts = []
 
         deciders.each { it ->
-            Collection<WorkflowArtefact> workflowArtefacts = it.decide(allWorkflowArtefacts, forceRun, userParams)
+            Decider decider = Holders.grailsApplication.mainContext.getBean(it)
+            Collection<WorkflowArtefact> workflowArtefacts = decider.decide(allWorkflowArtefacts, forceRun, userParams)
             allWorkflowArtefacts += workflowArtefacts
             newWorkflowArtefacts += workflowArtefacts
         }
