@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -61,7 +61,7 @@ class ProjectValidatorSpec extends Specification implements DataTest {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
+                new Problem(Collections.emptySet(), LogLevel.ERROR,
                         "Required column '${BamMetadataColumn.PROJECT}' is missing.")
         ]
 
@@ -119,7 +119,7 @@ class ProjectValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The project '${PROJECT_NAME}' is not registered in OTP.")
     }
@@ -138,7 +138,7 @@ class ProjectValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The project '${PROJECT_NAME}' is not registered in OTP.")
     }

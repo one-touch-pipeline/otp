@@ -51,7 +51,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
 import java.nio.file.*
@@ -315,13 +315,13 @@ class MetadataImportService {
 
     static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
         java.util.logging.Level maxLevel = context.maximumProblemLevel
-        if (maxLevel.intValue() < Level.WARNING.intValue()) {
+        if (maxLevel.intValue() < LogLevel.WARNING.intValue()) {
             return true
-        } else if (maxLevel == Level.WARNING && ignoreWarnings) {
+        } else if (maxLevel == LogLevel.WARNING && ignoreWarnings) {
             if (context.metadataFileMd5sum.equalsIgnoreCase(previousValidationMd5sum)) {
                 return true
             } else {
-                context.addProblem(Collections.emptySet(), Level.INFO,
+                context.addProblem(Collections.emptySet(), LogLevel.INFO,
                         'Not ignoring warnings, because the metadata file has changed since the previous validation.')
             }
         }

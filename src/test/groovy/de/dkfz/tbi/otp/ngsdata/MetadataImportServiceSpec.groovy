@@ -140,13 +140,13 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                     [
                             'validator1': [
                                     validate: { MetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), Level.ERROR, 'message1')
-                                        context.addProblem(Collections.emptySet(), Level.ERROR, 'message2')
+                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message1')
+                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message2')
                                     }
                             ] as MetadataValidator,
                             'validator2': [
                                     validate: { MetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), Level.ERROR, 'message3')
+                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message3')
                                     }
                             ] as MetadataValidator,
                     ]
@@ -320,7 +320,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         Problems problems = new Problems()
-        problems.addProblem([] as Set, Level.ERROR, "An Error occurred")
+        problems.addProblem([] as Set, LogLevel.ERROR, "An Error occurred")
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext(
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv"), problems: problems])
         MetadataValidationContext context2 = MetadataValidationContextFactory.createContext(
@@ -386,7 +386,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "mayImport, when maximumProblemLevel is less than WARNING, returns true"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-        assert context.maximumProblemLevel.intValue() < Level.WARNING.intValue()
+        assert context.maximumProblemLevel.intValue() < LogLevel.WARNING.intValue()
 
         expect:
         MetadataImportService.mayImport(context, false, HelperUtils.randomMd5sum)
@@ -395,8 +395,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "mayImport, when maximumProblemLevel is greater than WARNING, returns false"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-        context.addProblem(Collections.emptySet(), Level.ERROR, 'my message')
-        assert context.maximumProblemLevel.intValue() > Level.WARNING.intValue()
+        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'my message')
+        assert context.maximumProblemLevel.intValue() > LogLevel.WARNING.intValue()
 
         expect:
         !MetadataImportService.mayImport(context, true, context.metadataFileMd5sum)
@@ -406,8 +406,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "mayImport, when maximumProblemLevel is WARNING and MD5 sum matches, returns ignoreWarnings"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-        context.addProblem(Collections.emptySet(), Level.WARNING, 'my message')
-        assert context.maximumProblemLevel == Level.WARNING
+        context.addProblem(Collections.emptySet(), LogLevel.WARNING, 'my message')
+        assert context.maximumProblemLevel == LogLevel.WARNING
 
         expect:
         MetadataImportService.mayImport(context, ignoreWarnings, context.metadataFileMd5sum) == ignoreWarnings
@@ -419,8 +419,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is false and MD5 sum does not match, returns false"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-        context.addProblem(Collections.emptySet(), Level.WARNING, 'my message')
-        assert context.maximumProblemLevel == Level.WARNING
+        context.addProblem(Collections.emptySet(), LogLevel.WARNING, 'my message')
+        assert context.maximumProblemLevel == LogLevel.WARNING
 
         expect:
         !MetadataImportService.mayImport(context, false, HelperUtils.randomMd5sum)
@@ -430,13 +430,13 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is true and MD5 sum does not match, adds problem and returns false"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
-        context.addProblem(Collections.emptySet(), Level.WARNING, HelperUtils.uniqueString)
-        assert context.maximumProblemLevel == Level.WARNING
+        context.addProblem(Collections.emptySet(), LogLevel.WARNING, HelperUtils.uniqueString)
+        assert context.maximumProblemLevel == LogLevel.WARNING
 
         expect:
         !MetadataImportService.mayImport(context, true, HelperUtils.randomMd5sum)
         context.problems.find {
-            it.level == Level.INFO && it.message == 'Not ignoring warnings, because the metadata file has changed since the previous validation.'
+            it.level == LogLevel.INFO && it.message == 'Not ignoring warnings, because the metadata file has changed since the previous validation.'
         }
     }
 

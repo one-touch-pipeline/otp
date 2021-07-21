@@ -27,7 +27,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -102,8 +102,8 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
 
         where:
         seqTypeName                             | library | level         || message1                                                                                                                                           || message2
-        "seqtype"                               | "5"     | Level.WARNING || "The tagmentation library '5' in column ${TAGMENTATION_LIBRARY} indicates tagmentation, but the sequencing type 'seqtype' is without tagmentation" || TagmentationLibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
-        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ""      | Level.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${TAGMENTATION_LIBRARY} column."      || TagmentationLibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
+        "seqtype"                               | "5"     | LogLevel.WARNING || "The tagmentation library '5' in column ${TAGMENTATION_LIBRARY} indicates tagmentation, but the sequencing type 'seqtype' is without tagmentation" || TagmentationLibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
+        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ""      | LogLevel.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${TAGMENTATION_LIBRARY} column."      || TagmentationLibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
     }
 
     void 'validate, when CUSTOMER_LIBRARY is missing and SEQUENCING_TYPE has TAGMENTATION, adds error'() {
@@ -118,7 +118,7 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there " +
                                 "should be a value in the ${TAGMENTATION_LIBRARY} column.",
                         TagmentationLibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY),

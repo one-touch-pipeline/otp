@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_TYPE
@@ -59,7 +59,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
                         "SomeValue"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
+                new Problem(Collections.emptySet(), LogLevel.ERROR,
                         "Required column '${SEQUENCING_TYPE}' is missing.")
         ]
 
@@ -128,7 +128,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The sequencing type '${SEQ_TYPE_NAME}' is not registered in OTP.")
     }
@@ -145,7 +145,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("No seqType is given")
     }

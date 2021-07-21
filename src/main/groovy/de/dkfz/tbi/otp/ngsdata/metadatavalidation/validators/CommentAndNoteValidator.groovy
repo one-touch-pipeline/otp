@@ -58,7 +58,7 @@ class CommentAndNoteValidator<C extends ValidationContext> implements MetadataVa
                 }
             }
             cells.groupBy { it.text }.each { String text, List<Cell> cells1 ->
-                context.addProblem(cells1 as Set, Level.INFO, "Comment/Note (${column.headerCell.text}): ${text}", "Comment/Note.")
+                context.addProblem(cells1 as Set, LogLevel.INFO, "Comment/Note (${column.headerCell.text}): ${text}", "Comment/Note.")
             }
         }
     }

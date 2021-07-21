@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 @Rollback
@@ -92,7 +92,7 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
         """)
 
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set<Cell>, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set<Cell>, LogLevel.ERROR,
                         "A file with the md5sum '${md5sum1}' and sample type '${sampleType.name}' already exists for project '${project.name}'.",
                         "At least one file with the md5sum and sample type combination exists in the corresponding project."),
         ]
@@ -123,7 +123,7 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
         """)
 
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set<Cell>, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set<Cell>, LogLevel.ERROR,
                         "A file with the md5sum '${md5sum1}' and sample type '${sampleType.name}' already exists for project '${project.name}'.",
                         "At least one file with the md5sum and sample type combination exists in the corresponding project."),
         ]

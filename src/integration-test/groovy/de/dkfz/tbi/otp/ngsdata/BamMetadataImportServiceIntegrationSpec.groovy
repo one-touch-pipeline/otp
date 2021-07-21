@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -184,7 +184,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     void assertResultNoError(Map results, DataBamImportRow dataBamImportRow, Path metadataFile) {
         assert results.context.metadataFile == metadataFile
-        assert results.context.problemsObject.maximumProblemLevel.intValue() < Level.ERROR.intValue()
+        assert results.context.problemsObject.maximumProblemLevel.intValue() < LogLevel.ERROR.intValue()
         assert results.importProcess
         assert results.importProcess.externallyProcessedMergedBamFiles.size() == 1
         dataBamImportRow.assertBamFile(results.importProcess.externallyProcessedMergedBamFiles[0])
@@ -193,12 +193,12 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     void assertResultError(Map results, Path metadataFile, List<String> expectedErrorMessages) {
         assert results.context.metadataFile == metadataFile
-        assert results.context.problemsObject.maximumProblemLevel.intValue() == Level.ERROR.intValue()
+        assert results.context.problemsObject.maximumProblemLevel.intValue() == LogLevel.ERROR.intValue()
         assert results.importProcess == null
         assert results.project == null
 
         Collection<String> foundErrorMessages = results.context.problemsObject.problems.findAll {
-            it.level == Level.ERROR
+            it.level == LogLevel.ERROR
         }*.message
         TestCase.assertContainSame(expectedErrorMessages, foundErrorMessages)
     }

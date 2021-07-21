@@ -64,11 +64,11 @@ class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataVal
 
             if (libraryPreparationKit) {
                 if (!libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit)) {
-                    context.addProblem(it.cells, Level.ERROR, "The ${LIBRARY_PREPARATION_KIT} '${libraryPreparationKit}' is not registered in OTP.", "At least one ${LIBRARY_PREPARATION_KIT} is not registered in OTP.")
+                    context.addProblem(it.cells, LogLevel.ERROR, "The ${LIBRARY_PREPARATION_KIT} '${libraryPreparationKit}' is not registered in OTP.", "At least one ${LIBRARY_PREPARATION_KIT} is not registered in OTP.")
                 }
             } else {
                 if (seqType.toUpperCase() == SeqTypeNames.EXOME.seqTypeName) {
-                    context.addProblem(it.cells, Level.WARNING, "The ${SEQUENCING_TYPE} is '${seqType}' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.", "If the ${SEQUENCING_TYPE} is '${SeqTypeNames.EXOME.seqTypeName}' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
+                    context.addProblem(it.cells, LogLevel.WARNING, "The ${SEQUENCING_TYPE} is '${seqType}' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.", "If the ${SEQUENCING_TYPE} is '${SeqTypeNames.EXOME.seqTypeName}' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
                 }
             }
         }

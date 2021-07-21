@@ -65,13 +65,13 @@ class TagmentationLibrarySeqTypeValidator extends ValueTuplesValidator<MetadataV
             String library = valueTuple.getValue(TAGMENTATION_LIBRARY.name())
             if (seqType.endsWith(SeqType.TAGMENTATION_SUFFIX)) {
                 if (!library) {
-                    context.addProblem(valueTuple.cells, Level.ERROR,
+                    context.addProblem(valueTuple.cells, LogLevel.ERROR,
                             "For the tagmentation sequencing type '${seqType}' there should be a value in the ${TAGMENTATION_LIBRARY} column.",
                             TAGMENTATION_WITHOUT_LIBRARY)
                 }
             } else {
                 if (library) {
-                    context.addProblem(valueTuple.cells, Level.WARNING,
+                    context.addProblem(valueTuple.cells, LogLevel.WARNING,
                             "The tagmentation library '${library}' in column ${TAGMENTATION_LIBRARY} indicates tagmentation, " +
                                     "but the sequencing type '${seqType}' is without tagmentation",
                             LIBRARY_WITHOUT_TAGMENTATION)

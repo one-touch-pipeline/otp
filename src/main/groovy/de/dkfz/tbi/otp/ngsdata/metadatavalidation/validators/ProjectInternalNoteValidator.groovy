@@ -67,7 +67,7 @@ class ProjectInternalNoteValidator extends ValueTuplesValidator<ValidationContex
         }
         projects.each { Project project ->
             if (project && project.internalNotes) {
-                context.addProblem(Collections.emptySet(), Level.INFO, "Internal notes for project '${project.name}': ${project.internalNotes}", "A Project has internal notes")
+                context.addProblem(Collections.emptySet(), LogLevel.INFO, "Internal notes for project '${project.name}': ${project.internalNotes}", "A Project has internal notes")
             }
         }
     }

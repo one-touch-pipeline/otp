@@ -284,7 +284,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     @Test
     void testLinkNewResults_methylation_OneLibrary_AllFine() {
         setupData()
-        testLinkNewResults_methylation_setup()
+        linkNewResults_methylation_setup()
 
         List<File> linkedFiles = createLinkedFilesList()
         linkedFiles.addAll(roddyBamFile.finalMergedMethylationDirectory)
@@ -305,7 +305,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile.numberOfMergedLanes = 2
         assert roddyBamFile.save(flush: true)
 
-        testLinkNewResults_methylation_setup()
+        linkNewResults_methylation_setup()
 
         List<File> linkedFiles = createLinkedFilesList()
         linkedFiles.addAll(roddyBamFile.finalMergedMethylationDirectory)
@@ -343,7 +343,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         }
     }
 
-    private void testLinkNewResults_methylation_setup() {
+    private void linkNewResults_methylation_setup() {
         SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
         seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
         seqType.save(flush: true)

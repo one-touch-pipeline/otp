@@ -27,7 +27,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.MAXIMAL_READ_LENGTH
@@ -52,8 +52,8 @@ class MaximalReadLengthValidatorSpec extends Specification {
 
         where:
         linksource || warnlevel     | warntext
-        false      || Level.WARNING | "Optional column '${MAXIMAL_READ_LENGTH}' is missing."
-        true       || Level.ERROR   | "If source files should only linked, the column '${MAXIMAL_READ_LENGTH}' is required."
+        false      || LogLevel.WARNING | "Optional column '${MAXIMAL_READ_LENGTH}' is missing."
+        true       || LogLevel.ERROR   | "If source files should only linked, the column '${MAXIMAL_READ_LENGTH}' is required."
     }
 
     @Unroll
@@ -74,13 +74,13 @@ class MaximalReadLengthValidatorSpec extends Specification {
         ]
         )
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "The maximalReadLength '${INVALID_DOUBLE}' should be an integer number.", "At least one maximalReadLength is not an integer number."),
-                new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "The maximalReadLength '${INVALID_CHARS}' should be an integer number.", "At least one maximalReadLength is not an integer number."),
         ]
         if (linksource) {
-            expectedProblems << new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+            expectedProblems << new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                     "The maximalReadLength is required, if the files should only be linked")
         }
 

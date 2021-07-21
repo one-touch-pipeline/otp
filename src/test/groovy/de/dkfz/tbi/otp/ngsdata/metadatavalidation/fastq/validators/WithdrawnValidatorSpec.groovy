@@ -27,7 +27,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class WithdrawnValidatorSpec extends Specification {
@@ -47,13 +47,13 @@ class WithdrawnValidatorSpec extends Specification {
                         "None\n"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "'YES' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "'TRUE' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "'1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
-                new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "'-1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
         ]
 

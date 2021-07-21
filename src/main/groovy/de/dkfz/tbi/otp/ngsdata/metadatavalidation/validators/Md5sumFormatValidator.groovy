@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -49,7 +49,7 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
     void checkColumn(AbstractMetadataValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
             if (context.linkSourceFiles) {
-                context.addProblem(Collections.emptySet(), Level.ERROR,
+                context.addProblem(Collections.emptySet(), LogLevel.ERROR,
                         "If source files should only linked, the column '${MetaDataColumn.MD5.name()}' is required.")
             } else {
                 addWarningForMissingOptionalColumn(context, MetaDataColumn.MD5.name())
@@ -65,7 +65,7 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
             if (!value.empty) {
                 checkMd5Sum(context, value, cells)
             } else if (context.linkSourceFiles) {
-                context.addProblem(cells, Level.ERROR, "The md5sum is required, if the files should only be linked",
+                context.addProblem(cells, LogLevel.ERROR, "The md5sum is required, if the files should only be linked",
                         "The md5sum is required, if the files should only be linked")
             }
         } else {
@@ -75,7 +75,7 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
 
     static void checkMd5Sum(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
         if (!(value ==~ /^[0-9a-fA-F]{32}$/)) {
-            context.addProblem(cells, Level.ERROR, "Not a well-formatted MD5 sum: '${value}'.", "At least one md5sum is not well formatted.")
+            context.addProblem(cells, LogLevel.ERROR, "Not a well-formatted MD5 sum: '${value}'.", "At least one md5sum is not well formatted.")
         }
     }
 }

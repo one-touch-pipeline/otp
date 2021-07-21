@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKitService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LIB_PREP_KIT
@@ -58,9 +58,9 @@ class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext
     @Override
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
         if (value == "" || value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
-            context.addProblem(cells, Level.WARNING, "The library preparation kit column is ${value ?: 'empty'}", "At least one library preparation kit is ${value ?: 'empty'}")
+            context.addProblem(cells, LogLevel.WARNING, "The library preparation kit column is ${value ?: 'empty'}", "At least one library preparation kit is ${value ?: 'empty'}")
         } else if (!libraryPreparationKitService.findByNameOrImportAlias(value)) {
-            context.addProblem(cells, Level.ERROR, "The library preparation kit '${value}' is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.", "At least one library preparation kit is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.")
+            context.addProblem(cells, LogLevel.ERROR, "The library preparation kit '${value}' is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.", "At least one library preparation kit is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.")
         }
     }
 }

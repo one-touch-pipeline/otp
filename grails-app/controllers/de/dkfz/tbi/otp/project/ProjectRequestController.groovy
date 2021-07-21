@@ -140,15 +140,7 @@ class ProjectRequestController {
     }
 
     def save(ProjectRequestCreationCommand cmd) {
-        if (!cmd.save) {
-            flash.cmd = cmd
-            ProjectRequest projectRequest = ProjectRequest.findByName(cmd.name)
-            if (projectRequest) {
-                redirect(action: ACTION_INDEX, id: projectRequest.id)
-            } else {
-                redirect(action: ACTION_INDEX)
-            }
-        } else {
+        if (cmd.save) {
             if (!cmd.validate()) {
                 flash.message = new FlashMessage(g.message(code: "projectRequest.store.failure") as String, cmd.errors)
                 flash.cmd = cmd
@@ -174,6 +166,15 @@ class ProjectRequestController {
                 flash.cmd = cmd
             }
             redirect(action: ACTION_INDEX)
+        }
+        else {
+            flash.cmd = cmd
+            ProjectRequest projectRequest = ProjectRequest.findByName(cmd.name)
+            if (projectRequest) {
+                redirect(action: ACTION_INDEX, id: projectRequest.id)
+            } else {
+                redirect(action: ACTION_INDEX)
+            }
         }
     }
 

@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-interface MergeConstants {
+class MergeConstants {
 
     static final String MERGE_TOOL_PICARD = "picard"
 

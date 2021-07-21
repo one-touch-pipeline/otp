@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationCont
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -49,7 +49,7 @@ class LibraryLayoutValidator extends SingleValueValidator<AbstractMetadataValida
     void validateValue(AbstractMetadataValidationContext context, String libraryLayoutName, Set<Cell> cells) {
         SequencingReadType libraryLayout = SequencingReadType.findByName(libraryLayoutName)
         if (!libraryLayout) {
-            context.addProblem(cells, Level.ERROR, "sequencing read type '${libraryLayoutName}' is not registered in OTP.", "At least one sequencing read type is not registered in OTP.")
+            context.addProblem(cells, LogLevel.ERROR, "sequencing read type '${libraryLayoutName}' is not registered in OTP.", "At least one sequencing read type is not registered in OTP.")
         }
     }
 }

@@ -41,8 +41,4 @@ class CheckQcJob implements Job {
     final JobStage getJobStage() {
         return JobStage.CHECK_QC
     }
-
-    @SuppressWarnings("UnusedMethodParameter")
-    void checkQc(WorkflowStep workflowStep) {
-    }
 }

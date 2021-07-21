@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -51,9 +51,9 @@ class SeqTypeBamValidator extends SingleValueValidator<BamMetadataValidationCont
     @Override
     void validateValue(BamMetadataValidationContext context, String seqType, Set<Cell> cells) {
         if (!seqType) {
-            context.addProblem(cells, Level.ERROR, "No seqType is given.")
+            context.addProblem(cells, LogLevel.ERROR, "No seqType is given.")
         } else if (!seqTypeService.findByNameOrImportAlias(seqType)) {
-            context.addProblem(cells, Level.ERROR, "The sequencing type '${seqType}' is not registered in OTP.", "At least one sequencing type is not registered in OTP.")
+            context.addProblem(cells, LogLevel.ERROR, "The sequencing type '${seqType}' is not registered in OTP.", "At least one sequencing type is not registered in OTP.")
         }
     }
 }

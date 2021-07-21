@@ -69,13 +69,13 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
             String qualityControlFile = it.getValue(QUALITY_CONTROL_FILE.name())
 
             if (!qualityControlFile) {
-                context.addProblem(it.cells, Level.WARNING,
+                context.addProblem(it.cells, LogLevel.WARNING,
                         "${QUALITY_CONTROL_FILE} has to be set for Sophia",
                         "${QUALITY_CONTROL_FILE} file has to be set for Sophia")
                 return
             }
             if (!OtpPathValidator.isValidRelativePath(qualityControlFile)) {
-                context.addProblem(it.cells, Level.ERROR,
+                context.addProblem(it.cells, LogLevel.ERROR,
                         "The path '${qualityControlFile}' is not a relative path.",
                         "At least one path is not a relative path.")
                 return
@@ -86,15 +86,15 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
 
             Path qualityControlFilePath = context.fileSystem.getPath(bamFile).resolveSibling(qualityControlFile)
             if (!Files.exists(qualityControlFilePath)) {
-                context.addProblem(it.cells, Level.ERROR,
+                context.addProblem(it.cells, LogLevel.ERROR,
                         "'${qualityControlFile}' does not exist or cannot be accessed by OTP.",
                         "At least one file does not exist or cannot be accessed by OTP.")
             } else if (!Files.isRegularFile(qualityControlFilePath)) {
-                context.addProblem(it.cells, Level.ERROR,
+                context.addProblem(it.cells, LogLevel.ERROR,
                         "'${qualityControlFile}' is not a file.",
                         "At least one file is not a file.")
             } else if (!Files.isReadable(qualityControlFilePath)) {
-                context.addProblem(it.cells, Level.ERROR,
+                context.addProblem(it.cells, LogLevel.ERROR,
                         "'${qualityControlFile}' is not readable.",
                         "At least one file is not readable.")
             } else {
@@ -102,10 +102,10 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
                 try {
                     qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
                 } catch (IOException ex) {
-                    context.addProblem(it.cells, Level.ERROR, ex.message)
+                    context.addProblem(it.cells, LogLevel.ERROR, ex.message)
                     return
                 } catch (Exception ex) {
-                    context.addProblem(it.cells, Level.ERROR,
+                    context.addProblem(it.cells, LogLevel.ERROR,
                             "'${qualityControlFile}' has no valid JSON structure.",
                             "At least one file has no valid JSON structure.")
                     return
@@ -117,7 +117,7 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
                     assert qcValues.all.insertSizeMedian
                     assert qcValues.all.insertSizeCV
                 } catch (AssertionError | Exception ex) {
-                    context.addProblem(it.cells, Level.ERROR,
+                    context.addProblem(it.cells, LogLevel.ERROR,
                             "'${qualityControlFile}' has not all needed values.",
                             "At least one value is missing.")
                 }

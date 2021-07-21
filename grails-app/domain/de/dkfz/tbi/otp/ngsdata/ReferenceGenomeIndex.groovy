@@ -38,8 +38,9 @@ class ReferenceGenomeIndex implements Entity {
     String indexToolVersion
 
     static constraints = {
-        path unique: ['toolName', 'referenceGenome'], blank: false, shared: "relativePath"
-        indexToolVersion unique: ['toolName', 'referenceGenome'], blank: false
+        List<String> tables = ['toolName', 'referenceGenome']
+        path unique: tables, blank: false, shared: "relativePath"
+        indexToolVersion unique: tables, blank: false
     }
 
     static belongsTo = [

@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -61,9 +61,9 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
     @Override
     void validateValue(MetadataValidationContext context, String mateNumber, Set<Cell> cells) {
         if (!mateNumber) {
-            context.addProblem(cells, Level.ERROR, ERROR_NOT_PROVIDED)
+            context.addProblem(cells, LogLevel.ERROR, ERROR_NOT_PROVIDED)
         } else if (!(mateNumber ==~ MATE_NUMBER_EXPRESSION)) {
-            context.addProblem(cells, Level.ERROR, "The mate number ('${mateNumber}') ${ALLOWED_VALUE_POSTFIX}", ERROR_INVALID_VALUE_SUMMARY)
+            context.addProblem(cells, LogLevel.ERROR, "The mate number ('${mateNumber}') ${ALLOWED_VALUE_POSTFIX}", ERROR_INVALID_VALUE_SUMMARY)
         }
     }
 }

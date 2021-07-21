@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -140,9 +140,9 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem((context.spreadsheet.dataRows[3].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[3].cells) as Set, LogLevel.WARNING,
                         "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing."),
-                new Problem((context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[4].cells) as Set, LogLevel.WARNING,
                         "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kitWithoutAdapterSequence}' is missing.", "Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing."),
         ]
         assertContainSame(context.problems, expectedProblems)

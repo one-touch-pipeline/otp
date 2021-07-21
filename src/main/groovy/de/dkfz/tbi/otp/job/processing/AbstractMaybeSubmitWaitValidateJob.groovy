@@ -34,9 +34,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 
     @Override
     protected final NextAction execute(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
-        if (!finishedClusterJobs) {
-            return maybeSubmit()
-        } else {
+        if (finishedClusterJobs) {
             Map<ClusterJobIdentifier, String> failedClusterJobs = failedOrNotFinishedClusterJobs(finishedClusterJobs)
             if (failedClusterJobs.isEmpty()) {
                 log.info "All ${finishedClusterJobs.size()} cluster jobs have finished successfully."
@@ -45,20 +43,23 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
             }
             validate()
             return NextAction.SUCCEED
+        } else {
+            return maybeSubmit()
         }
     }
 
-    @SuppressWarnings("AssignCollectionSort")
-    protected String createExceptionString(Map<ClusterJobIdentifier, String> failedClusterJobs, Collection<?
-            extends ClusterJobIdentifier> finishedClusterJobs) {
+    protected String createExceptionString(Map<ClusterJobIdentifier, String> failedClusterJobs,
+                                           Collection<? extends ClusterJobIdentifier> finishedClusterJobs) {
         Comparator sortByClusterJobId = { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 ->
             identifier1.clusterJobId <=> identifier2.clusterJobId
         } as Comparator
 
         String failedJobsOfTotalJobs = "${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:"
 
-        List<String> failedClusterJobsDetails = failedClusterJobs.sort(sortByClusterJobId).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
-            "${clusterJobIdentifier}: ${reason}\n${"Log file: ${ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier, processingStep).jobLog}" }\n"
+        List<String> failedClusterJobsDetails = []
+        failedClusterJobs.sort(sortByClusterJobId).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
+            failedClusterJobsDetails.add("${clusterJobIdentifier}: " +
+                    "${reason}\n${"Log file: ${ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier, processingStep).jobLog}"}\n")
         }
 
         return "\n${failedJobsOfTotalJobs}\n\n${failedClusterJobsDetails.join("\n")}"

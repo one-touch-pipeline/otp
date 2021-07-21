@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFa
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -209,25 +209,25 @@ SeqType2\t${SequencingReadType.PAIRED}\t${SeqType.SINGLE_CELL_RNA}
             0 * _
         }
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType1' and sequencing read type '${SequencingReadType.PAIRED}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType1' and sequencing read type '${SequencingReadType.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType2' and sequencing read type '${SequencingReadType.SINGLE}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType2' and sequencing read type '${SequencingReadType.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType3' and sequencing read type '${SequencingReadType.SINGLE}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType3' and sequencing read type '${SequencingReadType.PAIRED}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[8].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType3' and sequencing read type '${SequencingReadType.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[9].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[9].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType3_TAGMENTATION' and sequencing read type '${SequencingReadType.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and without Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[10].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[10].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType3_TAGMENTATION' and sequencing read type '${SequencingReadType.PAIRED}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and Single Cell is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[11].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[11].cells as Set, LogLevel.ERROR,
                         "The combination of sequencing type 'SeqType2' and sequencing read type '${SequencingReadType.PAIRED}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and sequencing read type and Single Cell is not registered in the OTP database."),
                 createInfoForSeqType([seqType1ll1, seqType2ll2]),
         ]
@@ -241,6 +241,6 @@ SeqType2\t${SequencingReadType.PAIRED}\t${SeqType.SINGLE_CELL_RNA}
 
     private Problem createInfoForSeqType(List<SeqType> seqTypes) {
         String infoSeqType = "The submission contains following seqTypes:\n- ${seqTypes*.toString().sort().join('\n- ')}"
-        return new Problem([] as Set, Level.INFO, infoSeqType, infoSeqType)
+        return new Problem([] as Set, LogLevel.INFO, infoSeqType, infoSeqType)
     }
 }

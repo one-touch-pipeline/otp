@@ -82,16 +82,16 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         deleteExistingFastqcResults(realm, dataFiles, directory)
 
         FastqcProcessedFile.withTransaction {
-            if (!fastQcResultsFromSeqCenterAvailable(seqTrack)) {
+            if (fastQcResultsFromSeqCenterAvailable(seqTrack)) {
+                createAndExecuteCopyCommand(realm, dataFiles, directory)
+                validateAndReadFastQcResult()
+                return NextAction.SUCCEED
+            } else {
                 dataFiles.each { DataFile dataFile ->
                     assert dataFile.fileExists && dataFile.fileSize > 0L
                 }
                 createAndExecuteFastQcCommand(realm, dataFiles, directory)
                 return NextAction.WAIT_FOR_CLUSTER_JOBS
-            } else {
-                createAndExecuteCopyCommand(realm, dataFiles, directory)
-                validateAndReadFastQcResult()
-                return NextAction.SUCCEED
             }
         }
     }

@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import java.nio.file.Files
@@ -54,26 +54,26 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
     @Override
     void validateValue(BamMetadataValidationContext context, String filePath, Set<Cell> cells) {
         if (!filePath.endsWith(".bam")) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filePath}' does not end with '.bam'.", "At least one filename does not end with '.bam'.")
+            context.addProblem(cells, LogLevel.ERROR, "Filename '${filePath}' does not end with '.bam'.", "At least one filename does not end with '.bam'.")
         }
-        if (!OtpPathValidator.isValidAbsolutePath(filePath)) {
-            context.addProblem(cells, Level.ERROR, "The path '${filePath}' is no absolute path.", "At least one path is no absolute path.")
-        } else {
+        if (OtpPathValidator.isValidAbsolutePath(filePath)) {
             try {
                 Path bamFile = context.fileSystem.getPath(filePath)
                 if (!Files.isRegularFile(bamFile)) {
-                    if (!Files.exists(bamFile)) {
-                        context.addProblem(cells, Level.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.",
-                                "At least one file does not exist or cannot be accessed by OTP.")
+                    if (Files.exists(bamFile)) {
+                        context.addProblem(cells, LogLevel.ERROR, "'${filePath}' is not a file.", "At least one file is not a file.")
                     } else {
-                        context.addProblem(cells, Level.ERROR, "'${filePath}' is not a file.", "At least one file is not a file.")
+                        context.addProblem(cells, LogLevel.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.",
+                                "At least one file does not exist or cannot be accessed by OTP.")
                     }
                 } else if (!Files.isReadable(bamFile)) {
-                    context.addProblem(cells, Level.ERROR, "'${filePath}' is not readable.", "At least one file is not readable.")
+                    context.addProblem(cells, LogLevel.ERROR, "'${filePath}' is not readable.", "At least one file is not readable.")
                 }
             } catch (Exception e) {
-                context.addProblem(Collections.emptySet(), Level.ERROR, e.message)
+                context.addProblem(Collections.emptySet(), LogLevel.ERROR, e.message)
             }
+       } else {
+            context.addProblem(cells, LogLevel.ERROR, "The path '${filePath}' is no absolute path.", "At least one path is no absolute path.")
         }
     }
 }

@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.nio.file.Paths
@@ -58,7 +58,7 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         then:
         if (error) {
             Problem problem = exactlyOneElement(context.problems)
-            assert problem.level == Level.WARNING
+            assert problem.level == LogLevel.WARNING
             assert containSame(problem.affectedCells*.cellAddress, ['A2', 'A3'])
             assert problem.message.contains("The path of the metadata file should contain the run name.")
         } else {

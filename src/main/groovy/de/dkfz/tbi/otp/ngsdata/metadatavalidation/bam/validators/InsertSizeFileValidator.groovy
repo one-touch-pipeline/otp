@@ -70,13 +70,10 @@ class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidation
             String insertSizeFile = it.getValue(INSERT_SIZE_FILE.name())
 
             if (insertSizeFile.isEmpty()) {
-                context.addProblem(it.cells, Level.WARNING, "${INSERT_SIZE_FILE} has to be set for Sophia",
+                context.addProblem(it.cells, LogLevel.WARNING, "${INSERT_SIZE_FILE} has to be set for Sophia",
                         "${INSERT_SIZE_FILE} file has to be set for Sophia")
             } else {
-                if (!OtpPathValidator.isValidRelativePath(insertSizeFile)) {
-                    context.addProblem(it.cells, Level.ERROR, "The path '${insertSizeFile}' is not a relative path.",
-                            "At least one path is not a relative path.")
-                } else {
+                if (OtpPathValidator.isValidRelativePath(insertSizeFile)) {
                     try {
                         if (bamFile != null && !bamFile.isEmpty()) {
                             Path bamFilePath = context.fileSystem.getPath(bamFile)
@@ -85,24 +82,27 @@ class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidation
                                     Path insertSizeFilePath = bamFilePath.resolveSibling(insertSizeFile)
 
                                     if (!Files.isRegularFile(insertSizeFilePath)) {
-                                        if (!Files.exists(insertSizeFilePath)) {
-                                            context.addProblem(it.cells, Level.ERROR,
+                                        if (Files.exists(insertSizeFilePath)) {
+                                            context.addProblem(it.cells, LogLevel.ERROR,
+                                                    "'${insertSizeFile}' is not a file.", "At least one file is not a file.")
+                                        } else {
+                                            context.addProblem(it.cells, LogLevel.ERROR,
                                                     "'${insertSizeFile}' does not exist or cannot be accessed by OTP.",
                                                     "At least one file does not exist or cannot be accessed by OTP.")
-                                        } else {
-                                            context.addProblem(it.cells, Level.ERROR,
-                                                    "'${insertSizeFile}' is not a file.", "At least one file is not a file.")
                                         }
                                     } else if (!Files.isReadable(insertSizeFilePath)) {
-                                        context.addProblem(it.cells, Level.ERROR,
+                                        context.addProblem(it.cells, LogLevel.ERROR,
                                                 "'${insertSizeFile}' is not readable.", "At least one file is not readable.")
                                     }
                                 }
                             }
                         }
                     } catch (Exception e) {
-                        context.addProblem(Collections.emptySet(), Level.ERROR, e.message)
+                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, e.message)
                     }
+                } else {
+                    context.addProblem(it.cells, LogLevel.ERROR, "The path '${insertSizeFile}' is not a relative path.",
+                            "At least one path is not a relative path.")
                 }
             }
         }

@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 @Component
 class MetadataColumnValidator implements MetadataValidator {
@@ -48,7 +48,7 @@ class MetadataColumnValidator implements MetadataValidator {
 
         cellsByValue.each { String value, Set<Cell> cells ->
             if (!metadataColumnList.contains(value)) {
-                context.addProblem(cells, Level.WARNING, "Column '${value}' is not registered in OTP.",
+                context.addProblem(cells, LogLevel.WARNING, "Column '${value}' is not registered in OTP.",
                         "At least one metadata column is not registered in OTP.")
             }
         }

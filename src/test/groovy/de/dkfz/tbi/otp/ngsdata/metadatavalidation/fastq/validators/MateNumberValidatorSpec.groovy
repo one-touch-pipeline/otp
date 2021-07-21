@@ -28,7 +28,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class MateNumberValidatorSpec extends Specification {
@@ -41,7 +41,7 @@ SomeValue
 """)
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR, "Required column 'READ' is missing.",
+                new Problem(Collections.emptySet(), LogLevel.ERROR, "Required column 'READ' is missing.",
                         "Required column 'READ' is missing.")
         ]
 
@@ -91,7 +91,7 @@ ${value}
         when:
         new MateNumberValidator().validate(context)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR, message, summaryMessage),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR, message, summaryMessage),
         ]
 
         then:

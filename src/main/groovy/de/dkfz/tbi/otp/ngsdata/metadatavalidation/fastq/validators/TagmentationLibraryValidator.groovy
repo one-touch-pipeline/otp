@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import java.util.regex.Matcher
@@ -56,9 +56,9 @@ class TagmentationLibraryValidator extends SingleValueValidator<MetadataValidati
         if (library) {
             Matcher matcher = library =~ REGEX
             if (!OtpPathValidator.isValidPathComponent(library)) {
-                context.addProblem(cells, Level.ERROR, "Tagmentation library '${library}' contains invalid characters.", "At least one tagmentation library contains invalid characters.")
+                context.addProblem(cells, LogLevel.ERROR, "Tagmentation library '${library}' contains invalid characters.", "At least one tagmentation library contains invalid characters.")
             } else if (!matcher) {
-                context.addProblem(cells, Level.WARNING, "Tagmentation library '${library}' does not match regular expression '${REGEX}'.", "At least one tagmentation library does not match regular expression '${REGEX}'.")
+                context.addProblem(cells, LogLevel.WARNING, "Tagmentation library '${library}' does not match regular expression '${REGEX}'.", "At least one tagmentation library does not match regular expression '${REGEX}'.")
             }
         }
     }

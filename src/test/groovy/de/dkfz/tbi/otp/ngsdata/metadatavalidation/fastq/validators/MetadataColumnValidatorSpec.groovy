@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.MetaDataKey
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class MetadataColumnValidatorSpec extends Specification implements DataTest {
@@ -53,7 +53,7 @@ class MetadataColumnValidatorSpec extends Specification implements DataTest {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(document: 'FASTQ_FILE\tFASTQ_FILE_PREFIX\nI am data!')
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING, "Column 'FASTQ_FILE_PREFIX' is not registered in OTP.",
+                new Problem(Collections.emptySet(), LogLevel.WARNING, "Column 'FASTQ_FILE_PREFIX' is not registered in OTP.",
                         "At least one metadata column is not registered in OTP.")
         ]
 

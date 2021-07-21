@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.SoftwareToolService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_GENERATOR
@@ -48,7 +48,7 @@ class FastqGeneratorValidator extends SingleValueValidator<MetadataValidationCon
     @Override
     void validateValue(MetadataValidationContext context, String fastqGenerator, Set<Cell> cells) {
         if (fastqGenerator && !SoftwareToolService.getBaseCallingTool(fastqGenerator)) {
-            context.addProblem(cells, Level.ERROR, "Fastq generator '${fastqGenerator}' is not registered in the OTP database.", "At least one fastq generator is not registered in the OTP database.")
+            context.addProblem(cells, LogLevel.ERROR, "Fastq generator '${fastqGenerator}' is not registered in the OTP database.", "At least one fastq generator is not registered in the OTP database.")
         }
     }
 }

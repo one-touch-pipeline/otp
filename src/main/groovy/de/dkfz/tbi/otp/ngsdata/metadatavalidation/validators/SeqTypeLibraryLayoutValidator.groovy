@@ -89,17 +89,17 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
                     String msgStart = "The combination of sequencing type '${seqTypeName}' and sequencing read type '${libraryLayout}' and"
                     String msgDefaultStart = "At least one combination of sequencing type and sequencing read type and"
                     if (isSingleCell) {
-                        context.addProblem(it.cells, Level.ERROR, "${msgStart} Single Cell is not registered in the OTP database.",
+                        context.addProblem(it.cells, LogLevel.ERROR, "${msgStart} Single Cell is not registered in the OTP database.",
                                 "${msgDefaultStart} Single Cell is not registered in the OTP database.")
                     } else {
-                        context.addProblem(it.cells, Level.ERROR, "${msgStart} without Single Cell is not registered in the OTP database.",
+                        context.addProblem(it.cells, LogLevel.ERROR, "${msgStart} without Single Cell is not registered in the OTP database.",
                                 "${msgDefaultStart} without Single Cell is not registered in the OTP database.")
                     }
                 }
             }
         }
         if (seqTypes) {
-            context.addProblem([] as Set, Level.INFO, "The submission contains following seqTypes:\n- ${seqTypes*.toString().sort().unique().join('\n- ')}")
+            context.addProblem([] as Set, LogLevel.INFO, "The submission contains following seqTypes:\n- ${seqTypes*.toString().sort().unique().join('\n- ')}")
         }
     }
 }

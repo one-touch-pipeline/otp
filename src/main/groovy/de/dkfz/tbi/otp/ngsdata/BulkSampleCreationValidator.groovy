@@ -49,14 +49,14 @@ class BulkSampleCreationValidator extends ValueTuplesValidator<ValidationContext
         valueTuples.each {
             String projectName = it.getValue(PROJECT.name())?.trim()
             if (projectName && !Project.getByNameOrNameInMetadataFiles(projectName)) {
-                context.addProblem(it.cells, Level.ERROR, "Could not find Project '${projectName}'")
+                context.addProblem(it.cells, LogLevel.ERROR, "Could not find Project '${projectName}'")
             }
         }
         List<String> foundHeaders = context.spreadsheet.header.cells*.text
         List<String> allowedHeaders = SampleIdentifierService.BulkSampleCreationHeader.values()*.name()
         List<String> unknownHeaders = foundHeaders - allowedHeaders
         unknownHeaders.each {
-            context.addProblem([] as Set, Level.ERROR, "The column header '${it}' is unknown")
+            context.addProblem([] as Set, LogLevel.ERROR, "The column header '${it}' is unknown")
         }
     }
 }

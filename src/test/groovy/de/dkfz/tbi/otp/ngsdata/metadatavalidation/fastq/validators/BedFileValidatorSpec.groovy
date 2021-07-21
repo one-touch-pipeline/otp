@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.parser.TestSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -114,7 +114,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         ]*.join('\t').join('\n'))
 
         Collection<Problem> expectedProblems = expectError ? [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING,
                         "No BED file is configured for sample '${sampleName}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKit.name}'.", "No BED file is configured for at least on sample."),
         ] : []
 

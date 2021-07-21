@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
@@ -75,21 +75,21 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
 
         )
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "The path 'testFile.bam' is no absolute path.", "At least one path is no absolute path."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "The path 'abc/testFile.bam' is no absolute path.", "At least one path is no absolute path."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "The path '../testFile.bam' is no absolute path.", "At least one path is no absolute path."),
-                new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "The path './testFile.bam' is no absolute path.", "At least one path is no absolute path."),
-                new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[4].cells as Set, LogLevel.ERROR,
                         "Filename '${wrongFormatFile}' does not end with '.bam'.", "At least one filename does not end with '.bam'."),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                          "'/tmp/test.bam' does not exist or cannot be accessed by OTP.", "At least one file does not exist or cannot be accessed by OTP."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                          "'${dir.absolutePath}' is not a file.", "At least one file is not a file."),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                           "'${notReadAble.absolutePath}' is not readable.", "At least one file is not readable."),
         ]
 
@@ -107,7 +107,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                 "${INDIVIDUAL}\n"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
+                new Problem(Collections.emptySet(), LogLevel.ERROR,
                         "Required column '${BAM_FILE_PATH}' is missing.")
         ]
 

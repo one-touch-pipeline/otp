@@ -25,7 +25,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -43,7 +43,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
+                new Problem(Collections.emptySet(), LogLevel.ERROR,
                         "Required column 'SAMPLE_NAME' is missing.")
         ]
         assertContainSame(context.problems, expectedProblems)
@@ -62,7 +62,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${TAGMENTATION_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.")
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${TAGMENTATION_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -79,7 +79,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
+                new Problem(Collections.emptySet(), LogLevel.ERROR,
                         "Required column 'SAMPLE_NAME' is missing.")
         ]
         assertContainSame(context.problems, expectedProblems)
@@ -114,7 +114,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${TAGMENTATION_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${TAGMENTATION_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

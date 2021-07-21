@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -49,7 +49,7 @@ class MaximalReadLengthValidator extends SingleValueValidator<BamMetadataValidat
     @Override
     void checkColumn(BamMetadataValidationContext context) {
         if (context.linkSourceFiles) {
-            context.addProblem(Collections.emptySet(), Level.ERROR,
+            context.addProblem(Collections.emptySet(), LogLevel.ERROR,
                     "If source files should only linked, the column '${BamMetadataColumn.MAXIMAL_READ_LENGTH.name()}' is required.")
         } else {
             addWarningForMissingOptionalColumn(context, BamMetadataColumn.MAXIMAL_READ_LENGTH.name())
@@ -60,11 +60,11 @@ class MaximalReadLengthValidator extends SingleValueValidator<BamMetadataValidat
     void validateValue(BamMetadataValidationContext context, String maximalReadLength, Set<Cell> cells) {
         if (maximalReadLength) {
             if (!maximalReadLength.integer) {
-                context.addProblem(cells, Level.ERROR, "The maximalReadLength '${maximalReadLength}' should be an integer number.",
+                context.addProblem(cells, LogLevel.ERROR, "The maximalReadLength '${maximalReadLength}' should be an integer number.",
                         "At least one maximalReadLength is not an integer number.")
             }
         } else if (context.linkSourceFiles) {
-            context.addProblem(cells, Level.ERROR, "The maximalReadLength is required, if the files should only be linked")
+            context.addProblem(cells, LogLevel.ERROR, "The maximalReadLength is required, if the files should only be linked")
         }
     }
 }

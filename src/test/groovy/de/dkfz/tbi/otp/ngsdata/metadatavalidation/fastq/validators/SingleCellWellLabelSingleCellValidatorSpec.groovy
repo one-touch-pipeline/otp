@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class SingleCellWellLabelSingleCellValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -161,7 +161,7 @@ class SingleCellWellLabelSingleCellValidatorSpec extends Specification implement
 
         then:
         Problem problem = CollectionUtils.exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         TestCase.assertContainSame(problem.affectedCells*.cellAddress, ['A2', 'B2', 'C2', 'D2'])
         problem.message.contains(SingleCellWellLabelSingleCellValidator.WARNING_MESSAGE)
 

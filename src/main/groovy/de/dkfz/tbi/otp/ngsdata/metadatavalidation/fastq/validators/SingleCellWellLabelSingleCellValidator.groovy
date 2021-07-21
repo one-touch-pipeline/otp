@@ -75,7 +75,7 @@ class SingleCellWellLabelSingleCellValidator extends ValueTuplesValidator<Abstra
         }
 
         if (singleCellWithoutWellLabel) {
-            context.addProblem(singleCellWithoutWellLabel*.cells.flatten() as Set, Level.WARNING, WARNING_MESSAGE)
+            context.addProblem(singleCellWithoutWellLabel*.cells.flatten() as Set, LogLevel.WARNING, WARNING_MESSAGE)
         }
     }
 

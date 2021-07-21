@@ -77,7 +77,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(problems.getProblems())
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message.contains("is empty.")
     }
 
@@ -107,7 +107,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(problems.getProblems())
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message.contains("is not readable.")
     }
 
@@ -120,7 +120,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(problems.getProblems())
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message.contains("is empty.")
     }
 
@@ -136,7 +136,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(problems.getProblems())
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message.contains("is larger than ${AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
 
         cleanup:

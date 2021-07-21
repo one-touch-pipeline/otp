@@ -67,7 +67,7 @@ class DataFilesInSameDirectorySpec extends Specification {
         then:
         dataFilePath2 == null
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.affectedCells == invalidCells
         problem.message.contains('is not a valid file name')
     }

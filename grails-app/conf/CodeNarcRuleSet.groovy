@@ -132,7 +132,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     EmptyMethod {
-        priority = MIDDLE
+        priority = DEFAULT
         doNotApplyToFileNames = CONTROLLER
     }
     EmptyStaticInitializer {
@@ -243,7 +243,7 @@ All the Rules that will be used for OTP
         priority = LOW
     }
     JavadocMissingThrowsDescription {
-        priority = LOW
+        priority = DEFAULT
     }
 
     // rulesets/concurrency.xml
@@ -355,7 +355,7 @@ All the Rules that will be used for OTP
         priority = LOW
     }
     InvertedIfElse {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     LongLiteralWithLowerCaseL {
         priority = CRITICAL
@@ -412,7 +412,7 @@ All the Rules that will be used for OTP
         priority = MIDDLE
     }
     BooleanMethodReturnsNull {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     //BuilderMethodWithSideEffects //also finds non builder methods start with create
     CloneableWithoutClone {
@@ -425,7 +425,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ConstantsOnlyInterface {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     EmptyMethodInAbstractClass {
         priority = LOW
@@ -478,7 +478,7 @@ All the Rules that will be used for OTP
 
     // rulesets/dry.xml
     DuplicateListLiteral {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     //DuplicateMapLiteral //has problems with stuff like .save(flush: true)
     DuplicateNumberLiteral {
@@ -600,7 +600,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     Indentation {
-        priority = DEFAULT
+        priority = MIDDLE
     }
     LineLength {
         priority = DEFAULT
@@ -865,7 +865,7 @@ All the Rules that will be used for OTP
 
     // rulesets/junit.xml
     ChainedTest {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     CoupledTestCase {
         priority = DEFAULT
@@ -969,7 +969,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ClassNameSameAsSuperclass {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     ConfusingMethodName {
         priority = DEFAULT

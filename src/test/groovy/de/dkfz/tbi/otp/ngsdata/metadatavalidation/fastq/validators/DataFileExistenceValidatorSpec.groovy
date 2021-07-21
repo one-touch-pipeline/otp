@@ -89,29 +89,29 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(),
-                        Level.INFO, "Using directory structure 'test directory structure'. If this is incorrect, please select the correct one."),
+                        LogLevel.INFO, "Using directory structure 'test directory structure'. If this is incorrect, please select the correct one."),
                 new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[2].cells) as Set<Cell>,
-                        Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_empty')}'.", "Multiple rows reference the same file."),
+                        LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_empty')}'.", "Multiple rows reference the same file."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_a_file')}' is not a file.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'not_a_file')}' is not a file.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'empty')}' is empty.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'empty')}' is empty.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set<Cell>,
-                        Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found1')}'.", "Multiple rows reference the same file."),
+                        LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found1')}'.", "Multiple rows reference the same file."),
                 new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_found1')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'not_found1')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem((context.spreadsheet.dataRows[7].cells + context.spreadsheet.dataRows[8].cells) as Set<Cell>,
-                        Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found2')}'.", "Multiple rows reference the same file."),
+                        LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found2')}'.", "Multiple rows reference the same file."),
                 new Problem((context.spreadsheet.dataRows[7].cells + context.spreadsheet.dataRows[8].cells) as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_found2')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'not_found2')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem((context.spreadsheet.dataRows[9].cells + context.spreadsheet.dataRows[10].cells +
                         context.spreadsheet.dataRows[11].cells + context.spreadsheet.dataRows[12].cells) as Set<Cell>,
-                        Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found3')}'.", "Multiple rows reference the same file."),
+                        LogLevel.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found3')}'.", "Multiple rows reference the same file."),
                 new Problem((context.spreadsheet.dataRows[9].cells + context.spreadsheet.dataRows[10].cells +
                         context.spreadsheet.dataRows[11].cells + context.spreadsheet.dataRows[12].cells) as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_found3')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "'${new File(dir, 'not_found3')}' does not exist or cannot be accessed by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
                 new Problem((context.spreadsheet.dataRows[13].cells) as Set<Cell>,
-                        Level.ERROR, "File '${new File(dir, 'not_readable')}' is not readable by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
+                        LogLevel.ERROR, "File '${new File(dir, 'not_readable')}' is not readable by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
         ]
         DataFileExistenceValidator validator = new DataFileExistenceValidator()
 

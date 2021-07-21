@@ -84,7 +84,7 @@ class MultiImportValidator extends ValueTuplesValidator<AbstractMetadataValidati
 
         if (result > 0) {
             context.addProblem(valueTuple.cells,
-                    Level.ERROR, "A file with the md5sum '${md5sum}' and sample type '${projectSampleType.sampleType.name}' already exists " +
+                    LogLevel.ERROR, "A file with the md5sum '${md5sum}' and sample type '${projectSampleType.sampleType.name}' already exists " +
                     "for project '${projectSampleType.project.name}'.",
                     "At least one file with the md5sum and sample type combination exists in the corresponding project.")
         }

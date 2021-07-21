@@ -127,7 +127,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
             String messagePrefix = "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout}"
             if (seqType in singleCellSeqTypes) {
                 if (mergingWorkPackages.any { hasNonWithdrawnSeqTracks(it) }) {
-                    context.addProblem(valueTuple.cells, Level.ERROR,
+                    context.addProblem(valueTuple.cells, LogLevel.ERROR,
                             "${messagePrefix} would be automatically merged with existing samples.",
                             "Sample would be automatically merged with existing samples.")
                 }
@@ -140,7 +140,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
 
                     if (mergeableSeqPlatform && mergeableLibPrepKit) {
                         if (hasNonWithdrawnSeqTracks(mergingWorkPackage)) {
-                            context.addProblem(valueTuple.cells, Level.WARNING,
+                            context.addProblem(valueTuple.cells, LogLevel.WARNING,
                                     "${messagePrefix} would be automatically merged with existing samples.",
                                     "Sample would be automatically merged with existing samples.")
                         }
@@ -152,7 +152,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                         if (!mergeableLibPrepKit) {
                             warnings << "new library preparation kit ${libraryPreparationKit} differs from old library preparation kit ${mergingWorkPackage.libraryPreparationKit}"
                         }
-                        context.addProblem(valueTuple.cells, Level.WARNING,
+                        context.addProblem(valueTuple.cells, LogLevel.WARNING,
                                 "${messagePrefix} can not be merged with the existing bam file, since ${warnings.join(' and ')}",
                                 "Sample can not be merged with existing data, because merging criteria is incompatible.")
                     }

@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.OnlyOneRunValidatorSpec.Ilse.*
@@ -74,7 +74,7 @@ class OnlyOneRunValidatorSpec extends Specification {
         then:
         if (error) {
             Problem problem = exactlyOneElement(context.problems)
-            assert problem.level == Level.WARNING
+            assert problem.level == LogLevel.WARNING
             List<String> affectedCells = ilse == NONE ? ['A2', 'A3'] : ['B2', 'B3']
             assert containSame(problem.affectedCells*.cellAddress, affectedCells)
             assert problem.message.contains("Metadata file contains data from more than one run.")

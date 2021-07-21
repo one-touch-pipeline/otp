@@ -66,7 +66,7 @@ class DataFilesInGpcfSpecificStructureSpec extends Specification {
         } else {
             assert dataFilePath == null
             Problem problem = exactlyOneElement(context.problems)
-            assert problem.level == Level.ERROR
+            assert problem.level == LogLevel.ERROR
             assert problem.affectedCells == invalidCells
             assert problem.message.contains('Cannot construct a valid GPCF midterm storage path')
         }

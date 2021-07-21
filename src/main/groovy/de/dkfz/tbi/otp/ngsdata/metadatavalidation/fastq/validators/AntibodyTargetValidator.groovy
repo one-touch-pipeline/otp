@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.AntibodyTargetService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
@@ -56,7 +56,7 @@ class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationCon
     @Override
     void validateValue(MetadataValidationContext context, String antibodyTarget, Set<Cell> cells) {
         if (antibodyTarget && !antibodyTargetService.findByNameOrImportAlias(antibodyTarget)) {
-            context.addProblem(cells, Level.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.",
+            context.addProblem(cells, LogLevel.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.",
                     "At least one antibody target is not registered in OTP.")
         }
     }

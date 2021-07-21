@@ -58,7 +58,7 @@ class ValueTuplesValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message == "Required column 'C' is missing."
     }
 
@@ -94,7 +94,7 @@ class ValueTuplesValidatorSpec extends Specification {
         containSame(calledFor, expected)
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message == "Optional column 'C' is missing."
     }
 

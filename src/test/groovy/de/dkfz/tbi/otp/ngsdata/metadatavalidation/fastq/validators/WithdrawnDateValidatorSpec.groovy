@@ -27,7 +27,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class WithdrawnDateValidatorSpec extends Specification {
@@ -43,7 +43,7 @@ class WithdrawnDateValidatorSpec extends Specification {
                         "none\n"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "'2015' is not an acceptable '${MetaDataColumn.WITHDRAWN_DATE.name()}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
         ]
 

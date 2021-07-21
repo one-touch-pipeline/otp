@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
 
@@ -95,7 +95,7 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
             if (identifierOccupied(sampleName, identifier.pid, seqType)) {
                 context.addProblem(
                         valueTuple.cells,
-                        Level.WARNING,
+                        LogLevel.WARNING,
                         "Sample Name '${sampleName}' is already registered for another sample with the same pid and seq type.",
                         "At least one Sample Name is already registered for another sample.")
             }

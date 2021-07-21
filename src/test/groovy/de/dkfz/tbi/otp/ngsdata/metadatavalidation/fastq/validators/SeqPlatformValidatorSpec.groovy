@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -101,29 +101,29 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
                         "Platform3\tModel5\n")
         createPlatforms()
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[4].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform2', instrument model 'Model1' and sequencing kit 'Kit1' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model2' and sequencing kit 'Kit1' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model1' and sequencing kit 'Kit2' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model1' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[10].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[10].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform4', instrument model 'Model3' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[11].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[11].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform3', instrument model 'Model4' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[12].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[12].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform3', instrument model 'Model3' and sequencing kit 'Kit1' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[13].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[13].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform5', instrument model 'Model1' and sequencing kit 'Kit1' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[14].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[14].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model5' and sequencing kit 'Kit1' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[15].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[15].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model1' and sequencing kit 'Kit5' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[16].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[16].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform5', instrument model 'Model3' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[17].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[17].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform3', instrument model 'Model5' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
         ]
 
@@ -170,21 +170,21 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
                         "Platform3\tModel5\n")
         createPlatforms()
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING,
+                new Problem(Collections.emptySet(), LogLevel.WARNING,
                         "Optional column '${SEQUENCING_KIT}' is missing."),
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model1' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform2', instrument model 'Model1' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform1', instrument model 'Model2' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform4', instrument model 'Model3' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform3', instrument model 'Model4' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform5', instrument model 'Model3' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[8].cells as Set, LogLevel.ERROR,
                         "The combination of instrument platform 'Platform3', instrument model 'Model5' and sequencing kit '' is not registered in the OTP database.", "At least one combination of instrument platform, instrument model and sequencing kit is not registered in the OTP database."),
         ]
 

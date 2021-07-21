@@ -84,15 +84,15 @@ class LinkFilesToFinalDestinationService {
     void linkToFinalDestinationAndCleanup(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "roddyBamFile must not be null"
         assert realm: "realm must not be null"
-        if (!roddyBamFile.withdrawn) {
+        if (roddyBamFile.withdrawn) {
+            threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
+        } else {
             cleanupWorkDirectory(roddyBamFile, realm)
             executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
             cleanupOldResults(roddyBamFile, realm)
             handleQcCheckAndSetBamFile(roddyBamFile) {
                 linkNewResults(roddyBamFile, realm)
             }
-        } else {
-            threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
         }
     }
 

@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.util.regex.Matcher
@@ -82,11 +82,11 @@ class SampleValidatorSpec extends Specification implements DataTest {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_NAME}\nABC\nAAA")
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "Sample name 'ABC' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "Sample name 'AAA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
-                new Problem(Collections.emptySet(), Level.INFO,
+                new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tAAA\n\t\t\tABC"),
         ]
         when:
@@ -106,7 +106,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message == "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP."
     }
 
@@ -116,9 +116,9 @@ class SampleValidatorSpec extends Specification implements DataTest {
                 "${SAMPLE_NAME}\t${PROJECT}\n${SAMPLE_Z}")
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
-                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, Level.ERROR,
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
                         "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP.", "At least one sample name is not registered in OTP. It looks like it belongs to a project not registered in OTP."),
-                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, Level.ERROR,
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.ERROR,
                         "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.", "At least one sample name is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project."),
         ]
 
@@ -141,7 +141,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message == "Sample name '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.".toString()
     }
 
@@ -156,7 +156,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.INFO
+        problem.level == LogLevel.INFO
         problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tz\tP-X_I-Y_S-z"
     }
 
@@ -171,7 +171,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to project 'X', but it is already registered in OTP with project 'A'. If you ignore this warning, OTP will keep the assignment of the sample name to project 'A'."
     }
 
@@ -186,7 +186,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to individual 'Y', but it is already registered in OTP with individual 'B'. If you ignore this warning, OTP will keep the assignment of the sample name to individual 'B'."
     }
 
@@ -201,7 +201,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to sample type 'z', but it is already registered in OTP with sample type 'c' If you ignore this warning, OTP will keep the assignment of the sample name to sample type 'c'."
     }
 
@@ -221,7 +221,7 @@ class SampleValidatorSpec extends Specification implements DataTest {
         DomainFactory.createSampleIdentifier(name: 'SampleC2', sample: c1.sample)
         DomainFactory.createSampleIdentifier(name: 'SampleC3', sample: c1.sample)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1..6]*.cells.flatten() as Set, Level.WARNING, """\
+                new Problem(context.spreadsheet.dataRows[1..6]*.cells.flatten() as Set, LogLevel.WARNING, """\
 The sample names belong to different projects:
 Project 'B':
         '${SAMPLE_N}'
@@ -232,13 +232,13 @@ Project 'C':
         'SampleC2'
         'SampleC3'\
 """),
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "Sample name 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.",
                         "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
-                new Problem(Collections.emptySet(), Level.INFO,
+                new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
                                 "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
-                new Problem(Collections.emptySet(), Level.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N\nC\tM\tN\tP-C_I-M_S-N"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N\nC\tM\tN\tP-C_I-M_S-N"),
         ]
 
         when:
@@ -257,11 +257,11 @@ Project 'C':
                         "${SAMPLE_N}\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "Sample name 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
-                new Problem(Collections.emptySet(), Level.INFO,
+                new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
-                new Problem(Collections.emptySet(), Level.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
         ]
 
         when:
@@ -279,9 +279,9 @@ Project 'C':
                         "${SAMPLE_N}\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'x')
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.INFO,
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.INFO,
                         "All sample names belong to project 'B'."),
-                new Problem(Collections.emptySet(), Level.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
         ]
 
         when:
@@ -305,7 +305,7 @@ Project 'C':
         then:
 
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.INFO
+        problem.level == LogLevel.INFO
         problem.message == "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"
     }
 

@@ -60,14 +60,14 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
                 SequencingReadType libraryLayout = SequencingReadType.values().find {
                     it.toString() == libraryLayoutName
                 }
-                if (!libraryLayout) {
-                    context.addProblem(it.cells, Level.WARNING, "OTP does not know the sequencing read type '${libraryLayoutName}' and can therefore not validate the mate number.", "OTP does not know at least one sequencing read type and can therefore not validate the mate number.")
-                } else {
+                if (libraryLayout) {
                     int mate = mateNumber.toInteger()
                     int mateCount = libraryLayout.mateCount
                     if (mate > mateCount) {
-                        context.addProblem(it.cells, Level.ERROR, "The mate number '${mateNumber}' is bigger then the allowed value for the sequencing read type '${libraryLayoutName}' of '${mateCount}'.", "At least one mate number is bigger then the allowed value for the sequencing read type.")
+                        context.addProblem(it.cells, LogLevel.ERROR, "The mate number '${mateNumber}' is bigger then the allowed value for the sequencing read type '${libraryLayoutName}' of '${mateCount}'.", "At least one mate number is bigger then the allowed value for the sequencing read type.")
                     }
+                } else {
+                    context.addProblem(it.cells, LogLevel.WARNING, "OTP does not know the sequencing read type '${libraryLayoutName}' and can therefore not validate the mate number.", "OTP does not know at least one sequencing read type and can therefore not validate the mate number.")
                 }
             }
         }

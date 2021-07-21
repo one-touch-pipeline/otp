@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
 import java.nio.file.Paths
@@ -169,7 +169,7 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
         final List<MetaDataFile> metaDataFiles = []
 
         Problems problems = new Problems()
-        problems.addProblem([] as Set, Level.ERROR, "An Error occurred")
+        problems.addProblem([] as Set, LogLevel.ERROR, "An Error occurred")
         for (int i : 1..3) {
             MetaDataFile metadataFile = DomainFactory.createMetaDataFile()
             metaDataFiles.add(metadataFile)

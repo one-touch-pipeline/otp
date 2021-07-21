@@ -389,7 +389,10 @@ class SchedulerService {
         job.end()
         removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
-        if (!ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+        if (ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+            job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT " +
+                    "be created."
+        } else {
             // add a ProcessingStepUpdate to the ProcessingStep
             processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -402,9 +405,6 @@ class SchedulerService {
                 log.error("Could not create a FINISHED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FINISHED Update for Job")
             }
-        } else {
-            job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A FINISHED ProcessingStepUpdate will NOT " +
-                    "be created."
         }
         Parameter failedOutputParameter
         job.getOutputParameters().each { Parameter param ->

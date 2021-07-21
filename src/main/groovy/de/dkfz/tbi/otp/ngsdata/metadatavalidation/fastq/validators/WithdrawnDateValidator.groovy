@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.WITHDRAWN_DATE
@@ -54,7 +54,7 @@ class WithdrawnDateValidator extends SingleValueValidator<MetadataValidationCont
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
         final String uppercaseValue = value.toUpperCase(Locale.ENGLISH)
         if (value != "" && uppercaseValue != NONE) {
-            context.addProblem(cells, Level.ERROR, "'${value}' is not an acceptable '${WITHDRAWN_DATE}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP.")
+            context.addProblem(cells, LogLevel.ERROR, "'${value}' is not an acceptable '${WITHDRAWN_DATE}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP.")
         }
     }
 }

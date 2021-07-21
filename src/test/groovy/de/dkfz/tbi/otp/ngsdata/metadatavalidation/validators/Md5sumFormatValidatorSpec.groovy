@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -52,7 +52,7 @@ SomeValue
 
         then:
         Problem problem = CollectionUtils.exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         TestCase.assertContainSame(problem.affectedCells*.cellAddress, [])
         problem.message.contains("Required column 'MD5' is missing.")
     }
@@ -78,8 +78,8 @@ SomeValue
 
         where:
         linksource || warnlevel     | warntext
-        false      || Level.WARNING | "Optional column 'MD5' is missing."
-        true       || Level.ERROR   | "If source files should only linked, the column '${MetaDataColumn.MD5.name()}' is required."
+        false      || LogLevel.WARNING | "Optional column 'MD5' is missing."
+        true       || LogLevel.ERROR   | "If source files should only linked, the column '${MetaDataColumn.MD5.name()}' is required."
     }
 
     void 'validate concerning metadata, adds expected error'() {
@@ -96,7 +96,7 @@ xxxxyyyyxxxxyyyyxxxxyyyyxxxxyyyy
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
         problem.message.contains("Not a well-formatted MD5 sum: 'xxxxyyyyxxxxyyyyxxxxyyyyxxxxyyyy'.")
     }
@@ -126,7 +126,7 @@ ${BamMetadataColumn.MD5}
                 linkSourceFiles: true,
         ])
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "The md5sum is required, if the files should only be linked"),
         ]
 

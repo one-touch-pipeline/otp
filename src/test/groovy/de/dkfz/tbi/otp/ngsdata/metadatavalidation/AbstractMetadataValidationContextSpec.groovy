@@ -29,7 +29,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.nio.file.*
@@ -51,7 +51,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message.contains(problemMessage)
         infoMetadata.metadataFileMd5sum == null
         infoMetadata.spreadsheet == null
@@ -79,7 +79,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message.contains(problemMessage)
         infoMetadata.metadataFileMd5sum == md5sum
         infoMetadata.spreadsheet.dataRows[0].cells[0].text ==~ firstCellRegex
@@ -101,7 +101,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message.contains(problemMessage)
         infoMetadata.metadataFileMd5sum == md5sum
         infoMetadata.spreadsheet == null
@@ -150,7 +150,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message.contains('contains less than two lines')
         infoMetadata.spreadsheet == null
     }

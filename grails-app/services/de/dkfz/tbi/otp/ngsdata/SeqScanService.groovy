@@ -248,13 +248,13 @@ class SeqScanService {
         SeqCenter seqCenter = null
         String name = ""
         MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment mergingAssignment ->
-            if (!seqCenter) {
-                seqCenter = mergingAssignment.seqTrack.run.seqCenter
-                name = seqCenter.name
-            } else {
+            if (seqCenter) {
                 if (mergingAssignment.seqTrack.run.seqCenter != seqCenter) {
                     name += "*"
                 }
+            } else {
+                seqCenter = mergingAssignment.seqTrack.run.seqCenter
+                name = seqCenter.name
             }
         }
         seqScan.seqCenters = name
@@ -272,15 +272,15 @@ class SeqScanService {
         int iSize = 0
         String insertSize = ""
         MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment mergingAssignment ->
-            if (!defined) {
-                iSize = mergingAssignment.seqTrack.insertSize
-                defined = true
-                insertSize += iSize
-            } else {
+            if (defined) {
                 int thisSize = mergingAssignment.seqTrack.insertSize
                 if (thisSize > iSize + 5 || thisSize < iSize - 5) {
                     insertSize += "!"
                 }
+            } else {
+                iSize = mergingAssignment.seqTrack.insertSize
+                defined = true
+                insertSize += iSize
             }
         }
         seqScan.insertSize = insertSize

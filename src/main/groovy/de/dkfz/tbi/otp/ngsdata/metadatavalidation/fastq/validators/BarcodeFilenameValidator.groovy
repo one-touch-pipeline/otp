@@ -60,11 +60,11 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
             String fileNameBarcode = MultiplexingService.barcode(fileName)
 
             if (barcode == null && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The ${INDEX} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${INDEX} column should be filled.)", "The ${INDEX} column is missing")
+                context.addProblem(valueTuple.cells, LogLevel.WARNING, "The ${INDEX} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${INDEX} column should be filled.)", "The ${INDEX} column is missing")
             } else if (barcode == '' && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.")
+                context.addProblem(valueTuple.cells, LogLevel.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.")
             } else if (barcode && fileNameBarcode && barcode != fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${INDEX} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.", "At least one barcode parsed from the filename is different from the value in the ${INDEX} cell. OTP will ignore the barcode parsed from the filename.")
+                context.addProblem(valueTuple.cells, LogLevel.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${INDEX} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.", "At least one barcode parsed from the filename is different from the value in the ${INDEX} cell. OTP will ignore the barcode parsed from the filename.")
             }
         }
     }

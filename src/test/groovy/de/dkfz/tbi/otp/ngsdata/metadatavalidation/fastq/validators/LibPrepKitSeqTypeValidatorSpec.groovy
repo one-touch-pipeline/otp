@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -111,19 +111,19 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         then:
         context.problems.size() == 5
         Collection<Problem> expectedProblems = [
-                new Problem((context.spreadsheet.dataRows[10].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[10].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(10).cells.get(2).text} ${context.spreadsheet.dataRows.get(10).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[11].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[11].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(11).cells.get(2).text} ${context.spreadsheet.dataRows.get(11).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[12].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[12].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(12).cells.get(2).text} ${context.spreadsheet.dataRows.get(12).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[13].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[13].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(13).cells.get(2).text} ${context.spreadsheet.dataRows.get(13).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[14].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[14].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(14).cells.get(2).text} ${context.spreadsheet.dataRows.get(14).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
         ]
@@ -198,16 +198,16 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${SequencingReadType.PAIRED}
         then:
         context.problems.size() == 4
         Collection<Problem> expectedProblems = [
-                new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[4].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[4].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(1).cells.get(0).text} ${context.spreadsheet.dataRows.get(1).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[5].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[5].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(2).cells.get(0).text} ${context.spreadsheet.dataRows.get(2).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[6].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[6].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(6).cells.get(0).text} ${context.spreadsheet.dataRows.get(6).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
-                new Problem((context.spreadsheet.dataRows[7].cells) as Set, Level.ERROR,
+                new Problem((context.spreadsheet.dataRows[7].cells) as Set, LogLevel.ERROR,
                         "If the sequencing type is '${context.spreadsheet.dataRows.get(7).cells.get(0).text} ${context.spreadsheet.dataRows.get(7).cells.get(1).text}'" +
                                 ", the library preparation kit must be given."),
         ]

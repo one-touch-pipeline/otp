@@ -55,7 +55,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
         boolean directoryStructureInfoAdded = false
         Closure addDirectoryStructureInfo = {
             if (!directoryStructureInfoAdded) {
-                context.addProblem(Collections.emptySet(), Level.INFO,
+                context.addProblem(Collections.emptySet(), LogLevel.INFO,
                         "Using directory structure '${context.directoryStructureDescription}'. If this is incorrect, please select the correct one.")
                 directoryStructureInfoAdded = true
             }
@@ -70,7 +70,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
                 if (valueTuples*.cells.sum()*.row.unique().size() != 1) {
                     synchronized (sync) {
                         addDirectoryStructureInfo()
-                        context.addProblem((Set<Cell>) valueTuples*.cells.sum(), Level.WARNING,
+                        context.addProblem((Set<Cell>) valueTuples*.cells.sum(), LogLevel.WARNING,
                                 "Multiple rows reference the same file '${path}'.", "Multiple rows reference the same file.")
                     }
                 }
@@ -89,7 +89,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
                 if (message) {
                     synchronized (sync) {
                         addDirectoryStructureInfo()
-                        context.addProblem((Set<Cell>) valueTuples*.cells.sum(), Level.ERROR, message, "At least one file can not be accessed by OTP, does not exist, is empty or is not a file.")
+                        context.addProblem((Set<Cell>) valueTuples*.cells.sum(), LogLevel.ERROR, message, "At least one file can not be accessed by OTP, does not exist, is empty or is not a file.")
                     }
                 }
             }

@@ -26,7 +26,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -62,7 +62,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ${INDEX} column is missing. OTP will use the barcode 'AGGCAGAA' parsed from filename 'testFileName_AGGCAGAA_1.fastq.gz'. (For multiplexed lanes the ${INDEX} column should be filled.)", "The INDEX column is missing")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "The ${INDEX} column is missing. OTP will use the barcode 'AGGCAGAA' parsed from filename 'testFileName_AGGCAGAA_1.fastq.gz'. (For multiplexed lanes the ${INDEX} column should be filled.)", "The INDEX column is missing")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -95,7 +95,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "A barcode can be parsed from the filename 'testFileName_AGGCAGAA_1.fastq.gz', but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the INDEX cell is empty. OTP will ignore the barcode parsed from the filename.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "A barcode can be parsed from the filename 'testFileName_AGGCAGAA_1.fastq.gz', but the ${INDEX} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the INDEX cell is empty. OTP will ignore the barcode parsed from the filename.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -144,7 +144,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The barcode parsed from the filename 'testFileName_AGGCAGGG_1.fastq.gz' ('AGGCAGGG') is different from the value in the ${INDEX} cell ('AGGCAGAA'). OTP will ignore the barcode parsed from the filename and use the barcode 'AGGCAGAA'.", "At least one barcode parsed from the filename is different from the value in the INDEX cell. OTP will ignore the barcode parsed from the filename.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "The barcode parsed from the filename 'testFileName_AGGCAGGG_1.fastq.gz' ('AGGCAGGG') is different from the value in the ${INDEX} cell ('AGGCAGAA'). OTP will ignore the barcode parsed from the filename and use the barcode 'AGGCAGAA'.", "At least one barcode parsed from the filename is different from the value in the INDEX cell. OTP will ignore the barcode parsed from the filename.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

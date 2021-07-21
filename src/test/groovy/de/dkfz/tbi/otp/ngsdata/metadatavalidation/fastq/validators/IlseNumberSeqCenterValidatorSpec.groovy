@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.nio.file.Paths
@@ -83,7 +83,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "ILSe number is available although data was provided by 'another center'.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "ILSe number is available although data was provided by 'another center'.")
         ]
         containSame(context.problems, expectedProblems)
     }
@@ -102,7 +102,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "ILSe number is not available although data was provided by 'DKFZ'.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "ILSe number is not available although data was provided by 'DKFZ'.")
         ]
         containSame(context.problems, expectedProblems)
     }
@@ -120,7 +120,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "ILSe number is not available although data was provided by 'DKFZ'.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "ILSe number is not available although data was provided by 'DKFZ'.")
         ]
         containSame(context.problems, expectedProblems)
     }

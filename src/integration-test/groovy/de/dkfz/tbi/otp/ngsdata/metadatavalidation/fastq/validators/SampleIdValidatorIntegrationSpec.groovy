@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.util.regex.Matcher
@@ -148,7 +148,7 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "C2"])
         problem.message.contains("Sample Name '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
@@ -181,7 +181,7 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         containSame(problem.affectedCells*.cellAddress, ["A2", "B2", "D2", "E2", "C2"])
         problem.message.contains("Sample Name '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }

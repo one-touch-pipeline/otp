@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Column
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -119,7 +119,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = createContext("${RUN_ID}\nrunA")
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR, "Required column 'LANE_NO' is missing."),
+                new Problem(Collections.emptySet(), LogLevel.ERROR, "Required column 'LANE_NO' is missing."),
         ]
 
         when:
@@ -166,7 +166,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
         ]
 
         when:
@@ -182,7 +182,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
         ]
 
         when:
@@ -199,9 +199,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
         ]
 
         when:
@@ -232,7 +232,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
 
         when:
@@ -248,7 +248,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
         ]
 
         when:
@@ -277,9 +277,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
 
         when:
@@ -296,7 +296,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
 
         when:
@@ -317,7 +317,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runZ', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
         ]
 
         when:
@@ -333,11 +333,11 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
 
         when:
@@ -353,11 +353,11 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
         ]
 
         when:
@@ -373,9 +373,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
         ]
 
         when:
@@ -392,15 +392,15 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
 
         when:
@@ -417,13 +417,13 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         createSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0, 1),
-                        Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
+                        LogLevel.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode.", "There are rows with and without barcode."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 0),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP.", "At least one row has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS, 1),
-                        Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
+                        LogLevel.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP.", "At least one row has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
 
         when:
@@ -450,13 +450,13 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + SAMPLE_NAME, 0, 1, 2),
-                        Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${SAMPLE_NAME}'.", "All rows of the same seqTrack must have the same value in column 'SAMPLE_NAME'."),
+                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${SAMPLE_NAME}'.", "All rows of the same seqTrack must have the same value in column 'SAMPLE_NAME'."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_GENERATOR, 0, 1, 2),
-                        Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${FASTQ_GENERATOR}'.", "All rows of the same seqTrack must have the same value in column 'FASTQ_GENERATOR'."),
+                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${FASTQ_GENERATOR}'.", "All rows of the same seqTrack must have the same value in column 'FASTQ_GENERATOR'."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + TAGMENTATION_LIBRARY, 0, 1, 2),
-                        Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows of the same seqTrack must have the same value in column 'TAGMENTATION_LIBRARY'."),
+                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows of the same seqTrack must have the same value in column 'TAGMENTATION_LIBRARY'."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + SEQUENCING_TYPE, 3, 4),
-                        Level.ERROR, "All rows for run 'runA', lane 'L3', barcode 'ABC' must have the same value in column '${SEQUENCING_TYPE}'.", "All rows of the same seqTrack must have the same value in column 'SEQUENCING_TYPE'."),
+                        LogLevel.ERROR, "All rows for run 'runA', lane 'L3', barcode 'ABC' must have the same value in column '${SEQUENCING_TYPE}'.", "All rows of the same seqTrack must have the same value in column 'SEQUENCING_TYPE'."),
         ]
 
         when:
@@ -515,9 +515,9 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS, 0, 1),
-                        Level.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'.", "There must be no more than one row for one mate."),
+                        LogLevel.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'.", "There must be no more than one row for one mate."),
                 new Problem(cells(context, MATE_COLUMNS + FASTQ_FILE, 0, 1),
-                        Level.ERROR, "The filenames 's_101202_7_1.fastq.gz', 's_101202_7_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
+                        LogLevel.ERROR, "The filenames 's_101202_7_1.fastq.gz', 's_101202_7_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
         ]
 
         when:
@@ -541,7 +541,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
-                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${SequencingReadType.PAIRED}'.", "A mate is missing for at least one seqTrack."),
+                        LogLevel.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${SequencingReadType.PAIRED}'.", "A mate is missing for at least one seqTrack."),
         ]
 
         when:
@@ -565,7 +565,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS + SEQUENCING_READ_TYPE, 0),
-                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${SequencingReadType.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
+                        LogLevel.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with sequencing read type '${SequencingReadType.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
         ]
 
         when:
@@ -598,7 +598,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + SEQUENCING_READ_TYPE, 0, 1),
-                        Level.ERROR, "All rows for run 'runA', lane 'L1', barcode 'ABC' must have the same value in column 'SEQUENCING_READ_TYPE'.", "All rows of the same seqTrack must have the same value in column 'SEQUENCING_READ_TYPE'."),
+                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', barcode 'ABC' must have the same value in column 'SEQUENCING_READ_TYPE'.", "All rows of the same seqTrack must have the same value in column 'SEQUENCING_READ_TYPE'."),
         ]
 
         when:
@@ -671,17 +671,17 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, MATE_COLUMNS, 0, 1),
-                        Level.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'.", "There must be no more than one row for one mate."),
+                        LogLevel.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'.", "There must be no more than one row for one mate."),
                 new Problem(cells(context, MATE_COLUMNS + FASTQ_FILE, 0, 1),
-                        Level.ERROR, "The filenames 's_101202_4_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
+                        LogLevel.ERROR, "The filenames 's_101202_4_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
                 new Problem(cells(context, MATE_COLUMNS + FASTQ_FILE, 2, 3),
-                        Level.ERROR, "The filenames 's_101202_5_2.fastq.gz', 's_101202_6_1.fastq.gz' for run 'runA', lane 'L1', barcode 'DEF' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
+                        LogLevel.ERROR, "The filenames 's_101202_5_2.fastq.gz', 's_101202_6_1.fastq.gz' for run 'runA', lane 'L1', barcode 'DEF' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
                 new Problem(cells(context, MATE_COLUMNS, 4, 5),
-                        Level.ERROR, "There must be no more than one row for run 'runB', lane 'L1', barcode 'ABC', mate '1'.", "There must be no more than one row for one mate."),
+                        LogLevel.ERROR, "There must be no more than one row for run 'runB', lane 'L1', barcode 'ABC', mate '1'.", "There must be no more than one row for one mate."),
                 new Problem(cells(context, MATE_COLUMNS + FASTQ_FILE, 4, 5),
-                        Level.ERROR, "The filenames 'not_parseable_4_1.fastq.gz', 'not_parseable_4_1.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
+                        LogLevel.ERROR, "The filenames 'not_parseable_4_1.fastq.gz', 'not_parseable_4_1.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
                 new Problem(cells(context, MATE_COLUMNS + FASTQ_FILE, 6, 7),
-                        Level.ERROR, "The filenames 'not_parseable_5_2.fastq.gz', 'not_parseable_6_1.fastq.gz' for run 'runB', lane 'L1', barcode 'DEF' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
+                        LogLevel.ERROR, "The filenames 'not_parseable_5_2.fastq.gz', 'not_parseable_6_1.fastq.gz' for run 'runB', lane 'L1', barcode 'DEF' do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
         ]
 
         when:
@@ -704,15 +704,15 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_FILE, 0, 1) + cells(context, MATE_COLUMNS, 0),
-                        Level.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '1'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
+                        LogLevel.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '1'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_FILE, 0, 1) + cells(context, MATE_COLUMNS, 1),
-                        Level.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '4' in filename 's_101202_4_1.fastq.gz' is not the mate number '2'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
+                        LogLevel.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '4' in filename 's_101202_4_1.fastq.gz' is not the mate number '2'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_FILE, 2, 3) + cells(context, MATE_COLUMNS, 3),
-                        Level.ERROR, "The filenames 's_101202_1_1.fastq.gz', 's_101202_3_1.fastq.gz' for run 'runA', lane 'L2', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '2'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
+                        LogLevel.ERROR, "The filenames 's_101202_1_1.fastq.gz', 's_101202_3_1.fastq.gz' for run 'runA', lane 'L2', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '2'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_FILE, 4, 5) + cells(context, MATE_COLUMNS, 4),
-                        Level.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '2' in filename 'not_parseable_2.fastq.gz' is not the mate number '1'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
+                        LogLevel.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '2' in filename 'not_parseable_2.fastq.gz' is not the mate number '1'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
                 new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_FILE, 4, 5) + cells(context, MATE_COLUMNS, 5),
-                        Level.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '1' in filename 'not_parseable_1.fastq.gz' is not the mate number '2'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
+                        LogLevel.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '1' in filename 'not_parseable_1.fastq.gz' is not the mate number '2'.", "The filenames of one seqTrack differ in exactly one character as expected, but the distinguishing character is not the mate number."),
         ]
 
         when:

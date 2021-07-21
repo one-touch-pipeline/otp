@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
@@ -62,7 +62,7 @@ class MergingConflictsValidator extends MergingPreventionValidator {
                 findSeqPlatformGroup(valueTuple, key.seqType) ?: findSeqPlatform(valueTuple)
             }.unique().size() > 1
         }.each { key, values ->
-            context.addProblem(values*.cells.flatten() as Set<Cell>, Level.WARNING,
+            context.addProblem(values*.cells.flatten() as Set<Cell>, LogLevel.WARNING,
                     "Sample ${key.individual} ${key.sampleType} with sequencing type ${key.seqType.displayNameWithLibraryLayout} cannot be merged with itself, " +
                             "since it uses incompatible seq platforms",
                     "Sample can not be merged with itself, since it uses incompatible seq platforms."

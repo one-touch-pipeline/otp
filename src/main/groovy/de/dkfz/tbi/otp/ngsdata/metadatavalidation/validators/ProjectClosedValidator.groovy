@@ -62,7 +62,7 @@ class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> imp
             Project project = MetadataImportService.getProjectFromMetadata(it)
 
             if (project && project.closed) {
-                context.addProblem(it.cells, Level.ERROR, "The project '${project.name}' is closed.", "At least one project is closed.")
+                context.addProblem(it.cells, LogLevel.ERROR, "The project '${project.name}' is closed.", "At least one project is closed.")
             }
         }
     }

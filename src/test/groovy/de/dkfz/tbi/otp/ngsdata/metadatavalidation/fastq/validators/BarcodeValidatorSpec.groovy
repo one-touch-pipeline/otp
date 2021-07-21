@@ -26,7 +26,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -64,7 +64,7 @@ class BarcodeValidatorSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The barcode 'invalidBarcode' has an unusual format. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
     }
@@ -81,7 +81,7 @@ class BarcodeValidatorSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("'${barcode}' is not a well-formed barcode. It must match the regular expression '${BarcodeValidator.MUST_REGEX}'. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
 
@@ -99,7 +99,7 @@ class BarcodeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem([] as Set, Level.WARNING, "Optional column 'INDEX' is missing. OTP will try to parse the barcodes from the filenames.")
+                new Problem([] as Set, LogLevel.WARNING, "Optional column 'INDEX' is missing. OTP will try to parse the barcodes from the filenames.")
                 ]
         containSame(context.problems, expectedProblems)
     }

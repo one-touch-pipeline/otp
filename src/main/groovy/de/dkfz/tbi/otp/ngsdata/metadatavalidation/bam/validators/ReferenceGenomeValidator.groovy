@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -47,7 +47,7 @@ class ReferenceGenomeValidator extends SingleValueValidator<BamMetadataValidatio
     @Override
     void validateValue(BamMetadataValidationContext context, String refGen, Set<Cell> cells) {
         if (!ReferenceGenome.findByName(refGen)) {
-            context.addProblem(cells, Level.ERROR, "The reference genome '${refGen}' is not registered in OTP.", "At least one reference genome is not registered in OTP.")
+            context.addProblem(cells, LogLevel.ERROR, "The reference genome '${refGen}' is not registered in OTP.", "At least one reference genome is not registered in OTP.")
         }
     }
 }

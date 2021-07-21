@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
@@ -64,18 +64,18 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
     void validateValue(MetadataValidationContext context, String filename, Set<Cell> cells) {
         String basename = filename.split("/").last()
         if (!filename.endsWith('.gz')) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filename}' does not end with '.gz'.", "At least one filename does not end with '.gz'.")
+            context.addProblem(cells, LogLevel.ERROR, "Filename '${filename}' does not end with '.gz'.", "At least one filename does not end with '.gz'.")
         }
         try {
             FileTypeService.getFileType(filename, FileType.Type.SEQUENCE)
         } catch (FileTypeUndefinedException e) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.", "At least one filename contains neither '_fastq' nor '.fastq'.")
+            context.addProblem(cells, LogLevel.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.", "At least one filename contains neither '_fastq' nor '.fastq'.")
         }
         if (!(OtpPathValidator.isValidPathComponent(filename) || OtpPathValidator.isValidAbsolutePath(filename))) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.", "At least one filename contains invalid characters.")
+            context.addProblem(cells, LogLevel.ERROR, "Filename '${filename}' contains invalid characters.", "At least one filename contains invalid characters.")
         }
         if (!REQUIRED_CHARACTERS.every { String it -> basename.contains(it) }) {
-            context.addProblem(cells, Level.WARNING,
+            context.addProblem(cells, LogLevel.WARNING,
                     "Filename '${filename}' does not contain all required characters: ${requiredCharactersAsReadableList}",
                     "At least one filename does not contain all required characters."
             )

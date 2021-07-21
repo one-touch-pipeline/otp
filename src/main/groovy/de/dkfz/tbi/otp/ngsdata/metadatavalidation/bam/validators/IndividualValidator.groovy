@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -47,7 +47,7 @@ class IndividualValidator extends SingleValueValidator<BamMetadataValidationCont
     @Override
     void validateValue(BamMetadataValidationContext context, String individual, Set<Cell> cells) {
         if (!Individual.findByPidOrMockPidOrMockFullName(individual, individual, individual)) {
-            context.addProblem(cells, Level.ERROR, "The individual '${individual}' is not registered in OTP.", "At least one individual is not registered in OTP.")
+            context.addProblem(cells, LogLevel.ERROR, "The individual '${individual}' is not registered in OTP.", "At least one individual is not registered in OTP.")
         }
     }
 }

@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -95,7 +95,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set,
-                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
+                        LogLevel.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -117,7 +117,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set,
-                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
+                        LogLevel.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -138,7 +138,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set,
-                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
+                        LogLevel.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

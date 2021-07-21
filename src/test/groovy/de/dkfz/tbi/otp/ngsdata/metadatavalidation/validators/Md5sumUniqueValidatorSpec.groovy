@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
@@ -100,9 +100,9 @@ ${md5sum2}
         DomainFactory.createDataFile(md5sum: md5sum4)
 
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.WARNING,
                         "The MD5 sum '${md5sum2}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.WARNING,
                         "A fastq file with the MD5 sum '${md5sum3}' is already registered in OTP.", "At least one fastq file has a MD5 sum which is already registered in OTP."),
         ]
 
@@ -138,9 +138,9 @@ ${md5sum2}
                 fileSize: 1
         )
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.WARNING,
                         "The MD5 sum '${md5sum2}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.WARNING,
                         "A bam file with the MD5 sum '${md5sum3}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP."),
         ]
 

@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -59,9 +59,9 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
         if (!Project.getByNameOrNameInMetadataFiles(projectName)) {
             def level
             if (context instanceof BamMetadataValidationContext) {
-                level = Level.ERROR
+                level = LogLevel.ERROR
             } else {
-                level = Level.WARNING
+                level = LogLevel.WARNING
             }
             context.addProblem(cells, level, "The project '${projectName}' is not registered in OTP.", "At least one project is not registered in OTP.")
         }

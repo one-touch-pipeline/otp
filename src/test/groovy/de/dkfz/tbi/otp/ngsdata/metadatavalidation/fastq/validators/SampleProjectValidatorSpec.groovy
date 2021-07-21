@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -85,9 +85,9 @@ class SampleProjectValidatorSpec extends Specification implements DataTest {
                 }
         ] as SampleIdentifierService
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>, LogLevel.WARNING,
                         "Sample name 'project_D' is already registered in OTP with project 'Z', not with project 'D'. If you ignore this warning, OTP will keep the assignment of the sample name to project 'Z' and ignore the value 'D' in the '${PROJECT}' column.", "At least one sample name is already registered in OTP but with another project."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set<Cell>, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set<Cell>, LogLevel.WARNING,
                         "Sample name 'noProject_W' can not be parsed with the sampleIdentifierParser '${SampleIdentifierParserBeanName.HIPO}' given by project 'G'.", "At least one sample name looks like it does not belong to the project in the '${PROJECT}' column."),
         ]
 

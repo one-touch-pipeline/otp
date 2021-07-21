@@ -124,11 +124,11 @@ class RestartParseService {
                 JobErrorDefinition definition = CollectionUtils.exactlyOneElement(matching)
                 job.log.debug("Rule ${definition} matches ${it}.")
                 if (definition.action == JobErrorDefinition.Action.CHECK_FURTHER) {
-                    if (!definition.checkFurtherJobErrors.isEmpty()) {
-                        return detectAndHandleType(job, definition.checkFurtherJobErrors)
-                    } else {
+                    if (definition.checkFurtherJobErrors.isEmpty()) {
                         job.log.debug("Action of ${definition} is \"CHECK_FURTHER\" but \"checkFurtherJobErrors\" is empty")
                         return JobErrorDefinition.Action.STOP
+                    } else {
+                        return detectAndHandleType(job, definition.checkFurtherJobErrors)
                     }
                 } else {
                     return definition.action

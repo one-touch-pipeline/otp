@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -55,7 +55,7 @@ class InstrumentPlatformValidatorSpec extends Specification implements DataTest 
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, [])
         problem.message.contains("Required column 'INSTRUMENT_PLATFORM' is missing.")
     }
@@ -75,7 +75,7 @@ class InstrumentPlatformValidatorSpec extends Specification implements DataTest 
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
         problem.message.contains("Instrument platform 'Platform1' is not registered in the OTP database.")
     }

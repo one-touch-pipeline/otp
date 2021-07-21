@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
@@ -74,15 +74,15 @@ class RunRunDateValidatorSpec extends Specification implements DataTest, DomainF
         createRun(name: 'RunWithoutDateInDataBaseAndInSheet', dateExecuted: null)
         createRun(name: 'RunWithDateInDataBaseButNotInSheet', dateExecuted: date)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "All entries for run 'InconsistentMetadata' must have the same value in the column '${RUN_DATE}'.", "All entries of one run must have the same value in the column 'RUN_DATE'."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "Run 'InconsistentDatabaseAndMetadata' is already registered in the OTP database with run date '2016-01-01', not with '2016-01-02'.", "At least one run is already registered in the OTP database but with another date."),
-                new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[4].cells as Set, LogLevel.WARNING,
                         "Run date parsed from run name '160102InconsistentRunName' is not the same as '2016-01-01'. OTP will use the run date from the '${RUN_DATE}' column.", "At least one run date parsed from run name is not the same as in the 'RUN_DATE' column."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                         "Run 'RunWithoutDateInDataBaseButInSheet' is already registered in the OTP database without a date, not with '2016-01-01'.", "At least one run is already registered in the OTP database but with another date."),
-                new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[8].cells as Set, LogLevel.ERROR,
                         "Run 'RunWithDateInDataBaseButNotInSheet' is already registered in the OTP database with run date '2016-01-01', not with ''.", "At least one run is already registered in the OTP database but with another date."),
         ]
 

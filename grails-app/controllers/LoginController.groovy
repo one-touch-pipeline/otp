@@ -30,6 +30,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 
 import de.dkfz.tbi.otp.security.FailedToCreateUserException
 
+@SuppressWarnings('ClassNameSameAsSuperclass') //this affects the URL of the superclass
 @Secured('permitAll')
 class LoginController extends grails.plugin.springsecurity.LoginController {
 

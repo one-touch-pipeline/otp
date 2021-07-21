@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
@@ -60,9 +60,9 @@ class RunSeqCenterValidatorSpec extends Specification implements DataTest {
         DomainFactory.createRun(name: 'InconsistentDatabaseAndMetadata', seqCenter: center1)
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadata', seqCenter: center1)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "All entries for run 'InconsistentMetadata' must have the same value in the column '${CENTER_NAME}'.", "All entries for one run must have the same value in the column 'CENTER_NAME'."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "Run 'InconsistentDatabaseAndMetadata' is already registered in the OTP database with sequencing center 'Center1', not with 'Center2'.", "At least one run is already registered in the OTP database with another sequencing center."),
         ]
 

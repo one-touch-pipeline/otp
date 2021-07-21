@@ -61,7 +61,7 @@ class ProcessedBamFileSpec extends Specification implements DataTest, DomainFact
                 referenceGenome: referenceGenome,
         ])
 
-        BedFile bedFile = de.dkfz.tbi.otp.ngsdata.DomainFactory.createBedFile([
+        BedFile bedFile = DomainFactory.createBedFile([
                 referenceGenome      : referenceGenome,
                 libraryPreparationKit: libraryPreparationKit,
         ])

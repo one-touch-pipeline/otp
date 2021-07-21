@@ -47,7 +47,7 @@ class ColumnSetValidatorSpec extends Specification {
         columns == null
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message == "Required column 'C1' is missing."
     }
 
@@ -76,7 +76,7 @@ class ColumnSetValidatorSpec extends Specification {
         columns == [null, b1, a1]
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         problem.message == "Optional column 'C1' is missing."
     }
 }

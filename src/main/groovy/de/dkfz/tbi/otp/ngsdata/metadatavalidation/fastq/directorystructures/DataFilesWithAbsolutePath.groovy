@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
 import java.nio.file.Path
@@ -49,7 +49,7 @@ class DataFilesWithAbsolutePath implements DirectoryStructure {
         } else {
             context.addProblem(
                     valueTuple.cells,
-                    Level.ERROR,
+                    LogLevel.ERROR,
                     "'${fileName}' is not a valid absolute path.", "At least one file path is not a valid absolute path."
             )
             return null

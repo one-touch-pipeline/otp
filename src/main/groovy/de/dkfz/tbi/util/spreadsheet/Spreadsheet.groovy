@@ -72,7 +72,9 @@ class Spreadsheet {
             csvReader.errorLocale = Locale.ENGLISH
             String[] line
             while ((line = csvReader.readNext()) != null) {
-                if (!header) { // intercept first line as header
+                if (header) { // normal lines are kept without processing.
+                    dataRows.add(new Row(this, rowIndex++, line as List<String>))
+                } else { // intercept first line as header
                     header = new Row(this, rowIndex++, line.collect(renameHeader))
                     for (Cell cell : header.cells) {
                         if (cell.text.empty) {
@@ -83,13 +85,15 @@ class Spreadsheet {
                         }
                         columnsByTitle.put(cell.text, new Column(cell))
                     }
-                } else { // normal lines are kept without processing.
-                    dataRows.add(new Row(this, rowIndex++, line as List<String>))
                 }
             }
         } finally {
-            if (rawReader != null) { rawReader.close() }
-            if (csvReader != null) { csvReader.close() }
+            if (rawReader != null) {
+                rawReader.close()
+            }
+            if (csvReader != null) {
+                csvReader.close()
+            }
         }
 
         this.columnsByTitle = columnsByTitle.asImmutable()

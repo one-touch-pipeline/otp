@@ -44,7 +44,7 @@ class Problems {
     }
 
     static java.util.logging.Level getMaximumProblemLevel(Collection<Problem> problems) {
-        return problems*.level.max { it.intValue() } ?: Level.ALL
+        return problems*.level.max { it.intValue() } ?: LogLevel.ALL
     }
 
     Set<Problem> getProblems() {

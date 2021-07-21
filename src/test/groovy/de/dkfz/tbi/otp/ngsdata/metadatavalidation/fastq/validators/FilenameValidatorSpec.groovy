@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -60,15 +60,15 @@ class FilenameValidatorSpec extends Specification implements DataTest, DomainFac
 
         String charList = FilenameValidator.requiredCharactersAsReadableList
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.WARNING,
                         "Filename 'test.fastq.gz' does not contain all required characters: ${charList}", "At least one filename does not contain all required characters."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.WARNING,
                         "Filename '/tmp_underscore/test.fastq.gz' does not contain all required characters: ${charList}", "At least one filename does not contain all required characters."),
-                new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "Filename 'test_fastq.gzz' does not end with '.gz'.", "At least one filename does not end with '.gz'."),
-                new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[4].cells as Set, LogLevel.ERROR,
                         "Filename 'test_fast.gz' contains neither '_fastq' nor '.fastq'.", "At least one filename contains neither '_fastq' nor '.fastq'."),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                         "Filename 'öäü_fastq.gz' contains invalid characters.", "At least one filename contains invalid characters."),
         ]
 
@@ -88,7 +88,7 @@ class FilenameValidatorSpec extends Specification implements DataTest, DomainFac
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         problem.message == "Required column 'FASTQ_FILE' is missing."
     }
 }

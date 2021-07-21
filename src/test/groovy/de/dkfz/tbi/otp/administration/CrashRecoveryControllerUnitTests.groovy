@@ -467,6 +467,6 @@ class CrashRecoveryControllerUnitTests {
     void test_parametersOfJob_ShouldFailForIdsIsNotALong() {
         params.ids = IDS_WRONG_FORMAT
 
-        shouldFail(java.lang.NumberFormatException) { controller.parametersOfJob() }
+        shouldFail(NumberFormatException) { controller.parametersOfJob() }
     }
 }

@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -52,7 +52,7 @@ class CoverageValidator extends SingleValueValidator<BamMetadataValidationContex
     void validateValue(BamMetadataValidationContext context, String coverage, Set<Cell> cells) {
         if (!coverage.empty) {
             if (!coverage.isDouble()) {
-                context.addProblem(cells, Level.ERROR, "The coverage '${coverage}' should be a double number.", "At least one coverage is not a double number.")
+                context.addProblem(cells, LogLevel.ERROR, "The coverage '${coverage}' should be a double number.", "At least one coverage is not a double number.")
             }
         }
     }

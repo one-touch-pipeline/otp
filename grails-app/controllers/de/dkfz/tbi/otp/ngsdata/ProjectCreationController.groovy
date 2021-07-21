@@ -145,10 +145,7 @@ class ProjectCreationController {
         ]
         List<Project> projects = Project.findAllByUnixGroup(cmd.unixGroup)
 
-        if (!cmd.save) {
-            handleSubmitEvent(cmd)
-            return
-        } else {
+        if (cmd.save) {
             if (cmd.hasErrors()) {
                 flash.cmd = cmd
                 flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, cmd.errors)
@@ -183,6 +180,9 @@ class ProjectCreationController {
                 flash.cmd = cmd
                 redirect(action: "index")
             }
+        } else {
+            handleSubmitEvent(cmd)
+            return
         }
     }
 }

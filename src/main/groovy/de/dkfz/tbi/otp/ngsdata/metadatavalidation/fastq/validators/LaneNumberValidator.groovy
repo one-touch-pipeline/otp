@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LANE_NO
@@ -49,11 +49,11 @@ class LaneNumberValidator extends SingleValueValidator<MetadataValidationContext
     @Override
     void validateValue(MetadataValidationContext context, String laneNumber, Set<Cell> cells) {
         if (laneNumber.empty) {
-            context.addProblem(cells, Level.ERROR, "The lane number must not be empty.")
+            context.addProblem(cells, LogLevel.ERROR, "The lane number must not be empty.")
         } else if (!(laneNumber ==~ /^[0-9a-zA-Z]+$/)) {
-            context.addProblem(cells, Level.ERROR, "'${laneNumber}' is not a well-formed lane number. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed.")
+            context.addProblem(cells, LogLevel.ERROR, "'${laneNumber}' is not a well-formed lane number. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed.")
         } else if (!(laneNumber ==~ /^[1-8]$/)) {
-            context.addProblem(cells, Level.WARNING, "'${laneNumber}' is not a well-formed lane number. It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed.")
+            context.addProblem(cells, LogLevel.WARNING, "'${laneNumber}' is not a well-formed lane number. It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed.")
         }
     }
 }

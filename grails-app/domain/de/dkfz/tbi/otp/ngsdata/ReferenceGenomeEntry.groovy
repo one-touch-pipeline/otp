@@ -88,8 +88,8 @@ class ReferenceGenomeEntry implements Entity {
      * Nevertheless it is possible to have the same name or alias in two different reference genomes
      */
     static constraints = {
-        name(unique: ['referenceGenome'], blank: false)
-        alias(unique: ['referenceGenome'], blank: false)
+        name(unique: 'referenceGenome', blank: false)
+        alias(unique: 'referenceGenome', blank: false)
     }
 
     @Override

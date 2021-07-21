@@ -26,7 +26,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.COVERAGE
@@ -38,7 +38,7 @@ class CoverageValidatorSpec extends Specification {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING,
+                new Problem(Collections.emptySet(), LogLevel.WARNING,
                         "Optional column '${COVERAGE}' is missing.")
         ]
 
@@ -60,7 +60,7 @@ class CoverageValidatorSpec extends Specification {
                         "10.56565\n"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "The coverage '${COVERAGE_NO_DOUBLE}' should be a double number.", "At least one coverage is not a double number."),
         ]
 

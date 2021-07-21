@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -96,13 +96,13 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
                     [
                             'validator1': [
                                     validate: { BamMetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), Level.ERROR, 'message1')
-                                        context.addProblem(Collections.emptySet(), Level.ERROR, 'message2')
+                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message1')
+                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message2')
                                     }
                             ] as BamMetadataValidator,
                             'validator2': [
                                     validate: { BamMetadataValidationContext context ->
-                                        context.addProblem(Collections.emptySet(), Level.ERROR, 'message3')
+                                        context.addProblem(Collections.emptySet(), LogLevel.ERROR, 'message3')
                                     }
                             ] as BamMetadataValidator,
                     ]

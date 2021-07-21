@@ -86,7 +86,6 @@ class WorkflowRunService {
      * @param configs The sorted configs used for this workflow
      * @return the created, saved but not flushed WorkflowRun
      */
-    @SuppressWarnings('ParameterCount')
     WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, String name,
                                  List<ExternalWorkflowConfigFragment> configs = []) {
         String combinedConfig = configFragmentService.mergeSortedFragments(configs)

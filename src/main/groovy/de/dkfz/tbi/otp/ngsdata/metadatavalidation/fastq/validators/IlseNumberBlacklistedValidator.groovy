@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
@@ -54,7 +54,7 @@ class IlseNumberBlacklistedValidator extends SingleValueValidator<MetadataValida
         if (value && value.isInteger()) {
             IlseSubmission ilseSubmission = CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumberAndWarning(value.toInteger(), true))
             if (ilseSubmission) {
-                context.addProblem(cells, Level.WARNING, "The ilse ${value} is blacklisted:\n${ilseSubmission.comment.displayString()}.", "At least one ilse number is blacklisted.")
+                context.addProblem(cells, LogLevel.WARNING, "The ilse ${value} is blacklisted:\n${ilseSubmission.comment.displayString()}.", "At least one ilse number is blacklisted.")
             }
         }
     }

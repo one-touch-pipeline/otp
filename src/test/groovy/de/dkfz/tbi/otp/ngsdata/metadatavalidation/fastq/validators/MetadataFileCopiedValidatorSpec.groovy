@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.nio.file.Files
@@ -139,7 +139,7 @@ class MetadataFileCopiedValidatorSpec extends Specification implements DataTest 
 
         then:
         Problem problem = CollectionUtils.exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         TestCase.assertContainSame(problem.affectedCells*.cellAddress, [])
         problem.message.contains("There is already a file in the seqcenter inbox but it is different from this metadata file.")
     }
@@ -153,7 +153,7 @@ class MetadataFileCopiedValidatorSpec extends Specification implements DataTest 
 
         then:
         Problem problem = CollectionUtils.exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         TestCase.assertContainSame(problem.affectedCells*.cellAddress, [])
         problem.message.contains("There is already a file in the seqcenter inbox but it is different from this metadata file.")
     }

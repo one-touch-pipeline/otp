@@ -62,16 +62,16 @@ class RunRunDateValidator extends ValueTuplesValidator<MetadataValidationContext
                 String runDate = valueTuple.getValue(RUN_DATE.name())
                 Date runDateFromRunName = runDateParserService.parseDateFromRunName(runName)
                 if (runDateFromRunName && runDateFromRunName.format("yyyy-MM-dd") != runDate) {
-                    context.addProblem(valueTuple.cells, Level.WARNING, "Run date parsed from run name '${runName}' is not the same as '${runDate}'. OTP will use the run date from the '${RUN_DATE}' column.", "At least one run date parsed from run name is not the same as in the '${RUN_DATE}' column.")
+                    context.addProblem(valueTuple.cells, LogLevel.WARNING, "Run date parsed from run name '${runName}' is not the same as '${runDate}'. OTP will use the run date from the '${RUN_DATE}' column.", "At least one run date parsed from run name is not the same as in the '${RUN_DATE}' column.")
                 }
                 if (run && run.dateExecuted && run.dateExecuted.format("yyyy-MM-dd") != runDate) {
-                    context.addProblem(valueTuple.cells, Level.ERROR, "Run '${runName}' is already registered in the OTP database with run date '${run.dateExecuted.format("yyyy-MM-dd")}', not with '${runDate}'.", "At least one run is already registered in the OTP database but with another date.")
+                    context.addProblem(valueTuple.cells, LogLevel.ERROR, "Run '${runName}' is already registered in the OTP database with run date '${run.dateExecuted.format("yyyy-MM-dd")}', not with '${runDate}'.", "At least one run is already registered in the OTP database but with another date.")
                 }
                 if (run && !run.dateExecuted && runDate) {
-                    context.addProblem(valueTuple.cells, Level.ERROR, "Run '${runName}' is already registered in the OTP database without a date, not with '${runDate}'.", "At least one run is already registered in the OTP database but with another date.")
+                    context.addProblem(valueTuple.cells, LogLevel.ERROR, "Run '${runName}' is already registered in the OTP database without a date, not with '${runDate}'.", "At least one run is already registered in the OTP database but with another date.")
                 }
             } else {
-                context.addProblem(valueTuplesOfRun*.cells.sum(), Level.ERROR, "All entries for run '${runName}' must have the same value in the column '${RUN_DATE}'.", "All entries of one run must have the same value in the column '${RUN_DATE}'.")
+                context.addProblem(valueTuplesOfRun*.cells.sum(), LogLevel.ERROR, "All entries for run '${runName}' must have the same value in the column '${RUN_DATE}'.", "All entries of one run must have the same value in the column '${RUN_DATE}'.")
             }
         }
     }

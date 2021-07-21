@@ -85,10 +85,10 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
             }
 
             if ((antibodyTarget || antibody) && !seqType.hasAntibodyTarget) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "Antibody target ('${antibodyTarget}') and/or antibody ('${antibody}') are/is provided although the SeqType '${seqType} do not support it. OTP will ignore the values.", "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values.")
+                context.addProblem(valueTuple.cells, LogLevel.WARNING, "Antibody target ('${antibodyTarget}') and/or antibody ('${antibody}') are/is provided although the SeqType '${seqType} do not support it. OTP will ignore the values.", "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values.")
             }
             if (seqType.hasAntibodyTarget && !antibodyTarget) {
-                context.addProblem(valueTuple.cells, Level.ERROR, "Antibody target is not provided although the SeqType '${seqType}' require it.", "Antibody target is not provided for SeqType require AntibodyTarget")
+                context.addProblem(valueTuple.cells, LogLevel.ERROR, "Antibody target is not provided although the SeqType '${seqType}' require it.", "Antibody target is not provided for SeqType require AntibodyTarget")
             }
         }
     }

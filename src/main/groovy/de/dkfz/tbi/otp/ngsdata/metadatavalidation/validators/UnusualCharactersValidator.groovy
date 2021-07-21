@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.AllCellsValidator
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -56,9 +56,9 @@ class UnusualCharactersValidator extends AllCellsValidator<AbstractMetadataValid
         if (unusualCharacters) {
             String unusualCharactersString = unusualCharacters.collect { "'${it}' (0x${Integer.toHexString((int)it.charValue())})" }.join(', ')
             if (unusualCharacters.size() == 1) {
-                context.addProblem(cells, Level.WARNING, "'${value}' contains an unusual character: ${unusualCharactersString}", "At least one value contains an unusual character.")
+                context.addProblem(cells, LogLevel.WARNING, "'${value}' contains an unusual character: ${unusualCharactersString}", "At least one value contains an unusual character.")
             } else if (unusualCharacters.size() > 1) {
-                context.addProblem(cells, Level.WARNING, "'${value}' contains unusual characters: ${unusualCharactersString}", "At least one value contains an unusual character.")
+                context.addProblem(cells, LogLevel.WARNING, "'${value}' contains unusual characters: ${unusualCharactersString}", "At least one value contains an unusual character.")
             }
         }
     }

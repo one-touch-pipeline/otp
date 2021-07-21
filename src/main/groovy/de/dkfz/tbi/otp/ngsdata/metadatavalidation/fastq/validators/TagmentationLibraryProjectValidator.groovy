@@ -84,7 +84,7 @@ class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataV
                 Set<Cell> cells = rows*.cells.sum() as Set<Cell>
 
                 if (rows*.libraryName.unique().size() > 1) {
-                    context.addProblem(cells, Level.WARNING, "All rows for project '${currentProject.name}' which look similar to '${normalizedLibraryName}' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column '${TAGMENTATION_LIBRARY}'.")
+                    context.addProblem(cells, LogLevel.WARNING, "All rows for project '${currentProject.name}' which look similar to '${normalizedLibraryName}' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column '${TAGMENTATION_LIBRARY}'.")
                 }
 
                 List<String> result = SeqTrack.createCriteria().list {
@@ -104,7 +104,7 @@ class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataV
                         cells = rows.findAll { it.libraryName != result[0] }*.cells.sum() as Set<Cell>
                     }
                     if (cells) {
-                        context.addProblem(cells, Level.WARNING, "In project '${currentProject.name}' the following tagmentation library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered.")
+                        context.addProblem(cells, LogLevel.WARNING, "In project '${currentProject.name}' the following tagmentation library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered.")
                     }
                 }
             }

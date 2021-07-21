@@ -57,7 +57,6 @@ import java.time.format.DateTimeFormatter
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@SuppressWarnings('MethodCount')
 @Transactional
 class ProjectService {
 

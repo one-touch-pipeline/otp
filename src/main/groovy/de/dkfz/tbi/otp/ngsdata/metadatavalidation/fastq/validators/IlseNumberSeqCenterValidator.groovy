@@ -57,10 +57,10 @@ class IlseNumberSeqCenterValidator extends ValueTuplesValidator<MetadataValidati
             String seqCenterName = valueTuple.getValue(CENTER_NAME.name())
             String ilseNumber = valueTuple.getValue(ILSE_NO.name())
             if (ilseNumber && seqCenterName != "DKFZ") {
-                context.addProblem(valueTuple.cells, Level.WARNING, "ILSe number is available although data was provided by '${seqCenterName}'.")
+                context.addProblem(valueTuple.cells, LogLevel.WARNING, "ILSe number is available although data was provided by '${seqCenterName}'.")
             }
             if (seqCenterName == "DKFZ" && !ilseNumber) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "ILSe number is not available although data was provided by '${seqCenterName}'.")
+                context.addProblem(valueTuple.cells, LogLevel.WARNING, "ILSe number is not available although data was provided by '${seqCenterName}'.")
             }
         }
     }

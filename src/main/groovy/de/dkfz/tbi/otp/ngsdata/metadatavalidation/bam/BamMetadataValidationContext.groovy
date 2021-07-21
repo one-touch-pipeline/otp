@@ -21,14 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam
 
-
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.BamMetadataImportService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
 import java.nio.file.*
@@ -94,17 +93,17 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
                 checkFile(furtherFile, problems)
             }
         } else {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "The path '${furtherFile}' is no absolute path.")
+            problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "The path '${furtherFile}' is no absolute path.")
         }
     }
 
     static void checkFile(Path file, Problems problems) {
         if (!Files.isReadable(file)) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(file)} is not readable.")
+            problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(file)} is not readable.")
         } else if (Files.size(file) == 0L) {
-            problems.addProblem(Collections.emptySet(), Level.WARNING, "${pathForMessage(file)} is empty.")
+            problems.addProblem(Collections.emptySet(), LogLevel.WARNING, "${pathForMessage(file)} is empty.")
         } else if (Files.size(file) > MAX_ADDITIONAL_FILE_SIZE_IN_GIB * FACTOR_1024 * FACTOR_1024 * FACTOR_1024) {
-            problems.addProblem(Collections.emptySet(), Level.WARNING, "${pathForMessage(file)} is larger than ${MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
+            problems.addProblem(Collections.emptySet(), LogLevel.WARNING, "${pathForMessage(file)} is larger than ${MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
         }
     }
 
@@ -120,11 +119,11 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
                 } else if (Files.isDirectory(file)) {
                     checkFilesInDirectory(file, problems)
                 } else {
-                    problems.addProblem(Collections.emptySet(), Level.ERROR, "'${file}' is not a file.")
+                    problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "'${file}' is not a file.")
                 }
             }
             if (isEmpty) {
-                problems.addProblem(Collections.emptySet(), Level.WARNING, "'The folder ${furtherFile}' is empty.")
+                problems.addProblem(Collections.emptySet(), LogLevel.WARNING, "'The folder ${furtherFile}' is empty.")
             }
         } finally {
             stream?.close()

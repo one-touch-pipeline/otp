@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SINGLE_CELL_WELL_LABEL
@@ -52,7 +52,7 @@ class SingleCellWellLabelValidator extends SingleValueValidator<MetadataValidati
     @Override
     void validateValue(MetadataValidationContext context, String singleCellWellLabel, Set<Cell> cells) {
         if (singleCellWellLabel && !OtpPathValidator.isValidPathComponent(singleCellWellLabel)) {
-            context.addProblem(cells, Level.ERROR, "The single cell well label '${singleCellWellLabel}' is not a valid directory name.", "At least one single cell well label is not a valid directory name..")
+            context.addProblem(cells, LogLevel.ERROR, "The single cell well label '${singleCellWellLabel}' is not a valid directory name.", "At least one single cell well label is not a valid directory name..")
         }
     }
 }

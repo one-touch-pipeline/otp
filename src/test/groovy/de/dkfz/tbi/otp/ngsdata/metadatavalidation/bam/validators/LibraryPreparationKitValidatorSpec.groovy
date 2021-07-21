@@ -28,7 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.LIBRARY_PREPARATION_KIT
@@ -58,7 +58,7 @@ ${SEQUENCING_TYPE}\t${LIBRARY_PREPARATION_KIT}
 EXON\tIndividual1
 """)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "The ${LIBRARY_PREPARATION_KIT} 'Individual1' is not registered in OTP.",
                         "At least one ${LIBRARY_PREPARATION_KIT} is not registered in OTP.")
         ]
@@ -110,7 +110,7 @@ EXON\tIndividual1\t
         )
 
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING,
                         "The ${SEQUENCING_TYPE} is 'EXON' but no ${LIBRARY_PREPARATION_KIT} is given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.",
                         "If the ${SEQUENCING_TYPE} is '${SeqTypeNames.EXOME.seqTypeName}' the ${LIBRARY_PREPARATION_KIT} should be given. The ${LIBRARY_PREPARATION_KIT} is needed for Indel.")
         ]

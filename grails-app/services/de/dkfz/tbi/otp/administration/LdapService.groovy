@@ -164,7 +164,7 @@ class LdapService implements InitializingBean {
 
     boolean existsInLdap(User user) {
         if (!user.username) {
-            return null
+            return false
         }
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute)
@@ -185,7 +185,7 @@ class LdapService implements InitializingBean {
 
     Boolean isUserDeactivated(User user) {
         if (!user.username) {
-            return null
+            return true
         }
         ContainerCriteria query = query()
                 .attributes(configService.ldapSearchAttribute, LdapKey.USER_ACCOUNT_CONTROL)

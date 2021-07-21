@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
@@ -86,7 +86,7 @@ class AntibodyTargetValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The antibody target 'some_antibody_target' is not registered in OTP.")
     }
@@ -142,7 +142,7 @@ class AntibodyTargetValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The antibody target 'target' is not registered in OTP.")
     }
@@ -162,7 +162,7 @@ class AntibodyTargetValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The antibody target 'some_%_target' is not registered in OTP.")
     }

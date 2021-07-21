@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabelService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
@@ -51,9 +51,9 @@ class InstrumentModelValidator extends SingleValueValidator<MetadataValidationCo
     @Override
     void validateValue(MetadataValidationContext context, String seqPlatformModelLabelNameOrAlias, Set<Cell> cells) {
         if (!seqPlatformModelLabelNameOrAlias) {
-            context.addProblem(cells, Level.ERROR, "Instrument model must not be empty.", "At least one Instrument model is empty.")
+            context.addProblem(cells, LogLevel.ERROR, "Instrument model must not be empty.", "At least one Instrument model is empty.")
         } else if (!seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)) {
-            context.addProblem(cells, Level.ERROR, "Instrument model '${seqPlatformModelLabelNameOrAlias}' is not registered in the OTP database.", "At least one instrument model is not registered in the OTP database.")
+            context.addProblem(cells, LogLevel.ERROR, "Instrument model '${seqPlatformModelLabelNameOrAlias}' is not registered in the OTP database.", "At least one instrument model is not registered in the OTP database.")
         }
     }
 }

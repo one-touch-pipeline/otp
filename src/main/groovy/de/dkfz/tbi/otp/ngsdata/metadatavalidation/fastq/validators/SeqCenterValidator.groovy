@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
@@ -49,7 +49,7 @@ class SeqCenterValidator extends SingleValueValidator<MetadataValidationContext>
     @Override
     void validateValue(MetadataValidationContext context, String centerName, Set<Cell> cells) {
         if (!atMostOneElement(SeqCenter.findAllByName(centerName))) {
-            context.addProblem(cells, Level.ERROR, "Sequencing center '${centerName}' is not registered in the OTP database.", "At least one sequencing center is not registered in the OTP database.")
+            context.addProblem(cells, LogLevel.ERROR, "Sequencing center '${centerName}' is not registered in the OTP database.", "At least one sequencing center is not registered in the OTP database.")
         }
     }
 }

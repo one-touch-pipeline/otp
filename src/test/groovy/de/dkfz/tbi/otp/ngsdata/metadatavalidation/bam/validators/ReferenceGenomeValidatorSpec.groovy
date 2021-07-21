@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.REFERENCE_GENOME
@@ -52,7 +52,7 @@ class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
                         "SomeValue"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
+                new Problem(Collections.emptySet(), LogLevel.ERROR,
                         "Required column '${REFERENCE_GENOME}' is missing.")
         ]
 
@@ -95,7 +95,7 @@ class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The reference genome '${REF_GEN_NAME}' is not registered in OTP.")
     }

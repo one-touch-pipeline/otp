@@ -22,7 +22,7 @@
 
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="de.dkfz.tbi.util.spreadsheet.validation.Problems" %>
-<%@ page import="de.dkfz.tbi.util.spreadsheet.validation.Level" %>
+<%@ page import="de.dkfz.tbi.util.spreadsheet.validation.LogLevel" %>
 <html>
 <head>
     <meta name="layout" content="metadataLayout"/>
@@ -39,14 +39,14 @@
 
 <body>
 <g:if test="${context}">
-    <div id="border" class="borderMetadataImport${Level.normalize(context.getMaximumProblemLevel()).name}">
+    <div id="border" class="borderMetadataImport${LogLevel.normalize(context.getMaximumProblemLevel()).name}">
         <g:if test="${context.problems.isEmpty()}">
             No problems found :)
         </g:if>
         <g:else>
             <ul>
                 <g:each var="problem" in="${context.problems}">
-                    <li class="${Level.normalize(problem.level).name}"><span style="white-space: pre-line ">${problem.getLevelAndMessage()}</span>
+                    <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-line ">${problem.getLevelAndMessage()}</span>
                         <g:each var="cell" in="${problem.affectedCells}">
                             <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                         </g:each>
@@ -73,7 +73,7 @@
                         <g:each var="cell" in="${context.spreadsheet.header.cells}">
                             <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
                             <th
-                                    class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
+                                    class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
                                     title="${cellProblems*.getLevelAndMessage().join('\n\n')}">
                                 <span class="anchor" id="${cell.cellAddress}"></span>
                                 ${cell.text}
@@ -90,7 +90,7 @@
                             <g:each var="cell" in="${row.cells}">
                                 <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
                                 <td
-                                        class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
+                                        class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
                                         title="${cellProblems*.getLevelAndMessage().join('\n\n')}">
                                     <span class="anchor" id="${cell.cellAddress}"></span>
                                     ${cell.text}
@@ -168,7 +168,7 @@
         <g:submitButton name="submit" value="Validate"/>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:submitButton name="submit" value="Import"/>
-            <g:if test="${context?.getMaximumProblemLevel() == Level.WARNING}">
+            <g:if test="${context?.getMaximumProblemLevel() == LogLevel.WARNING}">
                 <label>
                     <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
                     <g:message code="bamMetadataImport.ignore.warning"/>

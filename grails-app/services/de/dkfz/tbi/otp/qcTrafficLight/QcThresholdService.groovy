@@ -148,7 +148,6 @@ class QcThresholdService {
         return classesWithProperties
     }
 
-
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     Errors createThreshold(Project project, String clasz, String property, SeqType seqType, QcThreshold.ThresholdStrategy condition,
                            Double errorThresholdLower, Double warningThresholdLower,

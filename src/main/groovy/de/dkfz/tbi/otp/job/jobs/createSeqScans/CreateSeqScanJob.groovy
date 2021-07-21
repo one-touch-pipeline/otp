@@ -44,7 +44,7 @@ class CreateSeqScanJob extends AbstractEndStateAwareJobImpl {
     /**
      * Check if all files are in the final location
      *
-     * @throws Exception
+     * @throws Exception The execution of the Job may throw any exception.
      */
     @Override
     void execute() throws Exception {

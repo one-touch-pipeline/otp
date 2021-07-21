@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.*
 
@@ -79,7 +79,7 @@ class BamMetadataImportService {
                 } catch (Throwable e) {
                     String message = "Exception occured in validator '${it.class.simpleName}': ${e.message}"
                     log.error(message, e)
-                    context.addProblem([] as Set, Level.ERROR, message)
+                    context.addProblem([] as Set, LogLevel.ERROR, message)
                 }
             }
         }

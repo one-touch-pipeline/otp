@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.MetadataImportService
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -73,11 +73,11 @@ class MetadataFileCopiedValidator implements MetadataValidator {
                 Path path = targetDirectory.resolve(source.fileName.toString())
                 if (Files.exists(path) && Files.isRegularFile(path) && Files.isReadable(path)) {
                     if (path.bytes != context.content) {
-                        context.addProblem([] as Set, Level.ERROR, "There is already a file in the seqcenter inbox but it is different from this metadata file.")
+                        context.addProblem([] as Set, LogLevel.ERROR, "There is already a file in the seqcenter inbox but it is different from this metadata file.")
                     }
                 }
             } catch (JSchException e)  {
-                context.addProblem(Collections.emptySet(), Level.WARNING, "Could not detect if there is an old metadata file already present in the seqcenter inbox.")
+                context.addProblem(Collections.emptySet(), LogLevel.WARNING, "Could not detect if there is an old metadata file already present in the seqcenter inbox.")
             }
         }
     }

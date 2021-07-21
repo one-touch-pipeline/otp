@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
 @Component
 class OnlyOneRunValidator implements MetadataValidator {
@@ -49,7 +49,7 @@ class OnlyOneRunValidator implements MetadataValidator {
                 !(ilsen.size() == 1 && ilsen != [""] && ilsen != [null] &&
                         context.directoryStructure instanceof DataFilesInGpcfSpecificStructure)
         ) {
-            context.addProblem(runCells as Set, Level.WARNING,
+            context.addProblem(runCells as Set, LogLevel.WARNING,
                     "Metadata file contains data from more than one run.")
         }
     }

@@ -56,9 +56,7 @@ class FastqcResultsController {
 
         String result
 
-        if (!fastqcResultsService.isFastqcAvailable(dataFile)) {
-            result = message(code: "fastqc.show.notAvailable")
-        } else {
+        if (fastqcResultsService.isFastqcAvailable(dataFile)) {
             String html = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, "fastqc_report.html").text
 
             Elements elements = Jsoup.parse(html).select("div.summary, div.main, div.footer")
@@ -77,6 +75,8 @@ class FastqcResultsController {
                 }
             }
             result = elements.toString()
+        } else {
+            result = message(code: "fastqc.show.notAvailable")
         }
         return [
                 html      : result,
@@ -103,7 +103,7 @@ class FastqcResultsController {
                 render status: 404
                 return void
             }
-            render file: stream , contentType: "image/png"
+            render file: stream, contentType: "image/png"
         }
     }
 }

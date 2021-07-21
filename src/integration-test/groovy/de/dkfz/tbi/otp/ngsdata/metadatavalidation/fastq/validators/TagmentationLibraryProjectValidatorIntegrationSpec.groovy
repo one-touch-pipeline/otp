@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -62,13 +62,13 @@ class TagmentationLibraryProjectValidatorIntegrationSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem((context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[8].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[8].cells) as Set, LogLevel.WARNING,
                         "In project 'project01' the following tagmentation library names which look similar to '1' are already registered: 'lib1', 'library1'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.WARNING,
                         "In project 'project02' the following tagmentation library names which look similar to '1' are already registered: 'lib1'.", "For at least one project tagmentation library names which look similar to entries in the metadata file are already registered."),
-                new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[2].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[2].cells) as Set, LogLevel.WARNING,
                         "All rows for project 'project02' which look similar to '1' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column 'TAGMENTATION_LIBRARY'."),
-                new Problem((context.spreadsheet.dataRows[3].cells + context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[3].cells + context.spreadsheet.dataRows[4].cells) as Set, LogLevel.WARNING,
                         "All rows for project 'project01' which look similar to '5' should have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows for one project which have a similar tagmentation library should have the same value in column 'TAGMENTATION_LIBRARY'."),
         ]
         assertContainSame(context.problems, expectedProblems)

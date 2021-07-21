@@ -81,10 +81,10 @@ class AbstractQualityAssessmentService {
             }
             chromosomeInformation.put(chromosome, chromosomeValues)
         }
-        if (!(roddyBamFile instanceof RnaRoddyBamFile)) {
-            assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
-        } else {
+        if (roddyBamFile instanceof RnaRoddyBamFile) {
             assert chromosomeInformation.keySet().size() == 1 && chromosomeInformation.keySet().contains(RnaQualityAssessment.ALL)
+        } else {
+            assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
         }
         return chromosomeInformation
     }

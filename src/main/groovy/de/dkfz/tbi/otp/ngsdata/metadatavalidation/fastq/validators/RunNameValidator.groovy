@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
@@ -48,7 +48,7 @@ class RunNameValidator extends SingleValueValidator<MetadataValidationContext> i
     @Override
     void validateValue(MetadataValidationContext context, String runName, Set<Cell> cells) {
         if (!OtpPathValidator.isValidPathComponent(runName)) {
-            context.addProblem(cells, Level.ERROR, "The run name '${runName}' is not a valid directory name.", "At least one run name is not a valid directory name.")
+            context.addProblem(cells, LogLevel.ERROR, "The run name '${runName}' is not a valid directory name.", "At least one run name is not a valid directory name.")
         }
     }
 }

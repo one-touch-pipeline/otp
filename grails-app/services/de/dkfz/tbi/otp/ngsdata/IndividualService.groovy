@@ -215,7 +215,7 @@ class IndividualService {
      *
      * @param cmd IndividualCommand holding data of objects to be saved
      * @return created Individual
-     * @throws IndividualCreationException
+     * @throws IndividualCreationException This method may throw an IndividualCreationException.
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Individual createIndividual(IndividualCommand cmd) throws IndividualCreationException {

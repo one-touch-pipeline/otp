@@ -73,7 +73,6 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         )
     }
 
-    @SuppressWarnings('ParameterCount')
     CellRangerMergingWorkPackage createCellRangerMwpHelper(CellRangerMergingWorkPackage.Status status, LocalDate baseDate, Integer informedOffset,
                                                            Integer dateUpdatedOffset, boolean withFinishedBamFile, Map properties = [:]) {
         Closure<Date> getBaseDateMinusDays = { Integer offset ->

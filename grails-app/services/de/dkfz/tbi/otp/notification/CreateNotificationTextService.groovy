@@ -196,9 +196,7 @@ class CreateNotificationTextService {
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
-            if (!(seqTracks.any { it.seqType in SeqTypeService.cellRangerAlignableSeqTypes })) {
-                message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
-            } else {
+            if ((seqTracks.any { it.seqType in SeqTypeService.cellRangerAlignableSeqTypes })) {
                 message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing.cellRanger', [
                         links: createOtpLinks(seqTracks*.project, "cellRangerConfiguration", "index"),
                 ])
@@ -207,6 +205,8 @@ class CreateNotificationTextService {
                             faq: processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
                     ])
                 }
+            } else {
+                message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
             }
             message += messageSourceService.createMessage('notification.template.installation.furtherProcessing.furtherNotification')
         }

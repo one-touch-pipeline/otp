@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.nio.file.Paths
@@ -104,8 +104,8 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.INFO, "There are multiple ILSe numbers in the metadata file.", "There are multiple ILSe numbers in the metadata file."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO_2}'.", "At least one metadata file path does not contain the ILSe number."),
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.INFO, "There are multiple ILSe numbers in the metadata file.", "There are multiple ILSe numbers in the metadata file."),
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO_2}'.", "At least one metadata file path does not contain the ILSe number."),
                 ]
         containSame(context.problems, expectedProblems)
     }
@@ -125,7 +125,7 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR, "The ILSe number 'ilseNu' is not an integer.", "At least one ILSe number is not an integer."),
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR, "The ILSe number 'ilseNu' is not an integer.", "At least one ILSe number is not an integer."),
         ]
         containSame(context.problems, expectedProblems)
     }
@@ -148,7 +148,7 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "The ILSe number '${ILSE_NO}' already exists.", "At least one ILSe number already exists.")
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.WARNING, "The ILSe number '${ILSE_NO}' already exists.", "At least one ILSe number already exists.")
         ]
         containSame(context.problems, expectedProblems)
     }
@@ -168,7 +168,7 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO}'.", "At least one metadata file path does not contain the ILSe number.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO}'.", "At least one metadata file path does not contain the ILSe number.")
         ]
         containSame(context.problems, expectedProblems)
     }

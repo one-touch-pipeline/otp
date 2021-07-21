@@ -124,7 +124,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
         )
         if (!bedFile) {
             String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
-            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleName}' " +
+            context.addProblem(valueTuple.cells, LogLevel.WARNING, "No BED file is configured for sample '${sampleName}' " +
                     "(reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.",
                     "No BED file is configured for at least on sample.")
         }

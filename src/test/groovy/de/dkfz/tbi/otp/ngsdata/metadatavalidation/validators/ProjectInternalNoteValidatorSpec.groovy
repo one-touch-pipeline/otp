@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -106,7 +106,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.INFO
+        problem.level == LogLevel.INFO
         containSame(problem.affectedCells*.cellAddress, Collections.emptySet())
         problem.message.contains("Internal notes for project '${project.name}': ${project.internalNotes}")
     }
@@ -126,7 +126,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.INFO
+        problem.level == LogLevel.INFO
         containSame(problem.affectedCells*.cellAddress, Collections.emptySet())
         problem.message.contains("Internal notes for project '${project.name}': ${project.internalNotes}")
     }
@@ -141,8 +141,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
                         "${project2.name}\n"
         )
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.INFO, "Internal notes for project '${project.name}': ${project.internalNotes}", "A Project has internal notes"),
-                new Problem(Collections.emptySet(), Level.INFO, "Internal notes for project '${project2.name}': ${project2.internalNotes}", "A Project has internal notes"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "Internal notes for project '${project.name}': ${project.internalNotes}", "A Project has internal notes"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "Internal notes for project '${project2.name}': ${project2.internalNotes}", "A Project has internal notes"),
         ]
 
         when:
@@ -167,7 +167,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.INFO
+        problem.level == LogLevel.INFO
         containSame(problem.affectedCells*.cellAddress, Collections.emptySet())
         problem.message.contains("Internal notes for project '${sampleIdentifier.project.name}': ${sampleIdentifier.project.internalNotes}")
     }

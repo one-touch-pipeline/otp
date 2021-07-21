@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -103,10 +103,10 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
 
         where:
         name                                                                       | hasAntibodyTarget | antibodyTarget    | antibody   || level         | message                                                                                                                                                                     | message2
-        'seq type require antibody target and no antibody is given'                | true              | ''                | ''         || Level.ERROR   | "Antibody target is not provided although the SeqType 'seqType PAIRED bulk' require it."                                                                                    | "Antibody target is not provided for SeqType require AntibodyTarget"
-        'seq type do not support target and only antibody target is given'         | false             | 'antibody target' | ''         || Level.WARNING | "Antibody target ('antibody target') and/or antibody ('') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."         | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
-        'seq type do not support target and antibody target and antibody is given' | false             | 'antibody target' | 'antibody' || Level.WARNING | "Antibody target ('antibody target') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values." | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
-        'seq type do not support target and only antibody is given'                | false             | ''                | 'antibody' || Level.WARNING | "Antibody target ('') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."                | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
+        'seq type require antibody target and no antibody is given'                | true              | ''                | ''         || LogLevel.ERROR   | "Antibody target is not provided although the SeqType 'seqType PAIRED bulk' require it."                                                                                    | "Antibody target is not provided for SeqType require AntibodyTarget"
+        'seq type do not support target and only antibody target is given'         | false             | 'antibody target' | ''         || LogLevel.WARNING | "Antibody target ('antibody target') and/or antibody ('') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."         | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
+        'seq type do not support target and antibody target and antibody is given' | false             | 'antibody target' | 'antibody' || LogLevel.WARNING | "Antibody target ('antibody target') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values." | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
+        'seq type do not support target and only antibody is given'                | false             | ''                | 'antibody' || LogLevel.WARNING | "Antibody target ('') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."                | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
     }
 
 
@@ -165,7 +165,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "Antibody target is not provided although the SeqType 'seqType PAIRED bulk' require it.",
                 "Antibody target is not provided for SeqType require AntibodyTarget"),
         ]

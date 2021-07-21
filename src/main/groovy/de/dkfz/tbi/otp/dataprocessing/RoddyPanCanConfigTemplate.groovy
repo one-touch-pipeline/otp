@@ -67,14 +67,14 @@ class RoddyPanCanConfigTemplate {
         SeqTypeOptions template = SeqTypeOptions.findByRoddyName(panCanAlignmentConfiguration.seqType.roddyName)
         String additional = ""
 
-        if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
+        if (panCanAlignmentConfiguration.seqType.isWgbs()) {
+            additional = template.additionalProperties
+        } else {
             additional = """
                 <!-- BWA Version -->
                 <cvalue name="BWA_VERSION" value="${panCanAlignmentConfiguration.bwaMemVersion}" type="string"
                         description="Use e.g. 0.7.8-r2.05 for a specific revision of bb-bwa. Suffix with -bisulfite to load a bisulfite patched version."/>
                 """
-        } else {
-            additional = template.additionalProperties
         }
 
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {

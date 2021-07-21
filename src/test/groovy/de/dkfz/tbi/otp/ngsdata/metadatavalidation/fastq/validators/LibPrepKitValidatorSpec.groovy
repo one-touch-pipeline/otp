@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -84,7 +84,7 @@ class LibPrepKitValidatorSpec extends Specification implements DataTest {
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
+        problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A4'])
         problem.message.contains("The library preparation kit '${invalid}' is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.")
     }
@@ -104,7 +104,7 @@ ${libPrepKit}\tdef
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A3'])
         problem.message.contains("The library preparation kit column is ${message}")
 
@@ -123,7 +123,7 @@ ${libPrepKit}\tdef
 
         then:
         Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
+        problem.level == LogLevel.WARNING
         containSame(problem.affectedCells*.cellAddress, [])
         problem.message.contains("Optional column 'LIB_PREP_KIT' is missing.")
     }

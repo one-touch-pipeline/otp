@@ -21,19 +21,21 @@
  */
 package de.dkfz.tbi.util.spreadsheet.validation
 
-class Level extends java.util.logging.Level {
+import java.util.logging.Level
 
-    static final Level ERROR = new Level('ERROR', 1000)
+class LogLevel extends Level {
 
-    Level(String name, int value) {
+    static final LogLevel ERROR = new LogLevel('ERROR', 1000)
+
+    LogLevel(String name, int value) {
         super(name, value)
     }
 
-    Level(String name, int value, String resourceBundleName) {
+    LogLevel(String name, int value, String resourceBundleName) {
         super(name, value, resourceBundleName)
     }
 
-    static java.util.logging.Level normalize(java.util.logging.Level level) {
+    static Level normalize(Level level) {
         if (level.intValue() > WARNING.intValue()) {
             return ERROR
         } else if (level.intValue() < WARNING.intValue()) {

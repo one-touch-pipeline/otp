@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -60,8 +60,8 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""""".replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR, "Required column '${SEQUENCING_READ_TYPE}' is missing."),
-                new Problem(Collections.emptySet(), Level.ERROR, "Required column '${SEQUENCING_TYPE}' is missing."),
+                new Problem(Collections.emptySet(), LogLevel.ERROR, "Required column '${SEQUENCING_READ_TYPE}' is missing."),
+                new Problem(Collections.emptySet(), LogLevel.ERROR, "Required column '${SEQUENCING_TYPE}' is missing."),
         ]
 
         when:
@@ -101,7 +101,7 @@ ${seqType.name},${createProject().name},,DNA,${SequencingReadType.SINGLE}
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.INFO, "Alignment for SeqType ${seqType} is not supported"),
+                new Problem(Collections.emptySet(), LogLevel.INFO, "Alignment for SeqType ${seqType} is not supported"),
         ]
 
         when:
@@ -127,8 +127,8 @@ ${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadTyp
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING, "${pipeline.name} is not configured for Project '${project}' and SeqType '${seqType1}'", "At least one Alignment is not configured."),
-                new Problem(Collections.emptySet(), Level.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqType2}'", "At least one Alignment is not configured."),
+                new Problem(Collections.emptySet(), LogLevel.WARNING, "${pipeline.name} is not configured for Project '${project}' and SeqType '${seqType1}'", "At least one Alignment is not configured."),
+                new Problem(Collections.emptySet(), LogLevel.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqType2}'", "At least one Alignment is not configured."),
         ]
 
         when:

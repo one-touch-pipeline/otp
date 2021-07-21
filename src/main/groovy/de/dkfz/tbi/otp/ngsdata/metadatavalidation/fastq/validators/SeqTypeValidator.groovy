@@ -56,10 +56,10 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
         valueTuples.each { ValueTuple valueTuple ->
             String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
             if (!seqType) {
-                context.addProblem(valueTuple.cells, Level.ERROR, "Sequencing type must not be empty.", "At least one sequencing type is empty.")
+                context.addProblem(valueTuple.cells, LogLevel.ERROR, "Sequencing type must not be empty.", "At least one sequencing type is empty.")
             }
             else if (!seqTypeService.findByNameOrImportAlias(seqType)) {
-                context.addProblem(valueTuple.cells, Level.ERROR, "Sequencing type '${seqType}' is not registered in the OTP database.", "At least one sequencing type is not registered in OTP.")
+                context.addProblem(valueTuple.cells, LogLevel.ERROR, "Sequencing type '${seqType}' is not registered in the OTP database.", "At least one sequencing type is not registered in OTP.")
             }
         }
     }

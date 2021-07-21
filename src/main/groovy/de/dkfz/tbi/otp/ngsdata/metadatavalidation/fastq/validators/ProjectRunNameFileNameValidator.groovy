@@ -93,7 +93,7 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
 
         if (result > 0) {
             context.addProblem(valueTuple.cells,
-                    Level.ERROR, "A file with name '${fileName}' already exists for run '${runId}' and project '${project.name}'", "At least one project, run and file combination already exists in OTP")
+                    LogLevel.ERROR, "A file with name '${fileName}' already exists for run '${runId}' and project '${project.name}'", "At least one project, run and file combination already exists in OTP")
         }
     }
 }

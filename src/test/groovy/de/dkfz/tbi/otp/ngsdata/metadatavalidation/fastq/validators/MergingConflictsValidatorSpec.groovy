@@ -167,10 +167,10 @@ class MergingConflictsValidatorSpec extends Specification implements DataTest, D
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem((context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells + context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells + context.spreadsheet.dataRows[4].cells) as Set, LogLevel.WARNING,
                         "Sample ${sample2.individual.pid} ${sample2.sampleType.displayName} with sequencing type ${seqType2.displayNameWithLibraryLayout} cannot be merged with itself, since it uses incompatible seq platforms",
                         "Sample can not be merged with itself, since it uses incompatible seq platforms."),
-                new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set, Level.WARNING,
+                new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set, LogLevel.WARNING,
                         "Sample ${individual3} ${sampleType3} with sequencing type ${seqType2.displayNameWithLibraryLayout} cannot be merged with itself, since it uses incompatible seq platforms",
                         "Sample can not be merged with itself, since it uses incompatible seq platforms."),
         ]

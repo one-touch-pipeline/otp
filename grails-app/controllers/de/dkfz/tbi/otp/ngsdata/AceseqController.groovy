@@ -85,14 +85,14 @@ class AceseqController extends AbstractAnalysisController {
             return
         }
         List<Path> files = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
-        if (!files.isEmpty()) {
+        if (files.isEmpty()) {
+            render status: 404
+        } else {
             if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
                 render file: files[cmd.index].bytes, contentType: "image/png"
             } else {
                 render file: files.first().bytes, contentType: "image/png"
             }
-        } else {
-            render status: 404
         }
     }
 }

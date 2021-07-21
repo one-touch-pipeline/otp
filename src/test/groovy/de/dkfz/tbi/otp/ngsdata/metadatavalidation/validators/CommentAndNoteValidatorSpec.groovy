@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -41,12 +41,12 @@ class CommentAndNoteValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[1].cells[0]] as Set,
-                        Level.INFO, "Comment/Note (ComMenT): a1", "Comment/Note."),
-                new Problem([context.spreadsheet.dataRows[1].cells[1]] as Set, Level.INFO, "Comment/Note (note): a1", "Comment/Note."),
-                new Problem([context.spreadsheet.dataRows[0].cells[1]] as Set, Level.INFO, "Comment/Note (note): a2", "Comment/Note."),
+                        LogLevel.INFO, "Comment/Note (ComMenT): a1", "Comment/Note."),
+                new Problem([context.spreadsheet.dataRows[1].cells[1]] as Set, LogLevel.INFO, "Comment/Note (note): a1", "Comment/Note."),
+                new Problem([context.spreadsheet.dataRows[0].cells[1]] as Set, LogLevel.INFO, "Comment/Note (note): a2", "Comment/Note."),
                 new Problem([context.spreadsheet.dataRows[0].cells[2], context.spreadsheet.dataRows[1].cells[2]] as Set,
-                        Level.INFO, "Comment/Note (important NOTe): a3", "Comment/Note."),
-                new Problem([context.spreadsheet.dataRows[0].cells[4]] as Set, Level.INFO, "Comment/Note (COMMENT asdf): a5", "Comment/Note."),
+                        LogLevel.INFO, "Comment/Note (important NOTe): a3", "Comment/Note."),
+                new Problem([context.spreadsheet.dataRows[0].cells[4]] as Set, LogLevel.INFO, "Comment/Note (COMMENT asdf): a5", "Comment/Note."),
         ]
 
         when:

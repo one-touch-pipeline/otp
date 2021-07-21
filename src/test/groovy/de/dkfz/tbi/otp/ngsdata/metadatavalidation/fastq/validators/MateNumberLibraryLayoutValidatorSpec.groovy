@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -100,13 +100,13 @@ i\t${SequencingReadType.PAIRED}
 """)
 
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING,
                         "OTP does not know the sequencing read type 'UnknownLibrary' and can therefore not validate the mate number.", "OTP does not know at least one sequencing read type and can therefore not validate the mate number."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "The mate number '3' is bigger then the allowed value for the sequencing read type '${SequencingReadType.PAIRED}' of '2'.", "At least one mate number is bigger then the allowed value for the sequencing read type."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "The mate number '3' is bigger then the allowed value for the sequencing read type '${SequencingReadType.MATE_PAIR}' of '2'.", "At least one mate number is bigger then the allowed value for the sequencing read type."),
-                new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "The mate number '2' is bigger then the allowed value for the sequencing read type '${SequencingReadType.SINGLE}' of '1'.", "At least one mate number is bigger then the allowed value for the sequencing read type."),
         ] as Set
 

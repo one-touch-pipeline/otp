@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -142,17 +142,17 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadataWithKit', seqPlatform: platformName1Label1Kit1)
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadataWithoutKit', seqPlatform: platformName2Label2KitNull)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         getSameCombinationError("InconsistentPlatformInMetadata"), SAME_COMBINATION_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         getSameCombinationError("InconsistentModelInMetadata"), SAME_COMBINATION_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[4].cells + context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[4].cells + context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                         getSameCombinationError("InconsistentKitInMetadata"), SAME_COMBINATION_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                         getAlreadyKnownError("PlatformInconsistentInDatabaseAndMetadata", platformName1Label1Kit1, platformName2Label1Kit1), ALREADY_KNOWN_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                         getAlreadyKnownError("ModelInconsistentInDatabaseAndMetadata", platformName1Label1Kit1, platformName1Label2Kit1), ALREADY_KNOWN_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[8].cells as Set, LogLevel.ERROR,
                         getAlreadyKnownError("KitInconsistentInDatabaseAndMetadata", platformName1Label1Kit1, platformName1Label1Kit2), ALREADY_KNOWN_DESCRIPTION),
         ]
 
@@ -192,17 +192,17 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
         DomainFactory.createRun(name: 'KitInconsistentInDatabaseAndMetadata', seqPlatform: platformName1Label2Kit1)
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadata', seqPlatform: platformName2Label2KitNull)
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING,
+                new Problem(Collections.emptySet(), LogLevel.WARNING,
                         "Optional column '${SEQUENCING_KIT}' is missing."),
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         getSameCombinationError("InconsistentPlatformInMetadata"), SAME_COMBINATION_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         getSameCombinationError("InconsistentModelInMetadata"), SAME_COMBINATION_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[4].cells as Set, LogLevel.ERROR,
                         getAlreadyKnownError("PlatformInconsistentInDatabaseAndMetadata", platformName2Label2KitNull, platformName1Label2KitNull), ALREADY_KNOWN_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                         getAlreadyKnownError("ModelInconsistentInDatabaseAndMetadata", platformName2Label2KitNull, platformName2Label1KitNull), ALREADY_KNOWN_DESCRIPTION),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
                         getAlreadyKnownError("KitInconsistentInDatabaseAndMetadata", platformName1Label2Kit1, platformName1Label2KitNull), ALREADY_KNOWN_DESCRIPTION),
         ]
 
