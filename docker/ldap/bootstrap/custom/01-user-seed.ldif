@@ -21,7 +21,6 @@
 #
 ##
 ##
-
 ####################################################
 ## Add Orgazantional Units
 ## These should provide a better overview of the tree
@@ -42,6 +41,11 @@ changetype: add
 objectclass: organizationalUnit
 ou: groups
 
+dn: OU=DeletedUsers,{{ LDAP_BASE_DN }}
+changetype: add
+objectclass: organizationalUnit
+ou: DeletedUsers
+
 ####################################################
 ## Add Groups
 ####################################################
@@ -56,15 +60,15 @@ objectcategory: group
 member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }} 
 member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
-dn: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+dn: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
 changetype: add
 objectClass: groupOfNames
 objectClass: groupOfUsers
-cn: test_project_01
-distinguishedname: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+cn: Example project 1
+distinguishedname: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
 objectcategory: group
-member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }} 
-member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }} 
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=mufasa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
@@ -112,12 +116,398 @@ member: UID=everett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=anisa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=grazyna,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=claudia,OU=persons,OU=users,{{ LDAP_BASE_DN }}
-member: UID=margarett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
-member: UID=marvella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=margarett,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=marvella,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+
+dn: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: groupOfNames
+objectClass: groupOfUsers
+cn: Example project 2
+distinguishedname: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+objectcategory: group
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mufasa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sarabi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=simba,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=nala,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kiara,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kovu,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=timon,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=pumbaa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=rafiki,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shenzi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sneezy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sleepy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dopey,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=doc,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=happy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bashful,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grumpy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=soo,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=hermila,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jennefer,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=tommie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ozella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=gerald,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bethany,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sue,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dudley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=daina,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=stephanie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ninfa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=leland,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mittie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=molly,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=fermin,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sueann,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=armand,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jinny,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=annabelle,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sandee,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shanika,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=cari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=everett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=anisa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grazyna,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=claudia,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=margarett,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=marvella,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+
+dn: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: groupOfNames
+objectClass: groupOfUsers
+cn: Example project 3
+distinguishedname: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+objectcategory: group
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mufasa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sarabi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=simba,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=nala,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kiara,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kovu,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=timon,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=pumbaa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=rafiki,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shenzi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sneezy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sleepy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dopey,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=doc,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=happy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bashful,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grumpy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=soo,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=hermila,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jennefer,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=tommie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ozella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=gerald,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bethany,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sue,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dudley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=daina,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=stephanie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ninfa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=leland,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mittie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=molly,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=fermin,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sueann,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=armand,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jinny,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=annabelle,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sandee,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shanika,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=cari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=everett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=anisa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grazyna,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=claudia,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=margarett,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=marvella,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+
+dn: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: groupOfNames
+objectClass: groupOfUsers
+cn: Example project 4
+distinguishedname: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+objectcategory: group
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mufasa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sarabi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=simba,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=nala,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kiara,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kovu,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=timon,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=pumbaa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=rafiki,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shenzi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sneezy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sleepy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dopey,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=doc,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=happy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bashful,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grumpy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=soo,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=hermila,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jennefer,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=tommie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ozella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=gerald,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bethany,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sue,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dudley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=daina,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=stephanie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ninfa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=leland,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mittie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=molly,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=fermin,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sueann,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=armand,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jinny,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=annabelle,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sandee,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shanika,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=cari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=everett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=anisa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grazyna,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=claudia,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=margarett,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=marvella,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+
+dn: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: groupOfNames
+objectClass: groupOfUsers
+cn: Example project 5
+distinguishedname: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+objectcategory: group
+member: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mufasa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sarabi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=simba,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=nala,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kiara,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kovu,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=timon,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=pumbaa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=rafiki,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shenzi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sneezy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sleepy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dopey,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=doc,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=happy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bashful,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grumpy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=soo,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=hermila,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jennefer,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=tommie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ozella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=gerald,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=bethany,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sue,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=dudley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=daina,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=stephanie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=kari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=ninfa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=leland,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mittie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=molly,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=fermin,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sueann,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=armand,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=jinny,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=annabelle,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sandee,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=shanika,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=cari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=everett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=anisa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=grazyna,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=claudia,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=margarett,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=marvella,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
 ####################################################
 ## Add Users and Set as Members of above Groups
 ####################################################
+
+### Deleted users part of every project
+
+dn: UID=margarett,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+changetype: add
+cn: margarett
+department: Administration
+givenname: Margarett
+mail: margarett.mclaughin@otp.de
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Mclaughin
+thumbnailphoto: someImageData
+uid: margarett
+useraccountcontrol: 1024
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+dn: UID=marvella,OU=DeletedUsers,{{ LDAP_BASE_DN }}
+changetype: add
+cn: marvella
+department: Administration
+givenname: Marvella
+mail: marvella.elfrink@otp.de
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Elfrink
+thumbnailphoto: someImageData
+uid: marvella
+useraccountcontrol: 1024
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+### Expired users part of every project
+
+dn: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: ewok
+department: Administration
+givenname: ewok
+mail: ewok.pixiedust@otp.de
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Pixie Dust
+thumbnailphoto: someImageData
+uid: ewok
+useraccountcontrol: 1024
+accountExpires: 132539328000000000
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+dn: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: goofy
+department: Administration
+givenname: goofy
+mail: goofy.wonderland@otp.de
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Wonderland
+thumbnailphoto: someImageData
+uid: goofy
+useraccountcontrol: 1024
+accountExpires: 132539328000000000
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+### Disabled users part of every project
+
+dn: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: mike
+department: Administration
+givenname: mike
+mail: mike.wazowski@otp.de
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Wazowski
+thumbnailphoto: someImageData
+uid: mike
+useraccountcontrol: 2
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+dn: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: sulley
+department: Administration
+givenname: James
+mail: james.sullivan@otp.de
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Sullivan
+thumbnailphoto: someImageData
+uid: sulley
+useraccountcontrol: 2
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+### Active users part of every project
 
 dn: UID=dave,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -134,7 +524,11 @@ thumbnailphoto: someImageData
 uid: dave
 useraccountcontrol: 1024
 memberOf: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=dori,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -151,7 +545,11 @@ thumbnailphoto: someImageData
 uid: dori
 useraccountcontrol: 1024
 memberOf: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=ralf,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -167,7 +565,11 @@ sn: Admin
 thumbnailphoto: someImageData
 uid: ralf
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=otp,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -183,7 +585,11 @@ sn: Admin
 thumbnailphoto: someImageData
 uid: otp
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=mufasa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -199,9 +605,11 @@ sn: Development
 thumbnailphoto: someImageData
 uid: mufasa
 useraccountcontrol: 1024
-memberOf: CN=developer,OU=groups,{{ LDAP_BASE_DN }}
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
-
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=sarabi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -217,7 +625,11 @@ sn: Baker
 thumbnailphoto: someImageData
 uid: sarabi
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=simba,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -233,7 +645,11 @@ sn: Clark
 thumbnailphoto: someImageData
 uid: simba
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=nala,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -249,7 +665,11 @@ sn: Davis
 thumbnailphoto: someImageData
 uid: nala
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=kiara,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -265,7 +685,11 @@ sn: Evans
 thumbnailphoto: someImageData
 uid: kiara
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=kovu,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -281,7 +705,11 @@ sn: Frank
 thumbnailphoto: someImageData
 uid: kovu
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=timon,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -297,7 +725,11 @@ sn: Ghosh
 thumbnailphoto: someImageData
 uid: timon
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=pumbaa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -313,7 +745,11 @@ sn: Hills
 thumbnailphoto: someImageData
 uid: pumbaa
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=rafiki,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -329,7 +765,11 @@ sn: Irwin
 thumbnailphoto: someImageData
 uid: rafiki
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=shenzi,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -345,7 +785,11 @@ sn: Jones
 thumbnailphoto: someImageData
 uid: shenzi
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=sneezy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -361,7 +805,11 @@ sn: Klein
 thumbnailphoto: someImageData
 uid: sneezy
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=sleepy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -377,7 +825,11 @@ sn: Lopez
 thumbnailphoto: someImageData
 uid: sleepy
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=dopey,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -393,7 +845,11 @@ sn: Mason
 thumbnailphoto: someImageData
 uid: dopey
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=doc,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -409,7 +865,11 @@ sn: Nalty
 thumbnailphoto: someImageData
 uid: doc
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=happy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -425,7 +885,11 @@ sn: Ochoa
 thumbnailphoto: someImageData
 uid: happy
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=bashful,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -441,7 +905,11 @@ sn: Patel
 thumbnailphoto: someImageData
 uid: bashful
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=grumpy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -457,7 +925,11 @@ sn: Quinn
 thumbnailphoto: someImageData
 uid: grumpy
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=soo,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -473,7 +945,11 @@ sn: Manners
 thumbnailphoto: someImageData
 uid: soo
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=hermila,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -489,7 +965,11 @@ sn: Herz
 thumbnailphoto: someImageData
 uid: hermila
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=jennefer,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -505,7 +985,11 @@ sn: Ebeling
 thumbnailphoto: someImageData
 uid: jennefer
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=tommie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -521,7 +1005,11 @@ sn: Deering
 thumbnailphoto: someImageData
 uid: tommie
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=ozella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -537,7 +1025,11 @@ sn: Couto
 thumbnailphoto: someImageData
 uid: ozella
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=gerald,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -553,7 +1045,11 @@ sn: Birnbaum
 thumbnailphoto: someImageData
 uid: gerald
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=bethany,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -569,7 +1065,11 @@ sn: Tyson
 thumbnailphoto: someImageData
 uid: bethany
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=sue,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -585,7 +1085,11 @@ sn: Larue
 thumbnailphoto: someImageData
 uid: sue
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=dudley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -601,7 +1105,11 @@ sn: Bejarano
 thumbnailphoto: someImageData
 uid: dudley
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=daina,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -617,7 +1125,11 @@ sn: Kaneshiro
 thumbnailphoto: someImageData
 uid: daina
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=stephanie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -633,7 +1145,11 @@ sn: Foye
 thumbnailphoto: someImageData
 uid: stephanie
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=kari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -649,7 +1165,11 @@ sn: Pellot
 thumbnailphoto: someImageData
 uid: kari
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=ninfa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -665,7 +1185,11 @@ sn: Paquin
 thumbnailphoto: someImageData
 uid: ninfa
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=leland,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -681,7 +1205,11 @@ sn: Rippe
 thumbnailphoto: someImageData
 uid: leland
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=mittie,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -697,7 +1225,11 @@ sn: Adamo
 thumbnailphoto: someImageData
 uid: mittie
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=molly,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -713,7 +1245,11 @@ sn: Spath
 thumbnailphoto: someImageData
 uid: molly
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=fermin,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -729,7 +1265,11 @@ sn: Kleinschmidt
 thumbnailphoto: someImageData
 uid: fermin
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=sueann,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -745,7 +1285,11 @@ sn: Carper
 thumbnailphoto: someImageData
 uid: sueann
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=armand,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -761,7 +1305,11 @@ sn: Wegman
 thumbnailphoto: someImageData
 uid: armand
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=jinny,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -777,7 +1325,11 @@ sn: Stamm
 thumbnailphoto: someImageData
 uid: jinny
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=annabelle,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -793,7 +1345,11 @@ sn: Fritts
 thumbnailphoto: someImageData
 uid: annabelle
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=sandee,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -809,7 +1365,11 @@ sn: Stucky
 thumbnailphoto: someImageData
 uid: sandee
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=shanika,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -825,7 +1385,11 @@ sn: Scanlon
 thumbnailphoto: someImageData
 uid: shanika
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=cari,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -841,7 +1405,11 @@ sn: Valliere
 thumbnailphoto: someImageData
 uid: cari
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=everett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -857,7 +1425,11 @@ sn: Linthicum
 thumbnailphoto: someImageData
 uid: everett
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=anisa,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -873,7 +1445,11 @@ sn: Ensey
 thumbnailphoto: someImageData
 uid: anisa
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=grazyna,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -889,7 +1465,11 @@ sn: Bermejo
 thumbnailphoto: someImageData
 uid: grazyna
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 
 dn: UID=claudia,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 changetype: add
@@ -905,36 +1485,8 @@ sn: Malick
 thumbnailphoto: someImageData
 uid: claudia
 useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
-
-dn: UID=margarett,OU=persons,OU=users,{{ LDAP_BASE_DN }}
-changetype: add
-cn: margarett
-department: Administration
-givenname: Margarett
-mail: margarett.mclaughin@otp.de
-objectcategory: user
-objectcategory: person
-objectclass: inetOrgPerson
-objectclass: user
-sn: Mclaughin
-thumbnailphoto: someImageData
-uid: margarett
-useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
-
-dn: UID=marvella,OU=persons,OU=users,{{ LDAP_BASE_DN }}
-changetype: add
-cn: marvella
-department: Administration
-givenname: Marvella
-mail: marvella.elfrink@otp.de
-objectcategory: user
-objectcategory: person
-objectclass: inetOrgPerson
-objectclass: user
-sn: Elfrink
-thumbnailphoto: someImageData
-uid: marvella
-useraccountcontrol: 1024
-memberOf: CN=test_project_01,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
