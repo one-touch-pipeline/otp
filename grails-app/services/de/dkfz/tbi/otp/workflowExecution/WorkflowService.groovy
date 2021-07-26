@@ -25,7 +25,10 @@ import grails.gorm.transactions.Transactional
 
 @Transactional
 class WorkflowService {
+
     JobService jobService
+
+    OtpWorkflowService otpWorkflowService
 
     void createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
         steps.each {
@@ -33,18 +36,23 @@ class WorkflowService {
         }
     }
 
-    void createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
+    WorkflowRun createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
         assert step
         assert step.workflowRun.state == WorkflowRun.State.FAILED
-        WorkflowRun run = new WorkflowRun(
-                workflow: step.workflowRun.workflow,
-                priority: step.workflowRun.priority,
-                project: step.workflowRun.project,
-                displayName: step.workflowRun.displayName,
+
+        WorkflowRun oldRun = step.workflowRun
+        boolean useOutputAsInput = otpWorkflowService.lookupOtpWorkflowBean(oldRun).useOutputArtefactAlsoAsInputArtefact()
+
+        WorkflowRun run = new WorkflowRun([
+                workflow        : oldRun.workflow,
+                priority        : oldRun.priority,
+                project         : oldRun.project,
+                displayName     : oldRun.displayName,
                 shortDisplayName: step.workflowRun.shortDisplayName,
-                combinedConfig: step.workflowRun.combinedConfig,
-                restartedFrom: step.workflowRun,
-        ).save(flush: true)
+                combinedConfig  : oldRun.combinedConfig,
+                restartedFrom   : oldRun,
+                state           : WorkflowRun.State.PENDING,
+        ]).save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
             WorkflowArtefact newArtefact = new WorkflowArtefact(
@@ -57,6 +65,12 @@ class WorkflowService {
                     seqType: oldArtefact.seqType,
             ).save(flush: true)
 
+            if (useOutputAsInput) {
+                Artefact concreteArtefact = oldArtefact.artefact.get()
+                concreteArtefact.workflowArtefact = newArtefact
+                concreteArtefact.save(flush: true)
+            }
+
             WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->
                 workflowRunInputArtefact.workflowArtefact = newArtefact
                 workflowRunInputArtefact.save(flush: true)
@@ -66,12 +80,14 @@ class WorkflowService {
             oldArtefact.save(flush: true)
         }
 
-        step.workflowRun.state = WorkflowRun.State.RESTARTED
-        step.workflowRun.save(flush: true)
+        oldRun.state = WorkflowRun.State.RESTARTED
+        oldRun.save(flush: true)
 
         if (startDirectly) {
             jobService.createNextJob(run)
         }
+
+        return run
     }
 
     void enableWorkflow(Workflow workflow) {

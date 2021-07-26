@@ -28,6 +28,9 @@ import de.dkfz.tbi.otp.utils.StackTraceUtils
 
 @Transactional
 class WorkflowStateChangeService {
+
+    OtpWorkflowService otpWorkflowService
+
     void changeStateToOmitted(WorkflowStep step, OmittedMessage message) {
         assert step
         assert message
@@ -147,7 +150,7 @@ class WorkflowStateChangeService {
 
         String lastBeanName = null
         if (step.workflowRun.workflow.beanName) {
-            OtpWorkflow otpWorkflow = applicationContext.getBean(step.workflowRun.workflow.beanName, OtpWorkflow)
+            OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(step.workflowRun)
             lastBeanName = otpWorkflow.jobBeanNames.last()
         }
 

@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -144,8 +143,10 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "abc")
         workflowStep.workflowRun.workflow.beanName = "workflow bean"
         workflowStep.workflowRun.workflow.save(flush: true)
-        service.applicationContext = Mock(ApplicationContext) {
-            getBean("workflow bean", OtpWorkflow) >> { [getJobBeanNames: { ["1st job bean", "2nd job bean"] }] as OtpWorkflow }
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(workflowStep.workflowRun) >> Mock(OtpWorkflow) {
+                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+            }
         }
 
         when:
@@ -165,8 +166,10 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "abc")
         workflowStep.workflowRun.workflow.beanName = "workflow bean"
         workflowStep.workflowRun.workflow.save(flush: true)
-        service.applicationContext = Mock(ApplicationContext) {
-            getBean("workflow bean", OtpWorkflow) >> { [getJobBeanNames: { ["1st job bean", "2nd job bean"] }] as OtpWorkflow }
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(workflowStep.workflowRun) >> Mock(OtpWorkflow) {
+                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+            }
         }
 
         when:

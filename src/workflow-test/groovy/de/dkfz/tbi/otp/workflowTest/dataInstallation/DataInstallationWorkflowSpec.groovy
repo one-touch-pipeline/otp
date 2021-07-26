@@ -65,7 +65,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
     @Override
     String getWorkflowName() {
-        return DataInstallationInitializationService.WORKFLOW
+        return DataInstallationWorkflow.WORKFLOW
     }
 
     final Class<DataInstallationWorkflow> workflowComponentClass = DataInstallationWorkflow

@@ -27,6 +27,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 
+/**
+ * represent the fastqc workflow, which calculates or copied the fastqc reports.
+ */
 @Component
 @Slf4j
 @CompileStatic

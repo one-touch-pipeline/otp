@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,7 +35,7 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Workflow,
                 WorkflowMessageLog,
                 WorkflowRun,
@@ -52,10 +51,10 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
     void "test createNextJob, first step"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun()
-        workflowRun.workflow.beanName = "workflow bean"
-        workflowRun.workflow.save(flush: true)
-        service.applicationContext = Mock(ApplicationContext) {
-            getBean("workflow bean", OtpWorkflow) >> { [getJobBeanNames: { ["1st job bean", "2nd job bean"] }] as OtpWorkflow }
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(workflowRun) >> Mock(OtpWorkflow) {
+                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+            }
         }
 
         when:
@@ -76,10 +75,10 @@ class JobServiceSpec extends Specification implements ServiceUnitTest<JobService
         given:
         WorkflowRun workflowRun = createWorkflowRun()
         WorkflowStep existingStep = createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean")
-        workflowRun.workflow.beanName = "workflow bean"
-        workflowRun.workflow.save(flush: true)
-        service.applicationContext = Mock(ApplicationContext) {
-            getBean("workflow bean", OtpWorkflow) >> { [getJobBeanNames: { ["1st job bean", "2nd job bean"] }] as OtpWorkflow }
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(workflowRun) >> Mock(OtpWorkflow) {
+                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+            }
         }
 
         when:

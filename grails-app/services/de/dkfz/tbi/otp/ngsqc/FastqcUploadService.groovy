@@ -26,6 +26,8 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
+import java.util.regex.Matcher
+
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database
  */
@@ -50,6 +52,8 @@ class FastqcUploadService {
             fastqc.dataFile.nReads = parsedFastqcFile["nReads"] as long
             fastqc.dataFile.sequenceLength = parsedFastqcFile["sequenceLength"]
             fastqc.dataFile.save(flush: true)
+            fastqc.contentUploaded = true
+            fastqc.save(flush: true)
         } catch (final Throwable t) {
             throw new RuntimeException("Failed to load data from ${DATA_FILE_NAME} of ${fastqc} into the database.", t)
         }
@@ -78,12 +82,11 @@ class FastqcUploadService {
     }
 
     private static String parsePropertyFromFastQC(String fastqcFileContent, String regex, Closure exception) {
-        def matcher = fastqcFileContent =~ regex
+        Matcher matcher = fastqcFileContent =~ regex
         if (matcher) {
             return matcher.group(1) as String
-        } else {
-            exception()
         }
+        return exception()
     }
 
     String getFastQCFileContent(FastqcProcessedFile fastqc) {

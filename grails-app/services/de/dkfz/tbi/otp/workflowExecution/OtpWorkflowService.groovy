@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,26 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-/**
- * Describes a workflow by returning all job bean names in the correct order
- */
-trait OtpWorkflow {
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+
+class OtpWorkflowService {
+
+    @Autowired
+    ApplicationContext applicationContext
 
     /**
-     * returns the list of all jobs of the workflow in the correct order.
+     * return the bean of the workflow for the workflowRun
      */
-    abstract List<String> getJobBeanNames()
+    OtpWorkflow lookupOtpWorkflowBean(WorkflowRun workflowRun) {
+        return lookupOtpWorkflowBean(workflowRun.workflow)
+    }
 
     /**
-     * Indicate, if an workflow use their output artefacts also for input.
-     *
-     * Usually a workflow works on input artefacts and produce from these output artefacts.
-     * But their are some special workflows used complete a gui import.
-     * These workflows has no separate input artefact, but only output artefacts.
-     * Some operation needs to know that, since they have to do something a little bit another way.
-     *
-     * @return false to indicate, that this workflow use separate input artefacts
+     * return the bean of the workflow of the given workflow
      */
-    boolean useOutputArtefactAlsoAsInputArtefact() {
-        return false
+    OtpWorkflow lookupOtpWorkflowBean(Workflow workflow) {
+        String bean = workflow.beanName
+        return applicationContext.getBean(bean, OtpWorkflow)
     }
 }

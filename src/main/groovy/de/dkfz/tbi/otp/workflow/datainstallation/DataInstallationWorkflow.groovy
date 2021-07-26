@@ -27,6 +27,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 
+/**
+ * represent the data installation workflow, sometimes also call fastq import workflow.
+ */
 @Component
 @Slf4j
 @CompileStatic
@@ -45,5 +48,13 @@ class DataInstallationWorkflow implements OtpWorkflow {
                 DataInstallationSingleCellLinkJob.simpleName.uncapitalize(),
                 DataInstallationPidLinkJob.simpleName.uncapitalize(),
         ]
+    }
+
+    /**
+     * Since it is an import workflow, it use othe output also for input.
+     */
+    @Override
+    boolean useOutputArtefactAlsoAsInputArtefact() {
+        return true
     }
 }

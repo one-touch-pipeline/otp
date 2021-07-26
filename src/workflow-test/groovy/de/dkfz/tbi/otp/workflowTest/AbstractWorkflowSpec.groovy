@@ -318,7 +318,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                         id                          : workflowRun.id,
                         state                       : workflowRun.state,
                         "workflow name"             : workflowRun.workflow.name,
-                        "workflow run name"         : workflowRun.displayName,
+                        "workflow run name"         : workflowRun.shortDisplayName,
                         "priority name"             : workflowRun.priority.name,
                         "priority queue"            : workflowRun.priority.queue,
                         "priority roddyConfigSuffix": workflowRun.priority.roddyConfigSuffix,

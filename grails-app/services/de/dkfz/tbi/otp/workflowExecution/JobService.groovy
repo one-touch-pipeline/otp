@@ -30,16 +30,20 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 class JobService {
 
     LogService logService
+
+    OtpWorkflowService otpWorkflowService
+
     WorkflowStateChangeService workflowStateChangeService
 
     void createNextJob(WorkflowRun workflowRun) {
         assert workflowRun
         assert workflowRun.workflow.beanName
 
-        OtpWorkflow otpWorkflow = applicationContext.getBean(workflowRun.workflow.beanName, OtpWorkflow)
+        OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(workflowRun)
+        List<String> jobBeanNames = otpWorkflow.jobBeanNames
         String beanName = workflowRun.workflowSteps ?
-                otpWorkflow.jobBeanNames[otpWorkflow.jobBeanNames.indexOf(workflowRun.workflowSteps.last().beanName) + 1] :
-                otpWorkflow.jobBeanNames.first()
+                jobBeanNames[jobBeanNames.indexOf(workflowRun.workflowSteps.last().beanName) + 1] :
+                jobBeanNames.first()
 
         new WorkflowStep(
                 workflowRun: workflowRun,

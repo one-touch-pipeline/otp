@@ -266,5 +266,6 @@ Sequences flagged as poor quality\t0\t
         then:
         parsedNReads == fastqcProcessedFile.dataFile.nReads
         parsedSequenceLength == fastqcProcessedFile.dataFile.sequenceLength
+        fastqcProcessedFile.contentUploaded == true
     }
 }

@@ -32,7 +32,7 @@ class ConfigSelectorServiceSpec extends Specification implements DataTest, Workf
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternalWorkflowConfigSelector,
         ]
     }

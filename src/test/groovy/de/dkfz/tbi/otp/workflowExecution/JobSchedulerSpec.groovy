@@ -40,7 +40,7 @@ class JobSchedulerSpec extends Specification implements DataTest, WorkflowSystem
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
             WorkflowStep,
         ]
     }

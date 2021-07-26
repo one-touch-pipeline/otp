@@ -120,6 +120,4 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
 
         final Closure<Boolean> validateConfig
     }
-
-
 }
