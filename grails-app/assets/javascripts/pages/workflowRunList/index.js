@@ -20,7 +20,8 @@
  * SOFTWARE.
  */
 $(function () {
-    var table = $("#runs").DataTable({
+    const runsTable = $('#runs');
+    var table = runsTable.DataTable({
         columns: [
             {
                 'data': function (row, type, set, meta) {
@@ -55,14 +56,15 @@ $(function () {
             {
                 'data': function (row, type, set, meta) {
                     if (type === "sort") {
-                        return row.name;
+                        return row.shortName;
                     }
-                    if (row.name) {
-                        return '<a href="' + $.otp.createLink({controller: "workflowRunDetails", action: "index", id: row.id, parameters: {
+                    if (row.shortName) {
+                        return '<a title="' + row.displayName.replaceAll('\n', '<br>') + '" data-toggle="tooltip" data-placement="bottom"' +
+                            ' href="' + $.otp.createLink({controller: "workflowRunDetails", action: "index", id: row.id, parameters: {
                                 "workflow.id": $('#workflow').val(),
                                 "state": $('#state').val(),
                                 "name": $('#name').val(),
-                            }}) + '">' + row.name + '</a>';
+                            }}) + '">' + row.shortName + '</a>';
                     }
                     return "";
                 }
@@ -133,7 +135,7 @@ $(function () {
     });
 
     table.on('draw', function () {
-        $('[title]').tooltip();
+        $('[title]').tooltip({html: true});
     });
 
     var setCount = function (values) {
@@ -170,7 +172,7 @@ $(function () {
         addSelection(e.target);
     });
 
-    $("#runs").on("submit", ".single", function (e) {
+    runsTable.on("submit", ".single", function (e) {
         addSelection(e.target);
     });
 

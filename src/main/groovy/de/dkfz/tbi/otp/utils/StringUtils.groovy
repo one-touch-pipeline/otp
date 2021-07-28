@@ -131,4 +131,14 @@ class StringUtils {
         int s = list.size()
         return s > 1 ? list[0..(s - 2)].join(separator) + finalSeparator + list.last().toString() : list.join(separator)
     }
+
+    /**
+     * Add line breaks to displayName lines and combine them into one single string.
+     *
+     * @param displayNameLines, List of the lines
+     * @return multi line displayName as string
+     */
+    static String generateMultiLineDisplayName(List<String> displayNameLines) {
+        return displayNameLines.join('\n')
+    }
 }

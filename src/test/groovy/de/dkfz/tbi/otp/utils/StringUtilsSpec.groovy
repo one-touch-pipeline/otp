@@ -165,4 +165,16 @@ class StringUtilsSpec extends Specification {
         ["one", "two"]          || "one and two"
         ["one", "two", "three"] || "one, two and three"
     }
+
+    void 'generateMultiLineDisplayName, test cases: #given'() {
+        expect:
+        expected == StringUtils.generateMultiLineDisplayName(given)
+
+        where:
+        given                                   || expected
+        []                                      || ""
+        ["one"]                                 || "one"
+        ["one", "two"]                          || "one\ntwo"
+        ["one", "two", "three", "four", "five"] || "one\ntwo\nthree\nfour\nfive"
+    }
 }

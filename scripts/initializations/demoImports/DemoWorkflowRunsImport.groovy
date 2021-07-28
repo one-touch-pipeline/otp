@@ -29,11 +29,16 @@ package initializations.demoImports
 import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRunInputArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 Project project1 = Project.findByName('Example project 1')
@@ -51,23 +56,50 @@ Workflow rnaAlignmentWorkflow = Workflow.findByName('RNA alignment')
 int workflowNumber = 0
 
 /**
+ * Additional FASTQ installation data
+ */
+Individual individual = Individual.findByPid("example_1")
+SeqType seqType = SeqType.findByName("WHOLE_GENOME")
+String multiLineDisplayName = '\nproject: ' + project1.displayName + '\nindividual: ' + individual.displayName + '\nsampleType: demo sampleType\nseqType: ' + seqType.displayName + '\nrun: demo run name\nlaneId: demo lane id'
+
+/**
  * Create FASTQ installation workflow runs.
  */
 WorkflowRun wr1 = new WorkflowRun(
         state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
-        displayName: 'Sample Run ' + workflowNumber++,
+        displayName: 'FASTQ installation ' + workflowNumber++ + multiLineDisplayName,
+        shortDisplayName: 'FASTQ installation ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: normalPriority,
         workflow: fastqWorkflow,
 ).save(flush: true)
 
+WorkflowArtefact wa1 = new WorkflowArtefact([
+        producedBy      : wr1,
+        outputRole      : 'FASTQ',
+        withdrawnDate   : null,
+        withdrawnComment: null,
+        state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
+        artefactType    : ArtefactType.FASTQ,
+        individual      : individual,
+        seqType         : seqType,
+        displayName     : 'FASTQ Artefact ' + multiLineDisplayName,
+]).save(flush: true)
+
+new WorkflowRunInputArtefact([
+        workflowRun: wr1,
+        workflowArtefact: wa1,
+        role: 'wa2 role',
+]).save(flush: true)
+
 new WorkflowRun(
         state: WorkflowRun.State.FAILED,
         project: project1,
         workDirectory: '/tmp',
-        displayName: 'Sample Run ' + workflowNumber++,
+        displayName: 'FASTQ installation ' + workflowNumber++ + multiLineDisplayName,
+        shortDisplayName: 'FASTQ installation ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: normalPriority,
         workflow: fastqWorkflow,
@@ -77,18 +109,38 @@ WorkflowRun wr2 = new WorkflowRun(
         state: WorkflowRun.State.RUNNING_OTP,
         project: project1,
         workDirectory: '/tmp',
-        displayName: 'Sample Run ' + workflowNumber++,
+        displayName: 'FASTQ installation ' + workflowNumber++ + multiLineDisplayName,
+        shortDisplayName: 'FASTQ installation ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: fasttrackPriority,
         workflow: fastqWorkflow,
         jobCanBeRestarted: false,
 ).save(flush: true)
 
+WorkflowArtefact wa2 = new WorkflowArtefact([
+        producedBy      : wr2,
+        outputRole      : 'FASTQ',
+        withdrawnDate   : null,
+        withdrawnComment: null,
+        state           : WorkflowArtefact.State.SUCCESS,
+        artefactType    : ArtefactType.FASTQ,
+        individual      : individual,
+        seqType         : seqType,
+        displayName     : 'FASTQ Artefact ' + multiLineDisplayName,
+]).save(flush: true)
+
+new WorkflowRunInputArtefact([
+        workflowRun: wr2,
+        workflowArtefact: wa2,
+        role: 'wa2 role',
+]).save(flush: true)
+
 new WorkflowRun(
         state: WorkflowRun.State.OMITTED_MISSING_PRECONDITION,
         project: project1,
         workDirectory: '/tmp',
-        displayName: 'Sample Run ' + workflowNumber++,
+        displayName: 'FASTQ installation ' + workflowNumber++ + multiLineDisplayName,
+        shortDisplayName: 'FASTQ installation ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: minimalPriority,
         workflow: fastqWorkflow,
@@ -103,6 +155,7 @@ new WorkflowRun(
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
+        shortDisplayName: 'Cell Ranger ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: minimalPriority,
         workflow: cellRangerWorkflow,
@@ -113,6 +166,7 @@ WorkflowRun wr3 = new WorkflowRun(
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
+        shortDisplayName: 'Cell Ranger ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: extremeFasttrackPriority,
         jobCanBeRestarted: false,
@@ -124,6 +178,7 @@ new WorkflowRun(
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
+        shortDisplayName: 'Cell Ranger ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: minimalPriority,
         workflow: cellRangerWorkflow,
@@ -138,6 +193,7 @@ new WorkflowRun(
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
+        shortDisplayName: 'RNA ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: reprocessingPriority,
         workflow: rnaAlignmentWorkflow,
@@ -148,6 +204,7 @@ new WorkflowRun(
         project: project1,
         workDirectory: '/tmp',
         displayName: 'Sample Run ' + workflowNumber++,
+        shortDisplayName: 'RNA ' + workflowNumber,
         combinedConfig: '{test: 1}',
         priority: normalPriority,
         workflow: rnaAlignmentWorkflow,

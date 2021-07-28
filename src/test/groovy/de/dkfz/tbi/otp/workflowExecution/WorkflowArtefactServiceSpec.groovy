@@ -45,10 +45,10 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         ArtefactType type = ArtefactType.FASTQ
         Individual individual = createIndividual()
         SeqType seqType = createSeqType()
-        String name = "asdf"
+        List<String> multiLineName = ["asdf", "xyz"]
 
         when:
-        WorkflowArtefact artefact = service.buildWorkflowArtefact(new WorkflowArtefactValues(run, role, type, individual, seqType, name))
+        WorkflowArtefact artefact = service.buildWorkflowArtefact(new WorkflowArtefactValues(run, role, type, individual, seqType, multiLineName))
 
         then:
         artefact
@@ -60,6 +60,6 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         artefact.seqType == seqType
         artefact.withdrawnDate == null
         artefact.withdrawnComment == null
-        artefact.displayName == name
+        artefact.displayName == multiLineName[0] + "\n" + multiLineName[1]
     }
 }

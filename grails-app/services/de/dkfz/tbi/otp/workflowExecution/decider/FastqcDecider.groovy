@@ -69,15 +69,19 @@ class FastqcDecider implements Decider {
 
         SeqTrack seqTrack = optionalArtefact.get() as SeqTrack
 
-        String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} " +
-                "${seqTrack.seqType.displayNameWithLibraryLayout} lane ${seqTrack.laneId} run ${seqTrack.run.name}"
+        List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
+        List<String> artefactDisplayName = runDisplayName
+        artefactDisplayName.remove(0)
+        String shortName = "${FastqcWorkflow.WORKFLOW}: ${seqTrack.individual.pid} " +
+                "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(
                 workflow,
                 inputArtefact.producedBy.priority,
                 fastqcDataFilesService.fastqcOutputDirectory(seqTrack),
                 inputArtefact.project,
-                "${FastqcWorkflow.WORKFLOW}: ${name}",
+                runDisplayName,
+                shortName,
                 getConfigFragments(seqTrack, workflow),
         )
 
@@ -95,7 +99,7 @@ class FastqcDecider implements Decider {
                     ArtefactType.FASTQC,
                     seqTrack.individual,
                     seqTrack.seqType,
-                    name,
+                    artefactDisplayName,
             )).save(flush: true))
         }
         return result
@@ -110,5 +114,23 @@ class FastqcDecider implements Decider {
                 null, //referenceGenome, not used for FastQC
                 seqTrack.libraryPreparationKit,
         ))
+    }
+
+    /**
+     * Generate display name for the workflowRun.
+     *
+     * @param seqTrack of the workflowRun
+     * @return display name as list of strings
+     */
+    private List<String> generateWorkflowRunDisplayName(SeqTrack seqTrack) {
+        List<String> runDisplayName = []
+        runDisplayName.add("project: ${seqTrack.project.name}")
+        runDisplayName.add("individual: ${seqTrack.individual.displayName}")
+        runDisplayName.add("sampleType: ${seqTrack.sampleType.displayName}")
+        runDisplayName.add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
+        runDisplayName.add("run: ${seqTrack.run.name}")
+        runDisplayName.add("lane: ${seqTrack.laneId}")
+
+        return runDisplayName
     }
 }

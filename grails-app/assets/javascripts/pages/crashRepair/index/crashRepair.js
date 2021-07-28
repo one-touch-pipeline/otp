@@ -66,8 +66,8 @@ function renderStepDataTable(steps) {
             '<a href="' + $.otp.createLink({
                 controller: 'workflowRunDetails', action: 'index',
                 parameters: {'id': step.workflowRunId, 'workflow.id': step.workflowId}
-            }) + '">' +
-            step.workflowRunName + '</a>',
+            }) + '" title="' + step.workflowRunName.replaceAll('\n', '<br>') + '" data-toggle="tooltip" data-placement="bottom">' +
+            step.workflowRunShortName + '</a>',
             step.beanName,
             step.id,
             lastUpdated.toLocaleDateString() + ' (' + lastUpdated.toLocaleTimeString().slice(0, 5) + ')',
@@ -87,6 +87,8 @@ function renderStepDataTable(steps) {
             '   <i class="bi bi-file-earmark-x"></i></button>' +
             '</div>'
         ]).draw();
+
+        $('a').tooltip({html: true});
     });
 
     // enable the new tooltips

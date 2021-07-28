@@ -26,16 +26,18 @@
 
 <body>
 <div class="body">
-    <h1>${g.message(code: "clusterJob.log")} (job ID <g:link action="show" id="${job.id}">${job.id}</g:link>) for
+    <h1>${g.message(code: "clusterJob.log")} (job ID <g:link action="show" id="${job.id}">${job.id}</g:link>)</h1>
         <g:if test="${job.oldSystem}">
             <g:link controller="processes" action="processingStep"
                     id="${job.processingStep.id}"><i>${job.processingStep.jobDefinition.name} (${job.processingStep.jobClass})</i></g:link>
         </g:if>
         <g:else>
-            <i>${job.workflowStep.beanName}</i> of <g:link controller="workflowRunDetails" action="index"
-                                                           id="${job.workflowStep.workflowRun.id}"><i>${job.workflowStep.workflowRun.displayName}</i></g:link>
+            ${job.workflowStep.beanName} of ${raw(job.workflowStep.workflowRun.displayName.replace("\n", "<br>"))}
+            <br>
+            <g:link controller="workflowRunDetails" action="index" id="${job.workflowStep.workflowRun.id}">
+                ${g.message(code: "workflowRun.details.log.back.link")}
+            </g:link>
         </g:else>
-    </h1>
     <pre>${job.jobLog}</pre>
     <hr>
     <pre>${content}</pre>

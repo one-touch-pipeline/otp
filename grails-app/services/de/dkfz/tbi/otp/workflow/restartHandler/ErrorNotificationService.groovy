@@ -229,12 +229,15 @@ class ErrorNotificationService {
                 message << "Start time: ${dateString(clusterJob.started)}"
                 message << "End time: ${dateString(clusterJob.ended)}"
                 message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na'}"
+                message << "Requested walltime: ${clusterJob.requestedWalltime}"
                 message << "Log file: ${clusterJob.jobLog}"
                 message << "Log page: ${grailsLinkGenerator.link(controller: 'clusterJobDetail', action: 'show', id: clusterJob.id, absolute: 'true')}"
                 message << "Exit status: ${clusterJob.exitStatus}"
                 message << "Exit code: ${clusterJob.exitCode}"
                 message << "Node: ${clusterJob.node}"
                 message << "Start count: ${clusterJob.startCount}"
+                message << "Used memory: ${clusterJob.usedMemory}"
+                message << "Requested memory: ${clusterJob.requestedMemory}"
                 message << ""
             }
         } else {

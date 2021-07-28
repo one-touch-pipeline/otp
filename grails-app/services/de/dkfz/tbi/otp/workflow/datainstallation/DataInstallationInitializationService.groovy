@@ -59,14 +59,25 @@ class DataInstallationInitializationService {
     }
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
+        List<String> runDisplayName = []
+        runDisplayName.add("project: ${seqTrack.project.name}")
+        runDisplayName.add("individual: ${seqTrack.individual.displayName}")
+        runDisplayName.add("sampleType: ${seqTrack.sampleType.displayName}")
+        runDisplayName.add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
+        runDisplayName.add("run: ${seqTrack.run.name}")
+        runDisplayName.add("lane: ${seqTrack.laneId}")
+
+        List<String> artefactDisplayName = runDisplayName
+        artefactDisplayName.remove(0)
+
+        String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
+
         String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(dataFiles.first())).parent
-        String name = "${seqTrack.project.name} ${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} " +
-                "${seqTrack.seqType.displayNameWithLibraryLayout} lane ${seqTrack.laneId} run ${seqTrack.run.name}"
         List<ExternalWorkflowConfigFragment> configFragments = getConfigFragments(seqTrack, workflow)
-        WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, "Data installation: ${name}",
-                configFragments)
+
+        WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, runDisplayName, shortName, configFragments)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
-                run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, seqTrack.individual, seqTrack.seqType, name
+                run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, seqTrack.individual, seqTrack.seqType, artefactDisplayName
         ))
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)

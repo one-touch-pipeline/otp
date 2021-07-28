@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.TransactionUtils
 
 @Transactional
@@ -82,25 +83,29 @@ class WorkflowRunService {
      * @param priority The priority to use for scheduling the run
      * @param workDirectory The directory for the data of the workflow
      * @param project The project the run should belong to
-     * @param name A name for the run. It is used in the GUI to show and also for filtering
+     * @param displayNameLines A name for the run. It is used in the GUI to show and also for filtering
+     * @param shortName A short display name
      * @param configs The sorted configs used for this workflow
      * @return the created, saved but not flushed WorkflowRun
      */
-    WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, String name,
-                                 List<ExternalWorkflowConfigFragment> configs = []) {
+    WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<String> displayNameLines,
+                                 String shortName, List<ExternalWorkflowConfigFragment> configs = []) {
         String combinedConfig = configFragmentService.mergeSortedFragments(configs)
+        String displayName = StringUtils.generateMultiLineDisplayName(displayNameLines)
+
         return new WorkflowRun([
-                workDirectory : workDirectory,
-                state         : WorkflowRun.State.PENDING,
-                project       : project,
-                configs       : configs,
-                combinedConfig: combinedConfig,
-                priority      : priority,
-                restartedFrom : null,
-                omittedMessage: null,
-                workflowSteps : [],
-                workflow      : workflow,
-                displayName   : name,
+                workDirectory   : workDirectory,
+                state           : WorkflowRun.State.PENDING,
+                project         : project,
+                configs         : configs,
+                combinedConfig  : combinedConfig,
+                priority        : priority,
+                restartedFrom   : null,
+                omittedMessage  : null,
+                workflowSteps   : [],
+                workflow        : workflow,
+                displayName     : displayName,
+                shortDisplayName: shortName,
         ]).save(flush: false)
     }
 

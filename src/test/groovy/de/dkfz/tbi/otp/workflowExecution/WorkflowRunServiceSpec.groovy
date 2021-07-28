@@ -62,10 +62,11 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         SeqTrack seqTrack = createSeqTrack()
         Project project = createProject()
         String dir = "/tmp/baseDir${nextId}"
-        String name = "asdf"
+        List<String> multiLineName = ["asdf", "xyz"]
+        String shortName = "DI: asdf"
 
         when:
-        WorkflowRun run = service.buildWorkflowRun(workflow, seqTrack.processingPriority, dir, project, name)
+        WorkflowRun run = service.buildWorkflowRun(workflow, seqTrack.processingPriority, dir, project, multiLineName, shortName)
 
         then:
         run
@@ -77,7 +78,8 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         run.restartedFrom == null
         run.omittedMessage == null
         run.workflowSteps == []
-        run.displayName == name
+        run.displayName == multiLineName[0] + "\n" + multiLineName[1]
+        run.shortDisplayName == shortName
     }
 
     void 'markJobAsNotRestartableInSeparateTransaction, when call, then change mayJobRestarted to true'() {

@@ -569,4 +569,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2021/otp-1181-unique-constraint-for-processing-thresholds.groovy'
+
+    changeSet(author: "gabkol", id: "otp-1108-add-shortDisplayName-to-workflowRun") {
+        sqlFile(path: 'changelogs/2021/otp-1106-workflowRun-shortDisplayName.sql')
+    }
 }

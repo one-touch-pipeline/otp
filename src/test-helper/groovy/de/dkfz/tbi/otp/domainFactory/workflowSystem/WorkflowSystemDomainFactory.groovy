@@ -45,11 +45,12 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         return createDomainObject(WorkflowRun, [
-                workflow      : { properties.restartedFrom?.workflow ?: createWorkflow() },
-                priority      : { createProcessingPriority() },
-                project       : { createProject() },
-                displayName   : "displayName_${nextId}",
-                combinedConfig: "{},"
+                workflow        : { properties.restartedFrom?.workflow ?: createWorkflow() },
+                priority        : { createProcessingPriority() },
+                project         : { createProject() },
+                displayName     : "displayName_${nextId}",
+                shortDisplayName: "shortName_${nextId}",
+                combinedConfig  : "{},"
         ], properties)
     }
 

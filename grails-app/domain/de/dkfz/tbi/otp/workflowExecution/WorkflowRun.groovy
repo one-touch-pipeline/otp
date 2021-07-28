@@ -75,6 +75,8 @@ class WorkflowRun implements Commentable, Entity {
 
     String displayName
 
+    String shortDisplayName
+
     /**
      * Flag to indicate, whether restarting a job can cause problems.
      *
@@ -112,6 +114,7 @@ class WorkflowRun implements Commentable, Entity {
         omittedMessage nullable: true
         comment nullable: true
         displayName blank: false, nullable: false
+        shortDisplayName blank: false, nullable: false
     }
 
     static mapping = {
@@ -166,11 +169,11 @@ class WorkflowRun implements Commentable, Entity {
     }
 
     String displayInfo() {
-        return "workflowRun ${id} ${displayName} in state ${state} for ${workflow.displayName}"
+        return "workflowRun ${id} ${shortDisplayName} in state ${state} for ${workflow.displayName}"
     }
 
     @Override
     String toString() {
-        return "workflowRun ${id} ${displayName} in state ${state}"
+        return "workflowRun ${id} ${shortDisplayName} in state ${state}"
     }
 }

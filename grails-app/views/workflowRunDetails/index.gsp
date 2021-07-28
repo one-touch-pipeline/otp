@@ -22,64 +22,22 @@
 <%@ page import="de.dkfz.tbi.otp.workflowExecution.WorkflowRun" %>
 <html>
 <head>
-    <title>${g.message(code: "workflowRun.details.title")} ${workflowRun.displayName}</title>
+    <title>${g.message(code: "workflowRun.details.title")} (${workflowRun.id})</title>
     <asset:javascript src="pages/workflowRunList/common.js"/>
     <asset:javascript src="pages/workflowRunDetails/index.js"/>
     <asset:javascript src="common/CommentBox.js"/>
 </head>
 
 <body>
-<div class="body">
-    <div class="container-fluid">
-    <div class="row">
-        <div class="col-7">
-            <h1><div id="statusDot" title="${workflowRun.state}" data-status="${workflowRun.state}" style="display: inline-block"></div> ${g.message(code: "workflowRun.details.title")} ${workflowRun.displayName}</h1>
-            <g:form method="POST">
-                <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
-                <input type="hidden" name="redirect" value="${uriWithParams}"/>
-                <div class="btn-group">
-                    <button class="btn btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
-                            formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
-                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailed")}
-                    </button>
-                    <button class="btn btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
-                            formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
-                        <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
-                    </button>
-                </div>
-            </g:form>
-
-            <p>
-            <div>
-                <g:if test="${workflowRun.restartCount == 1}">
-                    ${g.message(code: "workflowRun.details.restartedFrom")} <g:link id="${workflowRun.restartedFrom.id}">${workflowRun.restartedFrom.displayName}</g:link>
-                </g:if>
-                <g:elseif test="${workflowRun.restartCount > 1}">
-                    ${g.message(code: "workflowRun.details.restartedFromMultiple", args: [workflowRun.restartCount])}
-                    <g:link id="${workflowRun.restartedFrom.id}">${workflowRun.restartedFrom.displayName}</g:link>
-                    ${g.message(code: "workflowRun.details.restartedFromMultipleOriginally")}
-                    <g:link id="${workflowRun.originalRestartedFrom.id}">${workflowRun.originalRestartedFrom.displayName}</g:link>
-                </g:elseif>
-            </div>
-            <div>
-                <g:if test="${restartedAs}">
-                    ${g.message(code: "workflowRun.details.restartedAs")} <g:link id="${restartedAs.id}">${restartedAs.displayName}</g:link>
-                </g:if>
-            </div>
-            <div>
-                ${workflowRun.state.description}
-            </div>
-            <div>
-                <g:if test="${workflowRun.omittedMessage}">
-                    ${g.message(code: "workflowRun.details.omitted", args: [workflowRun.omittedMessage?.category, workflowRun.omittedMessage?.message])}
-                </g:if>
-            </div>
-            </p>
-
+<div class="container-fluid otp-main-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div id="statusDot" title="${workflowRun.state}" data-status="${workflowRun.state}" class="d-inline-block"></div>
+            <span class="d-inline-flex align-top">
+                ${g.message(code: "workflowRun.details.title")} (${workflowRun.id}) ${g.message(code: "workflowRun.details.of")} ${workflowRun.workflow.name}
+            </span>
         </div>
-
-        <div class="col-1">
-            <div class="btn-group">
+        <div class="btn-group">
             <g:if test="${previous}">
                 <g:link class="btn btn-primary" action="index" id="${previous.id}" params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
                     <i title="${g.message(code: "workflowRun.details.previous")}" class='bi-caret-left'></i>
@@ -96,30 +54,71 @@
             <g:else>
                 <button class="btn btn-primary" disabled><i title="${g.message(code: "workflowRun.details.next")}" class='bi-caret-right'></i></button>
             </g:else>
+        </div>
+    </nav>
+
+    <div class="dropdown-divider"></div>
+
+    <div class="row">
+        <div class="col">
+            ${raw(workflowRun.displayName.replace("\n", "<br>"))}
+            <p></p>
+            <g:form method="POST">
+                <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
+                <input type="hidden" name="redirect" value="${uriWithParams}"/>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
+                            formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
+                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailed")}
+                    </button>
+                    <button class="btn btn-sm btn-primary" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
+                            formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
+                        <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
+                    </button>
+                </div>
+            </g:form>
+
+            <g:if test="${workflowRun.restartCount == 1}">
+                <p>${g.message(code: "workflowRun.details.restartedFrom")} <g:link id="${workflowRun.restartedFrom.id}">
+                    ${workflowRun.restartedFrom.id}</g:link>.</p>
+            </g:if>
+            <g:elseif test="${workflowRun.restartCount > 1}">
+                <p>${g.message(code: "workflowRun.details.restartedFromMultiple", args: [workflowRun.restartCount])} <g:link id="${workflowRun.restartedFrom.id}">
+                    ${workflowRun.restartedFrom.id}</g:link>${g.message(code: "workflowRun.details.restartedFromMultipleOriginally")}
+                    <g:link id="${workflowRun.originalRestartedFrom.id}">${workflowRun.originalRestartedFrom.id}</g:link>.</p>
+            </g:elseif>
+
+            <g:if test="${restartedAs}">
+                <p>${g.message(code: "workflowRun.details.restartedAs")} <g:link id="${restartedAs.id}">${restartedAs.id}</g:link>.<p>
+            </g:if>
+
+            <p>${workflowRun.state.description}</p>
+
+            <g:if test="${workflowRun.omittedMessage}">
+                <p>${g.message(code: "workflowRun.details.omitted", args: [workflowRun.omittedMessage?.category, workflowRun.omittedMessage?.message])}</p>
+            </g:if>
+
+        </div>
+
+        <div class="col">
+            <div class="float-right">
+                <g:render template="/templates/commentBox" model="[
+                        commentable     : workflowRun,
+                        targetController: 'workflowRunDetails',
+                        targetAction    : 'saveComment',
+                        cols            : 40,
+                ]"/>
             </div>
         </div>
-
-        <div class="col-4">
-            <g:render template="/templates/commentBox" model="[
-                    commentable     : workflowRun,
-                    targetController: 'workflowRunDetails',
-                    targetAction    : 'saveComment',
-                    cols            : 40,
-            ]"/>
-        </div>
-    </div>
     </div>
 
-    <br>
     <h2>${g.message(code: "workflowRun.details.steps")}</h2>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-auto mr-auto"></div>
-            <div class="col-auto">
 
-            </div>
+    <g:if test="${workflowRun.state == WorkflowRun.State.RUNNING_WES}">
+        <div class="alert alert-primary" role="alert">
+            Workflow is running in WES.
         </div>
-    </div>
+    </g:if>
 
     <table id="steps" class="table-sm table-striped table-hover" data-id="${workflowRun.id}">
         <thead>
@@ -138,26 +137,30 @@
     </table>
 
     <br>
-    <h2>${g.message(code: "workflowRun.details.inputOutput")}</h2>
-    <h3>${g.message(code: "workflowRun.details.input")}</h3>
-    <ul>
-        <g:each in="${workflowRun.inputArtefacts}" var="artefact">
-            <li>${artefact.key}: <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">${artefact.value.displayName}</g:link></li>
-        </g:each>
-        <g:if test="${!workflowRun.inputArtefacts}">
-            ${g.message(code: "workflowRun.details.none")}
-        </g:if>
-    </ul>
-    <h3>${g.message(code: "workflowRun.details.output")}</h3>
-    <ul>
-        <g:each in="${workflowRun.outputArtefacts}" var="artefact">
-            <li>${artefact.key}: <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">${artefact.value.displayName}</g:link></li>
-        </g:each>
-        <g:if test="${!workflowRun.outputArtefacts}">
-            ${g.message(code: "workflowRun.details.none")}
-        </g:if>
-    </ul>
-</div>
 
+    <h2>${g.message(code: "workflowRun.details.input")}</h2>
+    <g:each in="${workflowRun.inputArtefacts}" var="artefact" status="index">
+        <div class="alert alert-secondary">
+            <b>${artefact.key}:</b><br>
+            <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
+                ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
+        </div>
+    </g:each>
+    <g:if test="${!workflowRun.inputArtefacts}">
+        ${g.message(code: "workflowRun.details.no.input")}
+    </g:if>
+
+    <h2>${g.message(code: "workflowRun.details.output")}</h2>
+    <g:each in="${workflowRun.outputArtefacts}" var="artefact" status="index">
+        <div class="alert alert-secondary">
+            <b>${artefact.key}:</b><br>
+            <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
+                ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
+        </div>
+    </g:each>
+    <g:if test="${!workflowRun.outputArtefacts}">
+        ${g.message(code: "workflowRun.details.no.output")}
+    </g:if>
+</div>
 </body>
 </html>

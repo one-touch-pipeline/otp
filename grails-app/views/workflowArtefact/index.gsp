@@ -23,68 +23,81 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <asset:stylesheet src="pages/workflowArtefact/index/styles.less"/>
     <asset:javascript src="pages/workflowRunList/common.js"/>
-    <title><g:message code="workflowArtefact.title" args="[artefact?.displayName ?: 'Artefact']"/></title>
+    <title><g:message code="workflowArtefact.title" args="[artefact.id.toString()]"/></title>
 </head>
 
 <body>
-    <div class="body">
-        <sec:access expression="hasRole('ROLE_OPERATOR')">
-            <g:render template="/templates/messages"/>
+<div class="container-fluid otp-main-container">
+    <sec:access expression="hasRole('ROLE_OPERATOR')">
+        <g:render template="/templates/messages"/>
+        <g:if test="${artefact}">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <div id="statusDot" title="${artefact.state}" data-status="${artefact.state}" class="d-inline-block"></div>
+                    <span class="d-inline-flex align-top"><g:message code="workflowArtefact.title" args="[artefact.id.toString()]"/></span>
+                </div>
+            </nav>
 
-            <div class="container-fluid">
-                <g:if test="${artefact}">
-                    <h1><div id="statusDot" title="${artefact.state}" data-status="${artefact.state}" style="display: inline-block"></div> ${artefact.displayName}</h1>
+            <div class="dropdown-divider"></div>
 
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.project"/>:</li>
-                        <li class="list-group-item flex-fill">${artefact.project.name}</li>
-                    </ul>
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.pid"/>:</li>
-                        <li class="list-group-item flex-fill">${artefact.individual.pid}</li>
-                    </ul>
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.seqtype"/>:</li>
-                        <li class="list-group-item flex-fill">${artefact.seqType}</li>
-                    </ul>
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.producedBy"/>:</li>
-                        <li class="list-group-item flex-fill">
-                            <g:if test="${artefact.producedBy}">
-                                <g:link controller="workflowRunDetails" action="index" id="${artefact.producedBy.id}">${artefact.producedBy.displayName} (${artefact.producedBy.id})</g:link>
+            ${raw(artefact.displayName.replace("\n", "<br>"))}
+
+            <ul class="list-group list-group-horizontal mt-2">
+                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.project"/>:</li>
+                <li class="list-group-item flex-fill">${artefact.project.name}</li>
+            </ul>
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.pid"/>:</li>
+                <li class="list-group-item flex-fill">${artefact.individual.pid}</li>
+            </ul>
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.seqtype"/>:</li>
+                <li class="list-group-item flex-fill">${artefact.seqType}</li>
+            </ul>
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.producedBy"/>:</li>
+                <li class="list-group-item flex-fill">
+                    <g:if test="${artefact.producedBy}">
+                        <g:message code="workflowArtefact.title.workflowRun"/> ${artefact.producedBy.id}<br>
+                        <g:link controller="workflowRunDetails" action="index"
+                                id="${artefact.producedBy.id}">${raw(artefact.producedBy.displayName.replace("\n", "<br>"))}</g:link>
+                    </g:if>
+                </li>
+            </ul>
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.outputRole"/>:</li>
+                <li class="list-group-item flex-fill">${artefact.outputRole}</li>
+            </ul>
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.usedBy"/>:</li>
+                <li class="list-group-item flex-fill">
+                    <g:each in="${artefactUsedBy}">
+                        <div class="workflow-artefacts-used-by-col">
+                            <g:link controller="workflowRunDetails" action="index" id="${it.id}">${raw(it.workflowRun.displayName.replace("\n", "<br>"))}</g:link> <g:message
+                                    code="workflowArtefact.as"/> ${it.role}<br>
+                            <p class="mt-2"><g:message code="workflowArtefact.outputs"/>:</p>
+                            <g:if test="${it.workflowRun.outputArtefacts.isEmpty()}">
+                                <i>--<g:message code="workflowArtefact.noOutputs"/>--</i>
                             </g:if>
-                        </li>
-                    </ul>
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.outputRole"/>:</li>
-                        <li class="list-group-item flex-fill">${artefact.outputRole}</li>
-                    </ul>
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.usedBy"/>:</li>
-                        <li class="list-group-item flex-fill">
-                            <g:each in="${artefactUsedBy}">
-                                <div class="workflow-artefacts-used-by-col">
-                                    <g:link controller="workflowRunDetails" action="index" id="${it.id}">${it.workflowRun.displayName}</g:link> <g:message code="workflowArtefact.as"/> ${it.role}<br>
-                                    <g:message code="workflowArtefact.outputs"/>:
-                                    <g:if test="${it.workflowRun.outputArtefacts.isEmpty()}">
-                                        <i>--<g:message code="workflowArtefact.noOutputs"/>--</i>
-                                    </g:if>
-                                    <div class="workflow-artefacts-outputs">
-                                        <g:each status="index" in="${it.workflowRun.outputArtefacts}" var="output">
-                                            <g:link controller="workflowArtefact" action="index" id="${output.value.properties.id}">${output.value.properties.displayName}</g:link>
-                                            <g:if test="${it.workflowRun.outputArtefacts.size() - 1 != index}">,</g:if>
-                                        </g:each>
-                                    </div>
+                            <ul class="list-group list-group-horizontal">
+                                <div class="workflow-artefacts-outputs">
+                                    <g:each status="index" in="${it.workflowRun.outputArtefacts}" var="output">
+                                        <li class="list-group-item">
+                                            <g:link controller="workflowArtefact" action="index"
+                                                    id="${output.value.properties.id}">${raw(output.value.properties.displayName.replace("\n", "<br>"))}</g:link>
+                                        </li>
+                                    </g:each>
                                 </div>
-                            </g:each>
-                        </li>
-                    </ul>
-                </g:if>
-            </div>
-        </sec:access>
-    </div>
+                            </ul>
+                        </div>
+                    </g:each>
+                </li>
+            </ul>
+        </g:if>
+    </sec:access>
+</div>
 </body>
 </html>

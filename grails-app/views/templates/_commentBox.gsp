@@ -24,23 +24,27 @@
 To be used in conjunction with: common/CommentBox.js
 --}%
 
-<div id="comment-box-container">
+<div id="comment-box-container" class="card">
     <g:set var="comment" value="${commentable?.comment}"/>
     <input type="hidden" id="entity-id" name="entityId" value="${commentable?.id}">
 
-    <div><strong><g:message code="commentBox.header"/>:</strong></div>
-    <div>
+    <div class="card-body p-2">
+        <strong><g:message code="commentBox.header"/>:</strong>
         <sec:ifNotGranted roles="ROLE_OPERATOR">
-            <textarea id="comment-content" rows="${rows ?: 5}" cols="${cols ?: 80}" readonly>${comment?.comment}</textarea>
+            <textarea id="comment-content" class="form-control" rows="${rows ?: 5}" cols="${cols ?: 80}" readonly>${comment?.comment}</textarea>
         </sec:ifNotGranted>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <textarea id="comment-content" rows="${rows ?: 5}" cols="${cols ?: 80}">${comment?.comment}</textarea>
+            <textarea id="comment-content" class="form-control" rows="${rows ?: 5}" cols="${cols ?: 80}">${comment?.comment}</textarea>
         </sec:ifAllGranted>
     </div>
     <sec:ifAllGranted roles="ROLE_OPERATOR">
-        <div>
-            <button id="button-save" class="btn btn-primary" data-controller="${targetController}" data-action="${targetAction}" disabled><g:message code="commentBox.save"/></button>
-            <button id="button-cancel" class="btn btn-primary" disabled><g:message code="commentBox.cancel"/></button>
+        <div class="card-footer">
+            <button id="button-save" class="btn btn-sm btn-primary float-right ml-1" data-controller="${targetController}" data-action="${targetAction}" type="button" disabled>
+                <g:message code="commentBox.save"/>
+            </button>
+            <button id="button-cancel" class="btn btn-sm btn-secondary float-right" type="button" disabled>
+                <g:message code="commentBox.cancel"/>
+            </button>
             <span id="authorSpan">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')} ${comment?.author}</span>
         </div>
     </sec:ifAllGranted>

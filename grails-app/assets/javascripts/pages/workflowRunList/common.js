@@ -31,7 +31,8 @@ var statusToClassName = function (status) {
         case "CREATED":
             return "dot grey";
         case "RUNNING_WES":
-            return "sm-loader grey";
+            return "sm-loader darkgreen";
+        case "PLANNED_OR_RUNNING":
         case "RUNNING":
         case "RUNNING_OTP":
         case "CHECKING":
@@ -59,5 +60,7 @@ var button = function (action, value, title, buttonsDisabled, icon) {
 };
 
 $(function () {
-    $("#statusDot").addClass(statusToClassName($("#statusDot").data("status")));
+    const statusDot = $('#statusDot');
+    statusDot.addClass(statusToClassName(statusDot.data("status")));
+    statusDot.tooltip();
 })

@@ -31,8 +31,8 @@ import de.dkfz.tbi.otp.utils.DataTablesCommand
 class WorkflowRunListController extends AbstractWorkflowRunController {
 
     static allowedMethods = [
-            index         : "GET",
-            data          : "GET",
+            index: "GET",
+            data : "GET",
     ]
 
     Map index(RunShowCommand cmd) {
@@ -41,10 +41,10 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         }
 
         return [
-                cmd: cmd,
+                cmd      : cmd,
                 workflows: workflows,
-                states: WorkflowRunOverviewController.STATES,
-                columns: Column.values(),
+                states   : WorkflowRunOverviewController.STATES,
+                columns  : Column.values(),
         ]
     }
 
@@ -80,7 +80,8 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
                     stateDesc  : r.state.description,
                     comment    : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
                     workflow   : r.workflow.toString(),
-                    name       : r.displayName,
+                    displayName: r.displayName,
+                    shortName  : r.shortDisplayName,
                     dateCreated: r.dateCreated,
                     lastUpdated: lastStep?.lastUpdated,
                     duration   : duration,
@@ -144,6 +145,7 @@ class RunShowCommand {
 
 class RunDataShowCommand extends DataTablesCommand {
     Workflow workflow
+
     void setState(String state) {
         states = state.split(",").collect { WorkflowRun.State.valueOf(it) }
     }

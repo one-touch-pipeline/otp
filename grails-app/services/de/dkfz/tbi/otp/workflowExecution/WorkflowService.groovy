@@ -41,6 +41,7 @@ class WorkflowService {
                 priority: step.workflowRun.priority,
                 project: step.workflowRun.project,
                 displayName: step.workflowRun.displayName,
+                shortDisplayName: step.workflowRun.shortDisplayName,
                 combinedConfig: step.workflowRun.combinedConfig,
                 restartedFrom: step.workflowRun,
         ).save(flush: true)

@@ -26,6 +26,7 @@ import groovy.transform.Canonical
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.StringUtils
 
 @Transactional
 class WorkflowArtefactService {
@@ -36,14 +37,12 @@ class WorkflowArtefactService {
      * The command creates a WorkflowArtefact with all the given parameter, save it in hibernate but do not flush it the database to improve the performance.
      * Therefore it is necessary to do somewhere later in the transaction a <b> flush </b> to get it in the database.
      *
-     * @param run The workflowRun this artefact s produced by or null if it is an initial artefact
-     * @param role The role this artefact is produced by or null if it is an initial artefact
-     * @param individual The Individual the artefact is connect by
-     * @param seqType The SeqType the artefact is connect by
-     * @param name A name for the artefact. It is used in the GUI to show and also for filtering
+     * @param values as wrapper for workflow artefact properties
      * @return the created, saved but not flushed WorkflowArtefact
      */
     WorkflowArtefact buildWorkflowArtefact(WorkflowArtefactValues values) {
+        String displayName = StringUtils.generateMultiLineDisplayName(values.displayNameLines)
+
         return new WorkflowArtefact([
                 producedBy      : values.run,
                 outputRole      : values.role,
@@ -53,7 +52,7 @@ class WorkflowArtefactService {
                 artefactType    : values.artefactType,
                 individual      : values.individual,
                 seqType         : values.seqType,
-                displayName     : values.name,
+                displayName     : displayName,
         ]).save(flush: false)
     }
 }
@@ -65,5 +64,5 @@ class WorkflowArtefactValues {
     ArtefactType artefactType
     Individual individual
     SeqType seqType
-    String name
+    List<String> displayNameLines
 }

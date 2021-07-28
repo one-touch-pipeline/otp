@@ -27,78 +27,80 @@
 </head>
 
 <body>
-<div class="body">
-    <h1>${g.message(code: "workflowRun.list.title")}</h1>
+<div class="container-fluid otp-main-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <i class="bi bi-card-list"></i>
+            <span class="d-inline-flex align-top">${g.message(code: "workflowRun.list.title")}</span>
+        </div>
+    </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm">
-                <table class="table-sm table-striped table-hover key-value-table key-input">
-                    <tr>
-                        <td><label for="workflow">${g.message(code: "workflowRun.list.workflow")}</label></td>
-                        <td><g:select id="workflow" name="workflow.id" from="${workflows}" optionKey="id" value="${cmd?.workflow?.id}"
-                                      noSelection="['': g.message(code: 'workflowRun.list.all')]" class="use-select-2" autocomplete="off"/></td>
-                    </tr>
-                    <tr>
-                        <td><label for="state">${g.message(code: "workflowRun.list.state")}</label></td>
-                        <td>
-                            <select id="state" class="use-select-2" autocomplete="off">
-                                <option value="">${g.message(code: "workflowRun.list.all")}</option>
-                                <g:each in="${states}" var="s">
-                                    <option value="${s.value.join(",")}" ${cmd?.state == s.value.join(",") ? "selected" : ""}>${s.key}</option>
-                                    <g:each in="${s.value}" var="state">
-                                        <option value="${state}" ${cmd?.state == state.name() ? "selected" : ""}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${state}</option>
-                                    </g:each>
+    <div class="dropdown-divider"></div>
+
+    <div class="row">
+        <div class="col-sm">
+            <table class="table-sm table-striped table-hover key-value-table key-input">
+                <tr>
+                    <td><label for="workflow">${g.message(code: "workflowRun.list.workflow")}</label></td>
+                    <td><g:select id="workflow" name="workflow.id" from="${workflows}" optionKey="id" value="${cmd?.workflow?.id}"
+                                  noSelection="['': g.message(code: 'workflowRun.list.all')]" class="use-select-2" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td><label for="state">${g.message(code: "workflowRun.list.state")}</label></td>
+                    <td>
+                        <select id="state" class="use-select-2" autocomplete="off">
+                            <option value="">${g.message(code: "workflowRun.list.all")}</option>
+                            <g:each in="${states}" var="s">
+                                <option value="${s.value.join(",")}" ${cmd?.state == s.value.join(",") ? "selected" : ""}>${s.key}</option>
+                                <g:each in="${s.value}" var="state">
+                                    <option value="${state}" ${cmd?.state == state.name() ? "selected" : ""}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${state}</option>
                                 </g:each>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label for="name">${g.message(code: "workflowRun.list.name")}</label></td>
-                        <td><input type="text" id="name" value="${cmd?.name}" autocomplete="off"/></td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="col-sm-1">
-            </div>
-
-            <div class="col-sm-5">
-                <table class="table-striped table-hover key-value-table key-input">
-                    <tr>
-                        <td>${g.message(code: "workflowRun.list.allRuns")}</td>
-                        <td id="allRuns"></td>
-                    </tr>
-                    <tr>
-                        <td>${g.message(code: "workflowRun.list.running")}</td>
-                        <td id="runningRuns"></td>
-                    </tr>
-                    <tr>
-                        <td>${g.message(code: "workflowRun.list.failed")}</td>
-                        <td id="failedRuns"></td>
-                    </tr>
-                </table>
-            </div>
+                            </g:each>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="name">${g.message(code: "workflowRun.list.name")}</label></td>
+                    <td><input type="text" id="name" value="${cmd?.name}" autocomplete="off"/></td>
+                </tr>
+            </table>
         </div>
 
-        <div class="row ">
-            <div class="col-auto mr-auto"></div>
-            <div class="col-auto">
-                %{-- using form because attribute "id" doesn't work in g:form --}%
-                <form method="POST" id="bulk">
-                    <div class="btn-group">
-                        <button class="btn btn-primary" formaction="${g.createLink(action: "setFailedFinal")}"
-                                title="${g.message(code: "workflowRun.list.setFailed")}"><i class="bi-file-earmark-x"></i></button>
-                        <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
-                                title="${g.message(code: "workflowRun.list.restartSteps")}"><i class="bi-reply"></i></button>
-                        <button class="btn btn-primary" formaction="${g.createLink(action: "restartRun")}"
-                                title="${g.message(code: "workflowRun.list.restartRuns")}"><i class="bi-reply-all"></i></button>
-                    </div>
-                </form>
-            </div>
+        <div class="col-sm">
+            <table class="table-striped table-hover key-value-table key-input">
+                <tr>
+                    <td>${g.message(code: "workflowRun.list.allRuns")}</td>
+                    <td id="allRuns"></td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "workflowRun.list.running")}</td>
+                    <td id="runningRuns"></td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "workflowRun.list.failed")}</td>
+                    <td id="failedRuns"></td>
+                </tr>
+            </table>
         </div>
     </div>
-    <br>
+
+    <div class="row ">
+        <div class="col-auto mr-auto"></div>
+
+        <div class="col-auto">
+            %{-- using form because attribute "id" doesn't work in g:form --}%
+            <form method="POST" id="bulk">
+                <div class="btn-group">
+                    <button class="btn btn-primary" formaction="${g.createLink(action: "setFailedFinal")}"
+                            title="${g.message(code: "workflowRun.list.setFailed")}"><i class="bi-file-earmark-x"></i></button>
+                    <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
+                            title="${g.message(code: "workflowRun.list.restartSteps")}"><i class="bi-reply"></i></button>
+                    <button class="btn btn-primary" formaction="${g.createLink(action: "restartRun")}"
+                            title="${g.message(code: "workflowRun.list.restartRuns")}"><i class="bi-reply-all"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <table id="runs" class="table-sm table-striped table-hover">
         <thead>

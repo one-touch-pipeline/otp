@@ -22,12 +22,24 @@
 <html>
 <head>
     <title>${g.message(code: "workflowRun.details.log")}</title>
+    <asset:javascript src="pages/workflowRunList/common.js"/>
 </head>
 
 <body>
-<div class="body">
-    <h1>${g.message(code: "workflowRun.details.log")} for <i>${step.beanName}</i> of
-        <g:link action="index" id="${step.workflowRun.id}"><i>${step.workflowRun.displayName}</i></g:link></h1>
+<div class="container-fluid otp-main-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div id="statusDot" title="${step.state}" data-status="${step.state}" class="d-inline-block"></div>
+            <span class="d-inline-flex align-top">${g.message(code: "workflowRun.details.log")} for ${step.beanName}</span>
+        </div>
+    </nav>
+
+    <div class="dropdown-divider"></div>
+
+    ${raw(step.workflowRun.displayName.replace("\n", "<br>"))}
+    <br>
+    <g:link action="index" id="${step.workflowRun.id}">${g.message(code: "workflowRun.details.log.back.link")}</g:link>
+
     <g:each in="${messages}" var="message">
         <hr>
         <pre>${message}</pre>
@@ -37,6 +49,5 @@
         <pre>${g.message(code: "workflowRun.details.log.none")}</pre>
     </g:if>
 </div>
-
 </body>
 </html>

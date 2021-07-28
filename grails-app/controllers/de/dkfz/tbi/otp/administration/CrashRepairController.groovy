@@ -84,6 +84,7 @@ class CrashRepairController implements CheckAndCall {
                 property("lastUpdated", "lastUpdated")
                 property("run.id", "workflowRunId")
                 property("run.displayName", "workflowRunName")
+                property("run.shortDisplayName", "workflowRunShortName")
                 property("run.jobCanBeRestarted", "workflowRunJobCanBeRestarted")
                 property("wf.id", "workflowId")
                 property("wf.name", "workflowName")
