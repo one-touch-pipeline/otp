@@ -109,7 +109,7 @@ $(function () {
             {data: "qcStatusOnly", visible: false},
             {data: "qcComment", visible: false},
             {data: "qcAuthor", visible: false},
-            {data: "dbVersion", visible: false},
+            {data: "dbVersion", visible: false, className: "no_csv_export"},
         ];
 
         // coverage

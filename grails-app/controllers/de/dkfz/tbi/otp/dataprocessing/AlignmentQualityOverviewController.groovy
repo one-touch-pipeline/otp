@@ -69,6 +69,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.qcStatus',
             'alignment.quality.qcComment',
             'alignment.quality.qcAuthor',
+            'alignment.quality.dbVersion',
     ].asImmutable()
 
     private static final List<String> HEADER_WHOLE_GENOME = HEADER_COMMON + [
