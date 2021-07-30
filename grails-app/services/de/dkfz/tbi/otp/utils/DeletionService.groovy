@@ -25,8 +25,6 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FileNotFoundException
-import de.dkfz.tbi.otp.dataswap.DataSwapService
-import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -34,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataswap.DataSwapService
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -41,6 +40,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
@@ -376,6 +376,7 @@ class DeletionService {
                 mergingWorkPackage.delete(flush: true)
             }
         }
+
         // for SingleCellBamFiles
         List<SingleCellBamFile> singleCellBamFiles = SingleCellBamFile.createCriteria().list {
             seqTracks {
@@ -396,6 +397,16 @@ class DeletionService {
             if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
                 crmwp.delete(flush: true)
             }
+        }
+
+        List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
+            seqTracks {
+                eq('id', seqTrack.id)
+            }
+        }
+        mergingWorkPackages.each {
+            SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it, it)*.delete()
+            it.delete(flush: true)
         }
 
         return ["dirsToDelete"             : dirsToDelete,

@@ -28,6 +28,10 @@ import de.dkfz.tbi.otp.project.Project
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 
+/**
+ * @Deprecated use the domain factories instead
+ */
+@Deprecated
 class TestData {
 
     final static ARBITRARY_LENGTH_FOR_REFERENCE_GENOME = 100

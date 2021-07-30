@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
@@ -42,14 +43,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.dta.DataTransfer
-import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
-import de.dkfz.tbi.otp.project.dta.DataTransferAgreementDocument
-import de.dkfz.tbi.otp.project.dta.DataTransferDocument
-import de.dkfz.tbi.otp.workflowExecution.ActiveProjectWorkflow
-import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
-import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.project.dta.*
+import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
 @Integration
@@ -497,5 +492,27 @@ rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqT
         then:
         ExternalWorkflowConfigSelector.count == 1
         !selector.projects.contains(project)
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, when seqTrack assigned to mergingWorkPackage with is assigned to SamplePair but no bam file exist"() {
+        given:
+        setupData()
+        SeqTrack seqTrack1 = createSeqTrack()
+        SeqTrack seqTrack2 = createSeqTrack()
+        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage([
+                seqTracks: [seqTrack1, seqTrack2] as Set,
+        ])
+        DomainFactory.createSamplePair([
+                mergingWorkPackage1: mergingWorkPackage,
+        ])
+        assert MergingWorkPackage.count() == 2
+        assert SamplePair.count() == 1
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack1)
+
+        then:
+        MergingWorkPackage.count() == 1
+        SamplePair.count() == 0
     }
 }
