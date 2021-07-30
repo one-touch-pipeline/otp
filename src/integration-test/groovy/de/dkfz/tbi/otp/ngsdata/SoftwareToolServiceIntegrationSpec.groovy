@@ -217,4 +217,23 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         then:
         result == SoftwareToolIdentifier.findBySoftwareToolAndName(softwareTool, alias)
     }
+
+    void "test createSoftwareToolIdentifier, create a software tool identifier with underscore"() {
+        given:
+        createUserAndRoles()
+        String alias = "Test 123"
+        String alias2 = "Test_123"
+        SoftwareTool softwareTool = createSoftwareTool()
+
+        SoftwareToolIdentifier result
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            softwareToolService.createSoftwareToolIdentifier(softwareTool, alias)
+            result = softwareToolService.createSoftwareToolIdentifier(softwareTool, alias2)
+        }
+
+        then:
+        result == SoftwareToolIdentifier.findBySoftwareToolAndName(softwareTool, alias2)
+    }
 }

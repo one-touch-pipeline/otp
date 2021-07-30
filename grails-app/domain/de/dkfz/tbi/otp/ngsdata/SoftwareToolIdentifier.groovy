@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
@@ -36,7 +37,7 @@ class SoftwareToolIdentifier implements Entity {
 
     static constraints = {
         name blank: false, validator: { val, obj ->
-            if (SoftwareToolIdentifier.findByNameIlike(val)) {
+            if (SoftwareToolIdentifier.findByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val))) {
                 return 'default.not.unique.message'
             }
         }

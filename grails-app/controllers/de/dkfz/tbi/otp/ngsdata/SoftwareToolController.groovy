@@ -47,7 +47,7 @@ class SoftwareToolController {
     }
 
     def createSoftwareTool(CreateSoftwareToolCommand cmd) {
-        Errors errors = softwareToolService.createSoftwareTool(cmd.programName, cmd.programVersion, SoftwareTool.Type.BASECALLING)
+        Errors errors = softwareToolService.createSoftwareTool(cmd.programName.trim(), cmd.programVersion.trim(), SoftwareTool.Type.BASECALLING)
         if (errors) {
             flash.message = new FlashMessage(g.message(code:  "softwareTool.list.error") as String, errors)
             flash.cmd = cmd
@@ -67,7 +67,7 @@ class SoftwareToolController {
             render data as JSON
             return
         }
-        Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value)]
+        Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value.trim())]
         render data as JSON
     }
 
@@ -81,7 +81,7 @@ class SoftwareToolController {
             render data as JSON
             return
         }
-        Map data = [success: true, softwareToolIdentifier: softwareToolService.updateSoftwareToolIdentifier(cmd.id, cmd.value)]
+        Map data = [success: true, softwareToolIdentifier: softwareToolService.updateSoftwareToolIdentifier(cmd.id, cmd.value.trim())]
         render data as JSON
     }
 
@@ -96,7 +96,7 @@ class SoftwareToolController {
             return
         }
         SoftwareTool softwareTool = softwareToolService.getSoftwareTool(cmd.id)
-        Map data = [success: true, softwareToolIdentifier: softwareToolService.createSoftwareToolIdentifier(softwareTool, cmd.value)]
+        Map data = [success: true, softwareToolIdentifier: softwareToolService.createSoftwareToolIdentifier(softwareTool, cmd.value.trim())]
         render data as JSON
     }
 }
