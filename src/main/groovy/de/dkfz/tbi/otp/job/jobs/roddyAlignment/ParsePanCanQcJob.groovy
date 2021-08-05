@@ -28,6 +28,10 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyQualityAssessment
 
+/**
+ * @deprecated: job of the old workflow system
+ */
+@Deprecated
 @Component
 @Scope("prototype")
 @Slf4j
