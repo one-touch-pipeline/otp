@@ -39,14 +39,18 @@ class UserCreatingUserDetailsService extends GormUserDetailsService {
     GrailsApplication grailsApplication
 
     @Override
-    @Transactional(readOnly=false, noRollbackFor=[IllegalArgumentException, UsernameNotFoundException])
+    @Transactional(readOnly = false, noRollbackFor = [IllegalArgumentException, UsernameNotFoundException])
     UserDetails loadUserByUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
+        loadUserByCaseInsensitiveUsername(username.toLowerCase(), loadRoles)
+    }
+
+    private UserDetails loadUserByCaseInsensitiveUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (!user) {
             LdapUserDetails ldapUserDetails = grailsApplication.mainContext.ldapService.getLdapUserDetailsByUsername(username)
             if (!ldapUserDetails || !ldapUserDetails.mail) {
                 throw new FailedToCreateUserException("There is a problem with your account. Please contact " +
-                    "${grailsApplication.mainContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")
+                "${grailsApplication.mainContext.processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)}.")
             }
             user = grailsApplication.mainContext.userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
         }

@@ -97,9 +97,10 @@ grails.exceptionresolver.params.exclude = ['password']
 
 
 // Added by the Spring Security Core plugin:
-grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
-grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
 grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
+grails.plugin.springsecurity.userLookup.usernameIgnoreCase = true
 
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [

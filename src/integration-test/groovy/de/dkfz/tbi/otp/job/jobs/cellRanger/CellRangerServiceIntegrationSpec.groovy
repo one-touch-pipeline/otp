@@ -58,6 +58,8 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
     File metricsSummaryFile
     File webSummaryFile
 
+    static final String USERNAME = "projectuser"
+
     void setupData() {
         createUserAndRoles()
         cellRangerService = new CellRangerService()
@@ -128,7 +130,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         setupData()
         String content = ""
         webSummaryFile = CreateFileHelper.createFile(singleCellBamFile.webSummaryResultFile, "content")
-        if (username == "projectUser") {
+        if (username == USERNAME) {
             User user = DomainFactory.createUser(username: username)
             addUserWithReadAccessToProject(user, singleCellBamFile.project)
         }
@@ -142,7 +144,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         content == "content"
 
         where:
-        username << [OPERATOR, "projectUser"]
+        username << [OPERATOR, USERNAME]
     }
 
     void "getWebSummaryResultFileContent, file has to be readable"() {
