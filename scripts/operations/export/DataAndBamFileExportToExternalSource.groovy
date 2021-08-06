@@ -82,8 +82,11 @@ boolean getFileList = false
 //************ Select new unix group ************//
 String unixGroup = ""
 
-//************ Select if data goes external ************//
+//************ Select the permissions of the files. If true group can read/execute. If false group/others can read/execute************//
 boolean external = true
+
+//************ adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync************//
+boolean copyExternal = false
 
 //************ Select seq types ************//
 def seqTypesToCopy = [
@@ -137,9 +140,9 @@ if (external) {
     rsyncChmod = "Du=rwx,Dgo=rx,Fu=rw,Fog=r"
 }
 
-assert targetFolder.absolute : "targetOutputFolder is not an absolute path"
-assert seqTypesToCopy : "no seq type selected"
-assert unixGroup : "no group given"
+assert targetFolder.absolute: "targetOutputFolder is not an absolute path"
+assert seqTypesToCopy: "no seq type selected"
+assert unixGroup: "no group given"
 
 def addToOutput = { String s ->
     output.append("${s}\n")
@@ -147,6 +150,14 @@ def addToOutput = { String s ->
 
 def addToOutputList = { String s ->
     outputList.append("${s}\n")
+}
+
+def addCopyConnection = {
+    copyExternal ? "\${COPY_CONNECTION}" : ""
+}
+
+def addCopyTargetBase = {
+    copyExternal ? "\${COPY_TARGET_BASE}" : ""
 }
 
 if (!checkFileStatus) {
@@ -165,7 +176,7 @@ patients.split('\n')*.trim().findAll {
     if (checkFileStatus) {
         println "${pid}"
     } else {
-        addToOutput("mkdir -p ${targetFolderWithPid}")
+        addToOutput("mkdir -p ${addCopyTargetBase()}${targetFolderWithPid}")
     }
 
     if (copyFastqFiles) {
@@ -213,9 +224,10 @@ patients.split('\n')*.trim().findAll {
                                 lsdfFilesService.getFilePathInViewByPid(dataFile)
                         ).parent
                         addToOutput("echo ${currentFile}")
-                        addToOutput("mkdir -p ${targetFastqFolder}")
+                        addToOutput("mkdir -p ${addCopyTargetBase()}${targetFastqFolder}")
                         String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"
-                        addToOutput("rsync -uvpL --chmod=${rsyncChmod} ${search} ${targetFastqFolder}")
+                        addToOutput("rsync -uvpL --chmod=${rsyncChmod} ${addCopyConnection()}${search} ${addCopyTargetBase()}${targetFastqFolder}")
+
                         if (getFileList) {
                             addToOutputList("ls -l ${search}")
                         }
@@ -269,7 +281,6 @@ patients.split('\n')*.trim().findAll {
                 sourceBam = Paths.get(basePath.toString(), bamFile.bamFileName)
             }
 
-
             Path targetBamFolder = Paths.get(
                     targetFolderWithPid.toString(),
                     bamFile.seqType.dirName,
@@ -279,22 +290,22 @@ patients.split('\n')*.trim().findAll {
                 if (!checkFileStatus) {
                     if (bamFile.seqType == SeqTypeService.rnaPairedSeqType && copyAnalyses) {
                         addToOutput("echo ${basePath}")
-                        addToOutput("mkdir -p ${targetBamFolder}")
-                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=.* --chmod=${rsyncChmod} ${basePath} ${targetBamFolder}")
+                        addToOutput("mkdir -p ${addCopyTargetBase()}${targetBamFolder}")
+                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=.* --chmod=${rsyncChmod} ${addCopyConnection()}${basePath} ${addCopyTargetBase()}${targetBamFolder}")
                         if (getFileList) {
                             addToOutputList("ls -l --ignore=\"*roddyExec*\" ${basePath}")
                         }
                     } else {
                         addToOutput("echo ${sourceBam}")
-                        addToOutput("mkdir -p ${targetBamFolder}")
-                        addToOutput("rsync -uvpL --chmod=${rsyncChmod} ${sourceBam}* ${targetBamFolder}")
+                        addToOutput("mkdir -p ${addCopyTargetBase()}${targetBamFolder}")
+                        addToOutput("rsync -uvpL --chmod=${rsyncChmod} ${addCopyConnection}${sourceBam}* ${addCopyTargetBase()}${targetBamFolder}")
                         if (getFileList) {
                             addToOutputList("ls -l ${sourceBam}*")
                         }
                     }
                     if (qcFolder.toFile().exists()) {
                         addToOutput("echo ${qcFolder}")
-                        addToOutput("rsync -uvrpL --chmod=${rsyncChmod} ${qcFolder}* ${targetBamFolder}")
+                        addToOutput("rsync -uvrpL --chmod=${rsyncChmod} ${addCopyConnection()}${qcFolder}* ${addCopyTargetBase()}${targetBamFolder}")
                         if (getFileList) {
                             addToOutputList("ls -l ${qcFolder}*")
                         }
@@ -326,8 +337,8 @@ patients.split('\n')*.trim().findAll {
                         )
                         File instancePath = fileService.toFile(bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it))
                         addToOutput("echo ${instancePath}")
-                        addToOutput("mkdir -p ${resultFolder}")
-                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${instancePath} ${resultFolder}")
+                        addToOutput("mkdir -p ${addCopyTargetBase()}${resultFolder}")
+                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${addCopyConnection()}${instancePath} ${addCopyTargetBase()}${resultFolder}")
                         if (getFileList) {
                             addToOutputList("ls -l --ignore=\"*roddyExec*\" ${instancePath}")
                         }
@@ -348,7 +359,7 @@ patients.split('\n')*.trim().findAll {
     }
 }
 
-List<BamFilePairAnalysis> getBamFilePairAnalysis (List seqTypesToCopy, String pid, String instanceName, List sampleTypesHelper) {
+List<BamFilePairAnalysis> getBamFilePairAnalysis(List seqTypesToCopy, String pid, String instanceName, List sampleTypesHelper) {
     List<BamFilePairAnalysis> analyses = []
 
     SamplePair.withCriteria {
@@ -384,7 +395,6 @@ List<BamFilePairAnalysis> getBamFilePairAnalysis (List seqTypesToCopy, String pi
         }
     }
 
-
     if (analyses) {
         return analyses
     } else {
@@ -392,7 +402,7 @@ List<BamFilePairAnalysis> getBamFilePairAnalysis (List seqTypesToCopy, String pi
     }
 }
 
-List<SampleType> splitSampleType (String input) {
+List<SampleType> splitSampleType(String input) {
     return input.split('\n')*.trim().findAll {
         it && !it.startsWith('#')
     }.collect {
@@ -404,8 +414,8 @@ outputFile << output.toString()
 
 println "\nCreation script has been saved to ${outputFile}"
 
-println "\n----------- ${checkFileStatus? "to get an output script -> set checkFileStatus = false" : "output script"} -----------"
+println "\n----------- ${checkFileStatus ? "to get an output script -> set checkFileStatus = false" : "output script"} -----------"
 println output
 
-println "\n\n----------- ${!getFileList? "to get an output list -> set getFileList = true and checkFileStatus = false" : "output list"} -----------"
+println "\n\n----------- ${!getFileList ? "to get an output list -> set getFileList = true and checkFileStatus = false" : "output list"} -----------"
 println outputList
