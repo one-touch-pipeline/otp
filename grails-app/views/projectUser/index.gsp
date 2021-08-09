@@ -29,6 +29,7 @@
     <asset:javascript src="pages/projectUser/index/functions.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
+
 <body>
 <div class="container-fluid otp-main-container">
     <g:set var="sharesUnixGroup" value="${projectsOfUnixGroup.size() > 1}"/>
@@ -56,6 +57,7 @@
     </div>
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <h5><strong><g:message code="projectUser.addMember.action" args="[selectedProject?.name]"/></strong></h5>
+        <h6><strong><g:message code="projectUser.addMember.unix" args="[selectedProject?.unixGroup]"/></strong></h6>
         <otp:annotation type="info"><g:message code="projectUser.annotation.delayedFileAccessChanges"/></otp:annotation>
         <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject">
             <sec:access expression="hasRole('ROLE_OPERATOR')">
