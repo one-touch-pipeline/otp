@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.Pair
 
+import de.dkfz.tbi.util.TimeFormats
+
 import java.sql.Timestamp
 
 @Secured("hasRole('ROLE_ADMIN')")
@@ -62,6 +64,9 @@ class WorkflowRunOverviewController {
         Map<Pair<WorkflowRun.State, Workflow>, Long> runs = workflowRunOverviewService.numberOfRunsPerWorkflowAndState
         Map<Workflow, Timestamp> lastRuns = workflowRunOverviewService.lastRuns
         Map<Workflow, Timestamp> lastFails = workflowRunOverviewService.lastFailedRuns
+
+        lastRuns.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(it.value) }
+        lastFails.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(it.value) }
 
         return [
                 states   : STATES,

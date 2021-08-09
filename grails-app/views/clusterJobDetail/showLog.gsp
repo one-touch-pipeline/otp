@@ -25,7 +25,17 @@
 </head>
 
 <body>
-<div class="body">
+<div class="container-fluid otp-main-container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+            <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${nav.workflowRun?.id}">
+                ${g.message(code: "workflow.navigation.details")} (${nav.workflowRun?.id})</g:link>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.clusterLog")}</li>
+        </ol>
+    </nav>
+
     <h1>${g.message(code: "clusterJob.log")} (job ID <g:link action="show" id="${job.id}">${job.id}</g:link>)</h1>
         <g:if test="${job.oldSystem}">
             <g:link controller="processes" action="processingStep"
@@ -33,10 +43,6 @@
         </g:if>
         <g:else>
             ${job.workflowStep.beanName} of ${raw(job.workflowStep.workflowRun.displayName.replace("\n", "<br>"))}
-            <br>
-            <g:link controller="workflowRunDetails" action="index" id="${job.workflowStep.workflowRun.id}">
-                ${g.message(code: "workflowRun.details.log.back.link")}
-            </g:link>
         </g:else>
     <pre>${job.jobLog}</pre>
     <hr>

@@ -38,7 +38,7 @@ $(function () {
                     if (type === "sort") {
                         return row.state;
                     }
-                    return '<div title="' + row.state + ": " + row.stateDesc + '" class="' + statusToClassName(row.state) + '"></div>';
+                    return '<div title="' + row.state + ": " + row.stateDesc + '" class="' + statusToClassName(row.state) + ' small"></div>';
                 }
             },
             {

@@ -27,6 +27,16 @@
 
 <body>
 <div class="container-fluid otp-main-container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+            <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${step.workflowRun.id}">
+                ${g.message(code: "workflow.navigation.details")} (${step.workflowRun.id})</g:link>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.error")}</li>
+        </ol>
+    </nav>
+
     <nav class="navbar">
         <div class="navbar-brand">
             <div id="statusDot" title="${step.state}" data-status="${step.state}" class="d-inline-block"></div>
@@ -37,11 +47,13 @@
     <div class="dropdown-divider"></div>
 
     ${raw(step.workflowRun.displayName.replace("\n", "<br>"))}
-    <br>
-    <g:link action="index" id="${step.workflowRun.id}">${g.message(code: "workflowRun.details.log.back.link")}</g:link>
+
+    <div class="dropdown-divider"></div>
 
     <pre class="mt-3"><b>${step.workflowError.message}</b></pre>
-    <hr>
+
+    <div class="dropdown-divider"></div>
+
     <pre>${step.workflowError.stacktrace}</pre>
 </div>
 

@@ -102,7 +102,7 @@
         </div>
     </div>
 
-    <table id="runs" class="table-sm table-striped table-hover">
+    <table id="runs" class="table table-sm table-striped table-hover table-bordered w-100 fixed-table-header">
         <thead>
         <tr>
             <g:each in="${columns}" var="column" status="i">

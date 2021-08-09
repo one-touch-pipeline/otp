@@ -88,6 +88,27 @@ class TimeUtilsSpec extends Specification {
     }
 
     @Unroll
+    void "getFormattedDuration, when called with ZonedDateTime params, then return formatted string '#expected'"() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now()
+        ZonedDateTime end = start.plusHours(hourOffset).plusMinutes(minuteOffset).plusSeconds(secondOffset)
+
+        when:
+        String duration = TimeUtils.getFormattedDurationForZonedDateTime(start, end)
+
+        then:
+        duration == expected
+
+        where:
+        hourOffset | minuteOffset | secondOffset || expected
+        0          | 0            | 0            || "00:00:00"
+        12         | 0            | 0            || "12:00:00"
+        0          | 12           | 0            || "00:12:00"
+        0          | 0            | 12           || "00:00:12"
+        12         | 34           | 56           || "12:34:56"
+    }
+
+    @Unroll
     void "fromMillis, toMillis, when #value is convert to zonedDateTime and back, the value is the same"() {
         when:
         ZonedDateTime zonedDateTime = TimeUtils.fromMillis(value)

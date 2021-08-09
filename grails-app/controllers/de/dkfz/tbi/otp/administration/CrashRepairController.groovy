@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
+import de.dkfz.tbi.util.TimeFormats
 
 @Secured("hasRole('ROLE_ADMIN')")
 class CrashRepairController implements CheckAndCall {
@@ -71,7 +72,7 @@ class CrashRepairController implements CheckAndCall {
      * @return JSON list of failed workflow steps
      */
     def runningWorkflowSteps() {
-        render WorkflowStep.createCriteria().list {
+         List<WorkflowStep> workflowSteps = WorkflowStep.createCriteria().list {
             eq("state", WorkflowStep.State.RUNNING)
 
             resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
@@ -89,7 +90,11 @@ class CrashRepairController implements CheckAndCall {
                 property("wf.id", "workflowId")
                 property("wf.name", "workflowName")
             }
-        } as JSON
+        } as List<WorkflowStep>
+
+        workflowSteps.each { it.lastUpdated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(it.lastUpdated) }
+
+        render workflowSteps as JSON
     }
 
     /**

@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.TimeFormats
 
 import javax.servlet.http.HttpServletResponse
 
@@ -80,8 +81,8 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
                     state      : step.state,
                     id         : step.id,
                     name       : step.beanName,
-                    dateCreated: step.dateCreated,
-                    lastUpdated: step.lastUpdated,
+                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.dateCreated),
+                    lastUpdated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.lastUpdated),
                     duration   : getFormattedDuration(convertDateToLocalDateTime(step.dateCreated), convertDateToLocalDateTime(step.lastUpdated)),
 
                     error      : step.workflowError,
@@ -111,7 +112,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         render dataToRender as JSON
     }
 
-    def showError() {
+    def showError(RunShowDetailsCommand navParams) {
         WorkflowStep step = WorkflowStep.get(params.id as long)
         if (!step?.workflowError) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
@@ -119,11 +120,12 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         }
 
         return [
+                nav : navParams,
                 step: step,
         ]
     }
 
-    def showLogs() {
+    def showLogs(RunShowDetailsCommand navParams) {
         WorkflowStep step = WorkflowStep.get(params.id as long)
         if (!step) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
@@ -131,6 +133,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         }
 
         return [
+                nav     : navParams,
                 step    : step,
                 messages: step.logs*.displayLog(),
         ]

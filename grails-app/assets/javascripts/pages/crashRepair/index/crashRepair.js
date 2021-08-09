@@ -56,9 +56,7 @@ function renderStepDataTable(steps) {
     const table = $("#jobTable");
     const dataTable = table.DataTable()
 
-        steps.forEach((step) => {
-        const lastUpdated = new Date(step.lastUpdated);
-
+    steps.forEach((step) => {
         dataTable.row.add([
             '<input type="checkbox" name="stepId" value="' + step.id + '" class="tableCheckbox">',
             '<a href="' + $.otp.createLink({controller: 'workflowRunList', action: 'index', parameters: {'workflow.id': step.workflowId}}) + '">' +
@@ -70,7 +68,7 @@ function renderStepDataTable(steps) {
             step.workflowRunShortName + '</a>',
             step.beanName,
             step.id,
-            lastUpdated.toLocaleDateString() + ' (' + lastUpdated.toLocaleTimeString().slice(0, 5) + ')',
+            step.lastUpdated,
             step.workflowRunJobCanBeRestarted ? '<i class="bi bi-check"></i>' : '<i class="bi bi-x"></i>',
             '<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">' +
             '<button class="btn btn-primary" onclick="restartStep(' + step.id + ')"' + (!step.workflowRunJobCanBeRestarted ? 'disabled' : '') +

@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.utils.DataTablesCommand
+import de.dkfz.tbi.util.TimeFormats
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class WorkflowRunListController extends AbstractWorkflowRunController {
@@ -82,8 +83,8 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
                     workflow   : r.workflow.toString(),
                     displayName: r.displayName,
                     shortName  : r.shortDisplayName,
-                    dateCreated: r.dateCreated,
-                    lastUpdated: lastStep?.lastUpdated,
+                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(r.dateCreated),
+                    lastUpdated: lastStep?.lastUpdated ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(lastStep.lastUpdated) : "",
                     duration   : duration,
                     id         : r.id,
                     step       : lastStep?.beanName,

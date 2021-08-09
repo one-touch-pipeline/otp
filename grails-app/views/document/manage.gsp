@@ -33,7 +33,7 @@
         <otp:annotation type="info">
             <g:message code="document.notice"/>
         </otp:annotation>
-        <table class="table-sm table-striped table-hover">
+        <table class="table table-sm table-striped table-hover">
             <tr>
                 <th><g:message code="document.name"/></th>
                 <th><g:message code="document.type"/></th>

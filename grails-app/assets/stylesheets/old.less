@@ -111,7 +111,13 @@ input[type=text] {
     box-sizing: border-box;
 }
 
+.table {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 table {
+    width: 100%;
     border-bottom: 1px solid #DFDFDF;
     border-collapse: collapse;
     margin-bottom: 0.8em;
@@ -162,6 +168,8 @@ th {
     line-height: 1.7em;
     padding: 0.2em 0.1em;
     white-space: nowrap;
+    border-top:  1px solid #DFDFDF;
+    border-bottom: 2px solid #DFDFDF;
     &.sample {
         background-image: -moz-linear-gradient(right, #ffffff, #f4f4ff);
         background-color: #ffffff;
@@ -195,6 +203,12 @@ th {
     }
 }
 
+.dataTable td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* PAGINATION */
 .pagination {
     .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
@@ -226,4 +240,10 @@ Fix for the commentbox, since it uses Bootstrap classes in the template.
     strong {
         display: block;
     }
+}
+
+.progressLegendText {
+    float: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

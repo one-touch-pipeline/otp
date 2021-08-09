@@ -34,6 +34,23 @@
     <sec:access expression="hasRole('ROLE_OPERATOR')">
         <g:render template="/templates/messages"/>
         <g:if test="${artefact}">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index">${g.message(code: "workflow.navigation.list")}</g:link></li>
+                    <g:if test="${artefact.producedBy}">
+                        <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" id="${artefact.producedBy.id}">
+                            ${g.message(code: "workflow.navigation.details")} (${artefact.producedBy.id})</g:link>
+                        </li>
+                    </g:if>
+                    <g:if test="${!artefactUsedBy.empty}">
+                        <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" id="${artefactUsedBy.first().workflowRun.id}">
+                            ${g.message(code: "workflow.navigation.details")} (${artefactUsedBy.first().workflowRun.id})</g:link>
+                        </li>
+                    </g:if>
+                    <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.artefact")}</li>
+                </ol>
+            </nav>
+
             <nav class="navbar">
                 <div class="navbar-brand">
                     <div id="statusDot" title="${artefact.state}" data-status="${artefact.state}" class="d-inline-block"></div>
@@ -76,7 +93,7 @@
                 <li class="list-group-item flex-fill">
                     <g:each in="${artefactUsedBy}">
                         <div class="workflow-artefacts-used-by-col">
-                            <g:link controller="workflowRunDetails" action="index" id="${it.id}">${raw(it.workflowRun.displayName.replace("\n", "<br>"))}</g:link> <g:message
+                            <g:link controller="workflowRunDetails" action="index" id="${it.workflowRun.id}">${raw(it.workflowRun.displayName.replace("\n", "<br>"))}</g:link> <g:message
                                     code="workflowArtefact.as"/> ${it.role}<br>
                             <p class="mt-2"><g:message code="workflowArtefact.outputs"/>:</p>
                             <g:if test="${it.workflowRun.outputArtefacts.isEmpty()}">

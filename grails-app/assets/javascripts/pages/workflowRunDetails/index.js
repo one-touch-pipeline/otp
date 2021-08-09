@@ -21,14 +21,15 @@
  */
 $(function () {
     function format(d) {
-        var childTable = '<table style="padding-left: 50px;">'
+        var childTable = '<table class="table table-sm table-borderless">'
+
         for (var i = 0; i < d.clusterJobs.length; i++) {
             childTable += '<tr>' +
                 '<td><div title="' + d.clusterJobs[i].state + '" class="small ' + statusToClassName(d.clusterJobs[i].state) + '"></div></td>' +
-                '<td>' + $.otp.createLinkMarkup({text: 'Cluster job: ' + d.clusterJobs[i].name, controller: "clusterJobDetail", action: "show", id: d.clusterJobs[i].id}) + '</td>' +
+                '<td>' + $.otp.createLinkMarkup({text: 'Cluster job: ' + d.clusterJobs[i].name, controller: "clusterJobDetail", action: "show", id: d.clusterJobs[i].id, parameters: createLinkParametersForNavigation()}) + '</td>' +
                 '<td>' + d.clusterJobs[i].jobId + '</td>'
             if (d.clusterJobs[i].hasLog === true) {
-                childTable +='<td>' + $.otp.createLinkMarkup({text: "Log", controller: "clusterJobDetail", action: "showLog", id: d.clusterJobs[i].id}) + '</td>'
+                childTable +='<td>' + $.otp.createLinkMarkup({text: "Log", controller: "clusterJobDetail", action: "showLog", id: d.clusterJobs[i].id, parameters: createLinkParametersForNavigation()}) + '</td>'
             } else {
                 childTable +='<td></td>'
             }
@@ -53,7 +54,7 @@ $(function () {
                 '<td></td>' +
                 '<td>Workflow logs</td>' +
                 '<td></td>' +
-                '<td>' + $.otp.createLinkMarkup({text: "Log", controller: "workflowRunDetails", action: "showLogs", id: d.id}) + '</td>' +
+                '<td>' + $.otp.createLinkMarkup({text: "Log", controller: "workflowRunDetails", action: "showLogs", id: d.id, parameters: createLinkParametersForNavigation()}) + '</td>' +
                 '<td></td>' +
                 '<td></td>' +
                 '</tr>'
@@ -63,7 +64,7 @@ $(function () {
                 '<td></td>' +
                 '<td>Workflow error: ' + d.error.message + '</td>' +
                 '<td></td>' +
-                '<td>' + $.otp.createLinkMarkup({text: "Error", controller: "workflowRunDetails", action: "showError", id: d.id}) + '</td>' +
+                '<td>' + $.otp.createLinkMarkup({text: "Error", controller: "workflowRunDetails", action: "showError", id: d.id, parameters: createLinkParametersForNavigation()}) + '</td>' +
                 '<td></td>' +
                 '<td></td>' +
                 '</tr>'
@@ -81,7 +82,7 @@ $(function () {
                     if (type === "sort") {
                         return row.state;
                     }
-                    return '<div title="' + row.state + '" class="' + statusToClassName(row.state) + '"></div>';
+                    return '<div title="' + row.state + '" class="' + statusToClassName(row.state) + ' small"></div>';
                 }
             },
             {
@@ -92,7 +93,8 @@ $(function () {
                     if (!row.error && !row.clusterJobs.length && !row.wes && !row.hasLogs) {
                         return ""
                     }
-                    return "<div class='details-control'><i title='Show/hide details' class='bi bi-chevron-bar-expand'></i></div>"
+                    return "<button class='btn btn-sm btn-info details-control'>" +
+                        "<i title='Show/hide details' class='bi bi-chevron-bar-expand'></i></button>"
                 },
                 'orderable': false,
             },
@@ -108,7 +110,8 @@ $(function () {
                         return null;
                     }
 
-                    var buttonsDisabled = lastStepFailed ? "" : " disabled "
+                    const runState = $("#steps").data("wf-run-state");
+                    const buttonsDisabled = !lastStepFailed || runState === "RESTARTED" || runState === "FAILED_FINAL" ? " disabled " : "";
 
                     return "<form method='POST' class='single'>" +
                         button($.otp.createLink({controller: "workflowRunDetails", action: "restartStep", parameters: {"redirect": $.otp.uriWithParams}}),
@@ -122,7 +125,6 @@ $(function () {
         paging: false,
         serverSide: true,
         scrollCollapse: true,
-
         ajax: {
             url: $.otp.createLink({
                 controller: 'workflowRunDetails',
@@ -137,6 +139,21 @@ $(function () {
             },
         },
     });
+
+    function createLinkParametersForNavigation() {
+        const stepsTable = $("#steps");
+        const workflowRunId = stepsTable.data("wf-run-id");
+        const workflowId = stepsTable.data("wf-id");
+        const state = stepsTable.data("state");
+        const name = stepsTable.data("name");
+
+        return {
+            "workflowRun.id": workflowRunId,
+            "workflow.id": workflowId,
+            "state": state,
+            "name": name
+        }
+    }
 
     table.on('draw', function () {
         $('[title]').tooltip();

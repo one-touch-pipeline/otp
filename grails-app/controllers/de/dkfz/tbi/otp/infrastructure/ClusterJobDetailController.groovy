@@ -30,6 +30,8 @@ import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
 import java.time.Duration
+import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ClusterJobDetailController {
@@ -42,7 +44,7 @@ class ClusterJobDetailController {
             getStatesTimeDistribution: "GET",
     ]
 
-    def show() {
+    def show(NavigationCommand navigationCommand) {
         ClusterJob clusterJob = ClusterJob.get(params.id as long)
         Individual individual = clusterJob ? clusterJobService.findProcessParameterObjectByClusterJob(clusterJob)?.individual : null
         Project project = clusterJob.oldSystem ? individual?.project : clusterJob.workflowStep.workflowRun.project
@@ -55,15 +57,17 @@ class ClusterJobDetailController {
                 'individual': individual,
                 'project'   : project,
                 'NA'        : ClusterJob.NOT_AVAILABLE,
+                'nav'       : navigationCommand,
         ]
     }
 
-    def showLog() {
+    def showLog(NavigationCommand navigationCommand) {
         ClusterJob clusterJob = ClusterJob.get(params.id as long)
         String content = clusterJobService.getClusterJobLog(clusterJob)
         return [
                 job    : clusterJob,
                 content: content,
+                nav    : navigationCommand,
         ]
     }
 
@@ -85,5 +89,17 @@ class ClusterJobDetailController {
 
     private String applyPeriodFormat(Long ms) {
         return TimeUtils.getFormattedDuration(Duration.ofMillis(ms))
+    }
+}
+
+class NavigationCommand {
+    WorkflowRun workflowRun
+    Workflow workflow
+
+    List<WorkflowRun.State> states
+    String name
+
+    void setState(String state) {
+        states = state.split(",").collect { WorkflowRun.State.valueOf(it) } ?: []
     }
 }

@@ -69,7 +69,7 @@
                 </button>
             </div>
 
-            <table id="jobTable" class="table-sm table-hover table-striped table-bordered">
+            <table id="jobTable" class="table table-sm table-hover table-striped table-bordered">
                 <thead>
                 <tr>
                     <th scope="col"></th>

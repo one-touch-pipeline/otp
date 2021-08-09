@@ -34,7 +34,7 @@
     <h3><g:message code="processingOption.title"/></h3>
     <p><g:message code="processingOption.subtitle"/></p>
 
-    <table class="table-sm table-striped table-hover">
+    <table class="table table-sm table-striped table-hover">
         <thead>
         <tr>
             <th scope="col">#</th>

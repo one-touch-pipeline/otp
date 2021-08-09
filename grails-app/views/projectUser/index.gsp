@@ -71,7 +71,7 @@
                 </label>
             </sec:access>
             <div class="form internal">
-                <table class="table-sm table-striped table-hover">
+                <table class="table table-sm table-striped table-hover">
                     <tr>
                         <td><g:message code="projectUser.addMember.username"/></td>
                         <td class="user-auto-complete"><input name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off"
@@ -118,7 +118,7 @@
             </div>
             <sec:access expression="hasRole('ROLE_OPERATOR')">
                 <div class="form external">
-                    <table class="table-sm table-striped table-hover">
+                    <table class="table table-sm table-striped table-hover">
                         <tr>
                             <td><g:message code="projectUser.addMember.name"/></td>
                             <td><input name="realName" type="text" class="inputField nonLdapUser" placeholder="${g.message(code: 'projectUser.addMember.realNameDescription')}"></td>
@@ -174,7 +174,7 @@
 
     <div class="otpDataTables projectUserTable fixed-table-header">
         <h5><strong><g:message code="projectUser.activeUsers" args="[selectedProject.displayName]"/></strong></h5>
-        <table class="table-sm table-striped table-hover">
+        <table class="table table-sm table-striped table-hover">
             <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: selectedProject]"/>
             <g:if test="${!enabledProjectUsers}">
                 <g:render template="noUsersTableRow"/>
@@ -337,7 +337,7 @@
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable">
             <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
-            <table class="table-sm table-striped table-hover fixed-table-header">
+            <table class="table table-sm table-striped table-hover fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: selectedProject]"/>
                 <g:if test="${!disabledProjectUsers}">
                     <g:render template="noUsersTableRow"/>

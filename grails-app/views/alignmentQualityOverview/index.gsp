@@ -59,7 +59,7 @@
         </g:if>
     </div>
 
-    <table id="overviewTableProcessedMergedBMF" class="table-sm table-striped">
+    <table id="overviewTableProcessedMergedBMF" class="table table-sm table-striped">
         <thead>
             <tr>
                 <g:each in="${header}" var="it" status="i">

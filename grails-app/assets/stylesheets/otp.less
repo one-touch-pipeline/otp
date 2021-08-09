@@ -355,13 +355,6 @@ input:invalid, select:invalid, textarea:invalid {
 }
 
 /* TABLES */
-table {
-    width: 100%;
-}
-th {
-    border-top:  1px solid #DFDFDF;
-    border-bottom: 2px solid #DFDFDF;
-}
 tr {
     &.TUMOR {
         background: #f0f0ff;
@@ -655,6 +648,7 @@ body {
     -moz-box-sizing: border-box; /* Firefox, other Gecko */
     box-sizing: border-box; /* Opera/IE 8+ */
     padding: 1em;
+    z-index: 5;
     a {
         color: #999;
     }
@@ -684,11 +678,6 @@ body {
 .dataTables_container {
     margin-top: 10px;
     length: 70px;
-}
-.dataTable td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 #runs td:last-child {
     // show dropdown menu
@@ -1113,10 +1102,6 @@ td div {
 .statistics {
     padding-right: 10px;
 }
-.table {
-    padding-left: 10px;
-    padding-right: 10px;
-}
 .graphics {
     padding-left: 10px;
 }
@@ -1495,12 +1480,6 @@ td div {
 
 .progressBarProcess {
     background: @babyblue;
-}
-
-.progressLegendText {
-    float: left;
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
 
 #clusterJobGeneralTable_filter {
@@ -2045,6 +2024,8 @@ div.dt-buttons {
 
 .fixed-table-header {
     th {
+        background: #fff;
+        z-index: 1;
         position: sticky !important;
         position: -webkit-sticky;
         top: 0;

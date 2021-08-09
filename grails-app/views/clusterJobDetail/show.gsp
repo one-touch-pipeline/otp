@@ -23,7 +23,6 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title><g:message code="jobstats.detail.title"/></title>
     <asset:javascript src="modules/multiprogressbar.js"/>
     <asset:stylesheet src="modules/multiprogressbar.css"/>
@@ -35,7 +34,17 @@ Cluster Jobs without filled properties have no link to this page in the datatabl
 on the general cluster job page
 -->
 <body>
-    <div class="body">
+    <div class="container-fluid otp-main-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+                <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${nav.workflowRun?.id}">
+                    ${g.message(code: "workflow.navigation.details")} (${nav.workflowRun?.id})</g:link>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.error")}</li>
+            </ol>
+        </nav>
+
         <h1><g:message code="jobstats.jobSpecific.detail.title"/></h1>
         <g:if test="${job}">
             <div class="detailContainer" id="general">
@@ -44,36 +53,25 @@ on the general cluster job page
                     <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.general"/></span>
                 </div>
                 <br>
-                <table>
+                <table class="w-100">
                     <colgroup>
-                        <col class="columnColors">
-                        <col class="columnSpace">
                         <col class="columnProperty">
                         <col class="columnValue">
                     </colgroup>
                     <tr>
-                        <!-- these empty td-elements are used to define the colored element and the space on the left of each table -->
-                        <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.id"/></td>
+                        <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.id"/></td>
                         <td>${job.clusterJobId ?: NA}</td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.jobClass"/></td>
+                        <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.jobClass"/></td>
                         <td>${job.jobClass ?: NA}</td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.seqType"/></td>
+                        <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.seqType"/></td>
                         <td>${job.seqType?.toString() ?: NA}</td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.project"/></td>
+                        <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.project"/></td>
                         <td>
                             <g:if test="${project != null}">
                                 <g:link controller="projectOverview" action="index" params="[(projectParameter): project.name]">${project}</g:link>
@@ -84,9 +82,7 @@ on the general cluster job page
                         </td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.individual"/></td>
+                        <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.individual"/></td>
                         <td>
                             <g:if test="${individual != null}">
                                 <g:link controller="individual" action="show" id="${individual.id}">${individual.mockPid}</g:link>
@@ -97,9 +93,7 @@ on the general cluster job page
                         </td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.name"/></td>
+                        <td class="pl-4"><g:message code="jobstats.jobSpecific.detail.table.attribute.name"/></td>
                         <td>${job.clusterJobName ?: NA}</td>
                     </tr>
                 </table>
@@ -110,21 +104,18 @@ on the general cluster job page
                     <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.state"/></span>
                 </div>
                 <br>
-                <table>
+                <table class="w-100">
                     <col class="columnColors">
-                    <col class="columnSpace">
                     <col class="columnProperty">
                     <col class="columnValue">
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.status"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.status"/></td>
                         <td>${job.exitStatus ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.code"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.code"/></td>
                         <td>${job.exitCode ?: NA}</td>
                     </tr>
                 </table>
@@ -135,45 +126,38 @@ on the general cluster job page
                     <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.time"/></span>
                 </div>
                 <br>
-                <table>
+                <table class="w-100">
                     <col class="columnColors">
-                    <col class="columnSpace">
                     <col class="columnProperty">
                     <col class="columnValue">
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.queued"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.queued"/></td>
                         <td>${jobQueued ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.started"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.started"/></td>
                         <td>${jobStarted ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.ended"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.ended"/></td>
                         <td>${jobEnded ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedWallTime"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedWallTime"/></td>
                         <td>${job.getRequestedWalltimeAsISO()}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.elapsedWallTime"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.elapsedWallTime"/></td>
                         <td>${job.getElapsedWalltimeAsISO()}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.wallTimeDifference"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.wallTimeDifference"/></td>
                         <td>${job.getWalltimeDiffAsISO()}</td>
                     </tr>
                 </table>
@@ -199,27 +183,23 @@ on the general cluster job page
                     <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.cpu"/></span>
                 </div>
                 <br>
-                <table>
+                <table class="w-100">
                     <col class="columnColors">
-                    <col class="columnSpace">
                     <col class="columnProperty">
                     <col class="columnValue">
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedCores"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedCores"/></td>
                         <td>${job.requestedCores ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuTime"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuTime"/></td>
                         <td>${job.getCpuTimeAsISO()}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuAvgUtilised"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuAvgUtilised"/></td>
                         <td>${job.cpuAvgUtilised?.round(2) ?: NA}</td>
                     </tr>
                 </table>
@@ -230,27 +210,23 @@ on the general cluster job page
                     <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.memory"/></span>
                 </div>
                 <br>
-                <table>
+                <table class="w-100">
                     <col class="columnColors">
-                    <col class="columnSpace">
                     <col class="columnProperty">
                     <col class="columnValue">
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedMemory"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedMemory"/></td>
                         <td>${job.requestedMemory ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.usedMemory"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.usedMemory"/></td>
                         <td>${job.usedMemory ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td></td>
-                        <td><g:message code="jobstats.jobSpecific.detail.table.attribute.memoryEfficiency"/></td>
+                        <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.memoryEfficiency"/></td>
                         <td>${job.memoryEfficiency?.round(2) ?: NA}</td>
                     </tr>
                 </table>

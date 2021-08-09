@@ -54,7 +54,7 @@ var statusToClassName = function (status) {
 };
 
 var button = function (action, value, title, buttonsDisabled, icon) {
-    return "<button class='btn btn-primary' formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + ">" +
+    return "<button class='btn btn-sm btn-primary' formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + ">" +
         "<i class='bi-" + icon + "'></i>" +
         "</button>"
 };

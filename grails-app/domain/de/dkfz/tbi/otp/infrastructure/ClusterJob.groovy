@@ -395,7 +395,7 @@ class ClusterJob implements Entity {
     }
 
     private String formatPeriodAsHhMmSs() {
-        return TimeUtils.getFormattedDuration(started, ended) ?: NOT_AVAILABLE
+        return TimeUtils.getFormattedDurationForZonedDateTime(started, ended) ?: NOT_AVAILABLE
     }
 
     static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
