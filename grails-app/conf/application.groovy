@@ -209,9 +209,9 @@ grails.gorm.default.mapping = {
 
 // Restore old data-binding behaviour (before 2.3)
 grails.databinding.convertEmptyStringsToNull = false
-grails.databinding.trimStrings = false
 grails.databinding.autoGrowCollectionLimit = 65536
 
+grails.databinding.trimStrings = true
 
 //configure mail sending: disable mail sending for tests
 environments {
