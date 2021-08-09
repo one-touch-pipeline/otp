@@ -116,16 +116,23 @@ class JobScheduler {
         }
     }
 
-    @Transactional
     @SuppressWarnings("CatchThrowable")
     private void handleException(WorkflowStep workflowStep, Throwable exceptionInJob) {
-        workflowStep.refresh()
         try {
-            workflowStateChangeService.changeStateToFailed(workflowStep, exceptionInJob)
-            autoRestartHandlerService.handleRestarts(workflowStep)
+            WorkflowStep.withTransaction {
+                workflowStep.refresh()
+                workflowStateChangeService.changeStateToFailed(workflowStep, exceptionInJob)
+            }
+            WorkflowStep.withTransaction {
+                workflowStep.refresh()
+                autoRestartHandlerService.handleRestarts(workflowStep)
+            }
         } catch (Throwable exceptionInExceptionHandling) {
             try {
-                errorNotificationService.sendMaintainer(workflowStep, exceptionInJob, exceptionInExceptionHandling)
+                WorkflowStep.withTransaction {
+                    workflowStep.refresh()
+                    errorNotificationService.sendMaintainer(workflowStep, exceptionInJob, exceptionInExceptionHandling)
+                }
             } catch (Throwable exceptionInSendingSimpleMail) {
                 String messageToLog = [
                         "Fail to send simple mail to maintainer for job: ${workflowStep}",
