@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Script to remove the mark as withdrawn.
  *
- * It fetches all seqTracks for all samples given by PID, SAMPLE_TYPE SEQ_TYPE and LIBRARY_LOAYOUT and remove the withdrawn flag.
+ * It fetches all seqTracks for all samples given by PID, SAMPLE_TYPE SEQ_TYPE and LIBRARY_LAYOUT, removes the withdrawn flag and adds a withdrawn comment.
  * It does not consider alignment or analysis, since they could also for other reason marked as withdrawn.
  *
  * Also the withdraw MetadataEntries are adapted.
@@ -37,8 +37,6 @@ String comment = """
 
 //PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT SINGLE_CELL
 List<SeqTrack> seqTracks = """
-
-
 """.split('\n').findAll().collect {
     String[] split = it.split(' ')
     println split as List
@@ -76,7 +74,7 @@ class UnWithdrawer {
 
     static void unwithdraw(final DataFile dataFile, List dirsToLink) {
         println "Unwithdrawing DataFile ${dataFile}"
-        dirsToLink.add("ln -s ${ctx.lsdfFilesService.getFileFinalPath(dataFile)} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
+        dirsToLink.add("ln -rs ${ctx.lsdfFilesService.getFileFinalPath(dataFile)} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
         dataFile.withdrawnDate = null
         if (!dataFile.withdrawnComment?.contains(comment)) {
             dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"
