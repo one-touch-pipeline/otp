@@ -37,6 +37,8 @@ String comment = """
 
 //PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT SINGLE_CELL
 List<SeqTrack> seqTracks = """
+
+
 """.split('\n').findAll().collect {
     String[] split = it.split(' ')
     println split as List
@@ -75,6 +77,8 @@ class UnWithdrawer {
     static void unwithdraw(final DataFile dataFile, List dirsToLink) {
         println "Unwithdrawing DataFile ${dataFile}"
         dirsToLink.add("ln -rs ${ctx.lsdfFilesService.getFileFinalPath(dataFile)} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
+        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${ctx.lsdfFilesService.getFileFinalPath(dataFile)}")
+        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
         dataFile.withdrawnDate = null
         if (!dataFile.withdrawnComment?.contains(comment)) {
             dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"
