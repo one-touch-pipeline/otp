@@ -196,6 +196,8 @@ dependencies {
     // library for easy HTML editing
     compile "org.jsoup:jsoup:1.9.2"
 
+    compile "com.networknt:json-schema-validator:1.0.57"
+
     compile "org.grails.plugins:spring-security-core:3.2.3"
     compile "org.grails.plugins:spring-security-ldap:3.0.2"
     compile "org.grails.plugins:spring-security-acl:3.2.1"

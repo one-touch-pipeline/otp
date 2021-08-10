@@ -60,4 +60,173 @@ class ExternalWorkflowConfigFragmentSpec extends Specification implements DataTe
         '{OTP_CLUSTER: {a:"b"}}'             || false | "invalid.configs"
         '{OTP_CLUSTER: {CORES: "5", a:"b"}}' || false | "invalid.configs"
     }
+
+    void "test validation for valid Roddy config values"() {
+        given:
+        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
+                configValues: '''{
+                  "RODDY": {
+                    "cvalues": {
+                      "mergedBamSuffixList": {
+                        "type": "string",
+                        "value": "asdf"
+                      },
+                      "INSERT_SIZE_LIMIT": {
+                        "type": "integer",
+                        "value": 1
+                      },
+                      "runSlimWorkflow": {
+                        "type": "boolean",
+                        "value": "true"
+                      },
+                      "useBioBamBamSort": {
+                        "type": "boolean",
+                        "value": "false"
+                      },
+                      "BWA_VERSION": {
+                        "value": "0.7.8"
+                      }
+                    },
+                    "resources": {
+                      "alignAndPair": {
+                        "value": "bwaMemSort.sh",
+                        "basepath": "qcPipeline",
+                        "memory": "1G",
+                        "cores": 1,
+                        "nodes": 2,
+                        "walltime": "00:10:00"
+                      }
+                    }
+                  },
+                  "RODDY_FILENAMES": {
+                    "filenames": [
+                      {
+                        "class": "asdf",
+                        "pattern": "asdf",
+                        "selectiontag": "asdf",
+                        "derivedFrom": "asdf"
+                      }
+                    ]
+                  }
+                }''',
+        ], false)
+
+        expect:
+        fragment.validate()
+    }
+
+    void "test validation for invalid Roddy config values"() {
+        given:
+        String configValues = "{\"RODDY\": ${config} }"
+        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
+                configValues: configValues,
+        ], false)
+
+        expect:
+        TestCase.assertAtLeastExpectedValidateError(fragment, "configValues", "invalid.configs", configValues)
+
+        where:
+        config << [
+                // wrong property
+                '''
+                {"asdf": {"asdf": {
+                  "type": "string",
+                  "value": "asdf"
+                }}}''',
+                // additional property
+                '''
+                {"cvalues": {"asdf": {
+                  "type": "string",
+                  "value": "asdf",
+                  "asdf": "asdf",
+                }}}''',
+                // illegal type
+                '''
+                {"cvalues": {"asdf": {
+                  "type": "asdf",
+                  "value": "asdf"
+                }}}''',
+                // missing property "value"
+                '''
+                {"cvalues": {"asdf": {
+                  "type": "path",
+                }}}''',
+                // illegal value
+                '''
+                {"cvalues": {"asdf": {
+                  "type": "boolean",
+                  "value": "not true"
+                }}}''',
+                // illegal value
+                '''
+                {"cvalues": {"asdf": {
+                  "type": "integer",
+                  "value": "asdf"
+                }}}''',
+
+                // additional property
+                '''
+                {"resources": {"asdf": {
+                  "value": "asdf",
+                  "basepath": "asdf",
+                  "gigacores": "1",
+                }}}''',
+                // missing property "value"
+                '''
+                {"resources": {"asdf": {
+                  "basepath": "asdf"
+                }}}''',
+                // missing property "basepath"
+                '''
+                {"resources": {"asdf": {
+                  "value": "asdf",
+                }}}''',
+                // illegal type
+                '''
+                {"resources": {"asdf": {
+                  "value": "asdf",
+                  "basepath": "asdf",
+                  "cores": "one"
+                }}}''',
+                // illegal type
+                '''
+                {"resources": {"asdf": {
+                  "value": "asdf",
+                  "basepath": "asdf",
+                  "nodes": "two"
+                }}}''',
+        ]
+    }
+
+    void "test validation for invalid Roddy filename config values"() {
+        given:
+        String configValues = "{\"RODDY_FILENAMES\": ${config} }"
+        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
+                configValues: configValues,
+        ], false)
+
+        expect:
+        TestCase.assertAtLeastExpectedValidateError(fragment, "configValues", "invalid.configs", configValues)
+
+        where:
+        config << [
+                // additional property
+                '''
+                {"filenames": [{
+                  "class": "asdf",
+                  "pattern": "asdf",
+                  "asdf": "asdf",
+                }]}''',
+                // missing property "class"
+                '''
+                {"filenames": [{
+                  "pattern": "asdf",
+                }]}''',
+                // missing property "pattern"
+                '''
+                {"filenames": [{
+                  "class": "asdf",
+                }]}''',
+        ]
+    }
 }

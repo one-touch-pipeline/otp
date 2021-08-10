@@ -30,6 +30,7 @@ import org.grails.web.json.*
 
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.utils.Deprecateable
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -103,7 +104,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         }
         List<String> invalidConfigs = jsonElement.collect { k, v ->
             Type t = Type.valueOf(k as String)
-            return (t.validateConfig && !t.validateConfig(v)) ? k as String : ""
+            return (t.validateConfig && !t.validateConfig(v.toString())) ? k as String : ""
         }.findAll()
         return invalidConfigs ? ["invalid.configs", invalidConfigs.join(",")] : true
     }
@@ -115,8 +116,10 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     @TupleConstructor
     enum Type {
         /** used for jobs that are submitted directly to cluster by OTP */
-        OTP_CLUSTER({ ClusterJobSubmissionOptionsService.validateJsonString(it.toString()) }),
+        OTP_CLUSTER({ String s -> ClusterJobSubmissionOptionsService.validateJsonString(s) }),
         WORKFLOWS({ true }),
+        RODDY( { String s -> RoddyConfigService.validateRoddyConfig(s) }),
+        RODDY_FILENAMES( { String s -> RoddyConfigService.validateRoddyFilenamesConfig(s) }),
 
         final Closure<Boolean> validateConfig
     }
