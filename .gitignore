@@ -47,3 +47,4 @@ out
 *.env
 ##sprint review
 review/
+/otp_local_setup.sh
