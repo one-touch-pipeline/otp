@@ -128,6 +128,7 @@ class LinkFilesToFinalDestinationService {
     /**
      * Link files (replaces existing files)
      */
+    @Deprecated
     void linkNewResults(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert realm: "Input realm must not be null"
