@@ -141,7 +141,7 @@
                                             <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
                                             <li><g:link controller="bulkSampleCreation" action="index"><g:message code="otp.menu.createSample"/></g:link></li>
                                             <li><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
-                                            <li><g:link controller="mergingCriteria" action="defaultSeqPlatformGroupConfiguration"><g:message
+                                            <li><g:link controller="defaultSeqPlatformGroup" action="index"><g:message
                                                     code="otp.menu.seqPlatformGroup"/></g:link></li>
                                             <li><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>
                                             <li><g:link controller="qcThreshold" action="defaultConfiguration"><g:message

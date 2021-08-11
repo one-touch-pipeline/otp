@@ -126,20 +126,27 @@ class MergingCriteriaService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void copyDefaultToSpecific(SeqPlatformGroup seqPlatformGroup, MergingCriteria mergingCriteria) {
-        SeqPlatformGroup seqPlatformGroup1  = new SeqPlatformGroup(
-                mergingCriteria: mergingCriteria,
-        )
-        seqPlatformGroup.seqPlatforms?.each { SeqPlatform seqPlatform ->
-            seqPlatformGroup1.addToSeqPlatforms(seqPlatform)
+    void emptyAllSeqPlatformGroups(List<SeqPlatformGroup> seqPlatformGroupList) {
+        seqPlatformGroupList.each {
+            emptySeqPlatformGroup(it)
         }
-        assert seqPlatformGroup1.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void copyAllDefaultToSpecific(MergingCriteria mergingCriteria) {
-        SeqPlatformGroup.findAllByMergingCriteriaIsNull().each { SeqPlatformGroup seqPlatformGroup ->
-            copyDefaultToSpecific(seqPlatformGroup, mergingCriteria)
+    void copySeqPlatformGroup(SeqPlatformGroup seqPlatformGroup, MergingCriteria mergingCriteria) {
+        SeqPlatformGroup newSpg = new SeqPlatformGroup(
+                mergingCriteria: mergingCriteria,
+        )
+        seqPlatformGroup.seqPlatforms?.each { SeqPlatform seqPlatform ->
+            newSpg.addToSeqPlatforms(seqPlatform)
+        }
+        newSpg.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void copySeqPlatformGroups(List<SeqPlatformGroup> seqPlatformGroupList, MergingCriteria mergingCriteria) {
+        seqPlatformGroupList.each {
+            copySeqPlatformGroup(it, mergingCriteria)
         }
     }
 }

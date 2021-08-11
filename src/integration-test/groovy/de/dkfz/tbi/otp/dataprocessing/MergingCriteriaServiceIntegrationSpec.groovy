@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -45,7 +44,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
@@ -63,9 +62,9 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
+        MergingCriteria mergingCriteria = createMergingCriteriaLazy(project: project, seqType: seqType)
 
         expect:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -77,7 +76,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
@@ -99,9 +98,9 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
+        MergingCriteria mergingCriteria = createMergingCriteriaLazy(project: project, seqType: seqType)
 
         when:
         def errors = SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -121,7 +120,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         SeqType seqType = DomainFactory.createExomeSeqType()
 
         when:
@@ -180,9 +179,9 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
-        SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatform()
+        SeqPlatformGroup group = createSeqPlatformGroup()
+        SeqPlatform seqPlatform1 = createSeqPlatform()
+        SeqPlatform seqPlatform2 = createSeqPlatform()
         group.addToSeqPlatforms(seqPlatform1)
         group.addToSeqPlatforms(seqPlatform2)
         group.save(flush: true)
@@ -203,8 +202,8 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatformGroup group = createSeqPlatformGroup()
+        SeqPlatform seqPlatform = createSeqPlatform()
         group.addToSeqPlatforms(seqPlatform)
         group.save(flush: true)
 
@@ -224,8 +223,8 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatformGroup group = createSeqPlatformGroup()
+        SeqPlatform seqPlatform = createSeqPlatform()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -241,7 +240,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = createSeqPlatform()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -257,8 +256,8 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
+        SeqPlatform seqPlatform = createSeqPlatform()
+        MergingCriteria mergingCriteria = createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
@@ -277,7 +276,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
+        SeqPlatformGroup group = createSeqPlatformGroup()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -295,9 +294,9 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
-        SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatform()
+        SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup()
+        SeqPlatform seqPlatform1 = createSeqPlatform()
+        SeqPlatform seqPlatform2 = createSeqPlatform()
         seqPlatformGroup.addToSeqPlatforms(seqPlatform1)
         seqPlatformGroup.addToSeqPlatforms(seqPlatform2)
 
@@ -313,20 +312,43 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         !seqPlatformGroup.comments.empty
     }
 
-    void "test copyDefaultToSpecific"() {
+    void "test emptyAllSeqPlatformGroups"() {
+        given:
+        setupData()
+        final SeqPlatform firstGroupFirstSeqPlatform = createSeqPlatform()
+        final SeqPlatform firstGroupSecondSeqPlatform = createSeqPlatform()
+        final SeqPlatformGroup firstGroup = createSeqPlatformGroup(seqPlatforms: [firstGroupFirstSeqPlatform, firstGroupSecondSeqPlatform])
+
+        final SeqPlatform secondGroupFirstSeqPlatform = createSeqPlatform()
+        final SeqPlatform secondGroupSecondSeqPlatform = createSeqPlatform()
+        final SeqPlatformGroup secondGroup = createSeqPlatformGroup(seqPlatforms: [secondGroupFirstSeqPlatform, secondGroupSecondSeqPlatform])
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            mergingCriteriaService.emptyAllSeqPlatformGroups([firstGroup, secondGroup])
+        }
+
+        then:
+        SeqPlatformGroup.list().size() == 2
+        SeqPlatformGroup.list().every { !it.seqPlatforms }
+        SeqPlatform.list().size() == 4
+        SeqPlatformGroup.list().every { !it.comments.empty }
+    }
+
+    void "test copySeqPlatformGroup"() {
         given:
         setupData()
 
-        SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatformGroup defaultGroup = createSeqPlatformGroup()
+        SeqPlatform seqPlatform = createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
+        MergingCriteria mergingCriteria = createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.copyDefaultToSpecific(defaultGroup, mergingCriteria)
+            mergingCriteriaService.copySeqPlatformGroup(defaultGroup, mergingCriteria)
         }
 
         then:
@@ -334,39 +356,46 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
     }
 
-    void "test copyAllDefaultToSpecific"() {
+    void "test copySeqPlatformGroups"() {
         given:
         setupData()
+        final SeqPlatform firstGroupFirstSeqPlatform = createSeqPlatform()
+        final SeqPlatform firstGroupSecondSeqPlatform = createSeqPlatform()
+        final SeqPlatformGroup firstGroup = createSeqPlatformGroup(seqPlatforms: [firstGroupFirstSeqPlatform, firstGroupSecondSeqPlatform])
 
-        SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
-        defaultGroup.addToSeqPlatforms(seqPlatform)
-        SeqPlatformGroup defaultGroup1 = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
-        defaultGroup1.addToSeqPlatforms(seqPlatform1)
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
+        final SeqPlatform secondGroupFirstSeqPlatform = createSeqPlatform()
+        final SeqPlatform secondGroupSecondSeqPlatform = createSeqPlatform()
+        final SeqPlatformGroup secondGroup = createSeqPlatformGroup(seqPlatforms: [secondGroupFirstSeqPlatform, secondGroupSecondSeqPlatform])
+
+        final MergingCriteria mergingCriteria = createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.copyAllDefaultToSpecific(mergingCriteria)
+            mergingCriteriaService.copySeqPlatformGroups([firstGroup, secondGroup], mergingCriteria)
         }
 
         then:
-        SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 2
-        CollectionUtils.containSame(SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)*.seqPlatforms, [[seqPlatform] as Set, [seqPlatform1] as Set])
+        final List<SeqPlatformGroup> groups = SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)
+        groups.size() == 2
+        groups*.seqPlatforms.flatten() == [
+                firstGroupFirstSeqPlatform,
+                firstGroupSecondSeqPlatform,
+                secondGroupFirstSeqPlatform,
+                secondGroupSecondSeqPlatform,
+        ]
     }
 
     void "test findSeqPlatformGroupsForProjectAndSeqType"() {
         given:
         setupData()
 
-        DomainFactory.createSeqPlatformGroup()
-        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroupWithMergingCriteria()
-        seqPlatformGroup.addToSeqPlatforms(DomainFactory.createSeqPlatform())
+        createSeqPlatformGroup()
+        SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroupWithMergingCriteria()
+        seqPlatformGroup.addToSeqPlatforms(createSeqPlatform())
         assert seqPlatformGroup.save(flush: true)
-        DomainFactory.createSeqPlatformWithSeqPlatformGroup()
+        createSeqPlatformWithSeqPlatformGroup()
 
         expect:
         [seqPlatformGroup] == SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -378,9 +407,9 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        DomainFactory.createSeqPlatformGroup()
-        DomainFactory.createSeqPlatformGroupWithMergingCriteria()
-        SeqPlatform platform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
+        createSeqPlatformGroup()
+        createSeqPlatformGroupWithMergingCriteria()
+        SeqPlatform platform = createSeqPlatformWithSeqPlatformGroup()
 
         expect:
         platform.seqPlatformGroups == SpringSecurityUtils.doWithAuth(OPERATOR) {

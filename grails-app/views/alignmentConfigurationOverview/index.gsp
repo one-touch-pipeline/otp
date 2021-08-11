@@ -99,7 +99,7 @@
                 <g:each in="${seqTypeMergingCriteria}" var="m">
                     <tr>
                         <td>
-                            <g:link controller="mergingCriteria" action="projectAndSeqTypeSpecific"
+                            <g:link controller="projectSeqPlatformGroup" action="index"
                                     params='["seqType.id": m.key.id]'>
                                 ${m.key}
                             </g:link>

@@ -25,43 +25,51 @@ Global style definitions which are relevant for all bootstrap pages.
 */
 
 html {
-    // reduce the default font size defined by bootstrap
-    font-size: 0.8rem;
+  // reduce the default font size defined by bootstrap
+  font-size: 0.8rem;
 }
 
 .otp-main-container {
-    margin-bottom: 60px;
-    margin-top: 60px;
+  margin-bottom: 60px;
+  margin-top: 60px;
 }
 
 .quick-navigation-bar {
-    .navigation-text {
-        margin-bottom: 0;
-        line-height: 42px;
-    }
+  .navigation-text {
+    margin-bottom: 0;
+    line-height: 42px;
+  }
 }
 
 .select2-appended-btn {
-    border-color: #ced4da;
+  border-color: #ced4da;
 }
 
 .btn.disabled, .btn:disabled {
     opacity: 0.38 !important;
 }
 
+// multiselect searchbar
+.combined-search-bar {
+    .select2-container:nth-of-type(2) .select2-selection{
+        border-left: 0;
+        border-radius: 0
+    }
+}
+
 /**
 Override unnecessary styles of otp.less
  */
 .input-group {
-    z-index: 0;
+  z-index: 0;
 }
 
 label {
-    margin: unset;
+  margin: unset;
 }
 
 option {
-    font-size: unset;
+  font-size: unset;
 }
 
 .progressLegendText {

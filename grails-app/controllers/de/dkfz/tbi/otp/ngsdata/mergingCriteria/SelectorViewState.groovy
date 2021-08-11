@@ -19,10 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.ngsdata.mergingCriteria
 
-$(document).ready(function () {
-    $('select.use-select-2').select2({
-        theme: 'bootstrap4',
-        minimumResultsForSearch: 7,
-    });
-});
+enum SelectorViewState {
+    CREATE,
+    COPY,
+    EDIT,
+    SHOW
+}
