@@ -22,9 +22,13 @@
 
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.project.*
-
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 // DO NOT USE THIS SCRIPT IF YOU DONT KNOW WHAT YOU ARE DOING!!!
+
+List<String> errors = []
 
 Project.withTransaction {
     Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
@@ -37,24 +41,31 @@ Project.withTransaction {
         }.groupBy { it.programVersion }
 
         [
-            ["IndelCallingWorkflow:1.2.177", "1.2.177-601"],
-            ["IndelCallingWorkflow:2.0.0", "2.0.0-101"],
-            ["IndelCallingWorkflow:2.2.0", "2.2.2"],
-            ["IndelCallingWorkflow:2.2.1", "2.2.2"],
-            ["IndelCallingWorkflow:2.4.0", "2.4.1-1"],
-            ["IndelCallingWorkflow:2.4.1", "2.4.1-1"]
+                ["IndelCallingWorkflow:1.2.177", "1.2.177-601"],
+                ["IndelCallingWorkflow:2.0.0", "2.0.0-101"],
+                ["IndelCallingWorkflow:2.2.0", "2.2.2"],
+                ["IndelCallingWorkflow:2.2.1", "2.2.2"],
+                ["IndelCallingWorkflow:2.4.0", "2.4.1-1"],
+                ["IndelCallingWorkflow:2.4.1", "2.4.1-1"]
         ].each { k, v ->
             configsByVersion[k].each { RoddyWorkflowConfig config ->
 
-                RoddyConfiguration configuration = new RoddyConfiguration(pluginName: "IndelCallingWorkflow",
-                        programVersion: v,
-                        baseProjectConfig: "otpIndelCallingWorkflow-1.1",
-                        configVersion: ctx.workflowConfigService.getNextConfigVersion(config.configVersion),
-                        project: config.project,
-                        seqType: config.seqType)
-                ctx.projectService.configureIndelPipelineProject(configuration)
+                String md5sum = new File(config.getConfigFilePath()).text.encodeAsMD5() as String
+
+                if (config.md5sum == md5sum) {
+                    RoddyConfiguration configuration = new RoddyConfiguration(pluginName: "IndelCallingWorkflow",
+                            programVersion: v,
+                            baseProjectConfig: "otpIndelCallingWorkflow-1.1",
+                            configVersion: ctx.workflowConfigService.getNextConfigVersion(config.configVersion),
+                            project: config.project,
+                            seqType: config.seqType)
+                    ctx.projectService.configureIndelPipelineProject(configuration)
+                } else {
+                    errors.add("Changes for indel version ${config.configVersion} in project ${config.project} with seqType ${config.seqType} found.")
+                }
             }
         }
     }
 }
-[]
+
+println errors.join('\n')
