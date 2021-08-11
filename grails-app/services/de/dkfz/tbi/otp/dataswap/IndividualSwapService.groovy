@@ -102,7 +102,7 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
         bashScriptToMoveFiles << "\n\n################ move data files ################\n"
         bashScriptToMoveFiles << renameDataFiles(data)
 
-        bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
+        bashScriptToMoveFiles << "\n\n\n################ move fastq files ################\n"
         data.samples = Sample.findAllByIndividual(data.individualSwap.old)
         data.seqTrackList = data.samples ? SeqTrack.findAllBySampleInList(data.samples) : []
         List<DataFile> newDataFiles = data.seqTrackList ? DataFile.findAllBySeqTrackInList(data.seqTrackList) : []

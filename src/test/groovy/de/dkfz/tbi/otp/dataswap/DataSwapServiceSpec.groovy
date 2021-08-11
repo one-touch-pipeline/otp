@@ -717,34 +717,42 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         log.toString() == "\n====> set mate number for withdrawn data file\n    changed ${oldDataFileName} to ${dataFile.fileName}"
     }
 
-    void "renameDataFiles, when old files exists but new files not then move old files to new location and link new"() {
+    @Unroll
+    void "renameDataFiles, when old files exists but new files not then move old files to new location and link new with #seqTrackAmount SeqTrack(s)"() {
         given:
-        final String newDataFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile()
-        final DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
-        final String oldDataFileName = dataFile.fileName
-        final Path oldFile = temporaryFolder.newFile(dataFile.fileName).toPath()
-        final Path oldFileViewByPid = temporaryFolder.newFile('oldViewByPidFile').toPath()
-        final Path newFile = Paths.get('somePath').resolve(Paths.get(newDataFileName))
-        final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
+        final Project project = createProject()
+        final Sample sample = createSample([individual: createIndividual([project: project,]),])
+        final List<DataFile> dataFileList = []
+
+        for (int i : 1..seqTrackAmount) {
+            final SeqTrack seqTrack = createSeqTrackWithTwoDataFile(
+                    [sample: sample,],
+                    [fileName: "DataFileFileName_${i}_R1.gz", project: project,],
+                    [fileName: "DataFileFileName_${i}_R2.gz", project: project,],
+            )
+
+            final List<DataFile> dataFilesPerSeqTrack = DataFile.findAllBySeqTrack(seqTrack)
+            dataFileList.addAll(dataFilesPerSeqTrack)
+        }
+        final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList, true, false)
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> newFile.toString()
-            _ * getFileViewByPidPath(_) >> newFileViewByPid.toString()
+            _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
+            _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
+        final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
-                (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
-                        (DataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
-                ],
-        ]
+        final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
+            [(it): [
+                    (DataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
+                    (DataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
+            ]]
+        }
 
         final DataSwapParameters parameters = new DataSwapParameters(
                 dataFileSwaps: dataFileSwaps,
@@ -752,72 +760,89 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
-                projectSwap: new Swap(dataFile.project, dataFile.project),
+                projectSwap: new Swap(project, project),
                 parameters: parameters,
-                dataFiles: [dataFile],
+                dataFiles: dataFileList,
                 oldDataFileNameMap: oldDataFileNameMap
         )
 
-        final String bashMoveDirectFile = """\n
-                                     |# ${dataFile.seqTrack} ${newDataFileName}
-                                     |mkdir -p -m 2750 '${newFile.parent}';
-                                     |mv '${oldFile}' \\
-                                     |   '${newFile}';
-                                     |chgrp -h `stat -c '%G' ${newFile.parent}` ${newFile}
-                                     |if [ -e '${oldFile}.md5sum' ]; then
-                                     |  mv '${oldFile}.md5sum' \\
-                                     |     '${newFile}.md5sum';
-                                     |  chgrp -h `stat -c '%G' ${newFile.parent}` ${newFile}.md5sum
+        String bashScriptToMoveFiles = ""
+        dataFileList.each {
+            final String bashMoveDirectFile = """\n
+                                     |# ${it.seqTrack} ${dataFilePaths[it].newFileName}
+                                     |mkdir -p -m 2750 '${dataFilePaths[it].newPath.parent}';
+                                     |mv '${dataFilePaths[it].oldPath}' \\
+                                     |   '${dataFilePaths[it].newPath}';
+                                     |chgrp -h `stat -c '%G' ${dataFilePaths[it].newPath.parent}` ${dataFilePaths[it].newPath}
+                                     |if [ -e '${dataFilePaths[it].oldPath}.md5sum' ]; then
+                                     |  mv '${dataFilePaths[it].oldPath}.md5sum' \\
+                                     |     '${dataFilePaths[it].newPath}.md5sum';
+                                     |  chgrp -h `stat -c '%G' ${dataFilePaths[it].newPath.parent}` ${dataFilePaths[it].newPath}.md5sum
                                      |fi\n""".stripMargin()
 
-        final String bashMoveVbpFile = """\
-                                 |rm -f '${oldFileViewByPid}';
-                                 |mkdir -p -m 2750 '${newFileViewByPid.parent}';
-                                 |ln -s '${newFile}' \\
-                                 |      '${newFileViewByPid}'""".stripMargin()
+            final String bashMoveVbpFile = """\
+                                 |rm -f '${dataFilePaths[it].oldVbpPath}';
+                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
+                                 |ln -s '${dataFilePaths[it].newPath}' \\
+                                 |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
 
-        String bashScriptToMoveFiles = "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
-        bashScriptToMoveFiles += "\n\n"
+            bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
+            bashScriptToMoveFiles += "\n\n"
+        }
+
+        String expectedLog = ""
+        dataFileList.each {
+            expectedLog += "\n    changed ${dataFilePaths[it].oldFileName} to ${dataFilePaths[it].newFileName}"
+        }
 
         when:
         String script = service.renameDataFiles(dataSwapData)
 
         then:
         bashScriptToMoveFiles == script
-        dataFile.fileName == newDataFileName
-        dataFile.vbpFileName == newDataFileName
-        log.toString() == "\n    changed ${oldDataFileName} to ${dataFile.fileName}"
+        dataFileList*.fileName == dataFilePaths.values().newFileName
+        dataFileList*.vbpFileName == dataFilePaths.values().newFileName
+        log.toString() == expectedLog
+
+        where:
+        seqTrackAmount << [1, 3]
     }
 
-    void "renameDataFiles, when old and new data files exists then remove old files and link new"() {
+    @Unroll
+    void "renameDataFiles, when old and new data files exists then remove old files and link new with #seqTrackAmount SeqTrack(s)"() {
         given:
-        final String newDataFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile()
-        final DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
-        final String oldDataFileName = dataFile.fileName
-        final Path oldFile = temporaryFolder.newFile(dataFile.fileName).toPath()
-        final Path oldFileViewByPid = temporaryFolder.newFile('oldViewByPidFile').toPath()
-        final Path newFile = temporaryFolder.newFile(newDataFileName).toPath()
-        final Path newFileViewByPid = temporaryFolder.newFolder('linking').toPath().resolve(newDataFileName)
-        newFileViewByPid.toFile().mkdirs()
+        final Project project = createProject()
+        final Sample sample = createSample([individual: createIndividual([project: project,]),])
+        final List<DataFile> dataFileList = []
+
+        for (int i : 1..seqTrackAmount) {
+            final SeqTrack seqTrack = createSeqTrackWithTwoDataFile(
+                    [sample: sample,],
+                    [fileName: "DataFileFileName_${i}_R1.gz", project: project,],
+                    [fileName: "DataFileFileName_${i}_R2.gz", project: project,]
+            )
+            final List<DataFile> dataFilesPerSeqTrack = DataFile.findAllBySeqTrack(seqTrack)
+            dataFileList.addAll(dataFilesPerSeqTrack)
+        }
+        final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList)
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> newFile.toString()
-            _ * getFileViewByPidPath(_) >> newFileViewByPid.toString()
+            _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
+            _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
         }
 
         // DTO
-        final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
+        final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
-                (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME): oldFile.toString(),
-                        (DataSwapService.VBP_FILE_NAME)   : oldFileViewByPid.toString(),
-                ],
-        ]
+        final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
+            [(it): [
+                    (DataSwapService.DIRECT_FILE_NAME): dataFilePaths[it].oldPath.toString(),
+                    (DataSwapService.VBP_FILE_NAME)   : dataFilePaths[it].oldVbpPath.toString(),
+            ]]
+        }
 
         final DataSwapParameters parameters = new DataSwapParameters(
                 dataFileSwaps: dataFileSwaps,
@@ -825,75 +850,94 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
-                projectSwap: new Swap(dataFile.project, dataFile.project),
+                projectSwap: new Swap(project, project),
                 parameters: parameters,
-                dataFiles: [dataFile],
+                dataFiles: dataFileList,
                 oldDataFileNameMap: oldDataFileNameMap
         )
 
-        String bashMoveDirectFile = "# rm -f '${oldFile}'"
-        String bashMoveVbpFile = """\
-                                 |rm -f '${oldFileViewByPid}';
-                                 |mkdir -p -m 2750 '${newFileViewByPid.parent}';
-                                 |ln -s '${newFile}' \\
-                                 |      '${newFileViewByPid}'""".stripMargin()
+        String bashScriptToMoveFiles = ""
+        dataFileList.each {
+            final String bashMoveDirectFile = "# rm -f '${dataFilePaths[it].oldPath}'"
+            final String bashMoveVbpFile = """\
+                                 |rm -f '${dataFilePaths[it].oldVbpPath}';
+                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
+                                 |ln -s '${dataFilePaths[it].newPath}' \\
+                                 |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
 
-        String bashScriptToMoveFiles = "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
-        bashScriptToMoveFiles += "\n\n"
+            bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
+            bashScriptToMoveFiles += "\n\n"
+        }
+
+        String expectedLog = ""
+        dataFileList.each {
+            expectedLog += "\n    changed ${dataFilePaths[it].oldFileName} to ${dataFilePaths[it].newFileName}"
+        }
 
         when:
         String script = service.renameDataFiles(dataSwapData)
 
         then:
         bashScriptToMoveFiles == script
-        dataFile.fileName == newDataFileName
-        dataFile.vbpFileName == newDataFileName
-        log.toString() == "\n    changed ${oldDataFileName} to ${dataFile.fileName}"
+        dataFileList*.fileName == dataFilePaths.values().newFileName
+        dataFileList*.vbpFileName == dataFilePaths.values().newFileName
+        log.toString() == expectedLog
+
+        where:
+        seqTrackAmount << [1, 3]
     }
 
-    void "renameDataFiles, when old file is singleCell then also create singleCellScript"() {
+    @Unroll
+    void "renameDataFiles, when old file is singleCell then also create singleCellScript with #seqTrackAmount SeqTrack(s)"() {
         given:
-        final String newDataFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType([singleCell: true,]), singleCellWellLabel: 'WELL'], [used: false])
-        final DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
-        final String oldDataFileName = dataFile.fileName
-        final Path oldFile = temporaryFolder.newFile(dataFile.fileName).toPath()
-        final Path oldFileViewByPid = temporaryFolder.newFile('oldViewByPidFile').toPath()
-        final Path newFile = temporaryFolder.newFile(newDataFileName).toPath()
-        final Path newFileViewByPid = temporaryFolder.newFolder('linking').toPath().resolve(newDataFileName)
-        newFileViewByPid.toFile().mkdirs()
-        final Path oldWellFile = temporaryFolder.newFile('wellFile').toPath()
-        final Path oldWellMappingFile = temporaryFolder.newFile('wellMappingFile').toPath()
-        final String oldWellMappingFileEntryName = 'oldWellMappingEntry'
-        final Path newWellMappingFile = temporaryFolder.newFile('newWellMappingFile').toPath()
-        final String newWellMappingFileEntryName = 'newWellMappingEntry'
+        final Project project = createProject()
+        final Sample sample = createSample([individual: createIndividual([project: project])])
+        final List<DataFile> dataFileList = []
+
+        for (int i : 1..seqTrackAmount) {
+            final SeqTrack seqTrack = createSeqTrackWithTwoDataFile(
+                    [sample: sample, seqType: createSeqType([singleCell: true,]), singleCellWellLabel: 'WELL',],
+                    [fileName: "DataFileFileName_${i}_R1.gz", project: project, used: false,],
+                    [fileName: "DataFileFileName_${i}_R2.gz", project: project, used: false,]
+            )
+            final List<DataFile> dataFilesPerSeqTrack = DataFile.findAllBySeqTrack(seqTrack)
+            dataFileList.addAll(dataFilesPerSeqTrack)
+        }
+
+        final Map<DataFile, Map<String, ?>> dataFilePaths = createPathsForDataFiles(dataFileList)
+        dataFilePaths.each {
+            it.value.put('oldWellFile', temporaryFolder.newFile("${it.key.fileName}_wellFile").toPath())
+            it.value.put('wellMappingFile', temporaryFolder.newFile("${it.key.fileName}_oldWellMappingFile").toPath())
+            it.value.put('oldWellMappingEntry', "${it.key.fileName}_oldWellMappingEntry")
+            it.value.put('newWellMappingFile', temporaryFolder.newFile("${it.key.fileName}_newWellMappingFile").toPath())
+            it.value.put('newWellMappingEntry', "${it.key.fileName}_newWellMappingEntry")
+        }
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> newFile.toString()
-            _ * getFileViewByPidPath(_) >> newFileViewByPid.toString()
-            _ * getWellAllFileViewByPidPath(_) >> newFileViewByPid.toString()
+            _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
+            _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
+            _ * getWellAllFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
         }
 
         service.singleCellService = Mock(SingleCellService) {
-            _ * singleCellMappingFile(_) >> newWellMappingFile
-            _ * mappingEntry(_) >> newWellMappingFileEntryName
+            _ * singleCellMappingFile(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newWellMappingFile }
+            _ * mappingEntry(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newWellMappingFileEntryName }
         }
 
-        // DTO
-        final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
+        final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
-        final Map<DataFile, Map<String, ?>> oldDataFileNameMap = [
-                (dataFile): [
-                        (DataSwapService.DIRECT_FILE_NAME)            : oldFile.toString(),
-                        (DataSwapService.VBP_FILE_NAME)               : oldFileViewByPid.toString(),
-                        (DataSwapService.WELL_FILE_NAME)              : oldWellFile.toString(),
-                        (DataSwapService.WELL_MAPPING_FILE_NAME)      : oldWellMappingFile,
-                        (DataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): oldWellMappingFileEntryName,
-                ],
-        ]
+        final Map<DataFile, Map<String, String>> oldDataFileNameMap = dataFileList.collectEntries {
+            [(it): [
+                    (DataSwapService.DIRECT_FILE_NAME)            : dataFilePaths[it].oldPath.toString(),
+                    (DataSwapService.VBP_FILE_NAME)               : dataFilePaths[it].oldVbpPath.toString(),
+                    (DataSwapService.WELL_FILE_NAME)              : dataFilePaths[it].oldWellFile.toString(),
+                    (DataSwapService.WELL_MAPPING_FILE_NAME)      : dataFilePaths[it].oldWellMappingFile,
+                    (DataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): dataFilePaths[it].oldWellMappingFileEntryName,
+            ]]
+        }
 
         final DataSwapParameters parameters = new DataSwapParameters(
                 dataFileSwaps: dataFileSwaps,
@@ -901,46 +945,57 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         )
 
         final DataSwapData dataSwapData = new DataSwapData(
-                projectSwap: new Swap(dataFile.project, dataFile.project),
+                projectSwap: new Swap(project, project),
                 parameters: parameters,
-                dataFiles: [dataFile],
+                dataFiles: dataFileList,
                 oldDataFileNameMap: oldDataFileNameMap
         )
 
-        final String bashMoveDirectFile = "# rm -f '${oldFile}'"
-        final String bashMoveVbpFile = """\
-                                 |rm -f '${oldFileViewByPid}';
-                                 |mkdir -p -m 2750 '${newFileViewByPid.parent}';
-                                 |ln -s '${newFile}' \\
-                                 |      '${newFileViewByPid}'""".stripMargin()
+        String bashScriptToMoveFiles = ""
+        dataFileList.each {
+            final String bashMoveDirectFile = "# rm -f '${dataFilePaths[it].oldPath}'"
+            final String bashMoveVbpFile = """\
+                                 |rm -f '${dataFilePaths[it].oldVbpPath}';
+                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
+                                 |ln -s '${dataFilePaths[it].newPath}' \\
+                                 |      '${dataFilePaths[it].newVbpPath}'""".stripMargin()
 
-        String bashScriptToMoveFiles = "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
-        bashScriptToMoveFiles += """
+            bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
+            bashScriptToMoveFiles += """
                                  |# Single Cell structure
                                  |## recreate link
-                                 |rm -f '${oldWellFile}'
-                                 |mkdir -p -m 2750 '${newFileViewByPid.parent}'
-                                 |ln -s '${newFile}' \\\n      '${newFileViewByPid}'
+                                 |rm -f '${dataFilePaths[it].oldWellFile}'
+                                 |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}'
+                                 |ln -s '${dataFilePaths[it].newPath}' \\\n      '${dataFilePaths[it].newVbpPath}'
                                  |\n## remove entry from old mapping file
-                                 |sed -i '\\#${oldWellMappingFileEntryName}#d' ${oldWellMappingFile}
+                                 |sed -i '\\#${dataFilePaths[it].oldWellMappingFileEntryName}#d' ${dataFilePaths[it].oldWellMappingFile}
                                  |\n## add entry to new mapping file
-                                 |touch '${newWellMappingFile}'
-                                 |echo '${newWellMappingFileEntryName}' >> '${newWellMappingFile}'
+                                 |touch '${dataFilePaths[it].newWellMappingFile}'
+                                 |echo '${dataFilePaths[it].newWellMappingFileEntryName}' >> '${dataFilePaths[it].newWellMappingFile}'
                                  |\n## delete mapping file, if empty
-                                 |if [ ! -s '${oldWellMappingFile}' ]
+                                 |if [ ! -s '${dataFilePaths[it].oldWellMappingFile}' ]
                                  |then
-                                 |    rm '${oldWellMappingFile}'
+                                 |    rm '${dataFilePaths[it].oldWellMappingFile}'
                                  |fi\n""".stripMargin()
-        bashScriptToMoveFiles += "\n\n"
+            bashScriptToMoveFiles += "\n\n"
+        }
+
+        String expectedLog = ""
+        dataFileList.each {
+            expectedLog += "\n    changed ${dataFilePaths[it].oldFileName} to ${dataFilePaths[it].newFileName}"
+        }
 
         when:
         String script = service.renameDataFiles(dataSwapData)
 
         then:
         bashScriptToMoveFiles == script
-        dataFile.fileName == newDataFileName
-        dataFile.vbpFileName == newDataFileName
-        log.toString() == "\n    changed ${oldDataFileName} to ${dataFile.fileName}"
+        dataFileList*.fileName == dataFilePaths.values().newFileName
+        dataFileList*.vbpFileName == dataFilePaths.values().newFileName
+        log.toString() == expectedLog
+
+        where:
+        seqTrackAmount << [1, 3]
     }
 
     void "renameDataFiles, when old data files can not be found fail with FileNotFoundException"() {
@@ -984,5 +1039,26 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
 
         then:
         thrown FileNotFoundException
+    }
+
+    private static Path createNonExistingFilePath(String fileName) {
+        return Paths.get("not_existing").resolve(Paths.get(fileName))
+    }
+
+    private Path createExistingFilePath(String fileName) {
+        return temporaryFolder.newFile(fileName).toPath()
+    }
+
+    private Map<DataFile, Map<String, ?>> createPathsForDataFiles(List<DataFile> dataFileList, boolean oldFilesExists = true, boolean newFilesExists = true) {
+        return dataFileList.collectEntries {
+            [(it): [
+                    "oldFileName": it.fileName,
+                    "oldPath"    : oldFilesExists ? createExistingFilePath(it.fileName) : createNonExistingFilePath(it.fileName),
+                    "oldVbpPath" : oldFilesExists ? createExistingFilePath("Vbp${it.fileName}") : createNonExistingFilePath("Vbp${it.fileName}"),
+                    "newFileName": "New${it.fileName}",
+                    "newPath"    : newFilesExists ? createExistingFilePath("New${it.fileName}") : createNonExistingFilePath("New${it.fileName}"),
+                    "newVbpPath" : newFilesExists ? createExistingFilePath("NewVbp${it.fileName}") : createNonExistingFilePath("NewVbp${it.fileName}"),
+            ]]
+        }
     }
 }

@@ -59,6 +59,21 @@ class ExampleData {
     int lanesPerSampleAndSeqType = 1
 
     /**
+     * The SeqTypes for which data is to be created.
+     */
+    List<SeqType> seqTypes = [
+            SeqTypeService.exomePairedSeqType,
+    ]
+
+    /**
+     * The SampleType names for which data is to be created.
+     */
+    List<String> sampleTypeNames = [
+            "control01",
+            "tumor01",
+    ]
+
+    /**
      * Should dummy files and links are created for the {@link DataFile}s?
      * Please ensure that otp has the necessary write permissions remotely for the project directory
      * (or any parent directory in which the directories needs to be created)
@@ -94,8 +109,6 @@ class ExampleData {
             "X",
             "Y",
     ]
-    List<SeqType> seqTypes
-    List<SampleType> sampleTypes
 
     Project project
     FastqImportInstance fastqImportInstance
@@ -109,26 +122,15 @@ class ExampleData {
     SeqPlatformGroup seqPlatformGroup
     SoftwareTool softwareTool
 
+    List<SampleType> sampleTypes = []
     List<RoddyBamFile> roddyBamFiles = []
     List<DataFile> dataFiles = []
     List<FastqcProcessedFile> fastqcProcessedFiles = []
 
     void init() {
-        seqTypes = [
-                SeqTypeService.exomePairedSeqType,
-                SeqTypeService.wholeGenomePairedSeqType,
-                SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-                SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
-        ]
-        sampleTypes = [
-                "tumor01",
-                "tumor02",
-                "control01",
-                "control02",
-        ].collect {
+        sampleTypes = sampleTypeNames.collect {
             findOrCreateSampleType(it)
         }
-
         processingPriority = findOrProcessingPriority()
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
@@ -447,6 +449,8 @@ class ExampleData {
                 run                : seqTrack.run,
                 project            : seqTrack.project,
                 used               : true,
+                fileExists         : true,
+                fileLinked         : true,
         ]).save(flush: true)
 
         dataFiles << dataFile

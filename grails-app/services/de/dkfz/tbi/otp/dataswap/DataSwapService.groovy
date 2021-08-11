@@ -256,7 +256,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
             it.save(flush: true)
             data.log << "\n    changed ${oldFilename} to ${it.fileName}"
 
-            bashScriptToMoveFiles += createRenameDataFileCommands(bashScriptToMoveFiles, oldFilename, it, data)
+            bashScriptToMoveFiles += createRenameDataFileCommands(oldFilename, it, data)
         }
         return bashScriptToMoveFiles
     }
@@ -509,13 +509,13 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     /**
      * Creates rename/move commands for one data file and adds them to an given bash script.
      *
-     * @param outPutBashScript to which the commands should be added.
      * @param oldFilename which the data file had before it was changed in the database
      * @param dataFile which should be renamed.
      * @param data DTO containing all entities necessary to perform a swap.
-     * @return outPutBashScript with added bash commands.
+     * @return outPutBashCommands with added bash commands.
      */
-    private String createRenameDataFileCommands(String outPutBashScript, String oldFilename, DataFile dataFile, D data) throws FileNotFoundException {
+    private String createRenameDataFileCommands(String oldFilename, DataFile dataFile, D data) throws FileNotFoundException {
+        String outPutBashCommands = ""
         // fill local variables
         String oldDirectFileName = data.oldDataFileNameMap[dataFile][DIRECT_FILE_NAME]
         String oldVbpFileName = data.oldDataFileNameMap[dataFile][VBP_FILE_NAME]
@@ -563,12 +563,12 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                                |ln -s '${newDirectFileName}' \\
                                |      '${newVbpFileName}'""".stripMargin()
 
-        outPutBashScript += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
+        outPutBashCommands += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
         if (oldWellName) {
-            outPutBashScript += createSingeCellScript(dataFile, data.oldDataFileNameMap[dataFile])
+            outPutBashCommands += createSingeCellScript(dataFile, data.oldDataFileNameMap[dataFile])
         }
-        outPutBashScript += '\n\n'
-        return outPutBashScript
+        outPutBashCommands += '\n\n'
+        return outPutBashCommands
     }
 
     /**

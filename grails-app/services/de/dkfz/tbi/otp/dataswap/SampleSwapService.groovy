@@ -132,14 +132,14 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
 
         swapSample(data)
 
-        bashScriptToMoveFiles << "################ move data files ################ \n"
+        bashScriptToMoveFiles << "\n\n################ move data files ################\n"
         bashScriptToMoveFiles << renameDataFiles(data)
 
         SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
 
         List<String> newFastQcFileNames = data.fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
-        bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
+        bashScriptToMoveFiles << "\n\n\n################ move fastq files ################\n"
 
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
