@@ -125,6 +125,7 @@ class Sequence implements Serializable {
 
     /** fields from {@link DataFile} */
     boolean fileExists
+    boolean fileWithdrawn
 
     // derived property for calculating the creation date without time
     Date dayCreated

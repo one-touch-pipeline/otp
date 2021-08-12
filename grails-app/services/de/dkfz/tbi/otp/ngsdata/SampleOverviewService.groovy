@@ -102,6 +102,35 @@ class SampleOverviewService {
         }
     }
 
+    List<Map> withdrawnLaneCountForSeqTypesPerPatientAndSampleType(Project project) {
+        List lanes = Sequence.withCriteria {
+            eq("projectId", project?.id)
+            eq("fileWithdrawn", true)
+            projections {
+                groupProperty("mockPid")
+                groupProperty("sampleTypeName")
+                groupProperty("seqTypeId")
+                count()
+            }
+        }
+
+        Map<Long, SeqType> seqTypes = [:]
+
+        return lanes.collect {
+            SeqType seqType = seqTypes[it[2]]
+            if (!seqType) {
+                seqType = SeqType.get(it[2])
+                seqTypes.put(it[2], seqType)
+            }
+            [
+                    mockPid       : it[0],
+                    sampleTypeName: it[1],
+                    seqType       : seqType,
+                    withdrawnCount: it[3],
+            ]
+        }
+    }
+
     Collection<AbstractMergedBamFile> abstractMergedBamFilesInProjectFolder(Project project) {
         if (!project) {
             return []

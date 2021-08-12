@@ -74,8 +74,18 @@ class SampleOverviewController {
         /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
         Map<String, Map<String, InfoAboutOneSample>> dataLastMap = [:].withDefault { [:].withDefault { new InfoAboutOneSample() } }
 
+        //Only counts lanes, which are not withdrawn
         sampleOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project).each {
             dataLastMap[it.mockPid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] = it.laneCount as String
+        }
+
+        //adds all withdrawn lanes to the total amount of registered Lanes and shows the number of withdrawn lanes in brackets
+        sampleOverviewService.withdrawnLaneCountForSeqTypesPerPatientAndSampleType(project).each {
+            Integer notWithdrawnLanesCount = (dataLastMap[it.mockPid as String][it.sampleTypeName as String]
+                    .laneCountRegistered[it.seqType.id as Long] ?: 0) as Integer
+            String registeredLanesCount = (notWithdrawnLanesCount + (it.withdrawnCount as Integer)) as String
+            dataLastMap[it.mockPid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] =
+                    registeredLanesCount + " (${it.withdrawnCount})"
         }
 
         sampleOverviewService.abstractMergedBamFilesInProjectFolder(project).each {

@@ -130,6 +130,8 @@
                         <g:each var="dataFile" status="i" in="${dataFiles}">
                             <g:set var="row" value="${i+3}"/>
                             <g:set var="withdrawn" value="${dataFile.fileWithdrawn ? 'withdrawn' : ''}"/>
+                            <g:set var="withdrawnComment" value="Withdrawn Comment: ${dataFile.fileWithdrawn ? dataFile.withdrawnComment : ''}"/>
+                            <g:set var="withdrawnDate" value="Withdrawn Date: ${dataFile.fileWithdrawn ? dataFile.withdrawnDate : ''}"/>
                             <g:set var="exists" value="${dataFile.fileExists ? '' : 'nonexistent'}"/>
                             <g:set var="nBasePairs" value="${dataFile.getNBasePairsOrNull()}"/>
                             <g:set var="fileType" value="${dataFile.indexFile ? "index" : "fastq"}"/>
@@ -137,6 +139,9 @@
                                  style="grid-row: ${row};"
                                  title="${dataFile.fileName}">
                                 <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link>
+                                <g:if test="${dataFile.fileWithdrawn}">
+                                    <img src="/assets/warning.png" title="${withdrawnComment}&#013;${withdrawnDate}">
+                                </g:if>
                             </div>
                             <div class="grid-element dataFile bases" style="grid-row: ${row}" title="${UnitHelper.asNucleobases(nBasePairs)}">
                                 ${UnitHelper.asNucleobases(nBasePairs, true)}
