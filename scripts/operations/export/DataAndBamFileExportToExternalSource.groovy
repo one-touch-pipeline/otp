@@ -20,10 +20,15 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
+import java.time.ZonedDateTime
 
 /**
  * Script to export data (fastq-, bam-file(s) and analysis) to external source.
@@ -49,6 +54,12 @@ String patients = """
 #patient2
 
 """
+
+//************ Path to save creation script to filesystem. (absolute path) ************//
+String outputDir = "/..."
+
+//************ Name of the file, in which the creation script is saved.************//
+String outputFileName = "data_bamfile_export_script"
 
 //************ Path to copy files. Underneath, 'PID folders' will be created. (absolute path) ************//
 String targetOutputFolder = "/..."
@@ -92,15 +103,28 @@ String sampleTypes = """
 
 """
 
-
 // work area
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+ConfigService configService = ctx.configService
+FileSystemService fileSystemService = ctx.fileSystemService
+FileService fileService = ctx.fileService
+
+Realm realm = configService.defaultRealm
+FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 StringBuilder output = new StringBuilder()
 StringBuilder outputList = new StringBuilder()
 
 Path targetFolder = Paths.get(targetOutputFolder)
 List sampleTypesFilter = splitSampleType(sampleTypes)
+
+
+// where to put output
+Path outputDirPath = fileService.toPath(new File(outputDir), fileSystem)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, realm)
+Path outputFile = fileService.createOrOverwriteScriptOutputFile(
+        outputDirPath,outputFileName + "${outputFileName}-${TimeFormats.DATE.getFormatted(ZonedDateTime.now())}.sh",realm)
+
 
 String rsyncChmod
 String umask
@@ -359,7 +383,6 @@ List<BamFilePairAnalysis> getBamFilePairAnalysis (List seqTypesToCopy, String pi
     }
 
 
-
     if (analyses) {
         return analyses
     } else {
@@ -374,6 +397,10 @@ List<SampleType> splitSampleType (String input) {
         SampleType.findAllByName(it)
     }.flatten()
 }
+
+outputFile << output.toString()
+
+println "\nCreation script has been saved to ${outputFile}"
 
 println "\n----------- ${checkFileStatus? "to get an output script -> set checkFileStatus = false" : "output script"} -----------"
 println output
