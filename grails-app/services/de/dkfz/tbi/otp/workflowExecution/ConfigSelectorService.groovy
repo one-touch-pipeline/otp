@@ -231,6 +231,7 @@ class ConfigSelectorService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ExternalWorkflowConfigSelector create(CreateCommand cmd) {
+        assert cmd.type != SelectorType.DEFAULT_VALUES
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
                 name: cmd.fragmentName,
                 configValues: cmd.value,
@@ -253,6 +254,7 @@ class ConfigSelectorService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ExternalWorkflowConfigSelector update(UpdateCommand cmd) {
+        assert cmd.type != SelectorType.DEFAULT_VALUES
         cmd.selector.workflows = cmd.workflows as Set
         cmd.selector.workflowVersions = cmd.workflowVersions as Set
         cmd.selector.projects = cmd.projects as Set
@@ -281,6 +283,7 @@ class ConfigSelectorService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void deprecate(ExternalWorkflowConfigFragment fragment) {
+        fragment.selector.ifPresent { assert it.selectorType != SelectorType.DEFAULT_VALUES }
         fragment.deprecationDate = LocalDate.now()
         fragment.save(flush: true)
         fragment.selector.ifPresent { it.delete(flush: true) }

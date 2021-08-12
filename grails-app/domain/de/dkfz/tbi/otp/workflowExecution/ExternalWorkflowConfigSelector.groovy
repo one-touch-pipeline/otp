@@ -58,6 +58,22 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
                 return "unique"
             }
         }
+        selectorType validator: { val, obj ->
+            if (val == SelectorType.DEFAULT_VALUES && (
+                    obj.projects ||
+                            obj.referenceGenomes ||
+                            obj.libraryPreparationKits)) {
+                return "default"
+            }
+        }
+        customPriority min: 0, validator: { val, obj ->
+            if (obj.selectorType == SelectorType.DEFAULT_VALUES && val != 0) {
+                return "default"
+            }
+            if (obj.selectorType != SelectorType.DEFAULT_VALUES && val == 0) {
+                return "min"
+            }
+        }
     }
 
     int calculateSuggestedPriority() {
@@ -92,5 +108,4 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
         )
         return !(other && other.id != externalWorkflowConfigSelector.id)
     }
-
 }

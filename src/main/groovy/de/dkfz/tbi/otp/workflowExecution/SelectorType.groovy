@@ -47,4 +47,7 @@ enum SelectorType {
 
     /** Reverse sequence specific configuration */
     REVERSE_SEQUENCE,
+
+    /** Default values that cannot be modified by users */
+    DEFAULT_VALUES,
 }

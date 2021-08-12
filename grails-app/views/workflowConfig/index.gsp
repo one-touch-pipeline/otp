@@ -110,7 +110,7 @@
 
         <br>
 
-        <g:form controller="workflowConfig" method="POST" useToken="true">
+        <g:form controller="workflowConfig" method="POST" useToken="true" class="editor">
             <input type="hidden" name="selector.id" value="${selector?.id}">
             <input type="hidden" name="fragment.id" value="${fragment?.id}">
             <table class="key-value-table key-input">
@@ -162,7 +162,7 @@
                 </tr>
                 <tr>
                     <td><label for="type">${g.message(code: "workflowConfig.selector.type")}</label></td>
-                    <td><g:select name="type" from="${selectorTypes}" class="use-select-2" value="${editedCmd ? editedCmd?.type : selector?.selectorType ?: SelectorType.GENERIC}"
+                    <td><g:select name="type" from="${selectorTypes}" class="use-select-2 type" value="${editedCmd ? editedCmd?.type : selector?.selectorType ?: SelectorType.GENERIC}"
                                   autocomplete="off"/></td>
                 </tr>
                 <tr>
@@ -196,6 +196,7 @@
                             <g:actionSubmit action="update" name="update" value="${g.message(code: "workflowConfig.button.update")}"/>
                             <g:actionSubmit action="deprecate" name="deprecate" value="${g.message(code: "workflowConfig.button.deprecate")}"/>
                         </g:if>
+                        <span class="disabledMessage" style="display: none">${g.message(code: "workflowConfig.button.disabled")}</span>
                     </td>
                 </tr>
             </table>

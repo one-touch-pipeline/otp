@@ -218,7 +218,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         setupData()
 
         ExternalWorkflowConfigSelector ewcs1 = ExternalWorkflowConfigSelector.findByName("ewcs1")
-        ewcs1.customPriority = 1
+        ewcs1.customPriority = 2
         ewcs1.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs3 = ExternalWorkflowConfigSelector.findByName("ewcs3")
@@ -226,7 +226,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         ewcs3.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs4 = ExternalWorkflowConfigSelector.findByName("ewcs4")
-        ewcs4.customPriority = 0
+        ewcs4.customPriority = 1
         ewcs4.save(flush: true)
 
         ExternalWorkflowConfigSelector ewcs5 = ExternalWorkflowConfigSelector.findByName("ewcs5")
@@ -250,9 +250,9 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
     void "test findRelatedSelectorsByName #x"() {
         given:
         ConfigSelectorService service = new ConfigSelectorService()
-        createEWCSHelperBaseCriteria("ewcs1", 0)
+        createEWCSHelperBaseCriteria("ewcs1", 1)
         createEWCSHelperBaseCriteria("ewcs2", 3)
-        createEWCSHelperBaseCriteria("ewcs3", 1)
+        createEWCSHelperBaseCriteria("ewcs3", 2)
         createEWCSHelperBaseCriteria("ewcs4", 7)
 
         expect:
@@ -280,7 +280,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 selectorName: "selectorName",
                 type: SelectorType.GENERIC,
                 fragmentName: "fragmentName",
-                customPriority: 0,
+                customPriority: 1,
                 value: '{"OTP_CLUSTER": {"MEMORY": "1"}}',
         )
 

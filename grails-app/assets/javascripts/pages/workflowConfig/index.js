@@ -37,4 +37,20 @@ $(function () {
         var value = $("#configValue");
         value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
     });
+
+    // disable buttons if default values are selected
+    var editForm = $("form.editor");
+    var disableButtons = function () {
+        var disable = ($("select.type", editForm).val() === "DEFAULT_VALUES")
+        $("input[type=submit]", editForm).prop("disabled", disable);
+        if (disable) {
+            $(".disabledMessage", editForm).show()
+        } else {
+            $(".disabledMessage", editForm).hide()
+        }
+    }
+    editForm.on("change", "select.type", function (e) {
+        disableButtons();
+    });
+    disableButtons();
 });
