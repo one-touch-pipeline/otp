@@ -65,8 +65,8 @@ class WorkflowRunOverviewController {
         Map<Workflow, Timestamp> lastRuns = workflowRunOverviewService.lastRuns
         Map<Workflow, Timestamp> lastFails = workflowRunOverviewService.lastFailedRuns
 
-        lastRuns.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(it.value) }
-        lastFails.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(it.value) }
+        lastRuns.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.value) }
+        lastFails.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.value) }
 
         return [
                 states   : STATES,

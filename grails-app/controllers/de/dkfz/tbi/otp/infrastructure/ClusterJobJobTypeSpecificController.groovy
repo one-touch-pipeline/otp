@@ -43,8 +43,8 @@ class ClusterJobJobTypeSpecificController {
         def jobClasses = clusterJobService.findAllJobClassesByDateBetween(date, date)
         return [
                 jobClasses: jobClasses,
-                beginDate : TimeFormats.DATE.getFormatted(date.minusWeeks(1)),
-                latestDate: TimeFormats.DATE.getFormatted(date),
+                beginDate : TimeFormats.DATE.getFormattedLocalDate(date.minusWeeks(1)),
+                latestDate: TimeFormats.DATE.getFormattedLocalDate(date),
         ]
     }
 

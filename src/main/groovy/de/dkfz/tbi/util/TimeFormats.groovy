@@ -22,16 +22,26 @@
 package de.dkfz.tbi.util
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 enum TimeFormats {
     DATE('yyyy-MM-dd'),
-    TIME ('HH:mm:ss'),
-    DATE_TIME ('yyyy-MM-dd HH:mm:ss'),
+    TIME('HH:mm:ss'),
+    DATE_TIME('yyyy-MM-dd HH:mm:ss'),
     DATE_TIME_WITHOUT_SECONDS('yyyy-MM-dd HH:mm'),
-    MONTH_YEAR ('MMM yyyy'),
+    MONTH_YEAR('MMM yyyy'),
     DATE_TIME_WITH_ZONE('yyyy-MM-dd-HH-mm-ss-SSSZ'),
+    WEEKDAY_DATE_TIME('EEE, d MMM yyyy HH:mm'),
+    DATE_2('dd.MM.yyyy'),
+    SHORT_DATE('dd.MM.'),
+    TIME_WEEKDAY_DATE('HH:mm:ss E dd.MM.yyyy'),
+    TIME_DATE('HH:mm:ss dd.MM.yyyy'),
+    TIME_SHORT_DATE('HH:mm:ss dd.MM.'),
+    DATE_TIME_SECONDS('yyyy-MM-dd-HHmmssSSSS'),
+    DATE_TIME_SECONDS_DASHES('yyyy-MM-dd-HH-mm-ss-SSS'),
+    DATE_TIME_DASHES('yyyy-MM-dd-HH-mm-ss')
 
     final String format
 
@@ -42,15 +52,57 @@ enum TimeFormats {
         formatter = DateTimeFormatter.ofPattern(format)
     }
 
-    String getFormatted(ZonedDateTime date) {
+    String getFormattedZonedDateTime(ZonedDateTime date) {
         return date ? date.format(formatter) : 'na'
     }
 
-    String getFormatted(LocalDate date) {
+    String getFormattedLocalDate(LocalDate date) {
         return date ? date.format(formatter) : 'na'
     }
 
-    String getFormatted(Date date) {
+    String getFormattedDate(Date date) {
         return date ? TimeUtils.toZonedDateTime(date).format(formatter) : 'na'
+    }
+
+    String getFormattedLocalDateTime(LocalDateTime localDateTime) {
+        return localDateTime ? localDateTime.format(formatter) : 'na'
+    }
+    /**
+     * Formats the date in such a way that only relevant changed values are displayed.
+     *
+     * Same day         : hh:mm:ss
+     * Same year        : hh-mm-ss DD.MM.
+     * Totally different: hh-mm-ss DD.MM.YYYY
+     *
+     * @param date Date object to format
+     */
+    static String getInShortestTimeFormat(Date date) {
+        Date now = new Date()
+        boolean same24hours = ((now.getTime() - date.getTime()) <= 86400000) // 86.400.000 = 24h * 60m * 60s * 1000ms
+        if (same24hours) {
+            return TIME.getFormattedDate(date)
+        } else {
+            if (now.getYear() == date.getYear()) {
+                TIME_SHORT_DATE.getFormattedDate(date)
+            } else {
+                TIME_DATE.getFormattedDate(date)
+            }
+        }
+    }
+
+    /**
+     * Helper method to render a date in a common way.
+     * @param value Date in JSON representation
+     * @returns Formatted dates and value to sort by
+     */
+    static Map<String, Object> asTimestamp(Date date) {
+        if (!date) {
+            return [shortest: "-", full: "-", value: 0]
+        }
+        return [
+                shortest: getInShortestTimeFormat(date),
+                full    : TIME_WEEKDAY_DATE.getFormattedDate(date),
+                value   : date.getTime(),
+        ]
     }
 }

@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartActionService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.util.TimestampHelper
+import de.dkfz.tbi.util.TimeFormats
 
 import static grails.async.Promises.task
 import static grails.async.Promises.waitAll
@@ -135,8 +135,8 @@ class ProcessesController {
                     finishedProcessesCount: finishedProcessesCount,
                     failedProcessesCount  : failedProcessCount,
                     runningProcessesCount : allProcessesCount - finishedProcessesCount,
-                    lastSuccessfulDate    : TimestampHelper.asTimestamp(successDate),
-                    lastFailureDate       : TimestampHelper.asTimestamp(failureDate),
+                    lastSuccessfulDate    : TimeFormats.asTimestamp(successDate),
+                    lastFailureDate       : TimeFormats.asTimestamp(failureDate),
             ]
         }
 
@@ -223,8 +223,8 @@ class ProcessesController {
                 process.id,
                 latestState,
                 parameterData,
-                TimestampHelper.asTimestamp(process.started),
-                TimestampHelper.asTimestamp(latest.date),
+                TimeFormats.asTimestamp(process.started),
+                TimeFormats.asTimestamp(latest.date),
                 latest.processingStep.jobDefinition.name,
                 [state: latestState, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
                 process.comment?.comment?.encodeAsHTML(),
@@ -304,8 +304,8 @@ class ProcessesController {
                                         jobClass: processingStep.jobClass,
                                 ],
                                 times: [
-                                    creation  : TimestampHelper.asTimestamp(processService.getFirstUpdate(processingStep)),
-                                    lastUpdate: TimestampHelper.asTimestamp(update?.date),
+                                    creation  : TimeFormats.asTimestamp(processService.getFirstUpdate(processingStep)),
+                                    lastUpdate: TimeFormats.asTimestamp(update?.date),
                                     duration  : processService.getProcessingStepDuration(processingStep),
                                 ],
                                 lastUpdate: [
@@ -382,7 +382,7 @@ class ProcessesController {
         updates.each { ProcessingStepUpdate update ->
             dataToRender.aaData << [
                 update.id,
-                TimestampHelper.asTimestamp(update.date),
+                TimeFormats.asTimestamp(update.date),
                 update.state,
                 update.error,
             ]
@@ -455,7 +455,7 @@ class ProcessesController {
     def saveProcessComment(CommentCommand cmd) {
         Process process = processService.getProcess(cmd.id)
         commentService.saveComment(process, cmd.comment)
-        def dataToRender = [date: process.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: process.comment.author]
+        def dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(process.comment.modificationDate), author: process.comment.author]
         render dataToRender as JSON
     }
 }

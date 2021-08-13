@@ -234,7 +234,7 @@ class StatisticService {
         List<String> labels = []
         for (LocalDate currentDate = firstDate; currentDate < lastDate; currentDate = currentDate.plusMonths(1)) {
             if (validMonths.contains(currentDate.month.value)) {
-                labels << TimeFormats.MONTH_YEAR.getFormatted(currentDate)
+                labels << TimeFormats.MONTH_YEAR.getFormattedLocalDate(currentDate)
             } else {
                 labels << ""
             }

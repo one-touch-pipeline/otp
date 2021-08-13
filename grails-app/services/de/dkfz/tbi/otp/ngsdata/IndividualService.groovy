@@ -377,7 +377,7 @@ class IndividualService {
     String createCommentString(String operation, Map oldProperties, Map newProperties, String additionalInformation) {
         Map diff = oldProperties - newProperties
 
-        String output = "== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==\n"
+        String output = "== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(configService.zonedDateTime)} ==\n"
         if (additionalInformation) {
             output += "${additionalInformation}\n"
         }

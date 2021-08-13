@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.util.TimeFormats
 
 import javax.xml.bind.ValidationException
 
@@ -127,7 +128,7 @@ class ProcessingOptionController {
                 ),
                 allowedValues: processingOption.name.validatorForValue.allowedValues?.sort(),
                 project: processingOption?.project,
-                dateCreated: processingOption?.dateCreated?.format("yyyy-MM-dd HH:mm"),
+                dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(processingOption?.dateCreated),
                 multiline: processingOption.name.validatorForValue == TypeValidators.MULTI_LINE_TEXT,
                 defaultValue: processingOption.name?.defaultValue
         )

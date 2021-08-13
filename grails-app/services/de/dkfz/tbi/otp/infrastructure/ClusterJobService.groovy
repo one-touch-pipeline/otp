@@ -1116,7 +1116,7 @@ SELECT
 
         List<String> formattedHourBuckets() {
             return hourBuckets.collect {
-                TimeFormats.DATE_TIME.getFormatted(it)
+                TimeFormats.DATE_TIME.getFormattedZonedDateTime(it)
             }
         }
     }

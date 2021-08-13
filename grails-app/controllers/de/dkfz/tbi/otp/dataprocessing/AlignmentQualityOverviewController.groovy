@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.AccessDeniedException
 import java.nio.file.FileSystem
@@ -358,7 +359,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                             ).toString()
                     ),
                     sampleType        : abstractMergedBamFile.sampleType.name,
-                    dateFromFileSystem: abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
+                    dateFromFileSystem: TimeFormats.DATE.getFormattedDate(abstractMergedBamFile.dateFromFileSystem),
                     withdrawn         : abstractMergedBamFile.withdrawn,
                     pipeline          : abstractMergedBamFile.workPackage.pipeline.displayName,
                     qcStatus          : generateQcStatusCell(abstractMergedBamFile),

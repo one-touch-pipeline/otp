@@ -116,15 +116,15 @@
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.dates.runExecutionDate"/></td>
-                <td class="myValue">${dataFile.dateExecuted?.format("yyyy-MM-dd")}</td>
+                <td class="myValue">${dateExecuted}</td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.dates.fileSystemDate"/></td>
-                <td class="myValue">${dataFile.dateFileSystem?.format("yyyy-MM-dd HH:mm")}</td>
+                <td class="myValue">${dateFileSystem}</td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.dates.databaseRegistrationDate"/></td>
-                <td class="myValue">${dataFile.dateCreated.format("yyyy-MM-dd HH:mm")}</td>
+                <td class="myValue">${dateCreated}</td>
             </tr>
         </table>
         <h2><g:message code="datafile.showDetails.metaDataStatus"/></h2>
@@ -143,7 +143,7 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.withdrawnDate"/></td>
-                <td class="myValue">${dataFile.withdrawnDate?.format("yyyy-MM-dd HH:mm") ?: "-"}</td>
+                <td class="myValue">${withdrawnDate}</td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.withdrawnComment"/></td>

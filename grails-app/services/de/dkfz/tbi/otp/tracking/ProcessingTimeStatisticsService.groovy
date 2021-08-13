@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
 import javax.sql.DataSource
@@ -36,13 +37,11 @@ import java.time.LocalDate
 @Transactional
 class ProcessingTimeStatisticsService {
 
-    static final String DATE_FORMAT = "yyyy-MM-dd HH:mm"
-
     DataSource dataSource
 
     List<OtrsTicket> findAllOtrsTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
-        assert dateFrom : "No date 'from' is defined."
-        assert dateTo : "No date 'to' is defined."
+        assert dateFrom: "No date 'from' is defined."
+        assert dateTo: "No date 'to' is defined."
 
         if (search?.length() > 0 && search?.length() < 3) {
             throw new RuntimeException("String to search for is too short - at least three characters are required.")
@@ -61,15 +60,15 @@ ${search ? """
   ) OR (otrsTicket.ticketNumber LIKE :search)
  ) AND
 """ : ""
-}
+        }
  otrsTicket.dateCreated >= :dateFrom AND
  otrsTicket.dateCreated < :dateTo
  ORDER BY otrsTicket.dateCreated DESC
 """
 
         Map<String, ?> queryOptions = [
-            dateFrom: TimeUtils.toDate(dateFrom),
-            dateTo: TimeUtils.toDate(dateTo.plusDays(1)),
+                dateFrom: TimeUtils.toDate(dateFrom),
+                dateTo  : TimeUtils.toDate(dateTo.plusDays(1)),
         ]
 
         if (search) {
@@ -82,13 +81,13 @@ ${search ? """
     }
 
     List formatData(OtrsTicket ticket) {
-        assert ticket : "No OTRS ticket defined."
+        assert ticket: "No OTRS ticket defined."
 
         List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
-        List<String> ilseIds =      seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
+        List<String> ilseIds = seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
         List<String> projectNames = seqTracks.collect { it.sample.individual.project.name }.unique().sort()
-        List<String> sampleNames =  seqTracks.collect { "${it.sample.individual.mockFullName} ${it.sample.sampleType.name}" }.unique().sort()
-        List<String> runs =         seqTracks.collect { it.run.name }.unique().sort()
+        List<String> sampleNames = seqTracks.collect { "${it.sample.individual.mockFullName} ${it.sample.sampleType.name}" }.unique().sort()
+        List<String> runs = seqTracks.collect { it.run.name }.unique().sort()
 
         List data = [
                 ticket.url,
@@ -97,26 +96,26 @@ ${search ? """
                 runs,
                 sampleNames,
                 seqTracks.collect { return "${it.run}, lane: ${it.laneId}" },
-                ticket.submissionReceivedNotice?.format(DATE_FORMAT) ?: "",
+                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.submissionReceivedNotice),
                 TimeUtils.getFormattedDurationWithDays(ticket.submissionReceivedNotice as Date, ticket.ticketCreated as Date),
-                ticket.ticketCreated?.format(DATE_FORMAT) ?: "",
+                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket.ticketCreated),
         ]
 
         String previousProcessingStep
         [
-            OtrsTicket.ProcessingStep.INSTALLATION,
-            OtrsTicket.ProcessingStep.FASTQC,
-            OtrsTicket.ProcessingStep.ALIGNMENT,
-            OtrsTicket.ProcessingStep.SNV,
+                OtrsTicket.ProcessingStep.INSTALLATION,
+                OtrsTicket.ProcessingStep.FASTQC,
+                OtrsTicket.ProcessingStep.ALIGNMENT,
+                OtrsTicket.ProcessingStep.SNV,
         ].each {
             if (previousProcessingStep) {
                 data << TimeUtils.getFormattedDurationWithDays(ticket."${previousProcessingStep}Finished" as Date, ticket."${it}Started" as Date)
             } else {
                 data << TimeUtils.getFormattedDurationWithDays(ticket.ticketCreated as Date, ticket."${it}Started" as Date)
             }
-            data << ticket."${it}Started"?.format(DATE_FORMAT)
+            data << TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket."${it}Started" as Date)
             data << TimeUtils.getFormattedDurationWithDays(ticket."${it}Started" as Date, ticket."${it}Finished" as Date)
-            data << ticket."${it}Finished"?.format(DATE_FORMAT)
+            data << TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(ticket."${it}Finished" as Date)
             previousProcessingStep = it
         }
 
@@ -125,7 +124,7 @@ ${search ? """
 
         if (ticket.comment?.comment) {
             data << ticket.comment.comment
-        } else  {
+        } else {
             data << ""
         }
 
@@ -141,7 +140,7 @@ ${search ? """
         if (dateString == "") {
             ticket."${property}" = null
         } else {
-            DateFormat format = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH)
+            DateFormat format = new SimpleDateFormat(TimeFormats.DATE_TIME_WITHOUT_SECONDS.format, Locale.ENGLISH)
             Date date = format.parse(dateString)
 
             ticket."${property}" = date

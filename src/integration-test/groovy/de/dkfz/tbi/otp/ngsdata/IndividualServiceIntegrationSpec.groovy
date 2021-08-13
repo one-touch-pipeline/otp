@@ -136,7 +136,7 @@ class IndividualServiceIntegrationSpec extends Specification implements UserAndR
         String result = individualService.createCommentString(operation, mapA, mapB, null)
 
         then:
-        result == """== operation - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
+        result == """== operation - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(configService.zonedDateTime)} ==
 Old:
 b: 2
 c: 3
@@ -159,7 +159,7 @@ c: 4
         String result = individualService.createCommentString(operation, mapA, mapB, additionalInformation)
 
         then:
-        result == """== operation - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
+        result == """== operation - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(configService.zonedDateTime)} ==
 ${additionalInformation}
 Old:
 a: 1
@@ -186,7 +186,7 @@ a: 2
         String expected = """\
             |${newHasComment ? newIndividual.comment.comment : ""}
             |
-            |== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
+            |== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(configService.zonedDateTime)} ==
             |Old:
             |individual: ${oldIndividual}
             |New:
@@ -224,7 +224,7 @@ a: 2
         String expected = """\
             |${hasComment ? individual.comment.comment : ""}
             |
-            |== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(configService.zonedDateTime)} ==
+            |== ${operation} - ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(configService.zonedDateTime)} ==
             |Old:
             |diff: A
             |New:

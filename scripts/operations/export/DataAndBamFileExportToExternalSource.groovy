@@ -124,7 +124,7 @@ List sampleTypesFilter = splitSampleType(sampleTypes)
 Path outputDirPath = fileService.toPath(new File(outputDir), fileSystem)
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, realm)
 Path outputFile = fileService.createOrOverwriteScriptOutputFile(
-        outputDirPath,outputFileName + "${outputFileName}-${TimeFormats.DATE.getFormatted(ZonedDateTime.now())}.sh",realm)
+        outputDirPath,outputFileName + "${outputFileName}-${TimeFormats.DATE.getFormattedZonedDateTime(ZonedDateTime.now())}.sh",realm)
 
 
 String rsyncChmod

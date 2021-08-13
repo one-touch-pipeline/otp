@@ -54,8 +54,6 @@ class ClusterJobGeneralController {
         }
     }
 
-    static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
-
     ClusterJobService clusterJobService
 
     Map index() {
@@ -88,9 +86,9 @@ class ClusterJobGeneralController {
                     job.clusterJobId,
                     job.clusterJobName,
                     job.exitStatus?.toString(),
-                    TimeFormats.DATE_TIME.getFormatted(job.queued),
-                    TimeFormats.DATE_TIME.getFormatted(job.started),
-                    TimeFormats.DATE_TIME.getFormatted(job.ended),
+                    TimeFormats.DATE_TIME.getFormattedZonedDateTime(job.queued),
+                    TimeFormats.DATE_TIME.getFormattedZonedDateTime(job.started),
+                    TimeFormats.DATE_TIME.getFormattedZonedDateTime(job.ended),
                     job.id,
             ]
         }

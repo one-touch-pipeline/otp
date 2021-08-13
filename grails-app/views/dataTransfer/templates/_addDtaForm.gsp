@@ -19,7 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
+<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <div class="container-sm left-aligned">
     <div class="card">
         <div class="card-header">
@@ -76,7 +76,7 @@
                     </label>
 
                     <div class="col-sm-10">
-                        <input id="validityDateInput" value="${docDtaCmd?.validityDate?.format("yyyy-MM-dd")}" type="date" name="validityDateInput"
+                        <input id="validityDateInput" value="${TimeFormats.DATE.getFormattedDate(docDtaCmd?.validityDate as Date)}" type="date" name="validityDateInput"
                                class="form-control form-control-sm"/>
                     </div>
                 </div>

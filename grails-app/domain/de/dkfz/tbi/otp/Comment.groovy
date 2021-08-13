@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.util.TimeFormats
 
 class Comment implements Entity {
 
@@ -36,6 +37,6 @@ class Comment implements Entity {
     }
 
     String displayString() {
-        return "Author: ${author}\nlast modified at: ${modificationDate.format('yyyy-MM-dd')}\ncomment: ${comment}"
+        return "Author: ${author}\nlast modified at: ${TimeFormats.DATE.getFormattedDate(modificationDate)}\ncomment: ${comment}"
     }
 }

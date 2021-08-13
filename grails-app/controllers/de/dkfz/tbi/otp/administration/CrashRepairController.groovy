@@ -92,7 +92,7 @@ class CrashRepairController implements CheckAndCall {
             }
         } as List<WorkflowStep>
 
-        workflowSteps.each { it.lastUpdated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(it.lastUpdated) }
+        workflowSteps.each { it.lastUpdated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.lastUpdated) }
 
         render workflowSteps as JSON
     }

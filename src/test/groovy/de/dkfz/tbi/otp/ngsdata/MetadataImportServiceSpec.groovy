@@ -55,6 +55,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -464,7 +465,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         def (String parse, String scParse, String get) = ["parse_me", "sc_parse_me", "in_db"]
 
         def (Date run1Date, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { TimeUtils.toDate(LocalDate.of(it[0], it[1], it[2])) }
-        def (String date1, String date2) = [run1Date, run2Date].collect { it.format("yyyy-MM-dd") }
+        def (String date1, String date2) = [run1Date, run2Date].collect { TimeFormats.DATE.getFormattedDate(it) }
 
         def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.getRandomMd5sum() }
 
@@ -871,7 +872,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         given:
         String runName = 'run'
         Date date = TimeUtils.toDate(LocalDate.of(2000, 1, 1))
-        String dateString = date.format("yyyy-MM-dd")
+        String dateString = TimeFormats.DATE.getFormattedDate(date)
         String fastq1 = "fastq_1.gz"
         String fastq2 = "fastq_2.gz"
         String md5sum1 = HelperUtils.randomMd5sum
@@ -1044,7 +1045,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         given:
         String runName = 'run'
         Date date = TimeUtils.toDate(LocalDate.of(2000, 1, 1))
-        String dateString = date.format("yyyy-MM-dd")
+        String dateString = TimeFormats.DATE.getFormattedDate(date)
         String fastq1 = "fastq_r1.gz"
         String fastq2 = "fastq_r2.gz"
         String fastqIndex1 = "fastq_i1.gz"
@@ -1653,7 +1654,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         SeqCenter seqCenter = run.seqCenter
         SeqPlatform seqPlatform = run.seqPlatform
         Date dateExecuted = run.dateExecuted
-        String dateExecutedString = dateExecuted ? dateExecuted.format('yyyy-MM-dd') : ''
+        String dateExecutedString = TimeFormats.DATE.getFormattedDate(dateExecuted)
 
         MetadataImportService service = new MetadataImportService([
                 seqPlatformService: new SeqPlatformService([

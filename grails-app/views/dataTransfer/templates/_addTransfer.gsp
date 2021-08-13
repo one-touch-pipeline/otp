@@ -19,7 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
+<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <div class="card card-body">
     <g:uploadForm action="addTransfer" useToken="true">
         <input type="hidden" name="dataTransferAgreement.id" value="${dta.id}">
@@ -112,7 +112,7 @@
             </label>
 
             <div class="col-sm-10">
-                <input id="transferStartedInput" value="${(cachedTransferCmd?.transferDate ?: new Date()).format("yyyy-MM-dd")}"
+                <input id="transferStartedInput" value="${(cachedTransferCmd?.transferDate ?: TimeFormats.DATE.getFormattedDate(new Date()))}"
                        type="date" name="transferDateInput" class="form-control form-control-sm" required/>
             </div>
         </div>
@@ -123,7 +123,7 @@
             </label>
 
             <div class="col-sm-10">
-                <input id="completionDateInput" value="${cachedTransferCmd?.completionDate?.format("yyyy-MM-dd") ?: ""}"
+                <input id="completionDateInput" value="${TimeFormats.DATE.getFormattedDate(cachedTransferCmd?.completionDate)}"
                        type="date" name="completionDateInput" class="form-control form-control-sm"/>
             </div>
         </div>

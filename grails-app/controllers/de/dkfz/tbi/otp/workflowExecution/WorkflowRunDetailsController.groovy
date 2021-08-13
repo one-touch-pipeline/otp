@@ -84,12 +84,12 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
             }.empty
 
             return [
-                    state                 : step.state,
-                    id                    : step.id,
-                    name                  : step.beanName,
-                    dateCreated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.dateCreated),
-                    lastUpdated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.lastUpdated),
-                    duration              : getFormattedDuration(convertDateToLocalDateTime(step.dateCreated), convertDateToLocalDateTime(step.lastUpdated)),
+                    state      : step.state,
+                    id         : step.id,
+                    name       : step.beanName,
+                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.dateCreated),
+                    lastUpdated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(step.lastUpdated),
+                    duration   : getFormattedDuration(convertDateToLocalDateTime(step.dateCreated), convertDateToLocalDateTime(step.lastUpdated)),
 
                     error                 : step.workflowError,
                     clusterJobs           : (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }.collect { ClusterJob clusterJob ->
@@ -117,7 +117,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
     def saveComment(CommentCommand cmd) {
         WorkflowRun workflowRun = WorkflowRun.get(cmd.id)
         commentService.saveComment(workflowRun, cmd.comment)
-        Map dataToRender = [date: workflowRun.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: workflowRun.comment.author]
+        Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(workflowRun.comment.modificationDate), author: workflowRun.comment.author]
         render dataToRender as JSON
     }
 

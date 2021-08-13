@@ -51,12 +51,12 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
+import de.dkfz.tbi.util.TimeFormats
 
 import javax.sql.DataSource
 import java.nio.file.*
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.*
 
 /**
@@ -480,7 +480,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 System.getProperty('user.name'),
                 this.class.simpleName,
                 methodName.methodName.replaceAll('[^a-zA-Z\\-_]', '-'),
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern('yyyy-MM-dd-HH-mm-ss-SSS', Locale.ENGLISH)),
+                TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedLocalDateTime(LocalDateTime.now()),
                 (Math.abs(HelperUtils.random.nextLong()) % 1000000).toString().padLeft(6, '0'),
         ].join('_')
 

@@ -40,9 +40,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
+import de.dkfz.tbi.util.TimeFormats
 
 import java.sql.Timestamp
-import java.text.SimpleDateFormat
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class ProjectConfigController implements CheckAndCall {
@@ -53,8 +53,6 @@ class ProjectConfigController implements CheckAndCall {
     ProjectRequestService projectRequestService
     ProjectSelectionService projectSelectionService
     ProjectService projectService
-
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
 
     static allowedMethods = [
             index                               : "GET",
@@ -91,7 +89,7 @@ class ProjectConfigController implements CheckAndCall {
                 .listAndFetchAbstractFields(project.projectType, ProjectPageType.PROJECT_CONFIG)
 
         return [
-                creationDate                   : simpleDateFormat.format(project.dateCreated),
+                creationDate                   : TimeFormats.DATE_TIME.getFormattedDate(project.dateCreated),
                 lastReceivedDate               : getLastReceivedDate(project),
                 projectRequestComments         : projectRequestComments,
                 directory                      : project ? LsdfFilesService.getPath(configService.rootPath.path, project.dirName) : "",
@@ -195,7 +193,7 @@ class ProjectConfigController implements CheckAndCall {
     def saveProjectComment(CommentCommand cmd) {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)
-        Map dataToRender = [date: project.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: project.comment.author]
+        Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(project.comment.modificationDate), author: project.comment.author]
         render dataToRender as JSON
     }
 
@@ -246,7 +244,7 @@ class ProjectConfigController implements CheckAndCall {
                 max("dateCreated")
             }
         }
-        return timestamps ? simpleDateFormat.format(timestamps[0]) : "-"
+        return timestamps ? TimeFormats.DATE_TIME.getFormattedDate(timestamps[0] as Date) : ''
     }
 }
 

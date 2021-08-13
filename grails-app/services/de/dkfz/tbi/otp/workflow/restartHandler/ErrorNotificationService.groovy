@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.util.TimeFormats
 
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
@@ -231,10 +230,10 @@ class ErrorNotificationService {
             prevRunningWorkflowStep.clusterJobs.sort { it.id }.each { ClusterJob clusterJob ->
                 message << "ID: ${clusterJob.clusterJobId}"
                 message << "Name: ${clusterJob.clusterJobName}"
-                message << "Queued time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.queued)}"
-                message << "Eligible time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.eligible)}"
-                message << "Start time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.started)}"
-                message << "End time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.ended)}"
+                message << "Queued time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.queued)}"
+                message << "Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.eligible)}"
+                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.started)}"
+                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.ended)}"
                 message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na'}"
                 message << "Requested walltime: ${clusterJob.requestedWalltime}"
                 message << "Log file: ${clusterJob.jobLog}"
@@ -266,7 +265,7 @@ class ErrorNotificationService {
     }
 
     private String dateString(Date date) {
-        return date ? new SimpleDateFormat('yyyy-MM-dd HH:mm', Locale.ENGLISH).format(date) : 'na'
+        return TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(date)
     }
 
     String getSubmissionIds(Set<SeqTrack> seqTracks) {

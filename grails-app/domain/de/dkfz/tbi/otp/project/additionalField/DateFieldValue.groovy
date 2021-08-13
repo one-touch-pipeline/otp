@@ -40,6 +40,6 @@ class DateFieldValue extends AbstractSingleFieldValue {
 
     @Override
     String getDisplayValue() {
-        return dateValue ? TimeFormats.DATE.getFormatted(dateValue) : ""
+        return dateValue ? TimeFormats.DATE.getFormattedLocalDate(dateValue) : ""
     }
 }

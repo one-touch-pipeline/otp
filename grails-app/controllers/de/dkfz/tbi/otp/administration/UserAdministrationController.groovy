@@ -31,8 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.DataTableCommand
-
-import java.text.SimpleDateFormat
+import de.dkfz.tbi.util.TimeFormats
 
 /**
  * @short Controller for user management.
@@ -77,7 +76,7 @@ class UserAdministrationController implements CheckAndCall {
         users.each { User user ->
             String dateString
             if (user.plannedDeactivationDate) {
-                dateString = new SimpleDateFormat('yyyy-MM-dd HH:mm:ss', Locale.ENGLISH).format(user.plannedDeactivationDate)
+                dateString = TimeFormats.DATE_TIME.getFormattedDate(user.plannedDeactivationDate)
             } else {
                 dateString = ""
             }

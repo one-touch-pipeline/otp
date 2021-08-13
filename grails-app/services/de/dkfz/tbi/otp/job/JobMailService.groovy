@@ -34,8 +34,6 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.TimeFormats
-
-import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 
 @Transactional
@@ -118,11 +116,11 @@ class JobMailService {
             Map clusterProperties = [
                     clusterId          : clusterJob.clusterJobId,
                     jobName            : clusterJob.clusterJobName,
-                    queue              : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.queued),
+                    queue              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.queued),
                     //time when job is ready for start (no hold anymore)
-                    eligible           : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.eligible),
-                    start              : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.started),
-                    ended              : TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.ended),
+                    eligible           : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.eligible),
+                    start              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.started),
+                    ended              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.ended),
                     runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.toHours() : 'na',
                     logFile            : clusterJob.jobLog,
                     exitStatus         : clusterJob.exitStatus,
@@ -156,7 +154,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
     }
 
     private String dateString(Date date) {
-        return date ? new SimpleDateFormat('yyyy-MM-dd HH:mm', Locale.ENGLISH).format(date) : 'na'
+        return date ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(date) : 'na'
     }
 
     int restartCount(ProcessingStep step) {

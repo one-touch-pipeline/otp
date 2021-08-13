@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -307,7 +308,7 @@ class MolgenisExporter {
     }
 }
 
-String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date())
+String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 Realm realm = ctx.configService.defaultRealm
 
 projects.each { Project project ->

@@ -409,7 +409,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         if (!baseDirectory) {
             String mkDirs = """\
 TEMP_DIR=`mktemp -d -p ${resultRootDirectory.absolutePath} ${this.class.simpleName[0..-6]}-${System.getProperty('user.name')}-${
-                TimeFormats.DATE_TIME_WITH_ZONE.getFormatted(ZonedDateTime.now())
+                TimeFormats.DATE_TIME_WITH_ZONE.getFormattedZonedDateTime(ZonedDateTime.now())
             }-XXXXXXXXXXXXXXXX`
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR

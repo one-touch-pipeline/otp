@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
 
@@ -68,7 +69,7 @@ class StatisticsController {
         List<ProjectGroup> availableProjectGroups = projects.groupBy { it.projectGroup }.keySet().findAll().toList()
                 .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name) }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        SimpleDateFormat dateFormat = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
         Date startDate = params.start && params.end ? dateFormat.parse(params.start) : null
         Date endDate = params.end && params.end ? dateFormat.parse(params.end) : new Date()
 

@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import java.text.SimpleDateFormat
+import de.dkfz.tbi.util.TimeFormats
 
 class FileNameGenerator {
 
@@ -34,7 +34,7 @@ class FileNameGenerator {
      */
     static String getUniqueFileNameWithTimestamp(String filename) {
         final int SPLITS = 2
-        String dateString = new SimpleDateFormat("yyyy-MM-dd-HHmmssSSSS", Locale.ENGLISH).format(new Date())
+        String dateString = TimeFormats.DATE_TIME_SECONDS.getFormattedDate(new Date())
         String[] splittedFileName = filename.split("\\.", SPLITS)
 
         if (splittedFileName.size() == SPLITS) {

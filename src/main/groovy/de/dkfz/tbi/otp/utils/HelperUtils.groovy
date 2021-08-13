@@ -30,7 +30,7 @@ class HelperUtils {
     static Random random = new SecureRandom()
 
     static String getUniqueString() {
-        return "${TimeFormats.DATE_TIME_WITH_ZONE.getFormatted(ZonedDateTime.now())}-${sprintf('%016X', random.nextLong())}"
+        return "${TimeFormats.DATE_TIME_WITH_ZONE.getFormattedZonedDateTime(ZonedDateTime.now())}-${sprintf('%016X', random.nextLong())}"
     }
 
     static String getRandomMd5sum() {

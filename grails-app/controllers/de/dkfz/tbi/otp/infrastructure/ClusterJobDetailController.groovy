@@ -51,9 +51,9 @@ class ClusterJobDetailController {
 
         return [
                 'job'       : clusterJob,
-                'jobQueued' : TimeFormats.DATE_TIME.getFormatted(clusterJob.queued),
-                'jobStarted': TimeFormats.DATE_TIME.getFormatted(clusterJob.started),
-                'jobEnded'  : TimeFormats.DATE_TIME.getFormatted(clusterJob.ended),
+                'jobQueued' : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.queued),
+                'jobStarted': TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.started),
+                'jobEnded'  : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.ended),
                 'individual': individual,
                 'project'   : project,
                 'NA'        : ClusterJob.NOT_AVAILABLE,

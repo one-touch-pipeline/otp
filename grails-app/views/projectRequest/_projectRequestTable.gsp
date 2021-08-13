@@ -19,7 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
+<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <g:if test="${projectRequests}">
     <g:each var="projectRequest" in="${projectRequests}">
         <div class="project-request-container">
@@ -30,10 +30,10 @@
                 <span style="color: ${projectRequest.status.color}">${projectRequest.formattedStatus}</span>
             </div>
             <div class="created">
-                opened on ${projectRequest.dateCreated.format("yyyy-MM-dd HH:mm")} by ${projectRequest.requester}
+                opened on ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(projectRequest.dateCreated as Date)} by ${projectRequest.requester}
             </div>
             <div class="updated">
-                last updated on ${projectRequest.lastUpdated.format("yyyy-MM-dd HH:mm")}
+                last updated on ${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(projectRequest.lastUpdated as Date)}
             </div>
         </div>
     </g:each>

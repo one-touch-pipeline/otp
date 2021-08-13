@@ -26,6 +26,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.util.TimeFormats
+
 import java.text.SimpleDateFormat
 import java.nio.file.*;
 
@@ -87,7 +89,7 @@ class MolgenisGlobal {
 
 Realm realm = ctx.configService.defaultRealm
 
-String timestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date())
+String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 final Path outputDirectory = ctx.fileService.toPath(ctx.configService.getScriptOutputPath(), ctx.fileSystemService.getRemoteFileSystemOnDefaultRealm()).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
 ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
 ctx.fileService.setPermission(outputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)

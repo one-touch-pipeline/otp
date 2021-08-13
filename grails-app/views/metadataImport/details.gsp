@@ -21,6 +21,7 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -120,7 +121,7 @@
             ${[
                     run.run.seqCenter.name,
                     run.run.seqPlatform.fullName(),
-                    run.run.dateExecuted?.format("yyyy-MM-dd")
+                    TimeFormats.DATE.getFormattedDate(run.run.dateExecuted),
             ].findAll().join(', ')}
         </h3>
         <ul>
@@ -155,7 +156,7 @@
                             </li>
                         </g:each>
                         <g:each in="${seqTrack.seqTrack.logMessages}" var="msg">
-                            <li>${de.dkfz.tbi.util.TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(msg.dateCreated)}: ${msg.message}</li>
+                            <li>${de.dkfz.tbi.util.TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(msg.dateCreated)}: ${msg.message}</li>
                         </g:each>
                     </ul>
                 </li>

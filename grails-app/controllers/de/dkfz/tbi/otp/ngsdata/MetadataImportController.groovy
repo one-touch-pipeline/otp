@@ -197,7 +197,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             new MetaDataFileWrapper(
                     metaDataFile: it,
                     fullPath    : metadataImportService.getMetaDataFileFullPath(it),
-                    dateCreated : TimeFormats.DATE_TIME.getFormatted(TimeUtils.toZonedDateTime(it.dateCreated)),
+                    dateCreated : TimeFormats.DATE_TIME.getFormattedZonedDateTime(TimeUtils.toZonedDateTime(it.dateCreated)),
             )
         }
 
@@ -337,7 +337,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             retMap << [
                     updateMap: [
                             author          : ilseSubmission.comment.author,
-                            modificationDate: ilseSubmission.comment.modificationDate.format('yyyy-MM-dd'),
+                            modificationDate: TimeFormats.DATE.getFormattedDate(ilseSubmission.comment.modificationDate),
                     ],
             ]
         }) {

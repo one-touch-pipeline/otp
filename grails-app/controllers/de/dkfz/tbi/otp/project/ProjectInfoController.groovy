@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.util.TimeFormats
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -53,10 +54,11 @@ class ProjectInfoController implements CheckAndCall {
         ProjectRequest projectRequest = projectRequestService.findProjectRequestByProject(project)
 
         return [
-                project            : project,
-                projectInfos       : projectInfoService.getAllProjectInfosSortedByDateDesc(project),
-                projectRequest     : projectRequest,
-                docCmd             : flash.docCmd as AddProjectInfoCommand,
+                project       : project,
+                dateFormat    : TimeFormats.DATE.format,
+                projectInfos  : projectInfoService.getAllProjectInfosSortedByDateDesc(project),
+                projectRequest: projectRequest,
+                docCmd        : flash.docCmd as AddProjectInfoCommand,
         ]
     }
 

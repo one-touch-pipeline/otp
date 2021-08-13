@@ -50,6 +50,7 @@ import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationS
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.utils.TransactionUtils
+import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
@@ -444,7 +445,7 @@ class MetadataImportService {
                 uniqueColumnValue(rows, INSTRUMENT_MODEL),
                 uniqueColumnValue(rows, SEQUENCING_KIT) ?: null)
         String dateString = uniqueColumnValue(rows, RUN_DATE)
-        Date dateExecuted = dateString ? RunDateParserService.parseDate('yyyy-MM-dd', dateString) : null
+        Date dateExecuted = dateString ? RunDateParserService.parseDate(TimeFormats.DATE.format, dateString) : null
 
         Run run = atMostOneElement(Run.findAllByName(runName))
         if (run) {
