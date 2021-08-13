@@ -157,7 +157,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     @SuppressWarnings('Indentation')
     void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
-        createDirectories([workPackage.project.projectSequencingDirectory])
+        createDirectories([new File(projectService.getSequencingDirectory(workPackage.project).toString())])
 
         GeneModel geneModel = DomainFactory.createGeneModel(
                 referenceGenome: workPackage.referenceGenome,

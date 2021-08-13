@@ -49,7 +49,7 @@ class StatisticsController {
         StringBuilder output = new StringBuilder()
 
         projectService.allProjects.each { Project project ->
-            output << project.projectDirectory << ","
+            output << projectService.getProjectDirectory(project) << ","
             output << project.dirAnalysis ?: ''
             output << "\n"
         }

@@ -42,12 +42,8 @@ class ProjectInfo implements Entity {
         comment type: "text"
     }
 
-    String getPath() {
-        return "${project.projectDirectory}/${ProjectService.PROJECT_INFO}/${fileName}"
-    }
-
     @Override
     String toString() {
-        return "ProjectInfo ${id}, file: ${path}"
+        return "ProjectInfo ${id}, file: ${fileName}"
     }
 }

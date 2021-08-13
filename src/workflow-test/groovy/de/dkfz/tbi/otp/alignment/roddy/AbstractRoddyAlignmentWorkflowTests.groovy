@@ -215,7 +215,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {
-        createDirectories([workPackage.project.projectSequencingDirectory])
+        createDirectories([new File(projectService.getSequencingDirectory(workPackage.project).toString())])
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,

@@ -23,6 +23,7 @@
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
@@ -77,10 +78,11 @@ enum ProjectDeletionMode {
 }
 
 DeletionService deletionService = ctx.deletionService
+ProjectService projectService = ctx.projectService
 
 Project.withTransaction {
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "No project with the provided name could be found")
-    String absoluteProjectDirectory = project.getProjectDirectory()
+    String absoluteProjectDirectory = projectService.getProjectDirectory(project)
 
     if (assertProjectEmpty) {
         assert !projectHasDataDependencies(project): "The project contains data, disable `assertProjectEmpty` to override this check"

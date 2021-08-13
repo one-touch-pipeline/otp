@@ -126,6 +126,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.mailHelperService = Mock(MailHelperService) {
             0 * sendEmail(_, _, _)
         }
+        projectService.configService = configService
 
         DomainFactory.createProcessingOptionLazy([
                 name : OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
@@ -1376,11 +1377,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 seqType: seqType,
         )
 
-        File baseProjectDirectory = baseProject.projectDirectory
-        assert baseProjectDirectory.exists() || baseProjectDirectory.mkdirs()
+        Path baseProjectDirectory = projectService.getProjectDirectory(baseProject)
+        assert Files.exists(baseProjectDirectory) || Files.createDirectories(baseProjectDirectory)
 
-        File targetProjectDirectory = targetProject.projectDirectory
-        assert targetProjectDirectory.exists() || targetProjectDirectory.mkdirs()
+        Path targetProjectDirectory = projectService.getProjectDirectory(targetProject)
+        assert Files.exists(targetProjectDirectory) || Files.createDirectories(targetProjectDirectory)
 
         return [
                 "baseProject"  : baseProject,

@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.FileNameGenerator
 import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
@@ -45,6 +46,7 @@ class DataTransferAgreementService {
     FileService fileService
     FileSystemService fileSystemService
     ExecutionHelperService executionHelperService
+    ProjectService projectService
 
     /**
      * Create a new DataTransferAgreement (DTA) and persist it in the database.
@@ -167,8 +169,7 @@ class DataTransferAgreementService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void deleteDataTransferAgreement(DataTransferAgreement dataTransferAgreement) throws IOException, AssertionError {
-        FileSystem fs = fileSystemService.getRemoteFileSystem(dataTransferAgreement.project.realm)
-        Path pathToDelete = fs.getPath(getPathOnRemoteFileSystem(dataTransferAgreement).toString())
+        Path pathToDelete = getPathOnRemoteFileSystem(dataTransferAgreement)
         fileService.deleteDirectoryRecursively(pathToDelete)
         dataTransferAgreement.project = null
         dataTransferAgreement.delete(flush: true)
@@ -201,8 +202,8 @@ class DataTransferAgreementService {
      * @param dta for which the path is requested
      * @return path to the specific dta
      */
-    static Path getPathOnRemoteFileSystem(DataTransferAgreement dta) {
-        return Paths.get("${dta.project.projectDirectory}/${DTA_DIRECTORY}/${DTA_DIR_PREFIX.concat(dta.id as String)}")
+    Path getPathOnRemoteFileSystem(DataTransferAgreement dta) {
+        return projectService.getProjectDirectory(dta.project).resolve(DTA_DIRECTORY).resolve(DTA_DIR_PREFIX.concat(dta.id as String))
     }
 
     /**
@@ -211,7 +212,7 @@ class DataTransferAgreementService {
      * @param dtaDocument for which the path is requested
      * @return path to the specific dta document
      */
-    static Path getPathOnRemoteFileSystem(DataTransferAgreementDocument dtaDocument) {
-        return Paths.get("${getPathOnRemoteFileSystem(dtaDocument.dataTransferAgreement)}/${dtaDocument.fileName}")
+    Path getPathOnRemoteFileSystem(DataTransferAgreementDocument dtaDocument) {
+        return getPathOnRemoteFileSystem(dtaDocument.dataTransferAgreement).resolve(dtaDocument.fileName)
     }
 }

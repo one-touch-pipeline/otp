@@ -29,10 +29,13 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 
+import java.nio.file.Path
 import java.time.LocalDate
 
 class ProjectServiceSpec extends Specification implements DataTest, DomainFactoryCore, UserAndRoles {
@@ -113,5 +116,40 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
                 config.project, config.seqType))
         newConfig != config
         newConfig.programVersion == "yapsa 1.0"
+    }
+
+    void "test getProjectDirectory all fine"() {
+        given:
+        ProjectService projectService = new ProjectService([
+                configService: new TestConfigService(),
+                fileSystemService: new TestFileSystemService(),
+        ])
+
+        Project project = createProject()
+
+        when:
+        Path file = projectService.getProjectDirectory(project)
+
+        then:
+        file.absolute
+        file.toString().contains(project.dirName)
+    }
+
+    void "test getProjectDirectory project directory contains slashes"() {
+        given:
+        ProjectService projectService = new ProjectService([
+                configService: new TestConfigService(),
+                fileSystemService: new TestFileSystemService(),
+        ])
+        Project project = createProject(
+                dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
+        )
+
+        when:
+        Path file = projectService.getProjectDirectory(project)
+
+        then:
+        file.absolute
+        file.toString().contains(project.dirName)
     }
 }

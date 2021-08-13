@@ -336,7 +336,7 @@
                     <g:if test="${baseProjectInfos}">
                         <g:select name="projectInfoToCopy" class="use-select-2"
                                   from="${baseProjectInfos}" value="${projectCreationCmd?.projectInfoToCopy?.id}"
-                                  optionKey="id" optionValue="path"
+                                  optionKey="id" optionValue="fileName"
                                   noSelection="${['': 'No project info selected']}"/>
                     </g:if>
                 </td>

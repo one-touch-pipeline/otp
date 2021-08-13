@@ -63,7 +63,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 project: project,
                 seqType: seqType,
         )
-        createDirectories([project.projectSequencingDirectory])
+        createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureSophiaPipelineProject(

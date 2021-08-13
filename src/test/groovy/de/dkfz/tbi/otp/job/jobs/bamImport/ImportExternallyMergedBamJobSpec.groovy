@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
@@ -312,7 +313,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         createHelperObjects(importProcess)
 
-        assert epmbfWithoutMd5sum.project.projectDirectory.mkdirs()
+        assert Files.createDirectories(importExternallyMergedBamJob.projectService.getProjectDirectory(epmbfWithoutMd5sum.project))
         CreateFileHelper.createFile(new File(mainDirectory, epmbfWithoutMd5sum.bamFileName))
         CreateFileHelper.createFile(new File(mainDirectory, epmbfWithoutMd5sum.baiFileName))
 
@@ -366,7 +367,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         createHelperObjects(importProcess)
 
-        assert epmbfWithoutMd5sum.project.projectDirectory.mkdirs()
+        assert Files.createDirectories(importExternallyMergedBamJob.projectService.getProjectDirectory(epmbfWithoutMd5sum.project))
         CreateFileHelper.createFile(new File(mainDirectory, epmbfWithoutMd5sum.bamFileName))
         CreateFileHelper.createFile(new File(mainDirectory, epmbfWithoutMd5sum.baiFileName))
 
@@ -583,6 +584,9 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         importExternallyMergedBamJob.fileSystemService = new FileSystemService()
         importExternallyMergedBamJob.fileSystemService.processingOptionService = new ProcessingOptionService()
         importExternallyMergedBamJob.processingOptionService = new ProcessingOptionService()
+        importExternallyMergedBamJob.projectService = new ProjectService()
+        importExternallyMergedBamJob.projectService.configService = configService
+        importExternallyMergedBamJob.projectService.fileSystemService = new TestFileSystemService()
 
         ExternallyProcessedMergedBamFile externallyProcessedMergedBamFile = importProcess.externallyProcessedMergedBamFiles[0]
         File bamFile = new File(mainDirectory, externallyProcessedMergedBamFile.bamFileName)

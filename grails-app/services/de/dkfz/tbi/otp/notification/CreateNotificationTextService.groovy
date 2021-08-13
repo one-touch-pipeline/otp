@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
@@ -56,6 +57,7 @@ class CreateNotificationTextService {
     LsdfFilesService lsdfFilesService
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
+    ProjectService projectService
 
     /**
      * Helper function to create the notification for exactly one ProcessingStep.
@@ -503,7 +505,7 @@ class CreateNotificationTextService {
         assert seqTracks
 
         return DataFile.findAllBySeqTrackInList(seqTracks).collect { DataFile file ->
-            String basePath = file.project.projectSequencingDirectory
+            String basePath = projectService.getSequencingDirectory(file.project)
             String seqTypeDir = lsdfFilesService.seqTypeDirectory(file)
             new File("${basePath}/${seqTypeDir}/")
         }.unique().sort()*.path.join('\n')
@@ -516,7 +518,7 @@ class CreateNotificationTextService {
         String sampleType = '${SAMPLE_TYPE}'
 
         return bamFiles.collect {
-            String projectDir = it.project.projectDirectory
+            String projectDir = projectService.getProjectDirectory(it.project)
             String seqTypeDir = it.seqType.dirName
             String layout = it.seqType.libraryLayoutDirName
             String antiBodyTarget = it.seqType.hasAntibodyTarget ? '-${ANTI_BODY_TARGET}' : ''

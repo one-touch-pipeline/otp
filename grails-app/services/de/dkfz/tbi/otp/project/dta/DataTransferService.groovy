@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 
 @Transactional
@@ -45,6 +44,7 @@ class DataTransferService {
 
     static final String TRANSFER_DIR_PREFIX = "transfer-"
 
+    DataTransferAgreementService dataTransferAgreementService
     FileService fileService
     FileSystemService fileSystemService
     ExecutionHelperService executionHelperService
@@ -133,13 +133,12 @@ class DataTransferService {
     @SuppressWarnings("JavaIoPackageAccess")
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     private Path uploadDataTransferDocumentToRemoteFileSystem(DataTransferDocument transferDocument, byte[] fileContent) {
-        Path absoluteFilePath = getPathOnRemoteFileSystem(transferDocument)
+        Path path = getPathOnRemoteFileSystem(transferDocument)
         Realm realm = transferDocument.dataTransfer.dataTransferAgreement.project.realm
-        Path path = fileSystemService.getRemoteFileSystem(realm).getPath(absoluteFilePath.toString())
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
         fileService.createFileWithContent(path, fileContent, realm, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
-        executionHelperService.setGroup(realm, new File(absoluteFilePath.toString()), transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup)
+        fileService.setGroupViaBash(path, realm, transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup)
 
         return path
     }
@@ -170,8 +169,7 @@ class DataTransferService {
             throw new FileNotFoundException("The transfer document ${transferDocument?.fileName} was not found.")
         }
 
-        Path file = fileSystemService.getRemoteFileSystem(transferDocument.dataTransfer.dataTransferAgreement.project.realm)
-                .getPath(getPathOnRemoteFileSystem(transferDocument).toString())
+        Path file = getPathOnRemoteFileSystem(transferDocument)
 
         if (!Files.exists(file)) {
             throw new FileNotFoundException("The transfer document ${transferDocument.fileName} was not found.")
@@ -186,9 +184,8 @@ class DataTransferService {
      * @param transfer for which the path is requested
      * @return path to the specific data transfer
      */
-    static Path getPathOnRemoteFileSystem(DataTransfer transfer) {
-        return Paths.get("${DataTransferAgreementService.getPathOnRemoteFileSystem(transfer.dataTransferAgreement)}/" +
-                "${TRANSFER_DIR_PREFIX.concat(transfer.id as String)}")
+    Path getPathOnRemoteFileSystem(DataTransfer transfer) {
+        return dataTransferAgreementService.getPathOnRemoteFileSystem(transfer.dataTransferAgreement).resolve(TRANSFER_DIR_PREFIX.concat(transfer.id as String))
     }
 
     /**
@@ -197,7 +194,7 @@ class DataTransferService {
      * @param transferDocument for which the path is requested
      * @return path to the specific data transfer document
      */
-    static Path getPathOnRemoteFileSystem(DataTransferDocument transferDocument) {
-        return Paths.get("${getPathOnRemoteFileSystem(transferDocument.dataTransfer)}/${transferDocument.fileName}")
+    Path getPathOnRemoteFileSystem(DataTransferDocument transferDocument) {
+        return getPathOnRemoteFileSystem(transferDocument.dataTransfer).resolve(transferDocument.fileName)
     }
 }

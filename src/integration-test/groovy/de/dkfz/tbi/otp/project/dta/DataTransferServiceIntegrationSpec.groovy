@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
@@ -48,6 +49,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
 
     DataTransferService dataTransferService
     TestConfigService configService
+    ProjectService projectService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -70,6 +72,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
                 springSecurityService : Mock(SpringSecurityService) {
                     _ * getCurrentUser() >> getUser(ADMIN)
                 },
+                dataTransferAgreementService: new DataTransferAgreementService(projectService: projectService),
         )
         configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }

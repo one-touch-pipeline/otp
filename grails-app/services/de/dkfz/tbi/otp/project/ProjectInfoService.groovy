@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
-import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 
 @Transactional
@@ -38,6 +37,7 @@ class ProjectInfoService {
     ExecutionHelperService executionHelperService
     FileSystemService fileSystemService
     FileService fileService
+    ProjectService projectService
 
     @SuppressWarnings('PropertyName') // static helper closure, not a normal property, more like a constant.
     static Closure SORT_DATE_CREATED_DESC = { a, b ->
@@ -89,8 +89,7 @@ class ProjectInfoService {
         cmd.validate()
         assert !cmd.errors.hasErrors()
         ProjectInfo projectInfo = cmd.projectInfo
-        FileSystem fs = getRemoteFileSystemForProject(projectInfo.project)
-        Path path = fs.getPath(projectInfo.path)
+        Path path = getPath(projectInfo)
         fileService.deleteDirectoryRecursively(path)
         projectInfo.project = null
         projectInfo.delete(flush: true)
@@ -99,25 +98,27 @@ class ProjectInfoService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
-        Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(projectInfo.path)
+        Path file = getPath(projectInfo)
         return Files.exists(file) ? file.bytes : [] as byte[]
     }
 
     private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
-        String absoluteFilePath = "${projectInfo.project.projectDirectory.absolutePath}/${ProjectService.PROJECT_INFO}/${projectInfo.fileName}"
-        Path file = getRemoteFileSystemForProject(projectInfo.project).getPath(absoluteFilePath)
+        Path file = getPath(projectInfo)
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(file.parent, projectInfo.project.realm,
                 '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(file, content, projectInfo.project.realm,
-                [PosixFilePermission.OWNER_READ] as Set<PosixFileAttributes>)
-        executionHelperService.setGroup(projectInfo.project.realm, new File(absoluteFilePath), projectInfo.project.unixGroup)
+        fileService.createFileWithContent(file, content, projectInfo.project.realm, [PosixFilePermission.OWNER_READ] as Set)
+        fileService.setGroupViaBash(file, projectInfo.project.realm, projectInfo.project.unixGroup)
 
         return file
     }
 
     FileSystem getRemoteFileSystemForProject(Project project) {
         return fileSystemService.getRemoteFileSystem(project.realm)
+    }
+
+    Path getPath(ProjectInfo projectInfo) {
+        return projectService.getProjectDirectory(projectInfo.project).resolve(ProjectService.PROJECT_INFO).resolve(projectInfo.fileName)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

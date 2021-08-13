@@ -36,9 +36,11 @@ output << """\
 
 """
 
+DataTransferAgreementService dataTransferAgreementService = ctx.dataTransferAgreementService
+ProjectService projectService = ctx.projectService
 dataTransferAgreements.each { DataTransferAgreement dta ->
-    String fileOnOldPath = "${dta.project.projectDirectory}/${ProjectService.PROJECT_INFO}/${dta.dataTransferAgreementDocuments.findAll().first().fileName}"
-    String newPath = DataTransferAgreementService.getPathOnRemoteFileSystem(dta).toString()
+    String fileOnOldPath = "${projectService.getProjectDirectory(dta.project).toString()}/${ProjectService.PROJECT_INFO}/${dta.dataTransferAgreementDocuments.findAll().first().fileName}"
+    String newPath = dataTransferAgreementService.getPathOnRemoteFileSystem(dta).toString()
     output << ("mkdir -m 750 ${newPath}" as String)
     output << ("mv ${fileOnOldPath} ${newPath}" as String)
 }

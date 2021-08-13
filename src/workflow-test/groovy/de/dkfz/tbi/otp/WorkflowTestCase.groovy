@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -83,6 +84,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
     ReferenceGenomeService referenceGenomeService
+    ProjectService projectService
 
     LinkFileUtils linkFileUtils
     FileService fileService

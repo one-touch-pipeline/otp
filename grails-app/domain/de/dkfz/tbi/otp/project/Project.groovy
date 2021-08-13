@@ -203,10 +203,18 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         "${name}${closed ? " (closed)" : ""}"
     }
 
+    /**
+     * @deprecated use {@link ProjectService#getProjectDirectory(Project)}
+     */
+    @Deprecated
     File getProjectDirectory() {
         new OtpPath(this, dirName).absoluteDataManagementPath
     }
 
+    /**
+     * @deprecated use {@link ProjectService#getSequencingDirectory(Project)}
+     */
+    @Deprecated
     File getProjectSequencingDirectory() {
         new File(projectDirectory, 'sequencing')
     }

@@ -31,34 +31,19 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.IndividualService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnitTest<LaneSwapService>, DomainFactoryCore, GrailsWebUnitTest {
 
@@ -124,6 +109,9 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
         service.deletionService = Mock(DeletionService)
+        service.projectService = new ProjectService()
+        service.projectService.configService = service.configService
+        service.projectService.fileSystemService = new TestFileSystemService()
 
         // Domain
         SampleType newSampleType = createSampleType()

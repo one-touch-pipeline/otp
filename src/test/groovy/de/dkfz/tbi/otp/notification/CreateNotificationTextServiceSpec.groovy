@@ -38,8 +38,10 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
@@ -201,11 +203,13 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         given:
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(lsdfFilesService: new LsdfFilesService())
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
-        String fileNameString = new CreateNotificationTextService(
-                lsdfFilesService: new LsdfFilesService(),
-        ).getSeqTypeDirectories([seqTrack1, seqTrack2])
+        String fileNameString = createNotificationTextService.getSeqTypeDirectories([seqTrack1, seqTrack2])
         String expected = [
                 new File("${configService.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}"),
                 new File("${configService.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}"),
@@ -240,9 +244,13 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                         pipeline: roddyBamFile1.pipeline,
                 ])
         ])
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService()
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
-        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
+        String fileNameString = createNotificationTextService.getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
         String expected = [
                 new File("${configService.rootPath}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
                         "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
@@ -262,9 +270,13 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                         pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ])
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService()
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
-        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
+        String fileNameString = createNotificationTextService.getMergingDirectories([roddyBamFile])
         String expected = new File("${configService.rootPath}/${roddyBamFile.project.dirName}/sequencing/" +
                 "${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/" +
                 "${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
@@ -384,6 +396,9 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 messageSourceService: messageSourceServiceWithMockedMessageSource,
                 processingOptionService: new ProcessingOptionService(),
         )
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
         List<String> samples = ["[-] ${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.seqTrack.sampleIdentifier})"]
@@ -506,6 +521,9 @@ ${expectedAlign}"""
                 messageSourceService: messageSourceServiceWithMockedMessageSource,
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         SeqTrack seqTrack1 = data1.seqTrack as SeqTrack
         SeqTrack seqTrack2 = data2.seqTrack as SeqTrack
@@ -663,6 +681,9 @@ ${expectedAlign}"""
                 }
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         SeqTrack seqTrack1 = data1.seqTrack as SeqTrack
         SeqTrack seqTrack2 = data2.seqTrack as SeqTrack
@@ -808,6 +829,9 @@ ${expectedAlign}"""
                     (singleCell ? 1 : 0) * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
                 }
         )
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -876,6 +900,9 @@ ${expectedAlign}"""
                     0 * _
                 }
         )
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -935,6 +962,9 @@ ${expectedAlign}"""
                     0 * _
             }
         )
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)

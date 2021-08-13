@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.ProjectService
 
 import java.nio.file.*
 
@@ -61,6 +62,9 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
     @Autowired
     FileService fileService
+
+    @Autowired
+    ProjectService projectService
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -179,7 +183,7 @@ md5sum -c ${targetBai}.md5sum
 
 ${furtherFilesMd5sumCheck}
 
-chgrp -hR ${executionHelperService.getGroup(epmbf.project.realm, epmbf.project.projectDirectory)} ${targetBaseDir}
+chgrp -hR ${executionHelperService.getGroup(epmbf.project.realm, new File(projectService.getProjectDirectory(epmbf.project).toString()))} ${targetBaseDir}
 find ${targetBaseDir} -type d -not -perm 2750 -print -exec chmod 2750 '{}' \\;
 find ${targetBaseDir} -type f -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '{}' \\;
 find ${targetBaseDir} -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\;

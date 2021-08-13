@@ -159,7 +159,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     void setupFiles(boolean furtherFiles) {
         SessionUtils.withNewSession {
             Project project = createProject(realm: realm)
-            createDirectories([new File(ftpDir), project.projectDirectory])
+            createDirectories([new File(ftpDir), new File(projectService.getProjectDirectory(project).toString())])
             ExternallyProcessedMergedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
             ExternallyProcessedMergedBamFile epmbf02 = createFile(project, '2', furtherFiles, true)
 

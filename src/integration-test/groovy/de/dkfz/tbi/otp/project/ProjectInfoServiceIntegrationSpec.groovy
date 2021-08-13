@@ -34,16 +34,12 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.dta.AddTransferCommand
 import de.dkfz.tbi.otp.project.dta.DataTransfer
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
@@ -55,6 +51,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
     ProjectInfoService projectInfoService
     TestConfigService configService
+    ProjectService projectService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -74,6 +71,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
                             }
                         }
                 ]),
+                projectService: projectService,
         )
         configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
@@ -177,7 +175,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         }
 
         then:
-        Path projectInfoFile = Paths.get("${project.projectDirectory}/${ProjectService.PROJECT_INFO}/${file.name}")
+        Path projectInfoFile = projectService.getProjectDirectory(project).resolve(ProjectService.PROJECT_INFO).resolve(file.name)
         PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
 
         projectInfoFile.bytes == file.bytes
@@ -196,7 +194,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         }
 
         then:
-        Path projectInfoFile = Paths.get(project.projectDirectory.absolutePath, ProjectService.PROJECT_INFO, cmd.projectInfoFile.name)
+        Path projectInfoFile = projectService.getProjectDirectory(project).resolve(ProjectService.PROJECT_INFO).resolve(cmd.projectInfoFile.name)
         PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
 
         projectInfoFile.bytes == cmd.projectInfoFile.bytes
@@ -298,7 +296,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         setupData()
         ProjectInfo projectInfo = createProjectInfo()
         if (fileExists) {
-            CreateFileHelper.createFile(new File(projectInfo.path), "content")
+            CreateFileHelper.createFile(projectInfoService.getPath(projectInfo), "content")
         }
 
         byte[] content

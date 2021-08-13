@@ -25,12 +25,8 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataswap.data.IndividualSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
@@ -39,6 +35,8 @@ import java.nio.file.Path
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class IndividualSwapService extends DataSwapService<IndividualSwapParameters, IndividualSwapData> {
+
+    ProjectService projectService
 
     @Override
     protected void logSwapParameters(IndividualSwapParameters parameters) {

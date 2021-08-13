@@ -70,7 +70,7 @@
             </g:if>
             <g:each var="doc" in="${projectInfos}">
                 <li id="doc${doc.id}">
-                    <g:link action="downloadProjectInfoDocument" params='["projectInfo.id": doc.id]'>${doc.path}</g:link>
+                    <g:link action="downloadProjectInfoDocument" params='["projectInfo.id": doc.id]'>${doc.fileName}</g:link>
                     <br>
                     <g:message code="dataTransfer.dta.transfer.created"/>
                     <g:formatDate date="${doc.dateCreated}" format="${dateFormat}"/>

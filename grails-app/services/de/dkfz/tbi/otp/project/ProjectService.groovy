@@ -231,7 +231,7 @@ class ProjectService {
             projectInfoService.createProjectInfoAndUploadFile(project, projectInfoCmd)
         }
         if (projectParams.projectInfoToCopy) {
-            Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(projectParams.projectInfoToCopy.path)
+            Path path = projectInfoService.getPath(projectParams.projectInfoToCopy)
             projectInfoService.createProjectInfoByPath(project, path)
         }
 
@@ -302,16 +302,15 @@ class ProjectService {
     }
 
     private void createProjectDirectoryIfNeeded(Project project) {
-        File projectDirectory = project.projectDirectory
-        if (projectDirectory.exists()) {
-            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
+        Path projectDirectory = getProjectDirectory(project)
+        if (Files.exists(projectDirectory)) {
+            PosixFileAttributes attrs = Files.readAttributes(projectDirectory, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
             if (attrs.group().toString() == project.unixGroup) {
                 return
             }
         }
-        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory.absolutePath), project, "0022")
-        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
-        FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
+        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory.toString()), project, "0022")
+        FileService.waitUntilExists(projectDirectory)
     }
 
     private void createAnalysisDirectoryIfPossible(Project project) {
@@ -694,8 +693,8 @@ class ProjectService {
     }
 
     private void alignmentHelper(RoddyConfiguration configuration, Pipeline pipeline, String xmlConfig, boolean adapterTrimmingNeeded) {
-        File projectDirectory = configuration.project.projectDirectory
-        assert projectDirectory.exists()
+        Path projectDirectory = getProjectDirectory(configuration.project)
+        assert Files.exists(projectDirectory)
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
                 configuration.project,
@@ -856,8 +855,8 @@ class ProjectService {
             xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
         }
 
-        File projectDirectory = configuration.project.projectDirectory
-        assert projectDirectory.exists()
+        Path projectDirectory = getProjectDirectory(configuration.project)
+        assert Files.exists(projectDirectory)
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
                 configuration.project,
@@ -1097,6 +1096,17 @@ echo 'OK'
     void addProjectToRelatedProjects(Project baseProject, Project newProject) {
         baseProject.relatedProjects = ("${baseProject.relatedProjects ?: ""},${newProject.name}").split(",").findAll().unique().sort().join(",")
         baseProject.save(flush: true)
+    }
+
+    Path getProjectDirectory(Project project) {
+        return fileSystemService.getRemoteFileSystem(project.realm).getPath(
+                configService.rootPath.absolutePath,
+                project.dirName,
+        )
+    }
+
+    Path getSequencingDirectory(Project project) {
+        return getProjectDirectory(project).resolve('sequencing')
     }
 }
 

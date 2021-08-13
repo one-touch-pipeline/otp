@@ -28,14 +28,17 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.Delimiter
@@ -283,10 +286,16 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     void "createFilesForUpload, when submission is given, then create all expected files"() {
         given:
-        new TestConfigService()
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
-        Path basePath = temporaryFolder.newFolder().toPath()
+        egaSubmissionFileService.projectService = new ProjectService()
+        egaSubmissionFileService.projectService.configService = configService
+        egaSubmissionFileService.projectService.fileSystemService = new TestFileSystemService()
+
         EgaSubmission egaSubmission = createEgaSubmission()
+
+        Path basePath = egaSubmissionFileService.projectService.getProjectDirectory(egaSubmission.project).resolve('submission')
+                .resolve(egaSubmission.id.toString())
 
         egaSubmissionFileService.egaFileContentService = Mock(EgaFileContentService) {
             1 * createFilesToUploadFileContent(egaSubmission) >> [
@@ -305,11 +314,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                     bam2: 'contentBam2',
             ]
             0 * _
-        }
-        egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> Mock(FileSystem) {
-                1 * getPath(*_) >> basePath
-            }
         }
         egaSubmissionFileService.fileService = Mock(FileService) {
             1 * createFileWithContent(basePath.resolve('mapping'), 'mappingContent', _, _)
@@ -331,7 +335,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     @SuppressWarnings('UnnecessaryObjectReferences')
     void "sendEmail, when submission is given, then send email"() {
         given:
-        new TestConfigService()
+        TestConfigService configService = new TestConfigService()
 
         Path basePath = temporaryFolder.newFolder().toPath()
         EgaSubmission egaSubmission = createEgaSubmission()
@@ -357,6 +361,9 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(emailSubject, content, user.email)
         }
+        egaSubmissionFileService.projectService = new ProjectService()
+        egaSubmissionFileService.projectService.configService = configService
+        egaSubmissionFileService.projectService.fileSystemService = egaSubmissionFileService.fileSystemService
 
         when:
         egaSubmissionFileService.sendEmail(egaSubmission)
@@ -368,7 +375,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     @SuppressWarnings('UnnecessaryObjectReferences')
     void "prepareSubmissionForUpload, when submission is given, then files are created, email is send state is changed to FILE_UPLOAD_STARTED"() {
         given:
-        new TestConfigService()
+        TestConfigService configService = new TestConfigService()
 
         Path basePath = temporaryFolder.newFolder().toPath()
         EgaSubmission egaSubmission = createEgaSubmission([
@@ -407,6 +414,9 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(emailSubject, content, user.email)
         }
+        egaSubmissionFileService.projectService = new ProjectService()
+        egaSubmissionFileService.projectService.configService = configService
+        egaSubmissionFileService.projectService.fileSystemService = egaSubmissionFileService.fileSystemService
 
         when:
         egaSubmissionFileService.prepareSubmissionForUpload(egaSubmission)

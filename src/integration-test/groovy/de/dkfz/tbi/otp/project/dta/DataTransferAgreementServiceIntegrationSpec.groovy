@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.project.dta
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.test.mixin.integration.Integration
 import grails.transaction.Rollback
+import grails.validation.ValidationException
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.web.multipart.MultipartFile
@@ -33,22 +34,15 @@ import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
-
-import grails.validation.ValidationException
-
 import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 
 @Rollback
 @Integration
@@ -56,6 +50,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
 
     DataTransferAgreementService dataTransferAgreementService
     TestConfigService configService
+    ProjectService projectService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -74,6 +69,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
                             }
                         }
                 ]),
+                projectService: projectService,
         )
         configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }

@@ -27,15 +27,8 @@ import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Individual
-
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SequencingReadType
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
@@ -44,6 +37,8 @@ import java.nio.file.Path
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> {
+
+    ProjectService projectService
 
     @Override
     protected void logSwapParameters(LaneSwapParameters parameters) {
@@ -190,7 +185,7 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
     private void checkForRemainingSeqTracks(LaneSwapData data) {
         if (SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
             data.moveFilesCommands << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
-            File basePath = data.projectSwap.old.projectSequencingDirectory
+            String basePath = projectService.getSequencingDirectory(data.projectSwap.old)
             data.moveFilesCommands << "#rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
                     "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}/" +
                     "${data.seqTypeSwap.old.libraryLayoutDirName}'\n"

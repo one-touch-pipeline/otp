@@ -29,13 +29,15 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermission
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
@@ -52,6 +54,7 @@ class EgaSubmissionFileService {
     LsdfFilesService lsdfFilesService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
+    ProjectService projectService
     SpringSecurityService springSecurityService
 
     enum EgaColumnName {
@@ -210,8 +213,7 @@ class EgaSubmissionFileService {
     }
 
     private Path createPathForSubmission(EgaSubmission submission) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(submission.project.realm)
-        return fileSystem.getPath(submission.project.projectDirectory.absolutePath, 'submission', submission.id.toString())
+        return projectService.getProjectDirectory(submission.project).resolve('submission').resolve(submission.id.toString())
     }
 
     void createFilesForUpload(EgaSubmission submission) {
