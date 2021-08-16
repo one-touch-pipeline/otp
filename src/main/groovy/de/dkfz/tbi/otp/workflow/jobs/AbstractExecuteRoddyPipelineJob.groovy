@@ -21,13 +21,97 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobHandlingService
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJob {
 
+    @Autowired
+    ClusterJobHandlingService clusterJobHandlingService
+    @Autowired
+    RoddyCommandService roddyCommandService
+    @Autowired
+    RoddyConfigService roddyConfigService
+    @Autowired
+    RoddyConfigValueService roddyConfigValueService
+    @Autowired
+    RoddyExecutionService roddyExecutionService
+    @Autowired
+    WorkflowRunService workflowRunService
+
     @Override
-    void execute(WorkflowStep workflowStep) {
+    final void execute(WorkflowStep workflowStep) {
+        RoddyResult roddyResult = getRoddyResult(workflowStep)
+        Realm realm = workflowStep.workflowRun.realm
+        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        Path outputDir = fs.getPath(roddyResult.workDirectory.absolutePath)
+
+        String xmlConfig = roddyConfigService.createRoddyXmlConfig(
+                workflowStep.workflowRun.combinedConfig,
+                roddyConfigValueService.getDefaultValues() + getConfigurationValues(workflowStep, workflowStep.workflowRun.combinedConfig),
+                roddyWorkflowName,
+                getWorkflowVersion(workflowStep, roddyResult),
+                getAnalysisConfiguration(roddyResult.seqType),
+                fileService.toPath(roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath, fs),
+                outputDir,
+                workflowStep.workflowRun.priority.queue,
+                filenameSectionKillSwitch,
+        )
+        fileService.createFileWithContent(outputDir.resolve("${RoddyConfigService.CONFIGURATION_NAME}.xml"), xmlConfig, realm)
+
+        String command = roddyCommandService.createRoddyCommand(
+                roddyResult.individual,
+                outputDir,
+                getAdditionalParameters(workflowStep),
+        )
+        roddyExecutionService.clearRoddyExecutionStoreDirectory(roddyResult)
+
+        // begin of non-restartable area
+        workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
+        ProcessOutput output = roddyExecutionService.execute(command, realm)
+        // end of non-restartable area
+        workflowStep.workflowRun.with {
+            // done in same transaction in which cluster jobs are saved
+            jobCanBeRestarted = true
+            save(flush: true)
+        }
+
+        Collection<ClusterJob> clusterJobs = roddyExecutionService.createClusterJobObjects(roddyResult, output, workflowStep)
+        if (clusterJobs) {
+            roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyResult, output.stderr, fs)
+            clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)
+            clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
+            workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)
+        } else {
+            workflowStateChangeService.changeStateToSuccess(workflowStep)
+        }
     }
 
-    abstract void createRoddyRequest(WorkflowStep workflowStep)
+    private WorkflowVersion getWorkflowVersion(WorkflowStep workflowStep, RoddyResult roddyResult) {
+        List<WorkflowVersion> versions = WorkflowVersion.findAllByWorkflow(workflowStep.workflowRun.workflow)
+        CollectionUtils.exactlyOneElement(ActiveProjectWorkflow.findAllByWorkflowVersionInListAndProjectAndSeqTypeAndActiveAndDeprecationDateIsNull(
+                versions, roddyResult.project, roddyResult.seqType, true
+        )).workflowVersion
+    }
+
+    protected abstract RoddyResult getRoddyResult(WorkflowStep workflowStep)
+
+    protected abstract String getRoddyWorkflowName()
+    protected abstract String getAnalysisConfiguration(SeqType seqType)
+    protected abstract boolean getFilenameSectionKillSwitch()
+
+    protected abstract Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig)
+    protected abstract List<String> getAdditionalParameters(WorkflowStep workflowStep)
 }
