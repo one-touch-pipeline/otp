@@ -24,184 +24,192 @@ package de.dkfz.tbi.otp.job.processing
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.networknt.schema.*
+import groovy.xml.MarkupBuilder
+
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+
+import java.nio.file.Path
 
 class RoddyConfigService {
 
+    final static String ANALYSIS_ID = "analysis"
+    final static String CONFIGURATION_NAME = "config"
+
     private static final String SCHEMA = '''
-{
-  "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "type": "object",
-  "title": "Roddy configuration schema",
-  "required": [],
-  "properties": {
-    "cvalues": {
-      "type": "object",
-      "title": "Regular configuration (cvalues)",
-      "description": "",
-      "additionalProperties": false,
-      "patternProperties": {
-        "": {
-          "anyOf": [
-            {
-              "type": "object",
-              "title": "Configuration",
-              "required": [
-                "value"
-              ],
-              "properties": {
-                "value": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "bashArray",
-                    "double",
-                    "filename",
-                    "filenamePattern",
-                    "float",
-                    "path",
-                    "string"
-                  ]
-                }
-              },
-              "additionalProperties": false
-            },
-            {
-              "type": "object",
-              "title": "Configuration with type integer",
-              "required": [
-                "value",
-                "type"
-              ],
-              "properties": {
-                "value": {
-                  "type": "integer"
-                },
-                "type": {
-                  "type": "string",
-                  "const": "integer"
-                }
-              },
-              "additionalProperties": false
-            },
-            {
-              "type": "object",
-              "title": "Configuration with type boolean",
-              "required": [
-                "value",
-                "type"
-              ],
-              "properties": {
-                "value": {
-                  "type": "string",
-                  "enum": [
-                    "true",
-                    "false"
-                  ]
-                },
-                "type": {
-                  "type": "string",
-                  "const": "boolean"
-                }
-              },
-              "additionalProperties": false
-            }
-          ]
-        }
-      }
-    },
-    "resources": {
-      "type": "object",
-      "title": "Configuration of resources",
-      "additionalProperties": false,
-      "patternProperties": {
-        "": {
+        {
+          "$schema": "https://json-schema.org/draft/2019-09/schema",
           "type": "object",
-          "required": [
-            "value",
-            "basepath"
-          ],
+          "title": "Roddy configuration schema",
+          "required": [],
           "properties": {
-            "value": {
-              "type": "string"
+            "cvalues": {
+              "type": "object",
+              "title": "Regular configuration (cvalues)",
+              "description": "",
+              "additionalProperties": false,
+              "patternProperties": {
+                "": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "title": "Configuration",
+                      "required": [
+                        "value"
+                      ],
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "bashArray",
+                            "double",
+                            "filename",
+                            "filenamePattern",
+                            "float",
+                            "path",
+                            "string"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "title": "Configuration with type integer",
+                      "required": [
+                        "value",
+                        "type"
+                      ],
+                      "properties": {
+                        "value": {
+                          "type": "integer"
+                        },
+                        "type": {
+                          "type": "string",
+                          "const": "integer"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "title": "Configuration with type boolean",
+                      "required": [
+                        "value",
+                        "type"
+                      ],
+                      "properties": {
+                        "value": {
+                          "type": "string",
+                          "enum": [
+                            "true",
+                            "false"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "const": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
             },
-            "basepath": {
-              "type": "string"
-            },
-            "memory": {
-              "type": "string"
-            },
-            "cores": {
-              "type": "integer"
-            },
-            "nodes": {
-              "type": "integer"
-            },
-            "walltime": {
-              "type": "string"
+            "resources": {
+              "type": "object",
+              "title": "Configuration of resources",
+              "additionalProperties": false,
+              "patternProperties": {
+                "": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "basepath"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "string"
+                    },
+                    "basepath": {
+                      "type": "string"
+                    },
+                    "memory": {
+                      "type": "string"
+                    },
+                    "cores": {
+                      "type": "integer"
+                    },
+                    "nodes": {
+                      "type": "integer"
+                    },
+                    "walltime": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
             }
           },
           "additionalProperties": false
         }
-      }
-    }
-  },
-  "additionalProperties": false
-}
-'''
+        '''
 
     private static final String FILENAMES_SCHEMA = '''
-{
-  "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "type": "object",
-  "title": "Roddy configuration schema",
-  "required": [
-  ],
-  "properties": {
-    "filenames": {
-      "type": "array",
-      "title": "Configuration of file names",
-      "additionalItems": false,
-      "items": {
-        "type": "object",
-        "required": [
-          "class",
-          "pattern"
-        ],
-        "properties": {
-          "class": {
-            "type": "string"
+        {
+          "$schema": "https://json-schema.org/draft/2019-09/schema",
+          "type": "object",
+          "title": "Roddy configuration schema",
+          "required": [
+          ],
+          "properties": {
+            "filenames": {
+              "type": "array",
+              "title": "Configuration of file names",
+              "additionalItems": false,
+              "items": {
+                "type": "object",
+                "required": [
+                  "class",
+                  "pattern"
+                ],
+                "properties": {
+                  "class": {
+                    "type": "string"
+                  },
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "selectiontag": {
+                    "type": "string"
+                  },
+                  "derivedFrom": {
+                    "type": "string"
+                  },
+                  "fileStage": {
+                    "type": "string"
+                  },
+                  "onMethod": {
+                    "type": "string"
+                  },
+                  "onScriptParameter": {
+                    "type": "string"
+                  },
+                  "onTool": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
           },
-          "pattern": {
-            "type": "string"
-          },
-          "selectiontag": {
-            "type": "string"
-          },
-          "derivedFrom": {
-            "type": "string"
-          },
-          "fileStage": {
-            "type": "string"
-          },
-          "onMethod": {
-            "type": "string"
-          },
-          "onScriptParameter": {
-            "type": "string"
-          },
-          "onTool": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  },
-  "additionalProperties": false
-}
-'''
+          "additionalProperties": false
+        }
+        '''
 
     private static final JsonSchema SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(SCHEMA)
     private static final JsonSchema FILENAMES_SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(FILENAMES_SCHEMA)
@@ -217,5 +225,90 @@ class RoddyConfigService {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)
         return errors.empty
+    }
+
+    String createRoddyXmlConfig(
+            String combinedConfig,
+            Map<String, String> specificConfig,
+            String workflowName,
+            WorkflowVersion workflowVersion,
+            String analysisConfiguration,
+            Path inputDir,
+            Path outputDir,
+            String queue,
+            boolean filenameSectionKillSwitch
+    ) {
+        assert combinedConfig
+        assert specificConfig != null
+        assert workflowName
+        assert workflowVersion
+        assert analysisConfiguration
+        assert inputDir
+        assert outputDir
+        assert queue
+
+        JsonNode combinedConfigJson = MAPPER.readTree(combinedConfig)
+
+        StringWriter writer = new StringWriter()
+        MarkupBuilder xml = new MarkupBuilder(writer)
+        xml.omitNullAttributes = true
+        xml.configuration(name: CONFIGURATION_NAME, configurationType: "project", usedresourcessize: "l") {
+            availableAnalyses {
+                analysis(
+                        id: ANALYSIS_ID,
+                        configuration: analysisConfiguration,
+                        useplugin: "${workflowName}:${workflowVersion.workflowVersion}",
+                        killswitches: filenameSectionKillSwitch ? "FilenameSection" : null,
+                )
+            }
+            configurationvalues {
+                cvalue(name: "inputBaseDirectory", value: inputDir, type: "path")
+                cvalue(name: "outputBaseDirectory", value: outputDir, type: "path")
+                specificConfig.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
+                    cvalue(name: conf.key, value: conf.value)
+                }
+                combinedConfigJson.RODDY.cvalues.fields().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
+                    cvalue(name: conf.key, value: conf.value.value.asText(), type: conf.value.has("type") ? conf.value.type.textValue() : null)
+                }
+            }
+            processingTools {
+                combinedConfigJson.RODDY.resources.fields().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { resource ->
+                    tool(
+                            name: resource.key,
+                            value: resource.value.value.textValue(),
+                            basepath: resource.value.basepath.textValue(),
+                            overrideresourcesets: "true",
+                    ) {
+                        resourcesets {
+                            rset(
+                                    size: "l",
+                                    queue: queue,
+                                    memory: resource.value.has("memory") ? resource.value.memory.textValue() : null,
+                                    cores: resource.value.has("cores") ? resource.value.cores.intValue() : null,
+                                    nodes: resource.value.has("nodes") ? resource.value.nodes.intValue() : null,
+                                    walltime: resource.value.has("walltime") ? resource.value.walltime.textValue() : null,
+                            )
+                        }
+                    }
+                }
+            }
+            filenames(package: "de.dkfz.b080.co.files", filestagesbase: "de.dkfz.b080.co.files.COFileStage") {
+                combinedConfigJson.RODDY_FILENAMES.filenames.elements()
+                        .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.findValue("class").textValue(), b.findValue("class").textValue()) }
+                        .each { fileName ->
+                            filename(
+                                    "class": fileName.findValue("class").textValue(),
+                                    derivedFrom: fileName.has("derivedFrom") ? fileName.derivedFrom.textValue() : null,
+                                    fileStage: fileName.has("fileStage") ? fileName.fileStage.textValue() : null,
+                                    onMethod: fileName.has("onMethod") ? fileName.onMethod.textValue() : null,
+                                    onScriptParameter: fileName.has("onScriptParameter") ? fileName.onScriptParameter.textValue() : null,
+                                    onTool: fileName.has("onTool") ? fileName.onTool.textValue() : null,
+                                    pattern: fileName.pattern.textValue(),
+                                    selectiontag: fileName.has("selectiontag") ? fileName.selectiontag.textValue() : null,
+                            )
+                        }
+            }
+        }
+        return writer.toString()
     }
 }
