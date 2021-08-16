@@ -44,8 +44,10 @@ trait RoddyResult {
 
     abstract SeqType getSeqType()
 
+    @Deprecated
     abstract Pipeline getPipeline()
 
+    @Deprecated
     abstract RoddyWorkflowConfig getConfig()
 
     abstract File getWorkDirectory()

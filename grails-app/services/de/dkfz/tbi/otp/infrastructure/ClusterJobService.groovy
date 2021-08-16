@@ -84,6 +84,7 @@ class ClusterJobService {
      * creates a cluster job object with at this time known attributes
      */
     @SuppressWarnings("ParameterCount")
+    @Deprecated
     ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
                                 ProcessingStep processingStep, SeqType seqType = null,
                                 String clusterJobName = processingStep.clusterJobName,

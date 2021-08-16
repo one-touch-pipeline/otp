@@ -56,6 +56,7 @@ import java.time.format.DateTimeFormatter
  */
 @GrailsCompileStatic
 @Transactional
+@Deprecated
 class ClusterJobSchedulerService {
 
     static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000
@@ -85,6 +86,7 @@ class ClusterJobSchedulerService {
      * @param jobSubmissionOptions additional options for the job
      * @return the cluster job ID
      */
+    @Deprecated
     String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:],
                       Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {
@@ -185,6 +187,7 @@ class ClusterJobSchedulerService {
      * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
+    @Deprecated
     Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm) throws Exception {
         assert realm: "No realm specified."
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
@@ -200,6 +203,7 @@ class ClusterJobSchedulerService {
         } as Map<ClusterJobIdentifier, ClusterJobStatus>
     }
 
+    @Deprecated
     private Map<BEJobID, JobState> queryAndLogAllClusterJobs(BatchEuphoriaJobManager jobManager) {
         Map<BEJobID, JobState> jobStates
         StringBuilder logStringBuilder = new StringBuilder()
@@ -215,6 +219,7 @@ class ClusterJobSchedulerService {
         return jobStates
     }
 
+    @Deprecated
     private Path pathForLogging() {
         String dateDirectory = LocalDateTime.now().format(PATH_FORMATTER)
 
@@ -228,6 +233,7 @@ class ClusterJobSchedulerService {
         return logFile
     }
 
+    @Deprecated
     void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
@@ -252,6 +258,7 @@ class ClusterJobSchedulerService {
         }
     }
 
+    @Deprecated
     void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob) throws Exception {
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
         BEJobID beJobId = new BEJobID(clusterJob.clusterJobId)
@@ -266,6 +273,7 @@ class ClusterJobSchedulerService {
         }
     }
 
+    @Deprecated
     private final List<JobState> failed = [
             JobState.FAILED,
             JobState.ABORTED,
@@ -274,6 +282,7 @@ class ClusterJobSchedulerService {
     ].asImmutable()
 
     // a job is considered complete if it either has status "completed" or it is not known anymore
+    @Deprecated
     private final List<JobState> finished = [
             JobState.COMPLETED_SUCCESSFUL,
             JobState.COMPLETED_UNKNOWN,
