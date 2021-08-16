@@ -26,7 +26,6 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -62,7 +61,6 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
     static final String STATUS_CODE_STARTED = "57427"
     static final String STATUS_CODE_FINISHED = "0"
     static final String STATUS_CODE_FAILED = "1"
-    static final String RANDOM_RODDY_EXECUTION_DIR = "/exec_150707_142149946_USER_WGS"
 
     AbstractRoddyJob abstractRoddyJob
     RoddyBamFile roddyBamFile
@@ -244,48 +242,5 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
         expect:
         [:] == abstractRoddyJob.analyseFinishedClusterJobs([], jobStateLogFile)
-    }
-
-    void "test parseRoddyExecutionStoreDirectoryFromRoddyOutput, when matches more than once, should return roddyExecutionDirectory"() {
-        given:
-        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + RANDOM_RODDY_EXECUTION_DIR
-        String output = """\
-            some String
-            Creating the following execution directory to store information about this process:
-            ${roddyExecutionDir}
-            some String""".stripIndent()
-
-        expect:
-        roddyExecutionDir == abstractRoddyJob.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output).absolutePath
-    }
-
-    void "test parseRoddyExecutionStoreDirectoryFromRoddyOutput, when no match, should fail"() {
-        given:
-        String output = "some wrong String"
-
-        when:
-        abstractRoddyJob.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output)
-
-        then:
-        thrown(RuntimeException)
-    }
-
-    void "test parseRoddyExecutionStoreDirectoryFromRoddyOutput, when matches more than once, should fail"() {
-        given:
-        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + RANDOM_RODDY_EXECUTION_DIR
-        String output = """\
-            some String
-            Creating the following execution directory to store information about this process:
-            ${roddyExecutionDir}
-            some String
-            Creating the following execution directory to store information about this process:
-            ${roddyExecutionDir}
-            some String""".stripIndent()
-
-        when:
-        abstractRoddyJob.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output)
-
-        then:
-        thrown(AssertionError)
     }
 }

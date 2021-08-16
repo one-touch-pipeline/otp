@@ -24,22 +24,15 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
-import java.util.concurrent.Semaphore
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import java.nio.file.FileSystem
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
@@ -49,31 +42,14 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
  */
 abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubmitWaitValidateJob {
 
-    static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
-
-    // suppressed because breaking the line would break the pattern
-    @SuppressWarnings("LineLength")
-    static final Pattern RODDY_EXECUTION_STORE_DIRECTORY_PATTERN = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
-
     @Autowired
     ConfigService configService
     @Autowired
-    ClusterJobService clusterJobService
-    @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
-
     @Autowired
-    RemoteShellHelper remoteShellHelper
-
-    // Example:
-    // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
-    static final Pattern RODDY_OUTPUT_PATTERN = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
-
-    private static final Semaphore RODDY_MEMORY_USAGE = {
-        SessionUtils.withNewSession {
-            new Semaphore((int) ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null), true)
-        }
-    } ()
+    FileSystemService fileSystemService
+    @Autowired
+    RoddyExecutionService roddyExecutionService
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -82,23 +58,13 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             final Realm realm = roddyResult.project.realm
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
-            RODDY_MEMORY_USAGE.acquire()
-            ProcessOutput output
-            try {
-                output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZero()
-            } finally {
-                RODDY_MEMORY_USAGE.release()
-            }
+            ProcessOutput output = roddyExecutionService.execute(cmd, realm)
 
-            if (output.stderr.contains("java.lang.OutOfMemoryError")) {
-                throw new RuntimeException('An out of memory error occurred when executing Roddy.')
-            } else if (output.stderr.contains("An uncaught error occurred during a run. SEVERE")) {
-                throw new RuntimeException('An unexpected error occurred when executing Roddy.')
-            }
+            Collection<ClusterJob> submittedClusterJobs = roddyExecutionService.createClusterJobObjects(roddyResult, output, null, processingStep)
 
-            Collection<ClusterJob> submittedClusterJobs = createClusterJobObjects(roddyResult, realm, output)
             if (submittedClusterJobs) {
-                saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
+                FileSystem fs = fileSystemService.getRemoteFileSystem(roddyResult.project.realm)
+                roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyResult, output.stderr, fs)
                 submittedClusterJobs.each {
                     clusterJobSchedulerService.retrieveAndSaveJobInformationAfterJobStarted(it)
                     threadLog?.info("Log file: ${it.jobLog}" )
@@ -155,62 +121,5 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             }
         }
         return failedOrNotFinishedClusterJobs
-    }
-
-    Collection<ClusterJob> createClusterJobObjects(RoddyResult roddyResult, Realm realm, ProcessOutput roddyOutput) {
-        assert realm
-        assert roddyResult
-        ProcessingStep processingStep = getProcessingStep()
-        assert processingStep
-        SeqType seqType = roddyResult.getSeqType()
-        assert seqType
-
-        Collection<ClusterJob> submittedClusterJobs = []
-        roddyOutput.stdout.eachLine {
-            if (it.trim().isEmpty()) {
-                return //skip empty lines
-            }
-            Matcher m = it =~ RODDY_OUTPUT_PATTERN
-            if (m.matches()) {
-                String jobName = m.group(1)
-                String jobClass = m.group(2)
-                String jobId = m.group(3)
-
-                if (!jobId.matches(/[1-9]\d*/)) {
-                    throw new RuntimeException("'${jobId}' is not a valid job ID.")
-                }
-
-                submittedClusterJobs.add(clusterJobService.createClusterJob(
-                        realm, jobId, configService.getSshUser(), processingStep, seqType, jobName, jobClass
-                ))
-            }
-        }
-        assert submittedClusterJobs.empty == roddyOutput.stderr.contains(NO_STARTED_JOBS_MESSAGE)
-        return submittedClusterJobs
-    }
-
-    void saveRoddyExecutionStoreDirectory(RoddyResult roddyResult, String roddyOutput) {
-        assert roddyResult
-
-        File directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput)
-        assert directory.parentFile == roddyResult.workExecutionStoreDirectory
-        WaitingFileUtils.waitUntilExists(directory)
-        assert directory.isDirectory()
-
-        roddyResult.roddyExecutionDirectoryNames.add(directory.name)
-
-        assert roddyResult.roddyExecutionDirectoryNames.last() == roddyResult.roddyExecutionDirectoryNames.max()
-        assert roddyResult.save(flush: true)
-    }
-
-    File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {
-        Matcher m = roddyOutput =~ RODDY_EXECUTION_STORE_DIRECTORY_PATTERN
-        if (m.find()) {
-            File directory = new File(m.group(1))
-            assert !m.find()
-            return directory
-        } else {
-            throw new RuntimeException("Roddy output contains no information about output directories")
-        }
     }
 }
