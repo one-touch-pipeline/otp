@@ -497,7 +497,7 @@ $.otp.applySelect2 = function (jqSelection) {
     }).on("change", function (ev) { // handler to keep html5 validity-state and -visuals synced between 'real' select and select2 elements.
         syncValidity(ev.target);
     }).on("select2:open", () => {
-        document.querySelector(".select2-search input").focus();
+        document.querySelector('.select2-container--open .select2-search__field').focus();
     }).each(function (i, e) { // initial sync when first applying, to match other fields (:invalid style is shown immediately on page load.)
         syncValidity(e);
     });
