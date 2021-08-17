@@ -100,6 +100,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
                     },
                     wes        : step.wesIdentifier,
                     hasLogs    : !step.logs.empty,
+                    obsolete   : step.obsolete,
             ]
         }
         render cmd.getDataToRender(result) as JSON

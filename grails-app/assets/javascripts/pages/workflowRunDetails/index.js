@@ -111,7 +111,7 @@ $(function () {
                     }
 
                     const runState = $("#steps").data("wf-run-state");
-                    const buttonsDisabled = !lastStepFailed || runState === "RESTARTED" || runState === "FAILED_FINAL" ? " disabled " : "";
+                    const buttonsDisabled = !lastStepFailed || runState === "RESTARTED" || runState === "FAILED_FINAL" || row.obsolete ? " disabled " : "";
 
                     return "<form method='POST' class='single'>" +
                         button($.otp.createLink({controller: "workflowRunDetails", action: "restartStep", parameters: {"redirect": $.otp.uriWithParams}}),
