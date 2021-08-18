@@ -279,6 +279,7 @@ class ProcessingOption implements Entity {
                 "Roddy version which is used currently to process Roddy-Pipelines",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+        @Deprecated // base configs are not used anymore by the new WF system
         RODDY_BASE_CONFIGS_PATH(
                 "Path to the baseConfig-files which are needed to execute Roddy",
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH

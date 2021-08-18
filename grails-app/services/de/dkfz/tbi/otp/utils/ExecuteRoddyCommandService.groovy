@@ -33,7 +33,11 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+/**
+ * @deprecated use {@link RoddyCommandService} for the new WF system
+ */
 @Transactional
+@Deprecated
 class ExecuteRoddyCommandService {
 
     static final String RESOURCE_PATH = "resource-generated"
@@ -44,6 +48,10 @@ class ExecuteRoddyCommandService {
     ExecutionHelperService executionHelperService
     ProcessingOptionService processingOptionService
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     String activateModulesForRoddyCommand() {
         String loadModule = processingOptionService.findOptionAsString(OptionName.COMMAND_LOAD_MODULE_LOADER)
         String activateJava = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_JAVA)
@@ -63,7 +71,9 @@ class ExecuteRoddyCommandService {
      * @param nameInConfigFile , This is the part before the @ in the ProjectConfigFile (i.e. $workflow_$version)
      * @param analysisIDinConfigFile , This is the part after the @ in the ProjectConfigFile (i.e. EXOME)
      * @param realm , This is the realm to work on.
+     * @deprecated use {@link RoddyCommandService} for the new WF system
      */
+    @Deprecated
     String defaultRoddyExecutionCommand(RoddyResult roddyResult, String nameInConfigFile, String analysisIDinConfigFile, Realm realm) {
         assert roddyResult: "The input roddyResult is not allowed to be null"
         assert nameInConfigFile: "The input nameInConfigFile is not allowed to be null"
@@ -96,6 +106,10 @@ class ExecuteRoddyCommandService {
         ].join('\n')
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     String roddyGetRuntimeConfigCommand(RoddyWorkflowConfig config, String nameInConfigFile, String analysisIDinConfigFile) {
         String roddyConfigCommand = [
                 roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.CONFIG),
@@ -108,6 +122,10 @@ class ExecuteRoddyCommandService {
         ].join('\n')
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     String commonRoddy(RoddyWorkflowConfig config, Realm.JobScheduler jobScheduler) {
         File roddyBaseConfigsPath = processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH) as File
         File applicationIniPath = processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI) as File
@@ -131,11 +149,19 @@ class ExecuteRoddyCommandService {
         ].join(" ")
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     String roddyBaseCommand(String configName, String analysisId, RoddyInvocationType type) {
         File roddyPath = processingOptionService.findOptionAsString(OptionName.RODDY_PATH) as File
         return roddyBaseCommand(roddyPath, configName, analysisId, type)
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     String roddyBaseCommand(File roddyPath, String configName, String analysisId, RoddyInvocationType type) {
         assert roddyPath: "roddyPath is not allowed to be null"
         assert configName: "configName is not allowed to be null"
@@ -146,7 +172,9 @@ class ExecuteRoddyCommandService {
 
     /**
      * Returns the analysis id which has to be used in this roddy workflow
+     * @deprecated use {@link RoddyCommandService} for the new WF system
      */
+    @Deprecated
     String getAnalysisIDinConfigFile(RoddyResult roddyResult) {
         assert roddyResult: "The input roddyResult must not be null"
         assert roddyResult.seqType: "There is not seqType available for ${roddyResult}"
@@ -159,6 +187,10 @@ class ExecuteRoddyCommandService {
         throw new RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     void createWorkOutputDirectory(Realm realm, File file) {
         assert realm: "Realm must not be null"
         assert file: "File must not be null"
@@ -244,11 +276,19 @@ class ExecuteRoddyCommandService {
         remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
+    @Deprecated
     File featureTogglesConfigPath() {
         return new File(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
     }
 
+    /**
+     * @deprecated use {@link RoddyCommandService} for the new WF system
+     */
     @TupleConstructor
+    @Deprecated
     enum RoddyInvocationType {
         EXECUTE("rerun"),
         CONFIG("printidlessruntimeconfig")
