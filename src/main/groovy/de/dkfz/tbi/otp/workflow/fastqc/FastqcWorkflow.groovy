@@ -25,7 +25,9 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represent the fastqc workflow, which calculates or copied the fastqc reports.
@@ -49,5 +51,20 @@ class FastqcWorkflow implements OtpWorkflow {
                 FastqcParseJob.simpleName.uncapitalize(),
                 FastqcFinishJob.simpleName.uncapitalize(),
         ]
+    }
+
+    /**
+     * Since it is designed for one run, it passes the artefact as it is.
+     */
+    @Override
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        return artefact
+    }
+
+    /**
+     * There is nothing to do in a single run workflow.
+     */
+    @Override
+    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
 }

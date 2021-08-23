@@ -32,6 +32,22 @@ trait OtpWorkflow {
     abstract List<String> getJobBeanNames()
 
     /**
+     * Create new concrete artefact for the restarted workflow based on a given artefact.
+     *
+     * @param artefact to copy
+     * @return new artefact
+     */
+    abstract Artefact createCopyOfArtefact(Artefact artefact)
+
+    /**
+     * Reconnect the dependencies of an artefact to a concrete workflow artefact.
+     *
+     * @param artefact with dependency connection as reference
+     * @param newWorkflowArtefact which should be reconnected to the dependencies
+     */
+    abstract void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact)
+
+    /**
      * Indicate, if an workflow use their output artefacts also for input.
      *
      * Usually a workflow works on input artefacts and produce from these output artefacts.

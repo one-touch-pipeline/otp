@@ -25,7 +25,9 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represent the data installation workflow, sometimes also call fastq import workflow.
@@ -51,7 +53,22 @@ class DataInstallationWorkflow implements OtpWorkflow {
     }
 
     /**
-     * Since it is an import workflow, it use othe output also for input.
+     * Since it is designed for one run, it passes the artefact as it is.
+     */
+    @Override
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        return artefact
+    }
+
+    /**
+     * There is nothing to do in a single run workflow.
+     */
+    @Override
+    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
+    }
+
+    /**
+     * Since it is an import workflow, it uses other output also for input.
      */
     @Override
     boolean useOutputArtefactAlsoAsInputArtefact() {
