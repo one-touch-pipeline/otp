@@ -25,6 +25,7 @@ import groovy.transform.Canonical
 import groovy.transform.TupleConstructor
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
@@ -49,11 +50,13 @@ class MergingConflictsValidator extends MergingPreventionValidator {
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.groupBy { values ->
             SeqType seqType = metadataImportService.getSeqTypeFromMetadata(values)
-            new MwpDetermingValues(
+
+            return new MwpDetermingValues(
                     getSampleIdentifier(values),
                     getSampleType(values),
                     seqType,
                     seqType ? findAntibodyTarget(values, seqType) : null,
+                    getMergingCriteria(values, seqType),
             )
         }.findAll { key, values ->
             key.individual && key.sampleType && key.seqType
@@ -62,16 +65,18 @@ class MergingConflictsValidator extends MergingPreventionValidator {
                 findSeqPlatformGroup(valueTuple, key.seqType) ?: findSeqPlatform(valueTuple)
             }.unique().size() > 1
         }.each { key, values ->
-            context.addProblem(values*.cells.flatten() as Set<Cell>, LogLevel.WARNING,
-                    "Sample ${key.individual} ${key.sampleType} with sequencing type ${key.seqType.displayNameWithLibraryLayout} cannot be merged with itself, " +
-                            "since it uses incompatible seq platforms",
-                    "Sample can not be merged with itself, since it uses incompatible seq platforms."
-            )
+            if (key.mergingCriteria == null || key.mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
+                context.addProblem(values*.cells.flatten() as Set<Cell>, LogLevel.WARNING,
+                        "Sample ${key.individual} ${key.sampleType} with sequencing type ${key.seqType.displayNameWithLibraryLayout} cannot be merged with itself, " +
+                                "since it uses incompatible seq platforms",
+                        "Sample can not be merged with itself, since it uses incompatible seq platforms."
+                )
+            }
         }
     }
 
     SeqPlatformGroup findSeqPlatformGroup(ValueTuple valueTuple, SeqType seqType) {
-        findSeqPlatform(valueTuple).getSeqPlatformGroupForMergingCriteria(
+        return findSeqPlatform(valueTuple).getSeqPlatformGroupForMergingCriteria(
                 metadataImportService.getProjectFromMetadata(valueTuple),
                 seqType,
         )
@@ -117,6 +122,11 @@ class MergingConflictsValidator extends MergingPreventionValidator {
         return parsedSampleIdentifier.sampleTypeDbName
     }
 
+    MergingCriteria getMergingCriteria(ValueTuple valueTuple, SeqType seqType) {
+        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
+        return atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
+    }
+
     @Canonical
     @TupleConstructor
     class MwpDetermingValues {
@@ -124,5 +134,6 @@ class MergingConflictsValidator extends MergingPreventionValidator {
         String sampleType
         SeqType seqType
         AntibodyTarget antibodyTarget
+        MergingCriteria mergingCriteria
     }
 }

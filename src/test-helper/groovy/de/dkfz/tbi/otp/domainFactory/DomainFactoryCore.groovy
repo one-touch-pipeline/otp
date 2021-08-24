@@ -344,9 +344,16 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
-        return createDomainObject(SeqPlatformGroup, [
+        SeqPlatformGroup seqPlatformGroup = createDomainObject(SeqPlatformGroup, [
                 seqPlatforms: [] as Set,
         ], properties)
+
+        properties.seqPlatforms.each { SeqPlatform seqPlatform ->
+            seqPlatform.addToSeqPlatformGroups(seqPlatformGroup)
+            seqPlatform.save(flush: true)
+        }
+
+        return seqPlatformGroup
     }
 
     SeqPlatformGroup createSeqPlatformGroupWithMergingCriteria(Map properties = [:]) {

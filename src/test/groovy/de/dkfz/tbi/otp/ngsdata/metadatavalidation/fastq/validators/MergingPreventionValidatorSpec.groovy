@@ -308,6 +308,38 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
     }
 
     @Unroll
+    void "validate, if mergingWorkPackage has not compatible seqPlatform but has IGNORE_FOR_MERGING flag"() {
+        given:
+        Map data = createData(factory, seqTypeClosure, withdrawn, MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING)
+
+        SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
+        seqPlatformGroup.seqPlatforms.add(createSeqPlatform())
+        seqPlatformGroup.save(flush: true)
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(data.content)
+
+        when:
+        data.validator.validate(context)
+
+        then:
+        context.problems.empty
+
+        where:
+        input << CASE_SEQ_PLATFORM_DIFFER_CAUSE_MESSAGE.collectMany {
+            [
+                    [withdrawn: true] + it,
+                    [withdrawn: false] + it,
+            ]
+        }
+
+        name = input.name
+        factory = input.factory
+        seqTypeClosure = input.seqTypeClosure
+        errorLevel = input.errorLevel
+        withdrawn = input.withdrawn
+    }
+
+    @Unroll
     void "validate, if libraryPreparationKit is used and different, add merging warning (case: #name, withdrawn: #withdrawn)"() {
         given:
         Map data = createData(factory, seqTypeClosure, withdrawn)
@@ -405,7 +437,8 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
             ],
     ]*.asImmutable().asImmutable()
 
-    private Map<String, ?> createData(IsAlignment alignment, Closure<SeqType> seqTypeClosure, boolean withdrawnSeqTracks = false) {
+    private Map<String, ?> createData(IsAlignment alignment, Closure<SeqType> seqTypeClosure, boolean withdrawnSeqTracks = false,
+                                      MergingCriteria.SpecificSeqPlatformGroups platformGroups = MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
         DomainFactory.createAllAlignableSeqTypes()
 
         MergingWorkPackage mergingWorkPackage = alignment.createMergingWorkPackage([
@@ -417,6 +450,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
         createMergingCriteria([
                 project: mergingWorkPackage.project,
                 seqType: mergingWorkPackage.seqType,
+                useSeqPlatformGroup: platformGroups,
         ])
 
         addSeqTrack(mergingWorkPackage, withdrawnSeqTracks)

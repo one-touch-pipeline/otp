@@ -137,14 +137,16 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                     boolean useLibPrepKit = mergingCriteria ? mergingCriteria.useLibPrepKit : true
                     boolean mergeableSeqPlatform = mergingWorkPackage.seqPlatformGroup.seqPlatforms.contains(seqPlatform)
                     boolean mergeableLibPrepKit = useLibPrepKit ? mergingWorkPackage.libraryPreparationKit == libraryPreparationKit : true
+                    boolean seqPlatformIsNotIgnoredForMerging = mergingCriteria == null ||
+                            mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
 
-                    if (mergeableSeqPlatform && mergeableLibPrepKit) {
+                    if (mergeableSeqPlatform && mergeableLibPrepKit && seqPlatformIsNotIgnoredForMerging) {
                         if (hasNonWithdrawnSeqTracks(mergingWorkPackage)) {
                             context.addProblem(valueTuple.cells, LogLevel.WARNING,
                                     "${messagePrefix} would be automatically merged with existing samples.",
                                     "Sample would be automatically merged with existing samples.")
                         }
-                    } else {
+                    } else if (seqPlatformIsNotIgnoredForMerging) {
                         List<String> warnings = []
                         if (!mergeableSeqPlatform) {
                             warnings << "new seq platform ${seqPlatform} is not compatible with seq platform group ${mergingWorkPackage.seqPlatformGroup}"
