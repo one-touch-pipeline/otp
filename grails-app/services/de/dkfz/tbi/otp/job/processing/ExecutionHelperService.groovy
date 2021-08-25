@@ -25,18 +25,27 @@ import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.ProcessOutput
+
+import java.nio.file.Path
 
 /**
  * This service provides file operations
  */
 @Transactional
+@Deprecated
 class ExecutionHelperService {
 
     @Autowired
     RemoteShellHelper remoteShellHelper
 
+    /**
+     * @deprecated use {@link Project#unixGroup}
+     */
+    @Deprecated
     String getGroup(Realm realm, File directory) {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
@@ -47,6 +56,10 @@ class ExecutionHelperService {
         return result.stdout.trim()
     }
 
+    /**
+     * @deprecated use {@link FileService#setGroupViaBash(Path, Realm, String)}
+     */
+    @Deprecated
     String setGroup(Realm realm, File directory, String group) {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
@@ -58,6 +71,10 @@ class ExecutionHelperService {
         return result.stdout
     }
 
+    /**
+     * @deprecated use {@link FileService#setPermissionViaBash(Path, Realm, String)}
+     */
+    @Deprecated
     String setPermission(Realm realm, File directory, String permission) {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'

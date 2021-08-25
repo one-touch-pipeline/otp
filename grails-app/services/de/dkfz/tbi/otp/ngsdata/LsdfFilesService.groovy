@@ -26,15 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
-import java.nio.file.FileSystem
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
@@ -55,7 +51,9 @@ class LsdfFilesService {
 
     /**
      * Similar to {@link java.nio.file.Paths#get(String, String ...)} from Java 7.
+     * @deprecated use Path
      */
+    @Deprecated
     static File getPath(final String first, final String... more) {
         validatePathSegment(first, "first")
         File file = new File(first)
@@ -81,7 +79,9 @@ class LsdfFilesService {
     /**
      * This function return path to the initial location
      * of the given dataFile
+     * @deprecated use {@link #getFileInitialPathAsPath}
      */
+    @Deprecated
     static String getFileInitialPath(DataFile dataFile) {
         return "${dataFile.initialDirectory}/${dataFile.fileName}"
     }
@@ -97,7 +97,9 @@ class LsdfFilesService {
      *
      * @param file
      * @return String with path or null if path can not be established
+     * @deprecated use {@link #getFileFinalPathAsPath}
      */
+    @Deprecated
     String getFileFinalPath(DataFile file) {
         if (!checkFinalPathDefined(file)) {
             return null
@@ -152,6 +154,10 @@ class LsdfFilesService {
         return sb.toString()
     }
 
+    /**
+     * @deprecated use {@link #getFileViewByPidPathAsPath}
+     */
+    @Deprecated
     String getFileViewByPidPath(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
@@ -160,6 +166,10 @@ class LsdfFilesService {
         return getFileViewByPidPath(file)
     }
 
+    /**
+     * @deprecated use {@link #getFileViewByPidPathAsPath}
+     */
+    @Deprecated
     String getFileViewByPidPath(DataFile file) {
         return createFinalPathHelper(file, false)
     }
@@ -171,7 +181,9 @@ class LsdfFilesService {
     /**
      * for single cell data with well identifier, the path in the all directory is returned.
      * For all other data the same as {@link #getFileViewByPidPath} is returned
+     * @deprecated use {@link #getWellAllFileViewByPidPathAsPath}
      */
+    @Deprecated
     String getWellAllFileViewByPidPath(DataFile file) {
         return createFinalPathHelper(file, true)
     }
@@ -219,16 +231,25 @@ class LsdfFilesService {
         return CollectionUtils.exactlyOneElement(paths.unique()).parentFile
     }
 
+    /**
+     * @deprecated use {@link FileService#ensureFileIsReadableAndNotEmpty}
+     */
     @Deprecated
     static void ensureFileIsReadableAndNotEmpty(final File file) {
         FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
     }
 
+    /**
+     * @deprecated use {@link FileService#ensureDirIsReadableAndNotEmpty}
+     */
     @Deprecated
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
         FileService.ensureDirIsReadableAndNotEmpty(dir.toPath())
     }
 
+    /**
+     * @deprecated use {@link FileService#ensureDirIsReadable}
+     */
     @Deprecated
     static void ensureDirIsReadable(final File dir) {
         FileService.ensureDirIsReadable(dir.toPath())
@@ -237,7 +258,9 @@ class LsdfFilesService {
     /**
      * Deletes the specified file. Throws an exception if the path is not absolute, if the file does not exist, if the
      * path points to something different than a file, or if the deletion fails.
+     * @deprecated use {@link Files#delete(Path)}
      */
+    @Deprecated
     void deleteFile(final Realm realm, final File file) {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
@@ -252,7 +275,9 @@ class LsdfFilesService {
     /**
      * Deletes the specified empty directory. Throws an exception if the path is not absolute, if the directory does not
      * exist, if the path points to something different than a directory, or if the deletion fails.
+     * @deprecated use {@link Files#delete(Path)}
      */
+    @Deprecated
     void deleteDirectory(final Realm realm, final File directory) {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
@@ -296,6 +321,10 @@ class LsdfFilesService {
         return path
     }
 
+    /**
+     * @deprecated use {@link FileService#deleteDirectoryRecursively(Path)}
+     */
+    @Deprecated
     void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
         assert realm: 'realm may not be null'
         assert filesOrDirectories != null: 'filesOrDirectories may not be null'

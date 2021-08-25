@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
-
+@Deprecated
 @Component
 class LinkFileUtils {
 
@@ -46,7 +46,9 @@ class LinkFileUtils {
      * Creates relative symbolic links.
      * Links which already exist are overwritten, parent directories are created automatically if necessary.
      * @param targetLinkMap The values of the map are used as link names, the keys as the targets.
+     * @deprecated use {@link FileService#createLink(Path, Path, Realm, CreateLinkOption[])}
      */
+    @Deprecated
     void createAndValidateLinks(Map<File, File> targetLinkMap, Realm realm, String unixGroup = '')  {
         assert targetLinkMap
         assert realm
