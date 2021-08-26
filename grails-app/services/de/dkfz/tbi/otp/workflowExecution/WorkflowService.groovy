@@ -60,9 +60,7 @@ class WorkflowService {
                     producedBy: run,
                     outputRole: oldArtefact.outputRole,
                     displayName: oldArtefact.displayName,
-                    individual: oldArtefact.individual,
                     artefactType: oldArtefact.artefactType,
-                    seqType: oldArtefact.seqType,
             ).save(flush: true)
 
             if (useOutputAsInput) {

@@ -26,8 +26,6 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class WorkflowArtefactServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, ServiceUnitTest<WorkflowArtefactService> {
 
@@ -43,12 +41,10 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         WorkflowRun run = createWorkflowRun()
         String role = "role ${nextId}"
         ArtefactType type = ArtefactType.FASTQ
-        Individual individual = createIndividual()
-        SeqType seqType = createSeqType()
         List<String> multiLineName = ["asdf", "xyz"]
 
         when:
-        WorkflowArtefact artefact = service.buildWorkflowArtefact(new WorkflowArtefactValues(run, role, type, individual, seqType, multiLineName))
+        WorkflowArtefact artefact = service.buildWorkflowArtefact(new WorkflowArtefactValues(run, role, type, multiLineName))
 
         then:
         artefact
@@ -56,8 +52,6 @@ class WorkflowArtefactServiceSpec extends Specification implements DataTest, Wor
         artefact.outputRole == role
         artefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING
         artefact.artefactType == type
-        artefact.individual == individual
-        artefact.seqType == seqType
         artefact.withdrawnDate == null
         artefact.withdrawnComment == null
         artefact.displayName == multiLineName[0] + "\n" + multiLineName[1]

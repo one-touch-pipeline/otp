@@ -64,8 +64,6 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         then:
         result.size() == 1
         result.first().artefactType == ArtefactType.FASTQC
-        result.first().individual == seqTrack.individual
-        result.first().seqType == seqTrack.seqType
         WorkflowRunInputArtefact inputArtefact = CollectionUtils.exactlyOneElement(WorkflowRunInputArtefact.findAllByWorkflowArtefact(wa1))
         inputArtefact.workflowRun
         inputArtefact.workflowRun.workflow == workflow

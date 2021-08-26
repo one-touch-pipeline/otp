@@ -24,8 +24,6 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.transform.Canonical
 
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.StringUtils
 
 @Transactional
@@ -50,8 +48,6 @@ class WorkflowArtefactService {
                 withdrawnComment: null,
                 state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
                 artefactType    : values.artefactType,
-                individual      : values.individual,
-                seqType         : values.seqType,
                 displayName     : displayName,
         ]).save(flush: false)
     }
@@ -62,7 +58,5 @@ class WorkflowArtefactValues {
     WorkflowRun run
     String role
     ArtefactType artefactType
-    Individual individual
-    SeqType seqType
     List<String> displayNameLines
 }

@@ -79,7 +79,7 @@ class FastqcDecider implements Decider {
                 workflow,
                 inputArtefact.producedBy.priority,
                 fastqcDataFilesService.fastqcOutputDirectory(seqTrack),
-                inputArtefact.project,
+                seqTrack.individual.project,
                 runDisplayName,
                 shortName,
                 getConfigFragments(seqTrack, workflow),
@@ -97,8 +97,6 @@ class FastqcDecider implements Decider {
                     run,
                     "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
-                    seqTrack.individual,
-                    seqTrack.seqType,
                     artefactDisplayName,
             )).save(flush: true))
         }

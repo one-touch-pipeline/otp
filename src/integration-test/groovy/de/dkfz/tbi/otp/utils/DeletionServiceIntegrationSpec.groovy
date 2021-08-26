@@ -448,7 +448,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
                 )
         )
         createClusterJob(individual: individual)
-        createWorkflowArtefact(individual: individual)
 
         final DataFile dataFile = createDataFile(seqTrack: seqTrack)
         createSampleIdentifier(sample: seqTrack.sample)
@@ -476,7 +475,6 @@ rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqT
         SeqTrack.count() == 0
         SampleIdentifier.count() == 0
         ClusterJob.count() == 0
-        WorkflowArtefact.count() == 0
     }
 
     void "deleteProjectsExternalWorkflowConfigSelector, should remove project from ExternalWorkflowConfigSelector or delete selector completely"() {

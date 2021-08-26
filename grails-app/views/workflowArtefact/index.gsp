@@ -62,18 +62,6 @@
 
             ${raw(artefact.displayName.replace("\n", "<br>"))}
 
-            <ul class="list-group list-group-horizontal mt-2">
-                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.project"/>:</li>
-                <li class="list-group-item flex-fill">${artefact.project.name}</li>
-            </ul>
-            <ul class="list-group list-group-horizontal">
-                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.pid"/>:</li>
-                <li class="list-group-item flex-fill">${artefact.individual.pid}</li>
-            </ul>
-            <ul class="list-group list-group-horizontal">
-                <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.seqtype"/>:</li>
-                <li class="list-group-item flex-fill">${artefact.seqType}</li>
-            </ul>
             <ul class="list-group list-group-horizontal">
                 <li class="list-group-item hlg-item-key"><g:message code="workflowArtefact.title.producedBy"/>:</li>
                 <li class="list-group-item flex-fill">

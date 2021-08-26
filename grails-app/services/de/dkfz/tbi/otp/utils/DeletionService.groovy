@@ -44,7 +44,6 @@ import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 import java.nio.file.Path
 
@@ -131,11 +130,6 @@ class DeletionService {
 
         seqTypes.unique().each { SeqType seqType ->
             deletionScript << "rm -rf ${individual.getViewByPidPath(seqType).absoluteDataManagementPath}\n"
-        }
-
-        WorkflowArtefact workflowArtefact = CollectionUtils.atMostOneElement(WorkflowArtefact.findAllByIndividual(individual))
-        if (workflowArtefact) {
-            workflowDeletionService.deleteWorkflowArtefact(workflowArtefact)
         }
 
         deleteClusterJobs(ClusterJob.findAllByIndividual(individual))

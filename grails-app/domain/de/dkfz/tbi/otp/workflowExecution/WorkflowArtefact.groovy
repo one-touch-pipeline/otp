@@ -22,9 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.Withdrawable
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -51,10 +48,6 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     ArtefactType artefactType
 
-    Individual individual
-
-    SeqType seqType
-
     String displayName
 
     static constraints = {
@@ -74,16 +67,12 @@ class WorkflowArtefact implements Withdrawable, Entity {
                 return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
             }
         }
-        individual nullable: false
-        seqType nullable: false
         displayName blank: false, nullable: false
     }
 
     static mapping = {
         withdrawnComment type: "text"
         state index: 'workflow_artefact_state_idx'
-        individual index: 'workflow_artefact_individual_idx'
-        seqType index: 'workflow_artefact_seq_type_idx'
     }
 
     // gorm/hibernate ignores the property workflowArtefact of trait Artefact if this method returns Artefact
@@ -91,10 +80,6 @@ class WorkflowArtefact implements Withdrawable, Entity {
         Optional.ofNullable(atMostOneElement(
                 executeQuery("FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact = :wa", [wa: this])
         ) as Artefact)
-    }
-
-    Project getProject() {
-        return individual?.project
     }
 
     @Override

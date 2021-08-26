@@ -69,8 +69,6 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
     WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
         return createDomainObject(WorkflowArtefact, [
                 artefactType: ArtefactType.FASTQ,
-                individual  : { createIndividual() },
-                seqType     : { createSeqType() },
                 displayName : "displayName_${nextId}",
                 outputRole  : { properties.producedBy ? "role ${nextId}" : null },
         ], properties)

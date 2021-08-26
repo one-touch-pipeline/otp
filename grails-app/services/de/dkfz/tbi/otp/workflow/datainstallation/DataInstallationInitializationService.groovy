@@ -77,7 +77,7 @@ class DataInstallationInitializationService {
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, runDisplayName, shortName, configFragments)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
-                run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, seqTrack.individual, seqTrack.seqType, artefactDisplayName
+                run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, artefactDisplayName
         ))
         seqTrack.workflowArtefact = artefact
         seqTrack.save(flush: false)

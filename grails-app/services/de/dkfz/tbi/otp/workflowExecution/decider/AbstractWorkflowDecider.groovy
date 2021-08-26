@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * creates workflow runs for one workflow
- * knows the needed input and created output workflowartefacts
+ * knows the needed input and created output workflow artefacts
  * knows all requirements
  * is called with a list of new/changed workflow artefacts
  */
@@ -84,19 +84,7 @@ abstract class AbstractWorkflowDecider implements Decider {
     /**
      * Group the artefacts by project and seqtype.
     */
-    Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupArtefacts(Collection<WorkflowArtefact> toGroup) {
-        /**
-         * We could have use .collectEntries(), but in this way the compiler can understand the type transformations.
-         * (collectEntries() has (?) as return type)
-         */
-        Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> result = [:]
-        toGroup.groupBy { it ->
-            new Pair<Project, SeqType>(it.project, it.seqType)
-        }.each { Pair <Project, SeqType> k, List<WorkflowArtefact> v ->
-            result.put(k, v.toSet())
-        }
-        return result
-    }
+    abstract Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupArtefacts(Collection<WorkflowArtefact> toGroup)
 
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> newArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
