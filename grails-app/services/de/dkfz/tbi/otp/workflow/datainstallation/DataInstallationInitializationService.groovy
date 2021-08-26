@@ -60,12 +60,14 @@ class DataInstallationInitializationService {
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
         List<String> runDisplayName = []
-        runDisplayName.add("project: ${seqTrack.project.name}")
-        runDisplayName.add("individual: ${seqTrack.individual.displayName}")
-        runDisplayName.add("sampleType: ${seqTrack.sampleType.displayName}")
-        runDisplayName.add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
-        runDisplayName.add("run: ${seqTrack.run.name}")
-        runDisplayName.add("lane: ${seqTrack.laneId}")
+        runDisplayName.with {
+            add("project: ${seqTrack.project.name}")
+            add("individual: ${seqTrack.individual.displayName}")
+            add("sampleType: ${seqTrack.sampleType.displayName}")
+            add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
+            add("run: ${seqTrack.run.name}")
+            add("lane: ${seqTrack.laneId}")
+        }
 
         List<String> artefactDisplayName = runDisplayName
         artefactDisplayName.remove(0)

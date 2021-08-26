@@ -26,8 +26,11 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -41,15 +44,22 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         Workflow workflow = createWorkflow(name: FastqcWorkflow.WORKFLOW)
 
         WorkflowArtefact wa1 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun())
-        SeqTrack seqTrack = createSeqTrack(workflowArtefact: wa1)
+        SeqTrack seqTrack = createSeqTrackWithTwoDataFile(workflowArtefact: wa1)
         WorkflowArtefact wa12 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ, producedBy: createWorkflowRun()) // already run
         createWorkflowRunInputArtefact(workflowArtefact: wa12, workflowRun: createWorkflowRun(workflow: workflow))
         WorkflowArtefact wa2 = createWorkflowArtefact(artefactType: ArtefactType.FASTQ) // without artefact
         WorkflowArtefact wa3 = createWorkflowArtefact(artefactType: ArtefactType.FASTQC) // wrong type
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
         FastqcDecider decider = new FastqcDecider()
+        decider.seqTrackService = Mock(SeqTrackService) {
+            1 * getSequenceFilesForSeqTrack(seqTrack) >> dataFiles
+        }
         decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(seqTrack) >> "/output-dir-fastqc"
+            2 * updateFastqcProcessedFile(_) >> { FastqcProcessedFile fastqc ->
+                fastqc.save(flush: true)
+            }
         }
         decider.configFragmentService = Mock(ConfigFragmentService) {
             1 * getSortedFragments(_) >> [new ExternalWorkflowConfigFragment(name: "xyz", configValues: '{"WORKFLOWS":{"resource":"1"}}')]
@@ -69,5 +79,6 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         inputArtefact.workflowRun.workflow == workflow
         inputArtefact.workflowRun.combinedConfig == '{"WORKFLOWS":{"resource":"1"}}'
         inputArtefact.workflowRun.workDirectory == "/output-dir-fastqc"
+        FastqcProcessedFile.findAllByWorkflowArtefact(inputArtefact.workflowArtefact)*.dataFile == dataFiles
     }
 }

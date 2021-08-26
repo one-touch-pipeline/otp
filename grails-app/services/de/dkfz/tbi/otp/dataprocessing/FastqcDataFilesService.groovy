@@ -148,8 +148,8 @@ class FastqcDataFilesService {
         assert (fastqc.save(flush: true))
     }
 
-    FastqcProcessedFile updateFastqcProcessedFile(DataFile dataFile, WorkflowArtefact workflowArtefact) {
-        FastqcProcessedFile fastqc = FastqcProcessedFile.findOrCreateWhere(dataFile: dataFile)
+    FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile, WorkflowArtefact workflowArtefact) {
+        FastqcProcessedFile fastqc = CollectionUtils.exactlyOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
         fastqc.workflowArtefact = workflowArtefact
         updateFastqcProcessedFile(fastqc)
         return fastqc

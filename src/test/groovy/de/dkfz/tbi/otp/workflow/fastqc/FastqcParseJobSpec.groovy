@@ -62,8 +62,8 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         job.execute(workflowStep)
 
         then:
-        1 * job.fastqcDataFilesService.updateFastqcProcessedFile(seqTrack.dataFiles.first(), _)
-        1 * job.fastqcDataFilesService.updateFastqcProcessedFile(seqTrack.dataFiles.last(), _)
+        1 * job.fastqcDataFilesService.getAndUpdateFastqcProcessedFile(seqTrack.dataFiles.first(), _)
+        1 * job.fastqcDataFilesService.getAndUpdateFastqcProcessedFile(seqTrack.dataFiles.last(), _)
         2 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(_)
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }

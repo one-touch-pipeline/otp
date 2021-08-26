@@ -221,22 +221,9 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
         expect:
-        service.updateFastqcProcessedFile(fastqcProcessedFile.dataFile, workflowArtefact) == fastqcProcessedFile
+        service.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile, workflowArtefact) == fastqcProcessedFile
         fastqcProcessedFile.workflowArtefact == workflowArtefact
     }
-
-    void "test updateFastqcProcessedFile, without existing FastqcProcessedFile"() {
-        given:
-        WorkflowArtefact workflowArtefact = createWorkflowArtefact()
-
-        when:
-        FastqcProcessedFile result = service.updateFastqcProcessedFile(createDataFile(), workflowArtefact)
-
-        then:
-        result.workflowArtefact == workflowArtefact
-        FastqcProcessedFile.all.size() == 1
-    }
-
 
     void "test pathToFastQcResultFromSeqCenter"() {
         expect:

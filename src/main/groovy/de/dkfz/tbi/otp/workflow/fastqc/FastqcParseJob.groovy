@@ -57,7 +57,7 @@ class FastqcParseJob extends AbstractJob implements FastqcShared {
 
         SeqTrack.withTransaction {
             seqTrackService.getSequenceFilesForSeqTrack(seqTrack).sort { it.mateNumber }.eachWithIndex { DataFile file, int i ->
-                FastqcProcessedFile fastqc = fastqcDataFilesService.updateFastqcProcessedFile(file, workflowArtefacts[i])
+                FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file, workflowArtefacts[i])
                 fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
             }
         }

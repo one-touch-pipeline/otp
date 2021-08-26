@@ -25,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -42,6 +44,8 @@ class FastqcDecider implements Decider {
     WorkflowArtefactService workflowArtefactService
     @Autowired
     WorkflowRunService workflowRunService
+    @Autowired
+    SeqTrackService seqTrackService
 
     @Override
     Collection<WorkflowArtefact> decide(Collection<WorkflowArtefact> inputArtefacts, boolean forceRun = false, Map<String, String> userParams = [:]) {
@@ -68,6 +72,12 @@ class FastqcDecider implements Decider {
         }
 
         SeqTrack seqTrack = optionalArtefact.get() as SeqTrack
+
+        seqTrackService.getSequenceFilesForSeqTrack(seqTrack).each {
+            FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findOrCreateWhere(dataFile: it)
+            fastqcProcessedFile.workflowArtefact = inputArtefact
+            fastqcDataFilesService.updateFastqcProcessedFile(fastqcProcessedFile)
+        }
 
         List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
         List<String> artefactDisplayName = runDisplayName
@@ -122,13 +132,14 @@ class FastqcDecider implements Decider {
      */
     private List<String> generateWorkflowRunDisplayName(SeqTrack seqTrack) {
         List<String> runDisplayName = []
-        runDisplayName.add("project: ${seqTrack.project.name}")
-        runDisplayName.add("individual: ${seqTrack.individual.displayName}")
-        runDisplayName.add("sampleType: ${seqTrack.sampleType.displayName}")
-        runDisplayName.add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
-        runDisplayName.add("run: ${seqTrack.run.name}")
-        runDisplayName.add("lane: ${seqTrack.laneId}")
-
+        runDisplayName.with {
+            add("project: ${seqTrack.project.name}")
+            add("individual: ${seqTrack.individual.displayName}")
+            add("sampleType: ${seqTrack.sampleType.displayName}")
+            add("seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}")
+            add("run: ${seqTrack.run.name}")
+            add("lane: ${seqTrack.laneId}")
+        }
         return runDisplayName
     }
 }
