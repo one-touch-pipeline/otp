@@ -75,13 +75,13 @@ String withdrawnComment = """\
 /**
  * indicate, if the bam files should be deleted (true) or set to withdrawn (false).
  */
-boolean deleteBamFile = true
+boolean deleteBamFile = false
 
 /**
  * indicate, if the analysis files should be deleted (true) or set to withdrawn (false).
  * The selection is only possible, if the bam files are not deleted.
  */
-boolean deleteAnalysis = true
+boolean deleteAnalysis = false
 
 /**
  * Multi selector using:
@@ -150,7 +150,7 @@ boolean tryRun = true
 // WORK
 
 assert withdrawnComment?.trim() : "no comment were given"
-assert fileName : "no file name were given"
+assert fileName?.trim() : "no file name were given"
 
 //services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
@@ -173,7 +173,7 @@ WithdrawParameters withdrawParameters = new WithdrawParameters([
         withdrawnComment          : withdrawnComment.trim(),
         deleteBamFile             : deleteBamFile,
         deleteAnalysis            : deleteAnalysis,
-        fileName                  : fileName,
+        fileName                  : fileName.trim(),
         stopOnMissingFiles        : stopOnMissingFiles,
         stopOnAlreadyWithdrawnData: stopOnAlreadyWithdrawnData,
         seqTracks                 : allSeqTracks,

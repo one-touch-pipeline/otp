@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.testing.gorm.DataTest
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.*
@@ -45,6 +48,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
             PATH_LIST1,
             PATH_LIST2,
     ].flatten().asImmutable()
+
+    @Rule
+    TemporaryFolder temporaryFolder
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -374,13 +380,19 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
     void "handleDataFiles, when datafiles given, then collect the needed path to the correct list"() {
         given:
         String withdrawnCommentToUse = "withdrawnComment"
-        String finalPathNormal = "/tmp/finalNormal"
-        String finalPathSingleCell = "/tmp/finalSingleCell"
+        final Path finalPathNormal = temporaryFolder.newFile("finalNormal").toPath()
+        final Path finalPathSingleCell = temporaryFolder.newFile("finalSingleCell").toPath()
         String viewByPidPathNormal = "/tmp/viewByPidNormal"
         String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
         String wellPathSingleCell = "/tmp/wellSingleCell"
-        String fastqcPathNormal = "/tmp/fastqcNormal"
-        String fastqcPathSingleCell = "/tmp/fastqcSingleCell"
+        final Path fastqcPathNormal = temporaryFolder.newFile("fastqcNormal").toPath()
+        final Path fastqcPathSingleCell = temporaryFolder.newFile("fastqcSingleCell").toPath()
+        final Path fastqcOutputMd5sumPath = temporaryFolder.newFile("fastqcOutputMd5sum").toPath()
+        final Path fastqcOutputMd5sumPathSingleCell = temporaryFolder.newFile("fastqcOutputMd5sumSingleCell").toPath()
+        final Path finalMd5sumNormal = temporaryFolder.newFile("finalMd5sum").toPath()
+        final Path finalMd5sumSingleCell = temporaryFolder.newFile("finalMd5sumSingleCell").toPath()
+        final Path fastqcHtmlPath = temporaryFolder.newFile("html").toPath()
+        final Path fastqcHtmlPathSingleCell = temporaryFolder.newFile("htmlSingleCell").toPath()
 
         DataFile dataFile = createDataFile()
         DataFile withDrawnDataFile = createDataFile([fileWithdrawn: true])
@@ -392,22 +404,14 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
                         singleCellWellLabel: 'someLabel',
                 ])
         ])
-
         WithdrawHelperService service = new WithdrawHelperService()
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile) >> finalPathNormal
-            1 * getFileFinalPath(singleCellDataFile) >> finalPathSingleCell
-            1 * getFileViewByPidPath(dataFile) >> viewByPidPathNormal
-            1 * getFileViewByPidPath(singleCellDataFile) >> viewByPidPathSingleCell
-            1 * getWellAllFileViewByPidPath(singleCellDataFile) >> wellPathSingleCell
-            0 * _
-        }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputFile(dataFile) >> fastqcPathNormal
-            1 * fastqcOutputFile(singleCellDataFile) >> fastqcPathSingleCell
-            0 * _
+        FileSystem fileSystem = FileSystems.default
+        service.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystemOnDefaultRealm() >> fileSystem
         }
 
+        service.lsdfFilesService = Mock(LsdfFilesService)
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracks       : [
@@ -419,10 +423,16 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
                 ]),
         ])
         List<String> pathsToChangeGroup = [
-                finalPathNormal,
-                finalPathSingleCell,
-                fastqcPathNormal,
-                fastqcPathSingleCell,
+                finalPathNormal.toString(),
+                finalMd5sumNormal.toString(),
+                fastqcPathNormal.toString(),
+                fastqcHtmlPath.toString(),
+                fastqcOutputMd5sumPath.toString(),
+                finalPathSingleCell.toString(),
+                finalMd5sumSingleCell.toString(),
+                fastqcPathSingleCell.toString(),
+                fastqcHtmlPathSingleCell.toString(),
+                fastqcOutputMd5sumPathSingleCell.toString(),
         ]
         List<String> pathsToDelete = [
                 viewByPidPathNormal,
@@ -434,6 +444,24 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         service.handleDataFiles(holder)
 
         then:
+        1 * service.lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem) >> finalPathNormal
+        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem) >> finalMd5sumNormal
+        1 * service.lsdfFilesService.getFileViewByPidPath(dataFile) >> viewByPidPathNormal
+        1 * service.lsdfFilesService.getFileFinalPathAsPath(singleCellDataFile, fileSystem) >> finalPathSingleCell
+        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(singleCellDataFile, fileSystem) >> finalMd5sumSingleCell
+        1 * service.lsdfFilesService.getFileViewByPidPath(singleCellDataFile) >> viewByPidPathSingleCell
+        1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellDataFile) >> wellPathSingleCell
+        0 * service.lsdfFilesService._
+
+        1 * service.fastqcDataFilesService.fastqcOutputPath(dataFile, fileSystem) >> fastqcPathNormal
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile, fileSystem) >> fastqcOutputMd5sumPath
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(dataFile, fileSystem) >> fastqcHtmlPath
+        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellDataFile, fileSystem) >> fastqcPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellDataFile, fileSystem) >> fastqcOutputMd5sumPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellDataFile, fileSystem) >> fastqcHtmlPathSingleCell
+        0 * service.fastqcDataFilesService._
+
+        and:
         TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)
         TestCase.assertContainSame(holder.pathsToDelete, pathsToDelete)
 

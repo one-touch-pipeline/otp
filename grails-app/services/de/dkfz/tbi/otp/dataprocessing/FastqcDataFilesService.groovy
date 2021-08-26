@@ -68,6 +68,33 @@ class FastqcDataFilesService {
         return "${base}/${fileName}"
     }
 
+    Path fastqcOutputPath(DataFile dataFile, FileSystem fileSystem) {
+        return fileSystem.getPath(fastqcOutputFile(dataFile))
+    }
+
+    String fastqcHtmlFile(DataFile dataFile) {
+        SeqTrack seqTrack = dataFile.seqTrack
+        if (!seqTrack) {
+            throw new ProcessingException("DataFile not assigned to a SeqTrack")
+        }
+        String base = fastqcOutputDirectory(seqTrack)
+        String fileName = fastqcFileNameWithoutZipSuffix(dataFile).concat(".html")
+        return "${base}/${fileName}"
+    }
+
+    Path fastqcHtmlPath(DataFile dataFile, FileSystem fileSystem) {
+        return fileSystem.getPath(fastqcHtmlFile(dataFile))
+    }
+
+    String fastqcOutputMd5sumFile(DataFile dataFile) {
+        return fastqcOutputFile(dataFile).concat(".md5sum")
+    }
+
+    Path fastqcOutputMd5sumPath(DataFile dataFile, FileSystem fileSystem) {
+        String fastqcOutputMd5sumFile = fastqcOutputMd5sumFile(dataFile)
+        return fastqcOutputMd5sumFile ? fileSystem.getPath(fastqcOutputMd5sumFile) : null
+    }
+
     String fastqcFileName(DataFile dataFile) {
         return "${fastqcFileNameWithoutZipSuffix(dataFile)}${FASTQC_ZIP_SUFFIX}"
     }

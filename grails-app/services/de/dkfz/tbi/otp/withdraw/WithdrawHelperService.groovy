@@ -33,8 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.DeletionService
 
-import java.nio.file.FileSystem
-import java.nio.file.Path
+import java.nio.file.*
 
 /**
  * Internal service for simplify {@link WithdrawService}.
@@ -151,6 +150,7 @@ class WithdrawHelperService {
     }
 
     void handleDataFiles(WithdrawStateHolder withdrawStateHolder) {
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         List<DataFile> dataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracks, false)
         dataFiles.each { DataFile dataFile ->
             dataFile.fileWithdrawn = true
@@ -158,12 +158,23 @@ class WithdrawHelperService {
             dataFile.withdrawnComment = withdrawStateHolder.withdrawnComment
             dataFile.save(flush: true)
 
-            withdrawStateHolder.pathsToChangeGroup << lsdfFilesService.getFileFinalPath(dataFile)
+            List<Path> filePaths = []
+            filePaths.add( lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem))
+            filePaths.add( lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem))
+            filePaths.add(fastqcDataFilesService.fastqcOutputPath(dataFile, fileSystem))
+            filePaths.add(fastqcDataFilesService.fastqcHtmlPath(dataFile, fileSystem))
+            filePaths.add(fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile, fileSystem))
+
+            filePaths.findAll { path ->
+                return Files.exists(path)
+            }.collect { existingPath ->
+                withdrawStateHolder.pathsToChangeGroup << existingPath.toString()
+            }
+
             withdrawStateHolder.pathsToDelete << lsdfFilesService.getFileViewByPidPath(dataFile)
             if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
                 withdrawStateHolder.pathsToDelete << lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
             }
-            withdrawStateHolder.pathsToChangeGroup << fastqcDataFilesService.fastqcOutputFile(dataFile)
         }
     }
 

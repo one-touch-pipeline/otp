@@ -95,27 +95,28 @@ class LsdfFilesService {
      * Important function.
      * This function knows all naming conventions and data organization
      *
-     * @param file
+     * @param dataFile
      * @return String with path or null if path can not be established
      * @deprecated use {@link #getFileFinalPathAsPath}
      */
     @Deprecated
-    String getFileFinalPath(DataFile file) {
-        if (!checkFinalPathDefined(file)) {
+    String getFileFinalPath(DataFile dataFile) {
+        if (!checkFinalPathDefined(dataFile)) {
             return null
         }
-        String seqTypeDir = seqTypeDirectory(file)
+        String seqTypeDir = seqTypeDirectory(dataFile)
         if (seqTypeDir == null) {
             return null
         }
-        String centerDir = file.run.seqCenter.dirName
-        String basePath = file.project.projectSequencingDirectory
-        String path = "${basePath}/${seqTypeDir}/${centerDir}/${file.run.dirName}/${file.pathName}/${file?.fileName}"
+        String centerDir = dataFile.run.seqCenter.dirName
+        String basePath = dataFile.project.projectSequencingDirectory
+        String path = "${basePath}/${seqTypeDir}/${centerDir}/${dataFile.run.dirName}/${dataFile.pathName}/${dataFile?.fileName}"
         return path
     }
 
-    Path getFileFinalPathAsPath(DataFile file, FileSystem fileSystem) {
-        return fileSystem.getPath(getFileFinalPath(file))
+    Path getFileFinalPathAsPath(DataFile dataFile, FileSystem fileSystem) {
+        String fileFinalPath = getFileFinalPath(dataFile)
+        return (fileFinalPath) ? fileSystem.getPath(getFileFinalPath(dataFile)) : null
     }
 
     boolean checkFinalPathDefined(DataFile dataFile) {
@@ -123,6 +124,16 @@ class LsdfFilesService {
             return false
         }
         return dataFile.used
+    }
+
+    String getFileMd5sumFinalPath(DataFile dataFile) {
+        String fileFinalPath = getFileFinalPath(dataFile)
+        return (fileFinalPath) ? fileFinalPath.concat(".md5sum") : null
+    }
+
+    Path getFileMd5sumFinalPathAsPath(DataFile dataFile, FileSystem fileSystem) {
+        String fileMd5sumFinalPath = getFileMd5sumFinalPath(dataFile)
+        return fileMd5sumFinalPath ? fileSystem.getPath(fileMd5sumFinalPath) : null
     }
 
     String seqTypeDirectory(DataFile file) {

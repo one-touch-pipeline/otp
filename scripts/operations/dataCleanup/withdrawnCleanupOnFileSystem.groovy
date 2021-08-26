@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.FileSystem
 
 /**
  * script to change group of all withdrawn data on file system to withdrawn.
@@ -48,6 +49,8 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
+FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
+FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 
 String withdrawnGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
@@ -75,13 +78,46 @@ String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
     "${chgrp} ${it}" as String
 }.sort().join('\n')
 
-String dataFiles = DataFile.findAllByFileWithdrawn(true).collect {
-    lsdfFilesService.getFileFinalPath(it)
-}.findAll {
-    it && new File(it).exists()
+String dataFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    lsdfFilesService.getFileFinalPathAsPath(it, fileSystem)
+}.findAll {path ->
+    path && Files.exists(path)
 }.collect {
     "${chgrp} ${it}" as String
 }.sort().join('\n')
+
+String md5sumDataFile = DataFile.findAllByFileWithdrawn(true).collect {
+    lsdfFilesService.getFileMd5sumFinalPathAsPath(it, fileSystem)
+}.findAll {path ->
+    path && Files.exists(path)
+}.collect {
+    "${chgrp} ${it}" as String
+}.sort().join('\n')
+
+String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect{
+    fastqcDataFilesService.fastqcOutputPath(it, fileSystem)
+}.findAll {path ->
+    Files.exists(path)
+}.collect {
+    "${chgrp} ${it}" as String
+}.sort().join('\n')
+
+String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    fastqcDataFilesService.fastqcHtmlPath(it, fileSystem)
+}.findAll {path ->
+    Files.exists(path)
+}.collect {
+    "${chgrp} ${it}" as String
+}.sort().join('\n')
+
+String md5sumFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
+    fastqcDataFilesService.fastqcOutputMd5sumPath(it, fileSystem)
+}.findAll {path ->
+    path && Files.exists(path)
+}.collect {
+    "${chgrp} ${it}" as String
+}.sort().join('\n')
+
 
 String script = [
         "#/bin/bash",
@@ -89,6 +125,10 @@ String script = [
         dataFiles,
         bamFiles,
         analysis,
+        zipFiles,
+        htmlFiles,
+        md5sumFiles,
+        md5sumDataFile
 ].join('\n')
 
 Path path = fileSystemService.getRemoteFileSystemOnDefaultRealm().getPath(file)

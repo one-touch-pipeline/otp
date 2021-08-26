@@ -20,8 +20,13 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.FileSystem
+import java.nio.file.Files
 
 /**
  * Script to remove the mark as withdrawn.
@@ -49,6 +54,7 @@ List<SeqTrack> seqTracks = """
     SeqTrack.findAllBySampleAndSeqType(sample, seqType)
 }.flatten()
 
+
 List dirsToLink = []
 assert comment: 'Please provide a comment why the data are set to withdrawn'
 SeqTrack.withTransaction {
@@ -75,13 +81,27 @@ class UnWithdrawer {
     }
 
     static void unwithdraw(final DataFile dataFile, List dirsToLink) {
+
+        FileSystemService fileSystemService = ctx.fileSystemService
+        LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+        FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+
         println "Unwithdrawing DataFile ${dataFile}"
-        dirsToLink.add("ln -rs ${ctx.lsdfFilesService.getFileFinalPath(dataFile)} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
-        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${ctx.lsdfFilesService.getFileFinalPath(dataFile)}")
-        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${ctx.lsdfFilesService.getFileViewByPidPath(dataFile)}")
+        dirsToLink.add("ln -rs ${lsdfFilesService.getFileFinalPath(dataFile)} ${lsdfFilesService.getFileViewByPidPath(dataFile)}")
+        dirsToLink.add("chrgrp ${dataFile.project.unixGroup} ${lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fileSystem)}")
+        [lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem),
+         lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem),
+         fastqcDataFilesService.fastqcOutputPath(dataFile, fileSystem),
+         fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile, fileSystem),
+         fastqcDataFilesService.fastqcHtmlPath(dataFile, fileSystem)].findAll { path ->
+            Files.exists(path)
+        }.collect { filePath ->
+            dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${filePath}")
+        }
         dataFile.withdrawnDate = null
         if (!dataFile.withdrawnComment?.contains(comment)) {
-            dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"
+            dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n" : ""}${comment}"
         }
         dataFile.fileWithdrawn = false
         assert dataFile.save(flush: true)
