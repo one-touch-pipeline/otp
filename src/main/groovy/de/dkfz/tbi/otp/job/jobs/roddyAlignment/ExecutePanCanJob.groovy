@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.*
@@ -76,7 +77,10 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
         return ""
     }
 
-
+    /**
+     * @deprecated use {@link RoddyConfigValueService#getFilesToMerge()}
+     */
+    @Deprecated
     protected List<File> getFilesToMerge(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
         List<File> vbpDataFiles = []

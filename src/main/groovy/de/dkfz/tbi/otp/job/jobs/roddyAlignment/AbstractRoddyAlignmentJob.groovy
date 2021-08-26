@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import htsjdk.samtools.SamReaderFactory
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
@@ -31,6 +32,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyBamFile> {
 
+    /**
+     * @deprecated use {@link RoddyConfigValueService#getAlignmentValues()}
+     */
+    @Deprecated
     List<String> prepareAndReturnAlignmentCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
 
