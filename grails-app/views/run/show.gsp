@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.MetaDataEntry; de.dkfz.tbi.util.TimeFormats" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -50,7 +50,7 @@
             <td class="myKey"><g:message code="run.show.general.dateExecuted"/></td>
             <td class="myValue">
                 <g:if test="${run.dateExecuted != null}">
-                    ${(new Date(run.dateExecuted.getTime())).format("yyyy-MM-dd")}
+                    ${TimeFormats.DATE.getFormatted((new Date(run.dateExecuted.getTime())))}
                 </g:if>
             </td>
        </tr>
@@ -92,7 +92,7 @@
                             ${file.fullPath}
                         </g:link>
                     </td>
-                    <td>${(new Date(file.metaDataFile.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
+                    <td>${TimeFormats.DATE.getFormatted((new Date(file.metaDataFile.dateCreated.getTime())))}</td>
                 </tr>
             </tbody>
             </g:each>
@@ -118,7 +118,7 @@
                     <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">view-by-pid</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                    <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : ' ' }</td>
+                    <td>${TimeFormats.DATE.getFormatted(new Date(file.dateFileSystem.getTime()))}</td>
                     <td>
                         <g:if test="${fastqcLinks.get(file.id)}">
                             <g:link controller="fastqcResults" action="show" id="${file.id}"><g:message code="run.show.fastqc"/></g:link>
@@ -137,7 +137,7 @@
                         <td class="${file.fileExists}">lsdf</td>
                         <td class="${file.fileLinked}">view-by-pid</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                        <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : ' ' }</td>
+                        <td>${TimeFormats.DATE.getFormatted(new Date(file.dateFileSystem.getTime()))}</td>
                         <td>&nbsp;</td>
                     </tr>
                 </g:each>
@@ -156,8 +156,8 @@
                 <tr>
                     %{--This code require metadata fields, since there is no connection to a SeqTrack--}%
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                    <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0])?.value}</td>
-                    <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
+                    <td>${MetaDataEntry.findByDataFileAndKey(file, keys[0])?.value}</td>
+                    <td>${MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
                     <td class="true"><g:message code="run.show.metaData"/></td>
                 </tr>
             </g:each>

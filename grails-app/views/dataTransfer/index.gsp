@@ -20,7 +20,6 @@
   - SOFTWARE.
   --}%
 <%@ page import="de.dkfz.tbi.otp.project.dta.DataTransfer" %>
-
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -74,7 +73,7 @@
                         <span><i class="bi bi-info-square"></i> <g:message code="dataTransfer.upload.overview"/>:</span><br>
                         ${dta.dtaId ? "${dta.dtaId}, " : ""}with <strong>${dta.peerInstitution}</strong> (${dta.legalBasis?.name()?.toLowerCase()}),
                         <g:message code="dataTransfer.dta.transfer.created"/>
-                        <g:formatDate date="${dta.dateCreated}" format="yyyy-MM-dd"/><br>
+                        <g:formatDate date="${dta.dateCreated}" format="${dateFormat}"/><br>
                         <br>
                         <span><i class="bi bi-files"></i> <g:message code="dataTransfer.upload.files"/>:</span>
                         <ul id="dtaDocuments-${i}">

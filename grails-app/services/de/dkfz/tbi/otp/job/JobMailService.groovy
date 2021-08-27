@@ -34,8 +34,6 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.TimeFormats
-
-import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 
 @Transactional
@@ -156,7 +154,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
     }
 
     private String dateString(Date date) {
-        return date ? new SimpleDateFormat('yyyy-MM-dd HH:mm', Locale.ENGLISH).format(date) : 'na'
+        return date ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(date) : 'na'
     }
 
     int restartCount(ProcessingStep step) {

@@ -37,10 +37,9 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.util.TimeFormats
 
 import java.sql.Timestamp
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 
 @SuppressWarnings("AnnotationsForJobs")
@@ -200,8 +199,7 @@ class CellRangerDataCleanupJob extends ScheduledJob {
     }
 
     String getFormattedPlannedDeletionDate() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-        return dateFormat.format(plannedDeletionDate)
+        return TimeFormats.DATE.getFormatted(plannedDeletionDate)
     }
 
     Date getPlannedDeletionDate() {

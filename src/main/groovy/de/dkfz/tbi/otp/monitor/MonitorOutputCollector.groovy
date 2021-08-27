@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.util.TimeFormats
 
 class MonitorOutputCollector {
 
@@ -211,7 +212,7 @@ the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n'
 
             Comment comment = ps.process.comment
             if (comment) {
-                errorOutput << "the comment (${comment.modificationDate.format("yyyy-MM-dd")} by ${comment.author}): " +
+                errorOutput << "the comment (${TimeFormats.DATE.getFormatted(comment.modificationDate)} by ${comment.author}): " +
                         "${ps.process.comment.comment.replaceAll('\n', "\n${INDENT3}")}"
             }
             if (update == null) {

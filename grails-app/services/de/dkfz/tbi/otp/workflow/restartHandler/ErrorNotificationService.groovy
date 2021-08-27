@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.util.TimeFormats
 
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
@@ -260,7 +259,7 @@ class ErrorNotificationService {
     }
 
     private String dateString(Date date) {
-        return date ? new SimpleDateFormat('yyyy-MM-dd HH:mm', Locale.ENGLISH).format(date) : 'na'
+        return TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(date)
     }
 
     String getSubmissionIds(Set<SeqTrack> seqTracks) {

@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.util.TimeFormats
 
 import java.time.LocalDate
 
@@ -35,7 +36,12 @@ class ProcessingTimeStatisticsController {
     ProcessingTimeStatisticsService processingTimeStatisticsService
     CommentService commentService
 
-    def index() { }
+    def index() {
+        return [
+                dateFrom: TimeFormats.DATE.getFormatted((new Date() - 6)),
+                dateTo  : TimeFormats.DATE.getFormatted(new Date()),
+        ]
+    }
 
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()

@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.project.ProjectInfo" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.util.TimeFormats; de.dkfz.tbi.otp.project.ProjectInfo" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -73,7 +73,7 @@
                     <g:link action="downloadProjectInfoDocument" params='["projectInfo.id": doc.id]'>${doc.path}</g:link>
                     <br>
                     <g:message code="dataTransfer.dta.transfer.created"/>
-                    <g:formatDate date="${doc.dateCreated}" format="yyyy-MM-dd"/>
+                    <g:formatDate date="${doc.dateCreated}" format="${dateFormat}"/>
                     <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
                             onSubmit="\$.otp.projectInfo.confirmProjectInfoDelete(event);">
                         <input type="hidden" name="projectInfo.id" value="${doc.id}"/>

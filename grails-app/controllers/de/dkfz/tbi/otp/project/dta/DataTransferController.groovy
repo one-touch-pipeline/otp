@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
 
@@ -65,6 +66,7 @@ class DataTransferController implements CheckAndCall {
 
         return [
                 dataTransferAgreements: dataTransferAgreements,
+                validityDate          : TimeFormats.DATE.getFormatted(docDtaCmd?.validityDate),
                 transferModes         : DataTransfer.TransferMode.values(),
                 selectedTransferMode  : (flash.transferCmd as AddTransferCommand)?.transferMode ?: DataTransfer.TransferMode.ASPERA,
                 directions            : DataTransfer.Direction.values(),
@@ -73,6 +75,7 @@ class DataTransferController implements CheckAndCall {
                 selectedLegalBasis    : (flash.docDtaCmd as AddDataTransferAgreementCommand)?.legalBasis ?: DataTransferAgreement.LegalBasis.DTA,
                 docDtaCmd             : flash.docDtaCmd as AddDataTransferAgreementCommand,
                 cachedTransferCmd     : flash.transferCmd as AddTransferCommand,
+                dateFormat            : TimeFormats.DATE.format,
         ]
     }
 
@@ -266,13 +269,13 @@ class AddTransferCommand implements MultipartFilesCommand {
 
     void setTransferDateInput(String s) {
         if (s) {
-            this.transferDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(s)
+            this.transferDate = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH).parse(s)
         }
     }
 
     void setCompletionDateInput(String s) {
         if (s) {
-            this.completionDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(s)
+            this.completionDate = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH).parse(s)
         }
     }
 
@@ -352,7 +355,7 @@ class AddDataTransferAgreementCommand implements MultipartFilesCommand {
 
     void setValidityDateInput(String validityDate) {
         if (validityDate) {
-            this.validityDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(validityDate)
+            this.validityDate = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH).parse(validityDate)
         }
     }
 }

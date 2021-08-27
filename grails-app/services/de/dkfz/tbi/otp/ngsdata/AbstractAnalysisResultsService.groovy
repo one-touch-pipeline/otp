@@ -30,10 +30,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Path
 import java.nio.file.FileSystem
-import java.text.SimpleDateFormat
 import java.nio.file.Files
 
 @Transactional
@@ -100,7 +100,6 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 property('dateCreated', "dateCreated")
             }
         }
-        SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat('yyyy-MM-dd HH:mm', Locale.ENGLISH)
 
         return results.collect { Map properties ->
             T instance = instanceClass.get(properties.instanceId)
@@ -120,7 +119,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             properties.sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"
             properties.remove('sampleType1')
             properties.remove('sampleType2')
-            properties.dateCreated = DATE_FORMATTER.format(properties.dateCreated)
+            properties.dateCreated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(properties.dateCreated)
             if (properties.processingState != AnalysisProcessingStates.FINISHED) {
                 properties.remove('instanceId')
             }

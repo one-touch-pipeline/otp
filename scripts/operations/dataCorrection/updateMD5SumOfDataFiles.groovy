@@ -22,6 +22,8 @@
 package operations.dataInstallation
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.util.TimeFormats
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
@@ -57,7 +59,7 @@ DataFile.withTransaction {
         if (fromMd5 != toMd5) {
             dataFile.md5sum = newMd5sum
             dataFile.fileSize = toFileSize
-            String newComment = """${new Date().format("yyyy-MM-dd HH:mm:ss")}
+            String newComment = """${TimeFormats.DATE_TIME.getFormatted(new Date())}
   changed md5sum   from: ${fromMd5} to: ${toMd5}
   changed fileSize from: ${fromFileSize} to: ${toFileSize}"""
             println(newComment)

@@ -27,9 +27,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.Entity
-
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import de.dkfz.tbi.util.TimeFormats
 
 class DataTransfer implements Entity {
 
@@ -98,14 +96,12 @@ class DataTransfer implements Entity {
 
     @Override
     String toString() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd" , Locale.ENGLISH)
-
         return "Transfer by ${performingUser} ${direction.adjective} " +
                 "${peerPerson}${peerAccount ? " (${peerAccount})" : ""}" +
                 ", via ${transferMode};\n" +
 
-                "(started ${ dateFormat.format(transferDate) }" +
-                "${completionDate ? " until ${dateFormat.format(completionDate)}" : ", ongoing"}" +
+                "(started ${TimeFormats.DATE.getFormatted(transferDate)}" +
+                "${completionDate ? " until ${TimeFormats.DATE.getFormatted(completionDate)}" : ", ongoing"}" +
                 ");\n" +
 
                 " requested by ${requester}" +

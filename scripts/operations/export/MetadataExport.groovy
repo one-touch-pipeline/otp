@@ -61,6 +61,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
@@ -405,7 +406,7 @@ class MetaDataExport {
         put(MD5, dataFile.md5sum)
         put(READ, (dataFile.indexFile ? 'I' : '') + dataFile.mateNumber?.toString())
         put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
-        put(WITHDRAWN_DATE, dataFile.withdrawnDate?.format("yyyy-MM-dd"))
+        put(WITHDRAWN_DATE, TimeFormats.DATE.getFormatted(dataFile.withdrawnDate))
         put(WITHDRAWN_COMMENT, dataFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
 
         //export, if the fastq file is available or is a dead link. It use the cached flag in the database.
@@ -413,7 +414,7 @@ class MetaDataExport {
 
         Run run = dataFile.run
         put(RUN_ID, run.name)
-        put(RUN_DATE, run.dateExecuted?.format("yyyy-MM-dd"))
+        put(RUN_DATE, TimeFormats.DATE.getFormatted(run.dateExecuted))
         put(CENTER_NAME, run.seqCenter.name)
         put(INSTRUMENT_PLATFORM, run.seqPlatform.name)
         put(INSTRUMENT_MODEL, run.seqPlatform.seqPlatformModelLabel?.name)
