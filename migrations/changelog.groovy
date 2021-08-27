@@ -581,4 +581,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2021/otp-1240-remove-individual-and-seqtype-from-workflow-artefact.groovy'
+
+    changeSet(author: "sunakshi", id: "otp-1270") {
+        sqlFile(path: 'changelogs/2021/otp-1270-update-datafile.sql')
+    }
 }

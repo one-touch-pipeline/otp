@@ -206,6 +206,7 @@ class DataFile implements CommentableWithProject, Entity {
     }
 
     static mapping = {
+        withdrawnComment type: 'text'
         run index: "data_file_run_idx"
         fastqImportInstance index: "data_file_fastq_import_instance_idx"
         seqTrack index: "data_file_seq_track_idx"
