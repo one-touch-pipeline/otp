@@ -1818,7 +1818,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 mailHelperService: Mock(MailHelperService),
                 createNotificationTextService: new CreateNotificationTextService(
                         linkGenerator: Mock(LinkGenerator) {
-                            (2) * link(_) >> 'link'
+                            _ * link(_) >> 'link'
                         },
                         lsdfFilesService: new LsdfFilesService(),
                         processingOptionService: processingOptionService,
@@ -1828,10 +1828,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
 
         when:
-        projectService.sendProjectCreationNotificationEmail(project)
+        projectService.sendProjectCreationMailToUserAndTicketSystem(project)
 
         then:
-        1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort() + [EMAIL_RECIPIENT])
+        1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort(), [EMAIL_RECIPIENT])
     }
 
     void "updateUnixGroup, should fail with UnixGroupIsInvalidException when it contains invalid chars"() {

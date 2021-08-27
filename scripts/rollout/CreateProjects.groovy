@@ -183,7 +183,7 @@ static String createProjects(AnnotationConfigEmbeddedWebApplicationContext ctx, 
             projects.each {
                 def project = ctx.projectService.createProject(it)
                 if (sendNotifications) {
-                    ctx.projectService.sendProjectCreationNotificationEmail(project)
+                    ctx.projectService.sendProjectCreationMailToUserAndTicketSystem(project)
                 }
             }
         }

@@ -348,7 +348,41 @@ class ProjectService {
         }
     }
 
-    void sendProjectCreationNotificationEmail(Project project) {
+    /**
+     * Send project creation email to the ticket system.
+     *
+     * @param project which was just created
+     */
+    void sendProjectCreationMailOnlyToTicketSystem(Project project) {
+        List<String> ticketSystemMails = processingOptionService.findOptionAsList(OptionName.EMAIL_RECIPIENT_NOTIFICATION)
+        sendProjectCreationMail(project, ticketSystemMails, [])
+    }
+
+    /**
+     * Send project creation email to the added users and the ticket system in CC. If no user mail address for
+     * the given project exists, then the mail will be sent to the ticket system only.
+     *
+     * @param project which was just created
+     */
+    void sendProjectCreationMailToUserAndTicketSystem(Project project) {
+        List<String> userMails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project).sort().unique()
+        List<String> ccMails = processingOptionService.findOptionAsList(OptionName.EMAIL_RECIPIENT_NOTIFICATION)
+
+        if (userMails.empty) {
+            sendProjectCreationMailOnlyToTicketSystem(project)
+        } else {
+            sendProjectCreationMail(project, userMails, ccMails)
+        }
+    }
+
+    /**
+     * Generate project creation email and send it to the given receivers and ccs.
+     *
+     * @param project which was just created
+     * @param receivers mail addresses
+     * @param cc mail addresses
+     */
+    private void sendProjectCreationMail(Project project, List<String> receivers, List<String> cc) {
         String subject = messageSourceService.createMessage("notification.projectCreation.subject", [projectName: project.displayName])
         String content = messageSourceService.createMessage("notification.projectCreation.message",
                 [
@@ -362,8 +396,8 @@ class ProjectService {
                         contactEmail              : processingOptionService.findOptionAsString(OptionName.EMAIL_OTP_MAINTENANCE),
                         teamSignature             : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 ])
-        mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project).sort() +
-                processingOptionService.findOptionAsList(OptionName.EMAIL_RECIPIENT_NOTIFICATION)).unique())
+
+        mailHelperService.sendEmail(subject, content, receivers, cc)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

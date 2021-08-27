@@ -170,7 +170,9 @@ class ProjectCreationController {
                     Project project = projectService.createProject(cmd)
                     flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
                     if (cmd.sendProjectCreationNotification) {
-                        projectService.sendProjectCreationNotificationEmail(project)
+                        projectService.sendProjectCreationMailToUserAndTicketSystem(project)
+                    } else {
+                        projectService.sendProjectCreationMailOnlyToTicketSystem(project)
                     }
                     redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
                     return

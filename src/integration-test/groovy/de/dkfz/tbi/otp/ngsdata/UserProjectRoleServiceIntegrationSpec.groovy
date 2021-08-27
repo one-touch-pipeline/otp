@@ -64,6 +64,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     private static final String EMAIL_INTERN = 'intern@de.de'
     private static final String EMAIL_EXTERN = 'extern@de.de'
+    private static final String EMAIL_RECIPIENT_NOTIFICATION = 'email-recipient@notification.com'
 
     @Autowired
     GrailsApplication grailsApplication
@@ -125,6 +126,10 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 type: null,
                 project: null,
                 value: SYSTEM_USER,
+        )
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                value: EMAIL_RECIPIENT_NOTIFICATION,
         )
     }
 
@@ -354,7 +359,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         and: "notification for user managers that a user has been enabled was sent"
         notifyEnableUser * userProjectRoleService.mailHelperService.sendEmail({
             it.contains("newProjectMember")
-        }, _ as String, _ as List<String>, [userProjectRole.user.email])
+        }, _ as String, [requesterUserProjectRole.user.email, userProjectRole.user.email], [EMAIL_RECIPIENT_NOTIFICATION])
 
         0 * userProjectRoleService.mailHelperService.sendEmail(*_)
 
@@ -505,7 +510,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         expectedInvocations * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, user.email, _ as List<String>)
 
         and: "notification for user managers regarding new user was sent"
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>, [user.email])
+        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String,
+                [requesterUserProjectRole.user.email, user.email], [EMAIL_RECIPIENT_NOTIFICATION])
 
         and:
         UserProjectRole.findAllByIdNotEqual(requesterUserProjectRole.id)*.fileAccessChangeRequested == [accessToFiles]
@@ -698,8 +704,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 _ as String,
                 _ as String,
-                recipients,
-                [newUserProjectRole.user.email],
+                recipients + [newUserProjectRole.user.email],
+                [EMAIL_RECIPIENT_NOTIFICATION],
         )
     }
 
@@ -722,7 +728,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, [uprToBeNotified.user.email], [newUPR.user.email])
+        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String,
+                [uprToBeNotified.user.email, newUPR.user.email], [EMAIL_RECIPIENT_NOTIFICATION])
     }
 
     @Unroll
@@ -763,8 +770,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 expectedSubject,
                 expectedContent,
-                [executingUPR.user.email],
-                [newUPR.user.email],
+                [executingUPR.user.email, newUPR.user.email],
+                [EMAIL_RECIPIENT_NOTIFICATION],
         )
 
         where:

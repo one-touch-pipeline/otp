@@ -161,7 +161,6 @@ class ProjectRequestService {
             }
         }
 
-        //sendEmailOnCreation(req)
         sendEmailOnMaintenanceApproval(req)
         logAction(req, "request created")
         return req
@@ -448,7 +447,6 @@ class ProjectRequestService {
         projectRequest.save(flush: true)
     }
 
-
     void sendEmailOnMaintenanceApproval(ProjectRequest request) {
         String link = linkGenerator.link(
                 controller: "projectRequest",
@@ -465,26 +463,6 @@ class ProjectRequestService {
                 projectName: request.name,
         ])
         List<String> recipients = [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)]
-        List<String> ccs = [mailHelperService.emailRecipientNotification]
-        mailHelperService.sendEmail(subject, message, recipients, ccs)
-    }
-
-    void sendEmailOnCreation(ProjectRequest request) {
-        String link = linkGenerator.link(
-                controller: "projectRequest",
-                action: "view",
-                absolute: true,
-                id: request.id,
-        )
-        String message = messageSourceService.createMessage("notification.template.projectRequest.new.body", [
-                requester  : request.requester.realName,
-                projectName: request.name,
-                link       : link,
-        ])
-        String subject = messageSourceService.createMessage("notification.template.projectRequest.new.subject", [
-                projectName: request.name,
-        ])
-        List<String> recipients = getApproversOfProjectRequest(request)*.user*.email
         List<String> ccs = [mailHelperService.emailRecipientNotification]
         mailHelperService.sendEmail(subject, message, recipients, ccs)
     }

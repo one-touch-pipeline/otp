@@ -240,8 +240,8 @@ class UserProjectRoleService {
         boolean executingUserIsAdministrativeUser = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRoleInList(executingUser, administrativeRoles))
 
         String subject = messageSourceService.createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
-
         String body
+
         if (userIsSubmitter && executingUserIsAdministrativeUser) {
             String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
             body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [
@@ -261,9 +261,11 @@ class UserProjectRoleService {
         }
 
         List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
-        List<String> recipients = projectAuthoritiesAndUserManagers*.email.unique().sort()
+        List<String> recipients = projectAuthoritiesAndUserManagers*.email.unique().sort() + [userProjectRole.user.email]
+        List<String> ccMails = processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
+
         if (recipients) {
-            mailHelperService.sendEmail(subject, body, recipients, [userProjectRole.user.email])
+            mailHelperService.sendEmail(subject, body, recipients, ccMails)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
                     "Notified project authorities (${projectAuthoritiesAndUserManagers*.realName.join(", ")}) and user (${userProjectRole.user.username})")
         }
