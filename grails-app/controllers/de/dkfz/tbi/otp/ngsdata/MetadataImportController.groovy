@@ -337,7 +337,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             retMap << [
                     updateMap: [
                             author          : ilseSubmission.comment.author,
-                            modificationDate: TimeFormats.DATE.getFormatted(ilseSubmission.comment.modificationDate),
+                            modificationDate: ilseSubmission.comment.modificationDate.format('yyyy-MM-dd'),
                     ],
             ]
         }) {

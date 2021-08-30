@@ -28,7 +28,6 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
 
@@ -102,8 +101,8 @@ class RunController {
                     id          : run.id,
                     name        : run.name,
                     seqCenters  : run.seqCenter?.toString()?.toLowerCase(),
-                    dateCreated : TimeFormats.DATE.getFormatted(run.dateCreated),
-                    dateExecuted: TimeFormats.DATE.getFormatted(run.dateExecuted),
+                    dateCreated : run.dateCreated?.format("yyyy-MM-dd"),
+                    dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
             ]
         }
         render dataToRender as JSON
@@ -161,7 +160,7 @@ class RunFiltering {
                     break
                 case "dateCreatedSelection":
                     if (it.value) {
-                        SimpleDateFormat sdf = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                         Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
                         Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
 
@@ -171,7 +170,7 @@ class RunFiltering {
                     break
                 case "dateExecutedSelection":
                     if (it.value) {
-                        SimpleDateFormat sdf = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                         Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
                         Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
 

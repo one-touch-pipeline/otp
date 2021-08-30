@@ -21,7 +21,6 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -39,8 +38,8 @@
                 <div class="error-list"></div>
             </div>
             <div class="date-pickers">
-                from: <input type="text" class="datePicker" id="dpFrom" value="${dateFrom}">
-                to: <input type="text" class="datePicker" id="dpTo" value="${dateTo}">
+                from: <input type="text" class="datePicker" id="dpFrom" value="${(new Date() - 6).format('yyyy-MM-dd')}">
+                to: <input type="text" class="datePicker" id="dpTo" value="${new Date().format('yyyy-MM-dd')}">
             </div>
         </div>
         <div class="temp-processing-time-statistics-table-wrapper">

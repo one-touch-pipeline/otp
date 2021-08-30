@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
-import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
 
 import java.time.LocalDate
@@ -156,25 +155,25 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
                 [seqTrackA.run.name],
                 [sampleA.displayName, sampleB.displayName],
                 ["${seqTrackA.run}, lane: ${seqTrackA.laneId}", "${seqTrackB.run}, lane: ${seqTrackB.laneId}"],
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.submissionReceivedNotice),
+                ticket.submissionReceivedNotice.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.submissionReceivedNotice, ticket.ticketCreated),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.ticketCreated),
+                ticket.ticketCreated.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.ticketCreated, ticket.installationStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.installationStarted),
+                ticket.installationStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.installationFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.installationFinished),
+                ticket.installationFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.installationFinished, ticket.fastqcStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.fastqcStarted),
+                ticket.fastqcStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.fastqcStarted, ticket.fastqcFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.fastqcFinished),
+                ticket.fastqcFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.fastqcFinished, ticket.alignmentStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.alignmentStarted),
+                ticket.alignmentStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.alignmentStarted, ticket.alignmentFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.alignmentFinished),
+                ticket.alignmentFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.alignmentFinished, ticket.snvStarted),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.snvStarted),
+                ticket.snvStarted.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.snvStarted, ticket.snvFinished),
-                TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(ticket.snvFinished),
+                ticket.snvFinished.format(ProcessingTimeStatisticsService.DATE_FORMAT),
                 TimeUtils.getFormattedDurationWithDays(ticket.installationStarted, ticket.snvFinished),
                 comment.comment,
                 ticket.finalNotificationSent,

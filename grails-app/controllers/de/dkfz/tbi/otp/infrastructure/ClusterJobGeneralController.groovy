@@ -54,6 +54,8 @@ class ClusterJobGeneralController {
         }
     }
 
+    static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
+
     ClusterJobService clusterJobService
 
     Map index() {

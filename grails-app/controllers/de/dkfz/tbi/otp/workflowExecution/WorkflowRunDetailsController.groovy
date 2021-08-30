@@ -109,7 +109,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
     def saveComment(CommentCommand cmd) {
         WorkflowRun workflowRun = WorkflowRun.get(cmd.id)
         commentService.saveComment(workflowRun, cmd.comment)
-        Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormatted(workflowRun.comment.modificationDate), author: workflowRun.comment.author]
+        Map dataToRender = [date: workflowRun.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: workflowRun.comment.author]
         render dataToRender as JSON
     }
 

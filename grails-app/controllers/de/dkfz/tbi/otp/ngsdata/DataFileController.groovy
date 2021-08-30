@@ -27,7 +27,6 @@ import grails.plugin.springsecurity.annotation.Secured
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.CommentCommand
-import de.dkfz.tbi.util.TimeFormats
 
 @Secured('isFullyAuthenticated()')
 class DataFileController {
@@ -51,10 +50,6 @@ class DataFileController {
 
         return [
                 dataFile       : dataFile,
-                dateExecuted   : TimeFormats.DATE.getFormatted(dataFile.dateExecuted),
-                dateFileSystem : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(dataFile.dateFileSystem),
-                dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(dataFile.dateCreated),
-                withdrawnDate  : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(dataFile.withdrawnDate),
                 entries        : MetaDataEntry.findAllByDataFile(dataFile, [sort: "key.id"]),
                 fullPath       : lsdfFilesService.getFileFinalPath(dataFile),
                 vbpPath        : lsdfFilesService.getFileViewByPidPath(dataFile),
@@ -65,7 +60,7 @@ class DataFileController {
     JSON saveDataFileComment(CommentCommand cmd) {
         DataFile dataFile = metaDataService.getDataFile(cmd.id)
         commentService.saveComment(dataFile, cmd.comment)
-        Map dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormatted(dataFile.comment.modificationDate), author: dataFile.comment.author]
+        Map dataToRender = [date: dataFile.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: dataFile.comment.author]
         render dataToRender as JSON
     }
 }

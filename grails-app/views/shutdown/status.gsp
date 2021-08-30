@@ -38,7 +38,7 @@
             <div class="card-body">
                 <ul class="list-group">
                     <li class="list-group-item"><b><g:message code="serverShutdown.reasonLabel"/>:</b> ${shutdown.reason}</li>
-                    <li class="list-group-item"><b><g:message code="serverShutdown.initiatedAtLabel"/>:</b> ${shutdownInititated}</li>
+                    <li class="list-group-item"><b><g:message code="serverShutdown.initiatedAtLabel"/>:</b> ${shutdown.initiated.format("yyyy-MM-dd HH:mm:ss")}</li>
                     <li class="list-group-item"><b><g:message code="serverShutdown.initiatedByLabel"/>:</b> ${shutdown.initiatedBy.username}</li>
                 </ul>
             </div>

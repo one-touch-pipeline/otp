@@ -25,7 +25,8 @@
 //Show for a run all samples with SeqType and creation date grouped by FastqImportInstance
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.util.TimeFormats
+
+
 
 Run run = Run.findByName("140819_SN7001149_0212_BC4H1BACXX")
 
@@ -34,7 +35,7 @@ List<FastqImportInstance> fastqImportInstances = FastqImportInstance.findAllByRu
 fastqImportInstances.each { FastqImportInstance fastqImportInstance ->
     output << "fastqImportInstance: ${fastqImportInstance.id}"
     List<DataFile> dataFiles = DataFile.findAllByFastqImportInstance(fastqImportInstance)
-    output << dataFiles.findAll{it?.seqTrack}.collect { "${TimeFormats.DATE.getFormatted(it.dateCreated)}  ${it.seqTrack.sample} ${it.seqTrack.seqType} ${SampleIdentifier.findAllBySample(it.seqTrack.sample)}" }.sort().unique().join("\n")
+    output << dataFiles.findAll{it?.seqTrack}.collect { "${it.dateCreated.format('yyyy-MM-dd')}  ${it.seqTrack.sample} ${it.seqTrack.seqType} ${SampleIdentifier.findAllBySample(it.seqTrack.sample)}" }.sort().unique().join("\n")
     output << ""
 }
 

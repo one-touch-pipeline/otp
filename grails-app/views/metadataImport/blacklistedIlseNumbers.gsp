@@ -21,7 +21,6 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -84,10 +83,10 @@
                         <span class="author">${ilseSubmission.comment.author}</span>
                         <br/>
                         <g:message code="comment.created"/>
-                        <span class="dateCreated">${TimeFormats.DATE.getFormatted(ilseSubmission.comment.dateCreated)}</span>
+                        <span class="dateCreated">${ilseSubmission.comment.dateCreated.format('yyyy-MM-dd')}</span>
                         <br/>
                         <g:message code="comment.lastModified"/>
-                        <span class="modificationDate">${TimeFormats.DATE.getFormatted(ilseSubmission.comment.modificationDate)}</span>
+                        <span class="modificationDate">${ilseSubmission.comment.modificationDate.format('yyyy-MM-dd')}</span>
                         <br/>
                         <g:message code="comment.comment"/>
                     </otp:editorSwitch>

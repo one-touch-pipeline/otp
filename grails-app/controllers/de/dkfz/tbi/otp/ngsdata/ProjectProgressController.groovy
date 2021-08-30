@@ -28,7 +28,6 @@ import grails.databinding.BindingFormat
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimeFormats
 
 class ProjectProgressDataTableCommand extends DataTableCommand {
 
@@ -56,8 +55,8 @@ class ProjectProgressController {
 
     def progress() {
         return [
-            startDate: TimeFormats.DATE.getFormatted(new Date() - 8),
-            endDate: TimeFormats.DATE.getFormatted(new Date()),
+            startDate: (new Date() - 8).format('yyyy-MM-dd'),
+            endDate: new Date().format('yyyy-MM-dd'),
         ]
     }
 

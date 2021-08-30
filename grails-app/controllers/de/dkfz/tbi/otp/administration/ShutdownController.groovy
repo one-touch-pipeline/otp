@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.util.TimeFormats
 
 @Secured("hasRole('ROLE_ADMIN')")
 class ShutdownController {
@@ -64,7 +63,6 @@ class ShutdownController {
 
             render(view: "status", model: [
                     shutdown: shutdownInformation,
-                    shutdownInititated: TimeFormats.DATE_TIME.getFormatted(shutdownInformation.initiated),
                     resumableJobs: resumableJobs,
                     notResumableJobs: notResumableJobs,
                     restartableRunningWorkflowSteps: restartableRunningWorkflowSteps,

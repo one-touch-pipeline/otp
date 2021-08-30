@@ -21,7 +21,6 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -121,7 +120,7 @@
             ${[
                     run.run.seqCenter.name,
                     run.run.seqPlatform.fullName(),
-                    TimeFormats.DATE.getFormatted(run.run.dateExecuted),
+                    run.run.dateExecuted?.format("yyyy-MM-dd")
             ].findAll().join(', ')}
         </h3>
         <ul>

@@ -30,7 +30,8 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimeFormats
+
+import java.text.SimpleDateFormat
 
 @Secured('isFullyAuthenticated()')
 class SequenceController {
@@ -105,7 +106,7 @@ class SequenceController {
                 data.put(it.key, it.value)
             }
             // format date
-            data.dateCreated = TimeFormats.DATE.getFormatted(data.dateCreated)
+            data.dateCreated = data.dateCreated.format("yyyy-MM-dd")
 
             data.withdrawn = SeqTrack.get(seq.seqTrackId).isWithdrawn()
 
@@ -126,7 +127,8 @@ class SequenceController {
 
     def exportAll(DataTableCommand cmd) {
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
-        String currentDate = TimeFormats.DATE.getFormatted(new Date())
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        String currentDate = dateFormat.format(new Date())
 
         List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
 
@@ -148,7 +150,7 @@ class SequenceController {
                     row.ilseId,
                     row.problem?.name() ?: "",
                     row.fileExists,
-                    TimeFormats.DATE.getFormatted(row.dateCreated),
+                    row.dateCreated?.format("yyyy-MM-dd"),
                     SeqTrack.get(row.seqTrackId).isWithdrawn(),
             ].collect { it ?: "" }.join(",")
         }.join("\n")

@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.security
 
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimestampHelper
 
 /** This table is used externally. Please discuss a change in the team */
 class User implements Entity {
@@ -99,7 +99,7 @@ class User implements Entity {
     }
 
     String getFormattedPlannedDeactivationDate() {
-        return TimeFormats.asTimestamp(plannedDeactivationDate)["full"]
+        return TimestampHelper.asTimestamp(plannedDeactivationDate)["full"]
     }
 
     @Override

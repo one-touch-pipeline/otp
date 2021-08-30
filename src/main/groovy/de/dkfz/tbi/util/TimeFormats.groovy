@@ -27,17 +27,11 @@ import java.time.format.DateTimeFormatter
 
 enum TimeFormats {
     DATE('yyyy-MM-dd'),
-    TIME('HH:mm:ss'),
-    DATE_TIME('yyyy-MM-dd HH:mm:ss'),
+    TIME ('HH:mm:ss'),
+    DATE_TIME ('yyyy-MM-dd HH:mm:ss'),
     DATE_TIME_WITHOUT_SECONDS('yyyy-MM-dd HH:mm'),
-    MONTH_YEAR('MMM yyyy'),
+    MONTH_YEAR ('MMM yyyy'),
     DATE_TIME_WITH_ZONE('yyyy-MM-dd-HH-mm-ss-SSSZ'),
-    WEEKDAY_DATE_TIME('EEE, d MMM yyyy HH:mm'),
-    DATE_2('dd.MM.yyyy'),
-    SHORT_DATE('dd.MM.'),
-    TIME_WEEKDAY_DATE('HH:mm:ss E dd.MM.yyyy'),
-    TIME_DATE('HH:mm:ss dd.MM.yyyy'),
-    TIME_SHORT_DATE('HH:mm:ss dd.MM.'),
 
     final String format
 
@@ -58,43 +52,5 @@ enum TimeFormats {
 
     String getFormatted(Date date) {
         return date ? TimeUtils.toZonedDateTime(date).format(formatter) : 'na'
-    }
-    /**
-     * Formats the date in such a way that only relevant changed values are displayed.
-     *
-     * Same day         : hh:mm:ss
-     * Same year        : hh-mm-ss DD.MM.
-     * Totally different: hh-mm-ss DD.MM.YYYY
-     *
-     * @param date Date object to format
-     */
-    static String getInShortestTimeFormat(Date date) {
-        Date now = new Date()
-        boolean same24hours = ((now.getTime() - date.getTime()) <= 86400000) // 86.400.000 = 24h * 60m * 60s * 1000ms
-        if (same24hours) {
-            return TIME.getFormatted(date)
-        } else {
-            if (now.getYear() == date.getYear()) {
-                TIME_SHORT_DATE.getFormatted(date)
-            } else {
-                TIME_DATE.getFormatted(date)
-            }
-        }
-    }
-
-    /**
-     * Helper method to render a date in a common way.
-     * @param value Date in JSON representation
-     * @returns Formatted dates and value to sort by
-     */
-    static Map<String, Object> asTimestamp(Date date) {
-        if (!date) {
-            return [shortest: "-", full: "-", value: 0]
-        }
-        return [
-                shortest: getInShortestTimeFormat(date),
-                full    : TIME_WEEKDAY_DATE.getFormatted(date),
-                value   : date.getTime(),
-        ]
     }
 }

@@ -47,7 +47,7 @@
  */
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.util.TimeFormats
+
 import java.text.SimpleDateFormat
 
 //---------------------------
@@ -58,7 +58,8 @@ String startDateString = '2019-01-01'
 String endDateString = '2019-02-01'
 
 //the format to use for grouping (if date is selected)
-String groupFormat = TimeFormats.DATE.format
+String groupFormat = 'yyyy-MM-dd'
+
 
 /*
     The following list defines the grouping.
@@ -77,7 +78,7 @@ List<Closure> grouping = [
 //---------------------
 //work
 
-SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
+SimpleDateFormat simpleDateFormat = new SimpleDateFormat('yyyy-MM-dd', Locale.ENGLISH)
 
 Date startDate = simpleDateFormat.parse(startDateString)
 Date endDate = simpleDateFormat.parse(endDateString) + 1

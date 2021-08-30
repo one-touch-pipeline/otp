@@ -23,7 +23,7 @@
 %{--
 To be used in conjunction with: common/CommentBox.js
 --}%
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+
 <div id="comment-box-container" class="card">
     <g:set var="comment" value="${commentable?.comment}"/>
     <input type="hidden" id="entity-id" name="entityId" value="${commentable?.id}">
@@ -45,7 +45,7 @@ To be used in conjunction with: common/CommentBox.js
             <button id="button-cancel" class="btn btn-sm btn-secondary float-right" type="button" disabled>
                 <g:message code="commentBox.cancel"/>
             </button>
-            <span id="authorSpan">${TimeFormats.WEEKDAY_DATE_TIME.getFormatted(comment?.modificationDate)} ${comment?.author}</span>
+            <span id="authorSpan">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')} ${comment?.author}</span>
         </div>
     </sec:ifAllGranted>
 </div>

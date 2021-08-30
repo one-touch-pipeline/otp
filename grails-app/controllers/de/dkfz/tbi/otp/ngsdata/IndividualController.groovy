@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimeFormats
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class IndividualController {
@@ -182,7 +181,7 @@ class IndividualController {
     def saveIndividualComment(CommentCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         commentService.saveComment(individual, cmd.comment)
-        def dataToRender = [date: TimeFormats.WEEKDAY_DATE_TIME.getFormatted(individual.comment.modificationDate), author: individual.comment.author]
+        def dataToRender = [date: individual.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: individual.comment.author]
         render dataToRender as JSON
     }
 

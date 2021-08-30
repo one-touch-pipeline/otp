@@ -26,7 +26,6 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystem
 
@@ -43,7 +42,7 @@ class ClusterJobLoggingService {
         assert processingStep: 'No processing step specified.'
 
         Date date = processingStep.firstProcessingStepUpdate.date
-        String dateDirectory = TimeFormats.DATE.getFormatted(date)
+        String dateDirectory = date.format('yyyy-MM-dd')
         return new File("${ConfigService.getInstance().getLoggingRootPath()}/${CLUSTER_LOG_BASE_DIR}/${dateDirectory}")
     }
 

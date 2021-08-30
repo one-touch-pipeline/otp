@@ -22,7 +22,6 @@
 
 import de.dkfz.tbi.otp.project.dta.DataTransfer
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
-import de.dkfz.tbi.util.TimeFormats
 
 /**
  * scripts show details to all open DataTransfer (having no completion date))
@@ -63,8 +62,8 @@ String content = DataTransfer.findAllByCompletionDateIsNull().collect { DataTran
             dataTransferAgreement.dtaId ?: '',
             dataTransferAgreement.peerInstitution ?: '',
             dataTransferAgreement.legalBasis,
-            TimeFormats.DATE.getFormatted(dataTransferAgreement.dateCreated),
-            TimeFormats.DATE.getFormatted(dataTransferAgreement.validityDate),
+            dataTransferAgreement.dateCreated?.format('yyyy-MM-dd'),
+            dataTransferAgreement.validityDate?.format('yyyy-MM-dd') ?: '',
             dataTransferAgreement.comment?.replaceAll('[\t\n\r]+', ' ') ?: '',
             dataTransfer.peerPerson ?: '',
             dataTransfer.peerAccount ?: '',
@@ -74,7 +73,7 @@ String content = DataTransfer.findAllByCompletionDateIsNull().collect { DataTran
             dataTransfer.performingUser.realName,
             dataTransfer.performingUser.username,
             dataTransfer.direction,
-            TimeFormats.DATE.getFormatted(dataTransfer.dateCreated),
+            dataTransfer.dateCreated?.format('yyyy-MM-dd'),
             dataTransfer.comment?.replaceAll('[\t\n\r]+', ' ') ?: '',
     ].join('\t')
 }.sort().join('\n')

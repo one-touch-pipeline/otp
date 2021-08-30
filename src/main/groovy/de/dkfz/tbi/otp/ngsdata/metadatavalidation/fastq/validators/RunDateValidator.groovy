@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
@@ -44,7 +43,7 @@ class RunDateValidator extends SingleValueValidator<MetadataValidationContext> i
      *
      * Since it is part of the interface, it is hardcoded here directly instead of referencing to another place.
      */
-    static final String RUN_DATE_FORMAT = TimeFormats.DATE.format
+    static final String RUN_DATE_FORMAT = "yyyy-MM-dd"
 
     static final DateTimeFormatter RUN_DATE_FORMATTER = DateTimeFormatter.ofPattern(RUN_DATE_FORMAT)
 
