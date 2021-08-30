@@ -53,9 +53,14 @@
  * A copy of the file with permission 440 is created using the file name and adding the suffix '.org'
  *
  * The flag 'overwriteExisting' indicate, if an existing file should be replaced.
+ *
+ * A flag exportOnlyWhiteListedColumns indicates, if only columns listed in the processing option METADATA_WHITELIST_COLUMNS should be exported (true)
+ * or all data (false).
  */
 
 import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -99,7 +104,6 @@ String selectByIlse = """
 
 """
 
-
 /**
  * List of sample types, one per line
  */
@@ -108,7 +112,6 @@ String selectBySampleName = """
 #sampleName2
 
 """
-
 
 /**
  * List of md5sums, one per line.
@@ -120,7 +123,6 @@ String selectByMd5Sum = """
 
 """
 
-
 /**
  * List of sample types, one per line
  */
@@ -129,7 +131,6 @@ String filterBySampleType = """
 #sampleType2
 
 """
-
 
 /**
  * A SeqType is defined as a combination of:
@@ -145,7 +146,6 @@ String filterBySeqTypeName = """
 #10x_scRNA PAIRED true
 
 """
-
 
 /**
  * Multi selector using:
@@ -165,7 +165,6 @@ String multiColumnInput = """
 
 """
 
-
 /**
  * Name of the file to generate. The name must be absolute.
  */
@@ -175,6 +174,11 @@ String fileName = ''
  * Flag to indicate, if existing files should be overwritten
  */
 boolean overwriteExisting = false
+
+/**
+ * Flag to indicate export only white-listed columns provided in processing options [option name: METADATA_WHITELIST_COLUMNS]
+ */
+boolean exportOnlyWhiteListedColumns = false
 
 //=============================================
 // check input area
@@ -298,7 +302,6 @@ if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMulti
 //=============================================
 // work area
 
-
 Collection<DataFile> dataFiles = DataFile.createCriteria().list {
     seqTrack {
         or {
@@ -359,25 +362,38 @@ if (dataFiles) {
     throw new OtpRuntimeException("Could not find any Datafiles for the Criteria.")
 }
 
-
 class MetaDataExport {
 
     LsdfFilesService lsdfFilesService
     FileService fileService
     FileSystemService fileSystemService
+    ProcessingOptionService processingOptionService
 
     /**
      * Creates a TSV file containing the metadata of the specified {@linkplain DataFile}s.
      * The output file has a format which is processable by the {@linkplain MetadataImportService}.
      */
-    void writeMetadata(Collection<DataFile> dataFiles, Path metadataOutputFile) {
-        metadataOutputFile.bytes = getMetadata(dataFiles).getBytes(StandardCharsets.UTF_8)
+    void writeMetadata(Collection<DataFile> dataFiles, Path metadataOutputFile, boolean exportOnlyWhiteListedColumns) {
+        metadataOutputFile.bytes = getMetadata(dataFiles, exportOnlyWhiteListedColumns).getBytes(StandardCharsets.UTF_8)
     }
 
-    String getMetadata(Collection<DataFile> dataFiles) {
+    String getMetadata(Collection<DataFile> dataFiles, boolean exportOnlyWhiteListedColumns) {
         MetaDataKey.list()
         Collection<Map<String, String>> allProperties = dataFiles.collect { getMetadata(it) }
-        List<String> headers = (MetaDataColumn.values()*.name() + (allProperties*.keySet().sum() as List<String>).sort()).unique()
+        List<String> allColumnsList = MetaDataColumn.values()*.name() + (allProperties*.keySet().sum() as List<String>).sort().unique() as List<String>
+        List<String> headers = []
+        if (exportOnlyWhiteListedColumns) {
+            String whitelistColumns = processingOptionService.findOptionAsString(ProcessingOption.OptionName.METADATA_WHITELIST_COLUMNS)
+            List<String> selectedColumns = whitelistColumns.split('[,;\t]+')*.trim()
+            selectedColumns.findAll().each { String column ->
+                if (allColumnsList.contains(column)) {
+                    headers << column
+                }
+            }
+        } else {
+            headers = allColumnsList
+        }
+        headers = headers.unique()
         StringBuilder s = new StringBuilder(headers.join('\t')).append('\n')
         for (Map<String, String> properties : allProperties) {
             s << headers.collect { String header ->
@@ -390,7 +406,6 @@ class MetaDataExport {
 
     Map<String, String> getMetadata(DataFile dataFile) {
         Map<String, String> properties = [:]
-
         MetaDataEntry.findAllByDataFile(dataFile).each {
             properties.put(it.key.name, it.value)
         }
@@ -453,7 +468,7 @@ class MetaDataExport {
         return all.contains(preferred) ? preferred : all.max { it.length() }
     }
 
-    Path handleCreationOfMetadataFile(Collection<DataFile> dataFiles, String fileName, boolean overwriteExisting) {
+    Path handleCreationOfMetadataFile(Collection<DataFile> dataFiles, String fileName, boolean overwriteExisting, boolean exportOnlyWhiteListedColumns) {
         assert fileName: 'No file name given, but this is required'
         assert !fileName.contains(' '): 'File name contains spaces, which is not allowed'
 
@@ -482,7 +497,7 @@ class MetaDataExport {
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
 
-        writeMetadata(dataFiles, outputFile)
+        writeMetadata(dataFiles, outputFile, exportOnlyWhiteListedColumns)
         fileService.setPermission(outputFile, [
                 PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE,
@@ -497,12 +512,12 @@ class MetaDataExport {
 }
 
 MetaDataExport metaDataExport = new MetaDataExport([
-        lsdfFilesService : ctx.lsdfFilesService,
-        fileService      : ctx.fileService,
-        fileSystemService: ctx.fileSystemService,
+        lsdfFilesService       : ctx.lsdfFilesService,
+        fileService            : ctx.fileService,
+        fileSystemService      : ctx.fileSystemService,
+        processingOptionService: ctx.processingOptionService,
 ])
 
-
-Path file = metaDataExport.handleCreationOfMetadataFile(dataFiles, fileName, overwriteExisting)
+Path file = metaDataExport.handleCreationOfMetadataFile(dataFiles, fileName, overwriteExisting, exportOnlyWhiteListedColumns)
 
 println "Metadata exported to ${file}"

@@ -573,6 +573,10 @@ class ProcessingOption implements Entity {
                 "How many weeks to wait before bioinformaticians of a project are reminded that they must categorise their CellRanger results",
                 Necessity.OPTIONAL, "12", TypeValidators.POSITIVE_NUMBER
         ),
+        METADATA_WHITELIST_COLUMNS(
+                "Mention metadata columns that should be exported; provide column names that are comma or semi-colon or tab separated, values are trimmed",
+                Necessity.OPTIONAL, "FASTQ_FILE, PROJECT, SAMPLE_NAME, SEQUENCING_TYPE", TypeValidators.SINGLE_LINE_TEXT
+        ),
 
         private final String description
         private final Necessity necessity
