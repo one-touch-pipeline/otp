@@ -25,12 +25,10 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -57,9 +55,6 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         }
         decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(seqTrack) >> "/output-dir-fastqc"
-            2 * updateFastqcProcessedFile(_) >> { FastqcProcessedFile fastqc ->
-                fastqc.save(flush: true)
-            }
         }
         decider.configFragmentService = Mock(ConfigFragmentService) {
             1 * getSortedFragments(_) >> [new ExternalWorkflowConfigFragment(name: "xyz", configValues: '{"WORKFLOWS":{"resource":"1"}}')]
@@ -72,13 +67,16 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
         Collection<WorkflowArtefact> result = decider.decide([wa1, wa2, wa3])
 
         then:
-        result.size() == 1
-        result.first().artefactType == ArtefactType.FASTQC
+        result.size() == 2
+        result.every {
+            assert it.artefactType == ArtefactType.FASTQC
+            true
+        }
         WorkflowRunInputArtefact inputArtefact = CollectionUtils.exactlyOneElement(WorkflowRunInputArtefact.findAllByWorkflowArtefact(wa1))
         inputArtefact.workflowRun
         inputArtefact.workflowRun.workflow == workflow
         inputArtefact.workflowRun.combinedConfig == '{"WORKFLOWS":{"resource":"1"}}'
         inputArtefact.workflowRun.workDirectory == "/output-dir-fastqc"
-        FastqcProcessedFile.findAllByWorkflowArtefact(inputArtefact.workflowArtefact)*.dataFile == dataFiles
+        TestCase.assertContainSame(result*.artefact*.get()*.dataFile , dataFiles)
     }
 }

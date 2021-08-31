@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
@@ -73,12 +74,6 @@ class FastqcDecider implements Decider {
 
         SeqTrack seqTrack = optionalArtefact.get() as SeqTrack
 
-        seqTrackService.getSequenceFilesForSeqTrack(seqTrack).each {
-            FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findOrCreateWhere(dataFile: it)
-            fastqcProcessedFile.workflowArtefact = inputArtefact
-            fastqcDataFilesService.updateFastqcProcessedFile(fastqcProcessedFile)
-        }
-
         List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
         List<String> artefactDisplayName = runDisplayName
         artefactDisplayName.remove(0)
@@ -102,13 +97,19 @@ class FastqcDecider implements Decider {
         ).save(flush: true)
 
         List<WorkflowArtefact> result = []
-        seqTrack.seqType.libraryLayout.mateCount.times { int i ->
-            result.add(workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
+
+        seqTrackService.getSequenceFilesForSeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
+            WorkflowArtefact workflowArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                     run,
                     "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
                     artefactDisplayName,
-            )).save(flush: true))
+            )).save(flush: true)
+
+            FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findOrCreateWhere(dataFile: it)
+            fastqcProcessedFile.workflowArtefact = workflowArtefact
+            fastqcProcessedFile.save(flush: true)
+            result << workflowArtefact
         }
         return result
     }
