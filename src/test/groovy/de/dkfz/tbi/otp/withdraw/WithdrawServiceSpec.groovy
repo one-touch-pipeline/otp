@@ -92,7 +92,10 @@ class WithdrawServiceSpec extends Specification implements DataTest, DomainFacto
         ])
 
         WithdrawParameters withdrawParameters = new WithdrawParameters([
-                seqTracks: seqTracks,
+                seqTracksWithComments: [
+                        (seqTracks[0]): "WithdrawnComment1\nover multiple lines",
+                        (seqTracks[1]): "WithdrawnComment2\nwith multiple lines",
+                ],
         ])
 
         when:

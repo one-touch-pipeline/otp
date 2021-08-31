@@ -23,7 +23,7 @@
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.ScriptInputHelperService
 
 import java.nio.file.FileSystem
 import java.nio.file.Files
@@ -37,32 +37,48 @@ import java.nio.file.Files
  * Also the withdraw MetadataEntries are adapted.
  */
 
-String comment = """
+/**
+ * Multi selector using:
+ * - pid
+ * - sample type
+ * - seqType name or alias (for example WGS, WES, RNA, ...
+ * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
+ * - single cell flag: true = single cell, false = bulk
+ * - sampleName: optional
+ * - withdrawn comment: comment in quote marks 'withdrawn Comment'
+ *
+ * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
+ * # indicates commentaries, that will be ignored in the script.
+ */
+String multiColumnInputSample = """
+#pid1,tumor,WGS,PAIRED,false,sampleName1
+#pid3,control,WES,PAIRED,false, 'withdraw comment'
+#pid3,control,WES,PAIRED,false, 'long withdrawn comment
+with multiple lines'
+#pid5,control,RNA,SINGLE,true,sampleName2, 'withdrawn comment'
 """
 
-//PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT SINGLE_CELL
-List<SeqTrack> seqTracks = """
 
+//service
+ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 
-""".split('\n').findAll().collect {
-    String[] split = it.split(' ')
-    println split as List
-    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(split[0]))
-    SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(split[1]))
-    SeqType seqType = CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(split[2], split[3], Boolean.valueOf(split[4])))
-    Sample sample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
-    SeqTrack.findAllBySampleAndSeqType(sample, seqType)
-}.flatten()
+assert (scriptInputHelperService.isCommentInMultiLineDefinition(multiColumnInputSample)):
+        "Please provide comments for every inputSample in the multiColumnInputSample"
 
+List<SeqTrack> seqTracks = scriptInputHelperService.seqTracksBySampleDefinition(multiColumnInputSample)
+List<String> comments = scriptInputHelperService.getCommentsFromMultiLineDefinition(multiColumnInputSample)
+
+Map<SeqTrack,String> seqTracksWithComments = [seqTracks, comments].transpose().collectEntries {[it[0],it[1]]}
 
 List dirsToLink = []
-assert comment: 'Please provide a comment why the data are set to withdrawn'
+final String TRIM_LINE = "----------------------------------------"
+
 SeqTrack.withTransaction {
     UnWithdrawer.ctx = ctx
-    UnWithdrawer.comment = comment.trim()
-    seqTracks.each {
-        UnWithdrawer.unwithdraw(it, dirsToLink)
+    seqTracksWithComments.each {seqTrackWithComment ->
+        UnWithdrawer.unwithdraw(seqTrackWithComment.key, seqTrackWithComment.value, dirsToLink)
     }
+    println("\n" + TRIM_LINE + "\n")
     println dirsToLink.join("\n")
 
     assert false: 'Fail for debug reason, remove if the output is okay'
@@ -72,15 +88,13 @@ class UnWithdrawer {
 
     static ctx
 
-    static String comment
+    static void unwithdraw(final SeqTrack seqTrack, String comment, List dirsToLink) {
+        println "\n\nUnwithdraw $seqTrack"
 
-    static void unwithdraw(final SeqTrack seqTrack, List dirsToLink) {
-        println "\n\nunwithdraw $seqTrack"
-
-        DataFile.findAllBySeqTrack(seqTrack).each { unwithdraw(it, dirsToLink) }
+        DataFile.findAllBySeqTrack(seqTrack).each { unwithdraw(it, comment, dirsToLink) }
     }
 
-    static void unwithdraw(final DataFile dataFile, List dirsToLink) {
+    static void unwithdraw(final DataFile dataFile, String comment, List dirsToLink) {
 
         FileSystemService fileSystemService = ctx.fileSystemService
         LsdfFilesService lsdfFilesService = ctx.lsdfFilesService

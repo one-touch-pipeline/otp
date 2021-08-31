@@ -74,12 +74,12 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         "\nabc,def\n#test\nghi;jkl\n\n" || [["abc", "def"], ["ghi", "jkl"]]
     }
 
-    void "seqTrackById, when input is seqTrack ids, then return corresponding seqTracks"() {
+    void "seqTrackById, when input is seqTrack ids with comment, then return corresponding seqTracks"() {
         given:
         List<SeqTrack> seqTracks = (1..3).collect {
             createSeqTrack()
         }
-        String input = seqTracks*.id.join('\n')
+        String input = seqTracks*.id.join(",\'comment\'\n") + ",\'comment\'"
 
         expect:
         service.seqTrackById(input) == seqTracks
@@ -108,7 +108,7 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
 
         String input = seqTracks.collect { SeqTrack seqTrack ->
             sampleDefinitionForSeqTrack(seqTrack)
-        }.join('\n')
+        }.join(',\'comment\'\n') + ",\'comment\'"
 
         expect:
         service.seqTracksBySampleDefinition(input) == seqTracks
@@ -126,7 +126,7 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
 
         String input = seqTracks.collect { SeqTrack seqTrack ->
             sampleDefinitionForSeqTrack(seqTrack)
-        }.join('\n') + '\n' + sampleDefinitionForSeqTrack(invalidSeqTrack, [(invalidProperty): invalidValue])
+        }.join(',\'comment\'\n') + ',\'comment\'\n' + sampleDefinitionForSeqTrack(invalidSeqTrack, [(invalidProperty): invalidValue]) + ",\'comment\'"
 
         when:
         service.seqTracksBySampleDefinition(input)
@@ -145,6 +145,89 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         'seqType'       | 'unknownSeqTypeName'         || 'Could not find seqType'
         'libraryLayout' | SequencingReadType.MATE_PAIR || 'Could not find seqType'
         'singleCell'    | 'true'                       || 'Could not find seqType'
+    }
+
+    void "getCommentsFromMultiLineDefinition, when receiving multi line string, then return only comments in quote marks"() {
+        given:
+        String stringListWithComment = """
+                                        pid1,tumor,WGS,PAIRED,false,sampleName1
+                                        pid3,control,WES,PAIRED,false,
+                                        pid3,control,WES,PAIRED,false,'long withdrawn Comment
+                                        with multiple Lines'
+                                        pid5,control,RNA,SINGLE,true,sampleName2,'This
+                                        is a multiline
+                                        commentary'""".stripIndent()
+
+        expect:
+        service.getCommentsFromMultiLineDefinition(stringListWithComment) ==
+                ["", "", 'long withdrawn Comment\nwith multiple Lines', "This\nis a multiline\ncommentary"]
+    }
+
+    void "removeCommentsFromStringList, when receiving string list, return string list without commentaries in quote marks"() {
+        given:
+        List<String> stringListWithComments = ["String1", 'String2', "'Commentary\nover multiple Lines with some special characters =)§\"(§'", "last String?"]
+
+        expect:
+        service.removeCommentsFromStringList(stringListWithComments) == ["String1", 'String2', "last String?"]
+    }
+
+    void "isCommentInMultiLineDefinition, when receiving multi line string with comment in every line, then return true"() {
+        given:
+        String multiLineString = """Input1, string2, 'Commentary'
+                                    string3, string?!§4, 'commentary
+                                    over multiple
+                                    lines', string5""".stripIndent()
+
+        expect:
+        service.isCommentInMultiLineDefinition(multiLineString)
+    }
+
+    void "isCommentInMultiLineDefinition, when receiving multi line string with comment not in every line, then return false"() {
+        given:
+        String multiLineString = """Input1, string3
+                                    Input1, string5, 'commentary'""".stripIndent()
+
+        expect:
+        !service.isCommentInMultiLineDefinition(multiLineString)
+    }
+
+    void "checkIfExactlyOneMultiLineStringContainsContent, when receiving List of multi line strings, should return true if exactly one is not empty"() {
+        expect:
+        service.checkIfExactlyOneMultiLineStringContainsContent(multiLineStringList) == containsExactlyOneMultiLineStringContainsContent
+
+        where:
+        multiLineStringList << [["""Input1, string2, 'Commentary'
+                 string3, string?!§4, 'commentary
+                 over multiple
+                 lines', string5""",
+                 """#Input1, string2, 'Commentary'
+                 #string3, string?!§4""",
+                 ""],
+                ["""Input1, string2, 'Commentary'
+                 string3, string?!§4, 'commentary
+                 over multiple
+                 lines', string5""",
+                 """#Input1, string2, 'Commentary'
+                 #string3, string?!§4"""],
+                ["""Input1, string2, 'Commentary'
+                 string3, string?!§4, 'commentary
+                 over multiple
+                 lines', string5""",
+                 """Input1, string2, 'Commentary'
+                 string3, string?!§4""",
+                 ""],
+                ["""Input1, string2, 'Commentary'
+                 string3, string?!§4, 'commentary
+                 over multiple
+                 lines', string5""",
+                 """Input1, string2, 'Commentary'
+                 string3, string?!§4""",
+                 "",
+                 """#Input1, string2, 'Commentary'
+                 #string3, string?!§4""",
+                 ""],
+        ]
+        containsExactlyOneMultiLineStringContainsContent << [true, true , false, false]
     }
 
     private String sampleDefinitionForSeqTrack(SeqTrack seqTrack, Map invalidVaue = [:]) {

@@ -26,14 +26,9 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 class WithdrawParameters {
 
     /**
-     * The comments to use for withdrawing
+     * The seqTracks as keys with the corresponding comments as values
      */
-    String withdrawnComment
-
-    /**
-     * The seqTracks to withdraw
-     */
-    List<SeqTrack> seqTracks
+    Map<SeqTrack, String> seqTracksWithComments = [:]
 
     /**
      * Name of the generated bash file. It should have the extension '.sh'
@@ -61,4 +56,12 @@ class WithdrawParameters {
      * Should withdrawing stop if files are already withdrawn
      */
     boolean stopOnAlreadyWithdrawnData = true
+
+    /**
+     * The seqTracks to withdraw
+     */
+    List<SeqTrack> getSeqTracks() {
+        return this.seqTracksWithComments.keySet().toList()
+    }
+
 }

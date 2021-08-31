@@ -60,7 +60,7 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
     }
 
     @Unroll
-    void "createOverviewSummary, when deleteBamFile is #deleteBamFile and deleteAnalysis is #deleteAnalysisinfos there, then create expected text"() {
+    void "createOverviewSummary, when deleteBamFile is #deleteBamFile and deleteAnalysis is #deleteAnalysisinfos, then create expected text"() {
         SeqTrack seqTrack1 = Mock(SeqTrack)
         SeqTrack seqTrack2 = Mock(SeqTrack)
         RoddyBamFile roddyBamFile1 = Mock(RoddyBamFile)
@@ -86,13 +86,12 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        withdrawnComment: "withdrawnComment",
-                        seqTracks       : [
-                                seqTrack1,
-                                seqTrack2,
+                        seqTracksWithComments: [
+                                (seqTrack1): "withdrawnComment1\nover multiple Lines",
+                                (seqTrack2): "withdrawnComment2",
                         ],
-                        deleteBamFile   : deleteBamFile,
-                        deleteAnalysis  : deleteAnalysis,
+                        deleteBamFile        : deleteBamFile,
+                        deleteAnalysis       : deleteAnalysis,
                 ]),
                 mergedBamFiles    : [
                         roddyBamFile1,
@@ -108,12 +107,10 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         String expected = [
                 "Withdraw summary",
-                "Used comment",
-                "withdrawnComment",
                 WithdrawHelperService.TRIM_LINE,
                 "Withdrawing 2 lanes",
-                "- seqTrack1",
-                "- seqTrack2",
+                "- seqTrack1 with comment: \'withdrawnComment1\nover multiple Lines\'",
+                "- seqTrack2 with comment: \'withdrawnComment2\'",
                 WithdrawHelperService.TRIM_LINE,
                 "${deleteBamFileText} 4 bam files",
                 "- roddyBamFile1",
@@ -152,7 +149,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks: [dataFile.seqTrack],
+                        seqTracksWithComments: [
+                                (dataFile.seqTrack) : ""
+                        ],
                 ]),
         ])
 
@@ -178,7 +177,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks         : [dataFile.seqTrack],
+                        seqTracksWithComments         : [
+                                (dataFile.seqTrack): ""
+                        ],
                         stopOnMissingFiles: false,
                 ]),
         ])
@@ -207,7 +208,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks         : [dataFile.seqTrack],
+                        seqTracksWithComments         : [
+                                (dataFile.seqTrack) : ""
+                        ],
                         stopOnMissingFiles: true,
                 ]),
         ])
@@ -230,7 +233,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks: [dataFile.seqTrack],
+                        seqTracksWithComments: [
+                                (dataFile.seqTrack) : ""
+                        ],
                 ]),
         ])
 
@@ -256,7 +261,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks                 : [dataFile.seqTrack],
+                        seqTracksWithComments     : [
+                                (dataFile.seqTrack): "",
+                        ],
                         stopOnAlreadyWithdrawnData: false,
                 ]),
         ])
@@ -285,7 +292,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks                 : [dataFile.seqTrack],
+                        seqTracksWithComments     : [
+                                (dataFile.seqTrack): "",
+                        ],
                         stopOnAlreadyWithdrawnData: true,
                 ]),
         ])
@@ -379,12 +388,14 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
     void "handleDataFiles, when datafiles given, then collect the needed path to the correct list"() {
         given:
-        String withdrawnCommentToUse = "withdrawnComment"
+        String withdrawnCommentNormal = "withdrawnComment \nover\nmultiple lines"
+        String withdrawnCommentWithdrawn = "withdrawnComment\nfor withdrawnDataFile"
+        String withdrawnCommentSingleCell = "withdrawnComment\nfor singleCellDataFile"
         final Path finalPathNormal = temporaryFolder.newFile("finalNormal").toPath()
         final Path finalPathSingleCell = temporaryFolder.newFile("finalSingleCell").toPath()
-        String viewByPidPathNormal = "/tmp/viewByPidNormal"
-        String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
-        String wellPathSingleCell = "/tmp/wellSingleCell"
+        final String viewByPidPathNormal = "/tmp/viewByPidNormal"
+        final String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
+        final String wellPathSingleCell = "/tmp/wellSingleCell"
         final Path fastqcPathNormal = temporaryFolder.newFile("fastqcNormal").toPath()
         final Path fastqcPathSingleCell = temporaryFolder.newFile("fastqcSingleCell").toPath()
         final Path fastqcOutputMd5sumPath = temporaryFolder.newFile("fastqcOutputMd5sum").toPath()
@@ -394,8 +405,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         final Path fastqcHtmlPath = temporaryFolder.newFile("html").toPath()
         final Path fastqcHtmlPathSingleCell = temporaryFolder.newFile("htmlSingleCell").toPath()
 
+
         DataFile dataFile = createDataFile()
-        DataFile withDrawnDataFile = createDataFile([fileWithdrawn: true])
+        DataFile withdrawnDataFile = createDataFile([fileWithdrawn: true])
         DataFile singleCellDataFile = createDataFile([
                 seqTrack: createSeqTrack([
                         seqType            : createSeqType([
@@ -414,12 +426,11 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         service.fastqcDataFilesService = Mock(FastqcDataFilesService)
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracks       : [
-                                dataFile.seqTrack,
-                                withDrawnDataFile.seqTrack,
-                                singleCellDataFile.seqTrack,
+                        seqTracksWithComments: [
+                                (dataFile.seqTrack)          : withdrawnCommentNormal,
+                                (withdrawnDataFile.seqTrack) : withdrawnCommentWithdrawn,
+                                (singleCellDataFile.seqTrack): withdrawnCommentSingleCell,
                         ],
-                        withdrawnComment: withdrawnCommentToUse,
                 ]),
         ])
         List<String> pathsToChangeGroup = [
@@ -468,18 +479,18 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         with(dataFile) {
             fileWithdrawn == true
             withdrawnDate != null
-            withdrawnComment == withdrawnCommentToUse
+            withdrawnComment == withdrawnCommentNormal
         }
 
         with(singleCellDataFile) {
             fileWithdrawn == true
             withdrawnDate != null
-            withdrawnComment == withdrawnCommentToUse
+            withdrawnComment == withdrawnCommentSingleCell
         }
 
-        with(withDrawnDataFile) {
+        with(withdrawnDataFile) {
             fileWithdrawn == true
-            withdrawnComment != withdrawnCommentToUse
+            withdrawnComment != withdrawnCommentWithdrawn
         }
     }
 

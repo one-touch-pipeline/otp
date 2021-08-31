@@ -63,13 +63,11 @@ class WithdrawHelperService {
     void createOverviewSummary(WithdrawStateHolder withdrawStateHolder) {
         List summary = withdrawStateHolder.summary
         summary << "Withdraw summary"
-        summary << "\nUsed comment"
-        summary << withdrawStateHolder.withdrawnComment
         summary << "\n"
         summary << TRIM_LINE
         summary << "Withdrawing ${withdrawStateHolder.seqTracks.size()} lanes"
-        withdrawStateHolder.seqTracks.each {
-            summary << "  - ${withdrawDisplayDomainService.seqTrackInfo(it)}"
+        withdrawStateHolder.seqTracksWithComments.each {
+            summary << "  - ${withdrawDisplayDomainService.seqTrackInfo(it.key)} with comment: \'" + it.value + "\'"
         }
         summary << "\n"
         summary << TRIM_LINE
@@ -151,16 +149,16 @@ class WithdrawHelperService {
 
     void handleDataFiles(WithdrawStateHolder withdrawStateHolder) {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracks, false)
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments.keySet().asList(), false)
         dataFiles.each { DataFile dataFile ->
             dataFile.fileWithdrawn = true
             dataFile.withdrawnDate = new Date()
-            dataFile.withdrawnComment = withdrawStateHolder.withdrawnComment
+            dataFile.withdrawnComment = withdrawStateHolder.withdrawParameters.seqTracksWithComments[dataFile.seqTrack]
             dataFile.save(flush: true)
 
             List<Path> filePaths = []
-            filePaths.add( lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem))
-            filePaths.add( lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem))
+            filePaths.add(lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem))
+            filePaths.add(lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem))
             filePaths.add(fastqcDataFilesService.fastqcOutputPath(dataFile, fileSystem))
             filePaths.add(fastqcDataFilesService.fastqcHtmlPath(dataFile, fileSystem))
             filePaths.add(fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile, fileSystem))
