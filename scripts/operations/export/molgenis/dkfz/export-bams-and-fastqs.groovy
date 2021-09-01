@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.TupleConstructor
 import org.springframework.context.ApplicationContext
 
@@ -33,9 +32,8 @@ import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.text.SimpleDateFormat
 
-String projectString ="""
+String projectString = """
 #project 1
 #project 2
 
@@ -53,7 +51,6 @@ List<String> projectNames = projectString.split("\n").findAll {
 assert projectNames: "No projects given"
 List<Project> projects = Project.findAllByNameInList(projectNames)
 assert projects.size() == projectNames.size(): "Not all project names could be resolved to a project"
-
 
 @TupleConstructor
 enum DataFileColumns {
@@ -73,13 +70,13 @@ enum DataFileColumns {
         return dataFile.seqTrack.sample.individual.pid
     }),
     COMMON_NAME("Species Common Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrain.species.speciesCommonName.name
+        return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.species*.speciesCommonName*.name.join(', ')
     }),
     SCIENTIFIC_NAME("Species Scientific Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrain.species.scientificName
+        return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.species*.scientificName.join(', ')
     }),
     STRAIN_NAME("Species Strain Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrain.strain.name
+        return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.strain*.name.join(', ')
     }),
     SAMPLE_IDENTIFIER("Sample Identifier", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sampleIdentifier
@@ -173,6 +170,9 @@ enum DataFileColumns {
     }),
     LANE_ID("Lane ID", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.laneId
+    }),
+    INDIVIDUAL_COMMENT("Individual comment", { DataFile dataFile, Map properties = [:] ->
+        return dataFile.seqTrack.individual.comment?.comment
     })
 
     String columnName
@@ -225,7 +225,6 @@ enum BamColumns {
     Closure<String> value
 }
 
-
 abstract class MolgenisEntity {
 
     final static String COLUMN_SEPARATOR = ","
@@ -243,7 +242,11 @@ abstract class MolgenisEntity {
     }
 
     String toCsvLine() {
-        return header.collect { "\"${(map[it] as String)?.replaceAll("\"", "\"\"")}\"" }.join(COLUMN_SEPARATOR)
+        return header.collect {
+            String value = map[it] as String
+            String preparedValue = value == null ? '' : value.replaceAll("\"", "\"\"").replaceAll("[\n\r\t]", " ")
+            "\"${preparedValue}\""
+        }.join(COLUMN_SEPARATOR)
     }
 }
 
@@ -311,6 +314,9 @@ class MolgenisExporter {
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 Realm realm = ctx.configService.defaultRealm
 
+final Path baseDirectory = ctx.fileService.toPath(ctx.configService.getScriptOutputPath(), ctx.fileSystemService.getRemoteFileSystemOnDefaultRealm())
+final Path outputExportDirectory = baseDirectory.resolve("export").resolve("molgenis").resolve(timestamp)
+
 projects.each { Project project ->
     List<DataFile> dataFiles = DataFile.withCriteria {
         seqTrack {
@@ -320,7 +326,7 @@ projects.each { Project project ->
                 }
             }
         }
-    }  as List<DataFile>
+    } as List<DataFile>
 
     List<AbstractMergedBamFile> bams = AbstractMergedBamFile.withCriteria {
         workPackage {
@@ -332,7 +338,7 @@ projects.each { Project project ->
         }
     } as List<AbstractMergedBamFile>
 
-    final Path outputDirectory = ctx.fileService.toPath(ctx.configService.getScriptOutputPath(), ctx.fileSystemService.getRemoteFileSystemOnDefaultRealm()).resolve("export").resolve("molgenis").resolve("${timestamp}-${project.name}")
+    final Path outputDirectory = outputExportDirectory.resolve(project.name)
     ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
     ctx.fileService.setPermission(outputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
