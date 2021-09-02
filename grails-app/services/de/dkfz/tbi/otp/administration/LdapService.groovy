@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.administration
 import grails.gorm.transactions.Transactional
 import groovy.transform.Immutable
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.ldap.NameNotFoundException
 import org.springframework.ldap.core.AttributesMapper
 import org.springframework.ldap.core.LdapTemplate
 import org.springframework.ldap.core.support.LdapContextSource
@@ -193,10 +194,14 @@ class LdapService implements InitializingBean {
      * @return if user is in the ou=DeletedUsers
      */
     Boolean isUserInDeletedUsersOu(User user) {
-        ContainerCriteria query = query().base("${LdapKey.ORGANIZATIONAL_UNIT}=${LdapKey.DELETED_USERS}").countLimit(1)
-                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
-                .and(configService.ldapSearchAttribute).is(user.username)
-        return !ldapTemplate.search(query, new IsUserDeactivatedMapper(ldapService: this)).empty
+        try {
+            ContainerCriteria query = query().base("${LdapKey.ORGANIZATIONAL_UNIT}=${LdapKey.DELETED_USERS}").countLimit(1)
+                    .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                    .and(configService.ldapSearchAttribute).is(user.username)
+            return !ldapTemplate.search(query, new IsUserDeactivatedMapper(ldapService: this)).empty
+        } catch (NameNotFoundException ignored) {
+           return false
+        }
     }
 
     /**
