@@ -26,6 +26,7 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -71,10 +72,14 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         setupData(false)
 
         WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "asdf")
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "qwertz")
-        workflowStep.workflowRun.state = WorkflowRun.State.FAILED
-        workflowStep.workflowRun.save(flush: true)
+        WorkflowRun oldRun = workflowStep.workflowRun
+        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: oldRun, outputRole: "asdf")
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: oldRun, outputRole: "qwertz")
+        oldRun.state = WorkflowRun.State.FAILED
+        oldRun.save(flush: true)
+        WorkflowArtefact wa3 = createWorkflowRunInputArtefact([
+                workflowRun: oldRun,
+        ]).workflowArtefact
 
         WorkflowRun wr2 = createWorkflowRun()
         createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
@@ -83,16 +88,16 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
 
         when:
-        service.createRestartedWorkflow(workflowStep, startDirectly)
+        WorkflowRun newRun = service.createRestartedWorkflow(workflowStep, startDirectly)
 
         then:
         workflowStep.workflowRun.state == WorkflowRun.State.RESTARTED
         [wa1, wa2].every { it.state == WorkflowArtefact.State.FAILED }
-        WorkflowArtefact.count == 4
+        WorkflowArtefact.count == 5
         WorkflowRun.count == 4
-        List<WorkflowArtefact> newWorkflowArtefacts = (WorkflowArtefact.all - [wa1, wa2])
-        WorkflowRun newRun = (WorkflowRun.all - [workflowStep.workflowRun, wr2, wr3]).first()
-        CollectionUtils.containSame(newRun.outputArtefacts.values(), newWorkflowArtefacts)
+        List<WorkflowArtefact> newWorkflowArtefacts = (WorkflowArtefact.all - [wa1, wa2, wa3])
+        TestCase.assertContainSame(newRun.inputArtefacts, oldRun.inputArtefacts)
+        TestCase.assertContainSame(newRun.outputArtefacts.values(), newWorkflowArtefacts)
         newWorkflowArtefacts.every { it.state == WorkflowArtefact.State.PLANNED_OR_RUNNING }
         newWorkflowArtefacts.every { it.producedBy == newRun }
         [wr2, wr3]*.inputArtefacts.every { Map<String, WorkflowArtefact> inputArtefacts ->

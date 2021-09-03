@@ -54,7 +54,15 @@ class WorkflowService {
                 state           : WorkflowRun.State.PENDING,
         ]).save(flush: true)
 
-        step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
+        oldRun.inputArtefacts.each { String role, WorkflowArtefact inputArtefact ->
+            new WorkflowRunInputArtefact([
+                    role            : role,
+                    workflowArtefact: inputArtefact,
+                    workflowRun     : run,
+            ]).save(flush: true)
+        }
+
+        oldRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
             WorkflowArtefact newArtefact = new WorkflowArtefact(
                     state: WorkflowArtefact.State.PLANNED_OR_RUNNING,
                     producedBy: run,
