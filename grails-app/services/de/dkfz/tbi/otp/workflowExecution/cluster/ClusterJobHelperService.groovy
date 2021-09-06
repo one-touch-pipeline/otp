@@ -89,6 +89,7 @@ class ClusterJobHelperService {
     }
 
     String constructJobName(WorkflowStep step) {
+        final String disallowedChars = '[^a-zA-Z0-9\\-_]'
         String env
         switch (Environment.current) {
             case Environment.PRODUCTION:
@@ -102,12 +103,14 @@ class ClusterJobHelperService {
         }
         String stepId = step.id
         String beanName = step.beanName
-        String workflowName = step.workflowRun.workflow.name.replaceAll('[^a-zA-Z0-9\\-_]', '_')
+        String workflowName = step.workflowRun.workflow.name.replaceAll(disallowedChars, '_')
+        String workflowRunName = step.workflowRun.shortDisplayName.replaceAll(disallowedChars, '_')
         return [
                 'otp',
                 env,
                 workflowName,
                 beanName,
+                workflowRunName,
                 stepId,
         ].findAll().join('_')
     }

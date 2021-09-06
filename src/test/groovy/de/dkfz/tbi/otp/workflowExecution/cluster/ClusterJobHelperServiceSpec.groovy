@@ -153,6 +153,7 @@ class ClusterJobHelperServiceSpec extends Specification implements ServiceUnitTe
                 Environment.current.name.toLowerCase(),
                 workflowStep.workflowRun.workflow.name,
                 workflowStep.beanName,
+                workflowStep.workflowRun.shortDisplayName,
                 workflowStep.id,
         ].join('_')
 
