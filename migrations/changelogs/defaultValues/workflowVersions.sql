@@ -33,7 +33,7 @@ VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Cell Ranger'), 'cellranger/4.0.0', now(), now())
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Cell Ranger'), 'cellranger/6.1.1', now(), now())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
