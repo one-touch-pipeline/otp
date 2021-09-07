@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.nio.file.Path
 import java.time.Duration
 
 abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RunYapsaInstance> {
@@ -100,13 +101,13 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         }
 
         RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(samplePair)
-        File runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore)
+        Path runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore, configService)
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         assert sp.save(flush: true)
 
         linkFileUtils.createAndValidateLinks([
-                (sourceSnvCallingInputFile): runYapsaInputFile,
+                (sourceSnvCallingInputFile): new File(runYapsaInputFile.toString()),
         ], realm)
     }
 
@@ -119,7 +120,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     }
 
     @SuppressWarnings("UnusedMethodParameter")
-    List<File> filesToCheck(RunYapsaInstance runYapsaInstance) {
+    List<Path> filesToCheck(RunYapsaInstance runYapsaInstance) {
         return []
     }
 

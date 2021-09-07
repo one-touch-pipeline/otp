@@ -347,7 +347,7 @@ class DeletionService {
 
         if (bamFiles) {
             BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
-                dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+                dirsToDeleteWithOtherUser << analysisDeletionService.deleteInstance(it)
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
         }
@@ -655,7 +655,7 @@ class DeletionService {
 
             if (processedMergedBamFiles) {
                 BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(processedMergedBamFiles, processedMergedBamFiles).each {
-                    dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+                    dirsToDeleteWithOtherUser << analysisDeletionService.deleteInstance(it)
                 }
             }
 

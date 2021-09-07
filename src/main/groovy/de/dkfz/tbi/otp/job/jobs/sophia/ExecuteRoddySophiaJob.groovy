@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -49,7 +50,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         assert sophiaInstance
 
         sophiaService.validateInputBamFiles(sophiaInstance)
-        File workDirectory = sophiaInstance.workDirectory
+        Path workDirectory = sophiaService.getWorkDirectory(sophiaInstance)
 
         AbstractMergedBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = sophiaInstance.sampleType2BamFile
@@ -115,8 +116,8 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         ]
         directories.addAll(sophiaInstance.workExecutionDirectories)
 
-        List<File> files = [
-                sophiaInstance.getFinalAceseqInputFile(),
+        List<Path> files = [
+                sophiaService.getFinalAceseqInputFile(sophiaInstance),
         ]
 
         directories.each {
@@ -124,7 +125,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         }
 
         files.each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+            FileService.ensureFileIsReadableAndNotEmpty(it)
         }
 
         sophiaService.validateInputBamFiles(sophiaInstance)

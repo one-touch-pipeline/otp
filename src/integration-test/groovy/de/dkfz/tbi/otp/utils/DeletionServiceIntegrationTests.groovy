@@ -34,7 +34,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.AlignmentLog
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -58,6 +60,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     DataProcessingFilesService dataProcessingFilesService
     FastqcDataFilesService fastqcDataFilesService
     TestConfigService configService
+    SnvCallingService snvCallingService
+    FileService fileService
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -71,6 +75,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
                 (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.toString(),
                 (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.toString(),
         ])
+        snvCallingService.configService = configService
         DomainFactory.createDefaultRealmWithProcessingOption()
     }
 
@@ -582,7 +587,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         dataBaseSetupForMergedBamFiles(controlBamFiles, false)
         createFastqFiles(controlBamFiles)
 
-        File snvFolder = snvCallingInstance.instancePath.absoluteDataManagementPath
+        File snvFolder = fileService.toFile(snvCallingService.getWorkDirectory(snvCallingInstance))
         CreateFileHelper.createFile(new File(snvFolder, "test.vcf"))
 
         return snvCallingInstance

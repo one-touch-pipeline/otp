@@ -38,6 +38,7 @@ import java.nio.file.Path
  * for analysis instances complete directories are renamed.
  */
 
+BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
@@ -59,7 +60,7 @@ MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
         analysisInstances.each { BamFilePairAnalysis result ->
             assert result.withdrawn
             // rename folder containing results
-            renameFiles.add(result.instancePath.absoluteDataManagementPath)
+            renameFiles.add(fileService.toFile(bamFileAnalysisServiceFactoryService.getService(result).getWorkDirectory(result)))
         }
     }
 }

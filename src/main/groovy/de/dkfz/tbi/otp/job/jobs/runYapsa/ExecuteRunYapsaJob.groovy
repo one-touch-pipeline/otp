@@ -27,8 +27,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
@@ -37,6 +36,8 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -53,6 +54,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired FileService fileService
     @Autowired FileSystemService fileSystemService
     @Autowired SnvCallingService snvCallingService
+    @Autowired RunYapsaService runYapsaService
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -60,7 +62,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         final Realm realm = runYapsaInstance.project.realm
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
-                fileService.toPath(runYapsaInstance.workDirectory, fileSystemService.getRemoteFileSystem(realm)),
+                runYapsaService.getWorkDirectory(runYapsaInstance),
                 realm, "", FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
 
         String jobScript = createScript(runYapsaInstance)
@@ -73,7 +75,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     private String createScript(RunYapsaInstance runYapsaInstance) {
         final RunYapsaConfig CONFIG = runYapsaInstance.config
-        File outputDirectory = runYapsaInstance.workDirectory
+        Path outputDirectory = runYapsaService.getWorkDirectory(runYapsaInstance)
         ReferenceGenome referenceGenome = runYapsaInstance.referenceGenome
 
         String moduleLoader = processingOptionService.findOptionAsString(COMMAND_LOAD_MODULE_LOADER)
@@ -82,8 +84,8 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
         List<String> runYapsaCall = []
         runYapsaCall << "runYAPSA.R"
-        runYapsaCall << "-i ${snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(runYapsaInstance, fileSystemService.filesystemForProcessingForRealm)}"
-        runYapsaCall << "-o ${outputDirectory.absolutePath}"
+        runYapsaCall << "-i ${snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(runYapsaInstance)}"
+        runYapsaCall << "-o ${outputDirectory}"
         if (runYapsaInstance.seqType == SeqTypeService.wholeGenomePairedSeqType) {
             runYapsaCall << "-s WGS"
         } else if (runYapsaInstance.seqType == SeqTypeService.exomePairedSeqType) {
@@ -115,7 +117,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         final Realm realm = runYapsaInstance.project.realm
 
         fileService.correctPathPermissionAndGroupRecursive(
-                fileService.toPath(runYapsaInstance.workDirectory, fileSystemService.getRemoteFileSystem(realm)),
+                runYapsaService.getWorkDirectory(runYapsaInstance),
                 realm,
                 runYapsaInstance.project.unixGroup,
         )

@@ -77,7 +77,6 @@ class SophiaInstanceSpec extends Specification implements DataTest {
     TestConfigService configService
 
     SophiaInstance instance
-    File instancePath
 
     /**
      * Creates Temporary File for Data Management path
@@ -91,37 +90,11 @@ class SophiaInstanceSpec extends Specification implements DataTest {
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
         instance.processingState = AnalysisProcessingStates.FINISHED
         assert instance.save(flush: true)
-
-        instancePath = new File(
-                temporaryFile, "${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/" +
-                "${instance.individual.pid}/sv_results/${instance.seqType.libraryLayoutDirName}/" +
-                "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/" +
-                "${instance.instanceName}"
-        )
     }
 
     void cleanup() {
         configService.clean()
     }
-
-    void "getSophiaInstancePath, tests if path is in a valid form"() {
-        when:
-        OtpPath sophiaInstancePath = instance.getInstancePath()
-
-        then:
-        instance.project == sophiaInstancePath.project
-        instancePath == sophiaInstancePath.absoluteDataManagementPath
-    }
-
-
-    void "getFinalAceseqInputFile, tests if path is in a valid form"() {
-        given:
-        File expectedPath = new File(instancePath, "svs_${instance.individual.pid}_${instance.SOPHIA_OUTPUT_FILE_SUFFIX}")
-
-        expect:
-        instance.getFinalAceseqInputFile() == expectedPath
-    }
-
 
     void "getLatestValidSophiaInstanceForSamplePair, test if one instance exists, return instance"() {
         expect:

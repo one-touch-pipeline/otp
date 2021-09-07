@@ -181,7 +181,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     void withdraw() {
         withTransaction {
             BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(this, this).each {
-                BamFileAnalysisService.withdraw(it)
+                AbstractBamFileAnalysisService.withdraw(it)
             }
 
             super.withdraw()

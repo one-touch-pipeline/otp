@@ -26,10 +26,13 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 import de.dkfz.tbi.otp.utils.SessionUtils
+
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -37,6 +40,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
     LsdfFilesService lsdfFilesService
     ProjectService projectService
+    SnvCallingService snvCallingService
 
     void "testWholeWorkflowWithProcessedMergedBamFile"() {
         given:
@@ -97,10 +101,10 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
     }
 
     @Override
-    List<File> filesToCheck(RoddySnvCallingInstance instance) {
+    List<Path> filesToCheck(RoddySnvCallingInstance instance) {
         return [
-                instance.getSnvCallingResult(),
-                instance.getSnvDeepAnnotationResult(),
+                snvCallingService.getSnvCallingResult(instance),
+                snvCallingService.getSnvDeepAnnotationResult(instance),
         ]
     }
 }

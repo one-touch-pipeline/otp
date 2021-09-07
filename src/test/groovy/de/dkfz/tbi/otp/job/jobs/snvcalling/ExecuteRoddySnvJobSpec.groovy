@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -39,6 +38,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.Path
 
 class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
@@ -102,7 +103,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService         : configService,
-                snvCallingService     : Mock(SnvCallingService) {
+                snvCallingService     : Spy(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
@@ -111,6 +112,9 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                     0 * _
                 },
         ])
+        job.fileSystemService = new TestFileSystemService()
+        job.snvCallingService.configService = configService
+        job.snvCallingService.fileSystemService = new TestFileSystemService()
         job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
@@ -181,22 +185,20 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> { }
                 },
-                snvCallingService         : Mock(SnvCallingService) {
+                snvCallingService         : Spy(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> { }
+                    1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_) >> { }
                 },
         ])
-        job.metaClass.searchResultRequiredForRunYapsa = {  final File workDirecotry, final String matcherForFileRequiredForRunYapsa ->
-            File file = temporaryFolder.newFile("snvs_pid_1_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf")
-            file.text = "SOME_CONTENT"
-            return file
-        }
+        job.snvCallingService.configService = configService
+        job.snvCallingService.fileSystemService = new TestFileSystemService()
 
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, configService)
 
         when:
         job.validate(roddySnvCallingInstance)
@@ -231,7 +233,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, configService)
 
         when:
         job.validate(roddySnvCallingInstance)
@@ -246,7 +248,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    void "validate, when file not exist, throw assert"() {
+    void "validate, when file not exists, throw assert"() {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
@@ -254,24 +256,26 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> { }
                 },
-                snvCallingService: Mock(SnvCallingService),
         ])
 
         job.fileSystemService = new TestFileSystemService()
+        job.snvCallingService = new SnvCallingService()
+        job.snvCallingService.fileSystemService = new TestFileSystemService()
+        job.snvCallingService.configService = configService
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, configService)
 
-        File fileToDelete = fileClousure(roddySnvCallingInstance)
-        assert fileToDelete.delete() || fileToDelete.deleteDir()
+        Path fileToDelete = fileClousure(roddySnvCallingInstance, job.snvCallingService)
+        new FileService().deleteDirectoryRecursively(fileToDelete)
 
         when:
         job.validate(roddySnvCallingInstance)
 
         then:
         AssertionError e = thrown()
-        e.message.contains(fileToDelete.path)
+        e.message.contains(fileToDelete.toString())
         roddySnvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
 
         cleanup:
@@ -279,20 +283,20 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
         where:
         fileClousure << [
-                { RoddySnvCallingInstance it ->
-                    it.workExecutionStoreDirectory
+                { RoddySnvCallingInstance it, SnvCallingService service ->
+                    it.workExecutionStoreDirectory.toPath()
                 },
-                { RoddySnvCallingInstance it ->
-                    it.workExecutionDirectories.first()
+                { RoddySnvCallingInstance it, SnvCallingService service ->
+                    it.workExecutionDirectories.first().toPath()
                 },
-                { RoddySnvCallingInstance it ->
-                    it.getCombinedPlotPath()
+                { RoddySnvCallingInstance it, SnvCallingService service ->
+                    service.getCombinedPlotPath(it)
                 },
-                { RoddySnvCallingInstance it ->
-                    it.getSnvCallingResult()
+                { RoddySnvCallingInstance it, SnvCallingService service ->
+                    service.getSnvCallingResult(it)
                 },
-                { RoddySnvCallingInstance it ->
-                    it.getSnvDeepAnnotationResult()
+                { RoddySnvCallingInstance it, SnvCallingService service ->
+                    service.getSnvDeepAnnotationResult(it)
                 },
         ]
     }

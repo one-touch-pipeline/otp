@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,28 +21,21 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.testing.services.ServiceUnitTest
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileAnalysisServiceSpec
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-/**
- * For each tumor-control pair the snv pipeline will be called.
- * The AbstractSnvCallingInstance symbolizes one call of the pipeline.
- */
-abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis {
+class SnvCallingServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<SnvCallingService> {
 
-    /**
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
-     *
-     * @deprecated use {@link SnvCallingService#getWorkDirectory()}
-     */
     @Override
-    @Deprecated
-    OtpPath getInstancePath() {
-        return new OtpPath(samplePair.snvSamplePairPath, instanceName)
+    BamFilePairAnalysis getNewInstance() {
+        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
     }
 
     @Override
-    String toString() {
-        return "SCI ${id} ${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+    String getPathPart() {
+        return 'snv_results'
     }
 }

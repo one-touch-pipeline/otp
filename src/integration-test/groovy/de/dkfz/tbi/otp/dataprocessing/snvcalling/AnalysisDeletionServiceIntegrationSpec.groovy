@@ -65,17 +65,17 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         )
 
         analysisInstancesDirectories = [
-                snvCallingInstance.getInstancePath().getAbsoluteDataManagementPath(),
-                indelCallingInstance.getInstancePath().getAbsoluteDataManagementPath(),
-                sophiaInstance.getInstancePath().getAbsoluteDataManagementPath(),
-                aceseqInstance.getInstancePath().getAbsoluteDataManagementPath(),
-        ]
+                analysisDeletionService.aceseqService.getWorkDirectory(aceseqInstance),
+                analysisDeletionService.snvCallingService.getWorkDirectory(snvCallingInstance),
+                analysisDeletionService.sophiaService.getWorkDirectory(sophiaInstance),
+                analysisDeletionService.indelCallingService.getWorkDirectory(indelCallingInstance),
+        ].collect { analysisDeletionService.fileService.toFile(it) }
         analysisSamplePairsDirectories = [
-                snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath(),
-                indelCallingInstance.samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath(),
-                sophiaInstance.samplePair.getSophiaSamplePairPath().getAbsoluteDataManagementPath(),
-                aceseqInstance.samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath(),
-        ]
+                analysisDeletionService.aceseqService.getSamplePairPath(aceseqInstance.samplePair),
+                analysisDeletionService.snvCallingService.getSamplePairPath(snvCallingInstance.samplePair),
+                analysisDeletionService.sophiaService.getSamplePairPath(sophiaInstance.samplePair),
+                analysisDeletionService.indelCallingService.getSamplePairPath(indelCallingInstance.samplePair),
+        ].collect { analysisDeletionService.fileService.toFile(it) }
         samplePairs = [
                 snvCallingInstance.samplePair,
                 indelCallingInstance.samplePair,
@@ -137,17 +137,19 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         List<File> instancesDirectories = []
         List<File> samplePairsDirectories
 
-        analysisInstancesDirectories.addAll(
-                snvCallingInstance2.getInstancePath().getAbsoluteDataManagementPath(),
-                indelCallingInstance2.getInstancePath().getAbsoluteDataManagementPath(),
-                sophiaInstance2.getInstancePath().getAbsoluteDataManagementPath(),
-                aceseqInstance2.getInstancePath().getAbsoluteDataManagementPath(),
+        analysisInstancesDirectories.addAll([
+                        analysisDeletionService.aceseqService.getWorkDirectory(aceseqInstance2),
+                        analysisDeletionService.snvCallingService.getWorkDirectory(snvCallingInstance2),
+                        analysisDeletionService.sophiaService.getWorkDirectory(sophiaInstance2),
+                        analysisDeletionService.indelCallingService.getWorkDirectory(indelCallingInstance2),
+                ].collect { analysisDeletionService.fileService.toFile(it) }
         )
-        analysisSamplePairsDirectories.addAll(
-                snvCallingInstance2.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath(),
-                indelCallingInstance2.samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath(),
-                sophiaInstance2.samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath(),
-                aceseqInstance2.samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath(),
+        analysisSamplePairsDirectories.addAll([
+                        analysisDeletionService.aceseqService.getSamplePairPath(aceseqInstance2.samplePair),
+                        analysisDeletionService.snvCallingService.getSamplePairPath(snvCallingInstance2.samplePair),
+                        analysisDeletionService.sophiaService.getSamplePairPath(sophiaInstance2.samplePair),
+                        analysisDeletionService.indelCallingService.getSamplePairPath(indelCallingInstance2.samplePair),
+                ].collect { analysisDeletionService.fileService.toFile(it) }
         )
         samplePairs.addAll(
                 snvCallingInstance2.samplePair,

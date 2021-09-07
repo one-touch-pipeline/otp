@@ -30,12 +30,14 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Path
 import java.time.Duration
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
+    IndelCallingService indelCallingService
     LsdfFilesService lsdfFilesService
 
     ProjectService projectService
@@ -74,12 +76,12 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
         ]
     }
 
-    List<File> filesToCheck(IndelCallingInstance indelCallingInstance) {
+    List<Path> filesToCheck(IndelCallingInstance indelCallingInstance) {
         return [
-                indelCallingInstance.getResultFilePathsToValidate(),
-                indelCallingInstance.getCombinedPlotPath(),
-                indelCallingInstance.getIndelQcJsonFile(),
-                indelCallingInstance.getSampleSwapJsonFile(),
+                indelCallingService.getResultFilePathsToValidate(indelCallingInstance),
+                indelCallingService.getCombinedPlotPath(indelCallingInstance),
+                indelCallingService.getIndelQcJsonFile(indelCallingInstance),
+                indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
         ].flatten()
     }
 

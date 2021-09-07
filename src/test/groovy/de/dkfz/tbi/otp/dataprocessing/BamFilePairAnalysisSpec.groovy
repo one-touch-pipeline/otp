@@ -234,6 +234,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
 @Artefact(DomainClassArtefactHandler.TYPE)
 class MockBamFilePairAnalysis extends BamFilePairAnalysis implements DomainClass, GormEntity<MockBamFilePairAnalysis>, Validateable {
     @Override
+    @Deprecated
     OtpPath getInstancePath() {
         return new OtpPath("somePath")
     }

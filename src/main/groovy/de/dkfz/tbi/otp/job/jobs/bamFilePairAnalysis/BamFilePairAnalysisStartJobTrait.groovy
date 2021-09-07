@@ -29,7 +29,7 @@ trait BamFilePairAnalysisStartJobTrait {
     abstract void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis)
 
     abstract ConfigPerProjectAndSeqType getConfig(SamplePair samplePair)
-    abstract BamFileAnalysisService getBamFileAnalysisService()
+    abstract AbstractBamFileAnalysisService getBamFileAnalysisService()
 
     abstract String getInstanceName(ConfigPerProjectAndSeqType config)
     abstract String getFormattedDate()

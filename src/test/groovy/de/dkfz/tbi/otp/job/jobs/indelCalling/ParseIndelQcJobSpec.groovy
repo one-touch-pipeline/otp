@@ -39,6 +39,8 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Path
+
 class ParseIndelQcJobSpec extends Specification implements DataTest {
 
     @Override
@@ -87,15 +89,28 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
     @Rule
     TemporaryFolder temporaryFolder
 
-    IndelCallingInstance indelCallingInstance
     ParseIndelQcJob job
 
+    IndelCallingInstance indelCallingInstance
+    Path sampleSwapJsonFile
+    Path indelQcJsonFile
+
     void setup() {
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        Path temporaryFile = temporaryFolder.newFolder().toPath()
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
         indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
         job = [
                 getProcessParameterObject: { -> indelCallingInstance },
         ] as ParseIndelQcJob
+
+        sampleSwapJsonFile = temporaryFile.resolve("sampleSwapJsonFile")
+        indelQcJsonFile = temporaryFile.resolve("indelQcJsonFile")
+
+        job.indelCallingService = Mock(IndelCallingService) {
+            getSampleSwapJsonFile(_) >> sampleSwapJsonFile
+            getIndelQcJsonFile(_) >> indelQcJsonFile
+        }
+
         job.qcTrafficLightService = new QcTrafficLightService()
     }
 
@@ -106,10 +121,13 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
     @Unroll
     void "test execute method, throw error since #notAvailable does not exist"() {
         given:
+        Path notAvailable
         if (available == "sampleSwapJsonFile") {
-            DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)
+            DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(sampleSwapJsonFile, indelCallingInstance.individual)
+            notAvailable = indelQcJsonFile
         } else {
-            DomainFactory.createIndelQcFileOnFileSystem(indelCallingInstance.indelQcJsonFile)
+            DomainFactory.createIndelQcFileOnFileSystem(indelQcJsonFile)
+            notAvailable = sampleSwapJsonFile
         }
 
         when:
@@ -117,18 +135,18 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("${indelCallingInstance."${notAvailable}"} on local filesystem is not accessible or does not exist.")
+        e.message.contains("${notAvailable} on local filesystem is not accessible or does not exist.")
 
         where:
-        available            | notAvailable
-        "sampleSwapJsonFile" | "indelQcJsonFile"
-        "indelQcJsonFile"    | "sampleSwapJsonFile"
+        available            | _
+        "sampleSwapJsonFile" | _
+        "indelQcJsonFile"    | _
     }
 
     void "test execute method when both files available"() {
         given:
-        DomainFactory.createIndelQcFileOnFileSystem(indelCallingInstance.indelQcJsonFile)
-        DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)
+        DomainFactory.createIndelQcFileOnFileSystem(indelQcJsonFile)
+        DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(sampleSwapJsonFile, indelCallingInstance.individual)
 
         when:
         job.execute()

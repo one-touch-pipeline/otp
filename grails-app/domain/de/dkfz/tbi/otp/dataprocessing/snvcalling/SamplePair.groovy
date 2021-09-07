@@ -142,27 +142,47 @@ class SamplePair implements Entity {
 
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
+     *
+     * @deprecated use {@link SnvCallingService#getSamplePairPath(SamplePair)}
      */
+    @Deprecated
     OtpPath getSnvSamplePairPath() {
         return buildPath(SNV_RESULTS_PATH_PART)
     }
 
+    /**
+     * @deprecated use {@link IndelCallingService#getSamplePairPath(SamplePair)}
+     */
+    @Deprecated
     OtpPath getIndelSamplePairPath() {
         return buildPath(INDEL_RESULTS_PATH_PART)
     }
 
+    /**
+     * @deprecated use {@link SophiaService#getSamplePairPath(SamplePair)}
+     */
+    @Deprecated
     OtpPath getSophiaSamplePairPath() {
         return buildPath(SOPHIA_RESULTS_PATH_PART)
     }
 
+    /**
+     * @deprecated use {@link AceseqService#getSamplePairPath(SamplePair)}
+     */
+    @Deprecated
     OtpPath getAceseqSamplePairPath() {
         return buildPath(ACESEQ_RESULTS_PATH_PART)
     }
 
+    /**
+     * @deprecated use {@link RunYapsaService#getSamplePairPath(SamplePair)}
+     */
+    @Deprecated
     OtpPath getRunYapsaSamplePairPath() {
         return buildPath(RUN_YAPSA_RESULTS_PATH_PART)
     }
 
+    @Deprecated
     private OtpPath buildPath(String analysisPath) {
         return new OtpPath(individual.getViewByPidPath(seqType), analysisPath, seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
     }

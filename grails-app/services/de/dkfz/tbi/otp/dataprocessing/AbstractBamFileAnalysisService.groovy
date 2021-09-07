@@ -24,15 +24,21 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.FileInconsistencyException
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Path
+
 @Transactional
-abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
+abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> implements BamFileAnalysisServiceTrait {
 
     AbstractMergedBamFileService abstractMergedBamFileService
+    ConfigService configService
+    FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
 
     static final List<AnalysisProcessingStates> PROCESSING_STATES_NOT_PROCESSABLE = [
@@ -182,4 +188,25 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
                 "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
                 ") "
     }
+
+    Path getSamplePairPath(SamplePair samplePair) {
+        // TODO otp-1174: extract view by pid path
+        return fileSystemService.getRemoteFileSystem(samplePair.project.realm).getPath(
+                configService.rootPath.absolutePath,
+                samplePair.individual.project.dirName,
+                'sequencing',
+                samplePair.seqType.dirName,
+                'view-by-pid',
+                samplePair.individual.pid,
+                resultsPathPart,
+                samplePair.seqType.libraryLayoutDirName,
+                "${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}"
+        )
+    }
+
+    Path getWorkDirectory(T instance) {
+        return getSamplePairPath(instance.samplePair).resolve(instance.instanceName)
+    }
+
+    protected abstract String getResultsPathPart()
 }

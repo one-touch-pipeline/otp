@@ -27,20 +27,26 @@ import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
-import java.nio.file.Path
-import java.nio.file.FileSystem
-import java.text.SimpleDateFormat
 import java.nio.file.Files
+import java.nio.file.Path
+import java.text.SimpleDateFormat
 
 @Transactional
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
-    ProjectService projectService
+    AceseqService aceseqService
     FileSystemService fileSystemService
+    IndelCallingService indelCallingService
+    ProjectService projectService
+    SnvCallingService snvCallingService
+    SophiaService sophiaService
 
     List getCallingInstancesForProject(String projectName) {
         Project proj = projectService.getProjectByName(projectName)
@@ -140,28 +146,29 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
         }
 
         List<Path> filePaths = []
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(callingInstance.realm)
 
         switch (plotType) {
             case PlotType.ACESEQ_GC_CORRECTED:
             case PlotType.ACESEQ_QC_GC_CORRECTED:
             case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR:
             case PlotType.ACESEQ_WG_COVERAGE:
-                filePaths.add(fileSystem.getPath((callingInstance as AceseqInstance).getPlot(plotType).toString()))
+                filePaths.add(aceseqService.getPlot(callingInstance as AceseqInstance, plotType))
                 break
             case PlotType.ACESEQ_ALL:
             case PlotType.ACESEQ_EXTRA:
-                (callingInstance as AceseqInstance).getPlots(plotType).each { File f ->
-                    filePaths << fileSystem.getPath(f.toString())
-                }
+                filePaths.addAll(aceseqService.getPlots(callingInstance as AceseqInstance, plotType))
                 break
             case PlotType.SOPHIA:
+                filePaths.add(sophiaService.getCombinedPlotPath(callingInstance as SophiaInstance))
+                break
             case PlotType.SNV:
+                filePaths.add(snvCallingService.getCombinedPlotPath(callingInstance as AbstractSnvCallingInstance))
+                break
             case PlotType.INDEL:
-                filePaths.add(fileSystem.getPath(callingInstance.getCombinedPlotPath().toString()))
+                filePaths.add(indelCallingService.getCombinedPlotPath(callingInstance as IndelCallingInstance))
                 break
             case PlotType.INDEL_TINDA:
-                filePaths.add(fileSystem.getPath((callingInstance as IndelCallingInstance).getCombinedPlotPathTiNDA().toString()))
+                filePaths.add(indelCallingService.getCombinedPlotPathTiNDA(callingInstance as IndelCallingInstance))
                 break
             default:
                 throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")

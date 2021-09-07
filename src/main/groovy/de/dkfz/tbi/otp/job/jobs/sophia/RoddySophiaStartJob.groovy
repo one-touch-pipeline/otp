@@ -49,7 +49,7 @@ class RoddySophiaStartJob extends AbstractBamFilePairAnalysisStartJob implements
     }
 
     @Override
-    BamFileAnalysisService getBamFileAnalysisService() {
+    AbstractBamFileAnalysisService getBamFileAnalysisService() {
         return sophiaService
     }
 }

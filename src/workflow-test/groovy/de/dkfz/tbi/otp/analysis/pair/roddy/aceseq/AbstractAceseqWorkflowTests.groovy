@@ -33,15 +33,17 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.nio.file.Path
 import java.time.Duration
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
 
+    AceseqService aceseqService
     LsdfFilesService lsdfFilesService
-
     ProjectService projectService
+    SophiaService sophiaService
 
     @Override
     void setupData() {
@@ -116,7 +118,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         File sourceSophiaInputFile = new File(workflowData, "svs_stds_filtered_somatic_minEventScore3.tsv")
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(samplePair)
-        File sophiaInputFile = sophiaInstance.finalAceseqInputFile
+        File sophiaInputFile = new File(sophiaService.getFinalAceseqInputFile(sophiaInstance).toString())
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         assert sp.save(flush: true)
@@ -134,8 +136,8 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         ]
     }
 
-    List<File> filesToCheck(AceseqInstance aceseqInstance) {
-        return aceseqInstance.getAllFiles()
+    List<Path> filesToCheck(AceseqInstance aceseqInstance) {
+        return aceseqService.getAllFiles(aceseqInstance)
     }
 
     @Override

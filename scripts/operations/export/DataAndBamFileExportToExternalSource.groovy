@@ -107,6 +107,7 @@ String sampleTypes = """
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
+BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 FileService fileService = ctx.fileService
 
 Realm realm = configService.defaultRealm
@@ -323,11 +324,12 @@ patients.split('\n')*.trim().findAll {
                                 "${instanceName.toLowerCase()}_results",
                                 "${it.samplePair.sampleType1.dirName}_${it.samplePair.sampleType2.dirName}"
                         )
-                        addToOutput("echo ${it.instancePath.absoluteDataManagementPath}")
+                        File instancePath = fileService.toFile(bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it))
+                        addToOutput("echo ${instancePath}")
                         addToOutput("mkdir -p ${resultFolder}")
-                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${it.instancePath.absoluteDataManagementPath} ${resultFolder}")
+                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${instancePath} ${resultFolder}")
                         if (getFileList) {
-                            addToOutputList("ls -l --ignore=\"*roddyExec*\" ${it.instancePath.absoluteDataManagementPath}")
+                            addToOutputList("ls -l --ignore=\"*roddyExec*\" ${instancePath}")
                         }
                     }
                 } else {

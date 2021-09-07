@@ -53,7 +53,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     }
 
     @Override
-    BamFileAnalysisService getBamFileAnalysisService() {
+    AbstractBamFileAnalysisService getBamFileAnalysisService() {
         return runYapsaService
     }
 

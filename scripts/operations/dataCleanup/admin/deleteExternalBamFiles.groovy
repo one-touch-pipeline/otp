@@ -88,7 +88,7 @@ ExternallyProcessedMergedBamFile.withTransaction {
         dirsToDelete << epmbf.importFolder
         BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(epmbf, epmbf).each {
             println "  --> delete analysis: ${it}"
-            dirsToDelete << AnalysisDeletionService.deleteInstance(it)
+            dirsToDelete << analysisDeletionService.deleteInstance(it)
         }
         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(workPackage, workPackage).each { SamplePair samplePair ->
             println "  --> delete pair: ${samplePair}"

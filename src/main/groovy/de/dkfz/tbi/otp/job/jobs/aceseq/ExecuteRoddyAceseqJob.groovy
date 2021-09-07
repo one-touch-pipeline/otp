@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 
+import java.nio.file.Path
+
 @Component
 @Scope("prototype")
 @Slf4j
@@ -47,6 +49,9 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
+
+    @Autowired
+    SophiaService sophiaService
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(AceseqInstance aceseqInstance) {
@@ -76,12 +81,13 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(gcContentFile)
 
         SophiaInstance sophiaInstance = SophiaInstance.getLatestValidSophiaInstanceForSamplePair(aceseqInstance.samplePair)
-        File aceseqInputFile = sophiaInstance.finalAceseqInputFile
+        Path aceseqInputFile = sophiaService.getFinalAceseqInputFile(sophiaInstance)
         assert aceseqInputFile : "Path to the ACEseq input file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(aceseqInputFile)
+        fileService.ensureFileIsReadableAndNotEmpty(aceseqInputFile)
 
-        linkFileUtils.createAndValidateLinks([(aceseqInputFile): new File(
-                aceseqInstance.workDirectory, aceseqInputFile.name)], realm, aceseqInstance.project.unixGroup
+        fileService.createLink(
+                aceseqService.getWorkDirectory(aceseqInstance).resolve(aceseqInputFile.fileName), aceseqInputFile,
+                realm, aceseqInstance.project.unixGroup
         )
 
         List<String> cValues = []
@@ -93,8 +99,8 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         cValues.add("CHROMOSOME_LENGTH_FILE:${chromosomeLengthFile}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
-        cValues.add("aceseqOutputDirectory:${aceseqInstance.workDirectory}")
-        cValues.add("svOutputDirectory:${aceseqInstance.workDirectory}")
+        cValues.add("aceseqOutputDirectory:${aceseqService.getWorkDirectory(aceseqInstance)}")
+        cValues.add("svOutputDirectory:${aceseqService.getWorkDirectory(aceseqInstance)}")
         cValues.add("MAPPABILITY_FILE:${referenceGenome.mappabilityFile}")
         cValues.add("REPLICATION_TIME_FILE:${referenceGenome.replicationTimeFile}")
         cValues.add("GC_CONTENT_FILE:${gcContentFile}")

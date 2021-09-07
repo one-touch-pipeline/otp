@@ -33,8 +33,11 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisR
 
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/indel_results/paired/tumor_control/2014-08-25_15h32
+     *
+     * @deprecated use {@link IndelCallingService#getWorkDirectory()}
      */
     @Override
+    @Deprecated
     OtpPath getInstancePath() {
         return new OtpPath(samplePair.indelSamplePairPath, instanceName)
     }
@@ -52,27 +55,5 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisR
     @Override
     RoddyWorkflowConfig getConfig() {
         return RoddyWorkflowConfig.get(super.config.id)
-    }
-
-    List<File> getResultFilePathsToValidate() {
-        return ["indel_${this.individual.pid}.vcf.gz", "indel_${this.individual.pid}.vcf.raw.gz"].collect {
-            new File(getWorkDirectory(), it)
-        }
-    }
-
-    File getCombinedPlotPath() {
-        return new File(getWorkDirectory(), "screenshots/indel_somatic_functional_combined.pdf")
-    }
-
-    File getCombinedPlotPathTiNDA() {
-        return new File(getWorkDirectory(), "snvs_${this.individual.pid}.GTfiltered_gnomAD.Germline.Rare.Rescue.png")
-    }
-
-    File getIndelQcJsonFile() {
-        return new File(getWorkDirectory(), "indel.json")
-    }
-
-    File getSampleSwapJsonFile() {
-        return new File(getWorkDirectory(), "checkSampleSwap.json")
     }
 }

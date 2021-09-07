@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,40 +21,19 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import grails.testing.services.ServiceUnitTest
 
-class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult {
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-    static hasMany = [
-            roddyExecutionDirectoryNames: String,
-    ]
+class RunYapsaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<RunYapsaService> {
 
-    /**
-     * Example:
-     * ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32
-     *
-     * @deprecated use {@link AceseqService#getWorkDirectory()}
-     */
     @Override
-    @Deprecated
-    OtpPath getInstancePath() {
-        return new OtpPath(samplePair.aceseqSamplePairPath, instanceName)
+    BamFilePairAnalysis getNewInstance() {
+        return DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
     }
 
     @Override
-    String toString() {
-        return "AI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
-    }
-
-    @Override
-    ReferenceGenome getReferenceGenome() {
-        return sampleType2BamFile.referenceGenome
-    }
-
-    @Override
-    RoddyWorkflowConfig getConfig() {
-        return RoddyWorkflowConfig.get(super.config.id)
+    String getPathPart() {
+        return 'mutational_signatures_results'
     }
 }

@@ -33,10 +33,14 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.Paths
 
 class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
@@ -118,17 +122,17 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         File gcContent = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "gcContentFile.tsv"))
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(aceseqInstance.samplePair)
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
 
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService         : configService,
-                linkFileUtils         : Mock(LinkFileUtils) {
-                    1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup ->
-                        CreateFileHelper.createFile(aceseqInstance.instancePath.absoluteDataManagementPath, sophiaInstance.finalAceseqInputFile.name)
-                    }
+                fileService           : Mock(FileService) {
+                    toFile(_) >> { new File() }
+                    ensureFileIsReadableAndNotEmpty(_) >> true
                 },
                 aceseqService         : Mock(AceseqService) {
                     1 * validateInputBamFiles(_) >> { }
+                    getWorkDirectory(_) >> { Paths.get("/asdf") }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * checkReferenceGenomeFilesAvailability(_) >> { }
@@ -137,6 +141,9 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                     1 * gcContentFile(_) >> gcContent
                 },
         ])
+        job.sophiaService = new SophiaService()
+        job.sophiaService.configService = configService
+        job.sophiaService.fileSystemService = new TestFileSystemService()
 
         ReferenceGenome referenceGenome = DomainFactory.createAceseqReferenceGenome()
 
@@ -167,8 +174,8 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                 "CHROMOSOME_LENGTH_FILE:${chromosomeLength}",
                 "CHR_SUFFIX:${referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${referenceGenome.chromosomePrefix}",
-                "aceseqOutputDirectory:${aceseqInstance.workDirectory}",
-                "svOutputDirectory:${aceseqInstance.workDirectory}",
+                "aceseqOutputDirectory:${job.aceseqService.getWorkDirectory(aceseqInstance)}",
+                "svOutputDirectory:${job.aceseqService.getWorkDirectory(aceseqInstance)}",
                 "MAPPABILITY_FILE:${referenceGenome.mappabilityFile}",
                 "REPLICATION_TIME_FILE:${referenceGenome.replicationTimeFile}",
                 "GC_CONTENT_FILE:${gcContent}",
@@ -185,7 +192,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         then:
         expectedList == returnedList
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(sophiaInstance.getFinalAceseqInputFile())
+        FileService.ensureFileIsReadableAndNotEmpty(job.sophiaService.getFinalAceseqInputFile(sophiaInstance))
     }
 
 
@@ -216,7 +223,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)
 
-        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance)
+        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, configService)
 
         when:
         job.validate(aceseqInstance)
@@ -250,7 +257,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)
 
-        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance)
+        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, configService)
 
         when:
         job.validate(aceseqInstance)
@@ -274,7 +281,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)
 
-        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance)
+        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, configService)
 
         File fileToDelete = fileClousure(aceseqInstance)
         assert fileToDelete.delete() || fileToDelete.deleteDir()

@@ -49,7 +49,7 @@ class RoddyIndelCallingStartJob extends AbstractBamFilePairAnalysisStartJob impl
     }
 
     @Override
-    BamFileAnalysisService getBamFileAnalysisService() {
+    AbstractBamFileAnalysisService getBamFileAnalysisService() {
         return indelCallingService
     }
 }

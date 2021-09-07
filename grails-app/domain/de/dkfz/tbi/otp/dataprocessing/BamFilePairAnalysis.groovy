@@ -46,7 +46,7 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
     AbstractMergedBamFile sampleType2BamFile
 
     /**
-     * Used to construct paths in {@link #getInstancePath()}.
+     * Used to construct paths in {@link AbstractBamFileAnalysisService#getWorkDirectory()}.
      * For example 2014-08-25_15h32.
      */
     String instanceName
@@ -121,9 +121,19 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
         return sampleType1BamFile.containedSeqTracks + sampleType2BamFile.containedSeqTracks
     }
 
+    /**
+     * @deprecated use {@link AbstractBamFileAnalysisService#getWorkDirectory()}
+     * (use {@link BamFileAnalysisServiceFactoryService#getService()} to get the correct service if necessary)
+     */
+    @Deprecated
     File getWorkDirectory() {
         return instancePath.absoluteDataManagementPath
     }
 
+    /**
+     * @deprecated use {@link AbstractBamFileAnalysisService#getWorkDirectory()}
+     * (use {@link BamFileAnalysisServiceFactoryService#getService()} to get the correct service if necessary)
+     */
+    @Deprecated
     abstract OtpPath getInstancePath()
 }

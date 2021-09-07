@@ -25,9 +25,11 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Path
-import java.nio.file.FileSystem
 
-class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
+class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallingInstance> implements RoddyBamFileAnalysis {
+
+    private final static String SNV_RESULTS_PATH_PART = 'snv_results'
+    private final static String SNV_RESULTS_PREFIX = 'snvs_'
 
     FileService fileService
 
@@ -51,10 +53,28 @@ class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAn
         return Pipeline.Name.RODDY_SNV
     }
 
-    Path getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(BamFilePairAnalysis bamFilePairAnalysis, FileSystem fileSystem) {
-        final File WORK_DIRECTORY = bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance().workDirectory
+    Path getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(BamFilePairAnalysis bamFilePairAnalysis) {
+        final Path WORK_DIRECTORY = getWorkDirectory(bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance())
         final String MIN_CONF_SCORE = /[0-9]/
-        final String MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA = ".*snvs_${bamFilePairAnalysis.individual.pid}_somatic_snvs_conf_${MIN_CONF_SCORE}_to_10.vcf"
-        return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(WORK_DIRECTORY, MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA, fileSystem)
+        final String MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA =
+                ".*${SNV_RESULTS_PREFIX}${bamFilePairAnalysis.individual.pid}_somatic_snvs_conf_${MIN_CONF_SCORE}_to_10.vcf"
+        return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(WORK_DIRECTORY, MATCHER_FOR_FILE_REQUIRED_FOR_RUN_YAPSA)
+    }
+
+    @Override
+    protected String getResultsPathPart() {
+        return SNV_RESULTS_PATH_PART
+    }
+
+    Path getSnvCallingResult(AbstractSnvCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_raw.vcf.gz")
+    }
+
+    Path getSnvDeepAnnotationResult(AbstractSnvCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}.vcf.gz")
+    }
+
+    Path getCombinedPlotPath(AbstractSnvCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_allSNVdiagnosticsPlots.pdf")
     }
 }

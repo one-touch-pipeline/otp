@@ -33,13 +33,13 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -61,8 +61,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
-                sophiaService    : Mock(SophiaService) {
-                    1 * validateInputBamFiles(_)
+                sophiaService    : Spy(SophiaService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 fileSystemService: Mock(FileSystemService) {
                     _ * getRemoteFileSystem(_) >> FileSystems.default
@@ -75,6 +75,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                         }
                 ]),
         ])
+        job.sophiaService.configService = configService
+        job.sophiaService.fileSystemService = new TestFileSystemService()
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
@@ -93,8 +95,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         bamFileControl.mergingWorkPackage.bamFileInProjectFolder = bamFileControl
         assert bamFileControl.mergingWorkPackage.save(flush: true)
 
-        String finalBamFileControlPath = "${sophiaInstance.workDirectory}/${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam"
-        String finalBamFileDiseasePath = "${sophiaInstance.workDirectory}/${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam"
+        Path finalBamFileControlPath = job.sophiaService.getWorkDirectory(sophiaInstance).resolve("${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam")
+        Path finalBamFileDiseasePath = job.sophiaService.getWorkDirectory(sophiaInstance).resolve("${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam")
 
         List<String> expectedList = [
                 "controlMedianIsize:${bamFileControlMergedBamQa.insertSizeMedian}",
@@ -146,13 +148,16 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _)
                 },
-                sophiaService             : Mock(SophiaService) {
-                    1 * validateInputBamFiles(_)
+                sophiaService             : Spy(SophiaService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
         ])
+        job.sophiaService.configService = configService
+        job.sophiaService.fileSystemService = new TestFileSystemService()
+
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
 
         when:
         job.validate(sophiaInstance)
@@ -187,7 +192,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
 
         when:
         job.validate(sophiaInstance)
@@ -211,20 +216,23 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                     1 * correctPermissionsAndGroups(_, _)
                 },
         ])
+        job.sophiaService = new SophiaService()
+        job.sophiaService.fileSystemService = new TestFileSystemService()
+        job.sophiaService.configService = configService
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
 
-        File fileToDelete = fileClousure(sophiaInstance)
-        assert fileToDelete.delete() || fileToDelete.deleteDir()
+        Path fileToDelete = fileClousure(sophiaInstance, job.sophiaService)
+        new FileService().deleteDirectoryRecursively(fileToDelete)
 
         when:
         job.validate(sophiaInstance)
 
         then:
         AssertionError e = thrown()
-        e.message.contains(fileToDelete.path)
+        e.message.contains(fileToDelete.toString())
         sophiaInstance.processingState != AnalysisProcessingStates.FINISHED
 
         cleanup:
@@ -232,14 +240,14 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
         where:
         fileClousure << [
-                { SophiaInstance it ->
-                    it.workExecutionStoreDirectory
+                { SophiaInstance it, SophiaService service ->
+                    it.workExecutionStoreDirectory.toPath()
                 },
-                { SophiaInstance it ->
-                    it.workExecutionDirectories.first()
+                { SophiaInstance it, SophiaService service ->
+                    it.workExecutionDirectories.first().toPath()
                 },
-                { SophiaInstance it ->
-                    it.finalAceseqInputFile
+                { SophiaInstance it, SophiaService service ->
+                    service.getFinalAceseqInputFile(it)
                 },
         ]
     }

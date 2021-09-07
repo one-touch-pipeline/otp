@@ -39,6 +39,8 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.NumberConverter
 
+import java.nio.file.Path
+
 class ParseAceseqQcJobSpec extends Specification implements DataTest {
 
     @Override
@@ -102,24 +104,26 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
 
     void "test execute"() {
         given:
-        File temporaryFile = temporaryFolder.newFolder()
-        File aceseqOutputFile = new File(temporaryFile, "aceseqOutputFile.txt")
+        Path temporaryFile = temporaryFolder.newFolder().toPath()
+        Path aceseqOutputFile = temporaryFile.resolve("aceseqOutputFile.txt")
         CreateFileHelper.createFile(aceseqOutputFile)
+
+        Path qcJson = temporaryFile.resolve("qc_json_file")
 
         AceseqInstance instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
 
-        instance.metaClass.getAllFiles = {
-            return [aceseqOutputFile]
-        }
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
 
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.path])
-
-        DomainFactory.createAceseqQaFileOnFileSystem(instance.getQcJsonFile())
+        DomainFactory.createAceseqQaFileOnFileSystem(qcJson)
 
         ParseAceseqQcJob job = [
                 getProcessParameterObject: { -> instance },
         ] as ParseAceseqQcJob
         job.qcTrafficLightService = new QcTrafficLightService()
+        job.aceseqService = Mock(AceseqService) {
+            getQcJsonFile(_) >> qcJson
+            getAllFiles(_) >> [aceseqOutputFile]
+        }
 
         when:
         job.execute()

@@ -33,7 +33,7 @@ import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingSta
 
 @Rollback
 @Integration
-class BamFileAnalysisServiceIntegrationSpec extends Specification {
+class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1

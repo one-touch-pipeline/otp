@@ -21,11 +21,17 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class CreateRoddyFileHelper {
 
@@ -82,51 +88,55 @@ class CreateRoddyFileHelper {
         createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Final")
     }
 
-    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, int minConfidenceScore = 8) {
+    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, TestConfigService configService, int minConfidenceScore = 8) {
+        SnvCallingService service = new SnvCallingService(fileSystemService: new TestFileSystemService(), configService: configService)
         CreateFileHelper.createFile(new File(roddySnvCallingInstance.workExecutionStoreDirectory, 'someFile'))
 
         roddySnvCallingInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))
         }
 
-        CreateFileHelper.createFile(roddySnvCallingInstance.getCombinedPlotPath())
+        CreateFileHelper.createFile(service.getCombinedPlotPath(roddySnvCallingInstance))
 
         [
-                roddySnvCallingInstance.getSnvCallingResult(),
-                roddySnvCallingInstance.getSnvDeepAnnotationResult(),
-                getSnvResultRequiredForRunYapsa(roddySnvCallingInstance, minConfidenceScore),
+                service.getSnvCallingResult(roddySnvCallingInstance),
+                service.getSnvDeepAnnotationResult(roddySnvCallingInstance),
+                getSnvResultRequiredForRunYapsa(roddySnvCallingInstance, minConfidenceScore, configService),
         ].each {
             CreateFileHelper.createFile(it)
         }
     }
 
-    static File getSnvResultRequiredForRunYapsa(RoddySnvCallingInstance instance, int minConfidenceScore) {
-        return new File(instance.workDirectory, "snvs_${instance.individual.pid}_somatic_snvs_conf_${minConfidenceScore}_to_10.vcf")
+    static Path getSnvResultRequiredForRunYapsa(RoddySnvCallingInstance instance, int minConfidenceScore, TestConfigService configService) {
+        SnvCallingService service = new SnvCallingService(fileSystemService: new TestFileSystemService(), configService: configService)
+        return service.getWorkDirectory(instance).resolve("snvs_${instance.individual.pid}_somatic_snvs_conf_${minConfidenceScore}_to_10.vcf")
     }
 
-    static void createIndelResultFiles(IndelCallingInstance indelCallingInstance) {
+    static void createIndelResultFiles(IndelCallingInstance indelCallingInstance, TestConfigService configService) {
+        IndelCallingService service = new IndelCallingService(fileSystemService: new TestFileSystemService(), configService: configService)
         CreateFileHelper.createFile(new File(indelCallingInstance.workExecutionStoreDirectory, 'someFile'))
 
         indelCallingInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))
         }
 
-        CreateFileHelper.createFile(indelCallingInstance.getCombinedPlotPath())
-        CreateFileHelper.createFile(indelCallingInstance.getIndelQcJsonFile())
-        CreateFileHelper.createFile(indelCallingInstance.getSampleSwapJsonFile())
+        CreateFileHelper.createFile(service.getCombinedPlotPath(indelCallingInstance))
+        CreateFileHelper.createFile(service.getIndelQcJsonFile(indelCallingInstance))
+        CreateFileHelper.createFile(service.getSampleSwapJsonFile(indelCallingInstance))
 
-        indelCallingInstance.getResultFilePathsToValidate().each {
+        service.getResultFilePathsToValidate(indelCallingInstance).each {
             CreateFileHelper.createFile(it)
         }
     }
 
-    static createSophiaResultFiles(SophiaInstance sophiaInstance) {
+    static createSophiaResultFiles(SophiaInstance sophiaInstance, TestConfigService configService) {
+        SophiaService service = new SophiaService(fileSystemService: new TestFileSystemService(), configService: configService)
         CreateFileHelper.createFile(new File(sophiaInstance.workExecutionStoreDirectory, 'someFile'))
         sophiaInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))
         }
 
-        CreateFileHelper.createFile(sophiaInstance.finalAceseqInputFile)
+        CreateFileHelper.createFile(service.getFinalAceseqInputFile(sophiaInstance))
     }
 
     static void createInsertSizeFiles(SophiaInstance sophiaInstance) {
@@ -137,12 +147,14 @@ class CreateRoddyFileHelper {
         CreateFileHelper.createFile(controlBam.getFinalInsertSizeFile())
     }
 
-    static void createAceseqResultFiles(AceseqInstance aceseqInstance) {
+    static void createAceseqResultFiles(AceseqInstance aceseqInstance, TestConfigService configService) {
+        AceseqService service = new AceseqService(fileSystemService: new TestFileSystemService(), configService: configService)
         CreateFileHelper.createFile(new File(aceseqInstance.workExecutionStoreDirectory, 'someFile'))
         aceseqInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))
         }
-        aceseqInstance.getAllFiles().each { File plot ->
+        Files.createDirectories(service.getWorkDirectory(aceseqInstance).resolve("plots"))
+        service.getAllFiles(aceseqInstance).each { Path plot ->
             CreateFileHelper.createFile(plot)
         }
     }

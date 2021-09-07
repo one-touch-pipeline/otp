@@ -24,22 +24,32 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-class RunYapsaInstanceSpec extends Specification implements DataTest {
+import java.nio.file.Path
+import java.nio.file.Paths
+
+abstract class AbstractBamFileAnalysisServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                AceseqInstance,
+                AceseqQc,
                 AlignmentPass,
                 DataFile,
+                FastqImportInstance,
                 FileType,
+                IndelCallingInstance,
                 Individual,
                 LibraryPreparationKit,
                 MergingCriteria,
@@ -59,7 +69,6 @@ class RunYapsaInstanceSpec extends Specification implements DataTest {
                 RoddySnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
-                FastqImportInstance,
                 RunYapsaConfig,
                 RunYapsaInstance,
                 Sample,
@@ -73,45 +82,42 @@ class RunYapsaInstanceSpec extends Specification implements DataTest {
                 SeqTrack,
                 SeqType,
                 SequencingKitLabel,
+                SnvConfig,
                 SoftwareTool,
+                SophiaInstance,
         ]
     }
 
-    SamplePair samplePair
-    String samplePairPath
-
-    void setup() {
-        samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
-
-        samplePairPath = "${samplePair.sampleType1.name}_${samplePair.sampleType2.name}"
-
-
-        samplePair.metaClass.getRunYapsaSamplePairPath = {
-            return new OtpPath(samplePair.project, samplePairPath)
-        }
-    }
-
-    void "test getInstance"() {
+    void "tests if the instance path is valid"() {
         given:
-        BamFilePairAnalysis instance = createBamFilePairAnalysis()
+        BamFilePairAnalysis instance = newInstance
+        service.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/asdf"])
+        service.fileSystemService = new TestFileSystemService()
 
         when:
-        OtpPath path = instance.getInstancePath()
+        Path result = service.getWorkDirectory(instance)
 
         then:
-        instance.project == path.project
-        new File(getInstancePathHelper(instance)) == path.relativePath
+        result == Paths.get(
+                "/asdf", "${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/" +
+                "${instance.individual.pid}/${pathPart}/${instance.seqType.libraryLayoutDirName}/" +
+                "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/" +
+                "${instance.instanceName}")
     }
 
-    private String getInstancePathHelper(BamFilePairAnalysis instance) {
-        return "${samplePairPath}/${instance.instanceName}"
+    void "test withdraw"() {
+        given:
+        AbstractBamFileAnalysisService service = new SnvCallingService()
+        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+
+        when:
+        service.withdraw(snvCallingInstance)
+
+        then:
+        snvCallingInstance.withdrawn
     }
 
-    BamFilePairAnalysis createBamFilePairAnalysis() {
-        return DomainFactory.createRunYapsaInstanceWithRoddyBamFiles([
-                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
-                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-                samplePair        : samplePair,
-        ])
-    }
+    abstract BamFilePairAnalysis getNewInstance()
+    abstract AbstractBamFileAnalysisService getService()
+    abstract String getPathPart()
 }

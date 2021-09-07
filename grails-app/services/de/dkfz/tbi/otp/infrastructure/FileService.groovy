@@ -238,8 +238,8 @@ class FileService {
     /**
      * Finds first available file using the given regex and ensures match is readable and not empty.
      */
-    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final File workDirectory, final String regex, final FileSystem fileSystem) {
-        Path foundFile = findFileInPath(toPath(workDirectory, fileSystem), regex)
+    Path getFoundFileInPathEnsureIsReadableAndNotEmpty(final Path workDirectory, final String regex) {
+        Path foundFile = findFileInPath(workDirectory, regex)
         ensureFileIsReadableAndNotEmpty(foundFile)
         return foundFile
     }

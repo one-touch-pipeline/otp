@@ -38,6 +38,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
+import java.nio.file.Path
+
 class ParseSophiaQcJobSpec extends Specification implements DataTest {
 
     @Override
@@ -80,17 +82,21 @@ class ParseSophiaQcJobSpec extends Specification implements DataTest {
 
     void "test execute"() {
         given:
-        File temporaryFile = temporaryFolder.newFolder()
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.path])
+        Path temporaryFile = temporaryFolder.newFolder().toPath()
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
+        Path jsonQCFile = temporaryFile.resolve("jsonQCFile")
 
         SophiaInstance instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        DomainFactory.createSophiaQcFileOnFileSystem(instance.getQcJsonFile())
+        DomainFactory.createSophiaQcFileOnFileSystem(jsonQCFile)
 
         ParseSophiaQcJob job = [
                 getProcessParameterObject: { -> instance },
         ] as ParseSophiaQcJob
         job.qcTrafficLightService = new QcTrafficLightService()
+        job.sophiaService = Mock(SophiaService) {
+            getQcJsonFile(_) >> jsonQCFile
+        }
 
         when:
         job.execute()

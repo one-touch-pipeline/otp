@@ -26,15 +26,24 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.infrastructure.FileService
+
+import java.nio.file.Path
 
 @Transactional
 class AnalysisDeletionService {
+    AceseqService aceseqService
+    FileService fileService
+    IndelCallingService indelCallingService
+    SnvCallingService snvCallingService
+    SophiaService sophiaService
+    BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
 
     /**
      * Delete all subclasses of BamFilePairAnalysis (such as SnvCallingInstance, IndelCallingInstance, etc) from the database.
      */
-    static File deleteInstance(BamFilePairAnalysis analysisInstance) {
-        File directory = analysisInstance.getInstancePath().getAbsoluteDataManagementPath()
+    File deleteInstance(BamFilePairAnalysis analysisInstance) {
+        Path directory = bamFileAnalysisServiceFactoryService.getService(analysisInstance).getWorkDirectory(analysisInstance)
         switch (analysisInstance) {
             case { it instanceof IndelCallingInstance } :
                 List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
@@ -61,7 +70,7 @@ class AnalysisDeletionService {
                 break
         }
         analysisInstance.delete(flush: true)
-        return directory
+        return fileService.toFile(directory)
     }
 
     /**
@@ -69,29 +78,29 @@ class AnalysisDeletionService {
      * The SamplePair directories are parent directories of the subclasses of BamFilePairAnalysis directories,
      * therefore this method has to run after deleteInstance().
      */
-    static List<File> deleteSamplePairsWithoutAnalysisInstances(List<SamplePair> samplePairs) {
-        List<File> directoriesToDelete = []
+    List<File> deleteSamplePairsWithoutAnalysisInstances(List<SamplePair> samplePairs) {
+        List<Path> directoriesToDelete = []
         samplePairs.unique().each { SamplePair samplePair ->
             if (!AbstractSnvCallingInstance.findBySamplePair(samplePair)) {
-                directoriesToDelete << samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
+                directoriesToDelete << snvCallingService.getSamplePairPath(samplePair)
             }
             if (!IndelCallingInstance.findBySamplePair(samplePair)) {
-                directoriesToDelete << samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath()
+                directoriesToDelete << indelCallingService.getSamplePairPath(samplePair)
             }
             if (!AceseqInstance.findBySamplePair(samplePair)) {
-                directoriesToDelete << samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath()
+                directoriesToDelete << aceseqService.getSamplePairPath(samplePair)
             }
             if (!SophiaInstance.findBySamplePair(samplePair)) {
-                directoriesToDelete << samplePair.getSophiaSamplePairPath().getAbsoluteDataManagementPath()
+                directoriesToDelete << sophiaService.getSamplePairPath(samplePair)
             }
             if (!BamFilePairAnalysis.findBySamplePair(samplePair)) {
                 samplePair.delete(flush: true)
             }
         }
-        return directoriesToDelete
+        return directoriesToDelete.collect { fileService.toFile(it) }
     }
 
-    static void assertThatNoWorkflowsAreRunning(List<BamFilePairAnalysis> instances) {
+    void assertThatNoWorkflowsAreRunning(List<BamFilePairAnalysis> instances) {
         assert instances.find { it.processingState != AnalysisProcessingStates.IN_PROGRESS || it.withdrawn }:
                 "There are some analysis workflows running for ${instances[0].sampleType1BamFile}"
     }

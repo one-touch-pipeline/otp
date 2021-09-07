@@ -84,6 +84,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     IndividualService individualService
     DataProcessingFilesService dataProcessingFilesService
     ProcessedAlignmentFileService processedAlignmentFileService
+    AnalysisDeletionService analysisDeletionService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -388,7 +389,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                 bashScriptToMoveFilesAsOtherUser << "# delete analysis stuff\n"
                 AnalysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
                 analysisInstances.each {
-                    bashScriptToMoveFilesAsOtherUser << "#rm -rf ${AnalysisDeletionService.deleteInstance(it)}/\n"
+                    bashScriptToMoveFilesAsOtherUser << "#rm -rf ${analysisDeletionService.deleteInstance(it)}/\n"
                 }
             }
 

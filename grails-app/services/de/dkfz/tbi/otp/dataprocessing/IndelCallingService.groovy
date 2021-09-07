@@ -21,7 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-class IndelCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
+import java.nio.file.Path
+
+class IndelCallingService extends AbstractBamFileAnalysisService<IndelCallingInstance> implements RoddyBamFileAnalysis {
+
+    private final static String INDEL_RESULTS_PATH_PART = 'indel_results'
+    private final static String INDEL_RESULTS_PREFIX = 'indel_'
 
     @Override
     protected String getProcessingStateCheck() {
@@ -46,5 +51,32 @@ class IndelCallingService extends BamFileAnalysisService implements RoddyBamFile
     @Override
     protected String pipelineSpecificBamFileChecks(String number) {
         return "AND ambf${number}.class in (de.dkfz.tbi.otp.dataprocessing.RoddyBamFile, de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile)"
+    }
+
+    @Override
+    protected String getResultsPathPart() {
+        return INDEL_RESULTS_PATH_PART
+    }
+
+    List<Path> getResultFilePathsToValidate(IndelCallingInstance instance) {
+        return ["${INDEL_RESULTS_PREFIX}${instance.individual.pid}.vcf.gz", "${INDEL_RESULTS_PREFIX}${instance.individual.pid}.vcf.raw.gz"].collect {
+            getWorkDirectory(instance).resolve(it)
+        }
+    }
+
+    Path getCombinedPlotPath(IndelCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("screenshots/${INDEL_RESULTS_PREFIX}somatic_functional_combined.pdf")
+    }
+
+    Path getCombinedPlotPathTiNDA(IndelCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("snvs_${instance.individual.pid}.GTfiltered_gnomAD.Germline.Rare.Rescue.png")
+    }
+
+    Path getIndelQcJsonFile(IndelCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("indel.json")
+    }
+
+    Path getSampleSwapJsonFile(IndelCallingInstance instance) {
+        return getWorkDirectory(instance).resolve("checkSampleSwap.json")
     }
 }

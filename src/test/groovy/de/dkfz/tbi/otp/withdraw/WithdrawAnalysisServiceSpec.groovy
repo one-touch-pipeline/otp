@@ -27,14 +27,20 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTest<WithdrawAnalysisService>, DataTest, DomainFactoryCore {
@@ -83,6 +89,7 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
         new TestConfigService()
 
         List<BamFilePairAnalysis> analyses = createAnalysisList()
+        createFactoryService(service)
 
         when:
         List<String> result = service.collectPaths(analyses)
@@ -110,6 +117,10 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
     void "deleteObjects, when called for analysis, then delete each of them"() {
         given:
         List<BamFilePairAnalysis> analyses = createAnalysisList()
+        createFactoryService(service)
+        service.analysisDeletionService = new AnalysisDeletionService()
+        service.analysisDeletionService.bamFileAnalysisServiceFactoryService = service.bamFileAnalysisServiceFactoryService
+        service.analysisDeletionService.fileService = new FileService()
 
         when:
         service.deleteObjects(analyses)
@@ -128,5 +139,18 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
                 DomainFactory.createAceseqInstanceWithRoddyBamFiles(),
                 DomainFactory.createRunYapsaInstanceWithRoddyBamFiles(),
         ]
+    }
+
+    private createFactoryService(WithdrawAnalysisService service) {
+        ConfigService configService = new TestConfigService()
+        FileSystemService fileSystemService = new TestFileSystemService()
+        service.bamFileAnalysisServiceFactoryService = new BamFileAnalysisServiceFactoryService()
+        service.bamFileAnalysisServiceFactoryService.aceseqService = new AceseqService(configService: configService, fileSystemService: fileSystemService)
+        service.bamFileAnalysisServiceFactoryService.indelCallingService = new IndelCallingService(
+                configService: configService, fileSystemService: fileSystemService)
+        service.bamFileAnalysisServiceFactoryService.runYapsaService = new RunYapsaService(configService: configService, fileSystemService: fileSystemService)
+        service.bamFileAnalysisServiceFactoryService.snvCallingService = new SnvCallingService(
+                configService: configService, fileSystemService: fileSystemService)
+        service.bamFileAnalysisServiceFactoryService.sophiaService = new SophiaService(configService: configService, fileSystemService: fileSystemService)
     }
 }

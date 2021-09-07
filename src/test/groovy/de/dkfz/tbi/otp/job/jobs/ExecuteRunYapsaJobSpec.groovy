@@ -124,7 +124,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
 
         ExecuteRunYapsaJob job = new ExecuteRunYapsaJob([
             snvCallingService: Mock(SnvCallingService) {
-                1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_, _) >> {
+                1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_) >> {
                     new File(
                             "/root/projectDirName_1/sequencing/whole_genome_sequencing/view-by-pid/pid_1/snv_results/paired/" +
                                     "sample-type-name-1_sample-type-name-1/instance-1/snvs_pid_1_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf"
@@ -141,6 +141,9 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         job.processingOptionService = new ProcessingOptionService()
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
+        job.runYapsaService = new RunYapsaService()
+        job.runYapsaService.configService = configService
+        job.runYapsaService.fileSystemService = new TestFileSystemService()
 
         when:
         String result = job.createScript(instance)

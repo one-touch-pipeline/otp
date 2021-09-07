@@ -21,8 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
@@ -31,7 +30,11 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
  */
 class RunYapsaInstance extends BamFilePairAnalysis {
 
+    /**
+     * @deprecated use {@link RunYapsaService#getWorkDirectory()}
+     */
     @Override
+    @Deprecated
     OtpPath getInstancePath() {
         return new OtpPath(samplePair.runYapsaSamplePairPath, instanceName)
     }

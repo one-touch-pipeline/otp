@@ -49,7 +49,7 @@ class RoddyAceseqStartJob extends AbstractBamFilePairAnalysisStartJob implements
     }
 
     @Override
-    BamFileAnalysisService getBamFileAnalysisService() {
+    AbstractBamFileAnalysisService getBamFileAnalysisService() {
         return aceseqService
     }
 }

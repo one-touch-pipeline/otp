@@ -419,8 +419,12 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        SnvCallingService snvCallingService = new SnvCallingService(fileService: new FileService())
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        SnvCallingService snvCallingService = new SnvCallingService(
+                configService: configService,
+                fileService: new FileService(),
+                fileSystemService: new TestFileSystemService(),
+        )
 
         RoddySnvCallingInstance instance = DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
@@ -431,14 +435,12 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 processingState: AnalysisProcessingStates.FINISHED,
         )
 
-        Path resultDir = Paths.get(instance.workDirectory.absolutePath)
+        Path resultDir = snvCallingService.getWorkDirectory(instance)
         Path expected = Files.createFile(Files.createDirectories(resultDir).resolve("snvs_${instance.individual.pid}_somatic_snvs_conf_6_to_10.vcf"))
         expected.text = "SOME_CONTENT"
 
-        FileSystem fileSystem = new TestFileSystemService().filesystemForProcessingForRealm
-
         when:
-        Path result = snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(instance, fileSystem)
+        Path result = snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(instance)
 
         then:
         noExceptionThrown()

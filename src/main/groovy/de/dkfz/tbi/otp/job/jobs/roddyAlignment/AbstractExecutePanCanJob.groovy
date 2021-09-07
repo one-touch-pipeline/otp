@@ -66,7 +66,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     @Autowired
     ProcessingOptionService processingOptionService
 
-    protected Path linkBamFileInWorkDirectory(AbstractMergedBamFile abstractMergedBamFile, File workDirectory) {
+    protected Path linkBamFileInWorkDirectory(AbstractMergedBamFile abstractMergedBamFile, Path workDirectory) {
         Realm realm = abstractMergedBamFile.realm
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
         String bamFileName = "${abstractMergedBamFile.sampleType.dirName}_${abstractMergedBamFile.individual.pid}_merged.mdup.bam"
@@ -74,10 +74,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
         Path targetFileBam = fileService.toPath(abstractMergedBamFile.pathForFurtherProcessing, fileSystem)
         Path targetFileBai = targetFileBam.resolveSibling(abstractMergedBamFile.baiFileName)
-        Path workDirectoryPath = fileService.toPath(workDirectory, fileSystem)
 
-        Path linkBamFile = workDirectoryPath.resolve(bamFileName)
-        Path linkBaiFile = workDirectoryPath.resolve(baiFileName)
+        Path linkBamFile = workDirectory.resolve(bamFileName)
+        Path linkBaiFile = workDirectory.resolve(baiFileName)
         fileService.createLink(linkBamFile, targetFileBam, realm, CreateLinkOption.DELETE_EXISTING_FILE)
         fileService.createLink(linkBaiFile, targetFileBai, realm, CreateLinkOption.DELETE_EXISTING_FILE)
         return linkBamFile

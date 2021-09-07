@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.nio.file.Path
+
 abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends BamFilePairAnalysis> extends AbstractBamFilePairAnalysisWorkflowTests {
 
     /**
@@ -93,14 +95,14 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
             assert createdInstance.sampleType1BamFile == bamFileTumor
             assert createdInstance.sampleType2BamFile == bamFileControl
 
-            filesToCheck(createdInstance).flatten().each { File file ->
-                FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
+            filesToCheck(createdInstance).flatten().each { Path file ->
+                FileService.ensureFileIsReadableAndNotEmpty(file)
             }
             checkAnalysisSpecific(createdInstance)
         }
     }
 
-    abstract List<File> filesToCheck(Instance instance)
+    abstract List<Path> filesToCheck(Instance instance)
 
     @SuppressWarnings("UnusedMethodParameter")
     void checkAnalysisSpecific(Instance instance) { }

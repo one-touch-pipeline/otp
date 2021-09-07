@@ -27,13 +27,13 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 @Component
 @Scope("prototype")
@@ -52,7 +52,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         assert indelCallingInstance
 
         indelCallingService.validateInputBamFiles(indelCallingInstance)
-        File workDirectory = indelCallingInstance.workDirectory
+        Path workDirectory = indelCallingService.getWorkDirectory(indelCallingInstance)
 
         AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
@@ -65,8 +65,9 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        Path individualPath = Paths.get(indelCallingInstance.individual.getViewByPidPath(indelCallingInstance.seqType).absoluteDataManagementPath.path)
-        Path resultDirectory = Paths.get(indelCallingInstance.instancePath.absoluteDataManagementPath.path)
+        Path individualPath = fileSystemService.getRemoteFileSystem(indelCallingInstance.project.realm)
+                .getPath(indelCallingInstance.individual.getViewByPidPath(indelCallingInstance.seqType).absoluteDataManagementPath.path)
+        Path resultDirectory = indelCallingService.getWorkDirectory(indelCallingInstance)
 
         List<String> cValues = []
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
@@ -109,20 +110,20 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         ]
         directories.addAll(indelCallingInstance.workExecutionDirectories)
 
-        List<File> files = [
-                indelCallingInstance.getCombinedPlotPath(),
-                indelCallingInstance.getIndelQcJsonFile(),
-                indelCallingInstance.getSampleSwapJsonFile(),
+        List<Path> files = [
+                indelCallingService.getCombinedPlotPath(indelCallingInstance),
+                indelCallingService.getIndelQcJsonFile(indelCallingInstance),
+                indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
         ]
 
-        files.addAll(indelCallingInstance.getResultFilePathsToValidate())
+        files.addAll(indelCallingService.getResultFilePathsToValidate(indelCallingInstance))
 
         directories.each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
         }
 
         files.each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+            FileService.ensureFileIsReadableAndNotEmpty(it)
         }
 
         indelCallingService.validateInputBamFiles(indelCallingInstance)

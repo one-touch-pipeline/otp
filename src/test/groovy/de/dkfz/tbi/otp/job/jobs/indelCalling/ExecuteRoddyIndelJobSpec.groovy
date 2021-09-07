@@ -28,19 +28,20 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
@@ -101,8 +102,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                indelCallingService   : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_)
+                indelCallingService   : Spy(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
@@ -121,6 +122,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ])
 
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        job.indelCallingService.configService = configService
+        job.indelCallingService.fileSystemService = new TestFileSystemService()
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
@@ -140,8 +143,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 "${indelCallingInstance.sampleType1BamFile.sampleType.dirName}_${indelCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
                 "${indelCallingInstance.instanceName}"
 
-        String finalBamFileControlPath = "${indelCallingInstance.workDirectory}/${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam"
-        String finalBamFileDiseasePath = "${indelCallingInstance.workDirectory}/${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam"
+        Path finalBamFileControlPath = job.indelCallingService.getWorkDirectory(indelCallingInstance).resolve("${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam")
+        Path finalBamFileDiseasePath = job.indelCallingService.getWorkDirectory(indelCallingInstance).resolve("${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam")
 
         List<String> expectedList = [
                 "bamfile_list:${finalBamFileControlPath};${finalBamFileDiseasePath}",
@@ -177,9 +180,11 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
         File bedFile = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "bed.txt"))
 
+        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                indelCallingService   : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_)
+                indelCallingService   : Spy(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
@@ -199,7 +204,9 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                         }
                 ]),
         ])
-        new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        job.indelCallingService.configService = configService
+        job.indelCallingService.fileSystemService = new TestFileSystemService()
+
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
         SeqType seqType = DomainFactory.createExomeSeqType()
 
@@ -241,8 +248,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 "${indelCallingInstance.sampleType1BamFile.sampleType.dirName}_${indelCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
                 "${indelCallingInstance.instanceName}"
 
-        String finalBamFileControlPath = "${indelCallingInstance.workDirectory}/${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam"
-        String finalBamFileDiseasePath = "${indelCallingInstance.workDirectory}/${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam"
+        Path finalBamFileControlPath = job.indelCallingService.getWorkDirectory(indelCallingInstance).resolve("${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam")
+        Path finalBamFileDiseasePath = job.indelCallingService.getWorkDirectory(indelCallingInstance).resolve("${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam")
 
         List<String> expectedList = [
                 "bamfile_list:${finalBamFileControlPath};${finalBamFileDiseasePath}",
@@ -286,18 +293,22 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
+        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _)
                 },
-                indelCallingService       : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_)
+                indelCallingService       : Spy(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
         ])
+        job.indelCallingService.configService = configService
+        job.indelCallingService.fileSystemService = new TestFileSystemService()
+
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
+        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, configService)
 
         expect:
         job.validate(indelCallingInstance)
@@ -316,9 +327,10 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
+        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {
                         throw new AssertionError(md5sum)
@@ -327,7 +339,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
+        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, configService)
 
         when:
         job.validate(indelCallingInstance)
@@ -340,51 +352,57 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
 
     @Unroll
-    void "validate, when file not exist, throw assert"() {
+    void "validate, when file not exists, throw assert"() {
         given:
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _)
                 },
         ])
+
+        job.indelCallingService = new IndelCallingService()
+        job.indelCallingService.fileSystemService = new TestFileSystemService()
+        job.indelCallingService.configService = configService
+
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
+        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, configService)
 
-        File fileToDelete = fileClousure(indelCallingInstance)
-        assert fileToDelete.delete() || fileToDelete.deleteDir()
+        Path fileToDelete = fileClousure(indelCallingInstance, job.indelCallingService)
+        new FileService().deleteDirectoryRecursively(fileToDelete)
 
         when:
         job.validate(indelCallingInstance)
 
         then:
         AssertionError e = thrown()
-        e.message.contains(fileToDelete.path)
+        e.message.contains(fileToDelete.toString())
         indelCallingInstance.processingState != AnalysisProcessingStates.FINISHED
 
         where:
         fileClousure << [
-                { IndelCallingInstance it ->
-                    it.workExecutionStoreDirectory
+                { IndelCallingInstance it, IndelCallingService service ->
+                    it.workExecutionStoreDirectory.toPath()
                 },
-                { IndelCallingInstance it ->
-                    it.workExecutionDirectories.first()
+                { IndelCallingInstance it, IndelCallingService service ->
+                    it.workExecutionDirectories.first().toPath()
                 },
-                { IndelCallingInstance it ->
-                    it.getCombinedPlotPath()
+                { IndelCallingInstance it, IndelCallingService service ->
+                    service.getCombinedPlotPath(it)
                 },
-                { IndelCallingInstance it ->
-                    it.resultFilePathsToValidate.first()
+                { IndelCallingInstance it, IndelCallingService service ->
+                    service.getResultFilePathsToValidate(it).first()
                 },
-                { IndelCallingInstance it ->
-                    it.resultFilePathsToValidate.last()
+                { IndelCallingInstance it, IndelCallingService service ->
+                    service.getResultFilePathsToValidate(it).last()
                 },
-                { IndelCallingInstance it ->
-                    it.getIndelQcJsonFile()
+                { IndelCallingInstance it, IndelCallingService service ->
+                    service.getIndelQcJsonFile(it)
                 },
-                { IndelCallingInstance it ->
-                    it.getSampleSwapJsonFile()
+                { IndelCallingInstance it, IndelCallingService service ->
+                    service.getSampleSwapJsonFile(it)
                 },
         ]
     }

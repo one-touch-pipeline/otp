@@ -29,11 +29,14 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.SophiaService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+
+import java.nio.file.Path
 
 @Component
 @Scope("prototype")
@@ -43,10 +46,13 @@ class ParseSophiaQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
     @Autowired
     QcTrafficLightService qcTrafficLightService
 
+    @Autowired
+    SophiaService sophiaService
+
     @Override
     void execute() throws Exception {
         final SophiaInstance sophiaInstance = getProcessParameterObject()
-        File qcFile = sophiaInstance.getQcJsonFile()
+        Path qcFile = sophiaService.getQcJsonFile(sophiaInstance)
         JSONObject qcJson = JSON.parse(qcFile.text)
         SophiaInstance.withTransaction {
             SophiaQc sophiaQc = qcJson.values()

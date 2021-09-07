@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.BamFileAnalysisService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileAnalysisService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
@@ -51,7 +51,7 @@ class RoddySnvCallingStartJob extends AbstractBamFilePairAnalysisStartJob implem
     }
 
     @Override
-    BamFileAnalysisService getBamFileAnalysisService() {
+    AbstractBamFileAnalysisService getBamFileAnalysisService() {
         return snvCallingService
     }
 }

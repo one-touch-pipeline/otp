@@ -47,6 +47,9 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Autowired
     ConfigService configService
 
+    @Autowired
+    BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
+
     @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
@@ -110,7 +113,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     private void tryToDeleteResultFilesOfFailedInstance(BamFilePairAnalysis analysis) {
         Realm realm = analysis.project.realm
 
-        String deleteFiles = "rm -rf ${analysis.workDirectory}"
+        String deleteFiles = "rm -rf ${bamFileAnalysisServiceFactoryService.getService(analysis).getWorkDirectory(analysis)}"
 
         remoteShellHelper.executeCommandReturnProcessOutput(realm, deleteFiles)
     }

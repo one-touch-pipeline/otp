@@ -21,7 +21,18 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
+import de.dkfz.tbi.otp.ngsdata.PlotType
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.stream.Collectors
+
+class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
+
+    private final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'
 
     @Override
     protected String getProcessingStateCheck() {
@@ -57,6 +68,75 @@ class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalys
     @Override
     List<String> getReferenceGenomes() {
         return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME)
+    }
+
+    @Override
+    protected String getResultsPathPart() {
+        return ACESEQ_RESULTS_PATH_PART
+    }
+
+    /**
+     * Example
+     * ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32/plots
+     */
+    private Path getPlotPath(AceseqInstance instance) {
+        return getWorkDirectory(instance).resolve("plots")
+    }
+
+    Path getQcJsonFile(AceseqInstance instance) {
+        return getWorkDirectory(instance).resolve("cnv_${instance.individual.pid}_parameter.json")
+    }
+
+    Path getPlot(AceseqInstance instance, PlotType plot) {
+        switch (plot) {
+            case PlotType.ACESEQ_GC_CORRECTED: return getPlotPath(instance).resolve("${instance.individual.pid}_gc_corrected.png")
+            case PlotType.ACESEQ_QC_GC_CORRECTED: return getPlotPath(instance).resolve("${instance.individual.pid}_qc_rep_corrected.png")
+            case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR: return getWorkDirectory(instance)
+                    .resolve("${instance.individual.pid}_tcn_distances_combined_star.png")
+            case PlotType.ACESEQ_WG_COVERAGE: return getPlotPath(instance).resolve("control_${instance.individual.pid}_wholeGenome_coverage.png")
+            default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")
+        }
+    }
+
+    /**
+     * Search for Files that is equal to the pattern for plot Extra/ALL in the instance absolute Path
+     * @return List with Files that matches with the Pattern
+     */
+    List<Path> getPlots(AceseqInstance instance, PlotType plot) {
+        String pattern
+        switch (plot) {
+            case PlotType.ACESEQ_EXTRA:
+                AceseqQc aceseqQc = CollectionUtils.exactlyOneElement(AceseqQc.findAllByNumberAndAceseqInstance(1, instance))
+                // If variables contain dots replace them, otherwise they will be used by Regex
+                DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH)
+                decimalFormat.applyPattern("0.##")
+                pattern = "${instance.individual.pid}_plot_${aceseqQc.ploidyFactor}extra_${decimalFormat.format(aceseqQc.tcc)}_"
+                        .replace('.', '\\.') + '.+\\.png'
+                break
+            case PlotType.ACESEQ_ALL:
+                //If variables contain dots replace them if not they will be used by Regex
+                pattern = "${instance.individual.pid}_plot_".replace('.', '\\.') + '.+_ALL\\.png'
+                break
+            default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")
+        }
+
+        if (!Files.exists(getWorkDirectory(instance))) {
+            return []
+        }
+
+        return Files.list(getPlotPath(instance)).collect(Collectors.toList()).findAll { it.fileName ==~ pattern }.sort()
+    }
+
+    List<Path> getAllFiles(AceseqInstance instance) {
+        return [
+                getPlot(instance, PlotType.ACESEQ_GC_CORRECTED),
+                getPlot(instance, PlotType.ACESEQ_QC_GC_CORRECTED),
+                getPlot(instance, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR),
+                getPlot(instance, PlotType.ACESEQ_WG_COVERAGE),
+                getPlots(instance, PlotType.ACESEQ_ALL),
+                getPlots(instance, PlotType.ACESEQ_EXTRA),
+                getQcJsonFile(instance),
+        ].flatten()
     }
 }
 

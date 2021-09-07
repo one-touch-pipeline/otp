@@ -34,11 +34,11 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 @Component
 @Scope("prototype")
@@ -70,8 +70,9 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        Path individualPath = Paths.get(roddySnvCallingInstance.individual.getViewByPidPath(roddySnvCallingInstance.seqType).absoluteDataManagementPath.path)
-        Path resultDirectory = Paths.get(roddySnvCallingInstance.instancePath.absoluteDataManagementPath.path)
+        Path individualPath = fileSystemService.getRemoteFileSystem(roddySnvCallingInstance.project.realm)
+                .getPath(roddySnvCallingInstance.individual.getViewByPidPath(roddySnvCallingInstance.seqType).absoluteDataManagementPath.path)
+        Path resultDirectory = snvCallingService.getWorkDirectory(roddySnvCallingInstance)
 
         List<String> cValues = []
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
@@ -105,10 +106,10 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         ]
         directories.addAll(roddySnvCallingInstance.workExecutionDirectories)
 
-        List<File> files = [
-                roddySnvCallingInstance.getCombinedPlotPath(),
-                roddySnvCallingInstance.getSnvCallingResult(),
-                roddySnvCallingInstance.getSnvDeepAnnotationResult(),
+        List<Path> files = [
+                snvCallingService.getCombinedPlotPath(roddySnvCallingInstance),
+                snvCallingService.getSnvCallingResult(roddySnvCallingInstance),
+                snvCallingService.getSnvDeepAnnotationResult(roddySnvCallingInstance),
         ]
 
         directories.each {
@@ -116,10 +117,10 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         }
 
         files.each {
-            FileService.ensureFileIsReadableAndNotEmpty(it.toPath())
+            FileService.ensureFileIsReadableAndNotEmpty(it)
         }
 
-        snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(roddySnvCallingInstance, fileSystemService.filesystemForProcessingForRealm)
+        snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(roddySnvCallingInstance)
         snvCallingService.validateInputBamFiles(roddySnvCallingInstance)
 
         roddySnvCallingInstance.processingState = AnalysisProcessingStates.FINISHED

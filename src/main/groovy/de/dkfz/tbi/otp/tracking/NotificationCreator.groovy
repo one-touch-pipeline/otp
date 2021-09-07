@@ -392,14 +392,14 @@ class NotificationCreator {
         }
     }
 
-    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
+    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, AbstractBamFileAnalysisService service) {
         WorkflowProcessingStatus status
         if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && MERGING_WORK_PACKAGE_NUMBERS.every {
             AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"
             return bamFile == bamFile.mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
         }) {
             status = ALL_DONE
-        } else if (analysis && !analysis.withdrawn && BamFileAnalysisService.PROCESSING_STATES_NOT_PROCESSABLE.contains(analysis.processingState)) {
+        } else if (analysis && !analysis.withdrawn && AbstractBamFileAnalysisService.PROCESSING_STATES_NOT_PROCESSABLE.contains(analysis.processingState)) {
             status = NOTHING_DONE_MIGHT_DO
         } else if (MERGING_WORK_PACKAGE_NUMBERS.every {
             sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis

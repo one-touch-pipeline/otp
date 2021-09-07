@@ -56,6 +56,8 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 import java.time.ZonedDateTime
 
@@ -2410,8 +2412,8 @@ class DomainFactory {
 """
     }
 
-    static void createAceseqQaFileOnFileSystem(File qaFile) {
-        qaFile.parentFile.mkdirs()
+    static void createAceseqQaFileOnFileSystem(Path qaFile) {
+        Files.createDirectories(qaFile.parent)
         qaFile << """\
 {
     "1":{
@@ -2434,8 +2436,8 @@ class DomainFactory {
 """
     }
 
-    static void createSophiaQcFileOnFileSystem(File qcFile) {
-        qcFile.parentFile.mkdirs()
+    static void createSophiaQcFileOnFileSystem(Path qcFile) {
+        Files.createDirectories(qcFile.parent)
         qcFile << """\
 {
   "all": {
@@ -2449,12 +2451,12 @@ class DomainFactory {
 """
     }
 
-    static void createIndelQcFileOnFileSystem(File qcFile) {
-        qcFile.parentFile.mkdirs()
+    static void createIndelQcFileOnFileSystem(Path qcFile) {
+        Files.createDirectories(qcFile.parent)
         qcFile << """
 {
   "all": {
-    "file": "${qcFile.path}",
+    "file": "${qcFile}",
     "numIndels":23,
     "numIns":24,
     "numDels":25,
@@ -2483,8 +2485,8 @@ class DomainFactory {
 """
     }
 
-    static void createIndelSampleSwapDetectionFileOnFileSystem(File qcFile, Individual individual) {
-        qcFile.parentFile.mkdirs()
+    static void createIndelSampleSwapDetectionFileOnFileSystem(Path qcFile, Individual individual) {
+        Files.createDirectories(qcFile.parent)
         qcFile << """
 {
     "somaticSmallVarsInTumorCommonInGnomADPer":1,

@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 
-class RunYapsaService extends BamFileAnalysisService implements WithReferenceGenomeRestriction {
+class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> implements WithReferenceGenomeRestriction {
+
+    private final static String RUN_YAPSA_RESULTS_PATH_PART = 'mutational_signatures_results'
 
     @Override
     protected String getProcessingStateCheck() {
@@ -65,5 +67,10 @@ class RunYapsaService extends BamFileAnalysisService implements WithReferenceGen
     @Override
     String getConfigName() {
         RunYapsaConfig.name
+    }
+
+    @Override
+    protected String getResultsPathPart() {
+        return RUN_YAPSA_RESULTS_PATH_PART
     }
 }

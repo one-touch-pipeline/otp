@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+import java.nio.file.Path
 import java.time.Duration
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
@@ -43,6 +44,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     LsdfFilesService lsdfFilesService
 
     ProjectService projectService
+    SophiaService sophiaService
 
     @Override
     void setupData() {
@@ -125,11 +127,11 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     }
 
     @Override
-    List<File> filesToCheck(SophiaInstance sophiaInstance) {
+    List<Path> filesToCheck(SophiaInstance sophiaInstance) {
         return [
-                sophiaInstance.getFinalAceseqInputFile(),
-                sophiaInstance.getQcJsonFile(),
-                sophiaInstance.getCombinedPlotPath(),
+                sophiaService.getFinalAceseqInputFile(sophiaInstance),
+                sophiaService.getQcJsonFile(sophiaInstance),
+                sophiaService.getCombinedPlotPath(sophiaInstance),
         ]
     }
 

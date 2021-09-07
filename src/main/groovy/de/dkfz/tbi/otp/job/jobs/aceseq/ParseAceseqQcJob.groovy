@@ -29,15 +29,20 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+
+import java.nio.file.Path
 
 @Component
 @Scope("prototype")
 @Slf4j
 class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
+
+    @Autowired
+    AceseqService aceseqService
 
     @Autowired
     QcTrafficLightService qcTrafficLightService
@@ -46,7 +51,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
     void execute() throws Exception {
         final AceseqInstance aceseqInstance = getProcessParameterObject()
 
-        File qcFile = aceseqInstance.getQcJsonFile()
+        Path qcFile = aceseqService.getQcJsonFile(aceseqInstance)
         JSONObject qcJson = JSON.parse(qcFile.text)
         AceseqQc.withTransaction {
             AceseqQc qcOne = qcJson.collect { String number, Map values ->
@@ -62,9 +67,9 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
             qcOne //the instance to used for qc
             // TODO OTP-3097: triger qc handling here
 
-            List<File> files = aceseqInstance.getAllFiles()
+            List<Path> files = aceseqService.getAllFiles(aceseqInstance)
             files.each {
-                LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+                FileService.ensureFileIsReadableAndNotEmpty(it)
             }
 
             aceseqInstance.processingState = AnalysisProcessingStates.FINISHED

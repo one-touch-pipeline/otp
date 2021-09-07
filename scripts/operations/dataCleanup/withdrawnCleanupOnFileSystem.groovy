@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -46,7 +47,8 @@ String file = ""
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FileService fileService = ctx.fileService
-FileSystemService fileSystemService=ctx.fileSystemService
+FileSystemService fileSystemService = ctx.fileSystemService
+BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 
 String withdrawnGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
 String chgrp = "chgrp --recursive --verbose ${withdrawnGroup}"
@@ -66,9 +68,9 @@ String bamFiles =  AbstractMergedBamFile.findAllByWithdrawn(true).findAll {
 }.sort().join('\n')
 
 String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
-    it.workDirectory
+    bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it)
 }.findAll {
-    it.exists()
+    Files.exists(it)
 }.collect {
     "${chgrp} ${it}" as String
 }.sort().join('\n')

@@ -25,12 +25,15 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.BamFileAnalysisServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractMergedBamFile> {
+    AnalysisDeletionService analysisDeletionService
+    BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
 
     @Override
     List<BamFilePairAnalysis> collectObjects(List<AbstractMergedBamFile> entities) {
@@ -43,7 +46,7 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     @Override
     List<String> collectPaths(List<BamFilePairAnalysis> entities) {
         return entities.collect {
-            it.instancePath.absoluteDataManagementPath.toString()
+            bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it).toString()
         }
     }
 
@@ -58,7 +61,7 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     @Override
     void deleteObjects(List<BamFilePairAnalysis> entities) {
         entities.each {
-            AnalysisDeletionService.deleteInstance(it)
+            analysisDeletionService.deleteInstance(it)
         }
     }
 }

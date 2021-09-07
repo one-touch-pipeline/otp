@@ -23,7 +23,14 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 
-class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
+import java.nio.file.Path
+
+class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
+
+    private final static String SOPHIA_RESULTS_PATH_PART = 'sv_results'
+    private final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
+    private final static String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+    private final static String COMBINED_PLOT_FILE_SUFFIX = "filtered.tsv_score_3_scaled_merged.pdf"
 
     @Override
     protected String getProcessingStateCheck() {
@@ -67,5 +74,26 @@ class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalys
     @Override
     List<String> getReferenceGenomes() {
         return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME)
+    }
+
+    @Override
+    protected String getResultsPathPart() {
+        return SOPHIA_RESULTS_PATH_PART
+    }
+
+    Path getFinalAceseqInputFile(SophiaInstance instance) {
+        return getWorkDirectory(instance).resolve("svs_${instance.individual.pid}_${SOPHIA_OUTPUT_FILE_SUFFIX}")
+    }
+
+    Path getCombinedPlotPath(SophiaInstance instance) {
+        return getWorkDirectory(instance).resolve("${getFileNamePrefix(instance)}_${COMBINED_PLOT_FILE_SUFFIX}")
+    }
+
+    Path getQcJsonFile(SophiaInstance instance) {
+        return getWorkDirectory(instance).resolve(QUALITY_CONTROL_JSON_FILE_NAME)
+    }
+
+    private String getFileNamePrefix(SophiaInstance instance) {
+        "svs_${instance.individual.pid}_${instance.samplePair.sampleType1.name.toLowerCase()}-${instance.samplePair.sampleType2.name.toLowerCase()}"
     }
 }

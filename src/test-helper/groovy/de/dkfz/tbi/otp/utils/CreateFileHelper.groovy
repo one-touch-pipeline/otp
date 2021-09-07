@@ -28,6 +28,10 @@ import java.nio.file.Paths
 @SuppressWarnings('JavaIoPackageAccess') //helper class for FileAccess, so its fine
 class CreateFileHelper {
 
+    /**
+     * @deprecated use {@link #createFile(Path)}
+     */
+    @Deprecated
     static File createFile(File file, String content = "some content") {
         if (!file.parentFile.exists()) {
             assert file.parentFile.mkdirs()
@@ -36,6 +40,18 @@ class CreateFileHelper {
         return file
     }
 
+    static Path createFile(Path file, String content = "some content") {
+        if (!Files.exists(file.parent)) {
+            assert Files.createDirectories(file.parent)
+        }
+        file.text = content
+        return file
+    }
+
+    /**
+     * @deprecated use {@link #createSymbolicLinkFile(Path)}
+     */
+    @Deprecated
     static File createSymbolicLinkFile(File source, File target = new File('/tmp')) {
         createSymbolicLinkFile(source.toPath(), target.toPath())
         return source
