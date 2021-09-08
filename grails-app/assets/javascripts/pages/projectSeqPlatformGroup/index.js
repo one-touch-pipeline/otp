@@ -39,13 +39,17 @@ $(function () {
             // Switch to system default seq. platforms
             this.form.submit();
         } else {
-            setTimeout(function () {
-                copyFromSeqTypeSelector.prop("disabled", false);
-            }, 0);
-            setTimeout(function () {
-                copyFromSeqTypeSelector.select2('open');
-                $(copyFromSeqTypeSelector, '.select2-search__field').focus();
-            }, 0);
+            if (copyFromSeqTypeSelector.prop("value") === "null") {
+                setTimeout(function () {
+                    copyFromSeqTypeSelector.prop("disabled", false);
+                }, 0);
+                setTimeout(function () {
+                    copyFromSeqTypeSelector.select2('open');
+                    $(copyFromSeqTypeSelector, '.select2-search__field').focus();
+                }, 0);
+            } else {
+                this.form.submit();
+            }
         }
     })
 
