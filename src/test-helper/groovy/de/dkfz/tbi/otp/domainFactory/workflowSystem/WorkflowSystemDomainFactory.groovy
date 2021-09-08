@@ -48,6 +48,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
                 workflow        : { properties.restartedFrom?.workflow ?: createWorkflow() },
                 priority        : { createProcessingPriority() },
                 project         : { createProject() },
+                workDirectory   : "dir_${nextId}",
                 displayName     : "displayName_${nextId}",
                 shortDisplayName: "shortName_${nextId}",
                 combinedConfig  : "{},"
