@@ -97,4 +97,34 @@ class AbstractMergedBamFileService {
             eq("withdrawn", false)
         } as List<AbstractMergedBamFile> : []
     }
+
+    /**
+     * Returns all the AbstractMergedBamFiles given by individual, sampleType and seqType.
+     * Only individual is required, others are optional. Missing parameters or null values means without these condition/constrains.
+     * For example: if sampleType is null or missing, then all sampleTypes are taken into account.
+     * The same is true with seqType.
+     *
+     * @param individual required
+     * @param sampleType all sample types if missing
+     * @param seqType all seq types if missing
+     * @return all the AbstractMergedBamFile
+     */
+    List<AbstractMergedBamFile> findAllByIndividualSampleTypeSeqType(Individual individual, SampleType sampleType = null, SeqType seqType = null) {
+        return AbstractMergedBamFile.createCriteria().list {
+            eq("withdrawn", false)
+            eq("fileOperationStatus",
+                    AbstractMergedBamFile.FileOperationStatus.PROCESSED)
+            workPackage {
+                sample {
+                    eq('individual', individual)
+                    if (sampleType) {
+                        eq('sampleType', sampleType)
+                    }
+                }
+                if (seqType) {
+                    eq('seqType', seqType)
+                }
+            }
+        }.findAll { it.isMostRecentBamFile() }
+    }
 }

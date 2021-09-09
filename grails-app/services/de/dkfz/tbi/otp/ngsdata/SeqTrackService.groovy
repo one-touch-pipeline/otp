@@ -384,6 +384,36 @@ LIMIT 1
         }
     }
 
+    /**
+     * Returns all the SamplePairs given by individual, sampleType, seqType and sampleName.
+     * Only individual is required, others are optional. Missing parameters or null values means without these condition/constrains.
+     * For example: if sampleType is null or missing, then all sampleTypes are taken into account.
+     * The same is true with seqType and sampleName.
+     *
+     * @param individual required
+     * @param sampleType all sample types if missing
+     * @param seqType all seq types if missing
+     * @param sampleName all samples if missing
+     * @return all the SamplePairs
+     */
+    List<SeqTrack> findAllByIndividualSampleTypeSeqTypeSampleName(Individual individual,
+        SampleType sampleType = null, SeqType seqType = null, String sampleName = null) {
+        return SeqTrack.withCriteria {
+            sample {
+                eq('individual', individual)
+                if (sampleType) {
+                    eq('sampleType', sampleType)
+                }
+            }
+            if (seqType) {
+                eq('seqType', seqType)
+            }
+            if (sampleName) {
+                eq('sampleIdentifier', sampleName)
+            }
+        }
+    }
+
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {
         LogThreadLocal.threadLog?.info(MessageFormat.format(message, " " + seqTrack))
         if (saveInSeqTrack) {

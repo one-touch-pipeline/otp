@@ -152,7 +152,7 @@ create doc:
 test migration:
   extends: .abstract_base_template
   services:
-    - postgres:latest
+    - postgres:9.5.9
   variables:
     POSTGRES_DB: otp
     POSTGRES_USER: otp
