@@ -29,8 +29,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.*
@@ -65,9 +64,9 @@ class WithdrawHelperService {
         summary << "Withdraw summary"
         summary << "\n"
         summary << TRIM_LINE
-        summary << "Withdrawing ${withdrawStateHolder.seqTracks.size()} lanes"
+        summary << "Withdrawing ${withdrawStateHolder.seqTracksWithComments.size()} lanes"
         withdrawStateHolder.seqTracksWithComments.each {
-            summary << "  - ${withdrawDisplayDomainService.seqTrackInfo(it.key)} with comment: \'" + it.value + "\'"
+            summary << "  - ${withdrawDisplayDomainService.seqTrackInfo(it.seqTrack)}\twith comment: \'" + it.comment + "\'"
         }
         summary << "\n"
         summary << TRIM_LINE
@@ -149,11 +148,14 @@ class WithdrawHelperService {
 
     void handleDataFiles(WithdrawStateHolder withdrawStateHolder) {
         FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments.keySet().asList(), false)
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments*.seqTrack, false)
+        Map<SeqTrack, String> commentBySeqTrack = withdrawStateHolder.seqTracksWithComments.collectEntries {
+            [(it.seqTrack): it.comment]
+        }
         dataFiles.each { DataFile dataFile ->
             dataFile.fileWithdrawn = true
             dataFile.withdrawnDate = new Date()
-            dataFile.withdrawnComment = withdrawStateHolder.withdrawParameters.seqTracksWithComments[dataFile.seqTrack]
+            dataFile.withdrawnComment = commentBySeqTrack[dataFile.seqTrack]
             dataFile.save(flush: true)
 
             List<Path> filePaths = []
@@ -185,7 +187,7 @@ class WithdrawHelperService {
         fileService.deleteDirectoryRecursively(outputFile) //delete file if already exists
         fileService.createFileWithContentOnDefaultRealm(outputFile, script, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
-        withdrawStateHolder.summary << "\nDeletionPath:"
+        withdrawStateHolder.summary << "\nScript Path:"
         withdrawStateHolder.summary << outputFile
 
         return outputFile

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackWithComment
 import de.dkfz.tbi.otp.utils.ScriptInputHelperService
 import de.dkfz.tbi.otp.withdraw.WithdrawParameters
 import de.dkfz.tbi.otp.withdraw.WithdrawService
@@ -46,7 +46,7 @@ import de.dkfz.tbi.otp.withdraw.WithdrawService
  *   - delete in in OTP (including analysis)
  *   - delete on file system (including analysis)
  * - Analysis (if deleteBamFiles = false and deleteAnalysis = false)
- *   - withdraw the analysis fle in OTP
+ *   - withdraw the analysis files in OTP
  *   - change unix group in file analysis directory recursively
  * - Analysis (if deleteBamFiles = true or deleteAnalysis = true)
  *   - delete in in OTP
@@ -60,7 +60,6 @@ import de.dkfz.tbi.otp.withdraw.WithdrawService
  *
  * Input: See description of the input variables.
  */
-
 
 //--------------------------------------------------------
 //input
@@ -85,19 +84,22 @@ boolean deleteAnalysis = false
  * - seqType name or alias (for example WGS, WES, RNA, ...
  * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
  * - single cell flag: true = single cell, false = bulk
- * - sampleName: optional
- * - withdrawn comment: comment in quote marks 'withdrawn Comment'
+ * - sampleName: can be empty
+ * - withdrawn comment: comment in single quotes 'withdrawn Comment'
  *
  * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
  * # indicates commentaries, that will be ignored in the script.
- *
  */
 String multiColumnInputSample = """
 #pid1,tumor,WGS,PAIRED,false,sampleName1, 'withdrawn comment'
-#pid3,control,WES,PAIRED,false, 'withdrawn comment'
-#pid3,control,WES,PAIRED,false,'long withdrawn comment
+#pid3,control,WES,PAIRED,false,, 'withdrawn comment'
+#pid3,control,WES,PAIRED,false,,'long withdrawn comment
 with multiple lines'
-#pid5,control,RNA,SINGLE,true,sampleName2,'withdrawn comment'
+#pid5,control,RNA,SINGLE,true,sampleName2,'withdrawn comment
+dfgdg
+dfghsdf
+'
+
 """
 
 /**
@@ -106,33 +108,38 @@ with multiple lines'
  * - run
  * - lane (inclusive barcode)
  * - well label: if single cell data with file per well
- * - withdrawn comment: comment in quote marks 'withdrawn Comment'
+ * - withdrawn comment: comment in single quotes 'withdrawn Comment'
  *
  * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
  *
  */
 String multiColumnInputSeqTrack = """
-#project1,run3,6,'withdrawn comment'
-#project3,run7,1_TTAGGC,4J01, 'long withdrawn
+#project1,run3,6,,'withdrawn comment'
+#project3,run7,1_TTAGGC,4J01,'long withdrawn
 comment'
-#project2,run78,2_TTAGGC,ATRX,6J01,'withdrawn comment'
+#project2,run78,2_TTAGGC,6J01,'withdrawn comment'
+
 """
 
 /**
  * List of seqTracks, one per line:
  * Multi selector using:
- *  - SeqTrackId
- *  - withdrawn comment: comment in quote marks 'withdrawn Comment'
+ * - SeqTrackId
+ * - withdrawn comment: comment in single quotes 'withdrawn Comment'
  */
 String seqTracksIds = """
 #123456, 'long withdraw
 comment' 
 #987, 'withdrawn comment'
+
 """
 
 /**
  * Name of the generated bash file.
- * The file is created in the default directory script directory in the folder
+ * The file is created in the default directory script directory in the withdrawn folder.
+ * It is also possible to provide an absolute path.
+ *
+ * If the file does not end of '.sh', the end is added.
  */
 String fileName = ''
 
@@ -146,16 +153,14 @@ boolean stopOnMissingFiles = true
  */
 boolean stopOnAlreadyWithdrawnData = true
 
-/**assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
- [multiColumnInputSeqTrack,multiColumnInputSeqTrack,seqTracksIds])): "Please use exactly one multiColumnInput option for input"
-
+/**
  * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
  */
 boolean tryRun = true
 
 //--------------------------------------------------------
 // WORK
-assert fileName?.trim() : "no file name were given"
+assert fileName?.trim(): "no file name were given"
 
 //services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
@@ -164,34 +169,25 @@ WithdrawService withdrawService = ctx.withdrawService
 assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
         [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for input"
 
-assert (scriptInputHelperService.isCommentInMultiLineDefinition(multiColumnInputSample) ||
-        scriptInputHelperService.isCommentInMultiLineDefinition(multiColumnInputSeqTrack) ||
-        scriptInputHelperService.isCommentInMultiLineDefinition(seqTracksIds)): "Please provide comments for every inputSample in the multiColumnInputSample"
-
 //load data
-List<SeqTrack> allSeqTracks = [
+List<SeqTrackWithComment> seqTracksWithComments = [
         scriptInputHelperService.seqTracksBySampleDefinition(multiColumnInputSample),
         scriptInputHelperService.seqTracksByLaneDefinition(multiColumnInputSeqTrack),
         scriptInputHelperService.seqTrackById(seqTracksIds),
-].flatten().unique()
-
-List<String> withdrawnComments = [
-        scriptInputHelperService.getCommentsFromMultiLineDefinition(multiColumnInputSample),
-        scriptInputHelperService.getCommentsFromMultiLineDefinition(multiColumnInputSeqTrack),
-        scriptInputHelperService.getCommentsFromMultiLineDefinition(seqTracksIds)
 ].flatten()
 
-assert allSeqTracks: "No seqTracks were defined"
+assert seqTracksWithComments: "No seqTracks were defined"
 
-Map<SeqTrack, String> seqTracksWithComments = [allSeqTracks, withdrawnComments].transpose().collectEntries { [it[0], it[1]] }
-
-if (!fileName.endsWith(".sh")) fileName.concat(".sh")
+fileName = fileName.trim()
+if (!fileName.endsWith(".sh")) {
+    fileName = fileName.concat(".sh")
+}
 
 WithdrawParameters withdrawParameters = new WithdrawParameters([
         seqTracksWithComments     : seqTracksWithComments,
         deleteBamFile             : deleteBamFile,
         deleteAnalysis            : deleteAnalysis,
-        fileName                  : fileName.trim(),
+        fileName                  : fileName,
         stopOnMissingFiles        : stopOnMissingFiles,
         stopOnAlreadyWithdrawnData: stopOnAlreadyWithdrawnData,
 ])
@@ -199,6 +195,6 @@ WithdrawParameters withdrawParameters = new WithdrawParameters([
 SeqTrack.withNewTransaction {
     String summary = withdrawService.withdraw(withdrawParameters)
     println summary
-
     assert !tryRun: "Rollback, since only tryRun"
 }
+''

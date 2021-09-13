@@ -38,6 +38,12 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         ]
     }
 
+    private static final List<String> COMMENTS = [
+            "a comment",
+            "a\nmultiline\ncomment",
+            "a 'quotes' 'containing' comment",
+    ]
+
     @Unroll
     void "parseHelper, when input is '#input', then output is '#output'"() {
         expect:
@@ -76,42 +82,56 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
 
     void "seqTrackById, when input is seqTrack ids with comment, then return corresponding seqTracks"() {
         given:
-        List<SeqTrack> seqTracks = (1..3).collect {
-            createSeqTrack()
+        List<SeqTrackWithComment> seqTrackWithComments = COMMENTS.collect {
+            new SeqTrackWithComment(createSeqTrack(), it)
         }
-        String input = seqTracks*.id.join(",\'comment\'\n") + ",\'comment\'"
+        String input = seqTrackWithComments.collect {
+            seqTrackIdDefinitionForSeqTrack(it)
+        }.join('\n')
 
         expect:
-        service.seqTrackById(input) == seqTracks
+        service.seqTrackById(input) == seqTrackWithComments
     }
 
-    void "seqTrackById, when input contain unknown seqTrack ids, then throw exception"() {
+    @Unroll
+    void "seqTrackById, when input is invalid (#invalidProperty = #invalidValue), then throw exception"() {
         given:
-        List<SeqTrack> seqTracks = (1..3).collect {
-            createSeqTrack()
+        List<SeqTrackWithComment> seqTrackWithComments = (1..3).collect {
+            new SeqTrackWithComment(createSeqTrack(), "comment")
         }
-        String input = seqTracks*.id.join('\n') + "\n-2"
+        SeqTrackWithComment invalid = new SeqTrackWithComment(createSeqTrack(), "comment")
+
+        String input = seqTrackWithComments.collect {
+            seqTrackIdDefinitionForSeqTrack(it)
+        }.join('\n') + "\n" + seqTrackIdDefinitionForSeqTrack(invalid, [(invalidProperty): invalidValue])
 
         when:
         service.seqTrackById(input)
 
         then:
-        thrown(AssertionError)
+        AssertionError e = thrown()
+        e.message.contains(errorText)
+
+        where:
+        invalidProperty | invalidValue || errorText
+        'id'            | -2           || 'Could not find seqTrack for id'
+        'comment'       | ''           || 'A multi input for seqType by ID is defined by 2 columns' //empty columns at the end are skipped, so column count is incorrect
+        'comment'       | "''"         || 'Comment may not be empty'
     }
 
     void "seqTracksBySampleDefinition, when input is valid, then return corresponding seqTracks"() {
         given:
         service.seqTypeService = new SeqTypeService()
-        List<SeqTrack> seqTracks = (1..3).collect {
-            createSeqTrack()
+        List<SeqTrackWithComment> seqTrackWithComments = COMMENTS.collect {
+            new SeqTrackWithComment(createSeqTrack(), it)
         }
 
-        String input = seqTracks.collect { SeqTrack seqTrack ->
-            sampleDefinitionForSeqTrack(seqTrack)
-        }.join(',\'comment\'\n') + ",\'comment\'"
+        String input = seqTrackWithComments.collect { SeqTrackWithComment seqTrackWithComment ->
+            sampleDefinitionForSeqTrack(seqTrackWithComment)
+        }.join('\n')
 
         expect:
-        service.seqTracksBySampleDefinition(input) == seqTracks
+        service.seqTracksBySampleDefinition(input) == seqTrackWithComments
     }
 
     @Unroll
@@ -119,14 +139,14 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         given:
         createSampleType(name: 'alternativeSampleType')
         service.seqTypeService = new SeqTypeService()
-        List<SeqTrack> seqTracks = (1..3).collect {
-            createSeqTrack()
+        List<SeqTrackWithComment> seqTrackWithComments = (1..3).collect {
+            new SeqTrackWithComment(createSeqTrack(), "comment")
         }
-        SeqTrack invalidSeqTrack = createSeqTrack()
+        SeqTrackWithComment invalidSeqTrack = new SeqTrackWithComment(createSeqTrack(), "comment")
 
-        String input = seqTracks.collect { SeqTrack seqTrack ->
-            sampleDefinitionForSeqTrack(seqTrack)
-        }.join(',\'comment\'\n') + ',\'comment\'\n' + sampleDefinitionForSeqTrack(invalidSeqTrack, [(invalidProperty): invalidValue]) + ",\'comment\'"
+        String input = seqTrackWithComments.collect { SeqTrackWithComment seqTrackWithComment ->
+            sampleDefinitionForSeqTrack(seqTrackWithComment)
+        }.join('\n') + '\n' + sampleDefinitionForSeqTrack(invalidSeqTrack, [(invalidProperty): invalidValue])
 
         when:
         service.seqTracksBySampleDefinition(input)
@@ -145,30 +165,8 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         'seqType'       | 'unknownSeqTypeName'         || 'Could not find seqType'
         'libraryLayout' | SequencingReadType.MATE_PAIR || 'Could not find seqType'
         'singleCell'    | 'true'                       || 'Could not find seqType'
-    }
-
-    void "getCommentsFromMultiLineDefinition, when receiving multi line string, then return only comments in quote marks"() {
-        given:
-        String stringListWithComment = """
-                                        pid1,tumor,WGS,PAIRED,false,sampleName1
-                                        pid3,control,WES,PAIRED,false,
-                                        pid3,control,WES,PAIRED,false,'long withdrawn Comment
-                                        with multiple Lines'
-                                        pid5,control,RNA,SINGLE,true,sampleName2,'This
-                                        is a multiline
-                                        commentary'""".stripIndent()
-
-        expect:
-        service.getCommentsFromMultiLineDefinition(stringListWithComment) ==
-                ["", "", 'long withdrawn Comment\nwith multiple Lines', "This\nis a multiline\ncommentary"]
-    }
-
-    void "removeCommentsFromStringList, when receiving string list, return string list without commentaries in quote marks"() {
-        given:
-        List<String> stringListWithComments = ["String1", 'String2', "'Commentary\nover multiple Lines with some special characters =)§\"(§'", "last String?"]
-
-        expect:
-        service.removeCommentsFromStringList(stringListWithComments) == ["String1", 'String2', "last String?"]
+        'comment'       | ''                           || 'A multi input for sample seqType is defined by 7 columns' //empty columns at the end are skipped, so column count is incorrect
+        'comment'       | "''"                         || 'Comment may not be empty'
     }
 
     void "isCommentInMultiLineDefinition, when receiving multi line string with comment in every line, then return true"() {
@@ -200,43 +198,73 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
                  string3, string?!§4, 'commentary
                  over multiple
                  lines', string5""",
-                 """#Input1, string2, 'Commentary'
+                                 """#Input1, string2, 'Commentary'
                  #string3, string?!§4""",
-                 ""],
-                ["""Input1, string2, 'Commentary'
+                                 ""],
+                                ["""Input1, string2, 'Commentary'
                  string3, string?!§4, 'commentary
                  over multiple
                  lines', string5""",
-                 """#Input1, string2, 'Commentary'
+                                 """#Input1, string2, 'Commentary'
                  #string3, string?!§4"""],
-                ["""Input1, string2, 'Commentary'
+                                ["""Input1, string2, 'Commentary'
                  string3, string?!§4, 'commentary
                  over multiple
                  lines', string5""",
-                 """Input1, string2, 'Commentary'
+                                 """Input1, string2, 'Commentary'
                  string3, string?!§4""",
-                 ""],
-                ["""Input1, string2, 'Commentary'
+                                 ""],
+                                ["""Input1, string2, 'Commentary'
                  string3, string?!§4, 'commentary
                  over multiple
                  lines', string5""",
-                 """Input1, string2, 'Commentary'
+                                 """Input1, string2, 'Commentary'
                  string3, string?!§4""",
-                 "",
-                 """#Input1, string2, 'Commentary'
+                                 "",
+                                 """#Input1, string2, 'Commentary'
                  #string3, string?!§4""",
-                 ""],
+                                 ""],
         ]
-        containsExactlyOneMultiLineStringContainsContent << [true, true , false, false]
+        containsExactlyOneMultiLineStringContainsContent << [true, true, false, false]
     }
 
-    private String sampleDefinitionForSeqTrack(SeqTrack seqTrack, Map invalidVaue = [:]) {
+    @Unroll
+    void "removeSurroundingSingleQuote, when input=<#input>, then return <#output>"() {
+        expect:
+        service.removeSurroundingSingleQuote(input) == output
+
+        where:
+        input           | output
+        "a comment"     | "a comment"
+        "'a comment'"   | "a comment"
+        "'a comment"    | "'a comment"
+        "a comment'"    | "a comment'"
+        "a '' comment"  | "a '' comment"
+        '"a comment"'   | '"a comment"'
+        ""              | ""
+        "'"             | "'"
+        "''"            | ""
+        "'''"           | "'"
+        "''''"          | "''"
+        "''a comment''" | "'a comment'"
+    }
+
+    private String sampleDefinitionForSeqTrack(SeqTrackWithComment seqTrackWithComment, Map invalidVaue = [:]) {
         return ([
-                pid          : seqTrack.individual.pid,
-                sampleType   : seqTrack.sampleType.name,
-                seqType      : seqTrack.seqType.name,
-                libraryLayout: seqTrack.seqType.libraryLayout,
-                singleCell   : seqTrack.seqType.singleCell,
+                pid          : seqTrackWithComment.seqTrack.individual.pid,
+                sampleType   : seqTrackWithComment.seqTrack.sampleType.name,
+                seqType      : seqTrackWithComment.seqTrack.seqType.name,
+                libraryLayout: seqTrackWithComment.seqTrack.seqType.libraryLayout,
+                singleCell   : seqTrackWithComment.seqTrack.seqType.singleCell,
+                sampleName   : '',
+                comment      : "'${seqTrackWithComment.comment}'",
+        ] + invalidVaue).values().join(',')
+    }
+
+    private String seqTrackIdDefinitionForSeqTrack(SeqTrackWithComment seqTrackWithComment, Map invalidVaue = [:]) {
+        return ([
+                id     : seqTrackWithComment.seqTrack.id,
+                comment: "'${seqTrackWithComment.comment}'",
         ] + invalidVaue).values().join(',')
     }
 }

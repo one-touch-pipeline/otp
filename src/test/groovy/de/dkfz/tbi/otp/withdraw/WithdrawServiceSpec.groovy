@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackWithComment
 
 import java.nio.file.FileSystems
 
@@ -93,8 +94,8 @@ class WithdrawServiceSpec extends Specification implements DataTest, DomainFacto
 
         WithdrawParameters withdrawParameters = new WithdrawParameters([
                 seqTracksWithComments: [
-                        (seqTracks[0]): "WithdrawnComment1\nover multiple lines",
-                        (seqTracks[1]): "WithdrawnComment2\nwith multiple lines",
+                        new SeqTrackWithComment(seqTracks[0], "WithdrawnComment1\nover multiple lines"),
+                        new SeqTrackWithComment(seqTracks[1], "WithdrawnComment2\nwith multiple lines"),
                 ],
         ])
 

@@ -56,21 +56,25 @@ class ExampleData {
     /**
      * The count of lanes to create for each sample and SeqType combination
      */
-    int lanesPerSampleAndSeqType = 1
+    int lanesPerSampleAndSeqType = 2
 
     /**
      * The SeqTypes for which data is to be created.
      */
     List<SeqType> seqTypes = [
             SeqTypeService.exomePairedSeqType,
+            SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
     ]
 
     /**
      * The SampleType names for which data is to be created.
      */
     List<String> sampleTypeNames = [
-            "control01",
             "tumor01",
+            "tumor02",
+            "control01",
     ]
 
     /**
@@ -265,7 +269,7 @@ class ExampleData {
         ]).save(flush: true)
     }
 
-    ProcessingPriority findOrProcessingPriority() {
+    ProcessingPriority findOrCreateProcessingPriority() {
         String name = "queue"
         return ProcessingPriority.findByName(name) ?: new ProcessingPriority([
                 name                       : name,
@@ -451,6 +455,8 @@ class ExampleData {
                 used               : true,
                 fileExists         : true,
                 fileLinked         : true,
+                fileSize           : 1000000000,
+                nReads             : 185000000,
         ]).save(flush: true)
 
         dataFiles << dataFile

@@ -27,7 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackWithComment
 
 @Rollback
 @Integration
@@ -36,14 +36,14 @@ class ScriptInputHelperServiceIntegrationSpec extends Specification implements D
     void "seqTracksByLaneDefinition, when input is valid, then return corresponding seqTracks"() {
         given:
         ScriptInputHelperService service = new ScriptInputHelperService()
-        List<SeqTrack> seqTracks = createValidSeqTracks()
+        List<SeqTrackWithComment> seqTrackWithComments = createValidSeqTracks()
 
-        String input = seqTracks.collect { SeqTrack seqTrack ->
-            seqTracksByLaneDefinitionForSeqTrack(seqTrack)
+        String input = seqTrackWithComments.collect { SeqTrackWithComment trackWithComment ->
+            seqTracksByLaneDefinitionForSeqTrack(trackWithComment)
         }.join('\n')
 
         expect:
-        service.seqTracksByLaneDefinition(input) == seqTracks
+        service.seqTracksByLaneDefinition(input) == seqTrackWithComments
     }
 
     @Unroll
@@ -51,16 +51,16 @@ class ScriptInputHelperServiceIntegrationSpec extends Specification implements D
         given:
         ScriptInputHelperService service = new ScriptInputHelperService()
 
-        List<SeqTrack> seqTracks = createValidSeqTracks()
-        SeqTrack invalidSeqTrack = createSeqTrack([
+        List<SeqTrackWithComment> seqTrackWithComments = createValidSeqTracks()
+        SeqTrackWithComment invalidSeqTrack = new SeqTrackWithComment(createSeqTrack([
                 seqType            : createSeqType([
                         singleCell: true,
                 ]),
                 singleCellWellLabel: withWellLabel ? 'label' : null,
-        ])
+        ]), "comment")
 
-        String input = seqTracks.collect { SeqTrack seqTrack ->
-            seqTracksByLaneDefinitionForSeqTrack(seqTrack)
+        String input = seqTrackWithComments.collect { SeqTrackWithComment seqTrackWithComment ->
+            seqTracksByLaneDefinitionForSeqTrack(seqTrackWithComment)
         }.join('\n') + '\n' + seqTracksByLaneDefinitionForSeqTrack(invalidSeqTrack, [(invalidProperty): invalidValue])
 
         when:
@@ -75,35 +75,40 @@ class ScriptInputHelperServiceIntegrationSpec extends Specification implements D
         false         | 'project'             | 'unknownProject'             || 'Could not find any project'
         false         | 'run'                 | 'unknownRunName'             || 'Could not find any run'
         false         | 'laneId'              | 'unknownLane'                || 'Could not find any seqTracks'
+        false         | 'comment'             | ''                           || 'A multi input for lane is defined by 5 columns' //empty columns at the end are skipped, so column count is incorrect
+        false         | 'comment'             | "''"                         || 'Comment may not be empty'
         true          | 'project'             | 'unknownProject'             || 'Could not find any project'
         true          | 'run'                 | 'unknownRunName'             || 'Could not find any run'
         true          | 'laneId'              | 'unknownLane'                || 'Could not find any seqTracks'
         true          | 'singleCellWellLabel' | 'unknownSingleCellWellLabel' || 'Could not find any seqTracks'
+        true          | 'comment'             | ''                           || 'A multi input for lane is defined by 5 columns' //empty columns at the end are skipped, so column count is incorrect
+        true          | 'comment'             | "''"                         || 'Comment may not be empty'
     }
 
-    private List<SeqTrack> createValidSeqTracks() {
+    private List<SeqTrackWithComment> createValidSeqTracks() {
         return [
-                createSeqTrack(),
-                createSeqTrack([
+                new SeqTrackWithComment(createSeqTrack(), "a comment"),
+                new SeqTrackWithComment(createSeqTrack([
                         seqType: createSeqType([
                                 singleCell: true,
                         ]),
-                ]),
-                createSeqTrack([
+                ]), "a\nmultiline\ncomment"),
+                new SeqTrackWithComment(createSeqTrack([
                         seqType            : createSeqType([
                                 singleCell: true,
                         ]),
                         singleCellWellLabel: 'label',
-                ]),
+                ]), "a 'quotes' 'containing' comment"),
         ]
     }
 
-    private String seqTracksByLaneDefinitionForSeqTrack(SeqTrack seqTrack, Map invalidValue = [:]) {
+    private String seqTracksByLaneDefinitionForSeqTrack(SeqTrackWithComment seqTrackWithComment, Map invalidValue = [:]) {
         return ([
-                project            : seqTrack.project.name,
-                run                : seqTrack.run.name,
-                laneId             : seqTrack.laneId,
-                singleCellWellLabel: seqTrack.singleCellWellLabel ?: '',
+                project            : seqTrackWithComment.seqTrack.project.name,
+                run                : seqTrackWithComment.seqTrack.run.name,
+                laneId             : seqTrackWithComment.seqTrack.laneId,
+                singleCellWellLabel: seqTrackWithComment.seqTrack.singleCellWellLabel ?: '',
+                comment            : "'${seqTrackWithComment.comment}'",
         ] + invalidValue).values().join(',')
     }
 }

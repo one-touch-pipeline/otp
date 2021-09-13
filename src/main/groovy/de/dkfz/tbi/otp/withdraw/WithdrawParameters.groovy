@@ -22,13 +22,14 @@
 package de.dkfz.tbi.otp.withdraw
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackWithComment
 
 class WithdrawParameters {
 
     /**
      * The seqTracks as keys with the corresponding comments as values
      */
-    Map<SeqTrack, String> seqTracksWithComments = [:]
+    List<SeqTrackWithComment> seqTracksWithComments = []
 
     /**
      * Name of the generated bash file. It should have the extension '.sh'
@@ -39,13 +40,13 @@ class WithdrawParameters {
     /**
      * indicate, if the bam files should be deleted (true) or set to withdrawn (false).
      */
-    boolean deleteBamFile = true
+    boolean deleteBamFile = false
 
     /**
      * indicate, if the analysis files should be deleted (true) or set to withdrawn (false).
      * The selection is only possible, if the bam files are not deleted.
      */
-    boolean deleteAnalysis = true
+    boolean deleteAnalysis = false
 
     /**
      * Should withdrawing stop if files are not existing in file system (using cached value 'dataFile.fileExists')
@@ -61,7 +62,7 @@ class WithdrawParameters {
      * The seqTracks to withdraw
      */
     List<SeqTrack> getSeqTracks() {
-        return this.seqTracksWithComments.keySet().toList()
+        return this.seqTracksWithComments*.seqTrack
     }
 
 }

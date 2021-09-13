@@ -60,7 +60,7 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
     }
 
     @Unroll
-    void "createOverviewSummary, when deleteBamFile is #deleteBamFile and deleteAnalysis is #deleteAnalysisinfos, then create expected text"() {
+    void "createOverviewSummary, when deleteBamFile is #deleteBamFile and deleteAnalysis is #deleteAnalysis, then create expected text"() {
         SeqTrack seqTrack1 = Mock(SeqTrack)
         SeqTrack seqTrack2 = Mock(SeqTrack)
         RoddyBamFile roddyBamFile1 = Mock(RoddyBamFile)
@@ -87,8 +87,8 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                (seqTrack1): "withdrawnComment1\nover multiple Lines",
-                                (seqTrack2): "withdrawnComment2",
+                                new SeqTrackWithComment(seqTrack1, "withdrawnComment1\nover multiple Lines"),
+                                new SeqTrackWithComment(seqTrack2, "withdrawnComment2"),
                         ],
                         deleteBamFile        : deleteBamFile,
                         deleteAnalysis       : deleteAnalysis,
@@ -109,8 +109,8 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
                 "Withdraw summary",
                 WithdrawHelperService.TRIM_LINE,
                 "Withdrawing 2 lanes",
-                "- seqTrack1 with comment: \'withdrawnComment1\nover multiple Lines\'",
-                "- seqTrack2 with comment: \'withdrawnComment2\'",
+                "- seqTrack1\twith comment: \'withdrawnComment1\nover multiple Lines\'",
+                "- seqTrack2\twith comment: \'withdrawnComment2\'",
                 WithdrawHelperService.TRIM_LINE,
                 "${deleteBamFileText} 4 bam files",
                 "- roddyBamFile1",
@@ -150,7 +150,7 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                (dataFile.seqTrack) : ""
+                                new SeqTrackWithComment(dataFile.seqTrack, ""),
                         ],
                 ]),
         ])
@@ -177,10 +177,10 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracksWithComments         : [
-                                (dataFile.seqTrack): ""
+                        seqTracksWithComments: [
+                                new SeqTrackWithComment(dataFile.seqTrack, ""),
                         ],
-                        stopOnMissingFiles: false,
+                        stopOnMissingFiles   : false,
                 ]),
         ])
 
@@ -208,10 +208,10 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
-                        seqTracksWithComments         : [
-                                (dataFile.seqTrack) : ""
+                        seqTracksWithComments: [
+                                new SeqTrackWithComment(dataFile.seqTrack, "")
                         ],
-                        stopOnMissingFiles: true,
+                        stopOnMissingFiles   : true,
                 ]),
         ])
 
@@ -234,7 +234,7 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                (dataFile.seqTrack) : ""
+                                new SeqTrackWithComment(dataFile.seqTrack, ""),
                         ],
                 ]),
         ])
@@ -262,7 +262,7 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments     : [
-                                (dataFile.seqTrack): "",
+                                new SeqTrackWithComment(dataFile.seqTrack, ""),
                         ],
                         stopOnAlreadyWithdrawnData: false,
                 ]),
@@ -293,7 +293,7 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments     : [
-                                (dataFile.seqTrack): "",
+                                new SeqTrackWithComment(dataFile.seqTrack, ""),
                         ],
                         stopOnAlreadyWithdrawnData: true,
                 ]),
@@ -405,7 +405,6 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         final Path fastqcHtmlPath = temporaryFolder.newFile("html").toPath()
         final Path fastqcHtmlPathSingleCell = temporaryFolder.newFile("htmlSingleCell").toPath()
 
-
         DataFile dataFile = createDataFile()
         DataFile withdrawnDataFile = createDataFile([fileWithdrawn: true])
         DataFile singleCellDataFile = createDataFile([
@@ -427,9 +426,9 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
-                                (dataFile.seqTrack)          : withdrawnCommentNormal,
-                                (withdrawnDataFile.seqTrack) : withdrawnCommentWithdrawn,
-                                (singleCellDataFile.seqTrack): withdrawnCommentSingleCell,
+                                new SeqTrackWithComment(dataFile.seqTrack, withdrawnCommentNormal),
+                                new SeqTrackWithComment(withdrawnDataFile.seqTrack, withdrawnCommentWithdrawn),
+                                new SeqTrackWithComment(singleCellDataFile.seqTrack, withdrawnCommentSingleCell),
                         ],
                 ]),
         ])
