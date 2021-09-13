@@ -58,7 +58,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [PROJECT, PATIENT_ID, SAMPLE_TYPE]*.name()
+        return [PROJECT, PATIENT_ID, SAMPLE_TYPE, ANTIBODY_TARGET]*.name()
     }
 
     @Override
@@ -74,13 +74,14 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             String projectName = it.getValue(PROJECT.name()) ?: ''
             String pid = it.getValue(PATIENT_ID.name()) ?: ''
             String sampleType = it.getValue(SAMPLE_TYPE.name()) ?: ''
+            String antibodyTarget = it.getValue(ANTIBODY_TARGET.name()) ?: ''
 
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
             if (!parsedIdentifier && !sampleIdentifier) {
                 context.addProblem(it.cells, LogLevel.ERROR, "Sample name '${sampleName}' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP.")
-                missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleName}")
+                missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleName}\t\t${antibodyTarget}")
             }
             if (parsedIdentifier && !sampleIdentifier) {
                 boolean error = false
@@ -118,20 +119,24 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
         }
 
         if (missingIdentifiersWithProject) {
-            context.addProblem(Collections.emptySet(), LogLevel.INFO, "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
-                    "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
-                    "${missingIdentifiersWithProject.sort().join('\n')}")
+            context.addProblem(Collections.emptySet(), LogLevel.INFO,
+                    "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
+                            "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
+                            "${missingIdentifiersWithProject.collect { it.substring(0, it.length() - it.reverse().indexOf("\t\t") - 2) }.sort().join('\n')}",
+                    "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
+                            "${SampleIdentifierService.BulkSampleCreationHeader.getSummaryHeaders()}\n" +
+                            "${missingIdentifiersWithProject.sort().join('\n')}")
         }
         if (byProjectName.size() == 1 && context.spreadsheet.getColumn(PROJECT.name()) == null) {
             String projectName = exactlyOneElement(byProjectName.keySet())
             if (projectName != null) {
-                context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), LogLevel.INFO,
+                context.addProblem((Set) byProjectName.values().sum()*.cells.sum(), LogLevel.INFO,
                         "All sample names belong to project '${projectName}'.")
             }
         }
         byProjectName.remove(null)
         if (byProjectName.size() > 1) {
-            context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), LogLevel.WARNING,
+            context.addProblem((Set) byProjectName.values().sum()*.cells.sum(), LogLevel.WARNING,
                     'The sample names belong to different projects:\n' +
                             byProjectName.collect { projectName, valueTuplesOfProject ->
                                 return "Project '${projectName}':\n        ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_NAME.name())}'" }.sort().join('\n        ')}"

@@ -47,8 +47,13 @@ class SampleIdentifierService {
         PID,
         SAMPLE_TYPE,
         SAMPLE_IDENTIFIER,
+        ANTIBODY_TARGET,
 
         static final String getHeaders(Delimiter delimiter = Delimiter.TAB) {
+            return values().findAll { it != ANTIBODY_TARGET }.join(delimiter.delimiter as String)
+        }
+
+        static final String getSummaryHeaders(Delimiter delimiter = Delimiter.TAB) {
             return values().join(delimiter.delimiter as String)
         }
     }
@@ -104,10 +109,10 @@ class SampleIdentifierService {
             }
             try {
                 DefaultParsedSampleIdentifier identifier = new DefaultParsedSampleIdentifier(
-                        projectName               : Project.getByNameOrNameInMetadataFiles(getCell(BulkSampleCreationHeader.PROJECT))?.name ?: project.name,
-                        pid                       : getCell(BulkSampleCreationHeader.PID),
-                        sampleTypeDbName          : getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
-                        fullSampleName            : getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
+                        projectName: Project.getByNameOrNameInMetadataFiles(getCell(BulkSampleCreationHeader.PROJECT))?.name ?: project.name,
+                        pid: getCell(BulkSampleCreationHeader.PID),
+                        sampleTypeDbName: getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
+                        fullSampleName: getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
                         useSpecificReferenceGenome: specificReferenceGenome,
                 )
                 SampleIdentifier sampleIdentifier = findOrSaveSampleIdentifier(identifier)
@@ -157,7 +162,7 @@ class SampleIdentifierService {
         Sample sample = findOrSaveSample(identifier)
         return new SampleIdentifier(
                 sample: sample,
-                name  : identifier.fullSampleName,
+                name: identifier.fullSampleName,
         ).save(flush: true)
     }
 
@@ -206,11 +211,11 @@ class SampleIdentifierService {
             }
         } else {
             individual = new Individual(
-                    pid         : identifier.pid,
-                    mockPid     : identifier.pid,
+                    pid: identifier.pid,
+                    mockPid: identifier.pid,
                     mockFullName: identifier.pid,
-                    project     : findProject(identifier),
-                    type        : Individual.Type.REAL
+                    project: findProject(identifier),
+                    type: Individual.Type.REAL
             )
             assert individual.save(flush: true)
         }

@@ -87,7 +87,8 @@ class SampleValidatorSpec extends Specification implements DataTest {
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
                         "Sample name 'AAA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), LogLevel.INFO,
-                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tAAA\n\t\t\tABC"),
+                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tAAA\n\t\t\tABC",
+                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getSummaryHeaders()}\n\t\t\tAAA\t\t\n\t\t\tABC\t\t"),
         ]
         when:
         validator.validate(context)
@@ -237,7 +238,9 @@ Project 'C':
                         "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), LogLevel.INFO,
                         "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
-                                "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
+                                "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA",
+                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
+                                "${SampleIdentifierService.BulkSampleCreationHeader.getSummaryHeaders()}\n\t\t\tSampleA\t\t"),
                 new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N\nC\tM\tN\tP-C_I-M_S-N"),
         ]
 
@@ -260,7 +263,8 @@ Project 'C':
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
                         "Sample name 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample name is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), LogLevel.INFO,
-                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
+                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA",
+                        "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getSummaryHeaders()}\n\t\t\tSampleA\t\t"),
                 new Problem(Collections.emptySet(), LogLevel.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
         ]
 
