@@ -105,24 +105,6 @@ class WorkflowStep implements Commentable, Entity {
         return null
     }
 
-    /**
-     * returns the previous running {@link WorkflowStep}, ignoring restarted ones.
-     *
-     * If the {@link WorkflowStep} was restart, then take the job before the restarted. Otherwise use the job run before this job.
-     *
-     * Example with 4 jobs, calling the method on job D:
-     * jobs: job A -> job B -> job C -> Job D
-     *
-     * Case 1: Job D was not restarted
-     * --> return Job C
-     *
-     * Case 2: job D is the restarted from job B
-     * --> return Job A
-     */
-    WorkflowStep getPreviousRunningWorkflowStep() {
-        return (restartedFrom ?: this).previous
-    }
-
     WorkflowStep getOriginalRestartedFrom() {
         WorkflowStep step = restartedFrom
         while (step?.restartedFrom) {

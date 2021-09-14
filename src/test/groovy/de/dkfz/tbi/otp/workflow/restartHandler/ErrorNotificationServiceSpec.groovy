@@ -219,6 +219,8 @@ class ErrorNotificationServiceSpec extends Specification
             2 * link(_) >> { return "link" }
         }
 
+        service.workflowStepService = Mock(WorkflowStepService)
+
         WorkflowStep step = createWorkflowStep()
         step.workflowError = createWorkflowError()
 
@@ -256,14 +258,20 @@ class ErrorNotificationServiceSpec extends Specification
             _ * link(_) >> { return "link" }
         }
 
-        WorkflowStep step = createWorkflowStep()
-        step.workflowError = createWorkflowError()
+        WorkflowStep prevStep = createWorkflowStep()
 
         List<ClusterJob> clusterJobs = (1..3).collect {
             createClusterJob([
-                    workflowStep: step,
+                    workflowStep: prevStep,
                     exitCode    : nextId,
             ])
+        }
+
+        WorkflowStep step = createWorkflowStep(previous: prevStep)
+        step.workflowError = createWorkflowError()
+
+        service.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(step) >> prevStep
         }
 
         String expectedExpression = [

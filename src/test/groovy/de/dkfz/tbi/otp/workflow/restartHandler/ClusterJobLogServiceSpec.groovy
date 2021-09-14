@@ -32,14 +32,15 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<ClusterJobLogService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -66,32 +67,38 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
         given:
         setupData()
 
-        File file = CreateFileHelper.createFile(temporaryFolder.newFile())
-        File file2 = CreateFileHelper.createFile(temporaryFolder.newFile())
+        Path file = CreateFileHelper.createFile(temporaryFolder.newFile().toPath())
+        Path file2 = CreateFileHelper.createFile(temporaryFolder.newFile().toPath())
 
         Set<ClusterJob> clusterJobs = [
-                DomainFactory.createClusterJob([
-                        jobLog: file.absolutePath
+                createClusterJob([
+                        jobLog: file.toString()
                 ]),
-                DomainFactory.createClusterJob([
-                        jobLog: file2.absolutePath
+                createClusterJob([
+                        jobLog: file2.toString()
                 ]),
         ]
+
+        WorkflowStep prevStep = createWorkflowStep(clusterJobs: clusterJobs)
 
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowError: createWorkflowError(),
                 state        : WorkflowStep.State.FAILED,
-                clusterJobs  : clusterJobs,
+                previous     : prevStep,
         ])
+
+        service.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(workflowStep) >> prevStep
+        }
 
         when:
         Collection<LogWithIdentifier> logWithIdentifiers = service.createLogsWithIdentifier(workflowStep)
 
         then:
         logWithIdentifiers.size() == 2
-        logWithIdentifiers[0].identifier == file.absolutePath
+        logWithIdentifiers[0].identifier == file.toString()
         logWithIdentifiers[0].log == file.text
-        logWithIdentifiers[1].identifier == file2.absolutePath
+        logWithIdentifiers[1].identifier == file2.toString()
         logWithIdentifiers[1].log == file2.text
     }
 
@@ -102,16 +109,22 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
         String nonExistingPath = TestCase.uniqueNonExistentPath
 
         Set<ClusterJob> clusterJobs = [
-                DomainFactory.createClusterJob([
+                createClusterJob([
                         jobLog: nonExistingPath
                 ])
         ]
 
+        WorkflowStep prevStep = createWorkflowStep(clusterJobs: clusterJobs)
+
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowError: createWorkflowError(),
                 state        : WorkflowStep.State.FAILED,
-                clusterJobs  : clusterJobs,
+                previous     : prevStep,
         ])
+
+        service.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(workflowStep) >> prevStep
+        }
 
         when:
         Collection<LogWithIdentifier> logWithIdentifiers = service.createLogsWithIdentifier(workflowStep)
@@ -123,24 +136,30 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
 
     void "test createLogsWithIdentifier when threshold exceeded"() {
         given:
-        File file = CreateFileHelper.createFile(temporaryFolder.newFile())
+        Path file = CreateFileHelper.createFile(temporaryFolder.newFile().toPath())
 
         setupData()
         service.fileService = Spy(FileService) {
-            1 * fileSizeExceeded(file, _) >> true
+            1 * fileSizeExceeded(file.toFile(), _) >> true
         }
 
         Set<ClusterJob> clusterJobs = [
-                DomainFactory.createClusterJob([
-                        jobLog: file.absolutePath
+                createClusterJob([
+                        jobLog: file.toString()
                 ]),
         ]
+
+        WorkflowStep prevStep = createWorkflowStep(clusterJobs: clusterJobs)
 
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowError: createWorkflowError(),
                 state        : WorkflowStep.State.FAILED,
-                clusterJobs  : clusterJobs,
+                previous     : prevStep,
         ])
+
+        service.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(workflowStep) >> prevStep
+        }
 
         when:
         Collection<LogWithIdentifier> logWithIdentifiers = service.createLogsWithIdentifier(workflowStep)

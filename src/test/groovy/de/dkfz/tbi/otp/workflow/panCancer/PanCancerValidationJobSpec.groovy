@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.workflow.RoddyService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 
 import java.nio.file.Path
 
@@ -169,6 +170,9 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
             ])
         }
         job.logService = Mock(LogService)
+        job.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
+        }
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepCurrent)
@@ -196,6 +200,9 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
             ])
         }
         job.logService = Mock(LogService)
+        job.workflowStepService = Mock(WorkflowStepService) {
+            1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
+        }
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepCurrent)

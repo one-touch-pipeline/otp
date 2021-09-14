@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileService
 
 import java.nio.file.FileSystems
@@ -67,6 +68,10 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         workflowStepValidatingClusterJob = createWorkflowStep([
                 previous: workflowStepSendingClusterJob
         ])
+
+        job.workflowStepService = Mock(WorkflowStepService) {
+            _ * getPreviousRunningWorkflowStep(workflowStepValidatingClusterJob) >> workflowStepSendingClusterJob
+        }
     }
 
     private void setupDataWithClusterJob(ClusterJob.CheckStatus checkStatus = ClusterJob.CheckStatus.FINISHED) {

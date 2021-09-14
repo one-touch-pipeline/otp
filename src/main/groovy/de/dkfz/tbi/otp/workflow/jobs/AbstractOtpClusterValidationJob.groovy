@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
+import org.springframework.beans.factory.annotation.Autowired
+
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 
 import java.nio.file.*
 import java.util.regex.Pattern
@@ -34,6 +37,9 @@ import java.util.regex.Pattern
  */
 abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
 
+    @Autowired
+    WorkflowStepService workflowStepService
+
     /**
      * checks, that all cluster jobs have created the job status log file with the correct content.
      *
@@ -42,7 +48,7 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
     @Override
     protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
         Realm realm = workflowStep.realm
-        Collection<ClusterJob> clusterJobs = workflowStep.previousRunningWorkflowStep.clusterJobs
+        Collection<ClusterJob> clusterJobs = workflowStepService.getPreviousRunningWorkflowStep(workflowStep).clusterJobs
         FileSystem fileSystem = getFileSystem(workflowStep)
         logService.addSimpleLogEntry(workflowStep, "Start checking of ${clusterJobs.size()} cluster jobs for finished successfully (run till the end).")
 

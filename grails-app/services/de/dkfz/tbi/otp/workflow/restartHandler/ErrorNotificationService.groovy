@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.util.TimeFormats
 
 import java.text.SimpleDateFormat
@@ -50,6 +51,8 @@ class ErrorNotificationService {
     ProcessingOptionService processingOptionService
 
     LinkGenerator grailsLinkGenerator
+
+    WorkflowStepService workflowStepService
 
     void sendMaintainer(WorkflowStep workflowStep, Throwable exceptionInJob, Throwable exceptionInExceptionHandling) {
         String subject = [
@@ -221,8 +224,11 @@ class ErrorNotificationService {
         message << "Log page: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showLogs', id: workflowStep.id, absolute: 'true')}"
 
         message << header("Cluster jobs")
-        if (workflowStep.clusterJobs) {
-            workflowStep.clusterJobs.sort { it.id }.each { ClusterJob clusterJob ->
+
+        WorkflowStep prevRunningWorkflowStep = workflowStepService.getPreviousRunningWorkflowStep(workflowStep)
+
+        if (prevRunningWorkflowStep?.clusterJobs) {
+            prevRunningWorkflowStep.clusterJobs.sort { it.id }.each { ClusterJob clusterJob ->
                 message << "ID: ${clusterJob.clusterJobId}"
                 message << "Name: ${clusterJob.clusterJobName}"
                 message << "Queued time: ${TimeFormats.DATE_TIME.getFormatted((ZonedDateTime)clusterJob.queued)}"

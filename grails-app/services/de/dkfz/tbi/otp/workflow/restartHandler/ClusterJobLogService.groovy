@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -40,6 +41,8 @@ class ClusterJobLogService extends AbstractRestartHandlerLogService {
     FileSystemService fileSystemService
 
     FileService fileService
+
+    WorkflowStepService workflowStepService
 
     static private final long FACTOR_1024 = 1024
 
@@ -55,7 +58,9 @@ class ClusterJobLogService extends AbstractRestartHandlerLogService {
     @Override
     Collection<LogWithIdentifier> createLogsWithIdentifier(WorkflowStep workflowStep) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
-        return workflowStep.clusterJobs.findResults { ClusterJob clusterJob ->
+        WorkflowStep prevRunningWorkflowStep = workflowStepService.getPreviousRunningWorkflowStep(workflowStep)
+
+        return prevRunningWorkflowStep?.clusterJobs?.findResults { ClusterJob clusterJob ->
             Path file = fileSystem.getPath(clusterJob.jobLog)
             if (!FileService.isFileReadable(file)) {
                 logService.addSimpleLogEntry(workflowStep, "The log file '${file}' does not exist.")

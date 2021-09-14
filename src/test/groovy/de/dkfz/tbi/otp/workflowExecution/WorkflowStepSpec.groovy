@@ -82,35 +82,4 @@ class WorkflowStepSpec extends Specification implements WorkflowSystemDomainFact
         step_5_2.originalRestartedFrom == step_1_2
         step_5_2.restartCount == 3
     }
-
-    void "test previousRunningWorkflowStep, when not restart, return the previous"() {
-        given:
-        WorkflowStep expected = createWorkflowStep()
-        WorkflowStep checked = createWorkflowStep([
-                previous: expected
-        ])
-
-        expect:
-        expected == checked.previousRunningWorkflowStep
-        expected == checked.previous
-    }
-
-    void "test previousRunningWorkflowStep, when restart, return the previous of the restarted one"() {
-        given:
-        WorkflowStep expected = createWorkflowStep()
-        WorkflowStep restarted = createWorkflowStep([
-                previous: expected
-        ])
-        WorkflowStep failed = createWorkflowStep([
-                previous: restarted
-        ])
-        WorkflowStep checked = createWorkflowStep([
-                previous     : failed,
-                restartedFrom: restarted,
-        ])
-
-        expect:
-        expected == checked.previousRunningWorkflowStep
-        expected != checked.previous
-    }
 }
