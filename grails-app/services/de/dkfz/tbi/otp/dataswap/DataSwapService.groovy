@@ -387,7 +387,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                     BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles) : []
             if (analysisInstances) {
                 bashScriptToMoveFilesAsOtherUser << "# delete analysis stuff\n"
-                AnalysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
+                analysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
                 analysisInstances.each {
                     bashScriptToMoveFilesAsOtherUser << "#rm -rf ${analysisDeletionService.deleteInstance(it)}/\n"
                 }
