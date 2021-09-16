@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import de.dkfz.tbi.otp.project.Project
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -42,5 +43,47 @@ class ProcessingPriorityService {
                         processingOptionService.findOptionAsString(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME)
                 )
         )
+    }
+
+    //operations on Priority domain object
+    ProcessingPriority getPriority(Long id) {
+        return ProcessingPriority.get(id)
+    }
+
+    int getPriorityListCount() {
+        return ProcessingPriority.count()
+    }
+
+    List<ProcessingPriority> getPriorityList(Map params) {
+        return ProcessingPriority.list(params)
+    }
+
+    ProcessingPriority savePriority(ProcessingPriority processingPriority) {
+        return processingPriority.save(flush: true)
+    }
+
+    void deletePriority(Long id) {
+        ProcessingPriority.get(id).delete(flush: true)
+    }
+
+    Map getReferences(ProcessingPriority processingPriority) {
+        Map references = [:]
+
+        //if it is defined in ProcessingOption as default
+        String defaultName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME)
+        if (processingPriority.name == defaultName) {
+            references.put(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, ProcessingOption.class.simpleName)
+        }
+
+        //if it is used by WorkflowRun, WorkflowRunStep, Project
+        Project.findAllByProcessingPriority(processingPriority).each {
+            references.put(it.id, it.class.simpleName)
+        }
+
+        WorkflowRun.findAllByPriority(processingPriority).each {
+            references.put(it.id, it.class.simpleName)
+        }
+
+        return references
     }
 }

@@ -78,9 +78,10 @@ class ProcessingPriority implements Entity {
     static constraints = {
         name blank: false, unique: true
         priority unique: true
+        allowedParallelWorkflowRuns min: 1
         queue blank: false
         roddyConfigSuffix blank: false
-        allowedParallelWorkflowRuns min: 1
+        errorMailPrefix blank: false
     }
 
     static mapping = {
