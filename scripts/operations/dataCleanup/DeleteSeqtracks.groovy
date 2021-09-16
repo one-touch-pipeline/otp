@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -30,9 +29,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.FileSystem
+
 // input area
 //----------------------
-
 
 /**
  * Multi selector using:
@@ -50,6 +49,13 @@ String multiColumnInput = """
 #pid3,control,WES,PAIRED,false,
 #pid5,control,RNA,SINGLE,true,sampleName2
 """
+
+/**
+ * You can also provide a comma-separated list of Ilse submission numbers to delete all the seq tracks contained therein
+ */
+List<Integer> ilseSubmissionNumbers = [
+
+]
 
 /**
  * should be stopped, if seqTracks are only linked (property) or for the sample an external bam files exist
@@ -108,9 +114,16 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
     return seqTracks
 }
 
+List<SeqTrack> ilseSeqTracks = []
+if (ilseSubmissionNumbers) {
+    ilseSeqTracks = SeqTrack.findAllByIlseSubmissionInList(ilseSubmissionNumbers.collect {
+        CollectionUtils.exactlyOneElement(IlseSubmission.findAllByIlseNumber(it))
+    })
+}
+
 Project.withTransaction {
-    List<File> filesToDelete = seqTrackPerMultiImport.collect {
-        print "deleting ${it}"
+    List<File> filesToDelete = (seqTrackPerMultiImport + ilseSeqTracks).collect {
+        println "deleting ${it}"
         deletionService.deleteSeqTrack(it, checkForExternalBamFilesOrLinkedFastqFiles)
     }.flatten().unique()
     println """"
@@ -121,7 +134,7 @@ please delete it now one the files system
 #!/bin/bash
 
 set -ve
-${filesToDelete.collect {"rm -rf ${it}"}.join('\n')}
+${filesToDelete.collect { "rm -rf ${it}" }.join('\n')}
 
 """
 
