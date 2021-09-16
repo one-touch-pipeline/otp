@@ -76,17 +76,23 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
     def data(DataCommand cmd) {
         assert cmd.validate()
 
-        List<LinkedHashMap<String, Object>> result = cmd.workflowRun.workflowSteps.reverse().collect { step ->
-            return [
-                    state      : step.state,
-                    id         : step.id,
-                    name       : step.beanName,
-                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.dateCreated),
-                    lastUpdated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.lastUpdated),
-                    duration   : getFormattedDuration(convertDateToLocalDateTime(step.dateCreated), convertDateToLocalDateTime(step.lastUpdated)),
+        List<WorkflowStep> workflowSteps = cmd.workflowRun.workflowSteps.reverse()
 
-                    error      : step.workflowError,
-                    clusterJobs: (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }.collect { ClusterJob clusterJob ->
+        List<LinkedHashMap<String, Object>> result = workflowSteps.collect { step ->
+            boolean isPreviousOfFailedStep = !workflowSteps.findAll {
+                it.previousRunningWorkflowStep?.id == step.id && it.state == WorkflowStep.State.FAILED
+            }.empty
+
+            return [
+                    state                 : step.state,
+                    id                    : step.id,
+                    name                  : step.beanName,
+                    dateCreated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.dateCreated),
+                    lastUpdated           : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormatted(step.lastUpdated),
+                    duration              : getFormattedDuration(convertDateToLocalDateTime(step.dateCreated), convertDateToLocalDateTime(step.lastUpdated)),
+
+                    error                 : step.workflowError,
+                    clusterJobs           : (step.clusterJobs as List<ClusterJob>).sort { it.dateCreated }.collect { ClusterJob clusterJob ->
                         [
                                 state   : "${clusterJob.checkStatus}${clusterJob.checkStatus == FINISHED ? "/${clusterJob.exitStatus}" : ""}",
                                 id      : clusterJob.id,
@@ -98,9 +104,11 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
                                 exitCode: clusterJob.exitCode ?: "-",
                         ]
                     },
-                    wes        : step.wesIdentifier,
-                    hasLogs    : !step.logs.empty,
-                    obsolete   : step.obsolete,
+                    wes                   : step.wesIdentifier,
+                    hasLogs               : !step.logs.empty,
+                    obsolete              : step.obsolete,
+                    previousStepId        : step.previousRunningWorkflowStep?.id,
+                    isPreviousOfFailedStep: isPreviousOfFailedStep,
             ]
         }
         render cmd.getDataToRender(result) as JSON

@@ -20,51 +20,98 @@
  * SOFTWARE.
  */
 $(function () {
-    function format(d) {
-        var childTable = '<table class="table table-sm table-borderless">'
+    /**
+     * Generate the child table which can be opend by the show/hide button inside the steps table.
+     *
+     * @param rowData
+     * @returns {string}
+     */
+    function generateChildTable(rowData) {
+        let childTable = '<table class="table table-sm table-borderless">'
 
-        for (var i = 0; i < d.clusterJobs.length; i++) {
-            childTable += '<tr>' +
-                '<td><div title="' + d.clusterJobs[i].state + '" class="small ' + statusToClassName(d.clusterJobs[i].state) + '"></div></td>' +
-                '<td>' + $.otp.createLinkMarkup({text: 'Cluster job: ' + d.clusterJobs[i].name, controller: "clusterJobDetail", action: "show", id: d.clusterJobs[i].id, parameters: createLinkParametersForNavigation()}) + '</td>' +
-                '<td>' + d.clusterJobs[i].jobId + '</td>'
-            if (d.clusterJobs[i].hasLog === true) {
-                childTable +='<td>' + $.otp.createLinkMarkup({text: "Log", controller: "clusterJobDetail", action: "showLog", id: d.clusterJobs[i].id, parameters: createLinkParametersForNavigation()}) + '</td>'
-            } else {
-                childTable +='<td></td>'
+        if (rowData.clusterJobs) {
+            rowData.clusterJobs.map((clusterJob) => {
+                childTable += '<tr>' +
+                    '<td><div title="' + clusterJob.state + '" class="small ' + statusToClassName(clusterJob.state) + '"></div></td>' +
+                    '<td>' + $.otp.createLinkMarkup({
+                        text: 'Cluster job: ' + clusterJob.name,
+                        controller: "clusterJobDetail",
+                        action: "show", id: clusterJob.id,
+                        parameters: createLinkParametersForNavigation()}) +
+                    '</td>' +
+                    '<td>' + clusterJob.jobId + '</td>'
+
+                if (clusterJob.hasLog) {
+                    childTable +='<td>' + $.otp.createLinkMarkup({
+                        text: "Log",
+                        controller: "clusterJobDetail",
+                        action: "showLog",
+                        id: clusterJob.id,
+                        parameters: createLinkParametersForNavigation()}) + '</td>'
+                } else {
+                    childTable +='<td></td>'
+                }
+
+                childTable +=
+                    '<td>' + clusterJob.node + '</td>' +
+                    '<td>' + clusterJob.wallTime + '</td>' +
+                    '<td>' + clusterJob.exitCode + '</td>' +
+                    '</tr>'
+            });
+
+            if (rowData.state === "FAILED" && rowData.previousStepId) {
+                childTable += '<tr>' +
+                '<td></td>' +
+                '<td><b>' +
+                    '<i class="bi bi-info-circle"></i> This job failed. Maybe the reason is related to the previous step (' + rowData.previousStepId + ').</b>' +
+                '</td>' +
+                '<td></td>' +
+                '<td></td>' +
+                '<td></td>' +
+                '<td></td>' +
+                '<td></td>' +
+                '</tr>';
             }
-            childTable +=
-                '<td>' + d.clusterJobs[i].node + '</td>' +
-                '<td>' + d.clusterJobs[i].wallTime + '</td>' +
-                '<td>' + d.clusterJobs[i].exitCode + '</td>' +
-                '</tr>'
         }
-        if (d.wes) {
+
+        if (rowData.wes) {
             childTable += '<tr>' +
                 '<td></td>' +
                 '<td>WES job</td>' +
-                '<td>' + d.wes + '</td>' +
+                '<td>' + rowData.wes + '</td>' +
                 '<td></td>' +
                 '<td></td>' +
                 '<td></td>' +
                 '</tr>'
         }
-        if (d.hasLogs) {
+
+        if (rowData.hasLogs) {
             childTable += '<tr>' +
                 '<td></td>' +
                 '<td>Workflow logs</td>' +
                 '<td></td>' +
-                '<td>' + $.otp.createLinkMarkup({text: "Log", controller: "workflowRunDetails", action: "showLogs", id: d.id, parameters: createLinkParametersForNavigation()}) + '</td>' +
+                '<td>' + $.otp.createLinkMarkup({
+                    text: "Log",
+                    controller: "workflowRunDetails",
+                    action: "showLogs",
+                    id: rowData.id,
+                    parameters: createLinkParametersForNavigation()}) + '</td>' +
                 '<td></td>' +
                 '<td></td>' +
                 '</tr>'
         }
-        if (d.error) {
+
+        if (rowData.error) {
             childTable += '<tr>' +
                 '<td></td>' +
-                '<td>Workflow error: ' + d.error.message + '</td>' +
+                '<td>Workflow error: ' + rowData.error.message + '</td>' +
                 '<td></td>' +
-                '<td>' + $.otp.createLinkMarkup({text: "Error", controller: "workflowRunDetails", action: "showError", id: d.id, parameters: createLinkParametersForNavigation()}) + '</td>' +
+                '<td>' + $.otp.createLinkMarkup({
+                    text: "Error",
+                    controller: "workflowRunDetails",
+                    action: "showError",
+                    id: rowData.id,
+                    parameters: createLinkParametersForNavigation()}) + '</td>' +
                 '<td></td>' +
                 '<td></td>' +
                 '</tr>'
@@ -73,20 +120,39 @@ $(function () {
         return childTable;
     }
 
-    var lastStepFailed = false;
+    /**
+     * Render the color and tooltip of the status circle for a single workflow step row.
+     *
+     * @param row with workflow step data
+     * @returns {string}
+     */
+    function renderStepStatusCircle(row) {
+        let cssClass = "";
 
-    var table = $('#steps').DataTable({
+        if (row.isPreviousOfFailedStep) {
+            cssClass += "dot darkorange"
+        } else {
+            cssClass += statusToClassName(row.state)
+        }
+
+        return '<div title="' + row.state + '" class="' + cssClass + ' small"></div>'
+    }
+
+    let lastStepFailed = false;
+
+    let table = $('#steps').DataTable({
         columns: [
             {
-                'data': function (row, type, set, meta) {
+                'data': function (row, type) {
                     if (type === "sort") {
                         return row.state;
                     }
-                    return '<div title="' + row.state + '" class="' + statusToClassName(row.state) + ' small"></div>';
+
+                    return renderStepStatusCircle(row);
                 }
             },
             {
-                'data': function (row, type, set, meta) {
+                'data': function (row, type) {
                     if (type === "sort") {
                         return null;
                     }
@@ -105,7 +171,7 @@ $(function () {
             {'data': 'duration', 'orderable': false},
             {'data': 'id'},
             {
-                'data': function (row, type, set, meta) {
+                'data': function (row, type) {
                     if (type === "sort") {
                         return null;
                     }
@@ -163,14 +229,14 @@ $(function () {
     });
 
     $('#steps tbody').on('click', 'td .details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = table.row(tr);
+        let tr = $(this).closest('tr');
+        let row = table.row(tr);
 
         if (row.child.isShown()) {
             row.child.hide();
             tr.removeClass('shown');
         } else {
-            row.child(format(row.data())).show();
+            row.child(generateChildTable(row.data())).show();
             tr.addClass('shown');
             $('[title]').tooltip();
         }
