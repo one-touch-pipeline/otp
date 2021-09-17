@@ -93,7 +93,6 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
         roddyJob.roddyExecutionService.configService = configService
         roddyJob.roddyExecutionService.clusterJobService = new ClusterJobService()
         roddyJob.roddyExecutionService.processingOptionService = new ProcessingOptionService()
-        roddyJob.roddyExecutionService.afterPropertiesSet()
         roddyJob.clusterJobSchedulerService = [
                 retrieveAndSaveJobInformationAfterJobStarted: { ClusterJob clusterJob -> },
         ] as ClusterJobSchedulerService

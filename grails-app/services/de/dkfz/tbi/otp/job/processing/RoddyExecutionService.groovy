@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -41,7 +40,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @Transactional
-class RoddyExecutionService implements InitializingBean {
+class RoddyExecutionService {
 
     @Autowired
     ClusterJobService clusterJobService
@@ -64,11 +63,6 @@ class RoddyExecutionService implements InitializingBean {
 
     private Semaphore numberOfRoddyProcesses
 
-    @Override
-    void afterPropertiesSet() {
-        numberOfRoddyProcesses = new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES), true)
-    }
-
     void clearRoddyExecutionStoreDirectory(RoddyResult roddyResult) {
         if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
             roddyResult.roddyExecutionDirectoryNames.clear()
@@ -79,6 +73,9 @@ class RoddyExecutionService implements InitializingBean {
     ProcessOutput execute(String cmd, Realm realm) {
         assert cmd
         assert realm
+
+        numberOfRoddyProcesses = numberOfRoddyProcesses ?:
+                new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES), true)
 
         ProcessOutput output
         numberOfRoddyProcesses.acquire()

@@ -123,7 +123,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         roddyExecutionService.configService = configService
         roddyExecutionService.clusterJobService = new ClusterJobService()
         roddyExecutionService.processingOptionService = new ProcessingOptionService()
-        roddyExecutionService.afterPropertiesSet()
     }
 
     void cleanup() {
