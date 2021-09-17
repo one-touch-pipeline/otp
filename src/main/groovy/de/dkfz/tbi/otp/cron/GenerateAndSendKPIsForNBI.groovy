@@ -21,21 +21,16 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.tracking.DeNbiKpi
+import de.dkfz.tbi.otp.tracking.DeNbiKpiService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import java.time.LocalDate
@@ -58,6 +53,9 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
     @Autowired
     ConfigService configService
 
+    @Autowired
+    DeNbiKpiService deNbiKpiService
+
     /**
      * Run this job only once per month.
      * @return true if it is the first day of a month
@@ -73,18 +71,18 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
         LocalDate fromDate = LocalDate.of(nowLastMonth.year, nowLastMonth.month, 1)
         LocalDate toDate = fromDate.plusMonths(1)
 
-        List<ResultData> resultDataList = generateKpiResultList(fromDate, toDate)
+        List<DeNbiKpi> kpiList = generateKpiList(fromDate, toDate)
 
         String kpiMailReceiver = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_MONTHLY_KPI_RECEIVER)
-        String kpiMailContent = resultDataList.groupBy { ResultData resultData ->
-            resultData.name
-        }.collect { String workflow, List<ResultData> resultDatasOfWorkflow ->
-            String dataOfWorkflow = resultDatasOfWorkflow.collect {
-                int userCount = usersForProjects(it.projects)
+        String kpiMailContent = kpiList.groupBy { DeNbiKpi kpi ->
+            kpi.name
+        }.collect { String workflow, List<DeNbiKpi> resultDatasOfWorkflow ->
+            String dataOfWorkflow = resultDatasOfWorkflow.collect { DeNbiKpi kpi ->
+                int userCount = deNbiKpiService.countUsersInProjects(kpi.projects)
                 [
-                        it.count,
+                        kpi.count,
                         userCount,
-                        it.projectCount,
+                        kpi.projectCount,
                 ].join(',')
             }.join('\n')
 
@@ -98,204 +96,43 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
         mailHelperService.sendEmail("KPIs for de.NBI - " + fromDate.month.name(), kpiMailContent, kpiMailReceiver)
     }
 
-    List<ResultData> generateKpiResultList(LocalDate fromDate, LocalDate toDate) {
+    /**
+     * Generate a list of all de.NBI workflow KPIs in a given date range.
+     *
+     * @param fromDate
+     * @param toDate
+     * @return List of de.NBI KPIs
+     */
+    private List<DeNbiKpi> generateKpiList(LocalDate fromDate, LocalDate toDate) {
         ZoneId zoneId = configService.timeZoneId
-        List<ResultData> resultDataList = []
-
         Date dateFrom = Date.from(fromDate.atStartOfDay().atZone(zoneId).toInstant())
         Date dateTo = Date.from(toDate.atStartOfDay().atZone(zoneId).toInstant())
 
-        WorkingDataSet panCan = new WorkingDataSet("PanCan", panCanData(dateFrom, dateTo))
-        WorkingDataSet rna = new WorkingDataSet("Rna alignment", rna(dateFrom, dateTo))
-        WorkingDataSet singleCell = new WorkingDataSet("CellRanger", singleCell(dateFrom, dateTo))
+        DeNbiKpi panCanKpi = deNbiKpiService.getPanCanKpi(dateFrom, dateTo)
+        DeNbiKpi rnaAlignmentKpi = deNbiKpiService.getRnaAlignmentKpi(dateFrom, dateTo)
+        DeNbiKpi cellRangerKpi = deNbiKpiService.getCellRangerKpi(dateFrom, dateTo)
+        DeNbiKpi snvCallingKpi = deNbiKpiService.getSnvCallingKpi(dateFrom, dateTo)
+        DeNbiKpi indelKpi = deNbiKpiService.getIndelKpi(dateFrom, dateTo)
+        DeNbiKpi sophiaKpi = deNbiKpiService.getSophiaKpi(dateFrom, dateTo)
+        DeNbiKpi aceseqKpi = deNbiKpiService.getAceseqKpi(dateFrom, dateTo)
+        DeNbiKpi runYapsaKpi = deNbiKpiService.getRunYapsaKpi(dateFrom, dateTo)
+        DeNbiKpi clusterJobKpi = deNbiKpiService.getClusterJobKpi(dateFrom, dateTo)
 
-        WorkingDataSet snv = new WorkingDataSet("Snv", analysis(dateFrom, dateTo, AbstractSnvCallingInstance))
-        WorkingDataSet indel = new WorkingDataSet("Indel", analysis(dateFrom, dateTo, IndelCallingInstance))
-        WorkingDataSet sophia = new WorkingDataSet("Sophia", analysis(dateFrom, dateTo, SophiaInstance))
-        WorkingDataSet aceseq = new WorkingDataSet("Aceseq", analysis(dateFrom, dateTo, AceseqInstance))
-        WorkingDataSet runyapsa = new WorkingDataSet("runYapsa", analysis(dateFrom, dateTo, RunYapsaInstance))
+        DeNbiKpi otpWorkflowKpi = deNbiKpiService.generateSumKpi("otp workflow", cellRangerKpi, runYapsaKpi)
+        DeNbiKpi roddyKpi = deNbiKpiService.generateSumKpi("roddy", panCanKpi, rnaAlignmentKpi, snvCallingKpi, indelKpi, sophiaKpi, aceseqKpi)
 
-        WorkingDataSet otp = new WorkingDataSet("otp workflow", singleCell, runyapsa)
-        WorkingDataSet roddy = new WorkingDataSet("roddy", panCan, rna, snv, indel, sophia, aceseq)
-        WorkingDataSet otpClusterJobs = new WorkingDataSet("otp cluster jobs", clusterJobs(dateFrom, dateTo))
-
-        [
-            panCan,
-            rna,
-            singleCell,
-            snv,
-            indel,
-            sophia,
-            aceseq,
-            runyapsa,
-            otp,
-            roddy,
-            otpClusterJobs,
-        ].each {
-            resultDataList << new ResultData(it)
-        }
-
-        return resultDataList
-    }
-
-    List<Object[]> panCanData(Date from, Date to) {
-        return RoddyBamFile.createCriteria().list {
-            lt("dateCreated", to)
-            gt("dateCreated", from)
-            workPackage {
-                seqType {
-                    ne("name", "RNA")
-                    eq("singleCell", false)
-                }
-            }
-            projections {
-                property('id')
-                workPackage {
-                    sample {
-                        individual {
-                            project {
-                                property('name')
-                            }
-                        }
-                    }
-                }
-            }
-        } as List<Object[]>
-    }
-
-    List<Object[]> rna(Date from, Date to) {
-        return RnaRoddyBamFile.createCriteria().list {
-            lt("dateCreated", to)
-            gt("dateCreated", from)
-            workPackage {
-                seqType {
-                    eq("singleCell", false)
-                    eq("name", "RNA")
-                }
-            }
-            projections {
-                property('id')
-                workPackage {
-                    sample {
-                        individual {
-                            project {
-                                property('name')
-                            }
-                        }
-                    }
-                }
-            }
-        } as List<Object[]>
-    }
-
-    List<Object[]> singleCell(Date from, Date to) {
-        return AbstractMergedBamFile.createCriteria().list {
-            lt("dateCreated", to)
-            gt("dateCreated", from)
-            workPackage {
-                seqType {
-                    eq("singleCell", true)
-                }
-            }
-            projections {
-                property('id')
-                workPackage {
-                    sample {
-                        individual {
-                            project {
-                                property('name')
-                            }
-                        }
-                    }
-                }
-            }
-        } as List<Object[]>
-    }
-
-    List<Object[]> analysis(Date from, Date to, Class<BamFilePairAnalysis> instance) {
-        return instance.createCriteria().list {
-            lt("dateCreated", to)
-            gt("dateCreated", from)
-            projections {
-                property('id')
-                samplePair {
-                    mergingWorkPackage1 {
-                        sample {
-                            individual {
-                                project {
-                                    property('name')
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } as List<Object[]>
-    }
-
-    List<Object[]> clusterJobs(Date from, Date to) {
-        return ClusterJob.createCriteria().list {
-            lt("dateCreated", to)
-            gt("dateCreated", from)
-            projections {
-                property('id')
-                individual {
-                    project {
-                        property('name')
-                    }
-                }
-            }
-        } as List<Object[]>
-    }
-
-    int usersForProjects(List<String> projectNames) {
-        if (!projectNames) {
-            return 0
-        }
-
-        return UserProjectRole.createCriteria().list {
-            eq("enabled", true)
-            user {
-                eq("enabled", true)
-            }
-            project {
-                'in'('name', projectNames)
-            }
-        }*.user.unique().size()
-    }
-}
-
-@ToString
-@TupleConstructor
-class WorkingDataSet {
-    String name
-    int workflowCount
-    List<String> projects
-
-    WorkingDataSet(String name, List<Object[]> result) {
-        this.name = name
-        workflowCount = result.size()
-        projects = result.collect { it[1] }.unique() as List<String>
-    }
-
-    WorkingDataSet(String name, WorkingDataSet... dataList) {
-        this.name = name
-        workflowCount = dataList*.workflowCount.sum() as int
-        projects = dataList*.projects.flatten().unique() as List<String>
-    }
-}
-
-@ToString
-class ResultData {
-    String name
-    int count
-    int projectCount
-    List<String> projects
-
-    ResultData(WorkingDataSet dataSet) {
-        name = dataSet.name
-        count = dataSet.workflowCount
-        projectCount = dataSet.projects.size()
-        projects = dataSet.projects
+        return [
+                panCanKpi,
+                rnaAlignmentKpi,
+                cellRangerKpi,
+                snvCallingKpi,
+                indelKpi,
+                sophiaKpi,
+                aceseqKpi,
+                runYapsaKpi,
+                otpWorkflowKpi,
+                roddyKpi,
+                clusterJobKpi,
+        ]
     }
 }
