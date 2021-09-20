@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataswap
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -38,8 +37,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
@@ -95,41 +92,25 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
 
     @Override
     protected void performDataSwap(LaneSwapData data) {
-        List<SeqTrack> seqTracksOfOldSample = SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old)
-        Path bashScriptToMoveFiles = createMoveFileScript(data)[0]
+        createRemoveAnalysisAndAlignmentsCommands(data)
+        swapLanes(data)
 
-        if (AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)) {
-            seqTracksOfOldSample.each {
-                deleteProcessingInformationOfSeqTrack(it, bashScriptToMoveFiles, data)
-            }
-            bashScriptToMoveFiles << "# delete analyses stuff\n"
-            data.dirsToDelete.flatten()*.path.each {
-                bashScriptToMoveFiles << "#rm -rf ${it}\n"
-            }
-            assert AlignmentPass.findAllBySeqTrackInList(data.seqTrackList).isEmpty(): "There are alignments for ${data.seqTrackList}, which can not be deleted"
-        }
-
-        swapSeqTracks(data)
-
-        bashScriptToMoveFiles << "\n\n#copy and remove fastq files\n"
-        bashScriptToMoveFiles << renameDataFiles(data)
+        createMoveDataFilesCommands(data)
 
         // files need to be already renamed at this point
         List<String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(
                 getFastQDataFilesBySeqTrackInList(data.seqTrackList, data.parameters).sort { it.id }
         )
-
-        bashScriptToMoveFiles << "\n\n#copy and delete fastqc files\n\n"
-
+        data.moveFilesBashScript << "\n\n################ move fastqc files ################\n\n"
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            bashScriptToMoveFiles << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
+            data.moveFilesBashScript << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
         }
 
         List<MergingAssignment> mergingAssignments = MergingAssignment.findAllBySeqTrackInList(data.seqTrackList)
         data.log << "\n${mergingAssignments.size()} MergingAssignment found"
         deletionService.deleteAllMergingAssignmentsWithAlignmentDataFilesAndSeqScans(mergingAssignments)
 
-        checkForRemainingSeqTracks(bashScriptToMoveFiles, data)
+        checkForRemainingSeqTracks(data)
     }
 
     @Override
@@ -161,20 +142,19 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
     }
 
     /**
-     * Swap all seqTracks to new seqType and sampleType.
+     * Swap all seqTracks (lanes) to new seqType and sampleType.
      *
      * @param seqTrack which should be swapped.
      * @param data DTO containing all entities necessary to perform a swap.
      * @return swapped seqTrack
      */
-    private void swapSeqTracks(LaneSwapData data) {
+    void swapLanes(LaneSwapData data) {
         data.seqTrackList = data.seqTrackList.collect {
             if (data.seqTypeSwap.old.hasAntibodyTarget != data.seqTypeSwap.new.hasAntibodyTarget) {
                 throw new UnsupportedOperationException("Old and new SeqTypes (old: ${data.seqTypeSwap.old};" +
                         " new: ${data.seqTypeSwap.new}) differ in antibody target usage and " +
                         "thus can not be swapped, as we would be missing the antibody target information.")
             }
-            it.swapped = true
             it.seqType = data.seqTypeSwap.new
             it.sample = data.sampleSwap.new
             assert it.save(flush: true)
@@ -183,41 +163,15 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
     }
 
     /**
-     * Calls deletionService and create bash commands to remove processing information, alignments and merging data.
-     *
-     * @param seqTrack as parameters for searching for the corresponding processing information.
-     * @param bashScriptToMoveFiles where the commands will be added.
-     * @param data DTO containing all entities necessary to perform a swap.
-     */
-    private void deleteProcessingInformationOfSeqTrack(SeqTrack seqTrack, Path bashScriptToMoveFiles, LaneSwapData data) {
-        bashScriptToMoveFiles << "\n\n#Delete Alignment- & Merging stuff from ${seqTrack} and retrigger Alignment.\n"
-        data.dirsToDelete.push(deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !data.linkedFilesVerified) as File)
-
-        String baseDir = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old, DataProcessingFilesService.OutputDirectories.ALIGNMENT)
-        String middleDir = processedAlignmentFileService.getRunLaneDirectory(seqTrack)
-        bashScriptToMoveFiles << "# rm -rf '${baseDir}/${middleDir}'\n"
-
-        String mergingResultDir = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
-                DataProcessingFilesService.OutputDirectories.MERGING)
-        bashScriptToMoveFiles << "# rm -rf '${mergingResultDir}/${data.sampleTypeSwap.old.name}/" +
-                "${data.seqTypeSwap.old.name}/${data.seqTypeSwap.old.libraryLayout}'\n"
-
-        String projectDir = configService.rootPath
-        String mergedAlignmentDir = mergedAlignmentDataFileService.buildRelativePath(data.seqTypeSwap.old, data.sampleSwap.old)
-        bashScriptToMoveFiles << "# rm -rf '${projectDir}/${mergedAlignmentDir}'\n"
-    }
-
-    /**
      * Check if there are any remaining SeqTracks for this sample/seqType combination left and create commands to remove them.
      *
-     * @param bashScriptToMoveFiles where the commands will be added.
      * @param data DTO containing all entities necessary to perform a swap.
      */
-    private void checkForRemainingSeqTracks(Path bashScriptToMoveFiles, LaneSwapData data) {
+    private void checkForRemainingSeqTracks(LaneSwapData data) {
         if (SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
-            bashScriptToMoveFiles << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
+            data.moveFilesBashScript << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
             File basePath = data.projectSwap.old.projectSequencingDirectory
-            bashScriptToMoveFiles << "#rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
+            data.moveFilesBashScript << "#rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
                     "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}/" +
                     "${data.seqTypeSwap.old.libraryLayoutDirName}'\n"
         }

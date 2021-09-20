@@ -34,8 +34,6 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.Path
-
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class IndividualSwapService extends DataSwapService<IndividualSwapParameters, IndividualSwapData> {
@@ -87,44 +85,33 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
 
     @Override
     protected void performDataSwap(IndividualSwapData data) {
-        def (Path bashScriptToMoveFiles, Path bashScriptToMoveFilesAsOtherUser) = createMoveFileScript(data)
-
-        data.seqTrackList.each { SeqTrack seqTrack ->
-            swapSeqTrack(bashScriptToMoveFilesAsOtherUser, seqTrack, data)
-        }
-
         swapIndividual(data)
 
         data.samples.each { Sample sample ->
             swapSampleAndDeleteOldIdentifier(sample, data)
         }
 
-        bashScriptToMoveFiles << "\n\n################ move data files ################\n"
-        bashScriptToMoveFiles << renameDataFiles(data)
+        createMoveDataFilesCommands(data)
 
-        bashScriptToMoveFiles << "\n\n\n################ move fastq files ################\n"
+        data.moveFilesBashScript << "\n\n\n################ move fastq files ################\n"
         data.samples = Sample.findAllByIndividual(data.individualSwap.old)
         data.seqTrackList = data.samples ? SeqTrack.findAllBySampleInList(data.samples) : []
         List<DataFile> newDataFiles = data.seqTrackList ? DataFile.findAllBySeqTrackInList(data.seqTrackList) : []
         List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            bashScriptToMoveFiles << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames.get(i), data)
+            data.moveFilesBashScript << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames.get(i), data)
         }
 
-        bashScriptToMoveFiles << "\n\n################ delete analysis stuff ################\n"
-        data.dirsToDelete.flatten()*.path.each {
-            bashScriptToMoveFiles << "#rm -rf ${it}\n"
-        }
+        createRemoveAnalysisAndAlignmentsCommands(data)
 
-        bashScriptToMoveFiles << "\n\n\n ################ delete old Individual ################ \n"
-        bashScriptToMoveFiles << "# rm -rf ${data.projectSwap.old.projectSequencingDirectory}/*/view-by-pid/${data.pidSwap.old}/\n"
+        data.moveFilesBashScript << "\n\n\n ################ delete old Individual ################ \n"
+        data.moveFilesBashScript << "# rm -rf ${data.projectSwap.old.projectSequencingDirectory}/*/view-by-pid/${data.pidSwap.old}/\n"
 
         String processingPathToOldIndividual = dataProcessingFilesService.getOutputDirectory(
                 data.individualSwap.old,
                 DataProcessingFilesService.OutputDirectories.BASE
         )
-        bashScriptToMoveFiles << "# rm -rf ${processingPathToOldIndividual}\n"
+        data.moveFilesBashScript << "# rm -rf ${processingPathToOldIndividual}\n"
     }
 
     @Override

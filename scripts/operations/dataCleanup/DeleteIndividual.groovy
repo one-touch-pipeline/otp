@@ -97,7 +97,7 @@ Individual.withTransaction {
     individuals.each {
         println "Delete: ${it} of project ${it.project}"
         allFilesToRemove << "\n\n#${it}"
-        allFilesToRemove << deletionService.deleteIndividual(it, check)[0]
+        allFilesToRemove << deletionService.deleteIndividual(it, check)
     }
 
     Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName, realm)

@@ -49,8 +49,10 @@ import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
 
+/**
+ * This class is written for scripts, so it needs the output in stdout.
+ */
 @SuppressWarnings('Println')
-//This class is written for scripts, so it needs the output in stdout
 @Transactional
 class DeletionService {
 
@@ -92,9 +94,8 @@ class DeletionService {
     }
 
     @SuppressWarnings('JavaIoPackageAccess')
-    List<String> deleteIndividual(Individual individual, boolean check = true) {
+    String deleteIndividual(Individual individual, boolean check = true) {
         StringBuilder deletionScript = new StringBuilder()
-        StringBuilder deletionScriptOtherUser = new StringBuilder()
 
         List<Sample> samples = Sample.findAllByIndividual(individual)
 
@@ -110,13 +111,10 @@ class DeletionService {
                         deletionScript << "rm -rf ${new File(filePath).absolutePath}\n"
                     }
                 }
-                Map<String, List<File>> seqTrackDirsToDelete = deleteSeqTrack(seqTrack, check)
+                List<File> seqTrackDirsToDelete = deleteSeqTrack(seqTrack, check)
 
-                seqTrackDirsToDelete.get("dirsToDelete").flatten().findAll().each {
+                seqTrackDirsToDelete.each {
                     deletionScript << "rm -rf ${it.absolutePath}\n"
-                }
-                seqTrackDirsToDelete.get("dirsToDeleteWithOtherUser").flatten().findAll().each {
-                    deletionScriptOtherUser << "rm -rf ${it.absolutePath}\n"
                 }
                 seqTypes.add(seqTrack.seqType)
 
@@ -135,7 +133,7 @@ class DeletionService {
         deleteClusterJobs(ClusterJob.findAllByIndividual(individual))
         individual.delete(flush: true)
 
-        return [deletionScript.toString(), deletionScriptOtherUser.toString()]
+        return deletionScript.toString()
     }
 
     void deleteEmptyRun(Run run) {
@@ -268,7 +266,7 @@ class DeletionService {
                     }
                 }
             }
-            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).get("dirsToDelete").flatten().each {
+            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).each {
                 if (it) {
                     dirsToDelete.add(it.path)
                 }
@@ -298,10 +296,9 @@ class DeletionService {
      * !! Be aware that the run information, alignmentLog information, mergingLog information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-    Map<String, List<File>> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
+     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
         List<File> dirsToDelete = []
-        List<File> dirsToDeleteWithOtherUser = []
 
         if (enableChecks) {
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
@@ -321,9 +318,8 @@ class DeletionService {
             mergingWorkPackage.save(flush: true)
             ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
-                Map<String, List<File>> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
-                dirsToDelete.addAll(processingDirsToDelete["dirsToDelete"])
-                dirsToDeleteWithOtherUser.addAll(processingDirsToDelete["dirsToDeleteWithOtherUser"])
+                List<File> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
+                dirsToDelete.addAll(processingDirsToDelete)
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
                 processedBamFile.delete(flush: true)
             }
@@ -347,7 +343,7 @@ class DeletionService {
 
         if (bamFiles) {
             BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
-                dirsToDeleteWithOtherUser << analysisDeletionService.deleteInstance(it)
+                dirsToDelete << analysisDeletionService.deleteInstance(it)
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
         }
@@ -403,8 +399,7 @@ class DeletionService {
             it.delete(flush: true)
         }
 
-        return ["dirsToDelete"             : dirsToDelete,
-                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser,]
+        return dirsToDelete
     }
 
     void deleteProcessParameters(List<ProcessParameter> processParameters) {
@@ -532,7 +527,7 @@ class DeletionService {
      * There is always more than one seqTrack which belongs to one Run, which is why the run is not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-    Map<String, List<File>> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
+    List<File> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
 
         if (check) {
@@ -541,8 +536,8 @@ class DeletionService {
         }
 
         List<File> dirsToDelete = []
-        Map<String, List<File>> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
-        dirsToDelete.addAll(seqTrackDelete["dirsToDelete"])
+        List<File> seqTrackDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
+        dirsToDelete.addAll(seqTrackDelete)
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
         DataFile.findAllBySeqTrack(seqTrack).each { DataFile df ->
             dirsToDelete.addAll(deleteDataFile(df))
@@ -555,7 +550,7 @@ class DeletionService {
             deleteEmptyRun(seqTrack.run)
         }
 
-        return ["dirsToDelete": dirsToDelete, "dirsToDeleteWithOtherUser": seqTrackDelete["dirsToDeleteWithOtherUser"]]
+        return dirsToDelete
     }
 
     /**
@@ -633,10 +628,9 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
-    private Map<String, List<File>> deleteMergingRelatedConnectionsOfBamFile(ProcessedBamFile processedBamFile) {
+    private List<File> deleteMergingRelatedConnectionsOfBamFile(ProcessedBamFile processedBamFile) {
         notNull(processedBamFile, "The input processedBamFile is null in method deleteMergingRelatedConnectionsOfBamFile")
         List<File> dirsToDelete = []
-        List<File> dirsToDeleteWithOtherUser = []
 
         List<MergingSetAssignment> mergingSetAssignments = MergingSetAssignment.findAllByBamFile(processedBamFile)
         List<MergingSet> mergingSets = mergingSetAssignments*.mergingSet
@@ -652,12 +646,6 @@ class DeletionService {
             List<ProcessedMergedBamFile> processedMergedBamFiles = mergingPasses ? ProcessedMergedBamFile.findAllByMergingPassInList(mergingPasses) : []
 
             mergingSetAssignments*.delete(flush: true)
-
-            if (processedMergedBamFiles) {
-                BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(processedMergedBamFiles, processedMergedBamFiles).each {
-                    dirsToDeleteWithOtherUser << analysisDeletionService.deleteInstance(it)
-                }
-            }
 
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
@@ -686,8 +674,7 @@ class DeletionService {
                 mergingWorkPackage.delete(flush: true)
             }
         }
-        return ["dirsToDelete"             : dirsToDelete,
-                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser,]
+        return dirsToDelete
     }
 
     /**

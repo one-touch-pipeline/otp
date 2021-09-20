@@ -44,8 +44,8 @@ import java.nio.file.*
  * Abstract class for an data swap service. Defines basic steps necessary to perform some sort of an data swap.
  * Used as base of {@link SampleSwapService}.
  *
- * @param <P >     of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
- * @param <D >     of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
+ * @param <P >       of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
+ * @param <D >       of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
  *        necessary to perform swap.
  */
 @SuppressWarnings("JavaIoPackageAccess")
@@ -57,9 +57,6 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     static final String WELL_FILE_NAME = "wellFileName"
     static final String WELL_MAPPING_FILE_NAME = "wellMappingFileName"
     static final String WELL_MAPPING_FILE_ENTRY_NAME = "wellMappingFileEntry"
-
-    static final String MISSING_FILES_TEXT = "The following files are expected, but not found:"
-    static final String EXCESS_FILES_TEXT = "The following files are found, but not expected:"
 
     static final String BASH_HEADER = """\
             #!/bin/bash
@@ -160,7 +157,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
-     * Perform data validation and the data swap with the real entities by the given DataSwapData DTO.
+     * Perform data validation, script creation and the data swap with the real entities by the given DataSwapData DTO.
      * It calls various abstracts methods which must be implemented by a concrete service.
      *
      * this method should not be called in the data swap scripts!!
@@ -172,6 +169,10 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     protected void swap(D data) throws IOException, AssertionError {
         validateDTO(data)
         logSwapData(data)
+        data.moveFilesBashScript = createMoveFilesScript(data)
+        checkThatNoAnalysisIsRunning(data)
+        createGroovyConsoleScriptToRestartAlignments(data)
+        markSeqTracksAsSwappedAndDeleteDependingObjects(data)
         performDataSwap(data)
         createSwapComments(data)
     }
@@ -337,6 +338,28 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
+     * Create bash commands for removing analysis files
+     *
+     * @param data DTO containing all entities necessary to perform a swap
+     */
+    void createRemoveAnalysisAndAlignmentsCommands(DataSwapData data) {
+        data.moveFilesBashScript << "\n\n################ delete analysis files ################\n"
+        data.dirsToDelete.flatten()*.path.each {
+            data.moveFilesBashScript << "#rm -rf ${it}\n"
+        }
+    }
+
+    /**
+     * Create bash commands for moving data files
+     *
+     * @param data DTO containing all entities necessary to perform a swap
+     */
+    void createMoveDataFilesCommands(D data) {
+        data.moveFilesBashScript << "\n\n################ move data files ################\n"
+        data.moveFilesBashScript << renameDataFiles(data)
+    }
+
+    /**
      * Create a warning comment in case the datafile is swapped
      */
     void createCommentForSwappedDatafiles(DataSwapData data) {
@@ -350,13 +373,11 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
-     * create a bash script to delete files from roddy,
-     * the script must be executed as other user
+     * Checks whether the analysis is still running and throw assert exception when it does.
      *
-     * @deprecated can partially deleted in otp-921, but bashScriptToMoveFiles is still needed.
+     * @param data DTO containing all entities necessary to perform a swap
      */
-    @Deprecated
-    void createBashScriptRoddy(DataSwapData data, Path bashScriptToMoveFiles, Path bashScriptToMoveFilesAsOtherUser) {
+    void checkThatNoAnalysisIsRunning(DataSwapData data) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().list {
             seqTracks {
                 inList("id", data.seqTrackList*.id)
@@ -364,86 +385,22 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         } as List<RoddyBamFile>
 
         if (roddyBamFiles) {
-            bashScriptToMoveFilesAsOtherUser << BASH_HEADER
-
-            bashScriptToMoveFilesAsOtherUser << "\n\n\n ################ delete otherUser files ################ \n"
-            roddyBamFiles.each { RoddyBamFile roddyBamFile ->
-                if (roddyBamFile.isOldStructureUsed()) {
-                    bashScriptToMoveFilesAsOtherUser <<
-                            "#rm -rf ${roddyBamFile.finalExecutionDirectories*.absolutePath.join("\n#rm -rf ")}\n" +
-                            "#rm -rf ${roddyBamFile.finalSingleLaneQADirectories.values()*.listFiles().flatten()*.absolutePath.join("\n#rm -rf ")}\n"
-                    if (roddyBamFile.isMostRecentBamFile()) {
-                        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${roddyBamFile.finalMergedQADirectory.listFiles()*.absolutePath.join("\n#rm -rf ")}\n"
-                    }
-                } else {
-                    bashScriptToMoveFilesAsOtherUser <<
-                            "#rm -rf ${roddyBamFile.workExecutionDirectories*.absolutePath.join("\n#rm -rf ")}\n" +
-                            "#rm -rf ${roddyBamFile.workMergedQADirectory.absolutePath}\n" +
-                            "#rm -rf ${roddyBamFile.workSingleLaneQADirectories.values()*.absolutePath.join("\n#rm -rf ")}\n"
-                }
-            }
-
             List<BamFilePairAnalysis> analysisInstances = roddyBamFiles ?
                     BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles) : []
             if (analysisInstances) {
-                bashScriptToMoveFilesAsOtherUser << "# delete analysis stuff\n"
                 analysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
-                analysisInstances.each {
-                    bashScriptToMoveFilesAsOtherUser << "#rm -rf ${analysisDeletionService.deleteInstance(it)}/\n"
-                }
-            }
-
-            Set<File> expectedContent = [
-                    roddyBamFiles*.finalBamFile,
-                    roddyBamFiles*.finalBaiFile,
-                    roddyBamFiles*.finalMd5sumFile,
-                    roddyBamFiles*.finalExecutionStoreDirectory,
-                    roddyBamFiles*.finalQADirectory,
-                    roddyBamFiles.findAll {
-                        //files of old structure has no work directory
-                        !it.isOldStructureUsed()
-                    }*.workDirectory.findAll {
-                        //in case of realignment the work dir could already be deleted
-                        it.exists()
-                    },
-            ].flatten() as Set<File>
-
-            List<RoddyBamFile> wgbsRoddyBamFiles = roddyBamFiles.findAll { it.seqType.isWgbs() }
-            if (wgbsRoddyBamFiles) {
-                expectedContent.addAll(wgbsRoddyBamFiles*.finalMetadataTableFile)
-                expectedContent.addAll(wgbsRoddyBamFiles*.finalMethylationDirectory)
-            }
-
-            Set<File> foundFiles = roddyBamFiles*.baseDirectory.unique()*.listFiles().flatten() as Set<File>
-            if (foundFiles != expectedContent) {
-                List<File> missingFiles = (expectedContent - foundFiles).sort()
-                List<File> excessFiles = (foundFiles - expectedContent).sort()
-
-                data.log << "\n\n=====================================================\n"
-                if (missingFiles) {
-                    data.log << "\n${MISSING_FILES_TEXT}\n    ${missingFiles.join('\n    ')}"
-                }
-                if (excessFiles) {
-                    data.log << "\n${EXCESS_FILES_TEXT}\n    ${excessFiles.join('\n    ')}"
-                }
-                data.log << "\n=====================================================\n"
-            }
-
-            bashScriptToMoveFiles << "#rm -rf ${roddyBamFiles*.baseDirectory.unique().join(" ")}\n"
-
-            data.seqTrackList.each { SeqTrack seqTrack ->
-                data.dirsToDelete.addAll(deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack,
-                        !data.linkedFilesVerified).get("dirsToDelete"))
             }
         }
     }
 
     /**
-     * Helper method to create a groovy script to restart the alignment for all SeqTracks of the old sample.
+     * Creates groovy script to restartAlignments after swap
+     *
+     * @param data DTO containing all entities necessary to perform a swap
      */
-    void createGroovyConsoleScriptToRestartAlignments(DataSwapData data, Realm realm) {
+    void createGroovyConsoleScriptToRestartAlignments(DataSwapData data) {
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                data.scriptOutputDirectory, "restartAli_${data.bashScriptName}.groovy", realm
+                data.scriptOutputDirectory, "restartAli_${data.bashScriptName}.groovy", configService.defaultRealm
         )
         groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
@@ -483,28 +440,16 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
-     * creates bash scripts to move files from roddy,
-     * one for the normal user and one that must be executed as other user
+     * creates bash script to move files after database swap
      *
-     * @deprecated can partially deleted in otp-921, but bashScriptToMoveFiles is still needed.
+     * @param data DTO containing all entities necessary to perform a swap
+     * @return Path to bash script
      */
-    @Deprecated
-    List<Path> createMoveFileScript(D dataSwapData) {
-        Realm realm = configService.defaultRealm
-
-        // RestartAlignmentScript
-        createGroovyConsoleScriptToRestartAlignments(dataSwapData, realm)
-
-        // MoveFilesScript will be filled during routine
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(dataSwapData.scriptOutputDirectory,
-                "${dataSwapData.bashScriptName}.sh", realm)
+    Path createMoveFilesScript(D data) {
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(data.scriptOutputDirectory,
+                "${data.bashScriptName}.sh", configService.defaultRealm)
         bashScriptToMoveFiles << BASH_HEADER
-
-        Path bashScriptToMoveFilesAsOtherUser = fileService.createOrOverwriteScriptOutputFile(dataSwapData.scriptOutputDirectory,
-                "${dataSwapData.bashScriptName}-otherUser.sh", realm)
-        createBashScriptRoddy(dataSwapData, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser)
-
-        return [bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser]
+        return bashScriptToMoveFiles
     }
 
     /**
@@ -587,20 +532,19 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
-     * Get dirs to delete and mark seqTrack as swapped.
+     * Iterate over seq tracks gather all directories to delete and make seqTrack as swapped.
      *
-     * @param bashScriptToMoveFilesAsOtherUser which should be add with commands to delete with other user.
-     * @param seqTrack to swap.
      * @param data DTO containing all entities necessary to perform a swap.
      */
-    protected void swapSeqTrack(Path bashScriptToMoveFilesAsOtherUser, SeqTrack seqTrack, D data) {
-        Map dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !data.linkedFilesVerified)
-        data.dirsToDelete.addAll(dirs.get("dirsToDelete"))
-        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
-
-        // mark as swapped
-        seqTrack.swapped = true
-        seqTrack.save(flush: true)
+    protected void markSeqTracksAsSwappedAndDeleteDependingObjects(D data) {
+        data.seqTrackList.each { SeqTrack seqTrack ->
+            List<File> dirsToDelete = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !data.linkedFilesVerified)
+            if (dirsToDelete) {
+                data.dirsToDelete.addAll(dirsToDelete)
+            }
+            seqTrack.swapped = true
+            seqTrack.save(flush: true)
+        }
     }
 
     /**

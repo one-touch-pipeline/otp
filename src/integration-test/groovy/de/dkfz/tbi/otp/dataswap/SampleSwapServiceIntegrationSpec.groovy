@@ -92,7 +92,6 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
 
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(bamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFile)
-        List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
         File destinationDirectory = bamFile.baseDirectory
 
         Path scriptFolder = temporaryFolder.newFolder("files").toPath()
@@ -123,13 +122,6 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         alignmentScript.exists()
         alignmentScript.text.contains("${bamFile.seqTracks.iterator().next().id},")
 
-        File copyScriptOtherUser = scriptFolder.resolve("${script}-otherUser.sh").toFile()
-        copyScriptOtherUser.exists()
-        String copyScriptOtherUserContent = copyScriptOtherUser.text
-        roddyFilesToDelete.each {
-            copyScriptOtherUserContent.contains("#rm -rf ${it}")
-        }
-
         File copyScript = scriptFolder.resolve("${script}.sh").toFile()
         copyScript.exists()
         String copyScriptContent = copyScript.text
@@ -140,13 +132,5 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
             copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             it.comment.comment == "Attention: Datafile swapped!"
         }
-    }
-
-    private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
-        return [
-                roddyBamFile.workExecutionDirectories,
-                roddyBamFile.workMergedQADirectory,
-                roddyBamFile.workSingleLaneQADirectories.values(),
-        ].flatten()*.absolutePath
     }
 }

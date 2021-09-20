@@ -465,8 +465,7 @@ rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqT
 rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqTrack.individual.pid}
 """
         when:
-        // ToDo: adapt when in otp-921 WithOtherUser is deleted
-        String deletionScript = deletionService.deleteIndividual(seqTrack.individual)[0]
+        String deletionScript = deletionService.deleteIndividual(seqTrack.individual)
 
         then:
         deletionScript == expectedScriptCommand

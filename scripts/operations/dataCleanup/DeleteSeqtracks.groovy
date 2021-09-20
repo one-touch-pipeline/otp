@@ -111,7 +111,7 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
 Project.withTransaction {
     List<File> filesToDelete = seqTrackPerMultiImport.collect {
         print "deleting ${it}"
-        deletionService.deleteSeqTrack(it, checkForExternalBamFilesOrLinkedFastqFiles)["dirsToDelete"]
+        deletionService.deleteSeqTrack(it, checkForExternalBamFilesOrLinkedFastqFiles)
     }.flatten().unique()
     println """"
 deleted in OTP

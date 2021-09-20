@@ -28,9 +28,11 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
@@ -40,7 +42,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
 
-class DataSwapServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -57,6 +59,11 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
                 AlignmentPass,
                 MergingAssignment,
                 Comment,
+                BamFilePairAnalysis,
+                ReferenceGenomeProjectSeqType,
+                SampleTypePerProject,
+                AceseqInstance,
+                AceseqQc,
         ]
     }
 
@@ -146,6 +153,18 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
 
         then:
         1 * service.logSwapData(_ as DataSwapData<DataSwapParameters>) >> _
+
+        then:
+        1 * service.createMoveFilesScript(_ as DataSwapData<DataSwapParameters>) >> null
+
+        then:
+        1 * service.checkThatNoAnalysisIsRunning(_ as DataSwapData<DataSwapParameters>) >> null
+
+        then:
+        1 * service.createGroovyConsoleScriptToRestartAlignments(_ as DataSwapData<DataSwapParameters>) >> null
+
+        then:
+        1 * service.markSeqTracksAsSwappedAndDeleteDependingObjects(_ as DataSwapData<DataSwapParameters>) >> null
 
         then:
         1 * service.performDataSwap(_ as DataSwapData<DataSwapParameters>) >> _
@@ -490,6 +509,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         final String bashScriptName = "TEST-SCRIPT"
         final Path scriptOutputDirectory = temporaryFolder.newFolder("files").toPath()
 
+        service.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
         service.fileService = Mock(FileService) {
             1 * createOrOverwriteScriptOutputFile(_, _, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
         }
@@ -502,7 +524,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>(parameters: parameters)
 
         when:
-        service.createGroovyConsoleScriptToRestartAlignments(dataSwapData, realm)
+        service.createGroovyConsoleScriptToRestartAlignments(dataSwapData)
 
         then:
         scriptOutputDirectory.toFile().listFiles().length != 0
@@ -519,6 +541,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         final String bashScriptName = "TEST-SCRIPT"
         final Path scriptOutputDirectory = temporaryFolder.newFolder("files").toPath()
 
+        service.configService = Mock(ConfigService) {
+            1 * getDefaultRealm() >> realm
+        }
         service.fileService = Mock(FileService) {
             1 * createOrOverwriteScriptOutputFile(_, _, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
         }
@@ -534,7 +559,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
                 "    ${seqTrackList[1].id},  //${seqTrackList[1]}\n"
 
         when:
-        service.createGroovyConsoleScriptToRestartAlignments(dataSwapData, realm)
+        service.createGroovyConsoleScriptToRestartAlignments(dataSwapData)
 
         then:
         scriptOutputDirectory.toFile().listFiles().length != 0
@@ -670,7 +695,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
         final String newDataFileName = 'newDataFileName.gz'
 
         // domain
-        final SeqTrack seqTrack = createSeqTrackWithOneDataFile()
+        final SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType([libraryLayout: SequencingReadType.SINGLE])])
         DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
         dataFile.fileType.vbpPath = "/sequence/"
         dataFile.mateNumber = null
@@ -806,6 +831,48 @@ class DataSwapServiceSpec extends Specification implements DataTest, DomainFacto
 
         where:
         seqTrackAmount << [1, 3]
+    }
+
+    void "checkThatNoAnalysisIsRunning, when analysis is still progress then it should throw an AssertionError"() {
+        given:
+        final List<BamFilePairAnalysis> bamFilePairAnalyses = (1..3).collect {
+            DomainFactory.createAceseqInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.IN_PROGRESS)
+        }
+        final List<RoddyBamFile> roddyBamFiles = (bamFilePairAnalyses*.sampleType1BamFile + bamFilePairAnalyses*.sampleType2BamFile).sort { it.dateCreated }
+        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>([
+                seqTrackList: roddyBamFiles*.seqTracks.flatten(),
+        ])
+        service.analysisDeletionService = Mock(AnalysisDeletionService)
+
+        when:
+        service.checkThatNoAnalysisIsRunning(dataSwapData)
+
+        then:
+        1 * service.analysisDeletionService.assertThatNoWorkflowsAreRunning(_) >> { throw new AssertionError() }
+
+        and:
+        thrown(AssertionError)
+    }
+
+    void "checkThatNoAnalysisIsRunning, when analysis is not in progress then it should throw no AssertionError"() {
+        given:
+        final List<BamFilePairAnalysis> bamFilePairAnalyses = (1..3).collect {
+            DomainFactory.createAceseqInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        }
+        final List<RoddyBamFile> roddyBamFiles = (bamFilePairAnalyses*.sampleType1BamFile + bamFilePairAnalyses*.sampleType2BamFile).sort { it.dateCreated }
+        final DataSwapData dataSwapData = new DataSwapData<DataSwapParameters>([
+                seqTrackList: roddyBamFiles*.seqTracks.flatten(),
+        ])
+        service.analysisDeletionService = Mock(AnalysisDeletionService)
+
+        when:
+        service.checkThatNoAnalysisIsRunning(dataSwapData)
+
+        then:
+        1 * service.analysisDeletionService.assertThatNoWorkflowsAreRunning(_) >> _
+
+        and:
+        notThrown(AssertionError)
     }
 
     @Unroll

@@ -36,8 +36,6 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.Path
-
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwapData> {
@@ -88,29 +86,22 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
 
     @Override
     protected void performDataSwap(SampleSwapData data) {
-        // RestartAlignmentScript
-        def (Path bashScriptToMoveFiles, Path bashScriptToMoveFilesAsOtherUser) = createMoveFileScript(data)
-
-        data.seqTrackList.each { SeqTrack seqTrack ->
-            swapSeqTrack(bashScriptToMoveFilesAsOtherUser, seqTrack, data)
-        }
-
         List<AlignmentPass> alignmentPasses = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
 
         if (data.seqTrackList && alignmentPasses) {
-            bashScriptToMoveFiles << "\n\n\n ################ delete old aligned & merged files ################ \n"
+            data.moveFilesBashScript << "\n\n\n ################ delete old aligned & merged files ################ \n"
             alignmentPasses.each { AlignmentPass alignmentPass ->
                 String baseDirAlignment = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
                         DataProcessingFilesService.OutputDirectories.ALIGNMENT)
                 String middleDirAlignment = processedAlignmentFileService.getRunLaneDirectory(alignmentPass.seqTrack)
                 String oldPathToAlignedFiles = "${baseDirAlignment}/${middleDirAlignment}"
-                bashScriptToMoveFiles << "#rm -rf ${oldPathToAlignedFiles}\n"
+                data.moveFilesBashScript << "#rm -rf ${oldPathToAlignedFiles}\n"
             }
 
             String baseDirMerging = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
                     DataProcessingFilesService.OutputDirectories.MERGING)
             String oldProcessingPathToMergedFiles = "${baseDirMerging}/${data.sampleTypeSwap.old.name}"
-            bashScriptToMoveFiles << "#rm -rf ${oldProcessingPathToMergedFiles}\n"
+            data.moveFilesBashScript << "#rm -rf ${oldProcessingPathToMergedFiles}\n"
 
             List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.createCriteria().list {
                 mergingPass {
@@ -126,29 +117,23 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
             }
             latestProcessedMergedBamFiles.each { ProcessedMergedBamFile latestProcessedMergedBamFile ->
                 String oldProjectPathToMergedFiles = latestProcessedMergedBamFile.baseDirectory.absolutePath
-                bashScriptToMoveFiles << "#rm -rf ${oldProjectPathToMergedFiles}\n"
+                data.moveFilesBashScript << "#rm -rf ${oldProjectPathToMergedFiles}\n"
             }
         }
 
         swapSample(data)
 
-        bashScriptToMoveFiles << "\n\n################ move data files ################\n"
-        bashScriptToMoveFiles << renameDataFiles(data)
+        createMoveDataFilesCommands(data)
 
         SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
 
         List<String> newFastQcFileNames = data.fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-
-        bashScriptToMoveFiles << "\n\n\n################ move fastq files ################\n"
-
+        data.moveFilesBashScript << "\n\n\n################ move fastqc files ################\n"
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            bashScriptToMoveFiles << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
+            data.moveFilesBashScript << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
         }
 
-        bashScriptToMoveFiles << "# delete snv stuff\n"
-        data.dirsToDelete.flatten()*.path.each {
-            bashScriptToMoveFiles << "#rm -rf ${it}\n"
-        }
+        createRemoveAnalysisAndAlignmentsCommands(data)
     }
 
     @Override

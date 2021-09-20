@@ -55,6 +55,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
                 return "DataFiles: ${difference} not found in database, and ${dataFilesFound} were missed in map"
             }
         }
+        moveFilesBashScript nullable: true
     }
 
     P parameters
@@ -66,6 +67,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     Map<DataFile, Map<String, String>> oldDataFileNameMap
     List<String> oldFastQcFileNames
     List<File> dirsToDelete = []
+    Path moveFilesBashScript
 
     Swap<String> getPidSwap() {
         return parameters.pidSwap

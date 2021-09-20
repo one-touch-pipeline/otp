@@ -95,7 +95,6 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         assert missedFile.delete()
         assert unexpectedFile.createNewFile()
 
-        List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
         File destinationDirectory = bamFile.baseDirectory
 
         Path scriptFolder = temporaryFolder.newFolder("files").toPath()
@@ -125,21 +124,10 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         }
 
         then:
-        String output = outputLog
-        output.contains("${DataSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
-        output.contains("${DataSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
-
         scriptFolder.toFile().listFiles().length != 0
 
         File alignmentScript = scriptFolder.resolve("restartAli_${scriptName}.groovy").toFile()
         alignmentScript.exists()
-
-        File copyScriptOtherUser = scriptFolder.resolve("${scriptName}-otherUser.sh").toFile()
-        copyScriptOtherUser.exists()
-        String copyScriptOtherUserContent = copyScriptOtherUser.text
-        roddyFilesToDelete.each {
-            assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
-        }
 
         File copyScript = scriptFolder.resolve("${scriptName}.sh").toFile()
         copyScript.exists()
@@ -154,13 +142,5 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
-    }
-
-    private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
-        return [
-                roddyBamFile.workExecutionDirectories,
-                roddyBamFile.workMergedQADirectory,
-                roddyBamFile.workSingleLaneQADirectories.values(),
-        ].flatten()*.absolutePath
     }
 }
