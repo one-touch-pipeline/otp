@@ -99,4 +99,88 @@ class HipoSampleIdentifierParserSpec extends Specification {
                 'INVALID_PID',
         ]
     }
+
+    void "test tryParse, invalid sample name, returns null"() {
+        expect:
+        !parser.tryParse(sampleName)
+
+        where:
+        sampleName           || _
+        "H004-ABCD-T1"       || _
+        ""                   || _
+        null                 || _
+        "H004-BPF4-D4-D1"    || _
+        "P021-EFGH"          || _
+        "H035-BPD1-B3-D1"    || _
+        "H035-BPDM-T3-D1"    || _
+        "H003-BPDK-C8-M1"    || _
+        "H003-BPDK-C8-D01"   || _
+        "H003-BPDK-C8-C1"    || _
+        "H003-BPDK-C80-C02"  || _
+        "H032-PX6D42-T2-B01" || _
+    }
+
+    void "test tryParse, valid sample name, returns identifier"() {
+        expect:
+        parser.tryParse(sampleName)
+
+        where:
+        sampleName          || _
+        "H004-ABCD-T1-D1"   || _
+        "P021-EFGH-T1-D1"   || _
+        "H035-BPDM-B3-D1"   || _
+        "H035-BPDM-C4-D1"   || _
+        "H035-BPDK-B1-D1"   || _
+        "H035-BPDK-C8-D1"   || _
+        "H003-BPDK-C8-A1"   || _
+        "H00B-BPD1-T1-D1"   || _
+        "H00A-BPD1-T1-D1"   || _
+        "H003-BPDK-C8-C10"  || _
+        "H003-BPDK-C8-C02"  || _
+        "H059-BPDK-C80-C02" || _
+        "H032-PX6D42-M2-D1" || _
+        "H032-PX6D42-T2-W1" || _
+        "H032-PX6D42-T2-Y1" || _
+        "H032-PX6D42-T2-B1" || _
+        "K032-PX6D42-T2-B1" || _
+        "A032-PX6D42-T2-B1" || _
+    }
+
+    void "test tryParse, valid sample name, check results"() {
+        when:
+        HipoSampleIdentifier identifier = parser.tryParse(sampleName)
+
+        then:
+        identifier
+        projectNumber == identifier.projectNumber
+        pid == identifier.pid
+        tissueType == identifier.tissueType
+        sampleNumber == identifier.sampleNumber
+        analyteTypeAndNumber == identifier.analyteTypeAndNumber
+        sampleName == identifier.fullSampleName
+        sampleName == identifier.toString()
+
+        where:
+        sampleName          || projectNumber | pid           | tissueType                | sampleNumber | analyteTypeAndNumber
+        "H456-ABCD-T3-D1"   || "456"         | "H456-ABCD"   | HipoTissueType.TUMOR      | '3'          | "D1"
+        "C026-EFGH-M2-D1"   || "C026"        | "C026-EFGH"   | HipoTissueType.METASTASIS | '2'          | "D1"
+        "H035-IJKLMM-B1-D1" || "035"         | "H035-IJKLMM" | HipoTissueType.BLOOD      | '1'          | "D1"
+    }
+
+    void "test sampleTypeDbName"() {
+        expect:
+        tissueTypeExp == parser.tryParse(sampleName).sampleTypeDbName
+
+        where:
+        sampleName          || tissueTypeExp
+        "H004-ABCD-T1-D1"   || "tumor"
+        "H456-ABCD-T3-D1"   || "tumor03"
+        "H035-BPDM-B3-D1"   || "blood03"
+        "H035-BPDM-B1-D1"   || "blood01"
+        "H035-BPDM-C1-D1"   || "cell01"
+        "H035-IJKLMM-B1-D1" || "blood01"
+        "H001-BPDK-L8-C02"  || "plasma08"
+        "H001-BPDK-Z8-C02"  || "normal_sorted_cells08"
+        "H003-BPDK-E8-C02"  || "tumor_interval_debulking_surgery08".toLowerCase()
+    }
 }
