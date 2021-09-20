@@ -72,9 +72,9 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
         String sampleNumber = matcher.group(6)
 
-        // all projects except 059 may have only one digit in the sampleNumber
+        // all projects except 059 may not have leading zeros in the sampleNumber
         if (projectNumber != "059") {
-            if (sampleNumber.length() != 1) {
+            if (sampleNumber[0] == "0" && sampleNumber != "0") {
                 return null
             }
         }

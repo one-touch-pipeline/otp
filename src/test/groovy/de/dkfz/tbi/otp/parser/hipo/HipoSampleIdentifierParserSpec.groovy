@@ -31,7 +31,7 @@ class HipoSampleIdentifierParserSpec extends Specification {
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
     @Unroll
-    void 'tryParse, when H059, uses sample number exactly as given'(String sampleNumber) {
+    void 'tryParse, when H059, uses sample number exactly as given'() {
         given:
         String fullSampleName = "H059-ABCDEF-T${sampleNumber}-D1"
 
@@ -51,15 +51,29 @@ class HipoSampleIdentifierParserSpec extends Specification {
     }
 
     @Unroll
-    void 'tryParse, when not H059 and sample number has two digits, returns null'(String sampleNumber) {
+    void 'tryParse, when not H059 and sample number has two digits, returns null'() {
         given:
         String fullSampleName = "H123-ABCDEF-T${sampleNumber}-D1"
 
-        expect:
-        parser.tryParse(fullSampleName) == null
+        when:
+        HipoSampleIdentifier identifier = parser.tryParse(fullSampleName)
+        boolean validPid = parser.tryParsePid(fullSampleName.substring(0, 11))
+
+        then:
+        validPid
+        identifier.sampleNumber == sampleNumber
+        identifier.sampleTypeDbName == "tumor${sampleTypeDbName}".toString()
+        identifier.fullSampleName == fullSampleName
+        identifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
-        sampleNumber << ['00', '01', '02', '10', '11']
+        sampleNumber || sampleTypeDbName
+        '0'          || '00'
+        '1'          || ''
+        '2'          || '02'
+        '10'         || '10'
+        '11'         || '11'
+        '99'         || '99'
     }
 
     @Unroll
@@ -116,8 +130,10 @@ class HipoSampleIdentifierParserSpec extends Specification {
         "H003-BPDK-C8-M1"    || _
         "H003-BPDK-C8-D01"   || _
         "H003-BPDK-C8-C1"    || _
-        "H003-BPDK-C80-C02"  || _
         "H032-PX6D42-T2-B01" || _
+        "H123-ABCDEF-T00-D1" || _
+        "H123-ABCDEF-T01-D1" || _
+        "H123-ABCDEF-T09-D1" || _
     }
 
     void "test tryParse, valid sample name, returns identifier"() {
@@ -138,6 +154,7 @@ class HipoSampleIdentifierParserSpec extends Specification {
         "H003-BPDK-C8-C10"  || _
         "H003-BPDK-C8-C02"  || _
         "H059-BPDK-C80-C02" || _
+        "H003-BPDK-C80-C02" || _
         "H032-PX6D42-M2-D1" || _
         "H032-PX6D42-T2-W1" || _
         "H032-PX6D42-T2-Y1" || _
