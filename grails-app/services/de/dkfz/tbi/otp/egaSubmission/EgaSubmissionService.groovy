@@ -67,6 +67,12 @@ class EgaSubmissionService {
         submission.save(flush: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updatePubMedId(EgaSubmission submission, String pubMedId) {
+        submission.pubMedId = pubMedId
+        submission.save(flush: true)
+    }
+
     @CompileDynamic
     List<SeqType> seqTypeByProject(Project project) {
         List<Long> seqTypeIds = AggregateSequences.withCriteria {

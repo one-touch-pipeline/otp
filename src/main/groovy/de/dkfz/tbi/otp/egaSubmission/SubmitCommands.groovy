@@ -66,6 +66,15 @@ class UpdateSubmissionStateSubmitCommand implements Validateable {
     }
 }
 
+class UpdatePubMedIdSubmitCommand implements Validateable {
+    EgaSubmission submission
+    String pubMedId
+
+    void setValue(String value) {
+        this.pubMedId = value
+    }
+}
+
 class SelectSamplesControllerSubmitCommand implements Validateable {
     EgaSubmission submission
     String next

@@ -168,6 +168,18 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         exception.message.contains("rejected value [[]]")
     }
 
+    void "updatePubMedId, when submission is not null it should succeed"() {
+        given:
+        final EgaSubmission submission = createEgaSubmission()
+        final String pubMedId = "123test"
+
+        when:
+        egaSubmissionService.updatePubMedId(submission, pubMedId)
+
+        then:
+        submission.pubMedId == pubMedId
+    }
+
     void "createAndSaveSampleSubmissionObjects, when submission is null, then throw an assertion"() {
         given:
         Sample sample = createSample()

@@ -20,16 +20,19 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="layout" content="main" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
     <title><g:message code="egaSubmission.studyMetadata.title"/></title>
+    <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
+
 <body>
 <div class="body">
     <h1><g:message code="egaSubmission.studyMetadata.header"/></h1>
+
     <div>
         <table class="key-value-table key-input">
             <tr>
@@ -58,7 +61,12 @@
             </tr>
             <tr>
                 <td><g:message code="egaSubmission.newSubmission.pubMedId"/></td>
-                <td>${submission.pubMedId}</td>
+                <td>
+                    <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            link="${g.createLink(controller: "egaSubmission", action: 'updatePubMedId', params: ['submission.id': submission.id,])}"
+                            value="${submission.pubMedId}"/>
+                </td>
             </tr>
         </table>
     </div>

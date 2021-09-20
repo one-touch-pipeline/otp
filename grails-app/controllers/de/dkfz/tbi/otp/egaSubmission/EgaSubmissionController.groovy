@@ -58,6 +58,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             bamFilesListFileUploadForm : "POST",
             selectFilesBamFilesForm    : "POST",
             sampleMetadataForm         : "POST",
+            updatePubMedId             : "POST",
     ]
 
     EgaSubmissionService egaSubmissionService
@@ -541,6 +542,14 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
         render dataToRender as JSON
+    }
+
+    def updatePubMedId(UpdatePubMedIdSubmitCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            egaSubmissionService.updatePubMedId(cmd.submission, cmd.pubMedId)
+            Map map = [success: true]
+            render map as JSON
+        }
     }
 
     EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
