@@ -44,8 +44,8 @@ import java.nio.file.*
  * Abstract class for an data swap service. Defines basic steps necessary to perform some sort of an data swap.
  * Used as base of {@link SampleSwapService}.
  *
- * @param <P >       of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
- * @param <D >       of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
+ * @param <P> of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
+ * @param <D> of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
  *        necessary to perform swap.
  */
 @SuppressWarnings("JavaIoPackageAccess")

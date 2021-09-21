@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -37,6 +38,7 @@ class AnalysisDeletionService {
     IndelCallingService indelCallingService
     SnvCallingService snvCallingService
     SophiaService sophiaService
+    RunYapsaService runYapsaService
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
 
     /**
@@ -81,19 +83,22 @@ class AnalysisDeletionService {
     List<File> deleteSamplePairsWithoutAnalysisInstances(List<SamplePair> samplePairs) {
         List<Path> directoriesToDelete = []
         samplePairs.unique().each { SamplePair samplePair ->
-            if (!AbstractSnvCallingInstance.findBySamplePair(samplePair)) {
+            if (!AbstractSnvCallingInstance.findAllBySamplePair(samplePair)) {
                 directoriesToDelete << snvCallingService.getSamplePairPath(samplePair)
             }
             if (!IndelCallingInstance.findBySamplePair(samplePair)) {
                 directoriesToDelete << indelCallingService.getSamplePairPath(samplePair)
             }
-            if (!AceseqInstance.findBySamplePair(samplePair)) {
+            if (!AceseqInstance.findAllBySamplePair(samplePair)) {
                 directoriesToDelete << aceseqService.getSamplePairPath(samplePair)
             }
-            if (!SophiaInstance.findBySamplePair(samplePair)) {
+            if (!SophiaInstance.findAllBySamplePair(samplePair)) {
                 directoriesToDelete << sophiaService.getSamplePairPath(samplePair)
             }
-            if (!BamFilePairAnalysis.findBySamplePair(samplePair)) {
+            if (!RunYapsaInstance.findAllBySamplePair(samplePair)) {
+                directoriesToDelete << runYapsaService.getSamplePairPath(samplePair)
+            }
+            if (!BamFilePairAnalysis.findAllBySamplePair(samplePair)) {
                 samplePair.delete(flush: true)
             }
         }

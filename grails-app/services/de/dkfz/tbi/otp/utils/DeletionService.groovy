@@ -326,7 +326,7 @@ class DeletionService {
             alignmentPass.delete(flush: true)
             // The MergingWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are already removed
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
-                analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
+                dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 mergingWorkPackage.delete(flush: true)
             }
@@ -342,10 +342,13 @@ class DeletionService {
         }
 
         if (bamFiles) {
-            BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
+            List<BamFilePairAnalysis> analyses = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles)
+            List<SamplePair> samplePairs = analyses*.samplePair.unique()
+            analyses.each {
                 dirsToDelete << analysisDeletionService.deleteInstance(it)
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
+            dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
         }
 
         bamFiles.each { RoddyBamFile bamFile ->
@@ -353,16 +356,12 @@ class DeletionService {
             mergingWorkPackage.bamFileInProjectFolder = null
             mergingWorkPackage.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
-                    SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.baseDirectory
             bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
-                dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
-                        SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 mergingWorkPackage.delete(flush: true)
             }
         }
@@ -647,12 +646,19 @@ class DeletionService {
 
             mergingSetAssignments*.delete(flush: true)
 
+            if (processedMergedBamFiles) {
+                List<BamFilePairAnalysis> analyses = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
+                        processedMergedBamFiles, processedMergedBamFiles)
+                List<SamplePair> samplePairs = analyses*.samplePair.unique()
+                analyses.each {
+                    dirsToDelete << analysisDeletionService.deleteInstance(it)
+                }
+                dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
+            }
+
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
                 MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
-
-                dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
-                        SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage)))
 
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
                 processedMergedBamFile.delete(flush: true)
