@@ -135,7 +135,7 @@ class ExampleData {
         sampleTypes = sampleTypeNames.collect {
             findOrCreateSampleType(it)
         }
-        processingPriority = findOrProcessingPriority()
+        processingPriority = findOrCreateProcessingPriority()
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
         realm = findOrCreateRealm()
