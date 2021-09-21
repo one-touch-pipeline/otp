@@ -35,8 +35,8 @@ import de.dkfz.tbi.otp.OtpRuntimeException
 class SpreadsheetParseException extends OtpRuntimeException { }
 
 class EmptyHeaderException extends SpreadsheetParseException {
-    EmptyHeaderException() {
-        super("Column without header detected.")
+    EmptyHeaderException(String columnAddress) {
+        super("Column '${columnAddress}' doesn't have a header")
     }
 }
 

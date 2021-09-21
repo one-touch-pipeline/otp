@@ -78,7 +78,7 @@ class Spreadsheet {
                     header = new Row(this, rowIndex++, line.collect(renameHeader))
                     for (Cell cell : header.cells) {
                         if (cell.text.empty) {
-                            throw new EmptyHeaderException()
+                            throw new EmptyHeaderException(cell.columnAddress)
                         }
                         if (columnsByTitle.containsKey(cell.text)) {
                             throw new DuplicateHeaderException(cell.text)
