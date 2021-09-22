@@ -65,9 +65,9 @@ class UserSpec extends Specification implements DataTest, UserDomainFactory {
 
         where:
         username    | email        || errorCount
-        'newIntern' | 'new@de.de'  || 0
-        'newIntern' | EMAIL_INTERN || 0
-        'newIntern' | EMAIL_EXTERN || 0
+        'newintern' | 'new@de.de'  || 0
+        'newintern' | EMAIL_INTERN || 0
+        'newintern' | EMAIL_EXTERN || 0
         null        | 'new@de.de'  || 0
         null        | EMAIL_INTERN || 0
         null        | EMAIL_EXTERN || 1

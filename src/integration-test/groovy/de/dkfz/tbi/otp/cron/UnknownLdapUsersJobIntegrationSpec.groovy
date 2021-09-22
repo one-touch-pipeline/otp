@@ -42,8 +42,8 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         List<User> createdUsers = [
                 [null, true],
                 [null, false],
-                ["usernameA", true],
-                ["usernameB", false],
+                ["username.a", true],
+                ["username.b", false],
         ].collect { List<?> properties ->
             DomainFactory.createUser(username: properties[0], enabled: properties[1])
         }
@@ -60,10 +60,10 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
 
     void "getUsersThatCanNotBeFoundInLdap, only returns users that return false from existsInLdap"() {
         given:
-        List<User> usersToBeFound = ["A", "B", "C"].collect { String username ->
+        List<User> usersToBeFound = ["a", "b", "c"].collect { String username ->
             return DomainFactory.createUser(username: username)
         }
-        List<User> usersToNotBeFound = ["D", "E"].collect { String username ->
+        List<User> usersToNotBeFound = ["d", "e"].collect { String username ->
             return DomainFactory.createUser(username: username)
         }
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([

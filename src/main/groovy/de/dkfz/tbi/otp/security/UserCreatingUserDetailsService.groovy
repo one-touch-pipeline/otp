@@ -41,10 +41,6 @@ class UserCreatingUserDetailsService extends GormUserDetailsService {
     @Override
     @Transactional(readOnly = false, noRollbackFor = [IllegalArgumentException, UsernameNotFoundException])
     UserDetails loadUserByUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
-        loadUserByCaseInsensitiveUsername(username.toLowerCase(), loadRoles)
-    }
-
-    private UserDetails loadUserByCaseInsensitiveUsername(String username, boolean loadRoles) throws UsernameNotFoundException {
         User user = CollectionUtils.atMostOneElement(User.findAllByUsername(username))
         if (!user) {
             LdapUserDetails ldapUserDetails = grailsApplication.mainContext.ldapService.getLdapUserDetailsByUsername(username)

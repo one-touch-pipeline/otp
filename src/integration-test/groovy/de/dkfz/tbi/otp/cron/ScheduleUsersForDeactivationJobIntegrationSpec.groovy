@@ -116,21 +116,21 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         given:
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob()
 
-        User userA = DomainFactory.createUser(username: "A", realName: "RealNameA")
+        User userA = DomainFactory.createUser(username: "a", realName: "RealNameA")
         Set<UserProjectRole> userProjectRolesA = [
                 DomainFactory.createUserProjectRole(user: userA),
                 DomainFactory.createUserProjectRole(user: userA),
         ] as Set<UserProjectRole>
 
-        User userB = DomainFactory.createUser(username: "B", realName: "RealNameB")
+        User userB = DomainFactory.createUser(username: "b", realName: "RealNameB")
         Set<UserProjectRole> userProjectRolesB = [
                 DomainFactory.createUserProjectRole(user: userB),
         ] as Set<UserProjectRole>
 
         String result
         String expected = """\
-        |  - A (RealNameA) in project(s): ${userProjectRolesA*.project*.name.join(", ")}
-        |  - B (RealNameB) in project(s): ${userProjectRolesB*.project*.name.join(", ")}""".stripMargin()
+        |  - a (RealNameA) in project(s): ${userProjectRolesA*.project*.name.join(", ")}
+        |  - b (RealNameB) in project(s): ${userProjectRolesB*.project*.name.join(", ")}""".stripMargin()
 
         when:
         result = job.getMailBodyWithInvalidUsers(userProjectRolesA + userProjectRolesB)

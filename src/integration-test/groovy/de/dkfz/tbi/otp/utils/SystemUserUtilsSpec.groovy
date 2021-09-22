@@ -41,7 +41,7 @@ class SystemUserUtilsSpec extends Specification implements UserDomainFactory {
 
     void "useSystemUser, if called, it use the system user"() {
         given:
-        String userName = "systemUser ${nextId}"
+        String userName = "systemuser ${nextId}"
         createUser([
                 username: userName,
         ])

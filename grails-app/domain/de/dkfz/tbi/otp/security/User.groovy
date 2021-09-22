@@ -46,7 +46,11 @@ class User implements Entity {
     Date plannedDeactivationDate
 
     static Closure constraints = {
-        username(blank: false, unique: true, nullable: true)
+        username(blank: false, unique: true, nullable: true, validator: { val, obj ->
+            if (val && val.toLowerCase() != val) {
+                return 'user.username.not.lowercase'
+            }
+        })
         password(blank: false)
         email(nullable: false, email: true, validator: { val, obj ->
             if (!obj.username && User.findAllByEmailAndUsernameIsNullAndIdNotEqual(val, obj.id)) {

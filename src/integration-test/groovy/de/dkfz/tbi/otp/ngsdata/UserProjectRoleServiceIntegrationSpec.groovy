@@ -382,7 +382,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
         ProjectRole projectRole = createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                username: "unknownUser",
+                username: "unknown",
                 realName: "Unknown User",
                 mail: mailOfUser,
         )

@@ -165,9 +165,9 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
             return user
         }
 
-        User userA = createUserWithProjectsHelper("usernameA", -1)
+        User userA = createUserWithProjectsHelper("username.a", -1)
         List<User> untouchedUsers = [
-            createUserWithProjectsHelper("usernameB", +1),
+            createUserWithProjectsHelper("username.b", +1),
             createUserWithProjectsHelper(null, -1),
             createUserWithProjectsHelper(null, +1),
         ]

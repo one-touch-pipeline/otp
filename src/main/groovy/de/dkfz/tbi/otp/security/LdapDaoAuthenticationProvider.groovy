@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider
 import org.springframework.stereotype.Component
 
@@ -48,6 +49,10 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
     @Override
     Authentication authenticate(Authentication authentication) throws AuthenticationException {
         assert authentication
+
+        if (authentication.name != authentication.name.toLowerCase()) {
+            throw new UsernameNotFoundException("Username must be lower case")
+        }
 
         // authenticate with LDAP first, so that it can't be found out whether an account
         // is locked/disabled/expired by somebody else than the account owner
