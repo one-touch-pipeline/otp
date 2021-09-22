@@ -158,9 +158,6 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     2 * sendEmail(_, _, _, _) >> { }
                     1 * sendEmail(_, _, _) >> { }
                 },
-                linkGenerator: Mock(LinkGenerator) {
-                    _ * link(_) >> { return "generated_link" }
-                },
         ])
         Map<User, Set<UserProjectRole>> map = [
                 (userA): [userProjectRole] as Set<UserProjectRole>,

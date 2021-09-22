@@ -21,11 +21,15 @@
  */
 package de.dkfz.tbi.otp.monitor
 
+import grails.util.Holders
+import grails.web.mapping.LinkGenerator
+
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
 class MonitorOutputCollector {
@@ -41,18 +45,19 @@ class MonitorOutputCollector {
     static final String HEADER_FINISHED = 'The following objects are finished'
     static final String HEADER_NOT_SUPPORTED_SEQTYPES = 'The following SeqTypes are unsupported by this workflow'
 
-
     final boolean showFinishedEntries
 
     final boolean showNotSupportedSeqTypes
 
-
     private List<String> output = []
-
 
     MonitorOutputCollector(boolean showFinishedEntries = false, boolean showNotSupportedSeqTypes = false) {
         this.showFinishedEntries = showFinishedEntries
         this.showNotSupportedSeqTypes = showNotSupportedSeqTypes
+    }
+
+    LinkGenerator getGrailsLinkGenerator() {
+        return Holders.grailsApplication.mainContext.getBean("grailsLinkGenerator")
     }
 
     MonitorOutputCollector leftShift(Object value) {
@@ -60,11 +65,9 @@ class MonitorOutputCollector {
         return this
     }
 
-
     String getOutput() {
         output.join('\n')
     }
-
 
     String prefix(String text, String prefix = INDENT) {
         return "${prefix}${text.replace('\n', "\n${prefix}")}"
@@ -82,17 +85,18 @@ class MonitorOutputCollector {
         output << '\n' << workflowName
         if (withSlots) {
             List<JobExecutionPlan> jobExecutionPlans = JobExecutionPlan.findAllByName(workflowName)
-            long occupiedSlots = Process.countByFinishedAndJobExecutionPlanInList(false, jobExecutionPlans)
-            long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null)
-            long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(
-                    ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null
-            )
-            long normalSlots = totalSlots - fastTrackSlots
-            output << "${INDENT}Used Slots: ${occupiedSlots}, Normal priority slots: ${normalSlots}, additional fasttrack slots: ${fastTrackSlots}"
+            if (jobExecutionPlans) {
+                long occupiedSlots = Process.countByFinishedAndJobExecutionPlanInList(false, jobExecutionPlans)
+                long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null)
+                long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(
+                        ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null
+                )
+                long normalSlots = totalSlots - fastTrackSlots
+                output << "${INDENT}Used Slots: ${occupiedSlots}, Normal priority slots: ${normalSlots}, additional fasttrack slots: ${fastTrackSlots}"
+            }
         }
         output << ''
     }
-
 
     void showList(String name, List objects, Closure valueToShow = { it }) {
         if (!objects) {
@@ -115,7 +119,6 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
             "${key}  ${value.size() == 1 ? '' : "(count: ${value.size()})"}"
         })
     }
-
 
     void showUniqueNotSupportedSeqTypes(List objects, Closure valueToShow = { it }) {
         if (showNotSupportedSeqTypes) {
@@ -154,7 +157,6 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
         }
     }
 
-
     void addInfoAboutProcessErrors(String workflow, Collection<Object> objects, Closure valueToShow, Closure objectToCheck) {
         if (!objects) {
             return
@@ -183,6 +185,11 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
             String workflow, List noProcess, List processWithError, Object object, Closure valueToShow, Closure extractObjectToCheck
     ) {
         Object objectToCheck = extractObjectToCheck(object)
+        if ((objectToCheck instanceof Artefact) && ((objectToCheck as Artefact).workflowArtefact)) {
+            return checkProcessesForObjectInNewWorkflowSystem(
+                    processWithError, object, valueToShow, extractObjectToCheck
+            )
+        }
 
         def processes = ProcessParameter.findAllByValue(objectToCheck.id, [sort: "id"])*.process.findAll {
             it.jobExecutionPlan.name == workflow
@@ -203,17 +210,16 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
         ProcessingStepUpdate update = ps.latestProcessingStepUpdate
         def state = update?.state
         if (state == ExecutionState.FAILURE || update == null) {
-            output << prefix("An error occur for the object: ${valueToShow(object)}")
+            output << prefix("An error occured for the object: ${valueToShow(object)}")
             List errorOutput = []
-            errorOutput << """\
-object class/id: ${object.class} / ${object.id}
-the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}
-the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT3}")}"""
+            errorOutput << "\nobject class/id: ${object.class} / ${object.id}" +
+                    "\nthe OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}" +
+                    "\nthe error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT3}")}"
 
             Comment comment = ps.process.comment
             if (comment) {
                 errorOutput << "the comment (${TimeFormats.DATE.getFormattedDate(comment.modificationDate)} by ${comment.author}): " +
-                        "${ps.process.comment.comment.replaceAll('\n', "\n${INDENT3}")}"
+                        "${comment.comment.replaceAll('\n', "\n${INDENT3}")}"
             }
             if (update == null) {
                 errorOutput << "no update available: Please inform a maintainer\n"
@@ -222,6 +228,46 @@ the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n'
             processWithError << object.id
             return true
         }
+        return false
+    }
+
+    private boolean checkProcessesForObjectInNewWorkflowSystem(
+            List processWithError, Object object, Closure valueToShow, Closure extractObjectToCheck
+    ) {
+
+        Artefact artefactToCheck = extractObjectToCheck(object) as Artefact
+        WorkflowArtefact workflowArtefact = artefactToCheck.workflowArtefact
+        if (workflowArtefact.state == WorkflowArtefact.State.FAILED) {
+            WorkflowRun workflowRun = workflowArtefact.producedBy
+            List errorOutput = []
+            output << "\n${INDENT2}Attention: An error occured for the object: ${valueToShow(object)}"
+            output << "${INDENT2}Please inform a maintainer"
+            errorOutput << "object class/id: ${object.class} / ${object.id}"
+            String link = grailsLinkGenerator.link([
+                    controller: 'workflowRunDetails',
+                    params    : [
+                            'workflow.id': workflowRun.workflow.id,
+                            state        : workflowArtefact.state,
+                    ],
+                    action    : 'index',
+                    state     : workflowArtefact.state,
+                    id        : workflowRun.id,
+                    absolute  : 'true',
+            ])
+            errorOutput << "the OTP link: ${link}"
+            errorOutput << "the short display name: ${workflowRun.shortDisplayName}"
+            WorkflowStep latestWorkflowStep = workflowArtefact.producedBy?.workflowSteps?.last()
+            errorOutput << "WorkflowError: " + latestWorkflowStep.workflowError.message
+            Comment comment = workflowRun.comment
+            if (comment) {
+                errorOutput << "the comment (${TimeFormats.DATE.getFormattedDate(comment.modificationDate)} by ${comment.author}) " +
+                        "${comment.comment.replaceAll('\n', "\n${INDENT3}")}"
+            }
+            output << prefix(errorOutput.join('\n'), INDENT3)
+            processWithError << object.id
+            return true
+        }
+
         return false
     }
 }

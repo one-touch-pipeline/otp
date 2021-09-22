@@ -189,7 +189,7 @@ All the Rules that will be used for OTP
 
     // rulesets/braces.xml
     ElseBlockBraces {
-        priority = HIGH
+        priority = DEFAULT
     }
     ForStatementBraces {
         priority = CRITICAL
