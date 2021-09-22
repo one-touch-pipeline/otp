@@ -342,10 +342,6 @@ class ProcessingOption implements Entity {
         ),
 
         // FileSystem
-        /**
-         * @Deprecated old workflow system
-         */
-        @Deprecated
         FILESYSTEM_FASTQ_IMPORT(
                 "Realm to use for filesystem access when importing FASTQs, local is used if empty",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT_OPTIONAL

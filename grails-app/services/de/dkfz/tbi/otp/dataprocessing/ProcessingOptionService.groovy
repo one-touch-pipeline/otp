@@ -120,8 +120,6 @@ class ProcessingOptionService {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingOption> listProcessingOptions() {
-        ProcessingOption.findAllByDateObsoletedIsNull().findAll {
-            !it.name.isDeprecated()
-        }
+        return ProcessingOption.findAllByDateObsoletedIsNull()
     }
 }
