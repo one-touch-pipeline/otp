@@ -36,8 +36,10 @@ import static de.dkfz.tbi.otp.infrastructure.ClusterJob.CheckStatus.FINISHED
 
 @Secured("hasRole('ROLE_OPERATOR')")
 class WorkflowRunDetailsController extends AbstractWorkflowRunController {
+
     ClusterJobService clusterJobService
     CommentService commentService
+    WorkflowStepService workflowStepService
 
     static allowedMethods = [
             index      : "GET",
@@ -80,7 +82,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
         List<LinkedHashMap<String, Object>> result = workflowSteps.collect { step ->
             boolean isPreviousOfFailedStep = !workflowSteps.findAll {
-                it.previousRunningWorkflowStep?.id == step.id && it.state == WorkflowStep.State.FAILED
+                workflowStepService.getPreviousRunningWorkflowStep(it)?.id == step.id && it.state == WorkflowStep.State.FAILED
             }.empty
 
             return [
@@ -107,7 +109,7 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
                     wes                   : step.wesIdentifier,
                     hasLogs               : !step.logs.empty,
                     obsolete              : step.obsolete,
-                    previousStepId        : step.previousRunningWorkflowStep?.id,
+                    previousStepId        : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
                     isPreviousOfFailedStep: isPreviousOfFailedStep,
             ]
         }
