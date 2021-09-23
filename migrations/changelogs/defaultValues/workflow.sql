@@ -34,8 +34,8 @@ VALUES(nextval('hibernate_sequence'), 0, 'FastQC', TRUE, 0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'PanCancer alignment', TRUE,  0, now(), now(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES(nextval('hibernate_sequence'), 0, 'PanCancer alignment', 'panCancerWorkflow', TRUE,  0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)

@@ -589,4 +589,8 @@ databaseChangeLog = {
     include file: 'changelogs/2021/otp-1255-add-column-maxParallelWorkflows.groovy'
 
     include file: 'changelogs/2021/otp-1285-add-species-info-to-individual-and-sample.groovy'
+
+    changeSet(author: "sunakshi", id: "otp-1127") {
+        sqlFile(path: 'changelogs/2021/otp-1127-pancancer-bean-migration.sql')
+    }
 }

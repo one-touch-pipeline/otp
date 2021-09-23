@@ -44,7 +44,7 @@ variables:
 .abstract_base_template:
   image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
   stage: test
-  dependencies: []
+  dependencies: [ ]
   only:
     - branches
     - tags
@@ -67,14 +67,14 @@ variables:
 compile:
   extends: .abstract_base_template
   stage: build
-  dependencies: []
+  dependencies: [ ]
   script:
     - ./gradlew classes
 
 license:
   image: groovy:latest
   stage: build
-  dependencies: []
+  dependencies: [ ]
   only:
     - branches
     - tags

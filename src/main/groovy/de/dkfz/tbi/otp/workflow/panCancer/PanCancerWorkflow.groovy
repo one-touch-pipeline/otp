@@ -24,15 +24,68 @@ package de.dkfz.tbi.otp.workflow.panCancer
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflowExecution.*
 
+/**
+ * represents the PanCancer Workflow
+ */
 @Component
 @Slf4j
 @CompileStatic
-class PanCancerWorkflow {
+class PanCancerWorkflow implements OtpWorkflow {
 
     static final String WORKFLOW = "PanCancer alignment"
     static final String INPUT_FASTQ = "FASTQ"
     static final String INPUT_FASTQC = "FASTQC"
     static final String INPUT_BASE_BAM_FILE = "BASE_BAM_FILE"
     static final String OUTPUT_BAM = "BAM"
+
+    @Override
+    List<String> getJobBeanNames() {
+        return [
+                PanCancerConditionalFailJob.simpleName.uncapitalize(),
+                PanCancerPrepareJob.simpleName.uncapitalize(),
+                PanCancerExecuteJob.simpleName.uncapitalize(),
+                PanCancerValidationJob.simpleName.uncapitalize(),
+                PanCancerParseJob.simpleName.uncapitalize(),
+                PanCancerCheckQcJob.simpleName.uncapitalize(),
+                PanCancerCleanUpJob.simpleName.uncapitalize(),
+                SetCorrectPermissionJob.simpleName.uncapitalize(),
+                PanCancerLinkJob.simpleName.uncapitalize(),
+                PanCancerFinishJob.simpleName.uncapitalize(),
+        ]
+    }
+
+    /**
+     * Since it is designed for repeated run, it creates and returns a new artefact
+     */
+    @Override
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        RoddyBamFile roddyBamFile = artefact as RoddyBamFile
+
+        MergingWorkPackage mergingWorkPackage = roddyBamFile.mergingWorkPackage
+        int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
+
+        RoddyBamFile outputRoddyBamFile = new RoddyBamFile([
+                workPackage        : mergingWorkPackage,
+                identifier         : identifier,
+                workDirectoryName  : "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                baseBamFile        : roddyBamFile.baseBamFile,
+                seqTracks          : roddyBamFile.seqTracks.collect() as Set,
+                config             : roddyBamFile.config,
+                numberOfMergedLanes: roddyBamFile.containedSeqTracks.size(),
+        ]).save()
+
+        return outputRoddyBamFile
+    }
+
+    /**
+     * There is nothing to do in a single run workflow.
+     */
+    @Override
+    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
+    }
 }
