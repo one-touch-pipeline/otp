@@ -21,9 +21,7 @@
  */
 package de.dkfz.tbi.util
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
+import java.time.*
 import java.time.format.DateTimeFormatter
 
 enum TimeFormats {
@@ -45,27 +43,24 @@ enum TimeFormats {
 
     final String format
 
-    final DateTimeFormatter formatter
-
     private TimeFormats(String format) {
         this.format = format
-        formatter = DateTimeFormatter.ofPattern(format)
     }
 
-    String getFormattedZonedDateTime(ZonedDateTime date) {
-        return date ? date.format(formatter) : 'na'
+    String getFormattedZonedDateTime(ZonedDateTime date, Locale locale = Locale.ENGLISH) {
+        return date ? date.format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
     }
 
-    String getFormattedLocalDate(LocalDate date) {
-        return date ? date.format(formatter) : 'na'
+    String getFormattedLocalDate(LocalDate date, Locale locale = Locale.ENGLISH) {
+        return date ? date.format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
     }
 
-    String getFormattedDate(Date date) {
-        return date ? TimeUtils.toZonedDateTime(date).format(formatter) : 'na'
+    String getFormattedDate(Date date, Locale locale = Locale.ENGLISH) {
+        return date ? TimeUtils.toZonedDateTime(date).format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
     }
 
-    String getFormattedLocalDateTime(LocalDateTime localDateTime) {
-        return localDateTime ? localDateTime.format(formatter) : 'na'
+    String getFormattedLocalDateTime(LocalDateTime localDateTime, Locale locale = Locale.ENGLISH) {
+        return localDateTime ? localDateTime.format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
     }
     /**
      * Formats the date in such a way that only relevant changed values are displayed.
