@@ -84,8 +84,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 initialDirectory: workflowResultDirectory.resolve("ftp").resolve(run.name),
     )
 
-        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile, remoteFileSystem), sourceFastq, realm)
-        fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(dataFile, remoteFileSystem), sourceFastq, realm)
+        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(dataFile), sourceFastq, realm)
+        fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(dataFile), sourceFastq, realm)
     }
 
     void "test FastQcWorkflow, when FastQC result file is available"() {

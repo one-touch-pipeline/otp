@@ -32,9 +32,9 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
@@ -60,7 +60,11 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        Path path = temporaryFolder.newFolder().toPath()
+        configService.addOtpProperties(path)
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> path
+        }
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 sophiaService    : Spy(SophiaService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -76,8 +80,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                         }
                 ]),
         ])
-        job.sophiaService.configService = configService
-        job.sophiaService.fileSystemService = new TestFileSystemService()
+        job.sophiaService.individualService = individualService
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
@@ -143,7 +146,11 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        Path path = temporaryFolder.newFolder().toPath()
+        configService.addOtpProperties(path)
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> path
+        }
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -153,12 +160,11 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                     1 * validateInputBamFiles(_) >> { }
                 },
         ])
-        job.sophiaService.configService = configService
-        job.sophiaService.fileSystemService = new TestFileSystemService()
+        job.sophiaService.individualService = individualService
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, individualService)
 
         when:
         job.validate(sophiaInstance)
@@ -181,7 +187,11 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        Path path = temporaryFolder.newFolder().toPath()
+        configService.addOtpProperties(path)
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> path
+        }
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
@@ -193,7 +203,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, individualService)
 
         when:
         job.validate(sophiaInstance)
@@ -210,7 +220,11 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        Path path = temporaryFolder.newFolder().toPath()
+        configService.addOtpProperties(path)
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> path
+        }
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -218,12 +232,11 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 },
         ])
         job.sophiaService = new SophiaService()
-        job.sophiaService.fileSystemService = new TestFileSystemService()
-        job.sophiaService.configService = configService
+        job.sophiaService.individualService = individualService
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, individualService)
 
         Path fileToDelete = fileClousure(sophiaInstance, job.sophiaService)
         new FileService().deleteDirectoryRecursively(fileToDelete)

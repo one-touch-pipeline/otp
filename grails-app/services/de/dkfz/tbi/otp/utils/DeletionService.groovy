@@ -56,15 +56,16 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class DeletionService {
 
-    CommentService commentService
-    FastqcDataFilesService fastqcDataFilesService
-    LsdfFilesService lsdfFilesService
-    DataProcessingFilesService dataProcessingFilesService
-    SeqTrackService seqTrackService
     AnalysisDeletionService analysisDeletionService
-    FileService fileService
-    RunService runService
+    CommentService commentService
     ConfigService configService
+    DataProcessingFilesService dataProcessingFilesService
+    FastqcDataFilesService fastqcDataFilesService
+    FileService fileService
+    IndividualService individualService
+    LsdfFilesService lsdfFilesService
+    RunService runService
+    SeqTrackService seqTrackService
     WorkflowDeletionService workflowDeletionService
 
     void deleteProjectContent(Project project) {
@@ -127,7 +128,7 @@ class DeletionService {
         }
 
         seqTypes.unique().each { SeqType seqType ->
-            deletionScript << "rm -rf ${individual.getViewByPidPath(seqType).absoluteDataManagementPath}\n"
+            deletionScript << "rm -rf ${individualService.getViewByPidPath(individual, seqType)}\n"
         }
 
         deleteClusterJobs(ClusterJob.findAllByIndividual(individual))

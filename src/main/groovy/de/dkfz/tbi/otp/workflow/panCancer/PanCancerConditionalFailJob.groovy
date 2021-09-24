@@ -26,15 +26,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.IllegalFileNameException
-import de.dkfz.tbi.otp.ngsdata.MetaDataService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -54,7 +50,6 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
     @Override
     protected void check(WorkflowStep workflowStep) {
         List<SeqTrack> seqTracks = getSeqTracks(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
         List<String> errorMessages = []
         List<File> allDataFiles = []
 
@@ -73,7 +68,7 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
             }
 
             final Collection<Path> paths = dataFiles.collect { DataFile file ->
-                lsdfFilesService.getFileViewByPidPathAsPath(file, fs)
+                lsdfFilesService.getFileViewByPidPathAsPath(file)
             }
 
             final Collection<Path> missingPaths = paths.findAll { Path path ->

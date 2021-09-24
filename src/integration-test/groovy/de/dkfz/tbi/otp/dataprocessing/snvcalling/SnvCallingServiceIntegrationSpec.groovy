@@ -34,13 +34,12 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -419,11 +418,14 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+        Path path = temporaryFolder.newFolder().toPath()
+        configService.addOtpProperties(path)
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> path
+        }
         SnvCallingService snvCallingService = new SnvCallingService(
-                configService: configService,
                 fileService: new FileService(),
-                fileSystemService: new TestFileSystemService(),
+                individualService: individualService,
         )
 
         RoddySnvCallingInstance instance = DomainFactory.createRoddySnvCallingInstance(

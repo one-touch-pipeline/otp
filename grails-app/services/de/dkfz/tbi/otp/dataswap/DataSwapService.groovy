@@ -30,11 +30,11 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.dataswap.data.DataSwapData
+import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataswap.data.DataSwapData
-import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
@@ -279,12 +279,12 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     Map<DataFile, Map<String, String>> collectFileNamesOfDataFiles(List<DataFile> dataFiles) {
         Map<DataFile, Map<String, String>> map = [:]
         dataFiles.each { DataFile dataFile ->
-            String directFileName = lsdfFilesService.getFileFinalPath(dataFile)
-            String vbpFileName = lsdfFilesService.getFileViewByPidPath(dataFile)
+            String directFileName = lsdfFilesService.getFileFinalPathAsPath(dataFile)
+            String vbpFileName = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
             map[dataFile] = [(DIRECT_FILE_NAME): directFileName, (VBP_FILE_NAME): vbpFileName]
             if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
-                map[dataFile][WELL_FILE_NAME] = lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
-                map[dataFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(dataFile)
+                map[dataFile][WELL_FILE_NAME] = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile).toString()
+                map[dataFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(dataFile).toString()
                 map[dataFile][WELL_MAPPING_FILE_ENTRY_NAME] = singleCellService.mappingEntry(dataFile)
             }
         }
@@ -295,8 +295,8 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         if (!dataFile.seqType.singleCell || !dataFile.seqTrack.singleCellWellLabel) {
             return ''
         }
-        String newDirectFileName = lsdfFilesService.getFileFinalPath(dataFile)
-        String newWellFileName = lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
+        String newDirectFileName = lsdfFilesService.getFileFinalPathAsPath(dataFile)
+        String newWellFileName = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile)
         File wellFile = new File(newWellFileName)
 
         Path mappingFile = singleCellService.singleCellMappingFile(dataFile)
@@ -510,24 +510,22 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         String oldDirectFileName = data.oldDataFileNameMap[dataFile][DIRECT_FILE_NAME]
         String oldVbpFileName = data.oldDataFileNameMap[dataFile][VBP_FILE_NAME]
         String oldWellName = data.oldDataFileNameMap[dataFile][WELL_FILE_NAME]
-        Path directFilePath = fileSystem.getPath(oldDirectFileName)
+        Path oldDirectFilePath = fileSystem.getPath(oldDirectFileName)
 
         // check if old files are already gone and moved
-        boolean filesAlreadyMoved = !Files.exists(directFilePath)
+        boolean filesAlreadyMoved = !Files.exists(oldDirectFilePath)
 
         String bashMoveVbpFile = "rm -f '${oldVbpFileName}';\n"
         String bashMoveDirectFile
 
-        String newDirectFileName = lsdfFilesService.getFileFinalPath(dataFile)
-        String newVbpFileName = lsdfFilesService.getFileViewByPidPath(dataFile)
-        directFilePath = fileSystem.getPath(newDirectFileName)
-        Path vbpFile = fileSystem.getPath(newVbpFileName)
+        Path newDirectPath = lsdfFilesService.getFileFinalPathAsPath(dataFile)
+        Path newVbpPath = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
 
-        if (Files.exists(directFilePath)) {
-            if (!filesAlreadyMoved && (oldDirectFileName != newDirectFileName)) {
+        if (Files.exists(newDirectPath)) {
+            if (!filesAlreadyMoved && (oldDirectFilePath != newDirectPath)) {
                 bashMoveDirectFile = "# rm -f '${oldDirectFileName}'"
             } else {
-                bashMoveDirectFile = "# ${newDirectFileName} is already at the correct position"
+                bashMoveDirectFile = "# ${newDirectPath} is already at the correct position"
             }
         } else {
             if (filesAlreadyMoved) {
@@ -536,22 +534,22 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
             }
             bashMoveDirectFile = """\n
                                      # ${dataFile.seqTrack} ${dataFile}
-                                     mkdir -p -m 2750 '${directFilePath.parent}';""".stripIndent()
+                                     mkdir -p -m 2750 '${newDirectPath.parent}';""".stripIndent()
 
             bashMoveDirectFile += """
                                           |mv '${oldDirectFileName}' \\
-                                          |   '${newDirectFileName}';
-                                          |${getFixGroupCommand(directFilePath)}
+                                          |   '${newDirectPath}';
+                                          |${getFixGroupCommand(newDirectPath)}
                                           |if [ -e '${oldDirectFileName}.md5sum' ]; then
                                           |  mv '${oldDirectFileName}.md5sum' \\
-                                          |     '${newDirectFileName}.md5sum';
-                                          |  ${getFixGroupCommand(directFilePath.resolveSibling("${directFilePath.fileName}.md5sum"))}
+                                          |     '${newDirectPath}.md5sum';
+                                          |  ${getFixGroupCommand(newDirectPath.resolveSibling("${newDirectPath.fileName}.md5sum"))}
                                           |fi\n""".stripMargin()
         }
         bashMoveVbpFile += """\
-                               |mkdir -p -m 2750 '${vbpFile.parent}';
-                               |ln -s '${newDirectFileName}' \\
-                               |      '${newVbpFileName}'""".stripMargin()
+                               |mkdir -p -m 2750 '${newVbpPath.parent}';
+                               |ln -s '${newDirectPath}' \\
+                               |      '${newVbpPath}'""".stripMargin()
 
         outPutBashCommands += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
         if (oldWellName) {
@@ -655,6 +653,6 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @return found list of fastq data filenames
      */
     protected List<String> getFastQcOutputFileNamesByDataFilesInList(List<DataFile> dataFiles) {
-        return dataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
+        return dataFiles.collect { fastqcDataFilesService.fastqcOutputPath(it).toString() }
     }
 }

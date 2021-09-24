@@ -119,7 +119,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
 
     private RnaRoddyBamFile setUpForPrepareAndReturnWorkflowSpecificCValues() {
         ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
-        executeRnaAlignmentJob.lsdfFilesService = new LsdfFilesService()
+        executeRnaAlignmentJob.lsdfFilesService = lsdfFilesService
         executeRnaAlignmentJob.referenceGenomeService = new ReferenceGenomeService()
         executeRnaAlignmentJob.referenceGenomeService.configService = configService
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()

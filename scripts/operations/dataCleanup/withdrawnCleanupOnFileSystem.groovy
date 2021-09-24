@@ -48,7 +48,6 @@ LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
 FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
-FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 
 String withdrawnGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
@@ -77,7 +76,7 @@ String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
 }.sort().join('\n')
 
 String dataFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    lsdfFilesService.getFileFinalPathAsPath(it, fileSystem)
+    lsdfFilesService.getFileFinalPathAsPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -85,7 +84,7 @@ String dataFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).col
 }.sort().join('\n')
 
 String md5sumDataFile = DataFile.findAllByFileWithdrawn(true).collect {
-    lsdfFilesService.getFileMd5sumFinalPathAsPath(it, fileSystem)
+    lsdfFilesService.getFileMd5sumFinalPathAsPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -93,7 +92,7 @@ String md5sumDataFile = DataFile.findAllByFileWithdrawn(true).collect {
 }.sort().join('\n')
 
 String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    fastqcDataFilesService.fastqcOutputPath(it, fileSystem)
+    fastqcDataFilesService.fastqcOutputPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -101,7 +100,7 @@ String zipFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).coll
 }.sort().join('\n')
 
 String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    fastqcDataFilesService.fastqcHtmlPath(it, fileSystem)
+    fastqcDataFilesService.fastqcHtmlPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -109,7 +108,7 @@ String htmlFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).col
 }.sort().join('\n')
 
 String md5sumFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    fastqcDataFilesService.fastqcOutputMd5sumPath(it, fileSystem)
+    fastqcDataFilesService.fastqcOutputMd5sumPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -117,7 +116,7 @@ String md5sumFiles = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).c
 }.sort().join('\n')
 
 String dataFilesViewByPid = DataFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    lsdfFilesService.getFileViewByPidPathAsPath(it, fileSystem)
+    lsdfFilesService.getFileViewByPidPathAsPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {

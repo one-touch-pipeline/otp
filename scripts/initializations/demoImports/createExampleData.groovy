@@ -186,12 +186,10 @@ class ExampleData {
             return
         }
         println "creating dummy datafiles on file system"
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
         dataFiles.each { DataFile dataFile ->
-            Path directPath = lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem)
+            Path directPath = lsdfFilesService.getFileFinalPathAsPath(dataFile)
             Path directPathMd5sum = directPath.resolveSibling("${dataFile.fileName}.md5sum")
-            Path vbpPath = lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fileSystem)
+            Path vbpPath = lsdfFilesService.getFileViewByPidPathAsPath(dataFile)
             [
                     directPath,
                     directPathMd5sum,

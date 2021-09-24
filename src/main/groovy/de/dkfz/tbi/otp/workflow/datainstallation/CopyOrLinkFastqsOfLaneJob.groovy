@@ -57,7 +57,7 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
         seqTrack.dataFiles.each { DataFile dataFile ->
             Path target = lsdfFilesService.getFileInitialPathAsPath(dataFile, fileSystem)
-            Path link = lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem)
+            Path link = lsdfFilesService.getFileFinalPathAsPath(dataFile)
             logService.addSimpleLogEntry(workflowStep, "Creating link ${link} to ${target}")
             fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
         }
@@ -69,7 +69,7 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
 
         return seqTrack.dataFiles.collect { DataFile dataFile ->
             Path source = lsdfFilesService.getFileInitialPathAsPath(dataFile, fileSystem)
-            Path destination = lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem)
+            Path destination = lsdfFilesService.getFileFinalPathAsPath(dataFile)
 
             String md5SumFileName = checksumFileService.md5FileName(dataFile)
             return """

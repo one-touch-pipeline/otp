@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -45,10 +44,9 @@ class FastqcValidationJob extends AbstractOtpClusterValidationJob implements Fas
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
 
         return seqTrack.dataFiles.collect { DataFile dataFile ->
-            fs.getPath(fastqcDataFilesService.fastqcOutputFile(dataFile))
+            fastqcDataFilesService.fastqcOutputPath(dataFile)
         }
     }
 

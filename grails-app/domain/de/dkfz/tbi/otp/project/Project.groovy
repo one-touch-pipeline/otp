@@ -200,7 +200,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     }
 
     String getDisplayName() {
-        "${name}${closed ? " (closed)" : ""}"
+        return "${name}${closed ? " (closed)" : ""}"
     }
 
     /**
@@ -208,15 +208,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
      */
     @Deprecated
     File getProjectDirectory() {
-        new OtpPath(this, dirName).absoluteDataManagementPath
-    }
-
-    /**
-     * @deprecated use {@link ProjectService#getSequencingDirectory(Project)}
-     */
-    @Deprecated
-    File getProjectSequencingDirectory() {
-        new File(projectDirectory, 'sequencing')
+        return new OtpPath(this, dirName).absoluteDataManagementPath
     }
 
     @Override

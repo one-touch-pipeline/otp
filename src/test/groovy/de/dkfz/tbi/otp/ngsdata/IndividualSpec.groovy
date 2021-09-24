@@ -42,7 +42,6 @@ class IndividualSpec extends Specification implements DataTest {
         ]
     }
 
-
     TestConfigService configService
 
     void "test validate"() {
@@ -131,9 +130,8 @@ class IndividualSpec extends Specification implements DataTest {
         assert sample1.save(flush: true)
 
         expect:
-        [sample1] == individual.getSamples()
+        [sample1] == individual.samples
     }
-
 
     void "test getSamples, with multiple samples"() {
         given:
@@ -154,62 +152,8 @@ class IndividualSpec extends Specification implements DataTest {
         assert sample2.save(flush: true)
 
         expect:
-        [sample1, sample2] == individual.getSamples()
+        [sample1, sample2] == individual.samples
     }
-
-    void "test getViewByPidPathBase"() {
-        given:
-        Individual individual = DomainFactory.createIndividual()
-        SeqType seqType = DomainFactory.createSeqType()
-        configService = new TestConfigService()
-        String expectedPath = "${configService.getRootPath()}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
-
-        when:
-        String actualPath = individual.getViewByPidPathBase(seqType).absoluteDataManagementPath
-
-        then:
-        expectedPath == actualPath
-    }
-
-    void "test getViewByPidPath"() {
-        given:
-        Individual individual = DomainFactory.createIndividual()
-        SeqType seqType = DomainFactory.createSeqType()
-        configService = new TestConfigService()
-        String expectedPath = "${configService.getRootPath()}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}"
-
-        when:
-        String actualPath = individual.getViewByPidPath(seqType).absoluteDataManagementPath
-
-        then:
-        expectedPath == actualPath
-    }
-
-
-    void "test getResultsPerPidPath"() {
-        given:
-        Realm realm = DomainFactory.createRealm()
-        assert realm.save(flush: true)
-
-        Project project = DomainFactory.createProject(
-                dirName: "projectDirName",
-                realm: realm
-        )
-
-        Individual individual = createIndividual()
-        individual.project = project
-
-        configService = new TestConfigService()
-
-        String expectedPath = "${configService.getRootPath()}/${project.dirName}/results_per_pid/${individual.pid}"
-
-        when:
-        String actualPath = individual.getResultsPerPidPath().absoluteDataManagementPath
-
-        then:
-        expectedPath == actualPath
-    }
-
 
     private Individual createIndividual() {
         return new Individual(

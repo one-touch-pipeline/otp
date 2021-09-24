@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -57,8 +56,7 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        return fileSystem.getPath(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
+        return fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
     }
 
     @Override

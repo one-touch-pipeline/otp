@@ -64,7 +64,7 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
             getRemoteFileSystem(_) >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_, _) >> path
+            getFileViewByPidPathAsPath(_) >> path
         }
 
         when:
@@ -103,7 +103,7 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
             getRemoteFileSystem(_) >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_, _) >> TestCase.uniqueNonExistentPath.toPath()
+            getFileViewByPidPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()
         }
 
         when:

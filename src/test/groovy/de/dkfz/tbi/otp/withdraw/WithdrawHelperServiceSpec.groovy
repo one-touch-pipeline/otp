@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.*
@@ -416,10 +415,6 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
                 ])
         ])
         WithdrawHelperService service = new WithdrawHelperService()
-        FileSystem fileSystem = FileSystems.default
-        service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> fileSystem
-        }
 
         service.lsdfFilesService = Mock(LsdfFilesService)
         service.fastqcDataFilesService = Mock(FastqcDataFilesService)
@@ -454,21 +449,21 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
         service.handleDataFiles(holder)
 
         then:
-        1 * service.lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem) >> finalPathNormal
-        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem) >> finalMd5sumNormal
+        1 * service.lsdfFilesService.getFileFinalPathAsPath(dataFile) >> finalPathNormal
+        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile) >> finalMd5sumNormal
         1 * service.lsdfFilesService.getFileViewByPidPath(dataFile) >> viewByPidPathNormal
-        1 * service.lsdfFilesService.getFileFinalPathAsPath(singleCellDataFile, fileSystem) >> finalPathSingleCell
-        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(singleCellDataFile, fileSystem) >> finalMd5sumSingleCell
+        1 * service.lsdfFilesService.getFileFinalPathAsPath(singleCellDataFile) >> finalPathSingleCell
+        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(singleCellDataFile) >> finalMd5sumSingleCell
         1 * service.lsdfFilesService.getFileViewByPidPath(singleCellDataFile) >> viewByPidPathSingleCell
         1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellDataFile) >> wellPathSingleCell
         0 * service.lsdfFilesService._
 
-        1 * service.fastqcDataFilesService.fastqcOutputPath(dataFile, fileSystem) >> fastqcPathNormal
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile, fileSystem) >> fastqcOutputMd5sumPath
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(dataFile, fileSystem) >> fastqcHtmlPath
-        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellDataFile, fileSystem) >> fastqcPathSingleCell
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellDataFile, fileSystem) >> fastqcOutputMd5sumPathSingleCell
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellDataFile, fileSystem) >> fastqcHtmlPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcOutputPath(dataFile) >> fastqcPathNormal
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile) >> fastqcOutputMd5sumPath
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(dataFile) >> fastqcHtmlPath
+        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellDataFile) >> fastqcPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellDataFile) >> fastqcOutputMd5sumPathSingleCell
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellDataFile) >> fastqcHtmlPathSingleCell
         0 * service.fastqcDataFilesService._
 
         and:

@@ -47,9 +47,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsInvalidException
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupIsSharedException
-import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupNotFoundException
+import de.dkfz.tbi.otp.project.exception.unixGroup.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*

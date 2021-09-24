@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
@@ -45,54 +46,57 @@ import java.util.zip.ZipFile
 class FastqcDataFilesService {
 
     LsdfFilesService lsdfFilesService
+    FileService fileService
     FileSystemService fileSystemService
 
     static final String FASTQC_FILE_SUFFIX = "_fastqc"
     static final String FASTQC_ZIP_SUFFIX = ".zip"
 
 
-    String fastqcOutputDirectory(SeqTrack seqTrack) {
-        def type = DataProcessingFilesService.OutputDirectories.FASTX_QC
+    Path fastqcOutputDirectory(SeqTrack seqTrack) {
+        DataProcessingFilesService.OutputDirectories type = DataProcessingFilesService.OutputDirectories.FASTX_QC
 
-        File baseString = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
-        return "${baseString}/${type.toString().toLowerCase()}"
+        Path baseString = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
+        return baseString.resolve(type.toString().toLowerCase())
     }
 
-    String fastqcOutputFile(DataFile dataFile) {
+    Path fastqcOutputPath(DataFile dataFile) {
         SeqTrack seqTrack = dataFile.seqTrack
         if (!seqTrack) {
             throw new ProcessingException("DataFile not assigned to a SeqTrack")
         }
-        String base = fastqcOutputDirectory(seqTrack)
+        Path base = fastqcOutputDirectory(seqTrack)
         String fileName = fastqcFileName(dataFile)
-        return "${base}/${fileName}"
+        return base.resolve(fileName)
     }
 
-    Path fastqcOutputPath(DataFile dataFile, FileSystem fileSystem) {
-        return fileSystem.getPath(fastqcOutputFile(dataFile))
+    @Deprecated
+    String fastqcOutputFile(DataFile dataFile) {
+        return fastqcOutputPath(dataFile).toString()
     }
 
-    String fastqcHtmlFile(DataFile dataFile) {
+    Path fastqcHtmlPath(DataFile dataFile) {
         SeqTrack seqTrack = dataFile.seqTrack
         if (!seqTrack) {
             throw new ProcessingException("DataFile not assigned to a SeqTrack")
         }
-        String base = fastqcOutputDirectory(seqTrack)
+        Path base = fastqcOutputDirectory(seqTrack)
         String fileName = fastqcFileNameWithoutZipSuffix(dataFile).concat(".html")
-        return "${base}/${fileName}"
+        return base.resolve(fileName)
     }
 
-    Path fastqcHtmlPath(DataFile dataFile, FileSystem fileSystem) {
-        return fileSystem.getPath(fastqcHtmlFile(dataFile))
+    @Deprecated
+    String fastqcHtmlFile(DataFile dataFile) {
+        return fastqcHtmlPath(dataFile).toString()
     }
 
+    Path fastqcOutputMd5sumPath(DataFile dataFile) {
+        return fastqcOutputPath(dataFile).resolveSibling(fastqcOutputPath(dataFile).fileName.toString().concat(".md5sum"))
+    }
+
+    @Deprecated
     String fastqcOutputMd5sumFile(DataFile dataFile) {
-        return fastqcOutputFile(dataFile).concat(".md5sum")
-    }
-
-    Path fastqcOutputMd5sumPath(DataFile dataFile, FileSystem fileSystem) {
-        String fastqcOutputMd5sumFile = fastqcOutputMd5sumFile(dataFile)
-        return fastqcOutputMd5sumFile ? fileSystem.getPath(fastqcOutputMd5sumFile) : null
+        return fastqcOutputMd5sumPath(dataFile)?.toString()
     }
 
     String fastqcFileName(DataFile dataFile) {

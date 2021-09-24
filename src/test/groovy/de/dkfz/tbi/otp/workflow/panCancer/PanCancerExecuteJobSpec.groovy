@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -39,6 +40,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.nio.file.Paths
 
 class PanCancerExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
@@ -94,6 +97,10 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
             chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
         }
         job.roddyConfigValueService.lsdfFilesService = new LsdfFilesService()
+        job.roddyConfigValueService.lsdfFilesService.fileService = new FileService()
+        job.roddyConfigValueService.lsdfFilesService.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
+        }
 
         DomainFactory.createRoddyAlignableSeqTypes()
 
@@ -279,7 +286,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
         return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
-                job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPath(dataFile) as File
+                job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString()
             }
         }.flatten().join(';')
     }

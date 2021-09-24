@@ -28,20 +28,19 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
-import java.nio.file.FileSystems
-import java.nio.file.Path
+import java.nio.file.*
 
 class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
@@ -101,7 +100,14 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         given:
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
 
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
+                individualService     : individualService,
                 indelCallingService   : Spy(IndelCallingService) {
                     1 * validateInputBamFiles(_) >> { }
                 },
@@ -121,9 +127,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 ]),
         ])
 
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
-        job.indelCallingService.configService = configService
-        job.indelCallingService.fileSystemService = new TestFileSystemService()
+        job.indelCallingService.individualService = individualService
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
@@ -180,9 +184,14 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
         File bedFile = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "bed.txt"))
 
-        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
+                individualService     : individualService,
                 indelCallingService   : Spy(IndelCallingService) {
                     1 * validateInputBamFiles(_) >> { }
                 },
@@ -204,8 +213,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                         }
                 ]),
         ])
-        job.indelCallingService.configService = configService
-        job.indelCallingService.fileSystemService = new TestFileSystemService()
+        job.indelCallingService.individualService = individualService
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
         SeqType seqType = DomainFactory.createExomeSeqType()
@@ -293,7 +301,12 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -303,12 +316,11 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                     1 * validateInputBamFiles(_) >> { }
                 },
         ])
-        job.indelCallingService.configService = configService
-        job.indelCallingService.fileSystemService = new TestFileSystemService()
+        job.indelCallingService.individualService = individualService
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, configService)
+        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, individualService)
 
         expect:
         job.validate(indelCallingInstance)
@@ -327,7 +339,12 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
-        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : configService,
@@ -339,7 +356,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, configService)
+        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, individualService)
 
         when:
         job.validate(indelCallingInstance)
@@ -354,7 +371,12 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     @Unroll
     void "validate, when file not exists, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -363,12 +385,11 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ])
 
         job.indelCallingService = new IndelCallingService()
-        job.indelCallingService.fileSystemService = new TestFileSystemService()
-        job.indelCallingService.configService = configService
+        job.indelCallingService.individualService = individualService
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, configService)
+        CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance, individualService)
 
         Path fileToDelete = fileClousure(indelCallingInstance, job.indelCallingService)
         new FileService().deleteDirectoryRecursively(fileToDelete)

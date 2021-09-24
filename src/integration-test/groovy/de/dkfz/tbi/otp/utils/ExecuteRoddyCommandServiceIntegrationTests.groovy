@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+import java.nio.file.Paths
+
 @Rollback
 @Integration
 class ExecuteRoddyCommandServiceIntegrationTests {
@@ -97,6 +99,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         featureTogglesConfigPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
 
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        executeRoddyCommandService.individualService = new IndividualService()
     }
 
     @After
@@ -108,6 +111,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         roddyBamFile = null
         TestCase.removeMetaClass(RemoteShellHelper, executeRoddyCommandService.remoteShellHelper)
         TestCase.removeMetaClass(ExecuteRoddyCommandService, executeRoddyCommandService)
+        TestCase.removeMetaClass(IndividualService, executeRoddyCommandService.individualService)
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
         executeRoddyCommandService.remoteShellHelper = remoteShellHelper
     }
@@ -231,6 +235,9 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail() {
         setupData()
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.individualService.metaClass.getViewByPidPathBase = { Individual individual, SeqType seqType ->
+            Paths.get("/view-by-pid-path")
+        }
         assert applicationIniPath.delete()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
@@ -241,6 +248,9 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     void testDefaultRoddyExecutionCommand_BaseConfigFolderDoesNotExistInFilesystem_ShouldFail() {
         setupData()
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.individualService.metaClass.getViewByPidPathBase = { Individual individual, SeqType seqType ->
+            Paths.get("/view-by-pid-path")
+        }
         assert roddyBaseConfigsPath.deleteDir()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
@@ -249,8 +259,9 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
     void helperFor_testDefaultRoddyExecutionCommand_AllFine() {
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
-
-        String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
+        executeRoddyCommandService.individualService.metaClass.getViewByPidPathBase = { Individual individual, SeqType seqType ->
+            Paths.get("/view-by-pid-path")
+        }
 
         String expectedCmd =
                 INIT_MODULES +
@@ -261,7 +272,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 "--usePluginVersion=${roddyBamFile.config.programVersion} " +
                 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}," +
                 "${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} " +
-                "--useiodir=${viewByPid},${roddyBamFile.workDirectory}"
+                "--useiodir=/view-by-pid-path,${roddyBamFile.workDirectory}"
 
         LogThreadLocal.withThreadLog(System.out) {
             String actualCmd = executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)

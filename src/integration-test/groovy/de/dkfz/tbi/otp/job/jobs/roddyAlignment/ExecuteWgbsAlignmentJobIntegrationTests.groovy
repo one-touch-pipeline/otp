@@ -263,7 +263,6 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         assert lines.size() == 3
         assert lines.get(0).trim() == executeWgbsAlignmentJob.HEADER.trim()
 
-
         DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).each {
             String oneLine = "${it.sampleType.dirName}\t${it.seqTrack.getLibraryDirectoryName()}\t${it.individual.pid}\t${it.seqType.libraryLayoutDirName}\t${it.run.dirName}\t${it.mateNumber}\t${lsdfFilesService.getFileViewByPidPath(it)}"
 
@@ -309,7 +308,6 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         executeWgbsAlignmentJob.workflowSpecificValidation(roddyBamFile)
     }
-
 
     private void createFileAndAddFileSize(File file, DataFile dataFile) {
         CreateFileHelper.createFile(file)

@@ -55,14 +55,14 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         Realm realm = workflowStep.realm
         FileSystem fileSystem = getFileSystem(workflowStep)
-        Path outputDir = fileSystem.getPath(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
+        Path outputDir = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
 
         //get data files to be used
         List<DataFile> dataFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
 
         //delete existing file in case of restart
         dataFiles.each { DataFile dataFile ->
-            Path resultFilePath = fileSystem.getPath(fastqcDataFilesService.fastqcOutputFile(dataFile))
+            Path resultFilePath = fastqcDataFilesService.fastqcOutputPath(dataFile)
             if (Files.exists(resultFilePath)) {
                 logService.addSimpleLogEntry(workflowStep, "Delete result file ${resultFilePath}")
                 fileService.deleteDirectoryRecursively(resultFilePath)
@@ -102,7 +102,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
                 |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
                 |cp ${seqCenterFastQcFile} ${outDir}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputFile(dataFile)}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputPath(dataFile)}
                 |
                 |#check md5sum
                 |cd ${outDir}
@@ -138,8 +138,8 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |${fastqcActivation}
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputFile(dataFile)}
-                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcHtmlFile(dataFile)}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputPath(dataFile)}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcHtmlPath(dataFile)}
                 |${deleteDecompressedFileCommand}
                 |""".stripMargin()
         }

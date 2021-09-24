@@ -26,7 +26,6 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 @Transactional
 class SingleCellService {
@@ -45,7 +44,7 @@ class SingleCellService {
     }
 
     Path singleCellMappingFile(DataFile dataFile) {
-        return Paths.get(lsdfFilesService.createSingleCellAllWellDirectoryPath(dataFile), buildMappingFileName(dataFile))
+        return lsdfFilesService.createSingleCellAllWellDirectoryPath(dataFile).resolve(buildMappingFileName(dataFile))
     }
 
     /**

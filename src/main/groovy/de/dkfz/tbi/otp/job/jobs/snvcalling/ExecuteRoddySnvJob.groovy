@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.IndividualService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -54,6 +55,9 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
     @Autowired
     FileSystemService fileSystemService
 
+    @Autowired
+    IndividualService individualService
+
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddySnvCallingInstance roddySnvCallingInstance) {
         assert roddySnvCallingInstance
@@ -70,8 +74,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        Path individualPath = fileSystemService.getRemoteFileSystem(roddySnvCallingInstance.project.realm)
-                .getPath(roddySnvCallingInstance.individual.getViewByPidPath(roddySnvCallingInstance.seqType).absoluteDataManagementPath.path)
+        Path individualPath = individualService.getViewByPidPath(roddySnvCallingInstance.individual, roddySnvCallingInstance.seqType)
         Path resultDirectory = snvCallingService.getWorkDirectory(roddySnvCallingInstance)
 
         List<String> cValues = []

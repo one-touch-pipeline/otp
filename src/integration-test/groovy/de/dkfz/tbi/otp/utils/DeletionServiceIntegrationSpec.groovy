@@ -42,8 +42,11 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.dta.*
 import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.nio.file.Paths
 
 @Rollback
 @Integration
@@ -52,9 +55,22 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     DeletionService deletionService
     TestConfigService configService
 
+    String seqDir = "/seq-dir"
+    String vbpDir = "/vbp-dir"
+
     void setupData() {
+        IndividualService individualService =  Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(vbpDir)
+        }
+
         deletionService = new DeletionService()
+        deletionService.individualService = individualService
         deletionService.lsdfFilesService = new LsdfFilesService()
+        deletionService.lsdfFilesService.fileService = new FileService()
+        deletionService.lsdfFilesService.projectService = Mock(ProjectService) {
+            getSequencingDirectory(_) >> Paths.get(seqDir)
+        }
+        deletionService.lsdfFilesService.individualService = individualService
         deletionService.commentService = Mock(CommentService)
         deletionService.fastqcDataFilesService = Mock(FastqcDataFilesService)
         deletionService.dataProcessingFilesService = Mock(DataProcessingFilesService)
@@ -526,11 +542,12 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         final String sampleTypeDirName = seqTrack.sample.sampleType.dirName
         final String vbpPath = dataFile.fileType.vbpPath
         final String vbpFileName = dataFile.vbpFileName
-        final String expectedScriptCommand = """rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
-rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
-rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}.md5sum
-rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqTrack.individual.pid}/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
-rm -rf $basePath/root/$projectPath/sequencing/$seqTypeDirName/view-by-pid/${seqTrack.individual.pid}
+        final String expectedScriptCommand = """\
+rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
+rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}
+rm -rf $seqDir/$seqTypeDirName/$seqCenterName/$runDirName/${dataFile.pathName}${dataFile?.fileName}.md5sum
+rm -rf $vbpDir/$sampleTypeDirName/single/$runDirName/$vbpPath/$vbpFileName
+rm -rf $vbpDir
 """
         when:
         String deletionScript = deletionService.deleteIndividual(seqTrack.individual)

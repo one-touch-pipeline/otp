@@ -28,10 +28,15 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTest<FastqcDataFilesService>, DataTest, DomainFactoryCore,
         WorkflowSystemDomainFactory {
@@ -68,6 +73,10 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     void setup() {
         configService = new TestConfigService()
         service.lsdfFilesService = new LsdfFilesService()
+        service.lsdfFilesService.individualService = new IndividualService()
+        service.lsdfFilesService.individualService.projectService = new ProjectService()
+        service.lsdfFilesService.individualService.projectService.fileSystemService = new TestFileSystemService()
+        service.lsdfFilesService.individualService.projectService.configService = configService
         service.fileSystemService = new TestFileSystemService()
 
         realm = DomainFactory.createRealm()
@@ -201,7 +210,8 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         String fastqc = DataProcessingFilesService.OutputDirectories.FASTX_QC.toString().toLowerCase()
 
         String viewByPidPath = "${configService.getRootPath()}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
-        String expectedPath = "${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${fastqc}"
+        Path expectedPath = Paths.get("${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/" +
+                "${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${fastqc}")
 
         expect:
         service.fastqcOutputDirectory(seqTrack) == expectedPath
@@ -209,6 +219,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
     void "test updateFastqcProcessedFile, with existing FastqcProcessedFile"() {
         given:
+        service.fileService = new FileService()
         WorkflowArtefact workflowArtefact = createWorkflowArtefact()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 

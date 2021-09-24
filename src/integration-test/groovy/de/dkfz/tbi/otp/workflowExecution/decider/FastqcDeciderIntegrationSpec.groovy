@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.FastqcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
+import java.nio.file.Paths
+
 @Rollback
 @Integration
 class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
@@ -54,7 +56,7 @@ class FastqcDeciderIntegrationSpec extends Specification implements WorkflowSyst
             1 * getSequenceFilesForSeqTrack(seqTrack) >> dataFiles
         }
         decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(seqTrack) >> "/output-dir-fastqc"
+            1 * fastqcOutputDirectory(seqTrack) >> Paths.get("/output-dir-fastqc")
         }
         decider.configFragmentService = Mock(ConfigFragmentService) {
             1 * getSortedFragments(_) >> [new ExternalWorkflowConfigFragment(name: "xyz", configValues: '{"WORKFLOWS":{"resource":"1"}}')]

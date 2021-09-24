@@ -30,8 +30,11 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+
+import java.nio.file.Paths
 
 class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTest<RoddyConfigValueService>, DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
@@ -175,6 +178,10 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     void "test getFilesToMerge"() {
         given:
         service.lsdfFilesService = new LsdfFilesService()
+        service.lsdfFilesService.fileService = new FileService()
+        service.lsdfFilesService.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
+        }
         RoddyBamFile roddyBamFile = createBamFile()
 
         expect:
@@ -184,7 +191,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse) {
         return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
-                service.lsdfFilesService.getFileViewByPidPath(dataFile) as File
+                service.lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString()
             }
         }.flatten().join(';')
     }

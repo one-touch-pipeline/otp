@@ -185,20 +185,18 @@ class UnWithdrawer {
 
     static void unwithdraw(final DataFile dataFile, String comment, List dirsToLink) {
 
-        FileSystemService fileSystemService = ctx.fileSystemService
         LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
         FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
         println "Unwithdrawing DataFile: ${dataFile}: ${dataFile.withdrawnComment}"
         dirsToLink.add("ln -rs ${lsdfFilesService.getFileFinalPath(dataFile)} ${lsdfFilesService.getFileViewByPidPath(dataFile)}")
-        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${lsdfFilesService.getFileViewByPidPathAsPath(dataFile, fileSystem)}")
+        dirsToLink.add("chgrp ${dataFile.project.unixGroup} ${lsdfFilesService.getFileViewByPidPathAsPath(dataFile)}")
         [
-                lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem),
-                lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile, fileSystem),
-                fastqcDataFilesService.fastqcOutputPath(dataFile, fileSystem),
-                fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile, fileSystem),
-                fastqcDataFilesService.fastqcHtmlPath(dataFile, fileSystem),
+                lsdfFilesService.getFileFinalPathAsPath(dataFile),
+                lsdfFilesService.getFileMd5sumFinalPathAsPath(dataFile),
+                fastqcDataFilesService.fastqcOutputPath(dataFile),
+                fastqcDataFilesService.fastqcOutputMd5sumPath(dataFile),
+                fastqcDataFilesService.fastqcHtmlPath(dataFile),
         ].findAll { path ->
             Files.exists(path)
         }.collect { filePath ->

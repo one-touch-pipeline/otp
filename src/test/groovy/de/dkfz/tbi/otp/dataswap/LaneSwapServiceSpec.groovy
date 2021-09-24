@@ -76,12 +76,12 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         // Services
         Path path = temporaryFolder.newFile().toPath()
         service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            _ * fastqcOutputFile(_) >> path
+            _ * fastqcOutputPath(_) >> path
         }
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> path
-            _ * getFileViewByPidPath(_) >> path
-            _ * getWellAllFileViewByPidPath(_) >> path
+            _ * getFileFinalPathAsPath(_) >> path
+            _ * getFileViewByPidPathAsPath(_) >> path
+            _ * getWellAllFileViewByPidPathAsPAth(_) >> path
         }
         service.seqTrackService = new SeqTrackService()
 

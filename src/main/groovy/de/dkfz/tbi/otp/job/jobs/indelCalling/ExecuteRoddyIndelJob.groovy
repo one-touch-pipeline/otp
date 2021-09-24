@@ -46,6 +46,9 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
     @Autowired
     IndelCallingService indelCallingService
 
+    @Autowired
+    IndividualService individualService
+
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(IndelCallingInstance indelCallingInstance) {
@@ -65,8 +68,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        Path individualPath = fileSystemService.getRemoteFileSystem(indelCallingInstance.project.realm)
-                .getPath(indelCallingInstance.individual.getViewByPidPath(indelCallingInstance.seqType).absoluteDataManagementPath.path)
+        Path individualPath = individualService.getViewByPidPath(indelCallingInstance.individual, indelCallingInstance.seqType)
         Path resultDirectory = indelCallingService.getWorkDirectory(indelCallingInstance)
 
         List<String> cValues = []

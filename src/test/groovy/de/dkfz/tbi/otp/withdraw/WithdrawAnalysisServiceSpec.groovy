@@ -27,21 +27,18 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+
+import java.nio.file.Paths
 
 class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTest<WithdrawAnalysisService>, DataTest, DomainFactoryCore {
 
@@ -142,15 +139,14 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
     }
 
     private createFactoryService(WithdrawAnalysisService service) {
-        ConfigService configService = new TestConfigService()
-        FileSystemService fileSystemService = new TestFileSystemService()
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get("/")
+        }
         service.bamFileAnalysisServiceFactoryService = new BamFileAnalysisServiceFactoryService()
-        service.bamFileAnalysisServiceFactoryService.aceseqService = new AceseqService(configService: configService, fileSystemService: fileSystemService)
-        service.bamFileAnalysisServiceFactoryService.indelCallingService = new IndelCallingService(
-                configService: configService, fileSystemService: fileSystemService)
-        service.bamFileAnalysisServiceFactoryService.runYapsaService = new RunYapsaService(configService: configService, fileSystemService: fileSystemService)
-        service.bamFileAnalysisServiceFactoryService.snvCallingService = new SnvCallingService(
-                configService: configService, fileSystemService: fileSystemService)
-        service.bamFileAnalysisServiceFactoryService.sophiaService = new SophiaService(configService: configService, fileSystemService: fileSystemService)
+        service.bamFileAnalysisServiceFactoryService.aceseqService = new AceseqService(individualService: individualService)
+        service.bamFileAnalysisServiceFactoryService.indelCallingService = new IndelCallingService(individualService: individualService)
+        service.bamFileAnalysisServiceFactoryService.runYapsaService = new RunYapsaService(individualService: individualService)
+        service.bamFileAnalysisServiceFactoryService.snvCallingService = new SnvCallingService(individualService: individualService)
+        service.bamFileAnalysisServiceFactoryService.sophiaService = new SophiaService(individualService: individualService)
     }
 }

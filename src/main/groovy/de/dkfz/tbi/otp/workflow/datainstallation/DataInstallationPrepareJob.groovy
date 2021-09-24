@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -49,8 +48,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert seqTrack.save(flush: true)
 
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        Path runDirectory = lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first(), fileSystem).parent
+        Path runDirectory = lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first()).parent
         logService.addSimpleLogEntry(workflowStep, "Creating work directory ${runDirectory}")
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                 runDirectory,
@@ -62,8 +60,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fileSystem = getFileSystem(workflowStep)
-        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first(), fileSystem).parent
+        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.dataFiles.first()).parent
     }
 
     @Override

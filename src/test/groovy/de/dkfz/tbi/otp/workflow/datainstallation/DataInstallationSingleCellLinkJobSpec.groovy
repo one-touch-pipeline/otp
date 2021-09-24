@@ -26,13 +26,13 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.*
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class DataInstallationSingleCellLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
@@ -71,12 +71,9 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
         DataInstallationSingleCellLinkJob job = Spy(DataInstallationSingleCellLinkJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
-        job.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
-        }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            (isSingleCell ? 2 : 0) * getFileFinalPathAsPath(_, _) >>> [target1, target2]
-            (isSingleCell ? 2 : 0) * getWellAllFileViewByPidPathAsPath(_, _) >>> [link1, link2]
+            (isSingleCell ? 2 : 0) * getFileFinalPathAsPath(_) >>> [target1, target2]
+            (isSingleCell ? 2 : 0) * getWellAllFileViewByPidPathAsPath(_) >>> [link1, link2]
         }
 
         expect:

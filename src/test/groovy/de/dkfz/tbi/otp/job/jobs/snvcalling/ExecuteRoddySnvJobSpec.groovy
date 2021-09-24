@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
@@ -99,10 +100,15 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
         File chromosomeLength = temporaryFolder.newFile()
 
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService         : configService,
+                individualService: individualService,
                 snvCallingService     : Spy(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> { }
                 },
@@ -113,8 +119,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 },
         ])
         job.fileSystemService = new TestFileSystemService()
-        job.snvCallingService.configService = configService
-        job.snvCallingService.fileSystemService = new TestFileSystemService()
+        job.snvCallingService.individualService = individualService
         job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
@@ -179,7 +184,12 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -190,15 +200,14 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                     1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_) >> { }
                 },
         ])
-        job.snvCallingService.configService = configService
-        job.snvCallingService.fileSystemService = new TestFileSystemService()
+        job.snvCallingService.individualService = individualService
 
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, configService)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, individualService)
 
         when:
         job.validate(roddySnvCallingInstance)
@@ -222,7 +231,13 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
         String md5sum = HelperUtils.uniqueString
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -233,7 +248,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, configService)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, individualService)
 
         when:
         job.validate(roddySnvCallingInstance)
@@ -250,7 +265,12 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     @Unroll
     void "validate, when file not exists, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        IndividualService individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
+
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -260,12 +280,11 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
         job.fileSystemService = new TestFileSystemService()
         job.snvCallingService = new SnvCallingService()
-        job.snvCallingService.fileSystemService = new TestFileSystemService()
-        job.snvCallingService.configService = configService
+        job.snvCallingService.individualService = individualService
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, configService)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, individualService)
 
         Path fileToDelete = fileClousure(roddySnvCallingInstance, job.snvCallingService)
         new FileService().deleteDirectoryRecursively(fileToDelete)

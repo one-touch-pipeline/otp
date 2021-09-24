@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
@@ -47,6 +47,9 @@ class LsdfFilesService {
     FileService fileService
 
     FileSystemService fileSystemService
+
+    IndividualService individualService
+    ProjectService projectService
 
     /**
      * Similar to {@link java.nio.file.Paths#get(String, String ...)} from Java 7.
@@ -96,10 +99,8 @@ class LsdfFilesService {
      *
      * @param dataFile
      * @return String with path or null if path can not be established
-     * @deprecated use {@link #getFileFinalPathAsPath}
      */
-    @Deprecated
-    String getFileFinalPath(DataFile dataFile) {
+    Path getFileFinalPathAsPath(DataFile dataFile) {
         if (!checkFinalPathDefined(dataFile)) {
             return null
         }
@@ -108,14 +109,16 @@ class LsdfFilesService {
             return null
         }
         String centerDir = dataFile.run.seqCenter.dirName
-        String basePath = dataFile.project.projectSequencingDirectory
-        String path = "${basePath}/${seqTypeDir}/${centerDir}/${dataFile.run.dirName}/${dataFile.pathName}/${dataFile?.fileName}"
-        return path
+        Path basePath = projectService.getSequencingDirectory(dataFile.project)
+        return basePath.resolve(seqTypeDir).resolve(centerDir).resolve(dataFile.run.dirName).resolve(dataFile.pathName).resolve(dataFile?.fileName)
     }
 
-    Path getFileFinalPathAsPath(DataFile dataFile, FileSystem fileSystem) {
-        String fileFinalPath = getFileFinalPath(dataFile)
-        return (fileFinalPath) ? fileSystem.getPath(getFileFinalPath(dataFile)) : null
+    /**
+     * @deprecated use {@link #getFileFinalPathAsPath}
+     */
+    @Deprecated
+    String getFileFinalPath(DataFile dataFile) {
+        return getFileFinalPathAsPath(dataFile)?.toString()
     }
 
     boolean checkFinalPathDefined(DataFile dataFile) {
@@ -125,14 +128,13 @@ class LsdfFilesService {
         return dataFile.used
     }
 
+    @Deprecated
     String getFileMd5sumFinalPath(DataFile dataFile) {
-        String fileFinalPath = getFileFinalPath(dataFile)
-        return (fileFinalPath) ? fileFinalPath.concat(".md5sum") : null
+        return getFileMd5sumFinalPathAsPath(dataFile)?.toString()
     }
 
-    Path getFileMd5sumFinalPathAsPath(DataFile dataFile, FileSystem fileSystem) {
-        String fileMd5sumFinalPath = getFileMd5sumFinalPath(dataFile)
-        return fileMd5sumFinalPath ? fileSystem.getPath(fileMd5sumFinalPath) : null
+    Path getFileMd5sumFinalPathAsPath(DataFile dataFile) {
+        return getFileFinalPathAsPath(dataFile)?.resolveSibling(dataFile.fileName.concat(".md5sum"))
     }
 
     String seqTypeDirectory(DataFile file) {
@@ -181,11 +183,11 @@ class LsdfFilesService {
      */
     @Deprecated
     String getFileViewByPidPath(DataFile file) {
-        return createFinalPathHelper(file, false)
+        return getFileViewByPidPathAsPath(file)
     }
 
-    Path getFileViewByPidPathAsPath(DataFile file, FileSystem fileSystem) {
-        return fileSystem.getPath(getFileViewByPidPath(file))
+    Path getFileViewByPidPathAsPath(DataFile file) {
+        return createFinalPathHelper(file, false)
     }
 
     /**
@@ -195,29 +197,26 @@ class LsdfFilesService {
      */
     @Deprecated
     String getWellAllFileViewByPidPath(DataFile file) {
+        return getWellAllFileViewByPidPathAsPath(file)
+    }
+
+    Path getWellAllFileViewByPidPathAsPath(DataFile file) {
         return createFinalPathHelper(file, true)
     }
 
-    Path getWellAllFileViewByPidPathAsPath(DataFile file, FileSystem fileSystem) {
-        return fileSystem.getPath(getWellAllFileViewByPidPath(file))
+    private Path createViewByPidPath(DataFile dataFile) {
+        return individualService.getViewByPidPath(dataFile.individual, dataFile.seqType)
     }
 
-    private OtpPath createViewByPidPath(DataFile dataFile) {
-        return dataFile.individual.getViewByPidPath(dataFile.seqType)
-    }
-
-    String createSingleCellAllWellDirectoryPath(DataFile file) {
-        OtpPath vbpPath = createViewByPidPath(file)
+    Path createSingleCellAllWellDirectoryPath(DataFile file) {
+        Path vbpPath = createViewByPidPath(file)
         String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, true)
-        return new OtpPath(vbpPath, sampleTypeDir).absoluteDataManagementPath.path
+        return vbpPath.resolve(sampleTypeDir)
     }
 
-    private String createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
-        OtpPath vbpPath = createViewByPidPath(file)
-        return new OtpPath(
-                vbpPath,
-                getFilePathInViewByPid(file, useAllWellDirectory)
-        ).absoluteDataManagementPath.path
+    private Path createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
+        Path vbpPath = createViewByPidPath(file)
+        return vbpPath.resolve(getFilePathInViewByPid(file, useAllWellDirectory))
     }
 
     String getFilePathInViewByPid(DataFile file, boolean useAllWellDirectory = false) {
@@ -233,12 +232,12 @@ class LsdfFilesService {
         )
     }
 
-    File getFileViewByPidDirectory(SeqTrack seqTrack) {
+    Path getFileViewByPidDirectory(SeqTrack seqTrack) {
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        List<File> paths = files.collect { DataFile file ->
-            new File(getFileViewByPidPath(file)).parentFile
+        List<Path> paths = files.collect { DataFile file ->
+            getFileViewByPidPathAsPath(file).parent
         }
-        return CollectionUtils.exactlyOneElement(paths.unique()).parentFile
+        return CollectionUtils.exactlyOneElement(paths.unique()).parent
     }
 
     /**
@@ -280,17 +279,17 @@ class LsdfFilesService {
         return (String[]) paths.toArray()
     }
 
-    private String getPathToRun(DataFile file, boolean fullPath = false) {
+    private Path getPathToRun(DataFile file, boolean fullPath = false) {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        String basePath = file.project.projectSequencingDirectory
+        Path basePath = projectService.getSequencingDirectory(file.project)
         String seqTypeDir = seqTypeDirectory(file)
         String centerDir = file.run.seqCenter.dirName
-        String path = "${basePath}/${seqTypeDir}/${centerDir}/"
+        Path path = basePath.resolve(seqTypeDir).resolve(centerDir)
         if (fullPath) {
             String runName = file.run.name
-            String pathWithRunName = "${path}run${runName}"
+            Path pathWithRunName = path.resolve("run${runName}")
             return pathWithRunName
         }
         return path

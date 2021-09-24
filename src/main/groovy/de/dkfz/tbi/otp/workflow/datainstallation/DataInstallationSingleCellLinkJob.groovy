@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @Component
@@ -45,12 +44,11 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
 
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
             return seqTrack.dataFiles.collect { DataFile dataFile ->
-                Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile, fs)
-                Path link = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile, fs)
+                Path target = lsdfFilesService.getFileFinalPathAsPath(dataFile)
+                Path link = lsdfFilesService.getWellAllFileViewByPidPathAsPath(dataFile)
                 return new LinkEntry(target: target, link: link)
             }
         }

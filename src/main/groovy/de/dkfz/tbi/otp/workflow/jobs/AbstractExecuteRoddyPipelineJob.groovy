@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.IndividualService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.ProcessOutput
@@ -40,6 +41,8 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     @Autowired
     ClusterJobHandlingService clusterJobHandlingService
+    @Autowired
+    IndividualService individualService
     @Autowired
     RoddyCommandService roddyCommandService
     @Autowired
@@ -64,7 +67,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
                 roddyWorkflowName,
                 workflowStep.workflowRun.workflowVersion,
                 getAnalysisConfiguration(roddyResult.seqType),
-                fileService.toPath(roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath, fs),
+                individualService.getViewByPidPathBase(roddyResult.individual, roddyResult.seqType),
                 outputDir,
                 workflowStep.workflowRun.priority.queue,
                 filenameSectionKillSwitch,

@@ -86,7 +86,7 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         given:
         new TestConfigService()
 
-        String allWellDir = '/vbpPath/0_all'
+        Path allWellDir = Paths.get('/vbpPath/0_all')
         DataFile dataFile = createDataFileHelper()
 
         SingleCellService service = new SingleCellService([
@@ -96,7 +96,7 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
                 },
         ])
 
-        Path expected = Paths.get(allWellDir, service.buildMappingFileName(dataFile))
+        Path expected = allWellDir.resolve(service.buildMappingFileName(dataFile))
 
         when:
         Path path = service.singleCellMappingFile(dataFile)

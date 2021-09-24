@@ -42,6 +42,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
@@ -120,15 +123,16 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         given:
         ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root", (OtpProperty.PATH_TOOLS): "/tools"])
 
+        Path vbpPath = Paths.get("/root/projectDirName_1/sequencing/whole_genome_sequencing/view-by-pid/pid_1")
+
         RunYapsaInstance instance = setupData()
 
         ExecuteRunYapsaJob job = new ExecuteRunYapsaJob([
             snvCallingService: Mock(SnvCallingService) {
                 1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_) >> {
-                    new File(
-                            "/root/projectDirName_1/sequencing/whole_genome_sequencing/view-by-pid/pid_1/snv_results/paired/" +
+                    vbpPath.resolve("snv_results/paired/" +
                                     "sample-type-name-1_sample-type-name-1/instance-1/snvs_pid_1_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf"
-                    ).toPath()
+                    )
                 }
             }
         ])
@@ -142,8 +146,9 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
         job.runYapsaService = new RunYapsaService()
-        job.runYapsaService.configService = configService
-        job.runYapsaService.fileSystemService = new TestFileSystemService()
+        job.runYapsaService.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> vbpPath
+        }
 
         when:
         String result = job.createScript(instance)

@@ -26,14 +26,14 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.*
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
@@ -74,9 +74,6 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(_) >> workDirectory
-        }
-        job.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
         }
 
         expect:

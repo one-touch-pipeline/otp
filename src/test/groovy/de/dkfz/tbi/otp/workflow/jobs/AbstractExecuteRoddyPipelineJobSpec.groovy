@@ -93,6 +93,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
         job.fileSystemService = new TestFileSystemService()
+        job.individualService = Mock(IndividualService)
         job.roddyCommandService = Mock(RoddyCommandService)
         job.roddyConfigService = Mock(RoddyConfigService)
         job.roddyConfigValueService = Mock(RoddyConfigValueService)
@@ -105,6 +106,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
         then:
         1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
+        1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
@@ -141,6 +143,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
         job.fileSystemService = new TestFileSystemService()
+        job.individualService = Mock(IndividualService)
         job.roddyCommandService = Mock(RoddyCommandService)
         job.roddyConfigService = Mock(RoddyConfigService)
         job.roddyConfigValueService = Mock(RoddyConfigValueService)
@@ -153,6 +156,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
         then:
         1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
+        1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
@@ -190,6 +194,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
         job.fileSystemService = new TestFileSystemService()
+        job.individualService = Mock(IndividualService)
         job.roddyCommandService = Mock(RoddyCommandService)
         job.roddyConfigService = Mock(RoddyConfigService)
         job.roddyConfigValueService = Mock(RoddyConfigValueService)
@@ -202,6 +207,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
         then:
         1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
+        1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)

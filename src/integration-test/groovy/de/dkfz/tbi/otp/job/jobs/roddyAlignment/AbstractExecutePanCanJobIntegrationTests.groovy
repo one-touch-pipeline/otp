@@ -38,6 +38,8 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 
+import java.nio.file.Paths
+
 @Rollback
 @Integration
 class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, DomainFactoryProcessingPriority {
@@ -86,6 +88,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
         abstractExecutePanCanJob.lsdfFilesService = new LsdfFilesService()
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
+        abstractExecutePanCanJob.executeRoddyCommandService.individualService = new IndividualService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
         abstractExecutePanCanJob.configService = configService
         abstractExecutePanCanJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
@@ -125,11 +128,8 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
     void tearDown() {
         TestCase.removeMetaClass(ExecuteRoddyCommandService, abstractExecutePanCanJob.executeRoddyCommandService)
         TestCase.removeMetaClass(ReferenceGenomeService, abstractExecutePanCanJob.referenceGenomeService)
+        TestCase.removeMetaClass(IndividualService, abstractExecutePanCanJob.executeRoddyCommandService.individualService)
         configService.clean()
-    }
-
-    private String viewByPidString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
-        return roddyBamFileToUse.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
     }
 
     @Test
@@ -198,6 +198,9 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
     void testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(String additionalImports) {
         DomainFactory.createProcessingOptionForInitRoddyModule()
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
+        abstractExecutePanCanJob.executeRoddyCommandService.individualService.metaClass.getViewByPidPathBase = { Individual individual, SeqType seqType ->
+            Paths.get("/view-by-pid-path")
+        }
 
         String expectedCmd = """
 ${roddyCommand} rerun \
@@ -209,7 +212,7 @@ ${roddyBamFile.individual.pid} \
 --usePluginVersion=${roddyBamFile.config.programVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},\
 ${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} \
---useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
+--useiodir=/view-by-pid-path,${roddyBamFile.workDirectory} \
 --additionalImports=${additionalImports} \
 workflowSpecificParameter \
 --cvalues="${workflowSpecificCValues},sharedFilesBaseDirectory:/shared"\

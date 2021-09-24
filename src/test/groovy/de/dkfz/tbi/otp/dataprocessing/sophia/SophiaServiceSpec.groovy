@@ -25,11 +25,9 @@ import grails.testing.services.ServiceUnitTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.IndividualService
 
 import java.nio.file.Path
 
@@ -57,13 +55,16 @@ class SophiaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
      */
     void setup() {
         Path temporaryFile = temporaryFolder.newFolder().toPath()
-        service.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.toString()])
-        service.fileSystemService = new TestFileSystemService()
 
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 
-        instancePath = temporaryFile.resolve("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/" +
-                "${instance.individual.pid}/sv_results/${instance.seqType.libraryLayoutDirName}/" +
+        Path vbpPath = temporaryFile.resolve("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}")
+
+        service.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> vbpPath
+        }
+
+        instancePath = vbpPath.resolve("sv_results/${instance.seqType.libraryLayoutDirName}/" +
                 "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/" +
                 "${instance.instanceName}")
     }

@@ -24,14 +24,11 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
@@ -91,16 +88,17 @@ abstract class AbstractBamFileAnalysisServiceSpec extends Specification implemen
     void "tests if the instance path is valid"() {
         given:
         BamFilePairAnalysis instance = newInstance
-        service.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/asdf"])
-        service.fileSystemService = new TestFileSystemService()
+
+        Path vbpPath = Paths.get("/root-path", "${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}")
+        service.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> vbpPath
+        }
 
         when:
         Path result = service.getWorkDirectory(instance)
 
         then:
-        result == Paths.get(
-                "/asdf", "${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/" +
-                "${instance.individual.pid}/${pathPart}/${instance.seqType.libraryLayoutDirName}/" +
+        result == vbpPath.resolve("${pathPart}/${instance.seqType.libraryLayoutDirName}/" +
                 "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/" +
                 "${instance.instanceName}")
     }

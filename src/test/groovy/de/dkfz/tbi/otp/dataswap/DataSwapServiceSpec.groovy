@@ -221,9 +221,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         )
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile) >> 'finalFile'
-            1 * getFileViewByPidPath(dataFile) >> 'viewByPidFile'
-            wellCount * getWellAllFileViewByPidPath(dataFile) >> 'wellFile'
+            1 * getFileFinalPathAsPath(dataFile) >> Paths.get('finalFile')
+            1 * getFileViewByPidPathAsPath(dataFile) >> Paths.get('viewByPidFile')
+            wellCount * getWellAllFileViewByPidPathAsPath(dataFile) >> Paths.get('wellFile')
             0 * _
         }
         service.singleCellService = Mock(SingleCellService) {
@@ -241,7 +241,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         if (wellCount) {
             expected[dataFile] << [
                     (DataSwapService.WELL_FILE_NAME)              : 'wellFile',
-                    (DataSwapService.WELL_MAPPING_FILE_NAME)      : Paths.get('wellMappingFile'),
+                    (DataSwapService.WELL_MAPPING_FILE_NAME)      : 'wellMappingFile',
                     (DataSwapService.WELL_MAPPING_FILE_ENTRY_NAME): 'entry',
             ]
         }
@@ -289,10 +289,10 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         final String OLD_MAPPING_PATH = "${OLD_ALL_PATH}/mapping"
         final String OLD_ENTRY = 'oldEntry\tvalue'
 
-        final String NEW_FINAL_PATH = "newFinalPath"
+        final Path NEW_FINAL_PATH = Paths.get("newFinalPath")
         final String NEW_PATH = 'newPath'
         final String NEW_ALL_PATH = "${NEW_PATH}/all"
-        final String NEW_WELL_PATH = "${NEW_ALL_PATH}/newFile"
+        final Path NEW_WELL_PATH = Paths.get("${NEW_ALL_PATH}/newFile")
         final String NEW_MAPPING_PATH = "${NEW_ALL_PATH}/mapping"
         final String NEW_ENTRY = 'newEntry\tvalue'
 
@@ -307,8 +307,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         )
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(dataFile) >> NEW_FINAL_PATH
-            1 * getWellAllFileViewByPidPath(dataFile) >> NEW_WELL_PATH
+            1 * getFileFinalPathAsPath(dataFile) >> NEW_FINAL_PATH
+            1 * getWellAllFileViewByPidPathAsPath(dataFile) >> NEW_WELL_PATH
             0 * _
         }
 
@@ -716,8 +716,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> newFile.toString()
-            _ * getFileViewByPidPath(_) >> newFileViewByPid.toString()
+            _ * getFileFinalPathAsPath(_) >> newFile
+            _ * getFileViewByPidPathAsPath(_) >> newFileViewByPid
         }
         service.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
@@ -776,8 +776,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
-            _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
+            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
@@ -911,8 +911,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
-            _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
+            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
@@ -1001,9 +1001,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
-            _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
-            _ * getWellAllFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
+            _ * getFileFinalPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newPath.toString()) }
+            _ * getFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
+            _ * getWellAllFileViewByPidPathAsPath(_) >> { DataFile dataFile -> Paths.get(dataFilePaths[dataFile].newVbpPath.toString()) }
         }
 
         service.singleCellService = Mock(SingleCellService) {
@@ -1095,8 +1095,8 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         // service
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
-            _ * getFileViewByPidPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
+            _ * getFileFinalPathAsPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
+            _ * getFileViewByPidPathAsPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default

@@ -25,12 +25,12 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.*
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class DataInstallationPidLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
@@ -56,12 +56,9 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
         DataInstallationPidLinkJob job = Spy(DataInstallationPidLinkJob) {
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
-        job.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
-        }
         job.lsdfFilesService = Mock(LsdfFilesService) {
-            2 * getFileFinalPathAsPath(_, _) >>> [target1, target2]
-            2 * getFileViewByPidPathAsPath(_, _) >>> [link1, link2]
+            2 * getFileFinalPathAsPath(_) >>> [target1, target2]
+            2 * getFileViewByPidPathAsPath(_) >>> [link1, link2]
         }
 
         expect:

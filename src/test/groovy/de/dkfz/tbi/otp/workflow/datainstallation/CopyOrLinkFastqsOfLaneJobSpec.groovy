@@ -104,8 +104,8 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         job.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileInitialPathAsPath(dataFile1, fileSystem) >> source1
             1 * getFileInitialPathAsPath(dataFile2, fileSystem) >> source2
-            1 * getFileFinalPathAsPath(dataFile1, fileSystem) >> target1
-            1 * getFileFinalPathAsPath(dataFile2, fileSystem) >> target2
+            1 * getFileFinalPathAsPath(dataFile1) >> target1
+            1 * getFileFinalPathAsPath(dataFile2) >> target2
             0 * _
         }
     }

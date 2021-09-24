@@ -26,12 +26,11 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystems
 import java.nio.file.Path
+import java.nio.file.Paths
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
@@ -54,10 +53,7 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
             1 * getSeqTrack(workflowStep) >> seqTrack
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputFile(_) >> { DataFile dataFile -> dataFile.fileName }
-        }
-        job.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
+            1 * fastqcOutputPath(_) >> { DataFile dataFile -> Paths.get(dataFile.fileName) }
         }
 
         when:

@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.util.TimeFormats
 
+import java.nio.file.Path
+
 @Transactional
 class IndividualService {
 
@@ -391,5 +393,28 @@ class IndividualService {
         }
 
         return "${output}${outputOld}${outputNew}"
+    }
+
+    /**
+     * returns the folder viewByPid without the pid
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid
+     */
+    Path getViewByPidPathBase(Individual individual, final SeqType seqType) {
+        return projectService.getSequencingDirectory(individual.project).resolve(seqType.dirName).resolve('view-by-pid')
+    }
+
+    /**
+     * returns the folder viewByPid with the pid
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}
+     */
+    Path getViewByPidPath(Individual individual, final SeqType seqType) {
+        return getViewByPidPathBase(individual, seqType).resolve(individual.pid)
+    }
+
+    /**
+     * Example: ${project}/results_per_pid/${pid}
+     */
+    Path getResultsPerPidPath(Individual individual) {
+        return projectService.getProjectDirectory(individual.project).resolve('results_per_pid').resolve(individual.pid)
     }
 }

@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
@@ -90,6 +89,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
     AceseqInstance aceseqInstance
 
     TestConfigService configService
+    IndividualService individualService
 
     void setup() {
         aceseqInstance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
@@ -98,7 +98,11 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         aceseqInstance.samplePair.mergingWorkPackage2.bamFileInProjectFolder = aceseqInstance.sampleType2BamFile
         assert aceseqInstance.samplePair.mergingWorkPackage2.save(flush: true)
 
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String path = temporaryFolder.newFolder().path
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): path])
+        individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get(path)
+        }
     }
 
     void cleanup() {
@@ -122,7 +126,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         File gcContent = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "gcContentFile.tsv"))
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(aceseqInstance.samplePair)
-        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, configService)
+        CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, individualService)
 
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService         : configService,
@@ -142,8 +146,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                 },
         ])
         job.sophiaService = new SophiaService()
-        job.sophiaService.configService = configService
-        job.sophiaService.fileSystemService = new TestFileSystemService()
+        job.sophiaService.individualService = individualService
 
         ReferenceGenome referenceGenome = DomainFactory.createAceseqReferenceGenome()
 
@@ -223,7 +226,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)
 
-        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, configService)
+        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, individualService)
 
         when:
         job.validate(aceseqInstance)
@@ -257,7 +260,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)
 
-        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, configService)
+        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, individualService)
 
         when:
         job.validate(aceseqInstance)
@@ -283,7 +286,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)
 
-        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, configService)
+        CreateRoddyFileHelper.createAceseqResultFiles(aceseqInstance, individualService)
 
         File fileToDelete = fileClousure(aceseqInstance)
         assert fileToDelete.delete() || fileToDelete.deleteDir()

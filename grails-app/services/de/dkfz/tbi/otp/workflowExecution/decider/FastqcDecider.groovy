@@ -83,7 +83,7 @@ class FastqcDecider implements Decider {
         WorkflowRun run = workflowRunService.buildWorkflowRun(
                 workflow,
                 inputArtefact.producedBy.priority,
-                fastqcDataFilesService.fastqcOutputDirectory(seqTrack),
+                fastqcDataFilesService.fastqcOutputDirectory(seqTrack).toString(),
                 seqTrack.individual.project,
                 runDisplayName,
                 shortName,

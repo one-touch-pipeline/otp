@@ -47,6 +47,7 @@ class ExecuteRoddyCommandService {
 
     ExecutionHelperService executionHelperService
     ProcessingOptionService processingOptionService
+    IndividualService individualService
 
     /**
      * @deprecated use {@link RoddyCommandService} for the new WF system
@@ -91,7 +92,7 @@ class ExecuteRoddyCommandService {
         RoddyWorkflowConfig config = roddyResult.config
 
         //base view by pid directory
-        File viewByPid = roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath
+        String viewByPid = individualService.getViewByPidPathBase(roddyResult.individual, roddyResult.seqType)
 
         String roddyCommand = [
                 roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.EXECUTE),

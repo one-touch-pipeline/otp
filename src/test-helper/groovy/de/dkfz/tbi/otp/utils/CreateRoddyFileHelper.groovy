@@ -21,14 +21,13 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.IndividualService
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -88,8 +87,8 @@ class CreateRoddyFileHelper {
         createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Final")
     }
 
-    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, TestConfigService configService, int minConfidenceScore = 8) {
-        SnvCallingService service = new SnvCallingService(fileSystemService: new TestFileSystemService(), configService: configService)
+    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, IndividualService individualService, int minConfidenceScore = 8) {
+        SnvCallingService service = new SnvCallingService(individualService: individualService)
         CreateFileHelper.createFile(new File(roddySnvCallingInstance.workExecutionStoreDirectory, 'someFile'))
 
         roddySnvCallingInstance.workExecutionDirectories.each {
@@ -101,19 +100,19 @@ class CreateRoddyFileHelper {
         [
                 service.getSnvCallingResult(roddySnvCallingInstance),
                 service.getSnvDeepAnnotationResult(roddySnvCallingInstance),
-                getSnvResultRequiredForRunYapsa(roddySnvCallingInstance, minConfidenceScore, configService),
+                getSnvResultRequiredForRunYapsa(roddySnvCallingInstance, minConfidenceScore, individualService),
         ].each {
             CreateFileHelper.createFile(it)
         }
     }
 
-    static Path getSnvResultRequiredForRunYapsa(RoddySnvCallingInstance instance, int minConfidenceScore, TestConfigService configService) {
-        SnvCallingService service = new SnvCallingService(fileSystemService: new TestFileSystemService(), configService: configService)
+    static Path getSnvResultRequiredForRunYapsa(RoddySnvCallingInstance instance, int minConfidenceScore, IndividualService individualService) {
+        SnvCallingService service = new SnvCallingService(individualService: individualService)
         return service.getWorkDirectory(instance).resolve("snvs_${instance.individual.pid}_somatic_snvs_conf_${minConfidenceScore}_to_10.vcf")
     }
 
-    static void createIndelResultFiles(IndelCallingInstance indelCallingInstance, TestConfigService configService) {
-        IndelCallingService service = new IndelCallingService(fileSystemService: new TestFileSystemService(), configService: configService)
+    static void createIndelResultFiles(IndelCallingInstance indelCallingInstance, IndividualService individualService) {
+        IndelCallingService service = new IndelCallingService(individualService: individualService)
         CreateFileHelper.createFile(new File(indelCallingInstance.workExecutionStoreDirectory, 'someFile'))
 
         indelCallingInstance.workExecutionDirectories.each {
@@ -129,8 +128,8 @@ class CreateRoddyFileHelper {
         }
     }
 
-    static createSophiaResultFiles(SophiaInstance sophiaInstance, TestConfigService configService) {
-        SophiaService service = new SophiaService(fileSystemService: new TestFileSystemService(), configService: configService)
+    static createSophiaResultFiles(SophiaInstance sophiaInstance, IndividualService individualService) {
+        SophiaService service = new SophiaService(individualService: individualService)
         CreateFileHelper.createFile(new File(sophiaInstance.workExecutionStoreDirectory, 'someFile'))
         sophiaInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))
@@ -147,8 +146,8 @@ class CreateRoddyFileHelper {
         CreateFileHelper.createFile(controlBam.getFinalInsertSizeFile())
     }
 
-    static void createAceseqResultFiles(AceseqInstance aceseqInstance, TestConfigService configService) {
-        AceseqService service = new AceseqService(fileSystemService: new TestFileSystemService(), configService: configService)
+    static void createAceseqResultFiles(AceseqInstance aceseqInstance, IndividualService individualService) {
+        AceseqService service = new AceseqService(individualService: individualService)
         CreateFileHelper.createFile(new File(aceseqInstance.workExecutionStoreDirectory, 'someFile'))
         aceseqInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))

@@ -138,11 +138,11 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         createData()
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> targetDir.toString()
+            1 * fastqcOutputDirectory(_) >> targetDir
             1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile1) >> target1
             1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile2) >> target2
-            2 * fastqcOutputFile(dataFile1) >> target1
-            2 * fastqcOutputFile(dataFile2) >> target2
+            2 * fastqcOutputPath(dataFile1) >> target1
+            2 * fastqcOutputPath(dataFile2) >> target2
             0 * _
         }
         job.seqTrackService = Mock(SeqTrackService) {
@@ -186,11 +186,11 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> targetDir.toString()
-            2 * fastqcOutputFile(dataFile1) >> target1
-            2 * fastqcOutputFile(dataFile2) >> target2
-            1 * fastqcHtmlFile(dataFile1) >> target1
-            1 * fastqcHtmlFile(dataFile2) >> target2
+            1 * fastqcOutputDirectory(_) >> targetDir
+            2 * fastqcOutputPath(dataFile1) >> target1
+            2 * fastqcOutputPath(dataFile2) >> target2
+            1 * fastqcHtmlPath(dataFile1) >> target1
+            1 * fastqcHtmlPath(dataFile2) >> target2
             0 * _
         }
         job.seqTrackService = Mock(SeqTrackService) {
@@ -246,11 +246,11 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(_) >> targetDir.toString()
-            2 * fastqcOutputFile(dataFile1) >> target1
-            2 * fastqcOutputFile(dataFile2) >> target2
-            1 * fastqcHtmlFile(dataFile1) >> target1
-            1 * fastqcHtmlFile(dataFile2) >> target2
+            1 * fastqcOutputDirectory(_) >> targetDir
+            2 * fastqcOutputPath(dataFile1) >> target1
+            2 * fastqcOutputPath(dataFile2) >> target2
+            1 * fastqcHtmlPath(dataFile1) >> target1
+            1 * fastqcHtmlPath(dataFile2) >> target2
             0 * _
         }
         job.seqTrackService = Mock(SeqTrackService) {
