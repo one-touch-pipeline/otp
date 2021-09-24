@@ -42,10 +42,6 @@ services:
       - filesystem:/home/otp/filesystem
     depends_on:
       - postgres
-    links:
-      - openssh-server:cluster-host
-      - open-ldap:ldap-host
-      - mailhog:mail-host
     networks:
       otp:
 
@@ -81,10 +77,8 @@ services:
     ports:
       - 8090:80
     environment:
-      PHPLDAPADMIN_LDAP_HOSTS: ldap_host
+      PHPLDAPADMIN_LDAP_HOSTS: open-ldap
       PHPLDAPADMIN_HTTPS: "false"
-    links:
-      - open-ldap:ldap_host
     networks:
       otp:
 
