@@ -209,7 +209,7 @@ Closure<String> createScript = { String swapLabel ->
                 )
                 if (seqTypeFilterList.empty) {
                     // if we moved _everything_ out of a patient, delete the leftover empty patient
-                    script << "\n\tIndividual.findByPid('${oldIndividual.pid}').delete(flush: true)\n"
+                    script << "\n\tIndividual.findByPid('${oldIndividual.pid}').delete()\n"
                 }
             }
         }
@@ -454,7 +454,7 @@ class Snippets {
                \tmockFullName: '${newIndividualName}',
                \ttype: Individual.Type.REAL,
                \tproject: Project.findByName('${newProjectName}'),
-               ).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"
+               ).save(failOnError: true) : "Error creating new Individual '${newIndividualName}'"
                """.stripIndent()
     }
 
@@ -463,7 +463,7 @@ class Snippets {
                assert new Sample(
                \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${newIndividualName}')),
                \tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
-               ).save(flush: true, failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
+               ).save(failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
                """.stripIndent()
     }
 

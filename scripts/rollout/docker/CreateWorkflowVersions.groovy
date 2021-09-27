@@ -39,37 +39,37 @@ WorkflowVersion.withTransaction {
             workflow: Workflow.findByName("Roddy ACEseq (CNV calling)"),
             workflowVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION,
                     SeqTypeService.aceseqPipelineSeqTypes.first().roddyName)
-    ).save(flush: true)
+    ).save()
 
     new WorkflowVersion(
             workflow: Workflow.findByName("Roddy Indel calling"),
             workflowVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION,
                     SeqTypeService.indelPipelineSeqTypes.first().roddyName)
-    ).save(flush: true)
+    ).save()
 
     new WorkflowVersion(
             workflow: Workflow.findByName("WGBS alignment"),
             workflowVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
                     SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType.roddyName)
-    ).save(flush: true)
+    ).save()
 
     new WorkflowVersion(
             workflow: Workflow.findByName("RNA alignment"),
             workflowVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
                     SeqTypeService.rnaPairedSeqType.roddyName)
-    ).save(flush: true)
+    ).save()
 
     new WorkflowVersion(
             workflow: Workflow.findByName("Roddy SNV calling"),
             workflowVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION,
                     SeqTypeService.snvPipelineSeqTypes.first().roddyName)
-    ).save(flush: true)
+    ).save()
 
     new WorkflowVersion(
             workflow: Workflow.findByName("Roddy Sophia (structural variation calling)"),
             workflowVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION,
                     SeqTypeService.sophiaPipelineSeqTypes.first().roddyName)
-    ).save(flush: true)
+    ).save()
 }
 
 

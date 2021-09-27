@@ -66,7 +66,7 @@ WorkflowRun wr1 = new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: normalPriority,
         workflow: fastqWorkflow,
-).save(flush: true)
+).save()
 
 WorkflowArtefact wa1 = new WorkflowArtefact([
         producedBy      : wr1,
@@ -78,13 +78,13 @@ WorkflowArtefact wa1 = new WorkflowArtefact([
         individual      : individual,
         seqType         : seqType,
         displayName     : 'FASTQ Artefact ' + multiLineDisplayName,
-]).save(flush: true)
+]).save()
 
 new WorkflowRunInputArtefact([
         workflowRun: wr1,
         workflowArtefact: wa1,
         role: 'wa2 role',
-]).save(flush: true)
+]).save()
 
 new WorkflowRun(
         state: WorkflowRun.State.FAILED,
@@ -95,7 +95,7 @@ new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: normalPriority,
         workflow: fastqWorkflow,
-).save(flush: true)
+).save()
 
 WorkflowRun wr2 = new WorkflowRun(
         state: WorkflowRun.State.RUNNING_OTP,
@@ -107,7 +107,7 @@ WorkflowRun wr2 = new WorkflowRun(
         priority: fasttrackPriority,
         workflow: fastqWorkflow,
         jobCanBeRestarted: false,
-).save(flush: true)
+).save()
 
 WorkflowArtefact wa2 = new WorkflowArtefact([
         producedBy      : wr2,
@@ -119,13 +119,13 @@ WorkflowArtefact wa2 = new WorkflowArtefact([
         individual      : individual,
         seqType         : seqType,
         displayName     : 'FASTQ Artefact ' + multiLineDisplayName,
-]).save(flush: true)
+]).save()
 
 new WorkflowRunInputArtefact([
         workflowRun: wr2,
         workflowArtefact: wa2,
         role: 'wa2 role',
-]).save(flush: true)
+]).save()
 
 new WorkflowRun(
         state: WorkflowRun.State.OMITTED_MISSING_PRECONDITION,
@@ -136,7 +136,7 @@ new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: minimalPriority,
         workflow: fastqWorkflow,
-).save(flush: true)
+).save()
 
 /**
  * Create Cell Ranger workflow runs.
@@ -151,7 +151,7 @@ new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: minimalPriority,
         workflow: cellRangerWorkflow,
-).save(flush: true)
+).save()
 
 WorkflowRun wr3 = new WorkflowRun(
         state: WorkflowRun.State.RUNNING_OTP,
@@ -163,7 +163,7 @@ WorkflowRun wr3 = new WorkflowRun(
         priority: extremeFasttrackPriority,
         jobCanBeRestarted: false,
         workflow: cellRangerWorkflow,
-).save(flush: true)
+).save()
 
 new WorkflowRun(
         state: WorkflowRun.State.PENDING,
@@ -174,7 +174,7 @@ new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: minimalPriority,
         workflow: cellRangerWorkflow,
-).save(flush: true)
+).save()
 
 /**
  * Create rna alignment workflow runs.
@@ -189,7 +189,7 @@ new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: reprocessingPriority,
         workflow: rnaAlignmentWorkflow,
-).save(flush: true)
+).save()
 
 new WorkflowRun(
         state: WorkflowRun.State.PENDING,
@@ -200,7 +200,7 @@ new WorkflowRun(
         combinedConfig: '{test: 1}',
         priority: normalPriority,
         workflow: rnaAlignmentWorkflow,
-).save(flush: true)
+).save()
 
 
 /**
@@ -215,7 +215,7 @@ workflowSteps1.add(
                 state: WorkflowStep.State.SUCCESS,
                 beanName: 'Test Step 1',
                 workflowRun: wr1,
-        ).save(flush: true)
+        ).save()
 )
 
 workflowSteps1.add(
@@ -223,7 +223,7 @@ workflowSteps1.add(
                 state: WorkflowStep.State.RUNNING,
                 beanName: 'Test Step 2',
                 workflowRun: wr1,
-        ).save(flush: true)
+        ).save()
 )
 
 workflowSteps1.add(
@@ -231,7 +231,7 @@ workflowSteps1.add(
                 state: WorkflowStep.State.CREATED,
                 beanName: 'Test Step 3',
                 workflowRun: wr1,
-        ).save(flush: true)
+        ).save()
 )
 
 workflowSteps2.add(
@@ -239,7 +239,7 @@ workflowSteps2.add(
                 state: WorkflowStep.State.CREATED,
                 beanName: 'Test Step A',
                 workflowRun: wr2,
-        ).save(flush: true)
+        ).save()
 )
 
 workflowSteps3.add(
@@ -247,7 +247,7 @@ workflowSteps3.add(
                 state: WorkflowStep.State.CREATED,
                 beanName: 'Test Step XY',
                 workflowRun: wr3,
-        ).save(flush: true)
+        ).save()
 )
 
 workflowSteps3.add(
@@ -255,17 +255,17 @@ workflowSteps3.add(
                 state: WorkflowStep.State.RUNNING,
                 beanName: 'Test Step ZZ',
                 workflowRun: wr3,
-        ).save(flush: true)
+        ).save()
 )
 
 wr1.workflowSteps = workflowSteps1
-wr1.save(flush: true)
+wr1.save()
 
 wr2.workflowSteps = workflowSteps2
-wr2.save(flush: true)
+wr2.save()
 
 wr3.workflowSteps = workflowSteps3
-wr3.save(flush: true)
+wr3.save()
 
 Realm realm = Realm.findAll().first()
 
@@ -283,5 +283,5 @@ workflowSteps1.each { step ->
                 checkStatus: ClusterJob.CheckStatus.CREATED,
                 oldSystem: false,
                 workflowStep: step,
-        ]).save(flush: true)
+        ]).save()
 }

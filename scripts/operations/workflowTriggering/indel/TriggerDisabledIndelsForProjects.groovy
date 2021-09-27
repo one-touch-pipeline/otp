@@ -20,9 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.utils.logging.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 
 println "\n\ntrigger disabled indel projects: "
 def samplePairs = SamplePair.withCriteria {
@@ -50,7 +48,7 @@ LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
         samplePairs.each {
             it.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
-            println it.save(flush: true)
+            println it.save()
         }
     }
 })

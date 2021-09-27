@@ -38,10 +38,10 @@ SeqTrack.withTransaction {
             println "fastqc file: ${file}  ${file.exists()}"
 
             final List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(it)
-            fastqcProcessedFiles*.delete(flush: true)
+            fastqcProcessedFiles*.delete()
         }
         seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-        seqTrack.save(flush: true)
+        seqTrack.save()
     }
     assert false
 }

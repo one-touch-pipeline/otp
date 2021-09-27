@@ -334,11 +334,11 @@ class Snippets {
                assert new Sample(
                \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${pid}')),
                \tsampleType: SampleType.findSampleTypeByName('${sampleTypeName}')
-               ).save(flush: true, failOnError: true) : \"Error creating new Sample '${pid} ${sampleTypeName}'\"""".stripIndent()
+               ).save(failOnError: true) : \"Error creating new Sample '${pid} ${sampleTypeName}'\"""".stripIndent()
     }
 
     static String createSampleType(String name) {
-        return "assert new SampleType(name: '${name}').save(flush: true, failOnError: true) : \"Error creating new SampleType '${name}'\""
+        return "assert new SampleType(name: '${name}').save(failOnError: true) : \"Error creating new SampleType '${name}'\""
     }
 
     static String swapLane(SeqTrack seqTrack, String fileName, Sample newSample) {

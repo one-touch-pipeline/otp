@@ -27,7 +27,7 @@ GeneModelService geneModelService = ctx.geneModelService
 ReferenceGenomeIndexService referenceGenomeIndexService = ctx.referenceGenomeIndexService
 
 def saveAndCheckGeneModel = { GeneModel model ->
-    assert model.save(flush: true)
+    assert model.save()
     assert geneModelService.getFile(model).exists()
     assert geneModelService.getExcludeFile(model).exists()
     if (model.dexSeqFileName) {
@@ -39,7 +39,7 @@ def saveAndCheckGeneModel = { GeneModel model ->
 }
 
 def saveAndCheckReferenceGenomeIndex = { ReferenceGenomeIndex index ->
-    assert index.save(flush: true)
+    assert index.save()
     assert referenceGenomeIndexService.getFile(index).exists()
 }
 

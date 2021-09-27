@@ -91,7 +91,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
                     workflow      : workflow,
                     displayName   : name,
             ]
-            WorkflowRun run = new WorkflowRun(runParam).save(flush: false)
+            WorkflowRun run = new WorkflowRun(runParam).save()
 
             //create the WF artefact
             Map artefactParam = [
@@ -103,11 +103,11 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
                     seqType       : seqTrack.seqType,
                     displayName   : name,
             ]
-            WorkflowArtefact artefact = new WorkflowArtefact(artefactParam).save(flush: false)
+            WorkflowArtefact artefact = new WorkflowArtefact(artefactParam).save()
 
             //assign the foreign key to artefact
             seqTrack.workflowArtefact = artefact
-            seqTrack.save(flush: false)
+            seqTrack.save()
         }
     }
 }

@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 
 int importId = 0// set it to delete the import process and related wrong metadata

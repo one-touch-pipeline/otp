@@ -98,6 +98,6 @@ AbstractMergedBamFile.withTransaction {
     bams.each { AbstractMergedBamFile bam ->
         ctx.qcTrafficLightService.setQcTrafficLightStatusWithComment(bam, toStatus, comment)
         bam.comment.author = author
-        bam.comment.save(flush: true)
+        bam.comment.save()
     }
 }

@@ -52,4 +52,4 @@ referenceGenome.replicationTimeFile = "${basePath}/databases/ENCODE/ReplicationT
 //for ACEseq and SNV
 referenceGenome.chromosomeLengthFilePath = "hg19_chrTotalLength.tsv"
 
-referenceGenome.save(flush: true)
+referenceGenome.save()

@@ -133,7 +133,7 @@ IlseSubmission.withTransaction {
                 retriggeredMergingWorkPackages << mergingWorkPackage
             }
         }
-        mergingWorkPackage.save(flush: true)
+        mergingWorkPackage.save()
 
         println "Trigger ${mergingWorkPackage}: ${mergingWorkPackage.needsProcessing}"
     }

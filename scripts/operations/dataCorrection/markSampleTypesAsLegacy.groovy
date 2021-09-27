@@ -41,7 +41,7 @@ SampleType.withTransaction {
     sampleTypeNames.each {
         SampleType sampleType = SampleType.findByName(it)
         sampleType.legacy = legacy
-        sampleType.save(flush: true)
+        sampleType.save()
     }
 
     assert false: "DEBUG: transaction intentionally failed to rollback changes"

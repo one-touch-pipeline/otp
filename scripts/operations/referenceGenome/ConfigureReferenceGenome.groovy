@@ -150,14 +150,14 @@ ReferenceGenome.withTransaction {
             ReferenceGenomeProjectSeqType oldRGPST = atMostOneElement(ReferenceGenomeProjectSeqType.findAllWhere(keyProperties + [deprecatedDate: null]))
             if (oldRGPST) {
                 oldRGPST.deprecatedDate = new Date()
-                assert oldRGPST.save(flush: true)
+                assert oldRGPST.save()
                 println "  - deprecate: ${rgpstToStringHelper(oldRGPST)} -> on: ${oldRGPST.deprecatedDate}"
             }
             ReferenceGenomeProjectSeqType newRGPST = new ReferenceGenomeProjectSeqType(keyProperties + [
                     referenceGenome: referenceGenome,
                     statSizeFileName: statSizeFileName,
             ])
-            assert newRGPST.save(flush: true)
+            assert newRGPST.save()
             println "  - create   : ${rgpstToStringHelper(newRGPST)}"
         }
     }

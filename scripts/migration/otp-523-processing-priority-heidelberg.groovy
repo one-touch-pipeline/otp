@@ -54,7 +54,7 @@ ProcessingPriority.withTransaction {
             queue = split[1]
             roddyConfigSuffix = split[1]
             errorMailPrefix = split[2]
-            save(flush: true)
+            save()
         }
     }
 }

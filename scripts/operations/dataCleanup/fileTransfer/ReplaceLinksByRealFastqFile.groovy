@@ -59,7 +59,7 @@ def transferDataAndCorrectDB(File finalPath, File orginialPathResolved, DataFile
     }
 
     script << ""
-    assert df.save(flush: true)
+    assert df.save()
 }
 
 assert ilseNumbers : "Please provide at least one ilse number"

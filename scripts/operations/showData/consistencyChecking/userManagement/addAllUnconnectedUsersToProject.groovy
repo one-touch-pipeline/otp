@@ -109,6 +109,6 @@ newUPRs.each { UserProjectRole userProjectRole ->
 
 assert false: "Assert for debug, remove to continue"
 
-newUPRs*.save(flush: true)
+newUPRs*.save()
 
 ''

@@ -21,10 +21,11 @@
  */
 package operations.workflowTriggering.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 // Input
 
 // Select Sample:
@@ -83,7 +84,7 @@ SeqTrack.withTransaction {
     seqTracksToInclude.each { SeqTrack seqTrack ->
         mwpToAddTo.addToSeqTracks(seqTrack)
     }
-    mwpToAddTo.save(flush: true)
+    mwpToAddTo.save()
 
     assert false: "rollback, remove this to persist changes"
 }

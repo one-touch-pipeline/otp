@@ -55,25 +55,25 @@ FastqImportInstance.withTransaction {
     assert fastqImportInstance
     DataFile.findAllByFastqImportInstance(fastqImportInstance).each { DataFile dataFile ->
         MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
-            entry.delete(flush: true)
+            entry.delete()
         }
         assert MetaDataEntry.countByDataFile(dataFile) == 0
         CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.delete()
         SeqTrack seqTrack = dataFile.seqTrack
         deletionService.deleteProcessingFilesOfProject(seqTrack.individual.project.name, baseOutputDir, false, false, [seqTrack])
 
-        ConsistencyStatus.findAllByDataFile(dataFile)*.delete(flush: true)
+        ConsistencyStatus.findAllByDataFile(dataFile)*.delete()
 
-        dataFile.delete(flush: true)
+        dataFile.delete()
         if (!seqTrack.dataFiles) {
-            MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
+            MergingAssignment.findAllBySeqTrack(seqTrack)*.delete()
 
-            seqTrack.delete(flush: true)
+            seqTrack.delete()
         }
     }
     assert DataFile.countByFastqImportInstance(fastqImportInstance) == 0
     MetaDataFile.findAllByFastqImportInstance(fastqImportInstance).each {
-        it.delete(flush: true)
+        it.delete()
     }
     assert MetaDataFile.countByFastqImportInstance(fastqImportInstance) == 0
     assert FastqImportInstance.get(fastqImportInstanceId) == fastqImportInstance

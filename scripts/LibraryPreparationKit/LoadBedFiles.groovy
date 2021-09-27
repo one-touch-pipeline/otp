@@ -85,7 +85,7 @@ BedFile.withTransaction {
         bedFileDom.targetSize = targetIntervals.getBaseCount()
         bedFileDom.mergedTargetSize = targetIntervals.getUniqueBaseCount()
         notNull bedFileDom.validate()
-        bedFileDom.save(flush: true)
+        bedFileDom.save()
         println "Added ${bedFileName} to OTP database."
     }
 }

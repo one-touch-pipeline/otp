@@ -112,7 +112,7 @@ if (preView) {
             String newSampleName= map.newSampleName
             seqTracks.each {SeqTrack seqTrack->
                 seqTrack.sampleIdentifier = newSampleName
-                seqTrack.save(flush: true)
+                seqTrack.save()
             }
         }
     }

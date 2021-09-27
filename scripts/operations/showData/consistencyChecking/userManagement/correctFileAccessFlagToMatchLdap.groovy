@@ -50,7 +50,7 @@ UserProjectRole.withTransaction {
             userProjectRole.save()
         }
     }
-    allUPRs.last().save(flush: true)
+    allUPRs.last().save()
     assert false: "Assert for debug, remove to continue"
 }
 ''
