@@ -45,11 +45,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
-import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
@@ -61,7 +60,6 @@ import java.util.regex.Matcher
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 /**
  * Metadata import 2.0 (OTP-34)
  */
@@ -337,32 +335,36 @@ class MetadataImportService {
                 otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
-        assert fastqImportInstance.save(flush: false)
-        Long timeStarted = System.currentTimeMillis()
-        log.debug("runs started")
-        importRuns(context, fastqImportInstance, context.spreadsheet.dataRows, align)
-        log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
-        fastqImportInstance.refresh()
+        MetaDataFile metaDataFile
+        SessionUtils.manualFlush {
+            assert fastqImportInstance.save()
+            Long timeStarted = System.currentTimeMillis()
+            log.debug("runs started")
+            importRuns(context, fastqImportInstance, context.spreadsheet.dataRows, align)
+            log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
-        if (!DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM) {
-            Long timeCreateWorkflowRuns = System.currentTimeMillis()
-            log.debug("create workflow runs started")
-            List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-            log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
-            Long timeDecider = System.currentTimeMillis()
-            log.debug("decider started")
-            allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
-            log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
+            fastqImportInstance.refresh()
+
+            if (!DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM) {
+                Long timeCreateWorkflowRuns = System.currentTimeMillis()
+                log.debug("create workflow runs started")
+                List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
+                log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
+                Long timeDecider = System.currentTimeMillis()
+                log.debug("decider started")
+                allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
+                log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
+            }
+
+            metaDataFile = new MetaDataFile(
+                    fileName: context.metadataFile.fileName.toString(),
+                    filePath: context.metadataFile.parent.toString(),
+                    md5sum: context.metadataFileMd5sum,
+                    fastqImportInstance: fastqImportInstance,
+            )
         }
-
-        MetaDataFile metaDataFile = new MetaDataFile(
-                fileName: context.metadataFile.fileName.toString(),
-                filePath: context.metadataFile.parent.toString(),
-                md5sum: context.metadataFileMd5sum,
-                fastqImportInstance: fastqImportInstance,
-        )
-        assert metaDataFile.save(flush: true)
+        metaDataFile.save()
 
         List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.dataFiles*.seqTrack as List).unique())
         List<ProcessingThresholds> generatedThresholds = processingThresholdsService.generateDefaultThresholds(analysableSeqTracks)
