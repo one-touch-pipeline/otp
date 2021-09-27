@@ -299,7 +299,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         processingPriority = createProcessingPriority([
                 priority         : 0,
                 name             : 'workflow test',
-                errorMailPrefix  : '',
+                errorMailPrefix  : 'error-prefix',
                 queue            : configService.workflowTestQueue,
                 roddyConfigSuffix: configService.workflowTestConfigSuffix,
         ])
@@ -309,7 +309,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         processingPriority.with {
             queue = configService.workflowTestFasttrackQueue
             roddyConfigSuffix = configService.workflowTestFasttrackConfigSuffix
-            save(flush: true)
+            save()
         }
     }
 

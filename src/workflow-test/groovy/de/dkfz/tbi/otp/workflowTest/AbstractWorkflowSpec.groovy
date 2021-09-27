@@ -431,7 +431,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         processingPriority = createProcessingPriority([
                 priority                   : 0,
                 name                       : 'workflow test',
-                errorMailPrefix            : '',
+                errorMailPrefix            : 'prefix',
                 queue                      : configService.workflowTestQueue,
                 roddyConfigSuffix          : configService.workflowTestConfigSuffix,
                 allowedParallelWorkflowRuns: 1000,

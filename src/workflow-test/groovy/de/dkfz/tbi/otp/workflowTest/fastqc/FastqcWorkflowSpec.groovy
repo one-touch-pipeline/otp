@@ -67,8 +67,6 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         workflowArtefact = createWorkflowArtefact(
                 state: WorkflowArtefact.State.SUCCESS,
                 artefactType: ArtefactType.FASTQ,
-                individual: seqTrack.individual,
-                seqType: seqTrack.seqType,
                 displayName: "display name",
                 outputRole: "FASTQ",
                 producedBy: createWorkflowRun(priority: processingPriority),
