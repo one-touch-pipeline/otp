@@ -49,7 +49,10 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/AnnotationsForValidatorsRule.groovy")
     rule("file:grails-app/codenarcRules/AnnotationsForStartJobsRule.groovy")
     rule("file:grails-app/codenarcRules/AnnotationsForJobsRule.groovy")
-    rule("file:grails-app/codenarcRules/ExplicitFlushForSaveRule.groovy")
+    rule("file:grails-app/codenarcRules/NoExplicitFlushForDeleteRule.groovy")
+    rule("file:grails-app/codenarcRules/NoExplicitFlushForSaveRule.groovy")
+    rule("file:grails-app/codenarcRules/ExplicitFlushForSaveForUnitTestRule.groovy")
+    rule("file:grails-app/codenarcRules/ExplicitFlushForDeleteForUnitTestRule.groovy")
     rule("file:grails-app/codenarcRules/UnusedImportWithoutAutowiredRule.groovy")
     rule("file:grails-app/codenarcRules/AvoidFindWithoutAllRule.groovy")
     rule("file:grails-app/codenarcRules/ControllerMethodNotInAllowedMethodsRule.groovy")
@@ -480,7 +483,7 @@ All the Rules that will be used for OTP
     DuplicateListLiteral {
         priority = DEFAULT
     }
-    //DuplicateMapLiteral //has problems with stuff like .save(flush: true)
+    //DuplicateMapLiteral //has problems with stuff like .save()
     DuplicateNumberLiteral {
         priority = MIDDLE
     }
