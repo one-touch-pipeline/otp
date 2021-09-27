@@ -219,19 +219,19 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
 
         ExternalWorkflowConfigSelector ewcs1 = ExternalWorkflowConfigSelector.findByName("ewcs1")
         ewcs1.customPriority = 2
-        ewcs1.save(flush: true)
+        ewcs1.save()
 
         ExternalWorkflowConfigSelector ewcs3 = ExternalWorkflowConfigSelector.findByName("ewcs3")
         ewcs3.customPriority = 5
-        ewcs3.save(flush: true)
+        ewcs3.save()
 
         ExternalWorkflowConfigSelector ewcs4 = ExternalWorkflowConfigSelector.findByName("ewcs4")
         ewcs4.customPriority = 1
-        ewcs4.save(flush: true)
+        ewcs4.save()
 
         ExternalWorkflowConfigSelector ewcs5 = ExternalWorkflowConfigSelector.findByName("ewcs5")
         ewcs5.customPriority = 3
-        ewcs5.save(flush: true)
+        ewcs5.save()
 
         expect:
         service.findAllSelectorsSortedByPriority(

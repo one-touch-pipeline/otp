@@ -51,7 +51,7 @@ class WgbsAlignmentStartJobIntegrationTests {
                 workPackage: mergingWorkPackage,
         ])
         mergingWorkPackage.bamFileInProjectFolder = bamFile
-        assert mergingWorkPackage.save(flush: true)
+        assert mergingWorkPackage.save()
 
         assert null == wgbsAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
     }

@@ -56,7 +56,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                         name: "project",
                         dirName: "project-dir",
                         )
-        assertNotNull(project.save([flush: true]))
+        assertNotNull(project.save())
 
         individual = DomainFactory.createIndividual(
                         pid: "patient",
@@ -65,25 +65,25 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                         type: Individual.Type.UNDEFINED,
                         project: project
                         )
-        assertNotNull(individual.save([flush: true]))
+        assertNotNull(individual.save())
 
         sampleType = DomainFactory.createSampleType(
                         name: "sample-type"
                         )
-        assertNotNull(sampleType.save([flush: true]))
+        assertNotNull(sampleType.save())
 
         sample = DomainFactory.createSample(
                         individual: individual,
                         sampleType: sampleType
                         )
-        assertNotNull(sample.save([flush: true]))
+        assertNotNull(sample.save())
 
         seqType = DomainFactory.createSeqType(
                         name: "seq-type",
                         libraryLayout: SequencingReadType.PAIRED,
                         dirName: "seq-type-dir"
                         )
-        assertNotNull(seqType.save([flush: true]))
+        assertNotNull(seqType.save())
         seqType.refresh()
 
         referenceGenome = DomainFactory.createReferenceGenome(

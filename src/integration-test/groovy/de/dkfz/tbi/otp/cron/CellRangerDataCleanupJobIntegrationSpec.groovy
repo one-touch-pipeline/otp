@@ -88,7 +88,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
                 workPackage        : mwp,
                 fileOperationStatus: withFinishedBamFile ? AbstractMergedBamFile.FileOperationStatus.PROCESSED : AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
         ])
-        mwp.save(flush: true)
+        mwp.save()
 
         if (dateUpdatedOffset) {
             SingleCellBamFile.executeUpdate("update SingleCellBamFile set lastUpdated = :lastUpdated, version = version + 1 where id = :id", [

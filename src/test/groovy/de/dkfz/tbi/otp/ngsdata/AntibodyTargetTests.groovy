@@ -24,11 +24,13 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.test.mixin.TestFor
 import org.junit.Test
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 
 @TestFor(AntibodyTarget)
-class AntibodyTargetTests {
+class AntibodyTargetTests implements DomainFactoryCore {
 
     static final String VALID_NAME = "a1Az2Z"
 
@@ -50,12 +52,9 @@ class AntibodyTargetTests {
 
     @Test
     void testUniqueName() {
-        AntibodyTarget antibodyTarget = new AntibodyTarget(
-            name: VALID_NAME)
-        antibodyTarget.save(flush: true)
+        createAntibodyTarget(name: VALID_NAME)
 
-        antibodyTarget = new AntibodyTarget(
-            name: VALID_NAME)
+        AntibodyTarget antibodyTarget = new AntibodyTarget(name: VALID_NAME)
         assertFalse antibodyTarget.validate()
     }
 

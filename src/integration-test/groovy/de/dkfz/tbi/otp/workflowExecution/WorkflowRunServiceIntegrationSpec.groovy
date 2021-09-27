@@ -143,11 +143,11 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         given:
         WorkflowRun workflowRun1 = createWorkflowRunWithPriority(5, 0)
         workflowRun1.state = WorkflowRun.State.RUNNING_OTP
-        workflowRun1.save(flush: true)
+        workflowRun1.save()
 
         WorkflowRun workflowRun2 = createWorkflowRunWithPriority(5, 0, workflowRun1.workflow)
         workflowRun2.state = WorkflowRun.State.RUNNING_OTP
-        workflowRun2.save(flush: true)
+        workflowRun2.save()
 
         WorkflowRun workflowRun3 = createWorkflowRunWithPriority(4, 0)
 
@@ -166,7 +166,7 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         WorkflowRun workflowRun = createWorkflowRunWithPriority(5, 8)
         createWorkflowRunWithPriority(5, 8)
         workflowRun.dateCreated = workflowRun.dateCreated - 5
-        workflowRun.save(flush: true)
+        workflowRun.save()
 
         WorkflowRunService service = new WorkflowRunService()
 
@@ -180,7 +180,7 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     private WorkflowRun createWorkflowRunHelper(WorkflowRun.State runState = WorkflowRun.State.PENDING,
                                                 WorkflowArtefact.State artefactState = WorkflowArtefact.State.SUCCESS, Workflow workflow = createWorkflow()) {
         workflow.maxParallelWorkflows = 2
-        workflow.save(flush: true)
+        workflow.save()
         WorkflowRun workflowRun = createWorkflowRun([
                 state   : runState,
                 workflow: workflow,
@@ -197,7 +197,7 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     private WorkflowRun createWorkflowRunWithPriority(int runPriority, int workflowPriority, Workflow workflow = createWorkflow()) {
         workflow.priority = workflowPriority as short
         workflow.maxParallelWorkflows = 1
-        workflow.save(flush: true)
+        workflow.save()
         WorkflowRun workflowRun = createWorkflowRun([
                 state   : WorkflowRun.State.PENDING,
                 priority: findOrCreateProcessingPriority([

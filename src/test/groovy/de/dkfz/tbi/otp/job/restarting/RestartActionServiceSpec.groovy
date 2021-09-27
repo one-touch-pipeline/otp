@@ -146,7 +146,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 context: Mock(ApplicationContext) {
                     1 * getBean(_) >> Mock(RestartableStartJob) {
                         1 * restart(_) >> GroovyMock(Process) {
-                            1 * save(_) >> new Process()
+                            1 * save() >> new Process()
                         }
                     }
                 },
@@ -223,7 +223,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 context: Mock(ApplicationContext) {
                     1 * getBean(_) >> Mock(RestartableStartJob) {
                         1 * restart(_) >> GroovyMock(Process) {
-                            1 * save(_) >> new Process()
+                            1 * save() >> new Process()
                         }
                     }
                 },

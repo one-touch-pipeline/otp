@@ -104,7 +104,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     private void prepareSophiaForAceseqBase() {
         samplePair1.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        samplePair1.save(flush: true)
+        samplePair1.save()
         DomainFactory.createProcessingOptionLazy([
                 name   : ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type   : null,

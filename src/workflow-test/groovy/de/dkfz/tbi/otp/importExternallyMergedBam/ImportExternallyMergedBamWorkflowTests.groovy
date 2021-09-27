@@ -112,7 +112,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                 ]
         )
         epmbf.individual.project = project
-        assert epmbf.individual.save(flush: true)
+        assert epmbf.individual.save()
         return epmbf
     }
 
@@ -129,7 +129,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                     externallyProcessedMergedBamFiles: [epmbf01, epmbf02],
                     state: ImportProcess.State.NOT_STARTED,
                     linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
-            ).save(flush: true)
+            ).save()
 
             DomainFactory.createProcessingOptionLazy(
                     name: COMMAND_LOAD_MODULE_LOADER,
@@ -169,7 +169,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_KEEP
-            importProcess.save(flush: true)
+            importProcess.save()
         }
 
         when:
@@ -205,7 +205,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_LINK
-            importProcess.save(flush: true)
+            importProcess.save()
         }
 
         when:
@@ -243,11 +243,11 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.LINK_SOURCE
-            importProcess.save(flush: true)
+            importProcess.save()
             importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile bamFile ->
                 bamFile.maximumReadLength = 100
                 bamFile.md5sum = HelperUtils.randomMd5sum
-                bamFile.save(flush: true)
+                bamFile.save()
             }
         }
 

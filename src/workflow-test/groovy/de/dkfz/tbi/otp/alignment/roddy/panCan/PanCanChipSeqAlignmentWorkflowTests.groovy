@@ -96,12 +96,12 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
             DataFile.findAllBySeqTrack(secondSeqTrack).eachWithIndex { DataFile dataFile, int index ->
                 dataFile.vbpFileName = dataFile.fileName = "fastq_${workPackage.individual.pid}_${workPackage.sampleType.name}_${secondSeqTrack.laneId}_${index + 1}.fastq.gz"
                 dataFile.nReads = NUMBER_OF_READS
-                dataFile.save(flush: true)
+                dataFile.save()
             }
             linkFastqFiles(secondSeqTrack, testFastqFiles[secondSeqTrack.laneId])
 
             secondMergingWorkPackage.needsProcessing = true
-            secondMergingWorkPackage.save(flush: true)
+            secondMergingWorkPackage.save()
         }
 
         when:

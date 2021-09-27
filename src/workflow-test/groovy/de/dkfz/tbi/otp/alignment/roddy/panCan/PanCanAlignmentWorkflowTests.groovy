@@ -53,7 +53,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
             MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
             workPackage.needsProcessing = false
-            workPackage.save(flush: true)
+            workPackage.save()
         }
 
         when:
@@ -175,9 +175,9 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         SessionUtils.withNewSession {
             roddyBamFile = createFirstRoddyBamFile()
             roddyBamFile.withdrawn = true
-            roddyBamFile.save(flush: true)
+            roddyBamFile.save()
             roddyBamFile.mergingWorkPackage.needsProcessing = true
-            roddyBamFile.mergingWorkPackage.save(flush: true)
+            roddyBamFile.mergingWorkPackage.save()
         }
 
         when:

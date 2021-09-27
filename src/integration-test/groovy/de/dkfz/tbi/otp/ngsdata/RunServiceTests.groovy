@@ -99,10 +99,10 @@ class RunServiceTests implements UserAndRoles {
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(run, runService.getRun("test"))
             run.name = run.id + 1
-            assertNotNull(run.save(flush: true))
+            assertNotNull(run.save())
             assertEquals(run, runService.getRun(run.name))
             Run run2 = new Run(name: "foo", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
-            assertNotNull(run2.save(flush: true))
+            assertNotNull(run2.save())
             assertEquals(run2, runService.getRun(run.name))
         }
     }
@@ -139,15 +139,15 @@ class RunServiceTests implements UserAndRoles {
         setupData()
         Run run = createRun("test")
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assert jep.save(flush: true)
+        assert jep.save()
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        assert jep.save(flush: true)
+        assert jep.save()
 
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assert process.save(flush: true)
+        assert process.save()
         ProcessParameter param = new ProcessParameter(value: run.id, className: Run.name, process: process)
-        assert param.save(flush: true)
+        assert param.save()
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(1, runService.retrieveProcessParameters(run).size())
@@ -155,9 +155,9 @@ class RunServiceTests implements UserAndRoles {
         }
 
         Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assert process2.save(flush: true)
+        assert process2.save()
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.name, process: process2)
-        assert param2.save(flush: true)
+        assert param2.save()
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(2, runService.retrieveProcessParameters(run).size())
@@ -184,15 +184,15 @@ class RunServiceTests implements UserAndRoles {
     @Deprecated
     private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save(flush: true))
-        assertNotNull(test2.save(flush: true))
-        assertNotNull(input.save(flush: true))
-        assertNotNull(input2.save(flush: true))
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save())
         return jobDefinition
     }
 }

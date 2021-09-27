@@ -50,7 +50,7 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         abstractBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         abstractBamFile.withdrawn = false
         abstractBamFile.workPackage.bamFileInProjectFolder = abstractBamFile
-        abstractBamFile.save(flush: true)
+        abstractBamFile.save()
     }
 
     abstract AbstractQualityAssessment createQualityAssessment()
@@ -144,7 +144,7 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
 
         qualityAssessment.bamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
         qualityAssessment.bamFile.md5sum = null
-        qualityAssessment.bamFile.save(flush: true)
+        qualityAssessment.bamFile.save()
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -160,7 +160,7 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         setupData()
         List<OverallQualityAssessmentMerged> result
         qualityAssessment.bamFile.withdrawn = true
-        qualityAssessment.bamFile.save(flush: true)
+        qualityAssessment.bamFile.save()
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -176,7 +176,7 @@ abstract class AbstractOverallQualityAssessmentMergedServiceIntegrationSpec exte
         setupData()
         List<OverallQualityAssessmentMerged> result
         qualityAssessment.bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.IN_PROGRESS
-        qualityAssessment.bamFile.save(flush: true)
+        qualityAssessment.bamFile.save()
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {

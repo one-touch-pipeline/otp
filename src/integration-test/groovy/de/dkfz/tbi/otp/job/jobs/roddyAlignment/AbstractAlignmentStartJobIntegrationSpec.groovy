@@ -46,7 +46,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends Specification {
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)
         failedInstance.mergingWorkPackage.bamFileInProjectFolder = failedInstance
-        failedInstance.mergingWorkPackage.save(flush: true)
+        failedInstance.mergingWorkPackage.save()
 
 
         AbstractAlignmentStartJob roddyAlignmentStartJob = new PanCanStartJob()
@@ -56,7 +56,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends Specification {
                         jobExecutionPlan: failedProcess.jobExecutionPlan
                 )
                 processParameterSecond.process = processSecond
-                assert processParameterSecond.save(flush: true)
+                assert processParameterSecond.save()
                 return processSecond
             }
         }

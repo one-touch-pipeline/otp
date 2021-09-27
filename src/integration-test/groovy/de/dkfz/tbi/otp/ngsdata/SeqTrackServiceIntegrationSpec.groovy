@@ -57,7 +57,7 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
                 laneId: "1"
         )
         seqTrack1.project.processingPriority = findOrCreateProcessingPriorityNormal()
-        seqTrack1.project.processingPriority.save(flush: true)
+        seqTrack1.project.processingPriority.save()
 
         SeqTrack seqTrack2 = createSeqTrack(
                 seqType: seqType,
@@ -66,7 +66,7 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
 
         )
         seqTrack2.project.processingPriority = findOrCreateProcessingPriority(priority: priority)
-        seqTrack2.project.processingPriority.save(flush: true)
+        seqTrack2.project.processingPriority.save()
 
         when:
         String laneId = service.seqTrackReadyToInstall(inputPriority)?.laneId
@@ -130,9 +130,9 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         SeqTrack oldestSeqTrack = createSeqTrack([fastqcState: NOT_STARTED])
         SeqTrack newerSeqTrack = createSeqTrack([fastqcState: NOT_STARTED])
         oldestSeqTrack.project.processingPriority = normal
-        oldestSeqTrack.project.save(flush: true)
+        oldestSeqTrack.project.save()
         newerSeqTrack.project.processingPriority = normal
-        newerSeqTrack.project.save(flush: true)
+        newerSeqTrack.project.save()
 
         when:
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
@@ -148,12 +148,12 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
 
         SeqTrack firstSeqtract = createSeqTrack([fastqcState: NOT_STARTED])
         firstSeqtract.processingPriority.priority = ProcessingPriority.NORMAL
-        firstSeqtract.save(flush: true)
+        firstSeqtract.save()
 
         SeqTrack importantSeqTrack = createSeqTrack([fastqcState: NOT_STARTED])
         Project importantProject = importantSeqTrack.project
         importantProject.processingPriority.priority = ProcessingPriority.FAST_TRACK
-        importantProject.save(flush: true)
+        importantProject.save()
 
         when: "asked for normal priority"
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
@@ -174,7 +174,7 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = createSeqTrack([fastqcState: NOT_STARTED])
         seqTrack.processingPriority.priority = ProcessingPriority.NORMAL
-        seqTrack.processingPriority.save(flush: true)
+        seqTrack.processingPriority.save()
 
         when:
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK)

@@ -88,7 +88,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
         AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
         AbstractMergingWorkPackage workPackage = mergedBamFile.workPackage
         workPackage.bamFileInProjectFolder = null
-        assert workPackage.save(flush: true)
+        assert workPackage.save()
 
         when:
         List result = sampleLaneService.abstractMergedBamFilesInProjectFolder(mergedBamFile.project)

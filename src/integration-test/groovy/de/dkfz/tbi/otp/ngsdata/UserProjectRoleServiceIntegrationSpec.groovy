@@ -1234,7 +1234,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         UserProjectRole userProjectRole = createUserProjectRole()
         userProjectRole.user.dateCreated = baseDate - 1
-        userProjectRole.user.save(flush: true)
+        userProjectRole.user.save()
 
         when:
         int users = userProjectRoleService.getNumberOfValidUsersForProjects([userProjectRole.project], startDate, endDate)

@@ -58,11 +58,11 @@ class ImportProcessIntegrationSpec extends Specification {
 
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = [epmbf01, epmbf02, epmbf03]
         importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles
-        assert importProcess01.save(flush: true)
+        assert importProcess01.save()
 
         when:
         importProcess02.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles
-        importProcess02.save(flush: true)
+        importProcess02.save()
 
         then:
         ValidationException e = thrown()
@@ -76,11 +76,11 @@ class ImportProcessIntegrationSpec extends Specification {
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles01 = [epmbf01, epmbf02]
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles02 = [epmbf01, epmbf03]
         importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles01
-        assert importProcess01.save(flush: true)
+        assert importProcess01.save()
 
         when:
         importProcess02.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles02
-        importProcess02.save(flush: true)
+        importProcess02.save()
 
         then:
         ValidationException e = thrown()
@@ -95,13 +95,13 @@ class ImportProcessIntegrationSpec extends Specification {
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles02 = [epmbf03, epmbf04]
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles03 = [epmbf02, epmbf04, epmbf05]
         importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles01
-        assert importProcess01.save(flush: true)
+        assert importProcess01.save()
         importProcess02.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles02
-        importProcess02.save(flush: true)
+        importProcess02.save()
 
         when:
         importProcess03.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles03
-        importProcess03.save(flush: true)
+        importProcess03.save()
 
         then:
         ValidationException e = thrown()

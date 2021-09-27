@@ -81,9 +81,9 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         SeqType notWgsSeqType = DomainFactory.createExomeSeqType()
         SamplePair samplePair = setupSamplePair()
         samplePair.mergingWorkPackage1.seqType = notWgsSeqType
-        assert samplePair.mergingWorkPackage1.save(flush: true)
+        assert samplePair.mergingWorkPackage1.save()
         samplePair.mergingWorkPackage2.seqType = notWgsSeqType
-        assert samplePair.mergingWorkPackage2.save(flush: true)
+        assert samplePair.mergingWorkPackage2.save()
 
         expect:
         service.findSamplePairToProcess(ProcessingPriority.NORMAL) == null
@@ -104,7 +104,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         FastqImportInstance.list().each {
             it.otrsTicket = otrsTicket
-            it.save(flush: true)
+            it.save()
         }
 
         expect:
@@ -160,7 +160,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
                         jobExecutionPlan: failedProcess.jobExecutionPlan
                 )
                 processParameter2.process = process2
-                assert processParameter2.save(flush: true)
+                assert processParameter2.save()
                 return process2
             }
         }

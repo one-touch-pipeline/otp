@@ -149,7 +149,7 @@ class ClusterJobIntegrationSpec extends Specification implements WorkflowSystemD
 
         if (changedFileSize) {
             clusterJob.fileSize = changedFileSize
-            assert clusterJob.save(flush: true)
+            assert clusterJob.save()
         }
 
         then:

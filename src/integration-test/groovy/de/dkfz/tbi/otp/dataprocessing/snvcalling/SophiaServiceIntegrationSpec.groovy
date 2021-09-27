@@ -46,7 +46,7 @@ class SophiaServiceIntegrationSpec extends Specification {
 
         RoddyBamFile.list().each {
             it.withdrawn = true
-            assert it.save(flush: true)
+            assert it.save()
         }
         DomainFactory.createSamplePairWithProcessedMergedBamFiles()
 
@@ -61,7 +61,7 @@ class SophiaServiceIntegrationSpec extends Specification {
 
         RoddyBamFile.list().each {
             it.withdrawn = true
-            assert it.save(flush: true)
+            assert it.save()
         }
         DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
 
@@ -82,7 +82,7 @@ class SophiaServiceIntegrationSpec extends Specification {
 
         RoddyBamFile.list().each {
             it.withdrawn = true
-            assert it.save(flush: true)
+            assert it.save()
         }
         SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
 

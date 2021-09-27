@@ -101,7 +101,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         referenceGenome.knownHaplotypesLegendFileX = new File(referenceGenomePath, 'IMPUTE/ALL_1000G_phase1integrated_v3_impute/ALL_1000G_phase1integrated_v3_chrX_nonPAR_impute.legend.gz').absolutePath
         referenceGenome.mappabilityFile = new File(referenceGenomePath, 'UCSC/wgEncodeCrgMapabilityAlign100mer_chr.bedGraph.gz').absolutePath
         referenceGenome.replicationTimeFile = new File(referenceGenomePath, 'ENCODE/ReplicationTime_10cellines_mean_10KB.Rda').absolutePath
-        referenceGenome.save(flush: true)
+        referenceGenome.save()
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
@@ -121,7 +121,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         File sophiaInputFile = new File(sophiaService.getFinalAceseqInputFile(sophiaInstance).toString())
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        assert sp.save(flush: true)
+        assert sp.save()
 
         linkFileUtils.createAndValidateLinks([
                 (sourceSophiaInputFile): sophiaInputFile,

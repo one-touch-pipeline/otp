@@ -232,7 +232,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         ClusterJob job2 = createClusterJob()
         job2.processingStep = job1.processingStep
-        job2.save(flush: true)
+        job2.save()
 
         createClusterJob()
 
@@ -251,11 +251,11 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         ClusterJob job2 = createClusterJob([jobClass: jobClass1])
         job2.processingStep = job1.processingStep
-        job2.save(flush: true)
+        job2.save()
 
         ClusterJob job3 = createClusterJob([jobClass: jobClass2])
         job3.processingStep = job1.processingStep
-        job3.save(flush: true)
+        job3.save()
 
         expect:
         CollectionUtils.containSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
@@ -629,7 +629,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         ClusterJob clusterJob = DomainFactory.createClusterJob('individual': individual)
         clusterJob.dateCreated = baseDate - 1
-        clusterJob.save(flush: true)
+        clusterJob.save()
 
         when:
         int clusterJobs = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, [clusterJob.individual.project])
@@ -1647,7 +1647,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ] + myProps
 
         Realm realm = DomainFactory.createRealm()
-        assert realm.save([flush: true])
+        assert realm.save()
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
         assert processingStep
@@ -1662,14 +1662,14 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
             job."${key}" = value
         }
 
-        assert job.save([flush: true])
+        assert job.save()
 
         return job
     }
 
     private static List createClusterJobWithRun(Run inputRun = null, Map clusterJobProps = [:]) {
         ClusterJob job = createClusterJob(clusterJobProps)
-        Run run = inputRun ?: DomainFactory.createRun().save([flush: true])
+        Run run = inputRun ?: DomainFactory.createRun().save()
 
         DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
 
@@ -1679,7 +1679,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
     private static List createClusterJobWithProcessingStepAndRun(ProcessingStep step = null, Run run = null, Map myProps = [:]) {
         def (j, r) = createClusterJobWithRun(run, myProps)
         j.processingStep = step
-        assert j.save(flush: true)
+        assert j.save()
         return [j, r]
     }
 

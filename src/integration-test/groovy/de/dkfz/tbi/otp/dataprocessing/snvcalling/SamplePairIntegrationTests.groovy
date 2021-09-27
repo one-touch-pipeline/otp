@@ -74,9 +74,9 @@ class SamplePairIntegrationTests {
         )
 
         nonPersistedSamplePair.snvProcessingStatus = processingStatus
-        nonPersistedSamplePair.save(flush: true)
+        nonPersistedSamplePair.save()
         persistedSamplePair.snvProcessingStatus = processingStatus
-        persistedSamplePair.save(flush: true)
+        persistedSamplePair.save()
 
         assert nonPersistedSamplePair.snvProcessingStatus == processingStatus
         assert nonPersistedSamplePair.id
@@ -89,12 +89,12 @@ class SamplePairIntegrationTests {
 
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
         mergingWorkPackage1.sample.individual = DomainFactory.createIndividual()
-        assert mergingWorkPackage1.sample.save(flush: true)
+        assert mergingWorkPackage1.sample.save()
 
         samplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual }
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "individual") {
-            samplePair.save(flush: true)
+            samplePair.save()
         }
     }
 
@@ -103,12 +103,12 @@ class SamplePairIntegrationTests {
         SamplePair samplePair = DomainFactory.createSamplePair()
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
         mergingWorkPackage1.seqType = DomainFactory.createSeqType()
-        assert mergingWorkPackage1.save(flush: true)
+        assert mergingWorkPackage1.save()
 
         samplePair.metaClass.getSeqType = { -> return mergingWorkPackage1.seqType }
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "seqType") {
-            samplePair.save(flush: true)
+            samplePair.save()
         }
     }
 

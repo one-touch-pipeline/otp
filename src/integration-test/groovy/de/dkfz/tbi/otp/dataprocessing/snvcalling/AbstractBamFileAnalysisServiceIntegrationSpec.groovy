@@ -69,7 +69,7 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
         given:
         setupData()
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
-        assert samplePair1.save(flush: true)
+        assert samplePair1.save()
         Pipeline pipeline1 = pipeline()
         Map configProperties = [
                 project : samplePair1.project,
@@ -105,12 +105,12 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
             samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
             DomainFactory.createSophiaInstance(samplePair1)
         }
-        assert samplePair1.save(flush: true)
+        assert samplePair1.save()
 
         AbstractMergedBamFile bamFile = samplePair1.mergingWorkPackage1.bamFileInProjectFolder
         bamFile.comment = DomainFactory.createComment()
         bamFile.qcTrafficLightStatus = qc
-        bamFile.save(flush: true)
+        bamFile.save()
 
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,
@@ -153,14 +153,14 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
             samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
             DomainFactory.createSophiaInstance(samplePair1)
         }
-        assert samplePair1.save(flush: true)
+        assert samplePair1.save()
 
         AbstractMergedBamFile bamFile = samplePair1.mergingWorkPackage1.bamFileInProjectFolder
         if (qc == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
             bamFile.comment = DomainFactory.createComment()
         }
         bamFile.qcTrafficLightStatus = qc
-        bamFile.save(flush: true)
+        bamFile.save()
 
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,

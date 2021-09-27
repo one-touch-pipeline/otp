@@ -72,7 +72,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
                 producedBy: createWorkflowRun(priority: processingPriority),
         )
         seqTrack.workflowArtefact = workflowArtefact
-        seqTrack.save(flush: true)
+        seqTrack.save()
 
         dataFile = createSequenceDataFile(
                 fileExists: true,

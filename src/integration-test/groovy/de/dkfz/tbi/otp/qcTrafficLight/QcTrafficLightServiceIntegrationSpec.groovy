@@ -143,7 +143,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
 
         QcThreshold qcThreshold = QcThreshold.findByQcProperty1('qcBasesMapped')
         qcThreshold.project = createProject()
-        qcThreshold.save(flush: true)
+        qcThreshold.save()
 
         when:
         qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
@@ -167,6 +167,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         cellRangerQualityAssessment.onTargetMappedBases = onTargetMappedBases
 
         when:
+        bamFile.comment = DomainFactory.createComment()
         bamFile.qcTrafficLightStatus = BLOCKED
         qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
         boolean thresholdExceeded = qcTrafficLightService.qcValuesExceedErrorThreshold(bamFile, cellRangerQualityAssessment)

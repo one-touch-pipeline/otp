@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import grails.validation.ValidationException
 import org.junit.*
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
@@ -49,7 +50,7 @@ class RoddyBamFileIntegrationTests {
     @Test
     void testConstraints_allFine() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        assert bamFile.save(flush: true)
+        assert bamFile.save()
     }
 
     @Test
@@ -165,7 +166,9 @@ class RoddyBamFileIntegrationTests {
     void testIsConsistentAndContainsNoWithdrawnData_seqTrackIsMergedSecondTime_shouldReturnErrorMessage() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
         bamFile.seqTracks.addAll(bamFile.baseBamFile.seqTracks)
-        assert bamFile.isConsistentAndContainsNoWithdrawnData().first()?.startsWith("the same seqTrack is going to be merged for the second time")
+        TestCase.shouldFailWithMessageContaining(ValidationException, "the same seqTrack is going to be merged for the second time") {
+            bamFile.save()
+        }
     }
 
     @Test
@@ -173,7 +176,7 @@ class RoddyBamFileIntegrationTests {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([withdrawn: true])
         List<DataFile> dataFiles = DataFile.findAll()
         dataFiles*.fileWithdrawn = true
-        dataFiles*.save(flush: true)
+        dataFiles*.save()
         assert [] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
@@ -188,7 +191,7 @@ class RoddyBamFileIntegrationTests {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         List<DataFile> dataFiles = DataFile.findAll()
         dataFiles*.fileWithdrawn = true
-        dataFiles*.save(flush: true)
+        dataFiles*.save()
         assert ["not withdrawn bam file has withdrawn seq tracks"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
@@ -196,7 +199,9 @@ class RoddyBamFileIntegrationTests {
     void testIsConsistentAndContainsNoWithdrawnData_numberOfMergedLanesNotEqualToNumberOfContainedLanes_shouldReturnErrorMessage() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         bamFile.numberOfMergedLanes = 5
-        assert ["total number of merged lanes is not equal to number of contained seq tracks: 5 vs 1"] == bamFile.isConsistentAndContainsNoWithdrawnData()
+        TestCase.shouldFailWithMessageContaining(ValidationException, "total number of merged lanes is not equal to number of contained seq tracks: 5 vs 1") {
+            bamFile.save()
+        }
     }
 
     @Test

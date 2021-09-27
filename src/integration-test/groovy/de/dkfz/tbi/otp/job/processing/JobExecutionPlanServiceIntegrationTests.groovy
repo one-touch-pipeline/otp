@@ -142,21 +142,21 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertTrue(service.getJobExecutionPlans().isEmpty())
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: true)
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         assertTrue(service.getJobExecutionPlans().isEmpty())
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test", previousPlan: plan, obsoleted: false, planVersion: 1)
-        assertNotNull(plan2.save(flush: true))
+        assertNotNull(plan2.save())
         List<JobExecutionPlan> plans = service.getJobExecutionPlans()
         assertEquals(1, plans.size())
         assertSame(plan2, plans[0])
 
         // adding three other not obsoleted JobExecutionPlans
         JobExecutionPlan plan3 = new JobExecutionPlan(name: "test3", obsoleted: false)
-        assertNotNull(plan3.save(flush: true))
+        assertNotNull(plan3.save())
         JobExecutionPlan plan4 = new JobExecutionPlan(name: "test4", obsoleted: false)
-        assertNotNull(plan4.save(flush: true))
+        assertNotNull(plan4.save())
         JobExecutionPlan plan5 = new JobExecutionPlan(name: "test5", obsoleted: false)
-        assertNotNull(plan5.save(flush: true))
+        assertNotNull(plan5.save())
         // service should return four objects
         plans = service.getJobExecutionPlans()
         assertEquals(4, plans.size())
@@ -166,16 +166,16 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertTrue(plans.contains(plan5))
         // turn plan3-5 into a sequence
         plan3.obsoleted = true
-        assertNotNull(plan3.save(flush: true))
+        assertNotNull(plan3.save())
         plan4.obsoleted = true
         plan4.previousPlan = plan3
         plan4.name = "test3"
         plan4.planVersion = 1
-        assertNotNull(plan4.save(flush: true))
+        assertNotNull(plan4.save())
         plan5.previousPlan = plan4
         plan5.name = "test3"
         plan5.planVersion = 2
-        assertNotNull(plan4.save(flush: true))
+        assertNotNull(plan4.save())
         // service should return two objects
         plans = service.getJobExecutionPlans()
         assertEquals(2, plans.size())
@@ -191,21 +191,21 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", obsoleted: false)
         plan.previousPlan = null
         plan2.previousPlan = null
-        assertNotNull(plan.save(flush: true))
-        assertNotNull(plan2.save(flush: true))
+        assertNotNull(plan.save())
+        assertNotNull(plan2.save())
         // has no Process - should return false
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         // create a finished process
         Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
         Process process2 = new Process(finished: true, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo")
-        assertNotNull(process.save(flush: true))
-        assertNotNull(process2.save(flush: true))
+        assertNotNull(process.save())
+        assertNotNull(process2.save())
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         // adding a third process which is not finished
         Process process3 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
-        assertNotNull(process3.save(flush: true))
+        assertNotNull(process3.save())
         assertTrue(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
     }
@@ -215,20 +215,20 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(id: 1, name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 0, previousPlan: null)
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         JobExecutionPlan plan2 = new JobExecutionPlan(id: 2, name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 1, previousPlan: plan)
-        assertNotNull(plan2.save(flush: true))
+        assertNotNull(plan2.save())
         plan.previousPlan = null
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         JobExecutionPlan plan3 = new JobExecutionPlan(id: 3, name: "testIsProcessRunningObsoletedPlan", obsoleted: false, planVersion: 2, previousPlan: plan2)
-        assertNotNull(plan3.save(flush: true))
+        assertNotNull(plan3.save())
         plan2.previousPlan = plan
-        assertNotNull(plan2.save(flush: true))
+        assertNotNull(plan2.save())
         plan.previousPlan = null
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         // an unrelated Plan
         JobExecutionPlan plan4 = new JobExecutionPlan(id: 4, name: "otherPlan", obsoleted: false, planVersion: 0)
-        assertNotNull(plan4.save(flush: true))
+        assertNotNull(plan4.save())
         // no process is running
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
@@ -236,21 +236,21 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         assertFalse(service.isProcessRunning(plan4))
         // create a finished Process for first Plan
         Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         assertFalse(service.isProcessRunning(plan3))
         assertFalse(service.isProcessRunning(plan4))
         // create a not finished Process for second plan
         Process process2 = new Process(finished: false, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo")
-        assertNotNull(process2.save(flush: true))
+        assertNotNull(process2.save())
         assertFalse(service.isProcessRunning(plan))
         assertTrue(service.isProcessRunning(plan2))
         assertTrue(service.isProcessRunning(plan3))
         assertFalse(service.isProcessRunning(plan4))
         // mark it as finished
         process2.finished = true
-        assertNotNull(process2.save(flush: true))
+        assertNotNull(process2.save())
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         assertFalse(service.isProcessRunning(plan3))
@@ -262,54 +262,54 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         // there should not be a started Process
         assertNull(service.getLastExecutedProcess(plan))
         // create the process
         Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
-        assertNotNull(process1.save(flush: true))
+        assertNotNull(process1.save())
         // there still is no started process
         assertNull(service.getLastExecutedProcess(plan))
         // create the Processing Step
         JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition1.save(flush: true))
+        assertNotNull(jobDefinition1.save())
         plan.firstJob = jobDefinition1
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition1)
-        assertNotNull(step1.save(flush: true))
+        assertNotNull(step1.save())
         // there still is no started Process
         assertNull(service.getLastExecutedProcess(plan))
         // now a created Processing Step Update...
         ProcessingStepUpdate created1 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step1)
-        assertNotNull(created1.save(flush: true))
+        assertNotNull(created1.save())
         // ... which changes the world
         assertSame(process1, service.getLastExecutedProcess(plan))
         // adding a success should not change anything
         ProcessingStepUpdate success1 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(created1), processingStep: step1, previous: created1)
-        assertNotNull(success1.save(flush: true))
+        assertNotNull(success1.save())
         assertSame(process1, service.getLastExecutedProcess(plan))
         // but adding a second process will change
         Process process2 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
-        assertNotNull(process2.save(flush: true))
+        assertNotNull(process2.save())
         ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition1)
-        assertNotNull(step2.save(flush: true))
+        assertNotNull(step2.save())
         ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(success1), processingStep: step2)
-        assertNotNull(created2.save(flush: true))
+        assertNotNull(created2.save())
         // now it should be Process2
         assertSame(process2, service.getLastExecutedProcess(plan))
         // adding a success should not change anything
         ProcessingStepUpdate success2 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(created2), processingStep: step2, previous: created2)
-        assertNotNull(success2.save(flush: true))
+        assertNotNull(success2.save())
         assertSame(process2, service.getLastExecutedProcess(plan))
         // even adding a new Processing Step to Process 1 should not change anything
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition1)
-        assertNotNull(jobDefinition2.save(flush: true))
+        assertNotNull(jobDefinition2.save())
         jobDefinition1.next = jobDefinition2
-        assertNotNull(jobDefinition1.save(flush: true))
+        assertNotNull(jobDefinition1.save())
         ProcessingStep step3 = new ProcessingStep(process: process1, jobDefinition: jobDefinition2, previous: step1)
-        assertNotNull(step3.save(flush: true))
+        assertNotNull(step3.save())
         ProcessingStepUpdate created3 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(success2), processingStep: step3)
-        assertNotNull(created3.save(flush: true))
+        assertNotNull(created3.save())
         assertSame(process2, service.getLastExecutedProcess(plan))
     }
 
@@ -318,19 +318,19 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         def planData = service.getLatestUpdatesForPlan(plan)
         assertTrue(planData.isEmpty())
         // create the process
         Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
-        assertNotNull(process1.save(flush: true))
+        assertNotNull(process1.save())
         // create the Processing Step
         JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition1.save(flush: true))
+        assertNotNull(jobDefinition1.save())
         plan.firstJob = jobDefinition1
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
         ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition1)
-        assertNotNull(step1.save(flush: true))
+        assertNotNull(step1.save())
         // now a created Processing Step Update...
         mockProcessingStepAsFinished(step1)
         // latest updates for plan should show one
@@ -356,7 +356,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
             previous: update,
             processingStep: update.processingStep
         )
-        assertNotNull(failure.save(flush: true))
+        assertNotNull(failure.save())
         // test for failure
         assertEquals(1, service.getNumberOfProcesses(plan,  [ExecutionState.FAILURE]))
         planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.FAILURE])
@@ -370,7 +370,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
             previous: failure,
             processingStep: update.processingStep
         )
-        assertNotNull(restarted.save(flush: true))
+        assertNotNull(restarted.save())
         // test for failure
         assertEquals(0, service.getNumberOfProcesses(plan,  [ExecutionState.FAILURE]))
         planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.FAILURE])
@@ -397,7 +397,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testEnablePlan() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
         assertFalse(plan.enabled)
         // let's enable the Plan
@@ -416,11 +416,11 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testEnablePlanForStartJob() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
-        assertNotNull(startJob.save(flush: true))
+        assertNotNull(startJob.save())
         plan.startJob = startJob
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
 
         // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
         TestSingletonStartJob job = null
@@ -442,7 +442,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testDisablePlan() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
         assertTrue(plan.enabled)
         // let's disable the Plan
@@ -461,11 +461,11 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testDisablePlanForStartJob() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
-        assertNotNull(startJob.save(flush: true))
+        assertNotNull(startJob.save())
         plan.startJob = startJob
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
 
         // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
         TestSingletonStartJob job = null
@@ -487,7 +487,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetPlanSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -504,7 +504,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testEnablePlanSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -521,7 +521,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testDisablePlanSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan.save(flush: true)
+        plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -540,7 +540,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         int numberOfPlans = 3
         numberOfPlans.times {
             JobExecutionPlan plan = new JobExecutionPlan(name: "test${it}", obsoleted: false, planVersion: 0, enabled: true)
-            plan.save(flush: true)
+            plan.save()
             assertNotNull(plan)
         }
 
@@ -556,7 +556,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetAllProcessesPermission() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan.save(flush: true)
+        plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -573,7 +573,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetLatestUpdatesForPlanSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -590,7 +590,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testIsProcessRunningSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -607,7 +607,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetProcessCountSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -624,7 +624,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetLastExecutedProcessSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -641,7 +641,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
     void testGetNumberOfProcessesSecurity() {
         setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan = plan.save()
         assertNotNull(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -659,10 +659,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         setupData()
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
-        assertNotNull(startJob.save(flush: true))
+        assertNotNull(startJob.save())
         plan.startJob = startJob
         plan.firstJob = startJob
-        assertNotNull(plan.save(flush: true))
+        assertNotNull(plan.save())
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             jobExecutionPlanService.planInformation(plan)
@@ -685,21 +685,21 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
             previous: null,
             processingStep: step
             )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.STARTED,
             previous: update,
             processingStep: step
             )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FINISHED,
             previous: update,
             processingStep: step
             )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         return update
     }
 
@@ -711,7 +711,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
             previous: update,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         return update
     }
 

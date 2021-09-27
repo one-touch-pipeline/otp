@@ -85,7 +85,7 @@ class FastqcStartJobIntegrationSpec extends Specification {
                     jobExecutionPlan: failedProcess.jobExecutionPlan,
                 )
                 processParameterSecond.process = processSecond
-                assert processParameterSecond.save(flush: true)
+                assert processParameterSecond.save()
                 return processSecond
             }
         }

@@ -99,7 +99,7 @@ class SeqTrackServiceTests {
         ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
                 workPackage: externalMergingWorkPackage,
                 type: AbstractBamFile.BamType.RMDUP,
-        ).save(flush: true)
+        ).save()
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
     }
 
@@ -110,7 +110,7 @@ class SeqTrackServiceTests {
         )
 
         SeqPlatform sp = seqTrack.seqPlatform
-        sp.save(flush: true)
+        sp.save()
 
         DomainFactory.createMergingCriteriaLazy(
                 project: seqTrack.project,
@@ -120,17 +120,17 @@ class SeqTrackServiceTests {
         DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
-        ).save(flush: true)
+        ).save()
 
         DomainFactory.createSequenceDataFile(
                 seqTrack: seqTrack,
                 fileWithdrawn: false,
                 fileExists: true,
                 fileSize: 1L,
-        ).save(flush: true)
+        ).save()
 
         Project project = seqTrack.project
-        project.save(flush: true)
+        project.save()
         return seqTrack
     }
 }

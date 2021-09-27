@@ -203,7 +203,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
                 pipeline: DomainFactory.createDefaultOtpPipeline()
         ])
         MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: mergingWorkPackage)
-        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save(flush: true)
+        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save()
         MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
         MergingSetAssignment mergingSetAssignment = DomainFactory.createMergingSetAssignment(bamFile: processedBamFile, mergingSet: mergingSet)
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(workPackage: mergingWorkPackage, mergingPass: mergingPass)
@@ -269,8 +269,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
 
         AbstractMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass: mergingPass, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, workPackage: workPackage)
         workPackage.bamFileInProjectFolder = processedMergedBamFile
-        workPackage.save(flush: true)
-        alignmentPass.save(flush: true)
+        workPackage.save()
+        alignmentPass.save()
 
         deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(alignmentPass.seqTrack)
 
@@ -284,7 +284,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
-        roddyBamFile.workPackage.save(flush: true)
+        roddyBamFile.workPackage.save()
 
         deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(roddyBamFile.seqTracks.iterator().next())
 
@@ -297,7 +297,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         setupData()
         SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile()
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
-        singleCellBamFile.workPackage.save(flush: true)
+        singleCellBamFile.workPackage.save()
 
         deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(singleCellBamFile.seqTracks.iterator().next())
 
@@ -440,21 +440,21 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     private void markFilesAsLinked(List<SeqTrack> seqTracks) {
         seqTracks.each {
             it.linkedExternally = true
-            assert it.save(flush: true)
+            assert it.save()
         }
     }
 
     private void markFilesAsWithdrawn(List<SeqTrack> seqTracks) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
         dataFiles*.fileWithdrawn = true
-        assert dataFiles*.save(flush: true)
+        assert dataFiles*.save()
     }
 
     private void createFastqFiles(List<SeqTrack> seqTracks) {
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
         DataFile.findAllBySeqTrackInList(seqTracks).each {
             it.fastqImportInstance = fastqImportInstance
-            assert it.save(flush: true)
+            assert it.save()
             CreateFileHelper.createFile(new File(lsdfFilesService.getFileViewByPidPath(it)))
         }
     }
@@ -466,7 +466,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealm = true) {
         AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         mergingWorkPackage.bamFileInProjectFolder = bamFile
-        assert mergingWorkPackage.save(flush: true)
+        assert mergingWorkPackage.save()
         Project project = bamFile.project
         if (addRealm) {
             project.realm = DomainFactory.createRealm()

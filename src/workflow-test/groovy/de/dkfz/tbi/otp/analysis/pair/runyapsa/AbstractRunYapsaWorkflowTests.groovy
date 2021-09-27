@@ -104,7 +104,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         Path runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore, configService)
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        assert sp.save(flush: true)
+        assert sp.save()
 
         linkFileUtils.createAndValidateLinks([
                 (sourceSnvCallingInputFile): new File(runYapsaInputFile.toString()),

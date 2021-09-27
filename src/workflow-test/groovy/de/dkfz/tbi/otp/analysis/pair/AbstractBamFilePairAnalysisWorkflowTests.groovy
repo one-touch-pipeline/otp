@@ -135,7 +135,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         This has to be done because Indel checks the sample types in the header of the bam file.
          */
         controlMwp.sampleType.name = 'control_test'
-        controlMwp.sampleType.save(flush: true)
+        controlMwp.sampleType.save()
 
         bamFileTumor = DomainFactory.createExternallyProcessedMergedBamFile([
                 workPackage      : tumorMwp,
@@ -161,16 +161,16 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         referenceGenome = bamFileControl.referenceGenome
 
         project.realm = realm
-        assert project.save(flush: true)
+        assert project.save()
 
         individual.pid = PID
-        assert individual.save(flush: true)
+        assert individual.save()
 
         bamFileTumor.workPackage.bamFileInProjectFolder = bamFileTumor
-        assert bamFileTumor.workPackage.save(flush: true)
+        assert bamFileTumor.workPackage.save()
 
         bamFileControl.workPackage.bamFileInProjectFolder = bamFileControl
-        assert bamFileControl.workPackage.save(flush: true)
+        assert bamFileControl.workPackage.save()
 
         createSampleTypeCategories()
         createThresholds()
@@ -227,10 +227,10 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         ], realm)
 
         bamFileTumor.fileSize = bamFileSet.diseaseBamFile.size()
-        assert bamFileTumor.save(flush: true)
+        assert bamFileTumor.save()
 
         bamFileControl.fileSize = bamFileSet.controlBamFile.size()
-        assert bamFileControl.save(flush: true)
+        assert bamFileControl.save()
     }
 
     abstract File getWorkflowData()
@@ -248,13 +248,13 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 referenceGenome: referenceGenome,
         )
         bamFileTumor.containedSeqTracks*.libraryPreparationKit = kit
-        bamFileTumor.containedSeqTracks*.save(flush: true)
+        bamFileTumor.containedSeqTracks*.save()
         bamFileControl.containedSeqTracks*.libraryPreparationKit = kit
-        bamFileControl.containedSeqTracks*.save(flush: true)
+        bamFileControl.containedSeqTracks*.save()
         bamFileTumor.workPackage.libraryPreparationKit = kit
-        bamFileTumor.workPackage.save(flush: true)
+        bamFileTumor.workPackage.save()
         bamFileControl.workPackage.libraryPreparationKit = kit
-        bamFileControl.workPackage.save(flush: true)
+        bamFileControl.workPackage.save()
     }
 
     @Override

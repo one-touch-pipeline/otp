@@ -70,7 +70,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         roddyBamFile.dateCreated = startDate + 1
-        roddyBamFile.save(flush: true)
+        roddyBamFile.save()
 
         // create more RoddyBamFiles (where the date criteria doesn't fit)
         createBamFile()
@@ -99,7 +99,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         rnaRoddyBamFile.dateCreated = startDate + 1
-        rnaRoddyBamFile.save(flush: true)
+        rnaRoddyBamFile.save()
 
         // create more RoddyBamFiles (where the date criteria doesn't fit)
         createBamFile()
@@ -127,7 +127,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         singleCellBamFile.dateCreated = startDate + 1
-        singleCellBamFile.save(flush: true)
+        singleCellBamFile.save()
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getCellRangerKpi(startDate, endDate)
@@ -153,7 +153,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         bamFileAnalysis.dateCreated = startDate + 1
-        bamFileAnalysis.save(flush: true)
+        bamFileAnalysis.save()
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getRunYapsaKpi(startDate, endDate)
@@ -179,7 +179,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         bamFileAnalysis.dateCreated = startDate + 1
-        bamFileAnalysis.save(flush: true)
+        bamFileAnalysis.save()
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getSnvCallingKpi(startDate, endDate)
@@ -205,7 +205,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         bamFileAnalysis.dateCreated = startDate + 1
-        bamFileAnalysis.save(flush: true)
+        bamFileAnalysis.save()
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getIndelKpi(startDate, endDate)
@@ -231,7 +231,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         bamFileAnalysis.dateCreated = startDate + 1
-        bamFileAnalysis.save(flush: true)
+        bamFileAnalysis.save()
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getSophiaKpi(startDate, endDate)
@@ -257,7 +257,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
         ])
 
         bamFileAnalysis.dateCreated = startDate + 1
-        bamFileAnalysis.save(flush: true)
+        bamFileAnalysis.save()
 
         when:
         DeNbiKpi kpi = deNbiKpiService.getAceseqKpi(startDate, endDate)
@@ -277,7 +277,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 oldSystem: true,
         ])
         oldClusterJob.dateCreated = startDate + 1
-        oldClusterJob.save(flush: true)
+        oldClusterJob.save()
 
         ClusterJob newClusterJob = createClusterJob([
                 workflowStep: createWorkflowStep(),
@@ -285,7 +285,7 @@ class DeNbiKpiServiceIntegrationSpec extends Specification implements RoddyRnaFa
                 oldSystem: false,
         ])
         newClusterJob.dateCreated = startDate + 1
-        newClusterJob.save(flush: true)
+        newClusterJob.save()
 
         // create more cluster jobs with newer start date
         createClusterJob()

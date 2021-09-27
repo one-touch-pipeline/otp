@@ -37,7 +37,7 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
             File sourceFastqFile = testFastqFiles[index]
             assert sourceFastqFile.exists()
             dataFile.fileSize = sourceFastqFile.length()
-            dataFile.save(flush: true)
+            dataFile.save()
             File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
             sourceLinkMap.put(sourceFastqFile, linkFastqFile)
             File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(dataFile))

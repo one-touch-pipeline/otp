@@ -69,14 +69,14 @@ class SchedulerIntegrationTests implements UserAndRoles {
     void testNormalJobExecution() {
         setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("testEndStateAwareJob") as Job
         job.processingStep = step
         // There is no Created ProcessingStep update - execution should fail
@@ -89,7 +89,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
             previous: null,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         TestCase.shouldFail(InvalidStateException) {
             job.getOutputParameters()
         }
@@ -119,14 +119,14 @@ class SchedulerIntegrationTests implements UserAndRoles {
     void testNormalEndStateAwareJobExecution() {
         setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "testEndStateAware", planVersion: 0, startJobBean: "someBean")
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep)
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(step.save())
         Job endStateAwareJob = grailsApplication.mainContext.getBean("testEndStateAwareJob") as Job
         endStateAwareJob.processingStep = step
         // There is no Created ProcessingStep update - execution should fail
@@ -139,7 +139,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
             previous: null,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         TestCase.shouldFail(InvalidStateException) {
             endStateAwareJob.getOutputParameters()
         }
@@ -176,14 +176,14 @@ class SchedulerIntegrationTests implements UserAndRoles {
     void testFailingEndStateAwareJobExecution() {
         setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "testFailureEndStateAware", planVersion: 0, startJobBean: "testStartJob")
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep, null, "testFailureEndStateAwareJob")
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(step.save())
         Job endStateAwareJob = grailsApplication.mainContext.getBean("testFailureEndStateAwareJob") as Job
         endStateAwareJob.processingStep = step
         // There is no Created ProcessingStep update - execution should fail
@@ -201,7 +201,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
             previous: null,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         TestCase.shouldFail(InvalidStateException) {
             endStateAwareJob.getOutputParameters()
         }
@@ -243,7 +243,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
                 jobDefinitions: [jobDefinition],
         )
         jep.firstJob = jobDefinition
-        assert jep.save(flush: true)
+        assert jep.save()
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep, startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
         ProcessingStep step = DomainFactory.createProcessingStep(process: process, jobDefinition: jobDefinition, jobClass: FailingTestJob.name)
         Job job = grailsApplication.mainContext.getBean("failingTestJob") as Job
@@ -276,24 +276,24 @@ class SchedulerIntegrationTests implements UserAndRoles {
     void testMissingOutputParameter() {
         setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         // create a third parameter type for which the job does not create a parameter
         ParameterType type = new ParameterType(name: "fail", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
-        assertNotNull(type.save(flush: true))
+        assertNotNull(type.save())
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         // run the Job
         Job job = grailsApplication.mainContext.getBean("testJob") as Job
         job.processingStep = step
@@ -312,28 +312,28 @@ class SchedulerIntegrationTests implements UserAndRoles {
     void testInputAsOutputParameter() {
         setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "directTestJob", plan: jep)
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "directTestJob", plan: jep, previous: jobDefinition)
-        assertNotNull(jobDefinition2.save(flush: true))
+        assertNotNull(jobDefinition2.save())
         jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save(flush: true))
+        assertNotNull(test.save())
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         Job job = grailsApplication.mainContext.getBean("directTestJob") as Job
         job.processingStep = step
         // run the Job
@@ -348,18 +348,18 @@ class SchedulerIntegrationTests implements UserAndRoles {
         assertEquals("Parameter abcd is either not defined for JobDefintion ${jobDefinition.id} or not of type Output.".toString(), updates[3].error.errorMessage)
         // verify that the test works if we use a proper parameter type
         test.parameterUsage = ParameterUsage.OUTPUT
-        assertNotNull(test.save(flush: true))
+        assertNotNull(test.save())
         process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
-        assertNotNull(process.save(flush: true))
+        assertNotNull(process.save())
         step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(step.save())
         update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
         )
-        assertNotNull(update.save(flush: true))
+        assertNotNull(update.save())
         job = grailsApplication.mainContext.getBean("directTestJob") as Job
         job.processingStep = step
         // run the Job
@@ -413,15 +413,15 @@ class SchedulerIntegrationTests implements UserAndRoles {
     @Deprecated
     private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save(flush: true))
-        assertNotNull(test2.save(flush: true))
-        assertNotNull(input.save(flush: true))
-        assertNotNull(input2.save(flush: true))
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save())
         return jobDefinition
     }
 
@@ -436,15 +436,15 @@ class SchedulerIntegrationTests implements UserAndRoles {
     @Deprecated
     protected JobDefinition createTestEndStateAwareJob(String name, JobExecutionPlan jep, JobDefinition previous = null, String beanName = "testEndStateAwareJob") {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: beanName, plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save(flush: true))
-        assertNotNull(test2.save(flush: true))
-        assertNotNull(input.save(flush: true))
-        assertNotNull(input2.save(flush: true))
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save())
         return jobDefinition
     }
 }

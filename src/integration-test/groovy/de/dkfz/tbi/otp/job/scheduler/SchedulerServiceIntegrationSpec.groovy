@@ -82,7 +82,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
         JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: null)
         DomainFactory.createProcessingStepUpdate(processingStep: step)
@@ -109,9 +109,9 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
         jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: null)
         DomainFactory.createProcessingStepUpdate(processingStep: step)
@@ -182,21 +182,21 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestJob("test2", jep, jobDefinition)
         jobDefinition.next = jobDefinition2
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         JobDefinition jobDefinition3 = createTestEndStateAwareJob("test3", jep, jobDefinition2)
         jobDefinition2.next = jobDefinition3
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         ParameterType constantParameterType = DomainFactory.createParameterType(jobDefinition: jobDefinition3, name: "constant")
         ParameterType constantParameterType2 = DomainFactory.createParameterType(jobDefinition: jobDefinition3, name: "constant2")
         jobDefinition3.addToConstantParameters(DomainFactory.createParameter(type: constantParameterType, value: "constant1"))
         jobDefinition3.addToConstantParameters(DomainFactory.createParameter(type: constantParameterType2, value: "constant2"))
-        jobDefinition3.save(flush: true)
+        jobDefinition3.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -258,7 +258,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         when: "run another process for same JobExecutionPlan, but trigger an exception by using an OUTPUT parameter as constant"
         constantParameterType.refresh()
         constantParameterType.parameterUsage = ParameterUsage.OUTPUT
-        constantParameterType.save(flush: true)
+        constantParameterType.save()
 
         process = DomainFactory.createProcess(jobExecutionPlan: jep)
         step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -302,7 +302,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestJob("test2", jep, jobDefinition)
         ParameterMapping mapping = new ParameterMapping(
@@ -312,9 +312,9 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         )
         jobDefinition2.addToParameterMappings(mapping)
         jobDefinition.next = jobDefinition2
-        jobDefinition.save(flush: true)
-        jobDefinition2.save(flush: true)
-        jep.save(flush: true)
+        jobDefinition.save()
+        jobDefinition2.save()
+        jep.save()
 
         JobDefinition jobDefinition3 = createTestEndStateAwareJob("test3", jep, jobDefinition2)
         mapping = new ParameterMapping(
@@ -330,14 +330,14 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         )
         jobDefinition3.addToParameterMappings(mapping)
         jobDefinition2.next = jobDefinition3
-        jobDefinition2.save(flush: true)
-        jep.save(flush: true)
+        jobDefinition2.save()
+        jep.save()
 
         ParameterType constantParameterType = DomainFactory.createParameterType(jobDefinition: jobDefinition3, name: "constant", parameterUsage: ParameterUsage.INPUT)
         ParameterType constantParameterType2 = DomainFactory.createParameterType(jobDefinition: jobDefinition3, name: "constant2", parameterUsage: ParameterUsage.INPUT)
         jobDefinition3.addToConstantParameters(DomainFactory.createParameter(type: constantParameterType, value: "constant1"))
         jobDefinition3.addToConstantParameters(DomainFactory.createParameter(type: constantParameterType2, value: "constant2"))
-        jobDefinition3.save(flush: true)
+        jobDefinition3.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -396,15 +396,15 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestEndStateAwareJob("test2", jep, jobDefinition)
         ParameterType passThrough = DomainFactory.createParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.PASSTHROUGH)
         ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough)
         jobDefinition2.addToParameterMappings(mapping)
         jobDefinition.next = jobDefinition2
-        jobDefinition.save(flush: true)
-        jobDefinition2.save(flush: true)
+        jobDefinition.save()
+        jobDefinition2.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -459,7 +459,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestEndStateAwareJob("test2", jep, jobDefinition)
         ParameterType passThrough = DomainFactory.createParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.PASSTHROUGH)
@@ -475,8 +475,8 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         ParameterMapping mapping4 = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input2"))
         jobDefinition2.addToParameterMappings(mapping4)
         jobDefinition.next = jobDefinition2
-        jobDefinition.save(flush: true)
-        jobDefinition2.save(flush: true)
+        jobDefinition.save()
+        jobDefinition2.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -541,13 +541,13 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
 
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
-        startJob.save(flush: true)
+        startJob.save()
         jep.startJob = startJob
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
         job.jobExecutionPlan = jep
 
@@ -588,12 +588,12 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
 
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
-        startJob.save(flush: true)
+        startJob.save()
         jep.startJob = startJob
 
         JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
         job.jobExecutionPlan = jep
@@ -625,12 +625,12 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
 
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
-        startJob.save(flush: true)
+        startJob.save()
         jep.startJob = startJob
 
         JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         ParameterType type1 = DomainFactory.createParameterType(name: "test", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType type2 = DomainFactory.createParameterType(name: "test2", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
@@ -647,7 +647,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         ParameterMapping mapping2 = new ParameterMapping(from: type2, to: input, jobDefinition: jobDefinition)
         jobDefinition.addToParameterMappings(mapping1)
         jobDefinition.addToParameterMappings(mapping2)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         when:
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
@@ -699,12 +699,12 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
 
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
-        startJob.save(flush: true)
+        startJob.save()
         jep.startJob = startJob
 
         JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         ParameterType type1 = DomainFactory.createParameterType(name: "test", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType type2 = DomainFactory.createParameterType(name: "test2", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
@@ -721,7 +721,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         ParameterMapping mapping2 = new ParameterMapping(from: type2, to: input, jobDefinition: jobDefinition)
         jobDefinition.addToParameterMappings(mapping1)
         jobDefinition.addToParameterMappings(mapping2)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         when:
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
@@ -765,31 +765,31 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
 
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
-        startJob.save(flush: true)
+        startJob.save()
         jep.startJob = startJob
 
         DecidingJobDefinition decidingJobDefinition = new DecidingJobDefinition(name: "test", bean: "decisionTestJob", plan: jep)
 
         JobDecision decision1 = new JobDecision(jobDefinition: decidingJobDefinition, name: "outcome1", description: "test")
-        decision1.save(flush: true)
+        decision1.save()
         JobDecision decision2 = new JobDecision(jobDefinition: decidingJobDefinition, name: "outcome2", description: "test")
-        decision2.save(flush: true)
+        decision2.save()
 
         JobDefinition jobDefinition1 = createTestEndStateAwareJob("decision1", jep, decidingJobDefinition)
-        jobDefinition1.save(flush: true)
+        jobDefinition1.save()
         JobDefinition jobDefinition2 = new JobDefinition(name: "decision2", bean: "directTestJob", plan: jep, previous: decidingJobDefinition)
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         decidingJobDefinition.next = null
-        decidingJobDefinition.save(flush: true)
+        decidingJobDefinition.save()
 
         DecisionMapping mapping1 = new DecisionMapping(decision: decision1, definition: jobDefinition1)
-        mapping1.save(flush: true)
+        mapping1.save()
         DecisionMapping mapping2 = new DecisionMapping(decision: decision2, definition: jobDefinition2)
-        mapping2.save(flush: true)
+        mapping2.save()
 
         jep.firstJob = decidingJobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         when:
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
@@ -853,13 +853,13 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan()
 
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
-        startJob.save(flush: true)
+        startJob.save()
         jep.startJob = startJob
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         StartJob job = Holders.grailsApplication.mainContext.getBean("testStartJob") as StartJob
         job.jobExecutionPlan = jep
@@ -885,18 +885,18 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
         ValidatingJobDefinition validator = new ValidatingJobDefinition(name: "validator", bean: "failingValidatingTestJob", validatorFor: jobDefinition, plan: jep)
-        validator.save(flush: true)
+        validator.save()
 
         jobDefinition.next = validator
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         JobDefinition jobDefinition2 = createTestEndStateAwareJob("testEndStateAware", jep)
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         validator.next = jobDefinition2
-        validator.save(flush: true)
+        validator.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -958,19 +958,19 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         ValidatingJobDefinition validator = new ValidatingJobDefinition(name: "validator", bean: "validatingTestJob", validatorFor: jobDefinition, plan: jep)
-        validator.save(flush: true)
+        validator.save()
 
         jobDefinition.next = validator
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         JobDefinition jobDefinition2 = createTestEndStateAwareJob("testEndStateAware", jep)
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         validator.next = jobDefinition2
-        validator.save(flush: true)
+        validator.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1033,9 +1033,9 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
         jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
 
@@ -1149,9 +1149,9 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
         jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1172,7 +1172,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         when:
         process.finished = true
-        process.save(flush: true)
+        process.save()
         schedulerService.restartProcessingStep(step, false)
 
         then:
@@ -1189,10 +1189,10 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
 
@@ -1223,10 +1223,10 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1261,7 +1261,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         when:
         process.finished = true
-        process.save(flush: true)
+        process.save()
         schedulerService.restartProcessingStep(step)
 
         then:
@@ -1310,15 +1310,15 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestJob("test2", jep)
         jobDefinition.next = jobDefinition2
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         JobDefinition jobDefinition3 = createTestEndStateAwareJob("test3", jep, jobDefinition2)
         jobDefinition2.next = jobDefinition3
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
 
@@ -1330,7 +1330,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         step2.metaClass.belongsToMultiJob = { -> return false }
 
         step.next = step2
-        step.save(flush: true)
+        step.save()
 
         expect:
         step.previous == null
@@ -1342,7 +1342,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         mockProcessingStepAsFailed(step2)
 
         process.finished = true
-        process.save(flush: true)
+        process.save()
 
         then: "restart step2"
         0 == RestartedProcessingStep.count()
@@ -1390,21 +1390,21 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestJob("test2", jep)
         jobDefinition.next = jobDefinition2
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
 
         JobDefinition jobDefinition3 = createTestJob("test3", jep)
         jobDefinition2.next = jobDefinition3
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         JobDefinition jobDefinition4 = createTestEndStateAwareJob("test4", jep, jobDefinition3)
         jobDefinition3.next = jobDefinition4
-        jobDefinition3.save(flush: true)
+        jobDefinition3.save()
 
-        jep.save(flush: true)
+        jep.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep firstStep = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1505,15 +1505,15 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition1 = createTestJob("test", jep)
         jep.firstJob = jobDefinition1
-        jep.save(flush: true)
+        jep.save()
 
         JobDefinition jobDefinition2 = createTestJob("test2", jep)
         jobDefinition1.next = jobDefinition2
-        jobDefinition1.save(flush: true)
+        jobDefinition1.save()
 
         JobDefinition jobDefinition3 = createTestEndStateAwareJob("test4", jep, jobDefinition2)
         jobDefinition2.next = jobDefinition3
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         ParameterType type4 = DomainFactory.createParameterType(name: "passthrough", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.PASSTHROUGH)
         ParameterType type5 = DomainFactory.createParameterType(name: "constant", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT)
@@ -1524,7 +1524,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         jobDefinition2.addToParameterMappings(mapping2)
 
         jobDefinition2.addToConstantParameters(DomainFactory.createParameter(type: type5, value: "foobar"))
-        jobDefinition2.save(flush: true)
+        jobDefinition2.save()
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
 
@@ -1534,18 +1534,18 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         mockProcessingStepAsFinished(firstStep)
         firstStep.addToOutput(DomainFactory.createParameter(type: ParameterType.findByNameAndJobDefinition("test", jobDefinition1), value: "bar"))
         firstStep.addToOutput(DomainFactory.createParameter(type: ParameterType.findByNameAndJobDefinition("test2", jobDefinition1), value: "foo"))
-        firstStep.save(flush: true)
+        firstStep.save()
 
         ProcessingStep secondStep = DomainFactory.createProcessingStep(jobDefinition: jobDefinition2, process: process, previous: firstStep)
         secondStep.metaClass.belongsToMultiJob = { -> return false }
-        secondStep.save(flush: true)
+        secondStep.save()
 
         firstStep.next = secondStep
-        firstStep.save(flush: true)
+        firstStep.save()
 
         mockProcessingStepAsFailed(secondStep)
         process.finished = true
-        process.save(flush: true)
+        process.save()
 
         when: "restart the failed Processing Step"
         schedulerService.restartProcessingStep(secondStep, false)
@@ -1575,10 +1575,10 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jep.save())
         jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        assertNotNull(jobDefinition.save(flush: true))
-        assertNotNull(jep.save(flush: true))
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jep.save())
         // create the Process
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1717,15 +1717,15 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
     @Deprecated
     private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save(flush: true))
-        assertNotNull(test2.save(flush: true))
-        assertNotNull(input.save(flush: true))
-        assertNotNull(input2.save(flush: true))
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save())
         return jobDefinition
     }
 
@@ -1740,15 +1740,15 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
     @Deprecated
     protected JobDefinition createTestEndStateAwareJob(String name, JobExecutionPlan jep, JobDefinition previous = null, String beanName = "testEndStateAwareJob") {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: beanName, plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save(flush: true))
+        assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save(flush: true))
-        assertNotNull(test2.save(flush: true))
-        assertNotNull(input.save(flush: true))
-        assertNotNull(input2.save(flush: true))
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save())
         return jobDefinition
     }
 }

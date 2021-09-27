@@ -103,7 +103,7 @@ class ReferenceGenomeServiceTests {
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
         mergingWorkPackage.pipeline = DomainFactory.createDefaultOtpPipeline()
         mergingWorkPackage.statSizeFileName = null
-        mergingWorkPackage.save(flush: true)
+        mergingWorkPackage.save()
         assert TestCase.shouldFail(AssertionError) {
             referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
         }.contains('No stat file size name is defined')

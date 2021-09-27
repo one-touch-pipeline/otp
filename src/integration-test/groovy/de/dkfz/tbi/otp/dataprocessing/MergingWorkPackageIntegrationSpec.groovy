@@ -121,7 +121,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
-        bamFile.workPackage.save(flush: true)
+        bamFile.workPackage.save()
 
         expect:
         bamFile == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
@@ -139,10 +139,10 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         given:
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
         bamFile.withdrawn = true
-        bamFile.save(flush: true)
+        bamFile.save()
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
-        bamFile.workPackage.save(flush: true)
+        bamFile.workPackage.save()
 
         expect:
         null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
@@ -153,7 +153,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, md5sum: null])
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
-        bamFile.workPackage.save(flush: true)
+        bamFile.workPackage.save()
 
         expect:
         null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
@@ -165,7 +165,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         DomainFactory.createSeqTrackWithDataFiles(bamFile.workPackage)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
-        bamFile.workPackage.save(flush: true)
+        bamFile.workPackage.save()
 
         expect:
         null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis

@@ -181,7 +181,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         assert runDirectory.mkdir()
         Path metadataFile = testDirectory.toPath().resolve('metadata.tsv')
         metadataFile.bytes = ("${RUN_ID}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${CENTER_NAME}\n" +
-                        ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)).getBytes(MetadataValidationContext.CHARSET)
+                ("run\tplatform\tmodelAlias\t${seqCenter.name}\n" * 2)).getBytes(MetadataValidationContext.CHARSET)
 
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
@@ -438,7 +438,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
     }
 
-
     @Unroll
     void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, FastqImportInstance.ImportMode importMode) {
         given:
@@ -451,7 +450,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         final String SC_EXON = "SC_" + SeqTypeNames.EXOME.seqTypeName
 
         def (fastq1, fastq2, fastq3, fastq4, fastq5, fastq6, fastq7, fastq8, fastq9) =
-            ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b", "fastq_sc"]
+        ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b", "fastq_sc"]
 
         def (String runName1, String runName2) = ["run1", "run2"]
         def (String center1, String center2) = ["center1", "center2"]
@@ -611,7 +610,6 @@ ${ILSE_NO}                      -             1234          1234          -     
         MetaDataFile result = service.importMetadataFile(context, align, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification)
 
         then:
-
         // runs
         Run.count == (includeOptional ? 2 : 1)
         Run run1 = Run.findWhere(
@@ -640,9 +638,9 @@ ${ILSE_NO}                      -             1234          1234          -     
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = MetaDataFile.findWhere(
-                fileName           : file.name,
-                filePath           : file.parent,
-                md5sum             : context.metadataFileMd5sum,
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         )
         result == metadataFile
@@ -865,7 +863,6 @@ ${ILSE_NO}                      -             1234          1234          -     
         true      | false           | true  | FastqImportInstance.ImportMode.MANUAL
     }
 
-
     void "importMetadataFile imports correctly data withAntibodyTarget"() {
         given:
         String runName = 'run'
@@ -983,9 +980,9 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = MetaDataFile.findWhere(
-                fileName           : file.name,
-                filePath           : file.parent,
-                md5sum             : context.metadataFileMd5sum,
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         )
         result == metadataFile
@@ -1184,9 +1181,9 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = MetaDataFile.findWhere(
-                fileName           : file.name,
-                filePath           : file.parent,
-                md5sum             : context.metadataFileMd5sum,
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
                 fastqImportInstance: fastqImportInstance,
         )
         result == metadataFile
@@ -1400,7 +1397,6 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         result.value == 'ACGTACGT'
         result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
-
 
     void "extractMateNumber, when READ columns is missing, returns null"() {
         given:
@@ -1721,7 +1717,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         given:
         SeqCenter seqCenter = createSeqCenter()
         DataForGetOrCreateRun data = new DataForGetOrCreateRun([
-                (CENTER_NAME)        : seqCenter.name,
+                (CENTER_NAME): seqCenter.name,
         ])
 
         when:
@@ -1755,7 +1751,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         given:
         String dateExecutedString = ''
         DataForGetOrCreateRun data = new DataForGetOrCreateRun([
-                (RUN_DATE)    :    dateExecutedString,
+                (RUN_DATE): dateExecutedString,
         ])
 
         when:

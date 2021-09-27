@@ -77,7 +77,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         SeqTrack seqTrack = CollectionUtils.exactlyOneElement(roddyBamFile.seqTracks)
         seqTrack.libraryName = LIBRARY_NAME
         seqTrack.normalizedLibraryName = NORMALIZED_LIBRARY_NAME
-        assert seqTrack.save(flush: true)
+        assert seqTrack.save()
 
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.class.toString(), roddyBamFile)
         parseWgbsAlignmentQcJob = grailsApplication.mainContext.getBean('parseWgbsAlignmentQcJob')
@@ -102,7 +102,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
             roddyBamFile.seqTracks.add(seqTrack)
             roddyBamFile.numberOfMergedLanes++
-            assert roddyBamFile.save(flush: true)
+            assert roddyBamFile.save()
         }
 
         createAllQaFilesOnFileSystem(roddyBamFile)
@@ -136,7 +136,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
         roddyBamFile.seqTracks.add(secondSeqTrack)
         roddyBamFile.numberOfMergedLanes = roddyBamFile.getContainedSeqTracks().size()
-        assert roddyBamFile.save(flush: true)
+        assert roddyBamFile.save()
 
         createAllQaFilesOnFileSystem(roddyBamFile)
 

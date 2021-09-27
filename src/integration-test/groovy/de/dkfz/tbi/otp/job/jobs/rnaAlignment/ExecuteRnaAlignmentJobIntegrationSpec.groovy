@@ -99,7 +99,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         roddyBamFile.containedSeqTracks.each {
             LibraryPreparationKit libraryPreparationKit = it.libraryPreparationKit
             libraryPreparationKit.reverseComplementAdapterSequence = ADAPTER_SEQUENCE1
-            assert libraryPreparationKit.save(flush: true)
+            assert libraryPreparationKit.save()
         }
         executeRnaAlignmentJob.fileSystemService = new TestFileSystemService()
 
@@ -135,7 +135,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
                 File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFile))
                 CreateFileHelper.createFile(file)
                 dataFile.fileSize = file.length()
-                assert dataFile.save(flush: true)
+                assert dataFile.save()
             }
         }
         CreateFileHelper.createFile(executeRnaAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))

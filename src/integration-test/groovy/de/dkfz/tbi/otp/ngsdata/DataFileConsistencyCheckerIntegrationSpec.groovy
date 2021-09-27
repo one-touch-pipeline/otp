@@ -123,7 +123,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
             SeqTrack seqTrack = DomainFactory.createSeqTrack(dataInstallationState: SeqTrack.DataProcessingState.FINISHED)
             dataFile = DomainFactory.createDataFile(fileType: fileType, seqTrack: seqTrack, fileLinked: false)
             dataFile.mateNumber = null
-            dataFile.save(flush: true, validate: false)
+            dataFile.save(validate: false)
         }
 
         dataFileConsistencyChecker.schedulerService = Mock(SchedulerService) {

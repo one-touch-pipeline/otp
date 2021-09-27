@@ -818,6 +818,8 @@ class FileServiceSpec extends Specification implements DataTest {
         !FileService.isFileReadableAndNotEmpty(file)
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "ensureFileIsReadable, fails when the file does not exist"() {
         given:
         File file = temporaryFolder.newFile()
@@ -1078,6 +1080,8 @@ class FileServiceSpec extends Specification implements DataTest {
     //----------------------------------------------------------------------------------------------------
     // test for ensurePathIsReadable
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "ensurePathIsReadable, fails when the path does not exist"() {
         given:
         Path file = temporaryFolder.newFolder().toPath()

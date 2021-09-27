@@ -72,7 +72,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         DomainFactory.createAllAnalysableSeqTypes()
 
         samplePair1.project.processingPriority.priority = 0
-        samplePair1.project.processingPriority.save(flush: true)
+        samplePair1.project.processingPriority.save()
     }
 
     @Unroll
@@ -85,7 +85,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         } else {
             roddyConfig1.seqType = DomainFactory.createExomeSeqType()
         }
-        assert roddyConfig1.save(flush: true)
+        assert roddyConfig1.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -99,7 +99,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         roddyConfig1.obsoleteDate = new Date()
-        assert roddyConfig1.save(flush: true)
+        assert roddyConfig1.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -194,7 +194,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         MergingWorkPackage otherMwp = DomainFactory.createMergingWorkPackage(withSamplePair)
         DomainFactory.createSampleTypePerProject(project: samplePair1.project, sampleType: otherMwp.sampleType, category: SampleTypePerProject.Category.DISEASE)
         DomainFactory.createSamplePair(otherMwp, withoutSamplePair)
-        samplePair1.delete(flush: true)
+        samplePair1.delete()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -212,7 +212,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         bamFileInProgress.md5sum = null
         bamFileInProgress.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
-        assert bamFileInProgress.save(flush: true)
+        assert bamFileInProgress.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -228,7 +228,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         problematicBamFile.coverage = COVERAGE_TOO_LOW
-        assert problematicBamFile.save(flush: true)
+        assert problematicBamFile.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -245,7 +245,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
         thresholds.numberOfLanes = 5
-        assert thresholds.save(flush: true)
+        assert thresholds.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -260,7 +260,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         ProcessingThresholds.findByProject(samplePair1.project).each {
             it.numberOfLanes = 5
-            it.save(flush: true)
+            it.save()
         }
 
         expect:
@@ -273,7 +273,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         [bamFile1, bamFile2].each {
             it.coverage = COVERAGE_TOO_LOW
-            it.save(flush: true)
+            it.save()
         }
 
         expect:
@@ -289,7 +289,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
         thresholds.project = otherProject
-        assert thresholds.save(flush: true)
+        assert thresholds.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -309,7 +309,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         if (property == "coverage") {
             thresholds.numberOfLanes = 1
         }
-        assert thresholds.save(flush: true)
+        assert thresholds.save()
 
         expect:
         samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
@@ -329,7 +329,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
         problematicBamFile.withdrawn = true
-        assert problematicBamFile.save(flush: true)
+        assert problematicBamFile.save()
 
         expect:
         snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
@@ -344,7 +344,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         SamplePair samplePair = DomainFactory.createProcessableSamplePair().samplePair
         samplePair.project.processingPriority = samplePair1.project.processingPriority
-        samplePair.project.save(flush: true)
+        samplePair.project.save()
 
         expect:
         samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
@@ -357,7 +357,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         SamplePair samplePairFastTrack = DomainFactory.createProcessableSamplePair().samplePair
         Project project = samplePairFastTrack.project
         project.processingPriority = findOrCreateProcessingPriorityFastrack()
-        assert project.save(flush: true)
+        assert project.save()
 
         expect:
         samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
@@ -382,7 +382,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFile2
         )
-        snvCallingInstance.save(flush: true)
+        snvCallingInstance.save()
 
         snvCallingService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath

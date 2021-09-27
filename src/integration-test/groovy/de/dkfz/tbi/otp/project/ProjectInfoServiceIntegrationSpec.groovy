@@ -96,7 +96,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
                 createProjectInfo(project: project, dateCreated: new Date(1)),
         ]
         project.projectInfos = projectInfos as Set<ProjectInfo>
-        project.save(flush: true)
+        project.save()
 
         List<ProjectInfo> expected = [projectInfos[2], projectInfos[1], projectInfos[0]]
         List<ProjectInfo> result = []

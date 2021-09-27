@@ -270,7 +270,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
 
         config1.previousConfig = config2
-        config1.save(flush: true)
+        config1.save()
 
         when:
         deletionService.deleteProject(project)
@@ -347,7 +347,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
 
         processingStep1.next = processingStep2
-        processingStep1.save(flush: true)
+        processingStep1.save()
 
         ProcessingStep processingStep3 = DomainFactory.createProcessingStep([
                 process      : process,
@@ -356,7 +356,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
 
         processingStep2.next = processingStep3
-        processingStep2.save(flush: true)
+        processingStep2.save()
 
         DomainFactory.createRestartedProcessingStep([
                 process      : process,
@@ -412,15 +412,15 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         DomainFactory.createProcessParameter(className: SeqTrack.name)
 
         processParameter1.process.finished = true
-        processParameter1.process.save(flush: true)
+        processParameter1.process.save()
 
         processParameter2.process.restarted = processParameter1.process
         processParameter2.process.finished = true
-        processParameter2.process.save(flush: true)
+        processParameter2.process.save()
 
         processParameter3.process.restarted = processParameter2.process
         processParameter3.process.finished = true
-        processParameter3.process.save(flush: true)
+        processParameter3.process.save()
 
         when:
         deletionService.deleteProcessParameters([processParameter1])
