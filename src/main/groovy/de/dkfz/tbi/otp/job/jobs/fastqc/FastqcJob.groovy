@@ -130,7 +130,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     private setnBasesInClusterJobForFastqc(ProcessingStep processingStep) {
         ClusterJob.findAllByProcessingStep(processingStep).each {
             it.nBases = ClusterJobService.getBasesSum(it)
-            it.save(flush: true)
+            it.save()
         }
     }
 

@@ -85,7 +85,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         workflowStep.workflowRun.with {
             // done in same transaction in which cluster jobs are saved
             jobCanBeRestarted = true
-            save(flush: true)
+            save()
         }
 
         Collection<ClusterJob> clusterJobs = roddyExecutionService.createClusterJobObjects(roddyResult, output, workflowStep)

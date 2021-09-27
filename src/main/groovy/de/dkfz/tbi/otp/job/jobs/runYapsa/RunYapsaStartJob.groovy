@@ -49,7 +49,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
 
         notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.RUN_YAPSA)
         bamFilePairAnalysis.samplePair.runYapsaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        bamFilePairAnalysis.samplePair.save(flush: true)
+        bamFilePairAnalysis.samplePair.save()
     }
 
     @Override

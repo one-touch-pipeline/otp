@@ -150,7 +150,7 @@ class SchedulerService {
                                 previous: last,
                                 processingStep: step
                         )
-                        if (!update.save(flush: true)) {
+                        if (!update.save()) {
                             valid = false
                             status.setRollbackOnly()
                             log.error("ProcessingStep ${step.id} could not be resumed")
@@ -248,10 +248,10 @@ class SchedulerService {
         lock.lock()
         try {
             previous.next = next
-            if (!previous.save(flush: true)) {
+            if (!previous.save()) {
                 throw new SchedulerPersistencyException("Could not save previous ProcessingStep for the process ${previous.process.id}")
             }
-            if (!next.process.save(flush: true)) {
+            if (!next.process.save()) {
                 throw new SchedulerPersistencyException("Could not save next ProcessingStep for the process ${next.process.id}")
             }
             queue.add(next)
@@ -283,18 +283,18 @@ class SchedulerService {
                 jobExecutionPlan: plan,
                 startJobClass: startJob.class.getName(),
         )
-        if (!process.save(flush: true)) {
+        if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
         if (processParameter) {
             processParameter.process = process
-            if (!processParameter.save(flush: true)) {
+            if (!processParameter.save()) {
                 throw new SchedulerPersistencyException("Could not save the process parameter for the Process ${process.id}")
             }
         }
         // create the first processing step
         ProcessingStep step = createProcessingStep(process, JobDefinition.get(plan.firstJob.id), input)
-        if (!process.save(flush: true)) {
+        if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
         lock.lock()
@@ -401,7 +401,7 @@ class SchedulerService {
                     previous: step.latestProcessingStepUpdate,
                     processingStep: step
             )
-            if (!update.save(flush: true)) {
+            if (!update.save()) {
                 log.error("Could not create a FINISHED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FINISHED Update for Job")
             }
@@ -418,7 +418,7 @@ class SchedulerService {
             }
             step.addToOutput(param)
         }
-        if (!step.save(flush: true)) {
+        if (!step.save()) {
             log.error("Could not create a FINISHED Update for Job of type ${job.class}")
             throw new ProcessingException("Could not create a FINISHED Update for Job")
         }
@@ -462,7 +462,7 @@ class SchedulerService {
                             previous: step.latestProcessingStepUpdate,
                             processingStep: step
                     )
-                    endStateUpdate.save(flush: true)
+                    endStateUpdate.save()
                 } else {
                     job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A SUCCESS ProcessingStepUpdate " +
                             "will NOT be created."
@@ -470,7 +470,7 @@ class SchedulerService {
                 if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
                     ((DecisionProcessingStep) step).decision = (job as DecisionJob).getDecision()
                 }
-                if (!step.save(flush: true)) {
+                if (!step.save()) {
                     log.error("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
                     throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
                 }
@@ -479,7 +479,7 @@ class SchedulerService {
                     ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution " +
                             "state set to FAILURE", processingStepUpdate: endStateUpdate)
                     endStateUpdate.error = error
-                    if (!error.save(flush: true)) {
+                    if (!error.save()) {
                         log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
                         throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
                     }
@@ -500,23 +500,23 @@ class SchedulerService {
                             previous: validatedStep.latestProcessingStepUpdate,
                             processingStep: validatedStep
                     )
-                    validatedUpdate.save(flush: true)
+                    validatedUpdate.save()
                     if (!succeeded) {
                         // create error
                         ProcessingError validatedError = new ProcessingError(
                                 errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate
                         )
-                        validatedError.save(flush: true)
+                        validatedError.save()
                         validatedUpdate.error = validatedError
                     }
-                    if (!validatedUpdate.save(flush: true)) {
+                    if (!validatedUpdate.save()) {
                         log.error("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
                         throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
                     }
                     if (!succeeded) {
                         Process process = Process.get(step.process.id)
                         process.finished = true
-                        if (!process.save(flush: true)) {
+                        if (!process.save()) {
                             // TODO: trigger error handling
                             log.error("Could not set Process to finished")
                             throw new ProcessingException("Could not set Process to finished")
@@ -548,7 +548,7 @@ class SchedulerService {
     void markProcessAsFailed(ProcessingStep step) {
         Process process = Process.get(step.process.id)
         process.finished = true
-        if (!process.save(flush: true)) {
+        if (!process.save()) {
             // TODO: trigger error handling
             log.error("Could not set Process to finished")
             throw new ProcessingException("Could not set Process to finished")
@@ -570,14 +570,13 @@ class SchedulerService {
                 state: ExecutionState.FAILURE,
                 previous: step.latestProcessingStepUpdate,
                 processingStep: step)
-        if (!update.save(flush: true)) {
+        if (!update.save()) {
             log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
             throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
         }
         ProcessingError error = new ProcessingError(errorMessage: errorMessage, processingStepUpdate: update)
         update.error = error
-        error.save(flush: true)
-        if (!error.save(flush: true)) {
+        if (!error.save()) {
             log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
             throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
         }
@@ -636,7 +635,7 @@ class SchedulerService {
                         state: ExecutionState.SUSPENDED,
                         previous: lastUpdate,
                         processingStep: restartedStep)
-                if (!resumed.save(flush: true)) {
+                if (!resumed.save()) {
                     throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for resumed ProcessingStep ${restartedStep.id}")
                 }
             } else {
@@ -647,12 +646,12 @@ class SchedulerService {
                         state: ExecutionState.RESTARTED,
                         previous: lastUpdate,
                         processingStep: step)
-                if (!restart.save(flush: true)) {
+                if (!restart.save()) {
                     log.error("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
                     throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
                 }
                 restartedStep = RestartedProcessingStep.create(step)
-                if (!restartedStep.save(flush: true)) {
+                if (!restartedStep.save()) {
                     log.error("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
                     throw new SchedulerPersistencyException("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
                 }
@@ -664,20 +663,20 @@ class SchedulerService {
                 // update the previous link
                 if (restartedStep.previous) {
                     restartedStep.previous.next = restartedStep
-                    if (!restartedStep.previous.save(flush: true)) {
+                    if (!restartedStep.previous.save()) {
                         log.error("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
                         throw new SchedulerPersistencyException("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
                     }
                 }
                 processService.setOperatorIsAwareOfFailure(step.process, false)
                 ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: restartedStep)
-                if (!created.save(flush: true)) {
+                if (!created.save()) {
                     throw new SchedulerPersistencyException("Could not save the first ProcessingStepUpdate for RestartedProcessingStep ${restartedStep.id}")
                 }
             }
             Process process = Process.get(step.process.id)
             process.finished = false
-            if (!process.save(flush: true)) {
+            if (!process.save()) {
                 log.error("Could not set Process ${process.id} to not finished")
                 throw new ProcessingException("Could not set Process ${process.id} to not finished")
             }
@@ -751,7 +750,7 @@ class SchedulerService {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean) as Job
         job.processingStep = step
         step.jobClass = job.class.getName()
-        step.save(flush: true)
+        step.save()
         return job
     }
 
@@ -770,7 +769,7 @@ class SchedulerService {
                         "to be an EndStateAwareJob. See OTP-991.)")
             }
             last.process.finished = true
-            last.process.save(flush: true)
+            last.process.save()
         } finally {
             lock.unlock()
         }
@@ -790,22 +789,22 @@ class SchedulerService {
             } else {
                 step = new ProcessingStep(processingStepParameters)
             }
-            if (input && !step.save(flush: true)) {
+            if (input && !step.save()) {
                 // we have to save the next processing step as the ParameterMapping references the JobDefinition
                 throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")
             }
             Parameter failedConstantParameter = mapInputParamatersToStep(step, input)
-            step = step.save(flush: true)
+            step = step.save()
             if (!step) {
                 throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
             }
             processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
-            if (!created.save(flush: true)) {
+            if (!created.save()) {
                 throw new SchedulerPersistencyException("Could not save the first ProcessingStep for Process ${process.id}")
             }
             if (failedConstantParameter) {
-                if (!created.save(flush: true)) {
+                if (!created.save()) {
                     throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
                 }
                 processService.setOperatorIsAwareOfFailure(step.process, false)
@@ -815,7 +814,7 @@ class SchedulerService {
                         " ${failedConstantParameter.type.name} to new processing step",
                         processingStepUpdate: failure)
                 failure.error = error
-                if (!failure.save(flush: true)) {
+                if (!failure.save()) {
                     throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
                 }
             }

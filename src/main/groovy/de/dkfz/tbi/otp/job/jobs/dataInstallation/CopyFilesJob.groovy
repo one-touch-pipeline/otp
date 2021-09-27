@@ -130,7 +130,7 @@ chmod 440 ${finalFile} ${md5SumFileName}
                 dataFile.fileSize = Files.size(targetPath)
                 dataFile.dateFileSystem = new Date(Files.getLastModifiedTime(targetPath).toMillis())
                 dataFile.fileExists = true
-                assert dataFile.save(flush: true)
+                assert dataFile.save()
 
                 return null
             } catch (Throwable t) {

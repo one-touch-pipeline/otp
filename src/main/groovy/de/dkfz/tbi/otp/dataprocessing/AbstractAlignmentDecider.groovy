@@ -50,7 +50,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT)) ?: new Pipeline(
                 name: pipelineName(seqTrack),
                 type: Pipeline.Type.ALIGNMENT,
-        ).save(flush: true)
+        ).save()
     }
 
     /** This method is used externally. Please discuss a change in the team */
@@ -133,7 +133,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                             statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
                             pipeline        : pipeline,
                     ])
-            workPackage.save(flush: true)
+            workPackage.save()
             workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect {
                 ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
                 new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
@@ -141,7 +141,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
 
         workPackage.addToSeqTracks(seqTrack)
-        workPackage.save(flush: true)
+        workPackage.save()
 
         return [workPackage]
     }

@@ -39,16 +39,16 @@ class JobExecutionPlanDSL {
 
     private static Closure constantParameterClosure = { JobDefinition jobDefinition, String typeName, String value ->
         ParameterType type = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        type.save(flush: true)
+        type.save()
         Parameter parameter = new Parameter(type: type, value: value)
-        parameter.save(flush: true)
+        parameter.save()
         jobDefinition.addToConstantParameters(parameter)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
     }
 
     private static Closure outputParameterClosure = { JobDefinition jobDefinition, String typeName ->
         ParameterType type = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
-        type.save(flush: true)
+        type.save()
     }
 
     private static Closure inputParameterClosure = { JobDefinition jobDefinition,
@@ -58,21 +58,21 @@ class JobExecutionPlanDSL {
                                                      String fromJob,
                                                      String fromParameter ->
         ParameterType inputType = new ParameterType(name: typeName, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        inputType.save(flush: true)
+        inputType.save()
         if (!previous) {
             // first job - get it from StartJob
             ParameterType outputType = ParameterType.findByJobDefinitionAndName(jep.startJob, fromParameter)
             assert(outputType)
             assert(outputType.parameterUsage == ParameterUsage.OUTPUT)
             ParameterMapping mapping = new ParameterMapping(from: outputType, to: inputType, job: jobDefinition)
-            mapping.save(flush: true)
+            mapping.save()
         } else if (previous.name == fromJob) {
             // simple case: direct mapping
             ParameterType outputType = ParameterType.findByJobDefinitionAndName(previous, fromParameter)
             assert(outputType)
             assert(outputType.parameterUsage == ParameterUsage.OUTPUT)
             ParameterMapping mapping = new ParameterMapping(from: outputType, to: inputType, job: jobDefinition)
-            mapping.save(flush: true)
+            mapping.save()
         } else {
             // need to add passthrough parameters
             JobDefinition mappingJob = JobDefinition.findByNameAndPlan(fromJob, jep)
@@ -87,19 +87,19 @@ class JobExecutionPlanDSL {
                             name: fromParameter + "Passthrough",
                             jobDefinition: mappingJob.next ? mappingJob.next : firstJob,
                             parameterUsage: ParameterUsage.PASSTHROUGH)
-                    passThroughType.save(flush: true)
+                    passThroughType.save()
                 }
                 ParameterMapping mapping = ParameterMapping.findByFromAndTo(outputType, passThroughType)
                 if (!mapping) {
                     mapping = new ParameterMapping(from: outputType, to: passThroughType, job: mappingJob.next ? mappingJob.next : firstJob)
-                    mapping.save(flush: true)
+                    mapping.save()
                 }
                 // next run
                 outputType = passThroughType
                 mappingJob = mappingJob.next ?: firstJob
             }
             ParameterMapping finalMapping = new ParameterMapping(from: outputType, to: inputType, job: jobDefinition)
-            finalMapping.save(flush: true)
+            finalMapping.save()
         }
     }
 
@@ -107,9 +107,9 @@ class JobExecutionPlanDSL {
     private static Closure startJobClosure = { JobExecutionPlan jep, Boolean startJobDefined, String startName, String bean, closure = null ->
         assert !startJobDefined, "Only one Start Job Definition can be defined per Job Execution Plan"
         StartJobDefinition startJobDefinition = new StartJobDefinition(name: startName, bean: bean, plan: jep)
-        startJobDefinition.save(flush: true)
+        startJobDefinition.save()
         jep.startJob = startJobDefinition
-        jep.save(flush: true)
+        jep.save()
         if (closure) {
             closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
@@ -128,44 +128,44 @@ class JobExecutionPlanDSL {
         ParameterType type = new ParameterType(
                 name: JobParameterKeys.JOB_ID_LIST, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT
         )
-        type.save(flush: true)
+        type.save()
         ParameterType realmOutputType = new ParameterType(
                 name: JobParameterKeys.REALM,
                 jobDefinition: jobDefinition,
                 parameterUsage: ParameterUsage.OUTPUT,
                 className: "de.dkfz.tbi.otp.ngsdata.Realm"
         )
-        realmOutputType.save(flush: true)
+        realmOutputType.save()
         JobDefinition watchdogJobDefinition = new JobDefinition(
                 name: "__WatchdogFor__" + jobDefinition.name, bean: watchdogBean, plan: jep, previous: jobDefinition
         )
-        watchdogJobDefinition.save(flush: true)
+        watchdogJobDefinition.save()
         ParameterType inputType = new ParameterType(
                 name: JobParameterKeys.JOB_ID_LIST, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT
         )
-        inputType.save(flush: true)
+        inputType.save()
         ParameterType realmInputType = new ParameterType(
                 name: JobParameterKeys.REALM,
                 jobDefinition: watchdogJobDefinition,
                 parameterUsage: ParameterUsage.INPUT,
                 className: "de.dkfz.tbi.otp.ngsdata.Realm"
         )
-        realmInputType.save(flush: true)
+        realmInputType.save()
         ParameterMapping mapping = new ParameterMapping(from: type, to: inputType, job: watchdogJobDefinition)
-        mapping.save(flush: true)
+        mapping.save()
         ParameterMapping realmMapping = new ParameterMapping(from: realmOutputType, to: realmInputType, job: watchdogJobDefinition)
-        realmMapping.save(flush: true)
+        realmMapping.save()
         helper.watchdogJobDefinition = watchdogJobDefinition
     }
 
     private static Closure jobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, closure = null ->
         log.debug("In job Closure with " + jobName)
         JobDefinition jobDefinition = new JobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous)
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
         helper.firstJob = helper.firstJob ?: jobDefinition
         if (helper.previous) {
             helper.previous.next = jobDefinition
-            helper.previous.save(flush: true)
+            helper.previous.save()
         }
         if (closure) {
             closure.metaClass = new ExpandoMetaClass(closure.class)
@@ -199,11 +199,11 @@ class JobExecutionPlanDSL {
         ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(
                 name: jobName, bean: bean, plan: jep, previous: helper.previous, validatorFor: validatorFor
         )
-        jobDefinition.save(flush: true)
+        jobDefinition.save()
         helper.firstJob = helper.firstJob ?: jobDefinition
         if (helper.previous) {
             helper.previous.next = jobDefinition
-            helper.previous.save(flush: true)
+            helper.previous.save()
         }
         if (closure) {
             closure.metaClass = new ExpandoMetaClass(closure.class)
@@ -230,13 +230,13 @@ class JobExecutionPlanDSL {
         // If there is a previous plan, obsolete it
         JobExecutionPlan plan = CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(name, false))
         plan?.obsoleted = true
-        plan?.save(flush: true)
+        plan?.save()
         int version = plan ? plan.planVersion + 1 : 0
 
         // create the new/updated plan
         JobExecutionPlan.withTransaction {
             JobExecutionPlan jep = new JobExecutionPlan(name: name, planVersion: version, enabled: true, previousPlan: plan)
-            jep.save(flush: true)
+            jep.save()
             Helper helper = new Helper()
             Boolean startJobDefined = false
 
@@ -254,7 +254,7 @@ class JobExecutionPlanDSL {
             c.metaClass.initialize()
             c()
             jep.firstJob = helper.firstJob
-            jep.save(flush: true)
+            jep.save()
             if (validate && ctx) {
                 List<String> errors = ctx.planValidatorService.validate(jep)
                 if (!errors.isEmpty()) {

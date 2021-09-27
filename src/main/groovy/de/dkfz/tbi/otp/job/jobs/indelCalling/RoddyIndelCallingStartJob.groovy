@@ -45,7 +45,7 @@ class RoddyIndelCallingStartJob extends AbstractBamFilePairAnalysisStartJob impl
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
         notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.INDEL)
         bamFilePairAnalysis.samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        bamFilePairAnalysis.samplePair.save(flush: true)
+        bamFilePairAnalysis.samplePair.save()
     }
 
     @Override

@@ -59,7 +59,7 @@ class CheckDataFileStatusJob extends AbstractEndStateAwareJobImpl {
                     dataFile: dataFile,
                     status: status
                 )
-                consistencyStatus.save(flush: true)
+                consistencyStatus.save()
                 numberOfInconsistencies++
             }
         }

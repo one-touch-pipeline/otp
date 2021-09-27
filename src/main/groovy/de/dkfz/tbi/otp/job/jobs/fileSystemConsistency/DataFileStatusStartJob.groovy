@@ -39,7 +39,7 @@ class DataFileStatusStartJob extends AbstractStartJobImpl {
     void execute() {
         SessionUtils.withNewSession {
             ConsistencyCheck consistencyCheck = new ConsistencyCheck()
-            consistencyCheck.save(flush: true)
+            consistencyCheck.save()
             createProcess(consistencyCheck)
             log.debug "FileSystemConsistencyWorkflow: job started"
         }

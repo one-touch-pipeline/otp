@@ -47,7 +47,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
-        assert seqTrack.save(flush: true)
+        assert seqTrack.save()
 
         FileSystem fileSystem = getFileSystem(workflowStep)
         Path runDirectory = lsdfFilesService.getFileFinalPathAsPath(seqTrack.dataFiles.first(), fileSystem).parent

@@ -76,7 +76,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                             sampleType1BamFile: sampleType1BamFile,
                             sampleType2BamFile: sampleType2BamFile,
                     )
-                    analysis.save(flush: true)
+                    analysis.save()
                     prepareCreatingTheProcessAndTriggerTracking(analysis)
                     createProcess(analysis)
                     log.debug "Analysis started for: ${analysis}"
@@ -95,7 +95,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
         BamFilePairAnalysis.withTransaction {
             failedAnalysis.withdrawn = true
-            assert failedAnalysis.save(flush: true)
+            assert failedAnalysis.save()
 
             BamFilePairAnalysis newAnalysis = bamFileAnalysisService.analysisClass.newInstance(
                     samplePair: failedAnalysis.samplePair,
@@ -104,7 +104,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                     sampleType1BamFile: failedAnalysis.sampleType1BamFile,
                     sampleType2BamFile: failedAnalysis.sampleType2BamFile,
             )
-            assert newAnalysis.save(flush: true)
+            assert newAnalysis.save()
 
             return createProcess(newAnalysis)
         }

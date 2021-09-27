@@ -55,7 +55,7 @@ class FetchUserDataFromLdapJob extends ScheduledJob {
                 if (syncedLdapUser.mail) {
                     otpUser.email = syncedLdapUser.mail
                 }
-                otpUser.save(flush: true)
+                otpUser.save()
             }
         }
     }

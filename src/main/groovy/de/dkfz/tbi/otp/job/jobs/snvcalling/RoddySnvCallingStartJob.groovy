@@ -47,7 +47,7 @@ class RoddySnvCallingStartJob extends AbstractBamFilePairAnalysisStartJob implem
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
         notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SNV)
         bamFilePairAnalysis.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        bamFilePairAnalysis.samplePair.save(flush: true)
+        bamFilePairAnalysis.samplePair.save()
     }
 
     @Override

@@ -58,7 +58,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
                 AceseqQc qc = new AceseqQc(values)
                 qc.number = Integer.parseInt(number)
                 qc.aceseqInstance = aceseqInstance
-                assert qc.save(flush: true)
+                assert qc.save()
                 return qc
             }.find {
                 it.number == 1
@@ -73,7 +73,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
             }
 
             aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
-            assert aceseqInstance.save(flush: true)
+            assert aceseqInstance.save()
             succeed()
         }
     }

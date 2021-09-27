@@ -58,10 +58,10 @@ class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstalla
         seqTrack.dataFiles.each { DataFile dataFile ->
             dataFile.fileLinked = true
             dataFile.dateLastChecked = new Date()
-            dataFile.save(flush: true)
+            dataFile.save()
         }
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-        assert seqTrack.save(flush: true)
+        assert seqTrack.save()
     }
 }

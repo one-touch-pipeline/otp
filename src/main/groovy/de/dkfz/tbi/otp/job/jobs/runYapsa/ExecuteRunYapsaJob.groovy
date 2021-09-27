@@ -123,6 +123,6 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         )
 
         runYapsaInstance.processingState = AnalysisProcessingStates.FINISHED
-        runYapsaInstance.save(flush: true)
+        runYapsaInstance.save()
     }
 }

@@ -61,10 +61,10 @@ class PanCancerFinishJob extends AbstractFinishJob implements PanCancerShared {
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
-        roddyBamFile.workPackage.save(flush: true)
+        roddyBamFile.workPackage.save()
         roddyBamFile.fileSize = Files.size(fileService.toPath(roddyBamFile.workBamFile, fs))
         roddyBamFile.md5sum = md5sum
-        roddyBamFile.save(flush: true)
+        roddyBamFile.save()
 
         abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
     }
