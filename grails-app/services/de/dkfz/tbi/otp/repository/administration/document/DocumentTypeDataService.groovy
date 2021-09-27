@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,26 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.administration
+package de.dkfz.tbi.otp.repository.administration.document
 
-import grails.compiler.GrailsCompileStatic
+import grails.gorm.services.Service
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.administration.DocumentType
 
-@GrailsCompileStatic
-class DocumentType implements Entity {
+@Service(DocumentType)
+interface DocumentTypeDataService {
+    DocumentType save(String title, String description)
 
-    String title
-    String description
-    int sortOrder
+    List<DocumentType> findAll()
 
-    static mapping = {
-        title index: "document_type_title_idx"
-        description type: "text"
-    }
+    void delete(Serializable id)
 
-    static constraints = {
-        title blank: false, unique: true
-        description blank: false
-    }
+    DocumentType save(DocumentType documentType)
 }

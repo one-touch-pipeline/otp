@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,37 +22,54 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.plugin.springsecurity.acl.AclSid
-import grails.testing.gorm.DataTest
+import grails.test.hibernate.HibernateSpec
 import grails.testing.web.controllers.ControllerUnitTest
+import grails.transaction.Rollback
 import org.grails.web.servlet.mvc.SynchronizerTokensHolder
-import spock.lang.Specification
+import spock.lang.Shared
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
+import de.dkfz.tbi.otp.repository.administration.document.DocumentDataService
+import de.dkfz.tbi.otp.repository.administration.document.DocumentTypeDataService
 import de.dkfz.tbi.otp.security.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static javax.servlet.http.HttpServletResponse.*
 
-class DocumentControllerSpec extends Specification implements ControllerUnitTest<DocumentController>, DataTest, UserAndRoles, DocumentFactory {
+class DocumentControllerSpec extends HibernateSpec implements ControllerUnitTest<DocumentController>, UserAndRoles, DocumentFactory {
 
     @Override
-    Class[] getDomainClassesToMock() {
-        [
+    List<Class> getDomainClasses() {
+        return [
                 AclSid,
                 Document,
                 DocumentType,
+                Role,
                 User,
                 UserRole,
-                Role,
         ]
+    }
+
+    @Shared
+    DocumentDataService documentDataService
+    @Shared
+    DocumentTypeDataService documentTypeDataService
+
+    @Override
+    void setup() {
+        documentDataService = hibernateDatastore.getService(DocumentDataService)
+        documentTypeDataService = hibernateDatastore.getService(DocumentTypeDataService)
     }
 
     void setupData() {
         createUserAndRoles()
         controller.documentService = new DocumentService()
+        controller.documentService.documentDataService = documentDataService
+        controller.documentService.documentTypeDataService = documentTypeDataService
     }
 
+    @Rollback
     void "test upload, successful"() {
         given:
         setupData()
@@ -82,6 +99,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
         d.content == content.bytes
     }
 
+    @Rollback
     @Unroll
     void "test upload, fails because of missing #problem"() {
         given:
@@ -115,6 +133,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
         problem << ["token", "file"]
     }
 
+    @Rollback
     void "test upload, fails because of wrong method"() {
         given:
         setupData()
@@ -127,6 +146,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
         Document.all.empty
     }
 
+    @Rollback
     void "test download"() {
         given:
         setupData()
@@ -161,6 +181,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
         DocumentController.Action.VIEW     | _
     }
 
+    @Rollback
     void "test manage"() {
         given:
         setupData()
@@ -168,7 +189,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
         Document document = createDocument(documentType: documentType)
 
         when:
-        def model = controller.manage()
+        Map model = controller.manage()
 
         then:
         controller.response.status == SC_OK
