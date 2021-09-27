@@ -156,7 +156,7 @@ class WithdrawHelperService {
             dataFile.fileWithdrawn = true
             dataFile.withdrawnDate = new Date()
             dataFile.withdrawnComment = commentBySeqTrack[dataFile.seqTrack]
-            dataFile.save(flush: true)
+            dataFile.save()
 
             List<Path> filePaths = []
             filePaths.add(lsdfFilesService.getFileFinalPathAsPath(dataFile, fileSystem))

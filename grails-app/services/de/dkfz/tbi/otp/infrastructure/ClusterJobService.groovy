@@ -99,7 +99,7 @@ class ClusterJobService {
                 jobClass: jobClass,
                 seqType: seqType,
                 queued: ZonedDateTime.now(),
-        ).save(flush: true)
+        ).save()
         assert job != null
         return job
     }
@@ -120,7 +120,7 @@ class ClusterJobService {
                 clusterJobName: clusterJobName,
                 jobClass      : jobClass,
                 queued        : ZonedDateTime.now(),
-        ]).save(flush: true)
+        ]).save()
         return job
     }
 
@@ -143,7 +143,7 @@ class ClusterJobService {
             } : []
         }
 
-        assert job.save(flush: true)
+        assert job.save()
     }
 
     /**
@@ -173,7 +173,7 @@ class ClusterJobService {
             nReads = getReadsSum(job)
             fileSize = getFileSizesSum(job)
 
-            save(flush: true)
+            save()
         }
 
         handleObviouslyFailedClusterJob(job)
@@ -309,7 +309,7 @@ class ClusterJobService {
     void handleObviouslyFailedClusterJob(ClusterJob job) {
         if (job.elapsedWalltime && job.elapsedWalltime <= DURATION_JOB_OBVIOUSLY_FAILED) {
             job.exitStatus = ClusterJob.Status.FAILED
-            job.save(flush: true)
+            job.save()
         }
     }
 

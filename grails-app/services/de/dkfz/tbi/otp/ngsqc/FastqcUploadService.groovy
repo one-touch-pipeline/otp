@@ -51,9 +51,9 @@ class FastqcUploadService {
             Map parsedFastqcFile = parseFastQCFile(fastqc, PROPERTIES_REGEX_TO_BE_PARSED)
             fastqc.dataFile.nReads = parsedFastqcFile["nReads"] as long
             fastqc.dataFile.sequenceLength = parsedFastqcFile["sequenceLength"]
-            fastqc.dataFile.save(flush: true)
+            fastqc.dataFile.save()
             fastqc.contentUploaded = true
-            fastqc.save(flush: true)
+            fastqc.save()
         } catch (final Throwable t) {
             throw new RuntimeException("Failed to load data from ${DATA_FILE_NAME} of ${fastqc} into the database.", t)
         }

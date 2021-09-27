@@ -41,7 +41,7 @@ class SpeciesWithStrainService {
                 strain: strain
         )
         try {
-            speciesWithStrain.save(flush: true)
+            speciesWithStrain.save()
         } catch (ValidationException e) {
             return e.errors
         }

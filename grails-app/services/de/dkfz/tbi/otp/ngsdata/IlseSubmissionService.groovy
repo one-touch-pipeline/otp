@@ -56,7 +56,7 @@ class IlseSubmissionService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void unBlacklistIlseSubmissions(IlseSubmission ilseSubmission) {
         ilseSubmission.warning = false
-        ilseSubmission.save(flush: true)
+        ilseSubmission.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

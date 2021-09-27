@@ -125,7 +125,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
 
         createMoveDataFilesCommands(data)
 
-        SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
+        SampleIdentifier.findAllBySample(data.sample)*.delete()
 
         List<String> newFastQcFileNames = data.fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
         data.moveFilesCommands << "\n\n\n################ move fastqc files ################\n"
@@ -160,7 +160,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
     private void swapSample(SampleSwapData data) {
         data.sample.individual = data.individualSwap.new
         data.sample.sampleType = data.sampleTypeSwap.new
-        data.sample.save(flush: true)
+        data.sample.save()
     }
 
     /**

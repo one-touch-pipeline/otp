@@ -115,7 +115,7 @@ class UpdateDomainPropertyService {
         MetaProperty metaProperty = getMetaProperty(entity, property)
 
         entity[property] = getValue(metaProperty)
-        entity.save(flush: true)
+        entity.save()
         return entity
     }
 

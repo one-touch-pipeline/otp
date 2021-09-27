@@ -194,7 +194,7 @@ class ProjectService {
                 projectRequestAvailable       : projectParams.projectRequestAvailable,
         ])
 
-        project.save(flush: true)
+        project.save()
 
         if (projectParams.additionalFieldValue) {
             projectParams.additionalFieldValue.each {
@@ -261,16 +261,16 @@ class ProjectService {
             TextFieldValue tfv = new TextFieldValue()
             tfv.definition = afd
             tfv.textValue = fieldValue
-            tfv.save(flush: true)
+            tfv.save()
             project.projectFields.add(tfv)
         } else if (afd.projectFieldType == ProjectFieldType.INTEGER) {
             IntegerFieldValue ifv = new IntegerFieldValue()
             ifv.definition = afd
             ifv.integerValue = fieldValue.toInteger()
-            ifv.save(flush: true)
+            ifv.save()
             project.projectFields.add(ifv)
         }
-        project.save(flush: true)
+        project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -281,13 +281,13 @@ class ProjectService {
                     TextFieldValue tfv = afv
                     afv.definition
                     tfv.textValue = fieldValue
-                    tfv.save(flush: true)
+                    tfv.save()
                 } else if (afv.definition.projectFieldType == ProjectFieldType.INTEGER) {
                     IntegerFieldValue ifv = afv
                     ifv.integerValue = fieldValue.toInteger()
-                    ifv.save(flush: true)
+                    ifv.save()
                 }
-                project.save(flush: true)
+                project.save()
             }
         }
     }
@@ -428,7 +428,7 @@ class ProjectService {
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue
-        project.save(flush: true)
+        project.save()
 
         if (fieldName == 'relatedProjects' && project.relatedProjects) {
             updateAllRelatedProjects(project)
@@ -461,21 +461,21 @@ class ProjectService {
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue ? LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(fieldValue)) : null
-        project.save(flush: true)
+        project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureNoAlignmentDeciderProject(Project project) {
         deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
-        project.save(flush: true)
+        project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureDefaultOtpAlignmentDecider(Project project, String referenceGenomeName) {
         deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT
-        project.save(flush: true)
+        project.save()
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
         SeqType seqTypeWgp = SeqTypeService.wholeGenomePairedSeqType
         SeqType seqTypeExome = SeqTypeService.exomePairedSeqType
@@ -485,7 +485,7 @@ class ProjectService {
             refSeqType.seqType = seqType
             refSeqType.referenceGenome = referenceGenome
             refSeqType.sampleType = null
-            refSeqType.save(flush: true)
+            refSeqType.save()
         }
     }
 
@@ -540,7 +540,7 @@ class ProjectService {
 
         ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(panCanAlignmentConfiguration, referenceGenome)
         refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
-        refSeqType.save(flush: true)
+        refSeqType.save()
 
         alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration),
                 panCanAlignmentConfiguration.adapterTrimmingNeeded)
@@ -593,7 +593,7 @@ class ProjectService {
                         pipeline: pipeline,
                         programVersion: programVersion,
                         previousConfig: latest,
-                ).save(flush: true)
+                ).save()
             } catch (ValidationException e) {
                 return e.errors
             }
@@ -607,7 +607,7 @@ class ProjectService {
 
         if (referenceGenomeProjectSeqType) {
             referenceGenomeProjectSeqType.deprecatedDate = new Date()
-            referenceGenomeProjectSeqType.save(flush: true)
+            referenceGenomeProjectSeqType.save()
         }
     }
 
@@ -625,7 +625,7 @@ class ProjectService {
                     pipeline: pipeline,
                     programVersion: programVersion,
                     previousConfig: latest,
-            ).save(flush: true)
+            ).save()
         } catch (ValidationException e) {
             return e.errors
         }
@@ -689,11 +689,11 @@ class ProjectService {
                     sampleType: it,
                     referenceGenome: referenceGenome,
             )
-            refSeqType.save(flush: true)
+            refSeqType.save()
             refSeqType.alignmentProperties = alignmentProperties.collect { String key, String value ->
                 new ReferenceGenomeProjectSeqTypeAlignmentProperty(name: key, value: value, referenceGenomeProjectSeqType: refSeqType)
             } as Set
-            refSeqType.save(flush: true)
+            refSeqType.save()
         }
     }
 
@@ -704,7 +704,7 @@ class ProjectService {
             deprecateAllReferenceGenomesByProjectAndSeqType(config.project, config.seqType)
         }
         config.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        config.project.save(flush: true)
+        config.project.save()
     }
 
     private ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(RoddyConfiguration config, ReferenceGenome referenceGenome) {
@@ -756,7 +756,7 @@ class ProjectService {
             sampleType: baseRefGenSeqType.sampleType,
             statSizeFileName: baseRefGenSeqType.statSizeFileName,
         )
-        refGenProjectSeqType.save(flush: true)
+        refGenProjectSeqType.save()
         return refGenProjectSeqType
     }
 
@@ -818,7 +818,7 @@ class ProjectService {
         )
 
         targetProject.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        targetProject.save(flush: true)
+        targetProject.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -832,9 +832,9 @@ class ProjectService {
         ]))
         if (snvConfig) {
             snvConfig.obsoleteDate = new Date()
-            snvConfig.save(flush: true)
+            snvConfig.save()
             roddyWorkflowConfig.previousConfig = snvConfig
-            roddyWorkflowConfig.save(flush: true)
+            roddyWorkflowConfig.save()
         }
         return roddyWorkflowConfig
     }
@@ -1034,28 +1034,28 @@ echo 'OK'
     private void deprecateAllReferenceGenomesByProject(Project project) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
-        referenceGenomeProjectSeqTypes*.save(flush: true)
+        referenceGenomeProjectSeqTypes*.save()
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqType(Project project, SeqType seqType) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(
                 project, seqType)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
-        referenceGenomeProjectSeqTypes*.save(flush: true)
+        referenceGenomeProjectSeqTypes*.save()
     }
 
     private void deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(Project project, SeqType seqType) {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
                 ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
         referenceGenomeProjectSeqType?.deprecatedDate = new Date()
-        referenceGenomeProjectSeqType?.save(flush: true)
+        referenceGenomeProjectSeqType?.save()
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(Project project, SeqType seqType, List<SampleType> sampleTypes) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = sampleTypes ?
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes) : []
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
-        referenceGenomeProjectSeqTypes*.save(flush: true)
+        referenceGenomeProjectSeqTypes*.save()
     }
 
     /**
@@ -1080,31 +1080,31 @@ echo 'OK'
         }
 
         project.unixGroup = unixGroup
-        assert project.save(flush: true)
+        assert project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateFingerPrinting(Project project, boolean value) {
         project.fingerPrinting = value
-        assert project.save(flush: true)
+        assert project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateCustomFinalNotification(Project project, boolean value) {
         project.customFinalNotification = value
-        assert project.save(flush: true)
+        assert project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateProcessingNotification(Project project, boolean value) {
         project.processingNotification = value
-        assert project.save(flush: true)
+        assert project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateQcTrafficLightNotification(Project project, boolean value) {
         project.qcTrafficLightNotification = value
-        assert project.save(flush: true)
+        assert project.save()
     }
 
     Map<String, List<Project>> getAllProjectsWithSharedUnixGroup() {
@@ -1118,7 +1118,7 @@ echo 'OK'
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addProjectToRelatedProjects(Project baseProject, Project newProject) {
         baseProject.relatedProjects = ("${baseProject.relatedProjects ?: ""},${newProject.name}").split(",").findAll().unique().sort().join(",")
-        baseProject.save(flush: true)
+        baseProject.save()
     }
 }
 

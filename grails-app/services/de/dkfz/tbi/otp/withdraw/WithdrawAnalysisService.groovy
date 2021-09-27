@@ -54,7 +54,7 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     void withdrawObjects(List<BamFilePairAnalysis> entities) {
         entities.each {
             it.withdrawn = true
-            it.save(flush: true)
+            it.save()
         }
     }
 

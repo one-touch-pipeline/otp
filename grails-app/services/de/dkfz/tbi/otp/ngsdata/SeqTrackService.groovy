@@ -258,12 +258,12 @@ LIMIT 1
 
     static void markFastqcInProgress(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
-        assert (seqTrack.save(flush: true))
+        assert seqTrack.save()
     }
 
     void markFastqcFinished(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assert (seqTrack.save(flush: true))
+        assert seqTrack.save()
     }
 
     List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
@@ -290,7 +290,7 @@ LIMIT 1
 
     void fillBaseCount(SeqTrack seqTrack) {
         seqTrack.nBasePairs = seqTrack.dataFilesWhereIndexFileIsFalse.sum { DataFile it -> it.getNBasePairs() } as Long ?: 0
-        assert seqTrack.save(flush: true)
+        assert seqTrack.save()
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project, 'OTP_READ_ACCESS')")
@@ -329,7 +329,7 @@ LIMIT 1
                 "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}, hasIndexFiles=${hasIndexFiles}")
         if (link) {
             seqTrack.linkedExternally = true
-            assert seqTrack.save(flush: true)
+            assert seqTrack.save()
         }
     }
 
@@ -387,12 +387,12 @@ LIMIT 1
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {
         LogThreadLocal.threadLog?.info(MessageFormat.format(message, " " + seqTrack))
         if (saveInSeqTrack) {
-            seqTrack.save(flush: true)
+            seqTrack.save()
             SeqTrack.withTransaction {
                 LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""))
-                logMessage.save(flush: true)
+                logMessage.save()
                 seqTrack.logMessages.add(logMessage)
-                seqTrack.save(flush: true)
+                seqTrack.save()
             }
         }
     }

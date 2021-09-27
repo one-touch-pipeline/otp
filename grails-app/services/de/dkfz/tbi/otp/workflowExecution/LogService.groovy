@@ -51,7 +51,7 @@ class LogService {
                     workflowStep: workflowStep,
                     message     : message,
                     createdBy   : userName(),
-            ]).save(flush: true)
+            ]).save()
         }
     }
 
@@ -65,7 +65,7 @@ class LogService {
                     workflowStep: workflowStep,
                     message     : "${message}\n\n${stacktrace}",
                     createdBy   : userName(),
-            ]).save(flush: true)
+            ]).save()
         }
     }
 
@@ -83,7 +83,7 @@ class LogService {
                 stdout = processOutput.stdout
                 stderr = processOutput.stderr
                 createdBy = userName()
-                save(flush: true)
+                save()
             }
         }
     }

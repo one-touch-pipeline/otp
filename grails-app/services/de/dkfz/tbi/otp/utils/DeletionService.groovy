@@ -90,7 +90,7 @@ class DeletionService {
     void deleteProject(Project project) {
         deleteProjectContent(project)
         deleteProjectDependencies(project)
-        project.delete(flush: true)
+        project.delete()
     }
 
     @SuppressWarnings('JavaIoPackageAccess')
@@ -121,9 +121,9 @@ class DeletionService {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
             }
 
-            SeqScan.findAllBySample(sample)*.delete(flush: true)
-            SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
-            sample.delete(flush: true)
+            SeqScan.findAllBySample(sample)*.delete()
+            SampleIdentifier.findAllBySample(sample)*.delete()
+            sample.delete()
         }
 
         seqTypes.unique().each { SeqType seqType ->
@@ -131,7 +131,7 @@ class DeletionService {
         }
 
         deleteClusterJobs(ClusterJob.findAllByIndividual(individual))
-        individual.delete(flush: true)
+        individual.delete()
 
         return deletionScript.toString()
     }
@@ -139,7 +139,7 @@ class DeletionService {
     void deleteEmptyRun(Run run) {
         assert run: "The input run of the method deleteRun is null"
         deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), Run.name))
-        run.delete(flush: true)
+        run.delete()
     }
 
     /**
@@ -308,27 +308,27 @@ class DeletionService {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
         if (dataFiles) {
-            ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
+            ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete()
         }
 
         // for ProcessedMergedBamFiles
         AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
             MergingWorkPackage mergingWorkPackage = alignmentPass.workPackage
             mergingWorkPackage.bamFileInProjectFolder = null
-            mergingWorkPackage.save(flush: true)
+            mergingWorkPackage.save()
             ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
                 List<File> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
                 dirsToDelete.addAll(processingDirsToDelete)
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
-                processedBamFile.delete(flush: true)
+                processedBamFile.delete()
             }
-            alignmentPass.delete(flush: true)
+            alignmentPass.delete()
             // The MergingWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are already removed
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
                 dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
-                mergingWorkPackage.delete(flush: true)
+                mergingWorkPackage.delete()
             }
         }
 
@@ -354,15 +354,15 @@ class DeletionService {
         bamFiles.each { RoddyBamFile bamFile ->
             mergingWorkPackage = bamFile.mergingWorkPackage
             mergingWorkPackage.bamFileInProjectFolder = null
-            mergingWorkPackage.save(flush: true)
+            mergingWorkPackage.save()
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.baseDirectory
             bamFile.baseBamFile = null
-            bamFile.delete(flush: true)
+            bamFile.delete()
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
-                mergingWorkPackage.delete(flush: true)
+                mergingWorkPackage.delete()
             }
         }
 
@@ -378,13 +378,13 @@ class DeletionService {
         singleCellBamFiles.each { SingleCellBamFile bamFile ->
             crmwp = bamFile.mergingWorkPackage
             crmwp.bamFileInProjectFolder = null
-            crmwp.save(flush: true)
+            crmwp.save()
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.workDirectory
-            bamFile.delete(flush: true)
+            bamFile.delete()
             if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
-                crmwp.delete(flush: true)
+                crmwp.delete()
             }
         }
 
@@ -395,7 +395,7 @@ class DeletionService {
         }
         mergingWorkPackages.each {
             SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it, it)*.delete()
-            it.delete(flush: true)
+            it.delete()
         }
 
         return dirsToDelete
@@ -405,13 +405,13 @@ class DeletionService {
         Set<ProcessParameter> processParametersSet = collectProcessParametersRecursively([] as Set<ProcessParameter>, processParameters)
         Set<Process> processSet = processParametersSet*.process
         processParametersSet.each {
-            it.delete(flush: true)
+            it.delete()
         }
         // delete all associations between processes
         // processes can only be safely deleted if no associations between them left
         processSet.each {
             it.restarted = null
-            it.save(flush: true)
+            it.save()
         }.each {
             deleteProcess(it)
         }
@@ -437,26 +437,26 @@ class DeletionService {
 
     private void deleteProjectDependencies(Project project) {
         // Deletes the connection of the project to the reference genome
-        ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete(flush: true)
+        ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete()
 
-        MergingCriteria.findAllByProject(project)*.delete(flush: true)
+        MergingCriteria.findAllByProject(project)*.delete()
 
-        ProcessingThresholds.findAllByProject(project)*.delete(flush: true)
+        ProcessingThresholds.findAllByProject(project)*.delete()
 
-        SampleTypePerProject.findAllByProject(project)*.delete(flush: true)
+        SampleTypePerProject.findAllByProject(project)*.delete()
 
         // Deletes the ProcessingOptions of the project
-        ProcessingOption.findAllByProject(project)*.delete(flush: true)
+        ProcessingOption.findAllByProject(project)*.delete()
 
         List configPerProjectAndSeqTypes = ConfigPerProjectAndSeqType.findAllByProject(project)
         configPerProjectAndSeqTypes*.previousConfig = null
-        configPerProjectAndSeqTypes*.delete(flush: true)
+        configPerProjectAndSeqTypes*.delete()
 
-        UserProjectRole.findAllByProject(project)*.delete(flush: true)
-        QcThreshold.findAllByProject(project)*.delete(flush: true)
-        ProjectInfo.findAllByProject(project)*.delete(flush: true)
+        UserProjectRole.findAllByProject(project)*.delete()
+        QcThreshold.findAllByProject(project)*.delete()
+        ProjectInfo.findAllByProject(project)*.delete()
 
-        DataTransferAgreement.findAllByProject(project)*.delete(flush: true)
+        DataTransferAgreement.findAllByProject(project)*.delete()
     }
 
     private void deleteProcess(Process process) {
@@ -464,7 +464,7 @@ class DeletionService {
         assert !ProcessParameter.findAllByProcess(process): "process with id ${process.id} has ProcessParameter attached to it. Delete association first."
 
         deleteProcessingSteps(ProcessingStep.findAllByProcess(process))
-        process.delete(flush: true)
+        process.delete()
     }
 
     private void deleteProcessingSteps(List<ProcessingStep> processingSteps) {
@@ -478,13 +478,13 @@ class DeletionService {
     private void deleteProcessingStep(ProcessingStep processingStep) {
         deleteClusterJobs(ClusterJob.findAllByProcessingStep(processingStep))
         deleteProcessingStepUpdates(ProcessingStepUpdate.findAllByProcessingStep(processingStep))
-        processingStep.delete(flush: true)
+        processingStep.delete()
     }
 
     private void deleteClusterJobs(List<ClusterJob> clusterJobs) {
         clusterJobs*.dependencies = [] as Set
         clusterJobs.each {
-            it.delete(flush: true)
+            it.delete()
         }
     }
 
@@ -499,9 +499,9 @@ class DeletionService {
         ProcessingError error = processingStepUpdate.error
         if (error) {
             processingStepUpdate.error = null
-            error.delete(flush: true)
+            error.delete()
         }
-        processingStepUpdate.delete(flush: true)
+        processingStepUpdate.delete()
     }
 
     private Set<ProcessParameter> collectProcessParametersRecursively(
@@ -541,9 +541,9 @@ class DeletionService {
         DataFile.findAllBySeqTrack(seqTrack).each { DataFile df ->
             dirsToDelete.addAll(deleteDataFile(df))
         }
-        MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
+        MergingAssignment.findAllBySeqTrack(seqTrack)*.delete()
 
-        seqTrack.delete(flush: true)
+        seqTrack.delete()
 
         if (runService.isRunEmpty(seqTrack.run)) {
             deleteEmptyRun(seqTrack.run)
@@ -559,7 +559,7 @@ class DeletionService {
      */
     private void deleteMetaDataEntryForDataFile(DataFile dataFile) {
         notNull(dataFile, "The input dataFiles is null")
-        MetaDataEntry.findAllByDataFile(dataFile)*.delete(flush: true)
+        MetaDataEntry.findAllByDataFile(dataFile)*.delete()
     }
 
     /**
@@ -569,7 +569,7 @@ class DeletionService {
      */
     private void deleteConsistencyStatusInformationForDataFile(DataFile dataFile) {
         notNull(dataFile, "The input dataFiles is null")
-        ConsistencyStatus.findAllByDataFile(dataFile)*.delete(flush: true)
+        ConsistencyStatus.findAllByDataFile(dataFile)*.delete()
     }
 
     /**
@@ -584,31 +584,31 @@ class DeletionService {
             List<QualityAssessmentPass> qualityAssessmentPasses = QualityAssessmentPass.findAllByProcessedBamFile(abstractBamFile)
 
             if (qualityAssessmentPasses) {
-                ChromosomeQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete(flush: true)
-                OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete(flush: true)
+                ChromosomeQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
+                OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
             }
 
             qualityAssessmentPasses.each {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-                it.delete(flush: true)
+                it.delete()
             }
         } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
 
             if (qualityAssessmentMergedPasses) {
-                ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
-                OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
+                ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+                OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
             }
             qualityAssessmentMergedPasses.each {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-                it.delete(flush: true)
+                it.delete()
             }
         } else if (abstractBamFile instanceof RoddyBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
-                RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
+                RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
             }
-            qualityAssessmentMergedPasses*.delete(flush: true)
+            qualityAssessmentMergedPasses*.delete()
         } else if (abstractBamFile instanceof SingleCellBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
@@ -619,7 +619,7 @@ class DeletionService {
             throw new RuntimeException("This BamFile type " + abstractBamFile + " is not supported")
         }
 
-        PicardMarkDuplicatesMetrics.findAllByAbstractBamFile(abstractBamFile)*.delete(flush: true)
+        PicardMarkDuplicatesMetrics.findAllByAbstractBamFile(abstractBamFile)*.delete()
     }
 
     /**
@@ -644,7 +644,7 @@ class DeletionService {
             List<MergingPass> mergingPasses = mergingSets ? MergingPass.findAllByMergingSetInList(mergingSets).unique() : []
             List<ProcessedMergedBamFile> processedMergedBamFiles = mergingPasses ? ProcessedMergedBamFile.findAllByMergingPassInList(mergingPasses) : []
 
-            mergingSetAssignments*.delete(flush: true)
+            mergingSetAssignments*.delete()
 
             if (processedMergedBamFiles) {
                 List<BamFilePairAnalysis> analyses = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
@@ -658,26 +658,26 @@ class DeletionService {
 
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
-                MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
+                MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete()
 
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
-                processedMergedBamFile.delete(flush: true)
+                processedMergedBamFile.delete()
             }
 
             mergingPasses.each {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-                it.delete(flush: true)
+                it.delete()
             }
 
             mergingSets.each { MergingSet mergingSet ->
                 // The MergingSet can only be deleted if all corresponding AbstractBamFiles are removed already
                 if (!MergingSetAssignment.findByMergingSet(mergingSet)) {
-                    mergingSet.delete(flush: true)
+                    mergingSet.delete()
                 }
             }
             // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
-                mergingWorkPackage.delete(flush: true)
+                mergingWorkPackage.delete()
             }
         }
         return dirsToDelete
@@ -700,7 +700,7 @@ class DeletionService {
         dirs.addAll(deleteFastQCInformationFromDataFile(dataFile))
         deleteMetaDataEntryForDataFile(dataFile)
         deleteConsistencyStatusInformationForDataFile(dataFile)
-        dataFile.delete(flush: true)
+        dataFile.delete()
         return dirs
     }
 
@@ -715,7 +715,7 @@ class DeletionService {
 
         AlignmentLog.findAllBySeqTrack(seqTrack).each { AlignmentLog alignmentLog ->
             DataFile.findAllByAlignmentLog(alignmentLog).each { deleteDataFile(it) }
-            alignmentLog.delete(flush: true)
+            alignmentLog.delete()
         }
     }
 
@@ -734,7 +734,7 @@ class DeletionService {
             ].collect {
                 new File(it)
             }
-            fastqcProcessedFiles*.delete(flush: true)
+            fastqcProcessedFiles*.delete()
             return files
         }
         return []
@@ -756,7 +756,7 @@ class DeletionService {
                 if (it.projects.size() > 1) {
                     it.projects.remove(project)
                 } else {
-                    it.delete(flush: true)
+                    it.delete()
                 }
             }
         }

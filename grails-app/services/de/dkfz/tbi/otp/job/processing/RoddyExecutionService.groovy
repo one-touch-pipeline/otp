@@ -66,7 +66,7 @@ class RoddyExecutionService {
     void clearRoddyExecutionStoreDirectory(RoddyResult roddyResult) {
         if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
             roddyResult.roddyExecutionDirectoryNames.clear()
-            roddyResult.save(flush: true)
+            roddyResult.save()
         }
     }
 
@@ -141,7 +141,7 @@ class RoddyExecutionService {
         roddyResult.roddyExecutionDirectoryNames.add(directory.fileName.toString())
 
         assert roddyResult.roddyExecutionDirectoryNames.last() == roddyResult.roddyExecutionDirectoryNames.max()
-        assert roddyResult.save(flush: true)
+        assert roddyResult.save()
     }
 
     private Path parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput, FileSystem fileSystem) {

@@ -34,19 +34,19 @@ class SeqCenterService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateAutoImportDirectory(SeqCenter seqCenter, String autoImportDirectory) {
         seqCenter.autoImportDir = autoImportDirectory
-        seqCenter.save(flush: true)
+        seqCenter.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateAutoImportable(SeqCenter seqCenter, boolean autoImportable) {
         seqCenter.autoImportable = autoImportable
-        seqCenter.save(flush: true)
+        seqCenter.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateCopyMetadateFile(SeqCenter seqCenter, boolean copyMetadataFile) {
         seqCenter.copyMetadataFile = copyMetadataFile
-        seqCenter.save(flush: true)
+        seqCenter.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -55,13 +55,13 @@ class SeqCenterService {
         if (importDirNew) {
             seqCenter.addToImportDirsAllowLinking(importDirNew)
         }
-        seqCenter.save(flush: true)
+        seqCenter.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createImportDirsAllowLinking(SeqCenter seqCenter, String importDir) {
         seqCenter.addToImportDirsAllowLinking(importDir)
-        seqCenter.save(flush: true)
+        seqCenter.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -79,7 +79,7 @@ class SeqCenterService {
             name: name,
             dirName: dirName
         )
-        assert seqCenter.save(flush: true)
+        assert seqCenter.save()
         return seqCenter
     }
 }

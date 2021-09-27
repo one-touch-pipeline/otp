@@ -126,7 +126,7 @@ class RestartActionService {
     void restart(StartJob startJob, Process process) {
         Process process1 = ((RestartableStartJob) startJob).restart(process)
         process1.restarted = process
-        assert process1.save(flush: true)
+        assert process1.save()
     }
 
     void logInCommentAndJobLog(Job job, String message) {

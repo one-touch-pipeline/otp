@@ -71,7 +71,7 @@ class ShutdownService implements DisposableBean {
         if (info) {
             ShutdownInformation.withTransaction {
                 info.succeeded = new Date()
-                info.save(flush: true)
+                info.save()
                 suspendResumeableJobs()
                 logRunningWorkflowSteps()
                 log.info("OTP is shutting down")
@@ -126,7 +126,7 @@ class ShutdownService implements DisposableBean {
             ShutdownInformation.withTransaction {
                 User user = User.findByUsername(springSecurityService.authentication.principal.username)
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
-                info.save(flush: true)
+                info.save()
                 schedulerService.suspendScheduler()
                 workflowSystemService.stopWorkflowSystem()
             }
@@ -152,7 +152,7 @@ class ShutdownService implements DisposableBean {
                 }
                 info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
                 info.canceled = new Date()
-                info.save(flush: true)
+                info.save()
                 schedulerService.resumeScheduler()
                 workflowSystemService.startWorkflowSystem()
             }
@@ -230,6 +230,6 @@ class ShutdownService implements DisposableBean {
                 previous: step.latestProcessingStepUpdate,
                 processingStep: step
         )
-        update.save(flush: true)
+        update.save()
     }
 }

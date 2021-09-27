@@ -65,7 +65,7 @@ class RoddyWorkflowConfigService {
 
             println "Realignment will be triggered for bam files of ${individual}"
             mergingWorkPackages*.needsProcessing = true
-            mergingWorkPackages*.save(flush: true)
+            mergingWorkPackages*.save()
         }
     }
 
@@ -108,13 +108,13 @@ class RoddyWorkflowConfigService {
             if (configPerProjectAndSeqType.previousConfig) {
                 makeObsolete(configPerProjectAndSeqType.previousConfig)
             }
-            assert configPerProjectAndSeqType.save(flush: true)
+            assert configPerProjectAndSeqType.save()
         }
     }
 
     void makeObsolete(ConfigPerProjectAndSeqType configPerProjectAndSeqType) {
         configPerProjectAndSeqType.obsoleteDate = new Date()
-        assert configPerProjectAndSeqType.save(flush: true)
+        assert configPerProjectAndSeqType.save()
     }
 
     String formatPluginVersion(String pluginName, String programVersion) {

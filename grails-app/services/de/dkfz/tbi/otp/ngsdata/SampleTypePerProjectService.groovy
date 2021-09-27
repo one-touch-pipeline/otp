@@ -49,7 +49,7 @@ class SampleTypePerProjectService {
                             category: category
                             )
         }
-        sampleTypePerProject.save(flush: true)
+        sampleTypePerProject.save()
         return sampleTypePerProject
     }
 }

@@ -52,7 +52,7 @@ class SeqPlatformService {
                 seqPlatformModelLabel: seqPlatformModelLabel,
                 sequencingKitLabel: sequencingKitLabel,
         )
-        assert seqPlatform.save(flush: true)
+        assert seqPlatform.save()
         return seqPlatform
     }
 
@@ -118,7 +118,7 @@ class SeqPlatformService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SeqPlatform changeLegacyState(SeqPlatform seqPlatform, boolean legacy) {
         seqPlatform.legacy = legacy
-        assert seqPlatform.save(flush: true)
+        assert seqPlatform.save()
         return seqPlatform
     }
 }

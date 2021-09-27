@@ -163,7 +163,7 @@ class SampleIdentifierService {
         return new SampleIdentifier(
                 sample: sample,
                 name: identifier.fullSampleName,
-        ).save(flush: true)
+        ).save()
     }
 
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
@@ -178,7 +178,7 @@ class SampleIdentifierService {
         return new Sample(
                 individual: individual,
                 sampleType: sampleType,
-        ).save(flush: true)
+        ).save()
     }
 
     SampleType findOrSaveSampleType(ParsedSampleIdentifier identifier) {
@@ -197,7 +197,7 @@ class SampleIdentifierService {
         return new SampleType(
                 name: sanitizedSampleTypeDbName,
                 specificReferenceGenome: identifier.useSpecificReferenceGenome,
-        ).save(flush: true)
+        ).save()
     }
 
     Individual findOrSaveIndividual(ParsedSampleIdentifier identifier) {
@@ -217,7 +217,7 @@ class SampleIdentifierService {
                     project: findProject(identifier),
                     type: Individual.Type.REAL
             )
-            assert individual.save(flush: true)
+            assert individual.save()
         }
         return individual
     }
@@ -252,18 +252,18 @@ class SampleIdentifierService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateSampleIdentifierName(SampleIdentifier sampleIdentifier, String name) {
         sampleIdentifier.name = name
-        sampleIdentifier.save(flush: true)
+        sampleIdentifier.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void deleteSampleIdentifier(SampleIdentifier sampleIdentifier) {
-        sampleIdentifier.delete(flush: true)
+        sampleIdentifier.delete()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SampleIdentifier createSampleIdentifier(String name, Sample sample) {
         SampleIdentifier sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
-        sampleIdentifier.save(flush: true)
+        sampleIdentifier.save()
         return sampleIdentifier
     }
 
@@ -272,7 +272,7 @@ class SampleIdentifierService {
         SampleIdentifier sampleIdentifier = SampleIdentifier.findByNameAndSample(name, sample)
         if (!sampleIdentifier) {
             sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
-            sampleIdentifier.save(flush: true)
+            sampleIdentifier.save()
         }
         return sampleIdentifier
     }

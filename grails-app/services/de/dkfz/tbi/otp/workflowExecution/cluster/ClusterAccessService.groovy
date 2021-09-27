@@ -86,7 +86,7 @@ class ClusterAccessService {
         workflowStep.workflowRun.with {
             //its done in same transaction in which cluster jobs are saved
             jobCanBeRestarted = true
-            save(flush: true)
+            save()
         }
 
         List<String> ids = beJobs*.jobID*.shortID

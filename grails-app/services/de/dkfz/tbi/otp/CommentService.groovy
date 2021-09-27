@@ -46,9 +46,9 @@ class CommentService {
         comment.comment = message
         comment.modificationDate = new Date()
         comment.author = userName
-        assert comment.save(flush: true)
+        assert comment.save()
         commentable.comment = comment
-        assert commentable.save(flush: true)
+        assert commentable.save()
         return comment
     }
 
@@ -64,8 +64,8 @@ class CommentService {
                 modificationDate: new Date(),
                 author: userName,
         )
-        comment.save(flush: true)
+        comment.save()
         commentableWithHistory.comments.add(comment)
-        assert commentableWithHistory.save(flush: true)
+        assert commentableWithHistory.save()
     }
 }

@@ -74,7 +74,7 @@ abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implement
                 //if withdraw, the status may not be NEEDS_PROCESSING (constrain)
                 it.status = AbstractBamFile.State.DECLARED
             }
-            it.save(flush: true)
+            it.save()
         }
     }
 

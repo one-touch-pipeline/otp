@@ -199,7 +199,7 @@ class ReferenceGenomeService {
         referenceGenome.chromosomePrefix = chromosomePrefix
         referenceGenome.chromosomeSuffix = chromosomeSuffix
         referenceGenome.fingerPrintingFileName = fingerPrintingFileName
-        referenceGenome.save(flush: true)
+        referenceGenome.save()
 
         fastaEntries.each { entry ->
             new ReferenceGenomeEntry(
@@ -209,14 +209,14 @@ class ReferenceGenomeService {
                     lengthWithoutN: entry.lengthWithoutN,
                     classification: entry.classification,
                     referenceGenome: referenceGenome,
-            ).save(flush: true)
+            ).save()
         }
 
         statSizeFileNames.each { String fileName ->
             new StatSizeFileName(
                     name: fileName,
                     referenceGenome: referenceGenome
-            ).save(flush: true)
+            ).save()
         }
 
         createReferenceGenomeMetafile(referenceGenome)

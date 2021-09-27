@@ -41,7 +41,7 @@ class AuditLogService {
                 action     : action,
                 description: description,
         ])
-        actionLog.save(flush: true)
+        actionLog.save()
         return actionLog
     }
 

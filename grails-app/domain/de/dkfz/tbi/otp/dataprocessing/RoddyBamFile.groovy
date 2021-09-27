@@ -171,7 +171,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
                     abstractMergedBamFile: this,
                     identifier: 0,
             )
-            assessmentMergedPass.save(flush: true)
+            assessmentMergedPass.save()
         }
         return assessmentMergedPass
     }

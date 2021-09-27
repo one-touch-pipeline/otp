@@ -38,7 +38,7 @@ class SpeciesService {
                 new Species(
                         commonName: commonNameService.findOrSaveCommonName(name),
                         scientificName: scientificName
-                ).save(flush: true)
+                ).save()
             }
         } catch (ValidationException e) {
             return e.errors

@@ -53,7 +53,7 @@ class OtrsTicketService {
             lockTicket(ticket)
             if (ticket[property] == null) {
                 ticket[property] = new Date()
-                ticket.save(flush: true)
+                ticket.save()
             }
         }
     }
@@ -64,7 +64,7 @@ class OtrsTicketService {
             lockTicket(ticket)
             if (ticket[property] == null) {
                 ticket[property] = new Date()
-                ticket.save(flush: true)
+                ticket.save()
                 return true
             }
         }
@@ -74,7 +74,7 @@ class OtrsTicketService {
     void markFinalNotificationSent(OtrsTicket ticket) {
         lockTicket(ticket)
         ticket.finalNotificationSent = true
-        ticket.save(flush: true)
+        ticket.save()
     }
 
     OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
@@ -83,7 +83,7 @@ class OtrsTicketService {
                 seqCenterComment: seqCenterComment,
                 automaticNotification: automaticNotification,
         )
-        assert otrsTicket.save(flush: true)
+        assert otrsTicket.save()
         return otrsTicket
     }
 
@@ -106,7 +106,7 @@ class OtrsTicketService {
                 otrsTicket.seqCenterComment += '\n\n' + seqCenterComment
             }
             otrsTicket.seqCenterComment = otrsTicket.seqCenterComment ?: seqCenterComment
-            assert otrsTicket.save(flush: true)
+            assert otrsTicket.save()
             return otrsTicket
         }
         return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
@@ -124,7 +124,7 @@ class OtrsTicketService {
         otrsTicket.aceseqFinished = null
         otrsTicket.runYapsaFinished = null
         otrsTicket.finalNotificationSent = false
-        assert otrsTicket.save(flush: true)
+        assert otrsTicket.save()
     }
 
 
@@ -179,7 +179,7 @@ class OtrsTicketService {
         }
 
         fastqImportInstance.otrsTicket = newOtrsTicket
-        assert fastqImportInstance.save(flush: true)
+        assert fastqImportInstance.save()
 
         ProcessingStatus status = notificationCreator.getProcessingStatus(newOtrsTicket.findAllSeqTracks())
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
@@ -192,7 +192,7 @@ class OtrsTicketService {
             newOtrsTicket."${step}Started" = [oldOtrsTicket?."${step}Started", newOtrsTicket."${step}Started"].min()
         }
 
-        assert newOtrsTicket.save(flush: true)
+        assert newOtrsTicket.save()
     }
 
     List<MetaDataFile> getMetaDataFilesOfOtrsTicket(OtrsTicket otrsTicket) {

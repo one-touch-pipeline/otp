@@ -38,12 +38,12 @@ class KeywordService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addKeywordToProject(Keyword keyword, Project project) {
         project.addToKeywords(keyword)
-        project.save(flush: true)
+        project.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void removeKeywordFromProject(Keyword keyword, Project project) {
         keyword.removeFromProjects(project)
-        keyword.save(flush: true)
+        keyword.save()
     }
 }

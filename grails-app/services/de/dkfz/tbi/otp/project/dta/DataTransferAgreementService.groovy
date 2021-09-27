@@ -58,7 +58,7 @@ class DataTransferAgreementService {
     DataTransferAgreement persistDtaWithDtaDocuments(DataTransferAgreement dta, List<MultipartFile> files) throws FileIsEmptyException {
         assert dta.project : "Project can not be empty."
 
-        dta.project.addToDataTransferAgreements(dta).save(flush: true)
+        dta.project.addToDataTransferAgreements(dta).save()
         return addFilesToDta(dta, files)
     }
 
@@ -81,7 +81,7 @@ class DataTransferAgreementService {
                 fileName: FileNameGenerator.getUniqueFileNameWithTimestamp(file.originalFilename),
         ])
 
-        dta.addToDataTransferAgreementDocuments(dtaFile).save(flush: true)
+        dta.addToDataTransferAgreementDocuments(dtaFile).save()
         uploadDataTransferAgreementToRemoteFileSystem(dtaFile, file.bytes)
 
         return dta
@@ -154,7 +154,7 @@ class DataTransferAgreementService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     DataTransferAgreement updateDataTransferAgreementComment(DataTransferAgreement dta, String newComment) {
         dta.comment = newComment
-        return dta.save(flush: true)
+        return dta.save()
     }
 
     /**
@@ -171,7 +171,7 @@ class DataTransferAgreementService {
         Path pathToDelete = fs.getPath(getPathOnRemoteFileSystem(dataTransferAgreement).toString())
         fileService.deleteDirectoryRecursively(pathToDelete)
         dataTransferAgreement.project = null
-        dataTransferAgreement.delete(flush: true)
+        dataTransferAgreement.delete()
     }
 
     /**

@@ -31,7 +31,7 @@ class WorkflowConfigService {
     void createConfigPerProjectAndSeqType(ConfigPerProjectAndSeqType workflowConfig) {
         Project.withTransaction {
             makeObsolete(workflowConfig.previousConfig)
-            assert workflowConfig.save(flush: true)
+            assert workflowConfig.save()
         }
     }
 
@@ -40,7 +40,7 @@ class WorkflowConfigService {
             return
         }
         workflowConfig.obsoleteDate = new Date()
-        assert workflowConfig.save(flush: true)
+        assert workflowConfig.save()
     }
 
     String getNextConfigVersion(String configVersion) {

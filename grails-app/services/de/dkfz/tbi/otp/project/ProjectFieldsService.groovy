@@ -84,7 +84,7 @@ class ProjectFieldsService {
             definition.allowCustomValue = cmd.allowCustomValue
         }
 
-        definition.save(flush: true)
+        definition.save()
         return definition
     }
 
@@ -95,7 +95,7 @@ class ProjectFieldsService {
         if (count > 0) {
             throw new OtpRuntimeException("The field '${definition}' is already used")
         }
-        definition.delete(flush: true)
+        definition.delete()
     }
 }
 

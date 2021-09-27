@@ -80,7 +80,7 @@ class JobExecutionPlanService {
     private boolean changePlanStatus(JobExecutionPlan plan, boolean enable) {
         boolean before = plan.enabled
         plan.enabled = enable
-        plan.save(flush: true)
+        plan.save()
         if (!plan) {
             log.error("JobExecutionPlan ${plan.id} could not be ${enable ? 'enabled' : 'disabled'}")
             return before

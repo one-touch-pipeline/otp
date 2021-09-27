@@ -93,7 +93,7 @@ class QcTrafficLightService {
 
     private void setQcTrafficLightStatus(AbstractMergedBamFile bamFile, AbstractMergedBamFile.QcTrafficLightStatus qcTrafficLightStatus) {
         bamFile.qcTrafficLightStatus = qcTrafficLightStatus
-        assert bamFile.save(flush: true)
+        assert bamFile.save()
     }
 
     //TODO OTP-3097: provide method for handling qc in analsys

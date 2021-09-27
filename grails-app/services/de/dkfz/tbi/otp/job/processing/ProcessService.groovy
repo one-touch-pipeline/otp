@@ -339,7 +339,7 @@ class ProcessService {
 
     void setOperatorIsAwareOfFailure(Process process, boolean operatorIsAwareOfFailure) {
         process.operatorIsAwareOfFailure = operatorIsAwareOfFailure
-        process.save(flush: true)
+        process.save()
     }
 
     /**

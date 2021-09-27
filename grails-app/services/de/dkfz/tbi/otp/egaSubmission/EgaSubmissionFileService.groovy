@@ -267,7 +267,7 @@ class EgaSubmissionFileService {
         createFilesForUpload(submission)
         sendEmail(submission)
         submission.state = EgaSubmission.State.FILE_UPLOAD_STARTED
-        submission.save(flush: true)
+        submission.save()
     }
 
     static EgaMapKey getIdentifierKey(Row row) {

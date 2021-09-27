@@ -53,12 +53,12 @@ class WorkflowJobErrorDefinitionService {
                 allowRestartingCount: cmd.allowRestartingCount,
                 beanToRestart       : cmd.beanToRestart ?: null,
                 mailText            : cmd.mailText,
-        ]).save(flush: true)
+        ]).save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void delete(WorkflowJobErrorDefinition workflowJobErrorDefinition) {
-        workflowJobErrorDefinition.delete(flush: true)
+        workflowJobErrorDefinition.delete()
     }
 
     /**
@@ -77,7 +77,7 @@ class WorkflowJobErrorDefinitionService {
         if (action != Action.RESTART_JOB && workflowJobErrorDefinition.beanToRestart) {
             workflowJobErrorDefinition.beanToRestart = null
         }
-        return workflowJobErrorDefinition.save(flush: true)
+        return workflowJobErrorDefinition.save()
     }
 
     /**

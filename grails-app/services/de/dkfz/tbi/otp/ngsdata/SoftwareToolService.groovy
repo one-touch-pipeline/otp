@@ -59,14 +59,14 @@ class SoftwareToolService {
     SoftwareTool updateSoftwareTool(Long id, String version) {
         SoftwareTool softwareTool = getSoftwareTool(id)
         softwareTool.programVersion = version
-        return softwareTool.save(flush: true)
+        return softwareTool.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors createSoftwareTool(String programName, String programVersion, SoftwareTool.Type type) {
         SoftwareTool softwareTool = new SoftwareTool(programName: programName, programVersion: programVersion, type: type)
         try {
-            softwareTool.save(flush: true)
+            softwareTool.save()
         } catch (ValidationException e) {
             return e.errors
         }
@@ -82,7 +82,7 @@ class SoftwareToolService {
     SoftwareToolIdentifier updateSoftwareToolIdentifier(Long id, String alias) {
         SoftwareToolIdentifier softwareToolIdentifier = getSoftwareToolIdentifier(id)
         softwareToolIdentifier.name = alias
-        return softwareToolIdentifier.save(flush: true)
+        return softwareToolIdentifier.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -91,6 +91,6 @@ class SoftwareToolService {
                 name: alias,
                 softwareTool: softwareTool
         )
-        return softwareToolIdentifier.save(flush: true)
+        return softwareToolIdentifier.save()
     }
 }

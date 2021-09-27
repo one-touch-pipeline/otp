@@ -166,7 +166,7 @@ class QcThresholdService {
                     warningThresholdUpper: warningThresholdUpper,
                     errorThresholdUpper: errorThresholdUpper,
                     qcProperty2: property2,
-            ).save(flush: true)
+            ).save()
             return null
         } catch (ValidationException e) {
             return e.errors
@@ -185,7 +185,7 @@ class QcThresholdService {
             qcThreshold.warningThresholdUpper = warningThresholdUpper
             qcThreshold.errorThresholdUpper = errorThresholdUpper
             qcThreshold.qcProperty2 = property2
-            qcThreshold.save(flush: true)
+            qcThreshold.save()
         } catch (ValidationException e) {
             return e.errors
         }
@@ -196,7 +196,7 @@ class QcThresholdService {
     Errors deleteThreshold(QcThreshold qcThreshold) {
         assert qcThreshold
         try {
-            qcThreshold.delete(flush: true)
+            qcThreshold.delete()
         } catch (ValidationException e) {
             return e.errors
         }

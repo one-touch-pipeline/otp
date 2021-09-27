@@ -48,7 +48,7 @@ class MergingCriteriaService {
         mergingCriteria.useLibPrepKit = useLibPrepKit
         mergingCriteria.useSeqPlatformGroup = useSeqPlatformGroups
         try {
-            mergingCriteria.save(flush: true)
+            mergingCriteria.save()
         } catch (ValidationException e) {
             return e.errors
         }
@@ -62,7 +62,7 @@ class MergingCriteriaService {
                     seqType: seqType,
                     useLibPrepKit: !seqType.isWgbs(),
                     useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
-            ).save(flush: true)
+            ).save()
         }
     }
 
@@ -94,14 +94,14 @@ class MergingCriteriaService {
     void removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         commentService.saveComment(group, group.seqPlatforms.collect { it.fullName() }.join("\n"))
         group.removeFromSeqPlatforms(platform)
-        assert group.save(flush: true)
+        assert group.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         commentService.saveComment(group, group.seqPlatforms.collect { it.fullName() }.join("\n"))
         group.addToSeqPlatforms(platform)
-        assert group.save(flush: true)
+        assert group.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -110,7 +110,7 @@ class MergingCriteriaService {
                 mergingCriteria: mergingCriteria,
         )
         seqPlatformGroup.addToSeqPlatforms(platform)
-        assert seqPlatformGroup.save(flush: true)
+        assert seqPlatformGroup.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -122,7 +122,7 @@ class MergingCriteriaService {
         seqPlatforms.each {
             group.removeFromSeqPlatforms(it)
         }
-        assert group.save(flush: true)
+        assert group.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -140,7 +140,7 @@ class MergingCriteriaService {
         seqPlatformGroup.seqPlatforms?.each { SeqPlatform seqPlatform ->
             newSpg.addToSeqPlatforms(seqPlatform)
         }
-        newSpg.save(flush: true)
+        newSpg.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

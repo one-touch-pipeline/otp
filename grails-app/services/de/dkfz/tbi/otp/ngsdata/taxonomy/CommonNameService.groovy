@@ -47,6 +47,6 @@ class CommonNameService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     CommonName createAndGetCommonName(String name) throws ValidationException {
         CommonName commonName = new CommonName(name: name)
-        commonName.save(flush: true)
+        commonName.save()
     }
 }

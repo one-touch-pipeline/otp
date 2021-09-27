@@ -32,11 +32,7 @@ import org.springframework.http.HttpStatus
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
-import de.dkfz.tbi.otp.workflowExecution.JobService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
 @Secured("hasRole('ROLE_ADMIN')")
@@ -62,7 +58,7 @@ class CrashRepairController implements CheckAndCall {
         boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()
 
         return [
-                workflowSystemEnabled: workflowSystemService.isEnabled(),
+                workflowSystemEnabled : workflowSystemService.isEnabled(),
                 processingOptionsValid: processingOptionsValid,
         ]
     }
@@ -72,7 +68,7 @@ class CrashRepairController implements CheckAndCall {
      * @return JSON list of failed workflow steps
      */
     def runningWorkflowSteps() {
-         List<WorkflowStep> workflowSteps = WorkflowStep.createCriteria().list {
+        List<WorkflowStep> workflowSteps = WorkflowStep.createCriteria().list {
             eq("state", WorkflowStep.State.RUNNING)
 
             resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)

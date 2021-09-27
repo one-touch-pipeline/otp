@@ -60,6 +60,7 @@ import java.util.regex.Matcher
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+
 /**
  * Metadata import 2.0 (OTP-34)
  */
@@ -185,13 +186,13 @@ class MetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateAutomaticNotificationFlag(OtrsTicket otrsTicket, boolean automaticNotification) {
         otrsTicket.automaticNotification = automaticNotification
-        assert otrsTicket.save(flush: true)
+        assert otrsTicket.save()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateFinalNotificationFlag(OtrsTicket otrsTicket, boolean finalNotificationSent) {
         otrsTicket.finalNotificationSent = finalNotificationSent
-        assert otrsTicket.save(flush: true)
+        assert otrsTicket.save()
     }
 
     protected void copyMetadataFileIfRequested(MetadataValidationContext context) {
@@ -437,7 +438,7 @@ class MetadataImportService {
 
         // Now that all rows are processed, we can clean up.
         // flush=false, because we don't care when it's cleaned up; it can just fade away together with the context.
-        context.usedSampleIdentifiers*.delete(flush: false)
+        context.usedSampleIdentifiers*.delete()
     }
 
     protected Run getOrCreateRun(String runName, List<Row> rows) {
@@ -463,7 +464,7 @@ class MetadataImportService {
                 seqPlatform: seqPlatform,
                 dateExecuted: dateExecuted,
         )
-        newRun.save(flush: true)
+        newRun.save()
         return newRun
     }
 
@@ -506,7 +507,7 @@ class MetadataImportService {
                 ilseSubmission = IlseSubmission.findWhere(ilseNumber: Integer.parseInt(ilseNumber))
                 if (!ilseSubmission) {
                     ilseSubmission = new IlseSubmission(ilseNumber: Integer.parseInt(ilseNumber))
-                    ilseSubmission.save(flush: true)
+                    ilseSubmission.save()
                 }
             } else {
                 ilseSubmission = null
@@ -541,13 +542,13 @@ class MetadataImportService {
             }
 
             SeqTrack seqTrack = new SeqTrack(properties)
-            assert seqTrack.save(flush: false)
+            assert seqTrack.save()
 
             Long timeStarted = System.currentTimeMillis()
             log.debug("dataFiles started ${index}/${amountOfRows}")
             importDataFiles(context, fastqImportInstance, seqTrack, rows)
             log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
-            assert seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
+            assert seqTrack.save() //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
             Collection<MergingWorkPackage> mergingWorkPackages = []
@@ -593,7 +594,7 @@ class MetadataImportService {
                     seqTrack: seqTrack,
                     fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
             )
-            assert dataFile.save(flush: false)
+            assert dataFile.save()
 
             assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == new File(file.toString())
 
@@ -606,13 +607,13 @@ class MetadataImportService {
             MetaDataKey metaDataKey = MetaDataKey.findWhere(name: it.text)
             if (!metaDataKey) {
                 metaDataKey = new MetaDataKey(name: it.text)
-                metaDataKey.save(flush: true)
+                metaDataKey.save()
             }
             assert new MetaDataEntry(
                     dataFile: dataFile,
                     key: metaDataKey,
                     value: row.cells[it.columnIndex].text,
-            ).save(flush: false)
+            ).save()
         }
     }
 

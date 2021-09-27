@@ -52,14 +52,14 @@ class WorkflowService {
                 combinedConfig  : oldRun.combinedConfig,
                 restartedFrom   : oldRun,
                 state           : WorkflowRun.State.PENDING,
-        ]).save(flush: true)
+        ]).save()
 
         oldRun.inputArtefacts.each { String role, WorkflowArtefact inputArtefact ->
             new WorkflowRunInputArtefact([
                     role            : role,
                     workflowArtefact: inputArtefact,
                     workflowRun     : run,
-            ]).save(flush: true)
+            ]).save()
         }
 
         oldRun.outputArtefacts.each { String role, WorkflowArtefact oldArtefact ->
@@ -69,25 +69,25 @@ class WorkflowService {
                     outputRole: oldArtefact.outputRole,
                     displayName: oldArtefact.displayName,
                     artefactType: oldArtefact.artefactType,
-            ).save(flush: true)
+            ).save()
 
             if (useOutputAsInput) {
                 Artefact concreteArtefact = oldArtefact.artefact.get()
                 concreteArtefact.workflowArtefact = newArtefact
-                concreteArtefact.save(flush: true)
+                concreteArtefact.save()
             }
 
             WorkflowRunInputArtefact.findAllByWorkflowArtefact(oldArtefact).each { WorkflowRunInputArtefact workflowRunInputArtefact ->
                 workflowRunInputArtefact.workflowArtefact = newArtefact
-                workflowRunInputArtefact.save(flush: true)
+                workflowRunInputArtefact.save()
             }
 
             oldArtefact.state = WorkflowArtefact.State.FAILED
-            oldArtefact.save(flush: true)
+            oldArtefact.save()
         }
 
         oldRun.state = WorkflowRun.State.RESTARTED
-        oldRun.save(flush: true)
+        oldRun.save()
 
         if (startDirectly) {
             jobService.createNextJob(run)
@@ -99,18 +99,18 @@ class WorkflowService {
     void enableWorkflow(Workflow workflow) {
         assert workflow
         workflow.enabled = true
-        workflow.save(flush: true)
+        workflow.save()
     }
 
     void disableWorkflow(Workflow workflow) {
         assert workflow
         workflow.enabled = false
-        workflow.save(flush: true)
+        workflow.save()
     }
 
     void changePriority(Workflow workflow, short priority) {
         assert workflow
         workflow.priority = priority
-        workflow.save(flush: true)
+        workflow.save()
     }
 }
