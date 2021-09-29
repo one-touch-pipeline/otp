@@ -86,7 +86,7 @@ class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements Se
     @Unroll()
     void "test getPlots with #plots, tests if Path is in a valid form"() {
         given:
-        Path expectedPath = instancePath.resolve("plots").resolve("${instance.individual.pid}_${name}")
+        Path expectedPath = instancePath.resolve("${instance.individual.pid}_${name}")
 
         CreateFileHelper.createFile(expectedPath)
 

@@ -103,7 +103,13 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
      * @return List with Files that matches with the Pattern
      */
     List<Path> getPlots(AceseqInstance instance, PlotType plot) {
+        Path workDirectory = getWorkDirectory(instance)
         String pattern
+
+        if (!Files.exists(workDirectory)) {
+            return []
+        }
+
         switch (plot) {
             case PlotType.ACESEQ_EXTRA:
                 AceseqQc aceseqQc = CollectionUtils.exactlyOneElement(AceseqQc.findAllByNumberAndAceseqInstance(1, instance))
@@ -120,11 +126,7 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
             default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")
         }
 
-        if (!Files.exists(getWorkDirectory(instance))) {
-            return []
-        }
-
-        return Files.list(getPlotPath(instance)).collect(Collectors.toList()).findAll { it.fileName ==~ pattern }.sort()
+        return Files.list(workDirectory).collect(Collectors.toList()).findAll { it.fileName ==~ pattern }.sort()
     }
 
     List<Path> getAllFiles(AceseqInstance instance) {
