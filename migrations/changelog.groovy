@@ -585,4 +585,5 @@ databaseChangeLog = {
     changeSet(author: "sunakshi", id: "otp-1270") {
         sqlFile(path: 'changelogs/2021/otp-1270-update-datafile.sql')
     }
+    include file: 'changelogs/2021/otp-1255-add-column-maxParallelWorkflows.groovy'
 }

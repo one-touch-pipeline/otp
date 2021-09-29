@@ -32,6 +32,11 @@ class WorkflowRunService {
 
     ConfigFragmentService configFragmentService
 
+    final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
+            WorkflowRun.State.RUNNING_OTP,
+            WorkflowRun.State.RUNNING_WES,
+    ].asImmutable()
+
     private final static String WAITING_WORKFLOW_QUERY = """
         from
             WorkflowRun wr
@@ -52,16 +57,20 @@ class WorkflowRunService {
                     wia.workflowRun = wr
                     and wia.workflowArtefact.state != '${WorkflowArtefact.State.SUCCESS}'
             )
+            and wr.workflow.maxParallelWorkflows > (
+                select
+                    count(id)
+                from
+                    WorkflowRun wr2
+                where
+                    wr2.workflow = wr.workflow
+                    and wr2.state in ('${STATES_COUNTING_AS_RUNNING.join('\',\'')}')
+            )
         order by
             wr.priority.priority desc,
             wr.workflow.priority desc,
             wr.dateCreated
         """
-
-    final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
-            WorkflowRun.State.RUNNING_OTP,
-            WorkflowRun.State.RUNNING_WES,
-    ].asImmutable()
 
     int countOfRunningWorkflows() {
         return WorkflowRun.countByStateInList(STATES_COUNTING_AS_RUNNING)

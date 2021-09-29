@@ -44,6 +44,11 @@ class Workflow implements Commentable, Entity {
      */
     short priority = 0
 
+    /**
+     * limit of the number of parallel runs for a workflow
+     */
+    short maxParallelWorkflows
+
     LocalDate deprecatedDate
 
     Set<ReferenceGenome> allowedReferenceGenomes
