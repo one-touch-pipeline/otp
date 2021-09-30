@@ -25,7 +25,7 @@
 <html>
 <head>
     <title>${g.message(code: "mergingCriteria.title", args: [selectedProject.name])}</title>
-    <asset:javascript src="CommentBox.js"/>
+    <asset:javascript src="common/CommentBox.js"/>
 </head>
 
 <body>
