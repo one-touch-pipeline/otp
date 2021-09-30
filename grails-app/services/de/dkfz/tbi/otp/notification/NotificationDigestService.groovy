@@ -78,7 +78,7 @@ class NotificationDigestService {
         }
 
         if (cmd.notifyQcThresholds && bams) {
-            content << qcTrafficLightNotificationService.buildContentForMultipleBamsBlockedMessage(bams)
+            content << qcTrafficLightNotificationService.buildContentForMultipleBamsWarningMessage(bams)
         }
 
         if (!content) {

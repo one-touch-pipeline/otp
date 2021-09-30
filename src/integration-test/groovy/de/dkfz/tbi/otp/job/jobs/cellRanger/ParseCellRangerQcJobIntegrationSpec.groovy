@@ -26,6 +26,7 @@ import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
@@ -64,6 +65,7 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
         job.qcTrafficLightService.commentService = new CommentService()
     }
 
+    @Unroll
     void "ParseCellRangerQcJob sets QcTrafficLight depending on exceeded thresholds"() {
         given:
         setupData()
@@ -90,7 +92,7 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
         where:
         estimatedNumberOfCells || resultStatus
         5.0                    || AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        25.0                   || AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        25.0                   || AbstractMergedBamFile.QcTrafficLightStatus.WARNING
     }
 
     void "ParseCellRangerQcJob sets qualityAssessmentStatus of BamFile to FINISHED"() {

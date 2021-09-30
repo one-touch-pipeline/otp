@@ -96,7 +96,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     void setUp_allFine() {
         linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> }
-        linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile -> }
+        linkFilesToFinalDestinationService.metaClass.informResultsAreWarned = { RoddyBamFile roddyBamFile -> }
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctPermissionsAndGroups = { RoddyResult roddyResult, Realm realm -> }
     }

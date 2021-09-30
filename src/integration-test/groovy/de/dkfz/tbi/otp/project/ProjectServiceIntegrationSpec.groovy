@@ -156,6 +156,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @SuppressWarnings("UnnecessaryObjectReferences")
+    @Unroll
     void "test createProject valid input"() {
         given:
         setupData()
@@ -204,10 +205,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         where:
         name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
-        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
         'project' | 'dir'   | ''          | ''              | ''             | null                | true           | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
         'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
-        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | false          | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
         'project' | 'dir'   | ''          | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
         'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | true           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
     }

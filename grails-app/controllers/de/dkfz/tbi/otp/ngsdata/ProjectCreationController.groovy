@@ -89,7 +89,7 @@ class ProjectCreationController {
         }
 
         Map<String, ?> defaults = [
-                qcThresholdHandling            : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
+                qcThresholdHandling            : QcThresholdHandling.CHECK_AND_NOTIFY,
                 processingPriority             : processingPriorityService.defaultPriority(),
                 storageUntil                   : "3000-01-01",
                 projectType                    : Project.ProjectType.SEQUENCING,

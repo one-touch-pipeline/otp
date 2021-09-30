@@ -58,7 +58,7 @@ class QcTrafficLightCheckService {
                 //no email sending, so nothing to do
                 break
             case AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.NOTIFY:
-                qcTrafficLightNotificationService.informResultsAreBlocked(bamFile)
+                qcTrafficLightNotificationService.informResultsAreWarned(bamFile)
                 break
             case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +

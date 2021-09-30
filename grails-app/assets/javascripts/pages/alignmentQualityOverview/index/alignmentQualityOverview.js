@@ -62,11 +62,12 @@ $(() => {
     if (tableCellData.status === 'BLOCKED' || tableCellData.status === 'REJECTED') {
       /* eslint-disable max-len */
       return "<span id='status-cell-" + tableCellData.id + "' title='" + tableCellData.tooltip + "'>" +
-                "<select class='qcDropdown " + tableCellData.status + " custom-select custom-select-sm' data-id='" + tableCellData.id + "'>" +
-                "<option value='ACCEPTED' class='ACCEPTED' " + (tableCellData.status === 'ACCEPTED' ? 'selected' : '') + '>&#10003; ACCEPTED</option>' +
-                "<option value='BLOCKED'  class='BLOCKED'" + (tableCellData.status === 'BLOCKED' ? 'selected' : '') + '>&#9888; BLOCKED</option>' +
-                "<option  value='REJECTED'  class='REJECTED' " + (tableCellData.status === 'REJECTED' ? 'selected' : '') + '>&#10005; REJECTED</option>' +
-                '</select> ' + $('<div>').text(tableCellData.value).html() + '</span>';
+        "<select class='qcDropdown " + tableCellData.status + " custom-select custom-select-sm' data-id='" + tableCellData.id + "'>" +
+        "<option value='ACCEPTED' class='ACCEPTED' " + (tableCellData.status === 'ACCEPTED' ? 'selected' : '') + '>&#10003; ACCEPTED</option>' +
+        "<option disabled value='BLOCKED'  class='BLOCKED'" + (tableCellData.status === 'BLOCKED' ? 'selected' : '') + '>&#9888; BLOCKED</option>' +
+        "<option disabled value='REJECTED'  class='REJECTED' " + (tableCellData.status === 'REJECTED' ? 'selected' : '') + '>&#10005; REJECTED</option>' +
+        "<option value='WARNING' class='WARNING' " + (tableCellData.status === 'WARNING' ? 'selected' : '') + '>&#9888; WARNING</option>' +
+        '</select> ' + $('<div>').text(tableCellData.value).html() + '</span>';
       /* eslint-enable max-len */
     }
 

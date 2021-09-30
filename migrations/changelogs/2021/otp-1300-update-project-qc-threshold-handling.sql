@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
-
-import groovy.transform.TupleConstructor
-
-@TupleConstructor
-enum QcThresholdHandling {
-    NO_CHECK(false, false),
-    CHECK_AND_NOT_NOTIFY(true, false),
-    CHECK_AND_NOTIFY(true, true),
-
-    final boolean checksThreshold
-    final boolean notifiesUser
-}
+UPDATE project
+SET qc_threshold_handling='CHECK_AND_NOTIFY'
+WHERE qc_threshold_handling='CHECK_NOTIFY_AND_BLOCK'

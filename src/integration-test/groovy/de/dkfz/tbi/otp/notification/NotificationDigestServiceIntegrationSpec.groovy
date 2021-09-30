@@ -182,7 +182,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                     _ * getFaq() >> { return FAQ }
                 },
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    _ * buildContentForMultipleBamsBlockedMessage(_) >> { List<AbstractMergedBamFile> bams ->
+                    _ * buildContentForMultipleBamsWarningMessage(_) >> { List<AbstractMergedBamFile> bams ->
                         // some bug (?) causes bams to be a List<List<AbstractMergedBamFile>>, so I flatten it here
                         return bams.flatten()*.id.join(",")
                     }

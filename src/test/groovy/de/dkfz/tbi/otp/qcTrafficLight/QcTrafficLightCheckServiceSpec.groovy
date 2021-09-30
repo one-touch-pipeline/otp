@@ -78,7 +78,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
 
         QcTrafficLightCheckService service = new QcTrafficLightCheckService([
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    notifyCount * informResultsAreBlocked(_)
+                    notifyCount * informResultsAreWarned(_)
                 },
         ])
 
@@ -96,7 +96,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
         where:
         status                                                   || callCallback | callNotify
         AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED     || true         | false
-        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED       || false        | true
+        AbstractMergedBamFile.QcTrafficLightStatus.WARNING       || true         | true
         AbstractMergedBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true         | true
         AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED     || true         | false
 
@@ -112,7 +112,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
 
         QcTrafficLightCheckService service = new QcTrafficLightCheckService([
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    0 * informResultsAreBlocked(_)
+                    0 * informResultsAreWarned(_)
                 },
         ])
 

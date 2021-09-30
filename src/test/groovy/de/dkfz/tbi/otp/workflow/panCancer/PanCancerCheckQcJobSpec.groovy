@@ -73,21 +73,20 @@ class PanCancerCheckQcJobSpec extends Specification implements WorkflowSystemDom
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, inputRoleName, workflow) >> bamFile
         1 * job.abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(bamFile) >> qa
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, qa) >> {
-            // only blocked or not blocked are relevant for setting the workflow status
+            // only warning or not blocked are relevant for setting the workflow status
             if (checkSuccessful) {
                 bamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
             } else {
-                bamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+                bamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.WARNING
             }
         }
         successCalls * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
-        waitingCalls * job.workflowStateChangeService.changeStateToWaitingOnUser(workflowStep)
-        waitingCalls * job.qcTrafficLightNotificationService.createResultsAreBlockedMessage(bamFile)
+        sendwarningMail * job.qcTrafficLightNotificationService.createResultsAreWarnedMessage(bamFile)
         0 * _
 
         where:
-        checkSuccessful || successCalls | waitingCalls
+        checkSuccessful || successCalls | sendwarningMail
         true            || 1            | 0
-        false           || 0            | 1
+        false           || 1            | 1
     }
 }

@@ -93,8 +93,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         5             | 5                   || QC_PASSED
         7             | 5                   || QC_PASSED
         7             | 7                   || QC_PASSED
-        9             | 5                   || BLOCKED
-        9             | 9                   || BLOCKED
+        9             | 5                   || WARNING
+        9             | 9                   || WARNING
     }
 
     @Unroll
@@ -123,14 +123,14 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
 
         where:
         qcBasesMapped || resultStatus
-        3             || BLOCKED
-        5             || BLOCKED
-        7             || BLOCKED
-        11            || BLOCKED
+        3             || WARNING
+        5             || WARNING
+        7             || WARNING
+        11            || WARNING
         13            || QC_PASSED
         15            || QC_PASSED
         17            || QC_PASSED
-        19            || BLOCKED
+        19            || WARNING
     }
 
     @Unroll
@@ -201,6 +201,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         qcBasesMapped << [0, 2, 4, 5, 6, 8, 10]
     }
 
+    @Unroll
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, CHECK_AND_NOTIFY only causes AUTO_ACCEPTED if the threshold would fail"() {
         given:
         setupData()
@@ -218,10 +219,10 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
 
         where:
         qcBasesMapped || expectedStatus
-        0             || AUTO_ACCEPTED
+        0             || WARNING
         3             || QC_PASSED
         5             || QC_PASSED
         7             || QC_PASSED
-        10            || AUTO_ACCEPTED
+        10            || WARNING
     }
 }

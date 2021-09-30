@@ -389,7 +389,7 @@ class ExampleData {
                 realm              : realm,
                 processingPriority : processingPriority,
                 projectType        : Project.ProjectType.SEQUENCING,
-                qcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
+                qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY,
                 unixGroup          : "developer",
         ]).save(flush: true)
     }

@@ -79,10 +79,16 @@ class QcTrafficLightService {
         assert qcTrafficLightStatus: "the qcTrafficLightStatus must not be null"
         assert comment: "the comment must not be null"
 
+        AbstractMergedBamFile.QcTrafficLightStatus prevQcTrafficLightStatus = bamFile.getQcTrafficLightStatus()
+
         commentService.saveComment(bamFile, comment)
         setQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
-        if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
-            otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
+        //No workflow will be triggered by changing from WARNING to ACCEPTED, since all workflows will be processed.
+        //The following block can be removed after migration
+        if ((bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED ||
+             bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.WARNING) &&
+                prevQcTrafficLightStatus != AbstractMergedBamFile.QcTrafficLightStatus.WARNING) {
+                otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
                 otrsTicketService.resetAnalysisNotification(it)
             }
             Closure<Void> qcHandler = qcHandlerMap[bamFile.seqType]
@@ -111,13 +117,10 @@ class QcTrafficLightService {
         }
 
         AbstractMergedBamFile.QcTrafficLightStatus qcStatus
+        //if QC error occurs, just set status to WARNING and continue with processing
         if (qcValuesExceedErrorThreshold(bamFile, qc)) {
-            if (project.qcThresholdHandling.blocksBamFile) {
-                qcStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
-                commentService.saveCommentAsOtp(bamFile, "Bam file exceeded threshold")
-            } else {
-                qcStatus = AbstractMergedBamFile.QcTrafficLightStatus.AUTO_ACCEPTED
-            }
+            qcStatus = AbstractMergedBamFile.QcTrafficLightStatus.WARNING
+            commentService.saveCommentAsOtp(bamFile, "Bam file exceeded threshold")
         } else {
             qcStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         }

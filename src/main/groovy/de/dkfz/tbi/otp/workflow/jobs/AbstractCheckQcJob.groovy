@@ -42,11 +42,9 @@ abstract class AbstractCheckQcJob extends AbstractJob {
     void execute(WorkflowStep workflowStep) throws Throwable {
         AbstractMergedBamFile bamFile = getAbstractMergedBamFile(workflowStep)
         qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, parseQcTrafficLightValue(bamFile))
-        if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
-            workflowStateChangeService.changeStateToWaitingOnUser(workflowStep)
-            qcTrafficLightNotificationService.createResultsAreBlockedMessage(bamFile)
-        } else {
-            workflowStateChangeService.changeStateToSuccess(workflowStep)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
+        if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.WARNING) {
+            qcTrafficLightNotificationService.createResultsAreWarnedMessage(bamFile)
         }
     }
 

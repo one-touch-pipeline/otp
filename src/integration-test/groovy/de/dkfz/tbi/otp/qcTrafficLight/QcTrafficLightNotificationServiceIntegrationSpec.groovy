@@ -38,7 +38,7 @@ class QcTrafficLightNotificationServiceIntegrationSpec extends Specification imp
     QcTrafficLightNotificationService qcTrafficLightNotificationService
 
     @Unroll
-    void "createResultsAreBlockedSubject, properly builds subject"() {
+    void "createResultsAreWarnedSubject, properly builds subject"() {
         given:
         DomainFactory.createProcessingOptionForOtrsTicketPrefix()
 
@@ -64,7 +64,7 @@ class QcTrafficLightNotificationServiceIntegrationSpec extends Specification imp
         String base = "[S#${seqTracks*.ilseSubmission.ilseNumber.sort().join(',')}] QC issues for bam file of ${bamFile.sample} ${bamFile.seqType}"
 
         when:
-        String result = qcTrafficLightNotificationService.createResultsAreBlockedSubject(bamFile, false)
+        String result = qcTrafficLightNotificationService.createResultsAreWarnedSubject(bamFile, false)
 
         then:
         otrsPrefix + base == result

@@ -606,6 +606,10 @@ databaseChangeLog = {
 
     include file: 'changelogs/2021/otp-1133.groovy'
 
+    changeSet(author: "wei-guo.peng", id: "otp-1300") {
+        sqlFile(path: 'changelogs/2021/otp-1300-update-project-qc-threshold-handling.sql')
+    }
+
     changeSet(author: "gabkol", id: "otp-708") {
         sqlFile(path: 'changelogs/2021/otp-708.sql')
     }

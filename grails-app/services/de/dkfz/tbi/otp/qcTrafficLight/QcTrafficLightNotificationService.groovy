@@ -47,7 +47,7 @@ class QcTrafficLightNotificationService {
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
 
-    String createResultsAreBlockedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
+    String createResultsAreWarnedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
         if (toBeSent) {
             subject << 'TO BE SENT: '
@@ -59,17 +59,17 @@ class QcTrafficLightNotificationService {
         List<IlseSubmission> ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
         String ilse = ilseSubmissions ? "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] " : ""
 
-        subject << messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedSubject", [
-                        ticketNumber: ticketNumber,
-                        ilse        : ilse,
-                        bamFile     : bamFile,
+        subject << messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningSubject", [
+                ticketNumber: ticketNumber,
+                ilse        : ilse,
+                bamFile     : bamFile,
         ])
 
         return subject.toString()
     }
 
-    String createResultsAreBlockedMessage(AbstractMergedBamFile bamFile) {
-        return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage", [
+    String createResultsAreWarnedMessage(AbstractMergedBamFile bamFile) {
+        return messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningMessage", [
                 bamFile              : bamFile,
                 link                 : getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType),
                 emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
@@ -78,22 +78,14 @@ class QcTrafficLightNotificationService {
         ])
     }
 
-    String createResultsAreBlockedMessage(List<AbstractMergedBamFile> bamFiles) {
-        return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage.multiple", [
-                content              : buildContentForMultipleBamsBlockedMessage(bamFiles),
-                faq                  : createNotificationTextService.faq,
-                emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
-        ])
-    }
-
-    String buildContentForMultipleBamsBlockedMessage(List<AbstractMergedBamFile> bamFiles) {
+    String buildContentForMultipleBamsWarningMessage(List<AbstractMergedBamFile> bamFiles) {
         Project project = CollectionUtils.exactlyOneElement(bamFiles.collect { it.project }.unique())
 
         String bamListing = bamFiles.groupBy { it.seqType }.collect { SeqType seqType, List<AbstractMergedBamFile> bams ->
             return buildSeqTypeBlockForNotification(seqType, bams)
         }.join("\n")
 
-        return messageSourceService.createMessage("notification.template.alignment.qcTrafficBlockedMessage.multiple.content", [
+        return messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningMessage.multiple.content", [
                 project      : project,
                 bamListing   : bamListing,
                 thresholdPage: getThresholdPageLink(project),
@@ -117,15 +109,15 @@ class QcTrafficLightNotificationService {
             |${i}Filesystem: ${bamFile.workDirectory}""".stripMargin()
     }
 
-    void informResultsAreBlocked(AbstractMergedBamFile bamFile) {
+    void informResultsAreWarned(AbstractMergedBamFile bamFile) {
         boolean projectNotification = bamFile.project.qcTrafficLightNotification
         boolean ticketNotification = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
             !it.finalNotificationSent && it.automaticNotification
         } as boolean
         boolean shouldSendEmailToProjectReceiver = projectNotification && ticketNotification
         List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project) : []
-        String subject = createResultsAreBlockedSubject(bamFile, recipients.empty)
-        String content = createResultsAreBlockedMessage(bamFile)
+        String subject = createResultsAreWarnedSubject(bamFile, recipients.empty)
+        String content = createResultsAreWarnedMessage(bamFile)
 
         if (recipients) {
             mailHelperService.sendEmail(subject, content, recipients)

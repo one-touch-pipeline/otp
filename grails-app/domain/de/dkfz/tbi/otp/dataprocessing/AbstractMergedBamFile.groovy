@@ -69,6 +69,8 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         AUTO_ACCEPTED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
         // status is set by OTP when project is configured to not check QC thresholds
         UNCHECKED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
+        // status is set by OTP when QC error thresholds were not met, replacing BLOCKED
+        WARNING(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
 
         final JobLinkCase jobLinkCase
 

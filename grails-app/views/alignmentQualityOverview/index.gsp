@@ -59,6 +59,11 @@
         </g:if>
     </div>
 
+    <div class="alert alert-info" role="alert" style="width: 100%">
+        ${g.message(code: "alignment.quality.qcTrafficLightStatus.warning", args: [supportEmail])}
+    </div>
+
+
     <table id="overviewTableProcessedMergedBMF" class="table table-sm table-striped">
         <thead>
             <tr>

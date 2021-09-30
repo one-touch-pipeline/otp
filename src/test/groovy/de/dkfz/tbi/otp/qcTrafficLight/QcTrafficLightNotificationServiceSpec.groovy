@@ -77,7 +77,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
     }
 
     @Unroll
-    void "test informResultsAreBlocked (#name)"() {
+    void "test informResultsAreWarned (#name)"() {
         given:
         final String HEADER = 'HEADER'
         final String BODY = 'BODY'
@@ -113,14 +113,14 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         ])
 
         service.messageSourceService = Mock(MessageSourceService) {
-            1 * createMessage('notification.template.alignment.qcTrafficBlockedSubject', _) >> { String templateName, Map properties ->
+            1 * createMessage('notification.template.alignment.qcTrafficWarningSubject', _) >> { String templateName, Map properties ->
                 assert properties.size() == 3
                 assert properties['bamFile'] == bamFile
                 assert properties['ticketNumber'] == "${otrsTickets.last().prefixedTicketNumber} "
                 assert properties['ilse'] == ilseNumbers
                 return HEADER
             }
-            1 * createMessage('notification.template.alignment.qcTrafficBlockedMessage', _) >> { String templateName, Map properties ->
+            1 * createMessage('notification.template.alignment.qcTrafficWarningMessage', _) >> { String templateName, Map properties ->
                 assert properties.size() == 5
                 assert properties['bamFile'] == bamFile
                 assert properties['emailSenderSalutation'] == emailSenderSalutation
@@ -161,7 +161,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         }
 
         expect:
-        service.informResultsAreBlocked(bamFile)
+        service.informResultsAreWarned(bamFile)
 
         where:
         name                                          | finalNotificationSent | automaticNotification | qcTrafficLightNotification | emails    | subjectHeader  | createIlse   || recipientsCount

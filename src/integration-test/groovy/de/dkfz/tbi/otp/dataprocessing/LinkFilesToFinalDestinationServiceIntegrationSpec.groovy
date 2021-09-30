@@ -168,47 +168,13 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
         linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
         linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
-            0 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
+            0 * informResultsAreWarned(_) >> { AbstractMergedBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
             1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
         }
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
             1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
-        }
-        linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            1 * updateSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
-        }
-
-        when:
-        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
-
-        then:
-        assertBamFileIsFine()
-    }
-
-    void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #BLOCKED"() {
-        given:
-        setupData()
-        roddyBamFile = createBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
-        ])
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy {
-            1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
-            0 * cleanupWorkDirectory(_, _)
-        }
-        linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
-        linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
-        linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
-            1 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
-        }
-        linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
-            1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
-        }
-        linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
-            0 *  createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             1 * updateSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }

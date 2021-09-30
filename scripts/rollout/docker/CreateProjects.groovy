@@ -43,7 +43,7 @@ Map<String, Object> projectCreationParameter = [
         dirAnalysis      : names.collect{ANALYSIS_BASE_PATH+it},
         unixGroup        : ["test_project_01"],
         sampleIdentifierParserBeanName: [SampleIdentifierParserBeanName.NO_PARSER],
-        qcThresholdHandling: [QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK],
+        qcThresholdHandling: [QcThresholdHandling.CHECK_AND_NOTIFY],
         projectType: [Project.ProjectType.SEQUENCING],
         processingPriority: [ctx.processingPriorityService.defaultPriority()]
 ]

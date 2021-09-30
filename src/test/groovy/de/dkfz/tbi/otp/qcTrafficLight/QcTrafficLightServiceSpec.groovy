@@ -83,6 +83,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         DomainFactory.createDefaultRealmWithProcessingOption()
         testConfigService = new TestConfigService()
         roddyBamFile.comment = new Comment(comment: "oldComment", author: "author", modificationDate: new Date())
+        roddyBamFile.qcTrafficLightStatus = prevQcStatus
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
             linkCount * linkNewResults(_, _)
@@ -104,13 +105,17 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         roddyBamFile.qcTrafficLightStatus == qcStatus
 
         where:
-        rna   | qcStatus                                            | linkCount | linkRnaCount | otrsCount
-        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED  | 0         | 0            | 0
-        false | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1         | 0            | 1
-        false | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0         | 0            | 0
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED  | 0         | 0            | 0
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 1            | 1
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0         | 0            | 0
+        rna   | prevQcStatus                                           | qcStatus                                            | linkCount | linkRnaCount | otrsCount
+        false | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1         | 0            | 1
+        false | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 1         | 0            | 1
+        false | AbstractMergedBamFile.QcTrafficLightStatus.WARNING     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 0            | 0
+        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 1         | 0            | 1
+        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1         | 0            | 1
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 1            | 1
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 0         | 1            | 1
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.WARNING     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 0            | 0
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.WARNING  | 0         | 1            | 1
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED     | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 1            | 1
     }
 
     void "test setQcTrafficLightStatusWithComment invalid input, fails"() {
