@@ -24,10 +24,7 @@ package de.dkfz.tbi.otp.tracking
 import grails.gorm.transactions.Transactional
 import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
@@ -212,16 +209,34 @@ class DeNbiKpiService {
      * @return DeNbiKpi
      */
     DeNbiKpi getClusterJobKpi(Date from, Date to) {
-        List<String> clusterJobProjects = ClusterJob.createCriteria().list {
-            lt("dateCreated", to)
-            gt("dateCreated", from)
-        }.collect { ClusterJob clusterJob ->
-            if (clusterJob.oldSystem) {
-                return clusterJob.individual.project.name
-            } else {
-                return clusterJob.workflowStep.workflowRun.project.name
-            }
-        }
+        List<String> clusterJobProjects = [
+                //old system
+                ClusterJob.createCriteria().list {
+                    lt("dateCreated", to)
+                    gt("dateCreated", from)
+                    projections {
+                        individual {
+                            project {
+                                property('name')
+                            }
+                        }
+                    }
+                },
+                //new system
+                ClusterJob.createCriteria().list {
+                    lt("dateCreated", to)
+                    gt("dateCreated", from)
+                    projections {
+                        workflowStep {
+                            workflowRun {
+                                project {
+                                    property('name')
+                                }
+                            }
+                        }
+                    }
+                },
+        ].flatten()
 
         return new DeNbiKpi("otp cluster jobs", clusterJobProjects.size(), clusterJobProjects.unique())
     }
