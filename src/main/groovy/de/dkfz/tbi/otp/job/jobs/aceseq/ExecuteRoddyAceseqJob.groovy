@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.*
@@ -87,7 +88,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
 
         fileService.createLink(
                 aceseqService.getWorkDirectory(aceseqInstance).resolve(aceseqInputFile.fileName), aceseqInputFile,
-                realm, aceseqInstance.project.unixGroup
+                realm, aceseqInstance.project.unixGroup, CreateLinkOption.DELETE_EXISTING_FILE
         )
 
         List<String> cValues = []
