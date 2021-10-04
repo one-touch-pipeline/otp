@@ -343,7 +343,10 @@ class DeletionService {
 
         if (bamFiles) {
             List<BamFilePairAnalysis> analyses = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles)
-            List<SamplePair> samplePairs = analyses*.samplePair.unique()
+            List<SamplePair> samplePairs = SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(
+                    bamFiles.first().workPackage,
+                    bamFiles.first().workPackage)
+
             analyses.each {
                 dirsToDelete << analysisDeletionService.deleteInstance(it)
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
