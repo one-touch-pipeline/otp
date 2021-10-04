@@ -20,15 +20,26 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.ngstools.bedUtils.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.BedFile
+import de.dkfz.tbi.otp.ngsdata.BedFileService
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
-import static org.springframework.util.Assert.*
+/**
+ * Script to show for selected bam files the bed files together with the library preparation kit.
+ *
+ * The input is a list of reference genomes.
+ *
+ * The output is a table of following columns:
+ * - reference genome name
+ * - library preparation kit
+ * - bed file name
+ * - bed file path
+ */
 
 //-----------------------------------
 //input area
 
-//The names of reference genomes for which the bedfiles and library preperation kit should be shown
+//The names of reference genomes for which the bedfiles and library preparation kit should be shown
 List<String> refGenomeNames = [
         '1KGRef_PhiX'
 ]
@@ -36,24 +47,25 @@ List<String> refGenomeNames = [
 //-----------------------------------
 //checks
 
-assert refGenomeNames: 'At least one reference genome have to be provided'
+assert refGenomeNames: 'At least one reference genome must be specified'
 
 
 List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
     ReferenceGenome referenceGenome = ReferenceGenome.findByName(it)
-    assert referenceGenome: "The ReferenceGenome '${it} could not found in OTP"
+    assert referenceGenome: "The ReferenceGenome '${it}' could not be found in OTP"
     return referenceGenome
 }
 
 //-----------------------------------
 //work
 
+BedFileService bedFileService = ctx.bedFileService
+
 BedFile.withTransaction {
     referenceGenomes.each { ReferenceGenome referenceGenome ->
         List<BedFile> bedFileList = BedFile.findAllByReferenceGenome(referenceGenome)
-        bedFileList.each {
-            BedFile bedFileObject -> 
-            println "${bedFileObject.referenceGenome}\t${bedFileObject.libraryPreparationKit}\t${bedFileObject.fileName}"
+        bedFileList.each { BedFile bedFileObject ->
+            println "${bedFileObject.referenceGenome}\t${bedFileObject.libraryPreparationKit}\t${bedFileObject.fileName}\t${bedFileService.filePath(bedFileObject, false)}"
         }
     }
 }
