@@ -40,4 +40,12 @@ databaseChangeLog = {
     changeSet(author: "albrecjp", id: "otp-796", runOnChange: "true") {
         sqlFile(path: 'changelogs/defaultValues/roles.sql')
     }
+
+    changeSet(author: "", id: "ewc-roddy-base", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/ewc-roddy-base.sql')
+    }
+
+    changeSet(author: "", id: "ewc-roddy-pancancer", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/ewc-roddy-pancancer.sql')
+    }
 }

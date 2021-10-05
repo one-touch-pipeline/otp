@@ -219,7 +219,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
                 preCheck()
 
-                createWorkflowObject()
+                loadDefaultValuesScripts()
                 createProcessingPriorityObject()
                 createRealmObject()
                 initFileSystem()
@@ -416,18 +416,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * create processingPriority and set it to default
      */
-    private void createWorkflowObject() {
-        createWorkflow([
-                name                : workflowName,
-                beanName            : workflowComponentClass.simpleName.uncapitalize(),
-                enabled             : true,
-                maxParallelWorkflows: 5,
-        ])
-    }
-
-    /**
-     * create processingPriority and set it to default
-     */
     private void createProcessingPriorityObject() {
         log.debug("creating processingPriority and set it to default")
         processingPriority = createProcessingPriority([
@@ -563,6 +551,24 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     }
 
     /**
+     * loads scripts located in the path 'migrations/changelogs/defaultValues'
+     */
+    private void loadDefaultValuesScripts() {
+        log.debug("Loading default values:")
+        Path dir = new File(".").toPath().resolve("migrations/changelogs/defaultValues")
+        List<Path> files = [
+                dir.resolve("workflow.sql"),
+                dir.resolve("workflowVersions.sql"),
+        ]
+        files.addAll(Files.newDirectoryStream(dir, "ewc-*.sql").toList())
+
+        files.each {
+            log.debug("Loading default value from ${it}")
+            sql.execute(it.text.replaceAll("nextval('hibernate_sequence')", "NEXT VALUE FOR hibernate_sequence").replaceAll("ON CONFLICT DO NOTHING", ""))
+        }
+    }
+
+    /**
      * Manually setup scheduling task.
      * This is done here so they will be stopped when each test is finished,
      * otherwise there would be problems with the database being deleted
@@ -595,7 +601,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *
      * It is no problem if additional workflows exist, as long at least the given count of {@link WorkflowRun} are ended.
      */
-    protected void execute(int requiredWorkflowRunCount = 1, int existingRuns  = 0, boolean ensureNoFailure = true) {
+    protected void execute(int requiredWorkflowRunCount = 1, int existingRuns = 0, boolean ensureNoFailure = true) {
         log.debug("starting workflow system")
         SessionUtils.withNewSession {
             if (WorkflowRun.count < requiredWorkflowRunCount) {

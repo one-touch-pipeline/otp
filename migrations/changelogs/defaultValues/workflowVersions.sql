@@ -19,7 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.182', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.51-1', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.51-2', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-1', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-2', now(), now())
+ON CONFLICT DO NOTHING;
+INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
+VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-3', now(), now())
+ON CONFLICT DO NOTHING;
 INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
 VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-201', now(), now())
 ON CONFLICT DO NOTHING;

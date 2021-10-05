@@ -29,8 +29,8 @@ VALUES(nextval('hibernate_sequence'), 0, 'Externally merged BAM files installati
 ON CONFLICT DO NOTHING;
 
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'FastQC', TRUE, 0, now(), now(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES(nextval('hibernate_sequence'), 0, 'FastQC', 'fastqcWorkflow', TRUE, 0, now(), now(), 10)
 ON CONFLICT DO NOTHING;
 
 
@@ -74,24 +74,24 @@ ON CONFLICT DO NOTHING;
 
 -- deprecated workflows
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'Convey BWA alignment', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Convey BWA alignment', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'Merging set creation', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Merging set creation', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'Merging', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Merging', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'Merged BAM file transfer', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Merged BAM file transfer', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment merged', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment merged', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'Quality assessment', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, deprecated_date, max_parallel_workflows)
-VALUES(nextval('hibernate_sequence'), 0, 'SNV calling', FALSE, 0, now(), now(), '2019-01-01'::timestamptz, 10)
+VALUES(nextval('hibernate_sequence'), 0, 'SNV calling', FALSE, 0, now(), now(), TIMESTAMP WITH TIME ZONE '2019-01-01 00:00:00Z', 10)
 ON CONFLICT DO NOTHING;
