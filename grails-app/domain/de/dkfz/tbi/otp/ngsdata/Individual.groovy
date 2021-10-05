@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.ngsdata.taxonomy.CommonName
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -65,6 +66,8 @@ class Individual implements CommentableWithProject, Entity {
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
 
+    CommonName species
+
     /** This attribute is used externally. Please discuss a change in the team */
     Project project
 
@@ -75,6 +78,7 @@ class Individual implements CommentableWithProject, Entity {
     static constraints = {
         pid(unique: true, nullable: false, blank: false, shared: "pathComponent")
         internIdentifier(nullable: true)
+        species(nullable: true)
         comment(nullable: true)
     }
 
@@ -149,5 +153,6 @@ order by type.name asc, type.libraryLayout
         mockPid index: "individual_mock_pid_idx"
         mockFullName index: "individual_mock_full_name_idx"
         comment cascade: "all-delete-orphan"
+        species index: "individual_species_idx"
     }
 }

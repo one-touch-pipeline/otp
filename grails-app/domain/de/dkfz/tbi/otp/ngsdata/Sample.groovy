@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.ngsdata.taxonomy.CommonName
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -34,6 +35,7 @@ class Sample implements Entity {
 
     static hasMany = [
             seqTracks: SeqTrack,
+            mixedInSpecies: CommonName,
     ]
 
     static belongsTo = [
