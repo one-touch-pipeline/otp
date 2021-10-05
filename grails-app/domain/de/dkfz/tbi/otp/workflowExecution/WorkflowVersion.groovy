@@ -31,4 +31,8 @@ class WorkflowVersion implements Entity {
     String getDisplayName() {
         return "${workflow.name} ${workflowVersion}"
     }
+
+    static constraints = {
+        workflow unique: 'workflowVersion'
+    }
 }

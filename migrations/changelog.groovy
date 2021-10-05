@@ -599,4 +599,6 @@ databaseChangeLog = {
     include file: 'changelogs/2021/otp-1284-extend-commonName-domain.groovy'
 
     include file: 'changelogs/2021/otp-1284-gui-metaDataEntry.groovy'
+
+    include file: 'changelogs/2021/otp-1133.groovy'
 }
