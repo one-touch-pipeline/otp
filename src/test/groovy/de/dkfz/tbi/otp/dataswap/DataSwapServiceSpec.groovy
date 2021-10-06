@@ -155,9 +155,6 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         1 * service.logSwapData(_ as DataSwapData<DataSwapParameters>) >> _
 
         then:
-        1 * service.createMoveFilesScript(_ as DataSwapData<DataSwapParameters>) >> null
-
-        then:
         1 * service.checkThatNoAnalysisIsRunning(_ as DataSwapData<DataSwapParameters>) >> null
 
         then:
@@ -171,6 +168,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         then:
         1 * service.createSwapComments(_ as DataSwapData<DataSwapParameters>) >> _
+
+        then:
+        1 * service.createMoveFilesScript(_ as DataSwapData<DataSwapParameters>) >> null
     }
 
     void "validateDTO, when validateable is valid should not throw an exception"() {

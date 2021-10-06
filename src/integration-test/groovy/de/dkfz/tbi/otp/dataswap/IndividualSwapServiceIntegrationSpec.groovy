@@ -133,6 +133,7 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         copyScript.exists()
         String copyScriptContent = copyScript.text
         copyScriptContent.contains("#rm -rf ${destinationDirectory}")
+        copyScriptContent.startsWith(DataSwapService.BASH_HEADER)
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).parent}'")
             assert copyScriptContent.contains("mv '${dataFilePaths[i]}' \\\n   '${lsdfFilesService.getFileFinalPath(it)}'")

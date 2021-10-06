@@ -169,12 +169,12 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     protected void swap(D data) throws IOException, AssertionError {
         validateDTO(data)
         logSwapData(data)
-        data.moveFilesBashScript = createMoveFilesScript(data)
         checkThatNoAnalysisIsRunning(data)
         createGroovyConsoleScriptToRestartAlignments(data)
         markSeqTracksAsSwappedAndDeleteDependingObjects(data)
         performDataSwap(data)
         createSwapComments(data)
+        createMoveFilesScript(data)
     }
 
     /**
@@ -343,9 +343,9 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @param data DTO containing all entities necessary to perform a swap
      */
     void createRemoveAnalysisAndAlignmentsCommands(DataSwapData data) {
-        data.moveFilesBashScript << "\n\n################ delete analysis files ################\n"
+        data.moveFilesCommands << "\n\n################ delete analysis files ################\n"
         data.dirsToDelete.flatten()*.path.each {
-            data.moveFilesBashScript << "#rm -rf ${it}\n"
+            data.moveFilesCommands << "#rm -rf ${it}\n"
         }
     }
 
@@ -355,8 +355,8 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @param data DTO containing all entities necessary to perform a swap
      */
     void createMoveDataFilesCommands(D data) {
-        data.moveFilesBashScript << "\n\n################ move data files ################\n"
-        data.moveFilesBashScript << renameDataFiles(data)
+        data.moveFilesCommands << "\n\n################ move data files ################\n"
+        data.moveFilesCommands << renameDataFiles(data)
     }
 
     /**
@@ -440,16 +440,15 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
-     * creates bash script to move files after database swap
+     * creates the complete bash script to move files after database swap
      *
      * @param data DTO containing all entities necessary to perform a swap
      * @return Path to bash script
      */
-    Path createMoveFilesScript(D data) {
+    void createMoveFilesScript(D data) {
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(data.scriptOutputDirectory,
                 "${data.bashScriptName}.sh", configService.defaultRealm)
-        bashScriptToMoveFiles << BASH_HEADER
-        return bashScriptToMoveFiles
+        bashScriptToMoveFiles << data.moveFilesCommands.join()
     }
 
     /**

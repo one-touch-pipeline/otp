@@ -89,19 +89,19 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
         List<AlignmentPass> alignmentPasses = AlignmentPass.findAllBySeqTrackInList(data.seqTrackList)
 
         if (data.seqTrackList && alignmentPasses) {
-            data.moveFilesBashScript << "\n\n\n ################ delete old aligned & merged files ################ \n"
+            data.moveFilesCommands << "\n\n\n ################ delete old aligned & merged files ################ \n"
             alignmentPasses.each { AlignmentPass alignmentPass ->
                 String baseDirAlignment = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
                         DataProcessingFilesService.OutputDirectories.ALIGNMENT)
                 String middleDirAlignment = processedAlignmentFileService.getRunLaneDirectory(alignmentPass.seqTrack)
                 String oldPathToAlignedFiles = "${baseDirAlignment}/${middleDirAlignment}"
-                data.moveFilesBashScript << "#rm -rf ${oldPathToAlignedFiles}\n"
+                data.moveFilesCommands << "#rm -rf ${oldPathToAlignedFiles}\n"
             }
 
             String baseDirMerging = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
                     DataProcessingFilesService.OutputDirectories.MERGING)
             String oldProcessingPathToMergedFiles = "${baseDirMerging}/${data.sampleTypeSwap.old.name}"
-            data.moveFilesBashScript << "#rm -rf ${oldProcessingPathToMergedFiles}\n"
+            data.moveFilesCommands << "#rm -rf ${oldProcessingPathToMergedFiles}\n"
 
             List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.createCriteria().list {
                 mergingPass {
@@ -117,7 +117,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
             }
             latestProcessedMergedBamFiles.each { ProcessedMergedBamFile latestProcessedMergedBamFile ->
                 String oldProjectPathToMergedFiles = latestProcessedMergedBamFile.baseDirectory.absolutePath
-                data.moveFilesBashScript << "#rm -rf ${oldProjectPathToMergedFiles}\n"
+                data.moveFilesCommands << "#rm -rf ${oldProjectPathToMergedFiles}\n"
             }
         }
 
@@ -128,9 +128,9 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
         SampleIdentifier.findAllBySample(data.sample)*.delete(flush: true)
 
         List<String> newFastQcFileNames = data.fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
-        data.moveFilesBashScript << "\n\n\n################ move fastqc files ################\n"
+        data.moveFilesCommands << "\n\n\n################ move fastqc files ################\n"
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            data.moveFilesBashScript << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
+            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
         }
 
         createRemoveAnalysisAndAlignmentsCommands(data)

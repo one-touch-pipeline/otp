@@ -101,9 +101,9 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
         List<String> newFastQcFileNames = getFastQcOutputFileNamesByDataFilesInList(
                 getFastQDataFilesBySeqTrackInList(data.seqTrackList, data.parameters).sort { it.id }
         )
-        data.moveFilesBashScript << "\n\n################ move fastqc files ################\n\n"
+        data.moveFilesCommands << "\n\n################ move fastqc files ################\n\n"
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            data.moveFilesBashScript << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
+            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
         }
 
         List<MergingAssignment> mergingAssignments = MergingAssignment.findAllBySeqTrackInList(data.seqTrackList)
@@ -169,9 +169,9 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
      */
     private void checkForRemainingSeqTracks(LaneSwapData data) {
         if (SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
-            data.moveFilesBashScript << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
+            data.moveFilesCommands << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
             File basePath = data.projectSwap.old.projectSequencingDirectory
-            data.moveFilesBashScript << "#rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
+            data.moveFilesCommands << "#rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
                     "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}/" +
                     "${data.seqTypeSwap.old.libraryLayoutDirName}'\n"
         }

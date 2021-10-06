@@ -93,25 +93,25 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
 
         createMoveDataFilesCommands(data)
 
-        data.moveFilesBashScript << "\n\n\n################ move fastq files ################\n"
+        data.moveFilesCommands << "\n\n\n################ move fastq files ################\n"
         data.samples = Sample.findAllByIndividual(data.individualSwap.old)
         data.seqTrackList = data.samples ? SeqTrack.findAllBySampleInList(data.samples) : []
         List<DataFile> newDataFiles = data.seqTrackList ? DataFile.findAllBySeqTrackInList(data.seqTrackList) : []
         List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
-            data.moveFilesBashScript << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames.get(i), data)
+            data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames.get(i), data)
         }
 
         createRemoveAnalysisAndAlignmentsCommands(data)
 
-        data.moveFilesBashScript << "\n\n\n ################ delete old Individual ################ \n"
-        data.moveFilesBashScript << "# rm -rf ${data.projectSwap.old.projectSequencingDirectory}/*/view-by-pid/${data.pidSwap.old}/\n"
+        data.moveFilesCommands << "\n\n\n ################ delete old Individual ################ \n"
+        data.moveFilesCommands << "# rm -rf ${data.projectSwap.old.projectSequencingDirectory}/*/view-by-pid/${data.pidSwap.old}/\n"
 
         String processingPathToOldIndividual = dataProcessingFilesService.getOutputDirectory(
                 data.individualSwap.old,
                 DataProcessingFilesService.OutputDirectories.BASE
         )
-        data.moveFilesBashScript << "# rm -rf ${processingPathToOldIndividual}\n"
+        data.moveFilesCommands << "# rm -rf ${processingPathToOldIndividual}\n"
     }
 
     @Override
