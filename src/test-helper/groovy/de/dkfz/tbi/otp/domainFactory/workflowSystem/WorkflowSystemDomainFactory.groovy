@@ -27,9 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
+import de.dkfz.tbi.otp.workflowExecution.log.*
 
 import java.time.ZonedDateTime
 
@@ -37,9 +35,10 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     Workflow createWorkflow(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Workflow, [
-                name    : "name_${nextId}",
-                beanName: "beanName_${nextId}",
-                enabled : true,
+                name                : "name_${nextId}",
+                beanName            : "beanName_${nextId}",
+                enabled             : true,
+                maxParallelWorkflows: 5,
         ], properties, saveAndValidate)
     }
 

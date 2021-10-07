@@ -417,9 +417,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void createWorkflowObject() {
         createWorkflow([
-                name    : workflowName,
-                beanName: workflowComponentClass.simpleName.uncapitalize(),
-                enabled : true,
+                name                : workflowName,
+                beanName            : workflowComponentClass.simpleName.uncapitalize(),
+                enabled             : true,
+                maxParallelWorkflows: 5,
         ])
     }
 
