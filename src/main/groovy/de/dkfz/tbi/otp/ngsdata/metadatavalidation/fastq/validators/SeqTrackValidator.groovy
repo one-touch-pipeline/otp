@@ -41,15 +41,18 @@ import static de.dkfz.tbi.otp.utils.StringUtils.extractDistinguishingCharacter
 class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> implements MetadataValidator {
 
     static final Collection<MetaDataColumn> EQUAL_ATTRIBUTES = [
-            SAMPLE_NAME,
-            ANTIBODY_TARGET,
             ANTIBODY,
+            ANTIBODY_TARGET,
+            BASE_MATERIAL,
+            FASTQ_GENERATOR,
+            FRAGMENT_SIZE,
+            ILSE_NO,
+            LIB_PREP_KIT,
+            PROJECT,
+            SAMPLE_NAME,
             SEQUENCING_TYPE,
             SEQUENCING_READ_TYPE,
-            LIB_PREP_KIT,
-            FRAGMENT_SIZE,
-            FASTQ_GENERATOR,
-            ILSE_NO,
+            SINGLE_CELL_WELL_LABEL,
             TAGMENTATION_LIBRARY,
     ].asImmutable()
 

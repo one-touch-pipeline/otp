@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -33,10 +34,10 @@ import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.PAIRED
-import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.SINGLE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
+import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.PAIRED
+import static de.dkfz.tbi.otp.ngsdata.SequencingReadType.SINGLE
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
 class SeqTrackValidatorSpec extends Specification implements DataTest {
@@ -66,8 +67,7 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
     private static final Collection<MetaDataColumn> MATE_COLUMNS = (SEQ_TRACK_COLUMNS + READ).asImmutable()
 
-    private
-    static Set<Cell> cells(MetadataValidationContext context, Collection<MetaDataColumn> columns, int ... rowIndices) {
+    private static Set<Cell> cells(MetadataValidationContext context, Collection<MetaDataColumn> columns, int ... rowIndices) {
         Set<Cell> cells = [] as Set
         columns.each {
             Column column = context.spreadsheet.getColumn(it.name())
@@ -433,30 +433,24 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         assertContainSame(context.problems, expectedProblems)
     }
 
-    // equal values in columns
-
-    void 'validate, when columns which must have equal values for a SeqTrack have different values, adds errors'() {
+    @Unroll
+    void 'validate, when column #column which must have equal values for a SeqTrack has different values, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SAMPLE_NAME} ${SEQUENCING_TYPE} ${FASTQ_GENERATOR} ${RUN_ID} ${LANE_NO} ${TAGMENTATION_LIBRARY} ${INDEX}\n" +
-                        "A F K runA L1 1\n" +
-                        "A F K runA L1 2\n" +
-                        "B F L runA L1 1\n" +
-                        "A F K runA L3 1 ABC\n" +
-                        "A G K runA L3 1 ABC\n" +
-                        "C H M runA L3 1 DEF\n" +  // unrelated barcode
-                        "D I N runA L2 1\n" +  // unrelated lane
-                        "E J O runB L1 1\n"      // unrelated run
+                "${column} ${RUN_ID} ${LANE_NO} ${INDEX}\n" +
+                        "A runA L1\n" +
+                        "B runA L1\n" +
+                        "C runB L2 ABC\n" +
+                        "D runB L2 ABC\n" +
+                        "E runB L2 DEF\n" +  // unrelated barcode
+                        "F runA L3\n" +  // unrelated lane
+                        "G runC L1\n"      // unrelated run
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
-                new Problem(cells(context, SEQ_TRACK_COLUMNS + SAMPLE_NAME, 0, 1, 2),
-                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${SAMPLE_NAME}'.", "All rows of the same seqTrack must have the same value in column 'SAMPLE_NAME'."),
-                new Problem(cells(context, SEQ_TRACK_COLUMNS + FASTQ_GENERATOR, 0, 1, 2),
-                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${FASTQ_GENERATOR}'.", "All rows of the same seqTrack must have the same value in column 'FASTQ_GENERATOR'."),
-                new Problem(cells(context, SEQ_TRACK_COLUMNS + TAGMENTATION_LIBRARY, 0, 1, 2),
-                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${TAGMENTATION_LIBRARY}'.", "All rows of the same seqTrack must have the same value in column 'TAGMENTATION_LIBRARY'."),
-                new Problem(cells(context, SEQ_TRACK_COLUMNS + SEQUENCING_TYPE, 3, 4),
-                        LogLevel.ERROR, "All rows for run 'runA', lane 'L3', barcode 'ABC' must have the same value in column '${SEQUENCING_TYPE}'.", "All rows of the same seqTrack must have the same value in column 'SEQUENCING_TYPE'."),
+                new Problem(cells(context, SEQ_TRACK_COLUMNS + column, 0, 1),
+                        LogLevel.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${column}'.", "All rows of the same seqTrack must have the same value in column '${column}'."),
+                new Problem(cells(context, SEQ_TRACK_COLUMNS + column, 2, 3),
+                        LogLevel.ERROR, "All rows for run 'runB', lane 'L2', barcode 'ABC' must have the same value in column '${column}'.", "All rows of the same seqTrack must have the same value in column '${column}'."),
         ]
 
         when:
@@ -464,9 +458,22 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
 
         then:
         assertContainSame(context.problems, expectedProblems)
-    }
 
-    // mates
+        where:
+        column << [SAMPLE_NAME,
+                   ANTIBODY_TARGET,
+                   ANTIBODY,
+                   SEQUENCING_TYPE,
+                   SEQUENCING_READ_TYPE,
+                   LIB_PREP_KIT,
+                   FRAGMENT_SIZE,
+                   FASTQ_GENERATOR,
+                   PROJECT,
+                   BASE_MATERIAL,
+                   SINGLE_CELL_WELL_LABEL,
+                   ILSE_NO,
+                   TAGMENTATION_LIBRARY]
+    }
 
     void 'validate, when mate extraction fails, does not complain'() {
         given:
