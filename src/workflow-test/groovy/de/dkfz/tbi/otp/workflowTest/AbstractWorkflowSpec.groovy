@@ -55,6 +55,7 @@ import de.dkfz.tbi.util.TimeFormats
 
 import javax.sql.DataSource
 import java.nio.file.*
+import java.nio.file.attribute.PosixFilePermission
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.*
@@ -704,6 +705,27 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         assert ClusterJob.findAllByCheckStatusNotEqual(ClusterJob.CheckStatus.FINISHED).empty
         assert ClusterJob.findAllByExitStatusIsNull().empty
         assert ClusterJob.findAllByJobLogIsNull().empty
+        ensureThatFilePermissionsAreCorrect()
+    }
+
+    /**
+     * check, that are files created have the correct permissions
+     */
+    protected void ensureThatFilePermissionsAreCorrect() {
+        log.debug("Checking file permissions")
+        Files.walk(configService.getRootPath().toPath()).each { Path path ->
+            if (Files.isDirectory(path)) {
+                assert fileService.getPermissionViaBash(path, realm, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
+            }
+            if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)
+                if (fileService.BAM_FILE_EXTENSIONS.any { path.toString().endsWith(it) }) {
+                    assert permissions == fileService.DEFAULT_BAM_FILE_PERMISSION
+                } else {
+                    assert permissions == fileService.DEFAULT_FILE_PERMISSION
+                }
+            }
+        }
     }
 
     /**

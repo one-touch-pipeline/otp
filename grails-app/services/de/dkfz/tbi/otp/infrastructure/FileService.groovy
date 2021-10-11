@@ -405,6 +405,11 @@ class FileService {
         remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
     }
 
+    String getPermissionViaBash(Path path, Realm realm, LinkOption... options) {
+        return remoteShellHelper.executeCommandReturnProcessOutput(realm, "stat ${LinkOption.NOFOLLOW_LINKS in options ? "" : "-L"} -c %a ${path}")
+                .assertExitCodeZeroAndStderrEmpty().stdout.trim()
+    }
+
     void setGroupViaBash(Path path, Realm realm, String groupString) {
         remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
     }

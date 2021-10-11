@@ -40,7 +40,7 @@ class SingleCellMappingFileService {
     SingleCellService singleCellService
 
     /**
-     * Adds the mapping entry for the given DataFile to the mapping file in a save manner.
+     * Adds the mapping entry for the given DataFile to the mapping file in a safe manner.
      *
      * It creates the mapping file if it does not already exist and only adds the entry
      * if it was not already added.
@@ -58,8 +58,12 @@ class SingleCellMappingFileService {
         }
 
         if (!mappingFile.text.contains(value)) {
+            if (!Files.isWritable(mappingFile)) {
+                fileService.setPermission(mappingFile, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
+            }
             mappingFile << value << '\n'
         }
+        fileService.setPermission(mappingFile, FileService.DEFAULT_FILE_PERMISSION)
     }
 
     /**

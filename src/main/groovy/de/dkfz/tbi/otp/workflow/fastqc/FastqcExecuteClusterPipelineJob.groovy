@@ -100,7 +100,9 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |#copy file
                 |cd ${seqCenterFastQcFile.parent}
                 |md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
                 |cp ${seqCenterFastQcFile} ${outDir}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputFile(dataFile)}
                 |
                 |#check md5sum
                 |cd ${outDir}
@@ -136,6 +138,8 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |${fastqcActivation}
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcOutputFile(dataFile)}
+                |chmod ${fileService.convertPermissionsToOctalString(fileService.DEFAULT_FILE_PERMISSION)} ${fastqcDataFilesService.fastqcHtmlFile(dataFile)}
                 |${deleteDecompressedFileCommand}
                 |""".stripMargin()
         }

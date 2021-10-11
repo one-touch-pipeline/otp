@@ -209,6 +209,7 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         mappingFile.text == "${ENTRY}\n"
 
         when: "File does exist, does not contain entry"
+        Files.setPosixFilePermissions(mappingFile, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
         mappingFile.text = DATA
         data.service.recreateAllMappingFiles()
 

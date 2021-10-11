@@ -141,8 +141,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             1 * fastqcOutputDirectory(_) >> targetDir.toString()
             1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile1) >> target1
             1 * pathToFastQcResultMd5SumFromSeqCenter(_, dataFile2) >> target2
-            1 * fastqcOutputFile(dataFile1) >> target1
-            1 * fastqcOutputFile(dataFile2) >> target2
+            2 * fastqcOutputFile(dataFile1) >> target1
+            2 * fastqcOutputFile(dataFile2) >> target2
             0 * _
         }
         job.seqTrackService = Mock(SeqTrackService) {
@@ -152,6 +152,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         job.fileService = Mock(FileService) {
             2 * deleteDirectoryRecursively(_)
             _ * ensureFileIsReadableAndNotEmpty(_)
+            _ * convertPermissionsToOctalString(_)
             0 * _
         }
         job.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -186,8 +187,10 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(_) >> targetDir.toString()
-            1 * fastqcOutputFile(dataFile1) >> target1
-            1 * fastqcOutputFile(dataFile2) >> target2
+            2 * fastqcOutputFile(dataFile1) >> target1
+            2 * fastqcOutputFile(dataFile2) >> target2
+            1 * fastqcHtmlFile(dataFile1) >> target1
+            1 * fastqcHtmlFile(dataFile2) >> target2
             0 * _
         }
         job.seqTrackService = Mock(SeqTrackService) {
@@ -197,6 +200,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         job.fileService = Mock(FileService) {
             2 * deleteDirectoryRecursively(_)
             _ * ensureFileIsReadableAndNotEmpty(_)
+            _ * convertPermissionsToOctalString(_)
             0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
@@ -243,8 +247,10 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(_) >> targetDir.toString()
-            1 * fastqcOutputFile(dataFile1) >> target1
-            1 * fastqcOutputFile(dataFile2) >> target2
+            2 * fastqcOutputFile(dataFile1) >> target1
+            2 * fastqcOutputFile(dataFile2) >> target2
+            1 * fastqcHtmlFile(dataFile1) >> target1
+            1 * fastqcHtmlFile(dataFile2) >> target2
             0 * _
         }
         job.seqTrackService = Mock(SeqTrackService) {
@@ -254,6 +260,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         job.fileService = Mock(FileService) {
             0 * deleteDirectoryRecursively(_)
             _ * ensureFileIsReadableAndNotEmpty(_)
+            _ * convertPermissionsToOctalString(_)
             0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
