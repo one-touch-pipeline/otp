@@ -38,7 +38,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 BamFileSubmissionObject,
                 DataFile,
@@ -82,9 +82,8 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         submission.addToSamplesToSubmit(sampleSubmissionObject2)
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = ["abc", "dfg"]
-        List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
@@ -99,9 +98,8 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         submission.addToSamplesToSubmit(createSampleSubmissionObject())
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String]
         List<String> egaSampleAlias = ["abc"]
-        List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
@@ -116,9 +114,8 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
         List<String> egaSampleAlias = ["abc"]
-        List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         expect:
@@ -133,25 +130,6 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
         expect:
         identifier == egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(sampleSubmissionObject)
-    }
-
-    @Unroll
-    void "test validate file type from input"() {
-        given:
-        List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
-        List<String> egaSampleAlias = ["abc"]
-        List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
-        egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
-        String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes).replace("FASTQ", fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
-
-        expect:
-        egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet) == result
-
-        where:
-        fileType || result
-        "FASTQ"  || true
-        "WRONG"  || false
     }
 
     @Unroll

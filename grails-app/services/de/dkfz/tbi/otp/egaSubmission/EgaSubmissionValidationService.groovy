@@ -27,8 +27,6 @@ import groovy.transform.CompileStatic
 
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.FILE_TYPE
-
 @CompileStatic
 @Transactional
 class EgaSubmissionValidationService {
@@ -181,17 +179,6 @@ class EgaSubmissionValidationService {
         existingAliases.addAll(DataFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
         existingAliases.addAll(BamFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
         return existingAliases.unique().sort()
-    }
-
-    boolean validateFileTypeFromInput(Spreadsheet spreadsheet) {
-        List<String> fileTypes = spreadsheet.dataRows.collect {
-            it.getCellByColumnTitle(FILE_TYPE.value).text.toUpperCase()
-        }
-
-        if (!(fileTypes.unique().size() > 2)) {
-            return EgaSubmissionService.FileType.values()*.toString().containsAll(fileTypes)
-        }
-        return false
     }
 
     EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {

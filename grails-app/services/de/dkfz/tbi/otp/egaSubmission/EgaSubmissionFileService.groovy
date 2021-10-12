@@ -101,16 +101,6 @@ class EgaSubmissionFileService {
         return egaSampleAliases
     }
 
-    Map<EgaMapKey, Boolean> readBoxesFromFile(Spreadsheet spreadsheet, EgaSubmissionService.FileType fileType) {
-        Map<EgaMapKey, Boolean> map = [:]
-
-        spreadsheet.dataRows.each {
-            map.put(getIdentifierKey(it), (it.getCellByColumnTitle(FILE_TYPE.value).text.toUpperCase().trim() as EgaSubmissionService.FileType) == fileType)
-        }
-
-        return map
-    }
-
     Map<String, String> readEgaFileAliasesFromFile(Spreadsheet spreadsheet, boolean isBam) {
         Map<String, String> egaAliases = [:]
 
@@ -130,7 +120,7 @@ class EgaSubmissionFileService {
         return egaAliases
     }
 
-    String generateCsvFile(List<String> sampleObjectId, List<String> alias, List<EgaSubmissionService.FileType> fileType) {
+    String generateCsvFile(List<String> sampleObjectId, List<String> alias) {
         StringBuilder contentBody = new StringBuilder()
 
         sampleObjectId.eachWithIndex { it, i ->
@@ -141,7 +131,6 @@ class EgaSubmissionFileService {
                     sampleSubmissionObject.seqType.toString(),
                     sampleSubmissionObject.sample.sampleType.displayName,
                     alias?.getAt(i) ?: "",
-                    fileType?.getAt(i) ?: EgaSubmissionService.FileType.FASTQ,
             ].join(",") + "\n")
         }
 
@@ -150,7 +139,6 @@ class EgaSubmissionFileService {
                 SEQ_TYPE,
                 SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
-                FILE_TYPE,
         ]*.value.join(",")
 
         return "${contentHeader}\n${contentBody}"

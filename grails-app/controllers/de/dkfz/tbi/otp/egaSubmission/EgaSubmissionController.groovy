@@ -270,14 +270,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 pushError(validateRows.error, cmd.submission)
             } else if (validateColumns.hasError) {
                 pushError(validateColumns.error, cmd.submission)
-            } else if (!egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet)) {
-                pushError("Wrong file type detected. Please use only ${EgaSubmissionService.FileType.collect().join(", ")}",
-                        cmd.submission)
             } else {
                 flash.message = new FlashMessage("File was uploaded")
-                flash.egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
-                flash.fastqs = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.FASTQ)
-                flash.bams = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.BAM)
+                Map<EgaMapKey, String> egaAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
+                flash.egaSampleAliases = egaAliases
+                flash.fastqs = egaAliases.collectEntries { [it.key, true] }
+                flash.bams = egaAliases.collectEntries { [it.key, false] }
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             }
         }
@@ -290,7 +288,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.csv) {
-            String content = egaSubmissionFileService.generateCsvFile(cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
+            String content = egaSubmissionFileService.generateCsvFile(cmd.sampleObjectId, cmd.egaSampleAlias)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=sample_information.csv")
             response.outputStream << content.bytes

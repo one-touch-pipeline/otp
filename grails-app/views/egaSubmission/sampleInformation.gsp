@@ -56,8 +56,6 @@
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.sampleAlias"/></th>
-                        <th title="<g:message code="egaSubmission.sampleInformation.fastqInfo"/>"><g:message code="egaSubmission.fastq"/></th>
-                        <th title="<g:message code="egaSubmission.sampleInformation.bamInfo"/>"><g:message code="egaSubmission.bam"/></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,10 +70,7 @@
                             <td>${seqType}</td>
                             <td>${sampleType}</td>
                             <td><g:textField name="egaSampleAlias[${i}]" size="50" value="${egaSampleAliases.get(key)}"/></td>
-                            <td><g:radio name="fileType[${i}]" value="${message(code: 'egaSubmission.fastq')}"
-                                         checked="${selectedFastqs.get(key)}" disabled="${!existingFastqs.get(it)}"/></td>
-                            <td><g:radio name="fileType[${i}]" value="${message(code: 'egaSubmission.bam')}"
-                                         checked="${selectedBams.get(key)}" disabled="${!existingBams.get(it)}"/></td>
+                            <g:hiddenField name="fileType[${i}]" value="${message(code: 'egaSubmission.fastq')}"/>
                         </tr>
                     </g:each>
                 </tbody>

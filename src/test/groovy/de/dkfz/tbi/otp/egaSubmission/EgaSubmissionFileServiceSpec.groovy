@@ -50,7 +50,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractMergedBamFile,
                 BamFileSubmissionObject,
                 DataFile,
@@ -94,27 +94,23 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
-        List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
 
         when:
-        String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
+        String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
 
         then:
         content == "${INDIVIDUAL.value}," +
                 "${SEQ_TYPE.value}," +
                 "${SAMPLE_TYPE.value}," +
-                "${EGA_SAMPLE_ALIAS.value}," +
-                "${FILE_TYPE.value}\n" +
+                "${EGA_SAMPLE_ALIAS.value}\n" +
                 "${sampleSubmissionObject1.sample.individual.displayName}," +
                 "${sampleSubmissionObject1.seqType}," +
                 "${sampleSubmissionObject1.sample.sampleType.displayName}," +
-                "${egaSampleAlias[0]}," +
-                "${fileTypes[0]}\n" +
+                "${egaSampleAlias[0]}\n" +
                 "${sampleSubmissionObject2.sample.individual.displayName}," +
                 "${sampleSubmissionObject2.seqType}," +
                 "${sampleSubmissionObject2.sample.sampleType.displayName}," +
-                "${egaSampleAlias[1]}," +
-                "${fileTypes[1]}\n"
+                "${egaSampleAlias[1]}\n"
     }
 
     void "test read from file"() {
@@ -123,19 +119,14 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
-        List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
-        String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
+        String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias)
         Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
 
         when:
         Map egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
-        Map fastqs = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.FASTQ)
-        Map bams = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.BAM)
 
         then:
         egaSampleAliases.size() == 2
-        fastqs*.value == [true, false]
-        bams*.value == [false, true]
     }
 
     void "test generate data files csv file"() {

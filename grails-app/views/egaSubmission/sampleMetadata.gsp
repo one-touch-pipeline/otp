@@ -64,7 +64,7 @@
                         <td>${it.seqType.toString()}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td><g:message code="egaSubmission.unknown"/></td>
-                        <td>${SampleTypePerProject.findByProjectAndSampleType(it.project,it.sample.sampleType).category.toString() ?: g.message(code: "egaSubmission.unknown")}</td>
+                        <td>${SampleTypePerProject.findByProjectAndSampleType(it.project,it.sample.sampleType)?.category?.toString() ?: g.message(code: "egaSubmission.unknown")}</td>
                         <td>${it.project.speciesWithStrain ?: g.message(code: "egaSubmission.unknown")}</td>
                         <td>${it.egaAliasName}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>
