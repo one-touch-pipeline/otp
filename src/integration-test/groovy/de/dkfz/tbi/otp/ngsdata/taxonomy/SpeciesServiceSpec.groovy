@@ -47,14 +47,14 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
         createUserAndRoles()
     }
 
-    void "createSpeciesAndCommonName, all fine"() {
+    void "createSpeciesAndSpeciesCommonName, all fine"() {
         given:
         setupData()
         Errors errors
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesService.createSpeciesAndCommonName(MOUSE, MUS)
+            errors = speciesService.createSpeciesAndSpeciesCommonName(MOUSE, MUS)
         }
 
         then:
@@ -62,27 +62,25 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
     }
 
     @Unroll
-    void "createSpeciesAndCommonName, fails on invalid commonName \"#commonName\""() {
+    void "createSpeciesAndSpeciesCommonName, fails on invalid speciesCommonName \"#speciesCommonName\""() {
         given:
         setupData()
         Errors errors
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesService.createSpeciesAndCommonName(commonName, MUS)
+            errors = speciesService.createSpeciesAndSpeciesCommonName(speciesCommonName, MUS)
         }
 
         then:
         errors.allErrors*.codes*.contains(expectedError)
-        SessionUtils.withNewSession {
-            CommonName.list() == []
-            Species.list() == []
-        }
+        SpeciesCommonName.list() == []
+        Species.list() == []
 
         where:
-        commonName    || expectedError
-        ""            || "cannot be blank"
-        "${MOUSE}#@!" || "Contains invalid characters"
+        speciesCommonName || expectedError
+        ""                || "cannot be blank"
+        "${MOUSE}#@!"     || "Contains invalid characters"
     }
 
     @Unroll
@@ -93,13 +91,13 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = speciesService.createSpeciesAndCommonName(MOUSE, scientificName)
+            errors = speciesService.createSpeciesAndSpeciesCommonName(MOUSE, scientificName)
         }
 
         then:
         errors.allErrors*.codes*.contains(expectedError)
         SessionUtils.withNewSession {
-            CommonName.list() == []
+            SpeciesCommonName.list() == []
             Species.list() == []
         }
 

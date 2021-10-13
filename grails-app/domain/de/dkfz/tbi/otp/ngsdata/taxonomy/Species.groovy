@@ -24,11 +24,11 @@ package de.dkfz.tbi.otp.ngsdata.taxonomy
 import de.dkfz.tbi.otp.utils.Entity
 
 class Species implements Entity {
-    CommonName commonName
+    SpeciesCommonName speciesCommonName
     String scientificName
 
     static constraints = {
-        commonName(unique: false)
+        speciesCommonName(unique: false)
         scientificName(unique: true, blank: false, nullable: false, validator: { String val ->
             if (val && !(val =~ /^[A-Za-z0-9 ]+$/)) {
                 return 'invalid'
@@ -38,6 +38,6 @@ class Species implements Entity {
 
     @Override
     String toString() {
-        return "${commonName.name} (${scientificName})"
+        return "${speciesCommonName.name} (${scientificName})"
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,36 +19,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import de.dkfz.tbi.otp.SqlUtil
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.Entity
 
-class CommonName implements Entity {
-    String name
-
-    static constraints = {
-        name(unique: true, nullable: false, blank: false, validator: { String val, CommonName obj ->
-            if (val && !(val =~ /^[A-Za-z0-9 ]+$/)) {
-                return 'invalid'
-            }
-            // custom case insensitive unique constraint
-            CommonName ilikeCommonName = CollectionUtils.atMostOneElement(CommonName.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val)))
-            if (ilikeCommonName) {
-                if (obj.id) {
-                    if (obj.id != ilikeCommonName.id) {
-                        return "default.not.unique.message"
-                    }
-                } else {
-                    return "default.not.unique.message"
-                }
-            }
-        })
-    }
-
-    @Override
-    String toString() {
-        return name
-    }
+table {
+  width: auto;
 }
+
+.box {
+  border: 1px solid black;
+  background-color: #F3FAFF;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.input-field {
+  width: 40ch;
+}
+
+.box-content {
+  display: flex;
+  flex: 2;
+
+  .form {
+    flex: 1;
+  }
+
+  .listing {
+    flex: 1;
+
+    .listing-content {
+      max-height: 20em;
+    }
+  }
+}
+
+.speciesCommonName-container {
+  display: flex;
+  justify-content: space-between;
+  flex: 3;
+
+  .name-box {
+    flex: 1;
+  }
+
+  .alias-box {
+    flex: 2;
+  }
+
+  //legacy automatically has flex: 0;
+}
+

@@ -28,13 +28,13 @@ trait TaxonomyFactory implements DomainFactoryCore {
 
     Species createSpecies(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Species, [
-                commonName    : { createCommonName() },
+                speciesCommonName    : { createSpeciesCommonName() },
                 scientificName: "scientificName ${nextId}",
         ], properties, saveAndValidate)
     }
 
-    CommonName createCommonName(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(CommonName, [
+    SpeciesCommonName createSpeciesCommonName(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(SpeciesCommonName, [
                 name: "name ${nextId}",
         ], properties, saveAndValidate)
     }

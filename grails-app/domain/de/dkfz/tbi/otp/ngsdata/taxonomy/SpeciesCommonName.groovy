@@ -21,32 +21,36 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import grails.gorm.transactions.Transactional
-import grails.validation.ValidationException
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.validation.Errors
+import de.dkfz.tbi.otp.SqlUtil
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.MetadataField
 
-@Transactional
-class CommonNameService {
+class SpeciesCommonName implements Entity, MetadataField {
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    CommonName findOrSaveCommonName(String name) {
-        return CommonName.findByNameIlike(name) ?: createAndGetCommonName(name)
+    static hasMany = [importAlias: String]
+
+    static constraints = {
+        name(unique: true, nullable: false, blank: false, validator: { String val, SpeciesCommonName obj ->
+            if (val && !(val =~ /^[A-Za-z0-9 ]+$/)) {
+                return 'invalid'
+            }
+            SpeciesCommonName caseInsensitiveSpeciesCommonName = CollectionUtils.atMostOneElement(
+                    SpeciesCommonName.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val)))
+            if (caseInsensitiveSpeciesCommonName) {
+                if (obj.id) {
+                    if (obj.id != caseInsensitiveSpeciesCommonName.id) {
+                        return "default.not.unique.message"
+                    }
+                } else {
+                    return "default.not.unique.message"
+                }
+            }
+        })
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Errors createCommonName(String name) {
-        try {
-            createAndGetCommonName(name)
-        } catch (ValidationException e) {
-            return e.errors
-        }
-        return null
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    CommonName createAndGetCommonName(String name) throws ValidationException {
-        CommonName commonName = new CommonName(name: name)
-        commonName.save()
+    @Override
+    String toString() {
+        return name
     }
 }

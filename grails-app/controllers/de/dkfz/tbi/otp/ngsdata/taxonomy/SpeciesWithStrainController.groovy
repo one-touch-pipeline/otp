@@ -21,24 +21,29 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.Validateable
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 
 @Secured("hasRole('ROLE_OPERATOR')")
-class SpeciesWithStrainController {
+class SpeciesWithStrainController implements CheckAndCall {
 
     SpeciesWithStrainService speciesWithStrainService
     SpeciesService speciesService
-    CommonNameService commonNameService
+    SpeciesCommonNameService speciesCommonNameService
     StrainService strainService
 
     static allowedMethods = [
-            index                  : "GET",
-            createSpeciesWithStrain: "POST",
-            createSpecies          : "POST",
-            createStrain           : "POST",
+            index                             : "GET",
+            createSpeciesWithStrain           : "POST",
+            createSpecies                     : "POST",
+            createStrain                      : "POST",
+            changeSpeciesCommonNameLegacyState: "POST",
+            createSpeciesCommonImportAlias    : "POST",
     ]
 
     private Map getRedirectParams() {
@@ -48,21 +53,34 @@ class SpeciesWithStrainController {
         ]
     }
 
+    JSON createSpeciesCommonImportAlias(CreateSpeciesCommonNameImportAliasCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            speciesCommonNameService.addNewAlias(cmd.id, cmd.importAlias)
+        }
+    }
+
     def index() {
         List<Species> species = speciesWithStrainService.getAllSpecies()
         return [
                 helperParams               : redirectParams.params,
 
-                cachedCommonName           : flash.commonName ?: "",
+                cachedCommonName           : flash.speciesCommonName ?: "",
                 cachedScientificName       : flash.scientificName ?: "",
                 cachedStrainName           : flash.strainName ?: "",
 
                 allSpecies                 : species.sort { it.toString() },
-                speciesByCommonName        : species.groupBy { it.commonName },
+                speciesBySpeciesCommonName : species.groupBy { it.speciesCommonName },
                 strains                    : Strain.list().sort { it.toString() },
-                commonNames                : CommonName.list().sort { it.toString() },
+                speciesCommonNames         : SpeciesCommonName.list().sort { it.toString() },
                 speciesWithStrainsBySpecies: SpeciesWithStrain.list().groupBy { it.species },
         ]
+    }
+
+    def changeSpeciesCommonNameLegacyState(SpeciesCommonNameCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            speciesCommonNameService.changeLegacyState(cmd.speciesCommonName, cmd.legacy)
+        }
+        redirect action: 'index'
     }
 
     def createSpeciesWithStrain(CreateSpeciesWithStrainCommand cmd) {
@@ -79,10 +97,10 @@ class SpeciesWithStrainController {
     }
 
     def createSpecies(CreateSpeciesCommand cmd) {
-        Errors errors = speciesService.createSpeciesAndCommonName(cmd.commonNameName, cmd.scientificName)
+        Errors errors = speciesService.createSpeciesAndSpeciesCommonName(cmd.speciesCommonName, cmd.scientificName)
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "speciesWithStrain.fail") as String, errors)
-            flash.commonName = cmd.commonNameName
+            flash.speciesCommonName = cmd.speciesCommonName
             flash.scientificName = cmd.scientificName
         } else {
             flash.message = new FlashMessage(g.message(code: "speciesWithStrain.succ") as String)
@@ -108,10 +126,28 @@ class CreateSpeciesWithStrainCommand {
 }
 
 class CreateSpeciesCommand {
-    String commonNameName
+    String speciesCommonName
     String scientificName
 }
 
 class CreateStrainCommand {
     String newStrainName
+}
+
+class LegacyCommand implements Validateable {
+    boolean legacy
+}
+
+class SpeciesCommonNameCommand extends LegacyCommand {
+    SpeciesCommonName speciesCommonName
+}
+
+class CreateSpeciesCommonNameImportAliasCommand {
+    Long id
+    String importAlias
+
+    static constraints = {
+        id(blank: false)
+        importAlias(blank: false)
+    }
 }

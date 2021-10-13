@@ -37,7 +37,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                CommonName,
+                SpeciesCommonName,
                 Species,
                 SpeciesWithStrain,
                 Strain,
@@ -47,8 +47,8 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
     void setupData() {
         controller.speciesWithStrainService = new SpeciesWithStrainService()
         controller.speciesService = new SpeciesService()
-        controller.speciesService.commonNameService = new CommonNameService()
-        controller.commonNameService = new CommonNameService()
+        controller.speciesService.speciesCommonNameService = new SpeciesCommonNameService()
+        controller.speciesCommonNameService = new SpeciesCommonNameService()
         controller.strainService = new StrainService()
     }
 
@@ -59,7 +59,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         expect:
         Species.list() == []
         Strain.list() == []
-        CommonName.list() == []
+        SpeciesCommonName.list() == []
         SpeciesWithStrain.list() == []
 
         when:
@@ -67,9 +67,9 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         then:
         model.allSpecies == []
-        model.speciesByCommonName == [:]
+        model.speciesBySpeciesCommonName == [:]
         model.strains == []
-        model.commonNames == []
+        model.speciesCommonNames == []
         model.speciesWithStrainsBySpecies == [:]
     }
 
@@ -77,11 +77,11 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         given:
         setupData()
 
-        CommonName mouse = createCommonName(name: "Mouse")
-        CommonName human = createCommonName(name: "Human")
+        SpeciesCommonName mouse = createSpeciesCommonName(name: "Mouse")
+        SpeciesCommonName human = createSpeciesCommonName(name: "Human")
 
-        Species musMusculus = createSpecies(commonName: mouse, scientificName: "mus musculus")
-        Species homoSapiens = createSpecies(commonName: human, scientificName: "homo sapiens")
+        Species musMusculus = createSpecies(speciesCommonName: mouse, scientificName: "mus musculus")
+        Species homoSapiens = createSpecies(speciesCommonName: human, scientificName: "homo sapiens")
 
         SpeciesWithStrain mouseStrain1 = createSpeciesWithStrain(species: musMusculus, strain: createStrain(name: "strain 1"))
         SpeciesWithStrain mouseStrain2 = createSpeciesWithStrain(species: musMusculus, strain: createStrain(name: "strain 2"))
@@ -89,9 +89,9 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         List<Species> expectedSortedSpecies = [homoSapiens, musMusculus]
         List<Strain> expectedSortedStrains = [humanStrainNotAvailable, mouseStrain1, mouseStrain2]*.strain
-        List<CommonName> expectedSortedCommonName = [human, mouse]
+        List<SpeciesCommonName> expectedSortedSpeciesCommonName = [human, mouse]
 
-        Map<CommonName, List<Species>> expectedSpeciesByCommonName = [
+        Map<SpeciesCommonName, List<Species>> expectedSpeciesBySpeciesCommonName = [
                 (mouse): [musMusculus],
                 (human): [homoSapiens],
         ]
@@ -105,25 +105,25 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         then:
         model.allSpecies == expectedSortedSpecies
-        model.speciesByCommonName == expectedSpeciesByCommonName
+        model.speciesBySpeciesCommonName == expectedSpeciesBySpeciesCommonName
         model.strains == expectedSortedStrains
-        model.commonNames == expectedSortedCommonName
+        model.speciesCommonNames == expectedSortedSpeciesCommonName
         model.speciesWithStrainsBySpecies == expectedSpeciesWithStrainBySpecies
     }
 
-    void "index, assert sort order of commonName"() {
+    void "index, assert sort order of speciesCommonName"() {
         given:
         setupData()
 
         SORTED_NAMES.each { String name ->
-            createCommonName(name: name)
+            createSpeciesCommonName(name: name)
         }
 
         when:
         def model = controller.index()
 
         then:
-        model.commonNames*.name == SORTED_NAMES
+        model.speciesCommonNames*.name == SORTED_NAMES
     }
 
     void "index, assert sort order of strains"() {
@@ -148,39 +148,39 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         List<String> reverseSortedNames = SORTED_NAMES.reverse()
 
         SORTED_NAMES.eachWithIndex { String name, int i ->
-            createSpecies(commonName: createCommonName(name: name), scientificName: reverseSortedNames[i])
+            createSpecies(speciesCommonName: createSpeciesCommonName(name: name), scientificName: reverseSortedNames[i])
         }
 
         when:
         def model = controller.index()
 
         then:
-        model.allSpecies*.commonName.name == SORTED_NAMES
+        model.allSpecies*.speciesCommonName*.name == SORTED_NAMES
         model.allSpecies*.scientificName == reverseSortedNames
     }
 
-    void "index, multiple Species get grouped by CommonName"() {
+    void "index, multiple Species get grouped by SpeciesCommonName"() {
         given:
         setupData()
 
-        CommonName commonName1 = createCommonName()
-        CommonName commonName2 = createCommonName()
+        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName()
+        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName()
 
-        Species species1 = createSpecies(commonName: commonName1)
-        Species species2 = createSpecies(commonName: commonName1)
-        Species species3 = createSpecies(commonName: commonName1)
-        Species species4 = createSpecies(commonName: commonName2)
+        Species species1 = createSpecies(speciesCommonName: speciesCommonName1)
+        Species species2 = createSpecies(speciesCommonName: speciesCommonName1)
+        Species species3 = createSpecies(speciesCommonName: speciesCommonName1)
+        Species species4 = createSpecies(speciesCommonName: speciesCommonName2)
 
-        Map<CommonName, List<Species>> expectedSpeciesByCommonName = [
-                (commonName1): [species1, species2, species3],
-                (commonName2): [species4],
+        Map<SpeciesCommonName, List<Species>> expectedSpeciesBySpeciesCommonName = [
+                (speciesCommonName1): [species1, species2, species3],
+                (speciesCommonName2): [species4],
         ]
 
         when:
         def model = controller.index()
 
         then:
-        model.speciesByCommonName == expectedSpeciesByCommonName
+        model.speciesBySpeciesCommonName == expectedSpeciesBySpeciesCommonName
     }
 
     void "index, multiple SpeciesWithStrain get grouped by Species"() {
@@ -263,7 +263,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         given:
         setupData()
 
-        String inputCommonName = "commonName"
+        String inputSpeciesCommonName = "speciesCommonName"
         String inputScientificName = "scientificName"
 
         expect:
@@ -271,7 +271,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         when:
         controller.request.method = 'POST'
-        controller.params.commonNameName = inputCommonName
+        controller.params.speciesCommonName = inputSpeciesCommonName
         controller.params.scientificName = inputScientificName
         controller.createSpecies()
 
@@ -281,26 +281,26 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         controller.flash.message.message == "speciesWithStrain.succ"
 
-        CommonName commonName = CommonName.findByName(inputCommonName)
-        commonName != null
+        SpeciesCommonName speciesCommonName = SpeciesCommonName.findByName(inputSpeciesCommonName)
+        speciesCommonName != null
 
-        Species.findByCommonNameAndScientificName(commonName, inputScientificName)
+        Species.findBySpeciesCommonNameAndScientificName(speciesCommonName, inputScientificName)
     }
 
     @Unroll
-    void "createSpecies, reuse already existing CommonNames (#inputCN)"() {
+    void "createSpecies, reuse already existing SpeciesCommonNames (#inputCN)"() {
         given:
         setupData()
 
         String scientificName = "scientificName"
-        createCommonName(name: "Mouse")
+        createSpeciesCommonName(name: "Mouse")
 
         expect:
         Species.list().isEmpty()
 
         when:
         controller.request.method = 'POST'
-        controller.params.commonNameName = inputCN
+        controller.params.speciesCommonName = inputCN
         controller.params.scientificName = scientificName
         controller.createSpecies()
 
@@ -310,11 +310,11 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
 
         controller.flash.message.message == "speciesWithStrain.succ"
 
-        CommonName.list().size() == expectedNumberOfCommonNames
-        Species.findByCommonNameAndScientificName(CommonName.findByNameIlike(inputCN), scientificName)
+        SpeciesCommonName.list().size() == expectedNumberOfSpeciesCommonNames
+        Species.findBySpeciesCommonNameAndScientificName(SpeciesCommonName.findByNameIlike(inputCN), scientificName)
 
         where:
-        inputCN || expectedNumberOfCommonNames
+        inputCN || expectedNumberOfSpeciesCommonNames
         "Human" || 2
         "Mouse" || 1
         "mouse" || 1
@@ -331,7 +331,7 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         when:
         controller.request.method = 'POST'
         controller.params.scientificName = scientificName
-        controller.params.commonName = "commonName"
+        controller.params.speciesCommonName = "speciesCommonName"
         controller.createSpeciesWithStrain()
 
         then:

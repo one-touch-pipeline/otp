@@ -185,6 +185,10 @@ class MetaDataFieldsController implements CheckAndCall {
         createImportAlias(cmd)
     }
 
+    JSON createSpeciesCommonImportAlias(CreateAntibodyTargetImportAliasCommand cmd) {
+        createImportAlias(cmd)
+    }
+
     JSON createLibraryPreparationKitImportAlias(CreateLibraryPreparationKitImportAliasCommand cmd) {
         createImportAlias(cmd)
     }

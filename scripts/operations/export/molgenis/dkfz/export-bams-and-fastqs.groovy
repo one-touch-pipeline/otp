@@ -73,7 +73,7 @@ enum DataFileColumns {
         return dataFile.seqTrack.sample.individual.pid
     }),
     COMMON_NAME("Species Common Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrain.species.commonName.name
+        return dataFile.seqTrack.sample.individual.project.speciesWithStrain.species.speciesCommonName.name
     }),
     SCIENTIFIC_NAME("Species Scientific Name", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.individual.project.speciesWithStrain.species.scientificName

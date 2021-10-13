@@ -26,21 +26,34 @@ import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-@Transactional
-class SpeciesService {
+import de.dkfz.tbi.otp.ngsdata.MetadataFieldsService
 
-    SpeciesCommonNameService speciesCommonNameService
+@Transactional
+class SpeciesCommonNameService extends MetadataFieldsService<SpeciesCommonName> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Errors createSpeciesAndSpeciesCommonName(String name, String scientificName) {
+    SpeciesCommonName findOrSaveSpeciesCommonName(String name) {
+        return SpeciesCommonName.findByNameIlike(name) ?: createAndGetSpeciesCommonName(name)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createSpeciesCommonName(String name) {
         try {
-            new Species(
-                    speciesCommonName: speciesCommonNameService.findOrSaveSpeciesCommonName(name),
-                    scientificName: scientificName
-            ).save()
+            createAndGetSpeciesCommonName(name)
         } catch (ValidationException e) {
             return e.errors
         }
         return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    SpeciesCommonName createAndGetSpeciesCommonName(String name) throws ValidationException {
+        SpeciesCommonName speciesCommonName = new SpeciesCommonName(name: name)
+        return speciesCommonName.save()
+    }
+
+    @Override
+    protected Class getClazz() {
+        return SpeciesCommonName
     }
 }

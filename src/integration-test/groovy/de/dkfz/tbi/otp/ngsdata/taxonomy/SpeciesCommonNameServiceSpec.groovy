@@ -35,39 +35,39 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class CommonNameServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
+class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
     private static final String NAME = "Mouse"
 
     @Autowired
-    CommonNameService commonNameService
+    SpeciesCommonNameService speciesCommonNameService
 
     void setupData() {
         createUserAndRoles()
     }
 
-    void "createCommonName, all fine"() {
+    void "createSpeciesCommonName, all fine"() {
         given:
         setupData()
         Errors errors
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = commonNameService.createCommonName(NAME)
+            errors = speciesCommonNameService.createSpeciesCommonName(NAME)
         }
 
         then:
         errors == null
     }
 
-    void "createCommonName, name contains invalid characters"() {
+    void "createSpeciesCommonName, name contains invalid characters"() {
         given:
         setupData()
         Errors errors
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = commonNameService.createCommonName("${NAME}#@!")
+            errors = speciesCommonNameService.createSpeciesCommonName("${NAME}#@!")
         }
 
         then:
@@ -75,20 +75,20 @@ class CommonNameServiceSpec extends Specification implements UserAndRoles, Taxon
     }
 
     @Unroll
-    void "createCommonName, name \"#name\" already exists"() {
+    void "createSpeciesCommonName, name \"#name\" already exists"() {
         given:
         setupData()
         Errors errors
 
-        createCommonName(name: NAME)
+        createSpeciesCommonName(name: NAME)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = commonNameService.createCommonName(name)
+            errors = speciesCommonNameService.createSpeciesCommonName(name)
         }
 
         then:
-        errors.allErrors*.codes*.contains('CommonName already exists')
+        errors.allErrors*.codes*.contains('SpeciesCommonName already exists')
 
         where:
         name               | _
@@ -97,19 +97,19 @@ class CommonNameServiceSpec extends Specification implements UserAndRoles, Taxon
         NAME.toUpperCase() | _
     }
 
-    void "findOrSaveCommonName, commonName found"() {
+    void "findOrSaveSpeciesCommonName, speciesCommonName found"() {
         given:
         setupData()
-        CommonName commonName = createCommonName(name: NAME)
-        CommonName foundCommonName
+        SpeciesCommonName speciesCommonName = createSpeciesCommonName(name: NAME)
+        SpeciesCommonName foundSpeciesCommonName
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            foundCommonName = commonNameService.findOrSaveCommonName(name)
+            foundSpeciesCommonName = speciesCommonNameService.findOrSaveSpeciesCommonName(name)
         }
 
         then:
-        commonName.id == foundCommonName.id
+        speciesCommonName.id == foundSpeciesCommonName.id
 
         where:
         name               | _
@@ -118,50 +118,50 @@ class CommonNameServiceSpec extends Specification implements UserAndRoles, Taxon
         NAME.toUpperCase() | _
     }
 
-    void "findOrSaveCommonName, commonName saved"() {
+    void "findOrSaveSpeciesCommonName, speciesCommonName saved"() {
         given:
         setupData()
 
         expect:
-        !CommonName.findByNameIlike(NAME)
+        !SpeciesCommonName.findByNameIlike(NAME)
 
-        CommonName commonName
+        SpeciesCommonName speciesCommonName
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            commonName = commonNameService.findOrSaveCommonName(NAME)
+            speciesCommonName = speciesCommonNameService.findOrSaveSpeciesCommonName(NAME)
         }
 
         then:
-        commonName
+        speciesCommonName
     }
 
-    void "createAndGetCommonName, valid"() {
+    void "createAndGetSpeciesCommonName, valid"() {
         given:
         setupData()
 
         expect:
-        !CommonName.findByNameIlike(NAME)
+        !SpeciesCommonName.findByNameIlike(NAME)
 
-        CommonName commonName
+        SpeciesCommonName speciesCommonName
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            commonName = commonNameService.createAndGetCommonName(NAME)
+            speciesCommonName = speciesCommonNameService.createAndGetSpeciesCommonName(NAME)
         }
 
         then:
-        commonName
+        speciesCommonName
     }
 
-    void "createAndGetCommonName, invalid"() {
+    void "createAndGetSpeciesCommonName, invalid"() {
         given:
         setupData()
 
         expect:
-        !CommonName.findByNameIlike(NAME)
+        !SpeciesCommonName.findByNameIlike(NAME)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            commonNameService.createAndGetCommonName("${NAME}#@!")
+            speciesCommonNameService.createAndGetSpeciesCommonName("${NAME}#@!")
         }
 
         then:
