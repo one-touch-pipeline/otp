@@ -31,6 +31,13 @@
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
+
+    <g:render template="/templates/quickNavigationBar" model="[
+            linkText : g.message(code: 'workflowSystem.configPage.link'),
+            link : g.createLink(controller: 'workflowSystemConfig', action: 'index'),
+            tooltip : g.message(code: 'workflowSystem.configPage.tooltip'),
+    ]"/>
+
     <h1>${g.message(code: "systemStatus.title")}</h1>
 
     <table>
@@ -85,14 +92,6 @@
                             <td>
                                 ${runs[new Pair(WorkflowRun.State.RUNNING_OTP, workflow)] ?: "0"} running
                                 <g:link controller="workflowRunOverview" action="index" params="${["workflow.id": workflow.id]}">Show</g:link>
-                            </td>
-                            <td>
-                                ${g.message(code: "systemStatus.workflows.priority")}:
-                                <div style="display: inline-block">
-                                    <otp:editorSwitch roles="ROLE_OPERATOR"
-                                                      link="${g.createLink(controller: 'systemStatus', action: 'changePriority', params: ["workflow.id": workflow.id])}"
-                                                      value="${workflow.priority}"/>
-                                </div>
                             </td>
                         </tr>
                     </g:each>

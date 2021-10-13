@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp
 
-import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -39,7 +38,6 @@ class SystemStatusController implements CheckAndCall {
             stopWorkflowSystem : "POST",
             enableWorkflow     : "POST",
             disableWorkflow    : "POST",
-            changePriority     : "POST",
     ]
 
     def index() {
@@ -80,15 +78,4 @@ class SystemStatusController implements CheckAndCall {
         }
         redirect action: "index"
     }
-
-    JSON changePriority(ChangePriorityCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            workflowService.changePriority(cmd.workflow, cmd.value)
-        }
-    }
-}
-
-class ChangePriorityCommand {
-    Workflow workflow
-    short value
 }

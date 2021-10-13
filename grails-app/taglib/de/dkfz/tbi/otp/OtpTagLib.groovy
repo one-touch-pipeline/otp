@@ -196,7 +196,7 @@ class OtpTagLib {
      * Works on the bootstrap pages only.
      */
     def otpModal = { attrs, body ->
-        String backdrop = attrs.closable == "true" ? "" : 'data-backdrop="static"'
+        String backdrop = attrs.closable == "true" ? "" : 'data-backdrop="static" data-keyboard="false"'
         String confirmText = attrs.confirmText ?: "Confirm"
         String closeText = attrs.closeText ?: "Close"
 
@@ -208,7 +208,7 @@ class OtpTagLib {
             if (attrs.title) {
                 out << "<h3 class='modal-title'>${attrs.title}</h3>"
             }
-            if (attrs.closable) {
+            if (attrs.closable == "true") {
                 out << "<button class='close closeModal' onclick='${attrs.onClose}' type='button' data-dismiss='modal'>&times;</button>"
             }
             out << "</div>"

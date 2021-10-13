@@ -107,10 +107,4 @@ class WorkflowService {
         workflow.enabled = false
         workflow.save()
     }
-
-    void changePriority(Workflow workflow, short priority) {
-        assert workflow
-        workflow.priority = priority
-        workflow.save()
-    }
 }
