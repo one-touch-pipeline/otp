@@ -60,7 +60,7 @@ class ProjectConfigController implements CheckAndCall {
             updateAbstractField                 : "POST",
             updateProjectFieldDate              : "POST",
             updateProcessingPriority            : "POST",
-            updateSpeciesWithStrain             : "POST",
+            updateSpeciesWithStrains            : "POST",
             updateTumorEntity                   : "POST",
             updateProjectGroup                  : "POST",
             updateSampleIdentifierParserBeanName: "POST",
@@ -133,9 +133,10 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
-    def updateSpeciesWithStrain(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+    def updateSpeciesWithStrains(UpdateProjectSpeciesCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
+            projectService.updateProjectField(cmd.selectedValuesList, cmd.fieldName, projectSelectionService.requestedProject)
+            render [:] as JSON
         }
     }
 
@@ -245,6 +246,19 @@ class ProjectConfigController implements CheckAndCall {
             }
         }
         return timestamps ? TimeFormats.DATE_TIME.getFormattedDate(timestamps[0] as Date) : ''
+    }
+}
+
+class UpdateProjectSpeciesCommand implements Validateable {
+    String fieldName
+    List<String> selectedValuesList
+
+    void setSelectedValues(String value) {
+        this.selectedValuesList = JSON.parse(value) as List<String>
+    }
+
+    static constraints = {
+        fieldName(nullable: true)
     }
 }
 

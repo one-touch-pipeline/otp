@@ -250,10 +250,24 @@
             </datalist>
             <tr>
                 <td><g:message code="project.speciesWithStrain"/></td>
-                <td><g:select name="speciesWithStrain" class="use-select-2"
-                              from="${allSpeciesWithStrains}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}" optionKey="id"
-                              noSelection="${['': 'None']}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrain', cmd: cmd]"/>
+                <td class="multi-input-field">
+                <g:each in="${source.getByFieldName("speciesWithStrains") ?: [null]}" var="specie" status="i">
+                    <div class="field">
+                        <g:select id="speciesWithStrains[${i}].id" name="speciesWithStrains.id" class="use-select-2"
+                                  from="${allSpeciesWithStrains}"
+                                  value="${specie?.id ?: ""}"
+                                  optionKey="id" optionValue="displayString"
+                                  noSelection="${["": 'Please Select']}" />
+                        <g:if test="${i == 0}">
+                            <button class="add-field">+</button>
+                        </g:if>
+                        <g:else>
+                            <button class="remove-field">-</button>
+                        </g:else>
+                    </div>
+                </g:each>
+            </td>
+                <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrains', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.forceCopyFiles"/></td>
@@ -313,26 +327,6 @@
                 <td><g:message code="project.endDate"/></td>
                 <td><input type="date" name="endDateInput" value="${(source.getFieldAsLocalDate("endDate"))?.format(DateTimeFormatter.ISO_LOCAL_DATE)}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'endDate', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.costCenter"/></td>
-                <td><g:textField name="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'costCenter', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.organizationalUnit"/></td>
-                <td><g:textField name="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'organizationalUnit', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.fundingBody"/></td>
-                <td><g:textField name="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'fundingBody', cmd: cmd]"/>
-            </tr>
-            <tr>
-                <td><g:message code="project.grantId"/></td>
-                <td><g:textField name="grantId" value="${source.getByFieldName("grantId")}"/></td>
-                <g:render template="baseValueColumns" model="[fieldName: 'grantId', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.projectInfo"/></td>

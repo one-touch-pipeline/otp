@@ -76,7 +76,7 @@ class ProjectCreationController {
                     dirAnalysis               : "",
                     unixGroup                 : "",
                     relatedProjects           : ((cmd.baseProject.relatedProjects?.split(",") ?: []) + cmd.baseProject.name).join(","),
-                    speciesWithStrain         : [id: null],
+                    speciesWithStrains        : cmd.baseProject.speciesWithStrains,
                     internalNotes             : "",
                     usersToCopyFromBaseProject: usersToCopyFromBaseProject,
                     nameInMetadataFiles       : "",
@@ -240,7 +240,6 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     String dirAnalysis
     String nameInMetadataFiles
     String unixGroup
-    String costCenter
     String projectGroup
     @BindUsing({ ProjectCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['usersToCopyFromBaseProject']?.id
@@ -251,7 +250,12 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName
     QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
-    SpeciesWithStrain speciesWithStrain
+    @BindUsing({ ProjectCreationCommand obj, SimpleMapDataBindingSource source ->
+        Object id = source['speciesWithStrains'].id
+        List<Long> ids = id instanceof String[] ? id : [id]
+        return ids.collect { SpeciesWithStrain.get(it) }.findAll()
+    })
+    List<SpeciesWithStrain> speciesWithStrains = []
     MultipartFile projectInfoFile
     ProjectInfo projectInfoToCopy
     String description
@@ -263,9 +267,6 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     LocalDate storageUntil
     Project.ProjectType projectType
     String relatedProjects
-    String organizationalUnit
-    String fundingBody
-    String grantId
     String internalNotes
     boolean ignoreUsersFromBaseObjects
     boolean sendProjectCreationNotification
@@ -306,7 +307,6 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
                 return "invalid"
             }
         })
-        costCenter(nullable: true)
         nameInMetadataFiles(nullable: true, validator: { val, obj ->
             if (val && Project.findByNameInMetadataFiles(val)) {
                 return "duplicate"
@@ -329,13 +329,10 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
             }
         })
         projectInfoToCopy(nullable: true)
-        speciesWithStrain(nullable: true)
+        speciesWithStrains(nullable: true)
         keywords(nullable: true)
         endDate(nullable: true)
         relatedProjects(nullable: true)
-        organizationalUnit(nullable: true)
-        fundingBody(nullable: true)
-        grantId(nullable: true)
         internalNotes(nullable: true)
     }
 

@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue" contentType="text/html;charset=UTF-8" %>
 <html>
     <head>
         <title><g:message code="user.administration.show.title"/></title>
@@ -91,7 +91,7 @@
                             </g:link>
                         </td>
                         <td>${userProjectRole.project.unixGroup}</td>
-                        <td>${userProjectRole.project.costCenter}</td>
+                        <td>${userProjectRole.project.projectFields?.find { it.definition.name == 'Cost Center'}?.displayValue ?: "Not Set"}</td>
                         <td>
                             <g:each var="projectRoles" in="${userProjectRole.projectRoles}">
                                 ${projectRoles.name} <br />

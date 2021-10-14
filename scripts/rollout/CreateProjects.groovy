@@ -56,10 +56,10 @@ import de.dkfz.tbi.otp.project.Project
  *
  * In addition to the required parameters, the following can be optionally set:
  *
- *     nameInMetadataFiles, costCentern, projectGroup, usersToCopyFromBaseProject,
+ *     nameInMetadataFiles, projectGroup, usersToCopyFromBaseProject,
  *     tumorEntity, speciesWithStrain, projectInfoFile, projectInfoToCopy,
  *     description, forceCopyFiles, fingerPrinting, keywords, endDate, storageUntil,
- *     relatedProjects, organizationalUnit, fundingBody, grantId, internalNotes,
+ *     relatedProjects, internalNotes,
  *     ignoreUsersFromBaseObjects, publiclyAvailable, projectRequestAvailable,
  *     sendProjectCreationNotification
  *

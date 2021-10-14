@@ -147,12 +147,11 @@
                 <td>
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: "projectConfig", action: 'updateSpeciesWithStrain', params: ['fieldName': 'speciesWithStrain'])}"
-                            optionKey="id"
-                            noSelection="${['': 'None']}"
+                            template="dropDownMulti"
+                            link="${g.createLink(controller: "projectConfig", action: 'updateSpeciesWithStrains', params: ['fieldName': 'speciesWithStrains'])}"
                             values="${allSpeciesWithStrain}"
-                            value="${selectedProject.speciesWithStrain}"/>
+                            optionKey="id"
+                            value="${selectedProject?.speciesWithStrains?:""}"/>
                 </td>
             </tr>
             <tr>
@@ -372,46 +371,6 @@
                     <sec:ifNotGranted roles="ROLE_OPERATOR">
                         ${selectedProject.endDate ?: g.message(code: "project.endDate.empty")}
                     </sec:ifNotGranted>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.costCenter"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'costCenter'])}"
-                            value="${selectedProject.costCenter}"/>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.organizationalUnit"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'organizationalUnit'])}"
-                            value="${selectedProject.organizationalUnit}"/>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.fundingBody"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'fundingBody'])}"
-                            value="${selectedProject.fundingBody}"/>
-                </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.grantId"/></td>
-                <td></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['fieldName': 'grantId'])}"
-                            value="${selectedProject.grantId}"/>
                 </td>
             </tr>
             <sec:ifAllGranted roles="ROLE_OPERATOR">

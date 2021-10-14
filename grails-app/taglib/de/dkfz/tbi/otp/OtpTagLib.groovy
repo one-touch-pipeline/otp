@@ -129,6 +129,8 @@ class OtpTagLib {
                 return "/templates/editorSwitchRemove"
             case "dropDown":
                 return "/templates/editorSwitchDropDown"
+            case "dropDownMulti":
+                return "/templates/editorSwitchDropDownMulti"
             case "urlValue":
                 return "/templates/editorSwitchUrl"
             case "newValue":

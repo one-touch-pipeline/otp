@@ -70,22 +70,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>${g.message(code: "project.organizationalUnit")}</td>
-                    <td>${projectRequest.organizationalUnit}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.costCenter")}</td>
-                    <td>${projectRequest.costCenter}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.fundingBody")}</td>
-                    <td>${projectRequest.fundingBody}</td>
-                </tr>
-                <tr>
-                    <td>${g.message(code: "project.grantId")}</td>
-                    <td>${projectRequest.grantId}</td>
-                </tr>
-                <tr>
                     <td>${g.message(code: "project.endDate")}</td>
                     <td>${projectRequest.endDate}</td>
                 </tr>
@@ -105,7 +89,7 @@
                 --}%
                 <tr>
                     <td>${g.message(code: "project.speciesWithStrain")}</td>
-                    <td>${projectRequest.speciesWithStrain ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrain]) : ""}</td>
+                    <td>${projectRequest.speciesWithStrains ?: projectRequest.customSpeciesWithStrain ? g.message(code: "project.speciesWithStrain.custom", args: [projectRequest.customSpeciesWithStrains]) : ""}</td>
                 </tr>
                 <tr>
                     <td>${g.message(code: "projectRequest.sequencingCenter")}</td>

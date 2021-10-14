@@ -24,16 +24,18 @@ package de.dkfz.tbi.otp
 import grails.converters.JSON
 import grails.validation.Validateable
 import grails.validation.ValidationException
+import groovy.util.logging.Slf4j
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 
+@Slf4j
 trait CheckAndCall {
 
     /**
      * Catch default errors for the input command and the method processing. Return default error messages and default HTTP status codes.
      * @param cmd Validateable input command
      * @param method closure method with the main logic
-     * @return http error messae in case of an error
+     * @return http error message in case of an error
      */
     def checkDefaultErrorsAndCallMethod(Validateable cmd, Closure method) {
         if (cmd.hasErrors()) {

@@ -356,6 +356,56 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     }
 
+    $("div.edit-switch-multi-drop-down p.edit-switch-editor button.save").on("click", function () {saveMultiDropDownOptions($(this))});
+
+    /**
+     * Save data of multi drop down editor switch.
+     */
+    function saveMultiDropDownOptions (that) {
+        "use strict";
+        let container, outerContainer;
+        container = that.parent();
+        outerContainer = container.parent();
+
+        let confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
+        if (confirmationText) {
+            let confirmed = confirm(confirmationText);
+            if (!confirmed) {
+                return
+            }
+        }
+
+        let values = [];
+        const selectOptions = container.find('select option:selected').toArray();
+
+        selectOptions.forEach((option) => {
+            values.push(option.value);
+        });
+
+        $.ajax({
+            url: $("input:hidden[name=target]", container).val(),
+            contentType: "application/x-www-form-urlencoded",
+            dataType: "*",
+            type: "POST",
+            data: {
+                selectedValues: JSON.stringify(values)
+            },
+            success: function () {
+                success("Success", "Data stored successfully");
+                $("p.edit-switch-label span", outerContainer).text($("select option:selected", container).text());
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    failure("Request failed", jqXHR.responseJSON.message);
+                } else {
+                    failure(textStatus + " occurred while processing the data", "Reason: " + errorThrown);
+                }
+            }
+        });
+        $("p.edit-switch-editor", outerContainer).hide();
+        $("p.edit-switch-label", outerContainer).show();
+    }
+
     $("div.edit-switch-date p.edit-switch-editor button.save").on("click", function () {
         "use strict";
         var container, outerContainer;

@@ -558,6 +558,8 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2021/otp-1063.sql')
     }
 
+    include file: 'changelogs/2021/otp-1136-project-request-changes.groovy'
+
     changeSet(author: "sunakshi", id: "otp-1108-update-strain.sql") {
         sqlFile(path: 'changelogs/2021/otp-1108-update-strain.sql')
     }

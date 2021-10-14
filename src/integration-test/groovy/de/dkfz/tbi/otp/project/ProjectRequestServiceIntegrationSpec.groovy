@@ -190,7 +190,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand(
                 name              : "name",
                 description       : "description",
-                organizationalUnit: "ou",
                 projectType       : Project.ProjectType.SEQUENCING,
                 users             : [
                         null, // null objects should be disregarded
@@ -240,7 +239,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand(
                 name              : "name",
                 description       : "description",
-                organizationalUnit: "ou",
                 projectType       : Project.ProjectType.SEQUENCING,
                 users             : [
                         new ProjectRequestUserCommand(

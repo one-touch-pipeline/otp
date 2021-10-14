@@ -78,8 +78,13 @@
             </tr>
             <tr>
                 <td><label for="name">${g.message(code: "project.name")}*</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.name.detail")}"></td>
-                <td><input name="name" id="name" value="${source.getByFieldName("name")}" required/></td>
+                <td class="help" title="${projectNameDescription ?: g.message(code: "projectRequest.name.detail")}"></td>
+                <g:if test="${projectNamePattern}">
+                    <td><input name="name" id="name" value="${source.getByFieldName("name")}" title="${projectNameDescription}" pattern=${projectNamePattern} required/></td>
+                </g:if>
+                <g:else>
+                    <td><input name="name" id="name" value="${source.getByFieldName("name")}" required/></td>
+                </g:else>
             </tr>
             <tr>
                 <td><label for="description">${g.message(code: "project.description")}*</label></td>
@@ -91,7 +96,7 @@
                 <td><label for="keyword">${g.message(code: "project.keywords")}*</label></td>
                 <td class="help" title="${g.message(code: "projectRequest.keywords.detail")}"></td>
                 <td class="multi-input-field">
-                    <g:each in="${source.getByFieldName("keywords")?.sort()}" var="keyword" status="i">
+                    <g:each in="${source.getByFieldName("keywords")?.sort() ?: [null]}" var="keyword" status="i">
                         <div class="field">
                             <input list="keywordList" name="keywords" id="keyword" type="text" value="${keyword}" required>
                             <g:if test="${i == 0}">
@@ -108,26 +113,6 @@
                         </g:each>
                     </datalist>
                 </td>
-            </tr>
-            <tr>
-                <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}*</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.organizationalUnit.detail")}"></td>
-                <td><input name="organizationalUnit" id="organizationalUnit" value="${source.getByFieldName("organizationalUnit")}" required/></td>
-            </tr>
-            <tr>
-                <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
-                <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
-                <td><input name="costCenter" id="costCenter" value="${source.getByFieldName("costCenter")}"/></td>
-            </tr>
-            <tr>
-                <td><label for="fundingBody">${g.message(code: "project.fundingBody")}</label></td>
-                <td></td>
-                <td><input name="fundingBody" id="fundingBody" value="${source.getByFieldName("fundingBody")}"/></td>
-            </tr>
-            <tr>
-                <td><label for="grantId">${g.message(code: "project.grantId")}</label></td>
-                <td></td>
-                <td><input name="grantId" id="grantId" value="${source.getByFieldName("grantId")}"/></td>
             </tr>
             <tr>
                 <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
@@ -163,32 +148,27 @@
             --}%
             <tr>
                 <g:set var="customSpeciesWithStrain" value="${source.getByFieldName("customSpeciesWithStrain")}"/>
-                <g:if test="${(source.getByFieldName("projectType") == Project.ProjectType.SEQUENCING)}">
-                    <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}*</label></td>
-                    <td class="help" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></td>
-                    <td>
-                        <g:select id="speciesWithStrain" name="speciesWithStrain.id" class="use-select-2"
-                                  from="${species}"
-                                  value="${customSpeciesWithStrain ? "other" : (source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}"
-                                  optionKey="id" optionValue="displayString"
-                                  noSelection="${['': 'Please select']}" required="true"/>
-                        <br>
-                        <input name="customSpeciesWithStrain" id="customSpeciesWithStrain" value="${customSpeciesWithStrain}" type="text" disabled/>
-                    </td>
-                </g:if>
-                <g:else>
-                    <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}</label></td>
-                    <td class="help" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></td>
-                    <td>
-                        <g:select id="speciesWithStrain" name="speciesWithStrain.id" class="use-select-2"
-                                  from="${species}"
-                                  value="${customSpeciesWithStrain ? "other" : (source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}"
-                                  optionKey="id" optionValue="displayString"
-                                  noSelection="${['': 'None']}"/>
-                        <br>
-                        <input name="customSpeciesWithStrain" id="customSpeciesWithStrain" value="${customSpeciesWithStrain}" type="text" disabled/>
-                    </td>
-                </g:else>
+                <td>${g.message(code: "project.speciesWithStrain")}</td>
+                <td class="help" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></td>
+                <td class="multi-input-field">
+                    <g:each in="${source.getByFieldName("speciesWithStrains") ?: [null]}" var="specie" status="i">
+                        <div class="field">
+                            <g:select id="speciesWithStrains[${i}].id" name="speciesWithStrains.id" class="use-select-2"
+                                      from="${species}"
+                                      value="${customSpeciesWithStrain ? "other" : specie?.id}"
+                                      optionKey="id" optionValue="displayString"
+                                      noSelection="${["": 'Please Select']}" />
+                            <g:if test="${i == 0}">
+                                <button class="add-field">+</button>
+                            </g:if>
+                            <g:else>
+                                <button class="remove-field">-</button>
+                            </g:else>
+                        </div>
+                    </g:each>
+                    <br>
+                    <input name="customSpeciesWithStrain" id="customSpeciesWithStrain" value="${customSpeciesWithStrain}" type="text" disabled style="display:none"/>
+                </td>
             </tr>
             <tr>
                 <td><label for="sequencingCenter">${g.message(code: "projectRequest.sequencingCenter")}</label></td>
@@ -217,11 +197,10 @@
                     <td class="multi-input-field">
                         <g:each in="${source.getByFieldName("seqTypes") ?: [null]}" var="seqType" status="i">
                             <div class="field">
-                                <g:select id="" name="seqType.id" class="use-select-2"
+                                <g:select id="seqTypes[${i}].id" name="seqTypes.id" class="use-select-2"
                                           from="${seqTypes}" value="${seqType?.id ?: ""}"
                                           optionKey="id" optionValue="displayNameWithLibraryLayout"
-                                          required="true"
-                                          noSelection="${["": "Please select"]}"/>
+                                          noSelection="${["": "None"]}"/>
                                 <g:if test="${i == 0}">
                                     <button class="add-field">+</button>
                                 </g:if>
@@ -238,7 +217,7 @@
                     <td class="multi-input-field">
                         <g:each in="${source.getByFieldName("seqTypes") ?: [null]}" var="seqType" status="i">
                             <div class="field">
-                                <g:select id="" name="seqType.id" class="use-select-2"
+                                <g:select id="seqTypes[${i}].id" name="seqTypes.id" class="use-select-2"
                                           from="${seqTypes}" value="${seqType?.id ?: ""}"
                                           optionKey="id" optionValue="displayNameWithLibraryLayout"
                                           noSelection="${["": "None"]}"/>

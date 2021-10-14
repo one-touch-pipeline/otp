@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.project.exception.unixGroup.*
@@ -180,16 +181,12 @@ class ProjectService {
                 sampleIdentifierParserBeanName: projectParams.sampleIdentifierParserBeanName,
                 description                   : projectParams.description,
                 unixGroup                     : projectParams.unixGroup,
-                costCenter                    : projectParams.costCenter,
                 tumorEntity                   : projectParams.tumorEntity,
-                speciesWithStrain             : projectParams.speciesWithStrain,
+                speciesWithStrains            : projectParams.speciesWithStrains as Set,
                 endDate                       : projectParams.endDate,
                 keywords                      : projectParams.keywords,
                 relatedProjects               : projectParams.relatedProjects,
                 internalNotes                 : projectParams.internalNotes,
-                organizationalUnit            : projectParams.organizationalUnit,
-                fundingBody                   : projectParams.fundingBody,
-                grantId                       : projectParams.grantId,
                 publiclyAvailable             : projectParams.publiclyAvailable,
                 projectRequestAvailable       : projectParams.projectRequestAvailable,
         ])
@@ -403,7 +400,6 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     <T> void updateProjectField(T fieldValue, String fieldName, Project project) {
         assert fieldName && [
-                "costCenter",
                 "description",
                 "dirAnalysis",
                 "nameInMetadataFiles",
@@ -414,20 +410,28 @@ class ProjectService {
                 "qcThresholdHandling",
                 "unixGroup",
                 "forceCopyFiles",
-                "speciesWithStrain",
+                "speciesWithStrains",
                 "publiclyAvailable",
                 "closed",
                 "projectRequestAvailable",
                 "individualPrefix",
                 "projectType",
                 "relatedProjects",
-                "organizationalUnit",
-                "fundingBody",
-                "grantId",
                 "internalNotes",
         ].contains(fieldName)
 
-        project."${fieldName}" = fieldValue
+        if (fieldName == 'speciesWithStrains') {
+            project.speciesWithStrains.clear()
+            project.save()
+            fieldValue.each { String it ->
+                if (it) {
+                    project.speciesWithStrains.add(SpeciesWithStrain.get(Long.valueOf(it)))
+                }
+            }
+        } else {
+            project."${fieldName}" = fieldValue
+        }
+
         project.save()
 
         if (fieldName == 'relatedProjects' && project.relatedProjects) {

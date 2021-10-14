@@ -36,20 +36,13 @@ trait ProjectPropertiesGivenWithRequest {
     String name
     String description
 
-    /** This attribute is used externally. Please discuss a change in the team */
-    String organizationalUnit
-    /** This attribute is used externally. Please discuss a change in the team */
-    String costCenter
-
     LocalDate endDate
     LocalDate storageUntil
 
     String relatedProjects
     TumorEntity tumorEntity
-    SpeciesWithStrain speciesWithStrain
+    Set<SpeciesWithStrain> speciesWithStrains = [] as Set
 
     Project.ProjectType projectType
 
-    String fundingBody
-    String grantId
 }

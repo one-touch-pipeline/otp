@@ -25,6 +25,7 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsdata.ProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
@@ -77,20 +78,15 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
             }
         }
         description blank: false
-        organizationalUnit blank: false
-
-        costCenter nullable: true
         endDate nullable: true
         storageUntil nullable: true
         relatedProjects nullable: true
         tumorEntity nullable: true
-        speciesWithStrain nullable: true
+        speciesWithStrains nullable: true
         customSpeciesWithStrain nullable: true
         sequencingCenter nullable: true
         approxNoOfSamples nullable: true
         comments nullable: true
-        fundingBody nullable: true
-        grantId nullable: true
 
         users validator: { val, obj ->
             List<ProjectRequestUser> value = val?.toList()?.findAll() ?: []
@@ -106,9 +102,10 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     }
 
     static hasMany = [
-            seqTypes     : SeqType,
-            users        : ProjectRequestUser,
-            projectFields: AbstractFieldValue,
+            seqTypes          : SeqType,
+            users             : ProjectRequestUser,
+            projectFields     : AbstractFieldValue,
+            speciesWithStrains: SpeciesWithStrain,
     ]
 
     static mapping = {

@@ -29,6 +29,8 @@ import groovy.transform.TupleConstructor
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
@@ -62,6 +64,7 @@ class ProjectRequestController {
     private static final String ACTION_CHECK = "check"
     private static final String ACTION_VIEW = "view"
 
+    ProcessingOptionService processingOptionService
     ProjectRequestService projectRequestService
     SecurityService securityService
 
@@ -80,14 +83,16 @@ class ProjectRequestController {
 
     def index(Long id) {
         ProjectRequest projectRequest = projectRequestService.get(id)
+        String projectNamePattern = processingOptionService.findOptionAsString(ProcessingOption.OptionName.REGEX_PROJECT_NAME_NEW_PROJECT_REQUEST)
+        String projectNameDescription = processingOptionService.findOptionAsString(ProcessingOption.OptionName.DESCRIPTION_PROJECT_NAME_NEW_PROJECT_REQUEST)
         ProjectRequestUser requester = new ProjectRequestUser()
         requester.user = securityService.currentUserAsUser
         Map<String, ?> defaults = [
-                keywords         : [""],
-                seqTypes         : [null],
-                users            : [requester] as Set,
-                speciesWithStrain: [id: null],
-                projectType      : Project.ProjectType.SEQUENCING,
+                keywords          : [""],
+                seqTypes          : [null],
+                users             : [requester] as Set,
+                speciesWithStrains: [],
+                projectType       : Project.ProjectType.SEQUENCING,
         ]
 
         Map<String, ?> projectRequestHelper = [:]
@@ -106,18 +111,20 @@ class ProjectRequestController {
                 .getByFieldName("projectType") as Project.ProjectType, ProjectPageType.PROJECT_REQUEST)
 
         return sharedModel + [
-                cmd                 : flash.cmd as ProjectRequestCreationCommand,
-                projectRequestToEdit: projectRequest,
-                projectTypes        : Project.ProjectType.values(),
-                storagePeriods      : StoragePeriod.values(),
-                tumorEntities       : TumorEntity.listOrderByName(),
-                species             : SpeciesWithStrain.all.sort { it.displayString } + [id: "other", displayString: "Other(s)"],
-                keywords            : Keyword.listOrderByName(),
-                seqTypes            : SeqType.all.sort { it.displayNameWithLibraryLayout },
-                availableRoles      : ProjectRole.findAll(),
-                source              : multiObjectValueSource,
-                abstractFields      : fieldDefinitions,
-                abstractValues      : abstractValues,
+                projectNamePattern    : projectNamePattern,
+                projectNameDescription: projectNameDescription,
+                cmd                   : flash.cmd as ProjectRequestCreationCommand,
+                projectRequestToEdit  : projectRequest,
+                projectTypes          : Project.ProjectType.values(),
+                storagePeriods        : StoragePeriod.values(),
+                tumorEntities         : TumorEntity.listOrderByName(),
+                species               : SpeciesWithStrain.all.sort { it.displayString } + [id: "other", displayString: "Other(s)"],
+                keywords              : Keyword.listOrderByName(),
+                seqTypes              : SeqType.all.sort { it.displayNameWithLibraryLayout },
+                availableRoles        : ProjectRole.findAll(),
+                source                : multiObjectValueSource,
+                abstractFields        : fieldDefinitions,
+                abstractValues        : abstractValues,
         ]
     }
 
@@ -299,28 +306,25 @@ class ProjectRequestCreationCommand {
         return ids.findAll()
     })
     List<String> keywords
-    String organizationalUnit
-    String costCenter
-    String fundingBody
-    String grantId
     LocalDate endDate
     StoragePeriod storagePeriod
     LocalDate storageUntil
     String relatedProjects
     TumorEntity tumorEntity
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
-        String id = source['speciesWithStrain']?.id
-        return id?.isLong() ? SpeciesWithStrain.get(id as Long) : null
+        Object id = source['speciesWithStrains'].id
+        List<Long> ids = id instanceof String[] ? id : [id]
+        return ids.collect { SpeciesWithStrain.get(it) }.findAll()
     })
-    SpeciesWithStrain speciesWithStrain
+    List<SpeciesWithStrain> speciesWithStrains = []
     String customSpeciesWithStrain
     Project.ProjectType projectType
     String sequencingCenter
     Integer approxNoOfSamples
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['seqTypes']?.id
-        List<String> ids = id instanceof String[] ? id : [id]
-        return ids.collect { it?.isLong() ? SeqType.get(it as Long) : null }.findAll()
+        List<Long> ids = id instanceof String[] ? id : [id]
+        return ids.collect { SeqType.get(it) }.findAll()
     })
     List<SeqType> seqTypes = []
     String comments
@@ -338,10 +342,6 @@ class ProjectRequestCreationCommand {
                 return "empty"
             }
         }
-        organizationalUnit blank: false
-        costCenter nullable: true, blank: false
-        fundingBody nullable: true, blank: false
-        grantId nullable: true, blank: false
         endDate nullable: true
         storageUntil nullable: true, validator: { val, obj ->
             if (obj.storagePeriod == StoragePeriod.USER_DEFINED && !val) {
@@ -350,7 +350,6 @@ class ProjectRequestCreationCommand {
         }
         relatedProjects nullable: true, blank: false
         tumorEntity nullable: true
-        speciesWithStrain nullable: true
         customSpeciesWithStrain nullable: true
         sequencingCenter nullable: true, blank: false
         approxNoOfSamples nullable: true
@@ -368,18 +367,6 @@ class ProjectRequestCreationCommand {
                 return "projectRequest.users.unique"
             }
         }
-    }
-
-    void setCostCenter(String s) {
-        costCenter = StringUtils.blankToNull(s)
-    }
-
-    void setFundingBody(String s) {
-        fundingBody = StringUtils.blankToNull(s)
-    }
-
-    void setGrantId(String s) {
-        grantId = StringUtils.blankToNull(s)
     }
 
     void setRelatedProjects(String s) {

@@ -33,7 +33,7 @@ $(function () {
 
     // hide and show the textbox to provide a custom SpeciesWithStrain
     var customSpecies = $("input#customSpeciesWithStrain");
-    $("select#speciesWithStrain").on("change", function (e) {
+    $("select#speciesWithStrains").on("change", function (e) {
         if ($(e.target).val() === "other") {
             customSpecies.show();
             customSpecies.prop("disabled", false);

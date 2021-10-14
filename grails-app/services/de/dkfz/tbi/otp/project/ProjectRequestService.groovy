@@ -129,27 +129,21 @@ class ProjectRequestService {
 
     ProjectRequest create(ProjectRequestCreationCommand cmd) throws SwitchedUserDeniedException {
         securityService.ensureNotSwitchedUser()
-
         ProjectRequest req = new ProjectRequest(
                 name: cmd.name,
                 description: cmd.description,
                 keywords: cmd.keywords as Set,
-                organizationalUnit: cmd.organizationalUnit,
-                costCenter: cmd.costCenter,
-                grantId: cmd.grantId,
-                fundingBody: cmd.fundingBody,
                 endDate: cmd.endDate,
                 storageUntil: resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
                 relatedProjects: cmd.relatedProjects,
                 tumorEntity: cmd.tumorEntity,
-                speciesWithStrain: cmd.speciesWithStrain,
+                speciesWithStrains: cmd.speciesWithStrains as Set,
                 customSpeciesWithStrain: cmd.customSpeciesWithStrain,
                 projectType: cmd.projectType,
                 sequencingCenter: cmd.sequencingCenter,
                 approxNoOfSamples: cmd.approxNoOfSamples,
-                seqTypes: cmd.seqTypes,
+                seqTypes: cmd.seqTypes as Set,
                 comments: cmd.comments,
-
                 requester: securityService.currentUserAsUser,
                 users: projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users),
         )
@@ -176,20 +170,16 @@ class ProjectRequestService {
             name = cmd.name
             description = cmd.description
             keywords = cmd.keywords as Set
-            organizationalUnit = cmd.organizationalUnit
-            costCenter = cmd.costCenter
-            grantId = cmd.grantId
-            fundingBody = cmd.fundingBody
             endDate = cmd.endDate
             storageUntil = resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil)
             relatedProjects = cmd.relatedProjects
             tumorEntity = cmd.tumorEntity
-            speciesWithStrain = cmd.speciesWithStrain
+            speciesWithStrains = cmd.speciesWithStrains as Set
             customSpeciesWithStrain = cmd.customSpeciesWithStrain
             projectType = cmd.projectType
             sequencingCenter = cmd.sequencingCenter
             approxNoOfSamples = cmd.approxNoOfSamples
-            seqTypes = cmd.seqTypes
+            seqTypes = cmd.seqTypes as Set
             comments = cmd.comments
 
             users = projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users)

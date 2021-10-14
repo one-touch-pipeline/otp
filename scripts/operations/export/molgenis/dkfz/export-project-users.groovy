@@ -41,8 +41,8 @@ class ExportHelper {
                     { User user -> return ["id", "username", "realName", "email", "enabled"].collect { user."$it" } },
             ),
             (Project)        : new ExportHelper(
-                    { return ["id", "name", "individualPrefix", "dirName", "unixGroup", "costCenter", "organizationalUnit", "description"] },
-                    { Project project -> return ["id", "name", "individualPrefix", "dirName", "unixGroup", "costCenter", "organizationalUnit", "description"].collect { project."$it" } },
+                    { return ["id", "name", "individualPrefix", "dirName", "unixGroup", "description"] },
+                    { Project project -> return ["id", "name", "individualPrefix", "dirName", "unixGroup", "description"].collect { project."$it" } },
             ),
             (UserProjectRole): new ExportHelper(
                     { return ["id", "project id", "project name", "user id", "user name", "role id", "role name"] },

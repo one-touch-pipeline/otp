@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.project
 
 import de.dkfz.tbi.otp.CommentableWithProject
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -113,10 +114,11 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     QcThresholdHandling qcThresholdHandling
 
     static hasMany = [
-            projectInfos : ProjectInfo,
+            speciesWithStrains    : SpeciesWithStrain,
+            projectInfos          : ProjectInfo,
             dataTransferAgreements: DataTransferAgreement,
-            keywords     : Keyword,
-            projectFields: AbstractFieldValue,
+            keywords              : Keyword,
+            projectFields         : AbstractFieldValue,
     ]
 
     static belongsTo = [
@@ -169,15 +171,10 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
         comment nullable: true
         description nullable: true
-        costCenter nullable: true
         tumorEntity nullable: true
-        speciesWithStrain nullable: true
         endDate nullable: true
-        organizationalUnit nullable: true
         relatedProjects nullable: true
         internalNotes nullable: true
-        fundingBody nullable: true
-        grantId nullable: true
         storageUntil nullable: true
     }
 

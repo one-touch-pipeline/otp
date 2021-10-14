@@ -574,6 +574,16 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "FASTQ_FILE, PROJECT, SAMPLE_NAME, SEQUENCING_TYPE", TypeValidators.SINGLE_LINE_TEXT
         ),
 
+        REGEX_PROJECT_NAME_NEW_PROJECT_REQUEST(
+                "Regex for project name",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT
+        ),
+
+        DESCRIPTION_PROJECT_NAME_NEW_PROJECT_REQUEST(
+                "Description for project name",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+
         private final String description
         private final Necessity necessity
         private final String defaultValue
