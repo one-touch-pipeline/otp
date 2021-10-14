@@ -57,6 +57,8 @@ class FastqcDecider implements Decider {
         }.findAll()
     }
 
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     private List<WorkflowArtefact> decideEach(WorkflowArtefact inputArtefact, Workflow workflow, boolean forceRun = false) {
         if (inputArtefact.artefactType != ArtefactType.FASTQ) {
             return []
@@ -94,7 +96,7 @@ class FastqcDecider implements Decider {
                 workflowRun: run,
                 role: FastqcWorkflow.INPUT_FASTQ,
                 workflowArtefact: inputArtefact,
-        ).save()
+        ).save(flush: false)
 
         List<WorkflowArtefact> result = []
 
@@ -104,11 +106,11 @@ class FastqcDecider implements Decider {
                     "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
                     artefactDisplayName,
-            )).save()
+            )).save(flush: false)
 
             FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findOrCreateWhere(dataFile: it)
             fastqcProcessedFile.workflowArtefact = workflowArtefact
-            fastqcProcessedFile.save()
+            fastqcProcessedFile.save(flush: false)
             result << workflowArtefact
         }
         return result

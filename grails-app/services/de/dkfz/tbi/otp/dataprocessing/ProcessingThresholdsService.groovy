@@ -67,7 +67,7 @@ class ProcessingThresholdsService {
     }
 
     /**
-     * Generate default thresholds for all seqTracks of a given list including of corresponding thresholds.
+     * Generate default unflushed thresholds for all seqTracks of a given list including of corresponding thresholds.
      *
      * Corresponding thresholds are thresholds for other sample types of the same individual and seqType.
      *
@@ -76,6 +76,8 @@ class ProcessingThresholdsService {
      * @param seqTracks with configured alignment
      * @return generated processing thresholds
      */
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingThresholds> generateDefaultThresholds(List<SeqTrack> seqTracks) {
         if (!seqTracks) {
@@ -120,7 +122,7 @@ class ProcessingThresholdsService {
                     sampleType   : it[1],
                     seqType      : it[2],
                     numberOfLanes: defaultNumberOfLanes,
-            ]).save()
+            ]).save(flush: false)
         }
 
         return generatedThresholds

@@ -45,7 +45,9 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.otp.utils.TransactionUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
@@ -133,11 +135,14 @@ class MetadataImportService {
         )
         if (context.spreadsheet) {
             Long hash = System.currentTimeMillis()
+            Long startTimeAll = System.currentTimeMillis()
             metadataValidators.each {
                 Long startTime = System.currentTimeMillis()
                 it.validate(context)
                 log.debug("finished ${it.getClass()} took ${System.currentTimeMillis() - startTime}ms validation started : ${hash}")
             }
+            log.debug("finished all ${metadataValidators.size()} validators for ${context.spreadsheet.dataRows.size()} lines took " +
+                    "${System.currentTimeMillis() - startTimeAll}ms validation started : ${hash}")
         }
         return context
     }
@@ -150,6 +155,7 @@ class MetadataImportService {
                                                             boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
                                                             boolean automaticNotification) {
         try {
+            Long startTime = System.currentTimeMillis()
             Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
                 return [(validate(pathWithMd5sum.path, directoryStructure)): pathWithMd5sum.md5sum]
             }
@@ -157,6 +163,8 @@ class MetadataImportService {
                 return importHelperMethod(context, align, FastqImportInstance.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
                         automaticNotification)
             }
+            int lines = results*.context*.spreadsheet*.dataRows*.size().sum() ?: 0
+            log.debug("finished validate and import took ${System.currentTimeMillis() - startTime}ms for ${lines}")
             return results
         } catch (Exception e) {
             if (!e.message.startsWith('Copying of metadata file')) {
@@ -328,34 +336,38 @@ class MetadataImportService {
         return false
     }
 
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode, String ticketNumber,
                                               String seqCenterComment, boolean automaticNotification) {
         Long timeImportStarted = System.currentTimeMillis()
         log.debug("import started ${context.metadataFile.fileName} ${timeImportStarted}")
-        FastqImportInstance fastqImportInstance = new FastqImportInstance(
-                otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
-                importMode: importMode,
-        )
 
+        FastqImportInstance fastqImportInstance
         MetaDataFile metaDataFile
+
         SessionUtils.manualFlush {
-            assert fastqImportInstance.save()
+            fastqImportInstance = new FastqImportInstance(
+                    otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
+                    importMode: importMode,
+            ).save(flush: false)
+
             Long timeStarted = System.currentTimeMillis()
-            log.debug("runs started")
+            log.debug("  import runs of file  ${context.metadataFile.fileName} started")
             importRuns(context, fastqImportInstance, context.spreadsheet.dataRows, align)
-            log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
+            log.debug("  import runs of file  ${context.metadataFile.fileName} stopped took: ${System.currentTimeMillis() - timeStarted}")
 
             fastqImportInstance.refresh()
 
             if (!DISABLE_ENTRY_TO_NEW_WORKFLOW_SYSTEM) {
                 Long timeCreateWorkflowRuns = System.currentTimeMillis()
-                log.debug("create workflow runs started")
+                log.debug("  create workflow runs started")
                 List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-                log.debug("create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
+                log.debug("  create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
                 Long timeDecider = System.currentTimeMillis()
-                log.debug("decider started")
+                log.debug("  decider started")
                 allDecider.decide(runs.collectMany { it.outputArtefacts*.value }, false)
-                log.debug("decider stopped took: ${System.currentTimeMillis() - timeDecider}")
+                log.debug("  decider stopped took: ${System.currentTimeMillis() - timeDecider}")
             }
 
             metaDataFile = new MetaDataFile(
@@ -365,14 +377,18 @@ class MetadataImportService {
                     fastqImportInstance: fastqImportInstance,
             )
         }
-        metaDataFile.save()
 
+        Long timeGeneratedThresholds = System.currentTimeMillis()
+        log.debug("  generatedThresholds started")
         List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.dataFiles*.seqTrack as List).unique())
         List<ProcessingThresholds> generatedThresholds = processingThresholdsService.generateDefaultThresholds(analysableSeqTracks)
-
         notifyAboutUnsetConfig(analysableSeqTracks, generatedThresholds, fastqImportInstance.otrsTicket)
+        log.debug("  generatedThresholds stopped took: ${System.currentTimeMillis() - timeGeneratedThresholds}")
 
-        log.debug("import stopped ${metaDataFile.fileName} ${timeImportStarted}: ${System.currentTimeMillis() - timeImportStarted}")
+        metaDataFile.save(flush: true)
+
+        log.debug("import stopped ${metaDataFile.fileName} (lines: ${context.spreadsheet.dataRows.size()}) ${timeImportStarted}: " +
+                "${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile
     }
 
@@ -426,21 +442,29 @@ class MetadataImportService {
         }
     }
 
+    //for permormance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForDeleteRule')
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows, boolean align) {
-        metadataFileRows.groupBy { it.getCellByColumnTitle(RUN_ID.name()).text }.each { String runName, List<Row> rows ->
+        Map<String, List<Row>> seqTrackPerRun =  metadataFileRows.groupBy {
+            it.getCellByColumnTitle(RUN_ID.name()).text
+        }
+        int amountOfRows = seqTrackPerRun.size()
+        seqTrackPerRun.eachWithIndex { String runName, List<Row> rows, int index ->
             Run run = getOrCreateRun(runName, rows)
 
             Long timeStarted = System.currentTimeMillis()
-            log.debug('seqTracks started')
+            log.debug("    seqTracks of run ${run.name} started ${index}/${amountOfRows}")
             importSeqTracks(context, fastqImportInstance, run, rows, align)
-            log.debug("seqTracks stopped took: ${System.currentTimeMillis() - timeStarted}")
+            log.debug("    seqTracks of run ${run.name} stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
 
         // Now that all rows are processed, we can clean up.
         // flush=false, because we don't care when it's cleaned up; it can just fade away together with the context.
-        context.usedSampleIdentifiers*.delete()
+        context.usedSampleIdentifiers*.delete(flush: false)
     }
 
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     protected Run getOrCreateRun(String runName, List<Row> rows) {
         SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME)))
         SeqPlatform seqPlatform = seqPlatformService.findSeqPlatform(
@@ -464,10 +488,12 @@ class MetadataImportService {
                 seqPlatform: seqPlatform,
                 dateExecuted: dateExecuted,
         )
-        newRun.save()
+        newRun.save(flush: false)
         return newRun
     }
 
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     private void importSeqTracks(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Run run, Collection<Row> runRows, boolean align) {
         Map<String, List<Row>> runsGroupedByLane = runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
@@ -507,7 +533,7 @@ class MetadataImportService {
                 ilseSubmission = IlseSubmission.findWhere(ilseNumber: Integer.parseInt(ilseNumber))
                 if (!ilseSubmission) {
                     ilseSubmission = new IlseSubmission(ilseNumber: Integer.parseInt(ilseNumber))
-                    ilseSubmission.save()
+                    ilseSubmission.save(flush: false)
                 }
             } else {
                 ilseSubmission = null
@@ -542,13 +568,13 @@ class MetadataImportService {
             }
 
             SeqTrack seqTrack = new SeqTrack(properties)
-            assert seqTrack.save()
+            seqTrack.save(flush: false)
 
             Long timeStarted = System.currentTimeMillis()
-            log.debug("dataFiles started ${index}/${amountOfRows}")
+            log.debug("      dataFiles of seqtrack ${seqTrack.laneId} started ${index}/${amountOfRows}")
             importDataFiles(context, fastqImportInstance, seqTrack, rows)
-            log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
-            assert seqTrack.save() //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
+            log.debug("      dataFiles of seqtrack ${seqTrack.laneId} stopped took: ${System.currentTimeMillis() - timeStarted}")
+            seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
             Collection<MergingWorkPackage> mergingWorkPackages = []
@@ -560,6 +586,8 @@ class MetadataImportService {
         }
     }
 
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     private static void importDataFiles(MetadataValidationContext context, FastqImportInstance fastqImportInstance, SeqTrack seqTrack,
                                         Collection<Row> seqTrackRows) {
         Map<String, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy {
@@ -594,7 +622,7 @@ class MetadataImportService {
                     seqTrack: seqTrack,
                     fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
             )
-            assert dataFile.save()
+            dataFile.save(flush: false)
 
             assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == new File(file.toString())
 
@@ -602,18 +630,20 @@ class MetadataImportService {
         }
     }
 
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     private static void importMetadataEntries(MetadataValidationContext context, DataFile dataFile, Row row) {
         for (Cell it : context.spreadsheet.header.cells) {
             MetaDataKey metaDataKey = MetaDataKey.findWhere(name: it.text)
             if (!metaDataKey) {
                 metaDataKey = new MetaDataKey(name: it.text)
-                metaDataKey.save()
+                metaDataKey.save(flush: true)
             }
-            assert new MetaDataEntry(
+            new MetaDataEntry(
                     dataFile: dataFile,
                     key: metaDataKey,
                     value: row.cells[it.columnIndex].text,
-            ).save()
+            ).save(flush: false)
         }
     }
 

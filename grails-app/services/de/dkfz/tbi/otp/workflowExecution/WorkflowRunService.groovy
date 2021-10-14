@@ -97,6 +97,8 @@ class WorkflowRunService {
      * @param configs The sorted configs used for this workflow
      * @return the created, saved but not flushed WorkflowRun
      */
+    //for performance we handle flushs manually
+    @SuppressWarnings('NoExplicitFlushForSaveRule')
     WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<String> displayNameLines,
                                  String shortName, List<ExternalWorkflowConfigFragment> configs = []) {
         String combinedConfig = configFragmentService.mergeSortedFragments(configs)
@@ -115,7 +117,7 @@ class WorkflowRunService {
                 workflow        : workflow,
                 displayName     : displayName,
                 shortDisplayName: shortName,
-        ]).save()
+        ]).save(flush: false)
     }
 
     /**
