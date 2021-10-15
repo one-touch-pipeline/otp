@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
 
@@ -249,6 +250,14 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update submission object all fine"() {
         given:
+        GroovyMock([global: true], SessionUtils)
+        _ * SessionUtils.manualFlush(_) >> { Closure closure ->
+            Realm.withSession { session ->
+                closure()
+                session.flush()
+            }
+        }
+
         EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
 

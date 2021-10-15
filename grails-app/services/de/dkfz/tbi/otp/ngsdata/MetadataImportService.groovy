@@ -442,7 +442,7 @@ class MetadataImportService {
         }
     }
 
-    //for permormance we handle flushs manually
+    //for performance we handle flushs manually
     @SuppressWarnings('NoExplicitFlushForDeleteRule')
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows, boolean align) {
         Map<String, List<Row>> seqTrackPerRun =  metadataFileRows.groupBy {
