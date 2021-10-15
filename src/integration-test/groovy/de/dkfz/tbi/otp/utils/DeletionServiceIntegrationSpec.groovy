@@ -25,6 +25,7 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -167,6 +168,72 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
         then:
         Run.count() == 1
+    }
+
+    void "deleteSeqTrack, delete non-blacklisted ilse that is not used by other seqTracks"() {
+        given:
+        setupData()
+        IlseSubmission ilseSubmission = createIlseSubmission(ilseNumber: 1234)
+        SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        seqTrack.ilseSubmission == null
+        IlseSubmission.count() == 0
+    }
+
+    void "deleteSeqTrack, don't delete non-blacklisted ilse that is used by other seqTracks"() {
+        given:
+        setupData()
+        IlseSubmission ilseSubmission = createIlseSubmission(ilseNumber: 1234)
+        SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
+        createSeqTrack(ilseSubmission: ilseSubmission)
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        seqTrack.ilseSubmission == null
+        IlseSubmission.count() == 1
+    }
+
+    void "deleteSeqTrack, don't delete ilse that is blacklisted that is not used by other seqTracks"() {
+        given:
+        setupData()
+        IlseSubmission ilseSubmission = createIlseSubmission(ilseNumber: 1234)
+        ilseSubmission.warning = true
+        ilseSubmission.comment = new Comment(author: "user", comment: "test", modificationDate: new Date())
+        ilseSubmission.save()
+
+        SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        seqTrack.ilseSubmission == null
+        IlseSubmission.count() == 1
+    }
+
+    void "deleteSeqTrack, don't delete ilse that is blacklisted that is used by other seqTracks"() {
+        given:
+        setupData()
+        IlseSubmission ilseSubmission = createIlseSubmission(ilseNumber: 1234)
+        ilseSubmission.warning = true
+        ilseSubmission.comment = new Comment(author: "user", comment: "test", modificationDate: new Date())
+        ilseSubmission.save()
+
+        SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
+        createSeqTrack(ilseSubmission: ilseSubmission)
+
+        when:
+        deletionService.deleteSeqTrack(seqTrack)
+
+        then:
+        seqTrack.ilseSubmission == null
+        IlseSubmission.count() == 1
     }
 
     void "deleteProjectContent without any content"() {

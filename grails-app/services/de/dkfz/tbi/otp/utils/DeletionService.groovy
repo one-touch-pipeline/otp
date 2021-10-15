@@ -296,7 +296,7 @@ class DeletionService {
      * !! Be aware that the run information, alignmentLog information, mergingLog information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
+    List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
         List<File> dirsToDelete = []
 
@@ -309,6 +309,17 @@ class DeletionService {
 
         if (dataFiles) {
             ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete()
+        }
+
+        //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
+        IlseSubmission ilseSubmission = seqTrack.ilseSubmission
+        List<SeqTrack> otherSeqTracks = SeqTrack.findAllByIlseSubmission(ilseSubmission)
+        seqTrack.ilseSubmission = null
+        seqTrack.save()
+        if (otherSeqTracks.size() == 1 && ilseSubmission) {
+            if (!ilseSubmission.warning) {
+                ilseSubmission.delete()
+            }
         }
 
         // for ProcessedMergedBamFiles
