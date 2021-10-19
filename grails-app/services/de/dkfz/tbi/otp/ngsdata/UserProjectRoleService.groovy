@@ -237,7 +237,7 @@ class UserProjectRoleService {
         List<Role> administrativeRoles = Role.findAllByAuthorityInList(Role.ADMINISTRATIVE_ROLES)
 
         boolean userIsSubmitter = projectRoleNames.any { it == ProjectRole.Basic.SUBMITTER.name() }
-        boolean executingUserIsAdministrativeUser = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRoleInList(executingUser, administrativeRoles))
+        boolean executingUserIsAdministrativeUser = UserRole.findAllByUserAndRoleInList(executingUser, administrativeRoles)
 
         String subject = messageSourceService.createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
         String body
