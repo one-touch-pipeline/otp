@@ -77,7 +77,7 @@ class RoddyPanCanConfigTemplate {
                 """
         }
 
-        if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
+        if (panCanAlignmentConfiguration.mergeTool == MergeTool.SAMBAMBA.name) {
             additional += """
                 <!-- Merging and Markdup version of sambamba -->
                 <cvalue name="SAMBAMBA_MARKDUP_VERSION" value="${panCanAlignmentConfiguration.sambambaVersion}" type="string"

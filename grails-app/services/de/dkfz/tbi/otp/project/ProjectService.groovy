@@ -473,8 +473,8 @@ class ProjectService {
 
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(panCanAlignmentConfiguration.referenceGenome))
 
-        assert panCanAlignmentConfiguration.mergeTool in MergeConstants.ALL_MERGE_TOOLS:
-                "Invalid merge tool: '${panCanAlignmentConfiguration.mergeTool}', possible values: ${MergeConstants.ALL_MERGE_TOOLS}"
+        assert panCanAlignmentConfiguration.mergeTool in MergeTool.ALL_MERGE_TOOLS*.name:
+                "Invalid merge tool: '${panCanAlignmentConfiguration.mergeTool}', possible values: ${MergeTool.ALL_MERGE_TOOLS*.name}"
 
         assert OtpPathValidator.isValidPathComponent(panCanAlignmentConfiguration.pluginName):
                 "pluginName '${panCanAlignmentConfiguration.pluginName}' is an invalid path component"
@@ -495,7 +495,7 @@ class ProjectService {
         if (panCanAlignmentConfiguration.seqType.chipSeq) {
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
-        if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
+        if (panCanAlignmentConfiguration.mergeTool == MergeTool.SAMBAMBA.name) {
             List<String> allSambambaVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE)
             assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions:
                     "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
@@ -503,7 +503,7 @@ class ProjectService {
 
         //Reference genomes with PHIX_INFIX only works with sambamba
         if (referenceGenome.name.contains(PHIX_INFIX)) {
-            assert panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA: "Only sambamba supported for reference genome with Phix"
+            assert panCanAlignmentConfiguration.mergeTool == MergeTool.SAMBAMBA.name: "Only sambamba supported for reference genome with Phix"
         }
 
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome)

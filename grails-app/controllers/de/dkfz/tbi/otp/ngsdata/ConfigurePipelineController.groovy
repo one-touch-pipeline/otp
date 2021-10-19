@@ -75,8 +75,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         assert allSambambaVersions.contains(defaultSambambaVersion)
         assert allBwaMemVersions.contains(defaultBwaMemVersion)
-        assert MergeConstants.ALL_MERGE_TOOLS.contains(defaultMergeTool)
-        assert MergeConstants.ALL_MERGE_TOOLS.containsAll(allMergeTools)
+        assert defaultMergeTool in MergeTool.ALL_MERGE_TOOLS*.name
+        assert MergeTool.ALL_MERGE_TOOLS*.name.containsAll(allMergeTools)
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
         Map result = [:]
@@ -393,7 +393,7 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
             obj.seqType.isWgbs() ? true : val != null
         })
         sambambaVersion(nullable: true, validator: { val, obj ->
-            obj.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA ? val != null : true
+            obj.mergeTool == MergeTool.SAMBAMBA.name ? val != null : true
         })
     }
 }

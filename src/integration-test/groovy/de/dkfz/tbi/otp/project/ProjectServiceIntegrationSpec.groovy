@@ -1011,7 +1011,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
-                mergeTool: MergeConstants.MERGE_TOOL_SAMBAMBA,
+                mergeTool: MergeTool.SAMBAMBA.name,
                 sambambaVersion: 'invalidSambambaVersion',
         )
 
@@ -1044,7 +1044,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         exception.message ==~ /Only sambamba supported for reference genome with Phix.*/
 
         where:
-        tool << [MergeConstants.MERGE_TOOL_PICARD, MergeConstants.MERGE_TOOL_BIOBAMBAM]
+        tool << [MergeTool.PICARD, MergeTool.BIOBAMBAM]*.name
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid configVersion input"() {
@@ -1911,7 +1911,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 statSizeFileName     : 'testStatSizeFileName.tab',
                 bwaMemVersion        : "bwa-mem",
                 sambambaVersion      : "sambamba",
-                mergeTool            : MergeConstants.MERGE_TOOL_PICARD,
+                mergeTool            : MergeTool.PICARD.name,
                 pluginName           : 'plugin',
                 programVersion       : '1.2.3',
                 baseProjectConfig    : 'baseConfig',

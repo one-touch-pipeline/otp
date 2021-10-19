@@ -108,20 +108,20 @@ class AlignmentInfoService {
         // Default empty
         merge.options = ''
 
-        String tool = getMergingTool(res, seqType)
+        MergeTool tool = getMergeTool(res, seqType)
         switch (tool) {
-            case MergeConstants.MERGE_TOOL_BIOBAMBAM:
+            case MergeTool.BIOBAMBAM:
                 merge.command = res.get("BIOBAMBAM_VERSION") ? "Biobambam bammarkduplicates Version ${res.get("BIOBAMBAM_VERSION")}" : ""
                 merge.options = res.get("mergeAndRemoveDuplicates_argumentList")
                 break
-            case MergeConstants.MERGE_TOOL_PICARD:
+            case MergeTool.PICARD:
                 merge.command = res.get("PICARD_VERSION") ? "Picard Version ${res.get("PICARD_VERSION")}" : ""
                 break
-            case MergeConstants.MERGE_TOOL_SAMBAMBA:
+            case MergeTool.SAMBAMBA:
                 merge.command = res.get('SAMBAMBA_MARKDUP_VERSION') ? "Sambamba Version ${res.get('SAMBAMBA_MARKDUP_VERSION')}" : ""
                 merge.options = res.get('SAMBAMBA_MARKDUP_OPTS')
                 break
-            case MergeConstants.MERGE_TOOL_SAMBAMBA_RNA:
+            case MergeTool.SAMBAMBA_RNA:
                 merge.command = res.get('SAMBAMBA_VERSION') ? "Sambamba Version ${res.get('SAMBAMBA_VERSION')}" : ""
                 break
             default:
@@ -140,13 +140,13 @@ class AlignmentInfoService {
      * Generates and returns String that holds what Merging have to be done
      * @return String with the generated tool
      */
-    private String getMergingTool(Map<String, String> res, SeqType seqType) {
-        String tool = res.get('markDuplicatesVariant')
-
+    private MergeTool getMergeTool(Map<String, String> res, SeqType seqType) {
         if (seqType.isRna()) {
-            tool = MergeConstants.MERGE_TOOL_SAMBAMBA_RNA
+            return MergeTool.SAMBAMBA_RNA
         }
-        return tool ?: res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
+
+        String tool = res.get('markDuplicatesVariant')
+        return MergeTool.getByName(tool) ?: res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeTool.BIOBAMBAM : MergeTool.PICARD
     }
 
     /**

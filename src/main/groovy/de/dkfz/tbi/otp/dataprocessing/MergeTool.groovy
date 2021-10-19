@@ -21,19 +21,27 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-class MergeConstants {
+import groovy.transform.TupleConstructor
 
-    static final String MERGE_TOOL_PICARD = "picard"
+@TupleConstructor
+enum MergeTool {
 
-    static final String MERGE_TOOL_BIOBAMBAM = "biobambam"
+    PICARD("picard"),
+    BIOBAMBAM("biobambam"),
+    SAMBAMBA("sambamba"),
+    SAMBAMBA_RNA("sambamba_rna"),
 
-    static final String MERGE_TOOL_SAMBAMBA = "sambamba"
+    final String name
 
-    static final String MERGE_TOOL_SAMBAMBA_RNA = "sambamba_rna"
+    static MergeTool getByName(String name) {
+        return values().find {
+            it.name == name
+        }
+    }
 
-    static final List<String> ALL_MERGE_TOOLS = [
-            MERGE_TOOL_PICARD,
-            MERGE_TOOL_BIOBAMBAM,
-            MERGE_TOOL_SAMBAMBA,
+    static final List<MergeTool> ALL_MERGE_TOOLS = [
+            PICARD,
+            BIOBAMBAM,
+            SAMBAMBA,
     ].asImmutable()
 }

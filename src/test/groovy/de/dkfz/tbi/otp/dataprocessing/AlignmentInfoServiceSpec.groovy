@@ -72,7 +72,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
             1 * executeCommandReturnProcessOutput(_, _) >> {
                 new ProcessOutput("""
                     useAcceleratedHardware=${useConvey}
-                    markDuplicatesVariant=${mergeTool}
+                    markDuplicatesVariant=${mergeTool.name}
 
                     BWA_VERSION=1.0
                     BWA_MEM_OPTIONS=alnOpt
@@ -110,11 +110,11 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
 
         where:
-        useConvey | mergeTool                           || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
-        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_PICARD    || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'programVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'programVersion:1.1.0'
-        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
+        useConvey | mergeTool           || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
+        false     | MergeTool.BIOBAMBAM || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
+        false     | MergeTool.PICARD    || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'programVersion:1.1.0'
+        false     | MergeTool.SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'programVersion:1.1.0'
+        true      | MergeTool.BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
     }
 
     void "getRoddyAlignmentInformation, when rna, return alignment info with the correct data"() {
