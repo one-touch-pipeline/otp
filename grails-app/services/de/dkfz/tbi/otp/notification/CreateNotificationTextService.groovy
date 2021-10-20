@@ -233,15 +233,52 @@ class CreateNotificationTextService {
         }.join('\n')
 
         Collection<AbstractMergedBamFile> allGoodBamFiles = status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
-        Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = allGoodBamFiles*.alignmentConfig.unique().collectEntries {
-            [it, alignmentInfoService.getAlignmentInformationFromConfig(it)]
-        }
 
         String links = createOtpLinks(allGoodBamFiles*.project, 'alignmentQualityOverview', 'index')
 
         String directories = getMergingDirectories(allGoodBamFiles)
 
-        Map<Project, List<AbstractMergedBamFile>> bamFilesByProject = allGoodBamFiles.groupBy { it.project }
+        Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = allGoodBamFiles*.alignmentConfig.unique().collectEntries {
+            [it, alignmentInfoService.getAlignmentInformationFromConfig(it)]
+        }
+
+        String processingValues = alignmentInformationProcessingValuesOldSystem(allGoodBamFiles, alignmentInfoByConfig)
+
+        String message = messageSourceService.createMessage("notification.template.alignment.base", [
+                samples         : sampleNames,
+                links           : links,
+                cellRangerNote  : cellRangerAlignmentNotificationHelper(allGoodBamFiles.findAll { it instanceof SingleCellBamFile } as Set<SingleCellBamFile>),
+                processingValues: processingValues.trim(),
+                paths           : directories,
+        ])
+
+        Map<Boolean, List<SamplePairProcessingStatus>> samplePairs = status.samplePairProcessingStatuses.groupBy {
+            it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO
+        }
+        if (samplePairs[true]) {
+            String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
+            message += '\n' + messageSourceService.createMessage("notification.template.alignment.furtherProcessing", [
+                    samplePairsWillProcess : getSamplePairRepresentation(samplePairs[true]*.samplePair),
+                    variantCallingPipelines: variantCallingPipelines,
+            ])
+        }
+        if (samplePairs[false]) {
+            message += '\n' + messageSourceService.createMessage("notification.template.alignment.noFurtherProcessing", [
+                    emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                    samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
+                        !it.processingDisabled
+                    }),
+            ])
+        }
+
+        message += getUserDocumentationOldSystem(alignmentInfoByConfig)
+
+        return message
+    }
+
+    private String alignmentInformationProcessingValuesOldSystem(List<AbstractMergedBamFile> bamFiles,
+                                                                 Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig) {
+        Map<Project, List<AbstractMergedBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
         boolean multipleProject = bamFilesByProject.size() > 1
         StringBuilder builder = new StringBuilder()
 
@@ -271,43 +308,20 @@ class CreateNotificationTextService {
                             alignmentProgram  : alignmentInfo.alignmentProgram,
                             alignmentParameter: alignmentInfo.alignmentParameter,
                     ])
-                    Map<String, Object> codeAndParams = alignmentInfo.getAlignmentSpecificMessageAttributes()
+                    Map<String, Object> codeAndParams = alignmentInfo.alignmentSpecificMessageAttributes
                     builder << messageSourceService.createMessage(codeAndParams.code as String, codeAndParams.params as Map)
                 }
             }
         }
+        return builder.toString()
+    }
 
-        String message = messageSourceService.createMessage("notification.template.alignment.base", [
-                samples         : sampleNames,
-                links           : links,
-                cellRangerNote  : cellRangerAlignmentNotificationHelper(allGoodBamFiles.findAll { it instanceof SingleCellBamFile } as Set<SingleCellBamFile>),
-                processingValues: builder.toString().trim(),
-                paths           : directories,
-        ])
-
-        Map<Boolean, List<SamplePairProcessingStatus>> samplePairs = status.samplePairProcessingStatuses.groupBy {
-            it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO
-        }
-        if (samplePairs[true]) {
-            String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
-            message += '\n' + messageSourceService.createMessage("notification.template.alignment.furtherProcessing", [
-                    samplePairsWillProcess : getSamplePairRepresentation(samplePairs[true]*.samplePair),
-                    variantCallingPipelines: variantCallingPipelines,
-            ])
-        }
-        if (samplePairs[false]) {
-            message += '\n' + messageSourceService.createMessage("notification.template.alignment.noFurtherProcessing", [
-                    emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
-                    samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
-                        !it.processingDisabled
-                    }),
-            ])
-        }
-
+    private String getUserDocumentationOldSystem(Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig) {
+        String message = ""
         alignmentInfoByConfig.keySet()*.pipeline*.name.sort().unique().each {
             switch (it) {
                 case Pipeline.Name.PANCAN_ALIGNMENT:
-                    message += '\n' + messageSourceService.createMessage("notification.template.references.alignment.pancan")
+                    message += '\n' + messageSourceService.createMessage("notification.template.references.alignment.pancancer")
                     break
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT: // no documentation/code available
                 case Pipeline.Name.EXTERNALLY_PROCESSED: // alignment was done externally
@@ -320,7 +334,6 @@ class CreateNotificationTextService {
                     break
             }
         }
-
         return message
     }
 

@@ -640,7 +640,7 @@ pancan alignment infos
 
                     (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
-                    (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                    (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancancer", [], _) >> ""
                     (singleCell ? 1 : 0) * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
                 }
         )
@@ -704,7 +704,7 @@ pancan alignment infos
 
                     countCellRanger * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
                     countRoddy * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
-                    countPanCan * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                    countPanCan * getMessageInternal("notification.template.references.alignment.pancancer", [], _) >> ""
                     countCellRanger * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
 
                     countCellRanger * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
@@ -765,7 +765,7 @@ pancan alignment infos
                     3 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
                     1 * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
                     2 * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
-                    1 * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                    1 * getMessageInternal("notification.template.references.alignment.pancancer", [], _) >> ""
                     1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
                     1 * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
                     0 * _
@@ -1122,7 +1122,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
             _ * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> '''finalRunSelectionLink: ${finalRunSelectionLink}'''
             _ * getMessageInternal("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [], _) >> '''serviceMail: ${serviceMail}'''
 
-            _ * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> '''pancan alignment infos\n'''
+            _ * getMessageInternal("notification.template.references.alignment.pancancer", [], _) >> '''pancan alignment infos\n'''
             _ * getMessageInternal("notification.template.references.snv", [], _) >> '''snv analysis infos\n'''
             _ * getMessageInternal("notification.template.references.indel", [], _) >> '''indel analysis infos\n'''
             _ * getMessageInternal("notification.template.references.sophia", [], _) >> '''sophia analysis infos\n'''
