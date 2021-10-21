@@ -363,6 +363,7 @@ class MetadataImportService {
                 Long timeCreateWorkflowRuns = System.currentTimeMillis()
                 log.debug("  create workflow runs started")
                 List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
+                fastqImportInstance.save(flush: true)
                 log.debug("  create workflow runs stopped took: ${System.currentTimeMillis() - timeCreateWorkflowRuns}")
                 Long timeDecider = System.currentTimeMillis()
                 log.debug("  decider started")
