@@ -45,6 +45,7 @@ class WorkflowService {
 
         WorkflowRun run = new WorkflowRun([
                 workflow        : oldRun.workflow,
+                workflowVersion : oldRun.workflowVersion,
                 priority        : oldRun.priority,
                 project         : oldRun.project,
                 displayName     : oldRun.displayName,

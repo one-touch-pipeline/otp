@@ -52,7 +52,6 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                SelectedProjectSeqTypeWorkflowVersion,
                 FastqImportInstance,
                 FileType,
                 LibraryPreparationKit,
@@ -80,8 +79,6 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String configText = "<config/>"
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
-        WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
-        SelectedProjectSeqTypeWorkflowVersion activeWorkflow = createSelectedProjectSeqTypeWorkflowVersion(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
         List<ClusterJob> clusterJobs = [createClusterJob(), createClusterJob()]
 
@@ -108,7 +105,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
         then:
         1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
-        1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", activeWorkflow.workflowVersion, "analysis-id", _, _, _,
+        1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
@@ -126,12 +123,11 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         given:
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         WorkflowStep workflowStep = createWorkflowStep()
+        workflowStep.workflowRun.workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
 
         String configText = "<config/>"
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
-        WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
-        SelectedProjectSeqTypeWorkflowVersion activeWorkflow = createSelectedProjectSeqTypeWorkflowVersion(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
 
         AbstractExecuteRoddyPipelineJob job = Spy(AbstractExecuteRoddyPipelineJob) {
@@ -157,7 +153,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
         then:
         1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
-        1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", activeWorkflow.workflowVersion, "analysis-id", _, _, _,
+        1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
@@ -175,12 +171,11 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         given:
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         WorkflowStep workflowStep = createWorkflowStep()
+        workflowStep.workflowRun.workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
 
         String configText = "<config/>"
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
-        WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
-        SelectedProjectSeqTypeWorkflowVersion activeWorkflow = createSelectedProjectSeqTypeWorkflowVersion(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
         List<ClusterJob> clusterJobs = [createClusterJob(), createClusterJob()]
 
@@ -207,7 +202,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
 
         then:
         1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
-        1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", activeWorkflow.workflowVersion, "analysis-id", _, _, _,
+        1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.fileService.createFileWithContent(Paths.get(bamFile.workDirectory.absolutePath).resolve("config.xml"), configText, _)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }

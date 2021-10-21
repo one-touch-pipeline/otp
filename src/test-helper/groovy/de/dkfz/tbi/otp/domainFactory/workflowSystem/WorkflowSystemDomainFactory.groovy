@@ -43,8 +43,10 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
     }
 
     WorkflowRun createWorkflowRun(Map properties = [:]) {
+        Workflow workflow = properties.workflow ?: properties.restartedFrom?.workflow ?: createWorkflow()
         return createDomainObject(WorkflowRun, [
-                workflow        : { properties.restartedFrom?.workflow ?: createWorkflow() },
+                workflow        : { workflow },
+                workflowVersion : { properties.restartedFrom?.workflowVersion ?: createWorkflowVersion(workflow: workflow) },
                 priority        : { createProcessingPriority() },
                 project         : { createProject() },
                 workDirectory   : "dir_${nextId}",

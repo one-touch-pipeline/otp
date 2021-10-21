@@ -619,4 +619,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2021/otp-1326_adapt_referenceGenomeSelector_and_activeProjectWorkflow.groovy'
+
+    include file: 'changelogs/2021/otp-1256.groovy'
 }

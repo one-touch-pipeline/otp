@@ -73,6 +73,8 @@ class WorkflowRun implements Commentable, Entity {
 
     Workflow workflow
 
+    WorkflowVersion workflowVersion
+
     String displayName
 
     String shortDisplayName
@@ -113,6 +115,11 @@ class WorkflowRun implements Commentable, Entity {
         }
         omittedMessage nullable: true
         comment nullable: true
+        workflowVersion nullable: true, validator: { val, obj ->
+            if (val && obj.workflow != val.workflow) {
+                return false
+            }
+        }
         displayName blank: false, nullable: false
         shortDisplayName blank: false, nullable: false
     }

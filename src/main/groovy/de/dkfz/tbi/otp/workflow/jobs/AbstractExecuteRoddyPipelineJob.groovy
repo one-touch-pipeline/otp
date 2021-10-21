@@ -28,9 +28,9 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRunService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobHandlingService
 
 import java.nio.file.FileSystem
@@ -62,7 +62,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
                 workflowStep.workflowRun.combinedConfig,
                 roddyConfigValueService.getDefaultValues() + getConfigurationValues(workflowStep, workflowStep.workflowRun.combinedConfig),
                 roddyWorkflowName,
-                getWorkflowVersion(workflowStep, roddyResult),
+                workflowStep.workflowRun.workflowVersion,
                 getAnalysisConfiguration(roddyResult.seqType),
                 fileService.toPath(roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath, fs),
                 outputDir,
@@ -97,14 +97,6 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         } else {
             workflowStateChangeService.changeStateToSuccess(workflowStep)
         }
-    }
-
-    private WorkflowVersion getWorkflowVersion(WorkflowStep workflowStep, RoddyResult roddyResult) {
-        List<WorkflowVersion> versions = WorkflowVersion.findAllByWorkflow(workflowStep.workflowRun.workflow)
-        CollectionUtils.exactlyOneElement(SelectedProjectSeqTypeWorkflowVersion
-                .findAllByWorkflowVersionInListAndProjectAndSeqTypeAndDeprecationDateIsNull(
-                versions, roddyResult.project, roddyResult.seqType
-        )).workflowVersion
     }
 
     protected abstract RoddyResult getRoddyResult(WorkflowStep workflowStep)
