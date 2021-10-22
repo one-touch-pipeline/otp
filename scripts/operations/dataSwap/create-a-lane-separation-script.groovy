@@ -333,7 +333,7 @@ class Snippets {
         return """\
                assert new Sample(
                \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${pid}')),
-               \tsampleType: SampleType.findSampleTypeByName('${sampleTypeName}')
+               \tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${sampleTypeName}'))
                ).save(failOnError: true) : \"Error creating new Sample '${pid} ${sampleTypeName}'\"""".stripIndent()
     }
 
