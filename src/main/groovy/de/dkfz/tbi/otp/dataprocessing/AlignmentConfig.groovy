@@ -21,9 +21,15 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link AlignmentInfoService} instead
+ */
+@Deprecated
 interface AlignmentConfig {
 
+    @Deprecated
     abstract AlignmentInfo getAlignmentInformation()
 
+    @Deprecated
     abstract Pipeline getPipeline()
 }

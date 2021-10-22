@@ -27,6 +27,7 @@ import org.hibernate.Hibernate
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
@@ -123,6 +124,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     abstract String getBaiFileName()
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+     */
+    @Deprecated
     abstract AlignmentConfig getAlignmentConfig()
 
     abstract File getFinalInsertSizeFile()

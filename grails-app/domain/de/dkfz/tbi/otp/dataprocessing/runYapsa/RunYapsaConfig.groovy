@@ -22,9 +22,14 @@
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@Deprecated
+/**
+ * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+ */
 class RunYapsaConfig extends ConfigPerProjectAndSeqType {
 
     static constraints = {

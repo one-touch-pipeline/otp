@@ -24,16 +24,22 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * To be more flexible the configuration shall be stored in the database instead of in the code.
  * This domain stores the configuration project specific.
  * If the configuration changes, the old database entry is set to obsolete and the new entry refers to the old entry.
+ *
+ * @deprecated class is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
  */
+@Deprecated
 abstract class ConfigPerProjectAndSeqType implements Entity {
 
+    @Deprecated
     Project project
 
+    @Deprecated
     SeqType seqType
 
     static belongsTo = [
@@ -41,11 +47,13 @@ abstract class ConfigPerProjectAndSeqType implements Entity {
             seqType: SeqType,
     ]
 
+    @Deprecated
     Pipeline pipeline
 
     /**
      * When changes appear in the configuration, a new ConfigPerProjectAndSeqType entry is created and the old entry is set to obsolete.
      */
+    @Deprecated
     Date obsoleteDate
 
     /**
@@ -54,12 +62,14 @@ abstract class ConfigPerProjectAndSeqType implements Entity {
      * For Roddy configurations this contains the plugin version in the Roddy expected naming
      * format, e.g.: IndelCallingWorkflow:1.0.176-8 and is used for the parameter --usePluginVersion
      */
+    @Deprecated
     String programVersion
 
     /**
      * When a previous config files exists, it should be referred here.
      * This is needed for tracking.
      */
+    @Deprecated
     ConfigPerProjectAndSeqType previousConfig
 
     static constraints = {

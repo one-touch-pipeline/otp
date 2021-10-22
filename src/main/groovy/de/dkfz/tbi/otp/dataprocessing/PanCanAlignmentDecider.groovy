@@ -26,11 +26,16 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
+ */
 @Component
 @Scope("singleton")
+@Deprecated
 class PanCanAlignmentDecider extends RoddyAlignmentDecider {
 
     @Override
+    @Deprecated
     Pipeline.Name pipelineName(SeqTrack seqTrack) {
         if (seqTrack.seqType.isRna()) {
             return Pipeline.Name.RODDY_RNA_ALIGNMENT

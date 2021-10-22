@@ -22,16 +22,17 @@
 package de.dkfz.tbi.otp.project
 
 import de.dkfz.tbi.otp.CommentableWithProject
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
-import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
+import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.SelectedProjectSeqTypeWorkflowVersion
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -106,6 +107,10 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     boolean projectRequestAvailable = false
 
+    /**
+     * @deprecated field is part of the old workflow system, use {@link SelectedProjectSeqTypeWorkflowVersion} instead
+     */
+    @Deprecated
     AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
 
     /** This attribute is used externally. Please discuss a change in the team */

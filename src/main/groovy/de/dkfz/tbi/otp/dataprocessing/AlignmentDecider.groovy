@@ -26,7 +26,10 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 /**
  * An alignment decider decides how a {@link SeqTrack} will be aligned and merged, and triggers the workflow(s) which
  * will do the alignment and merging.
+ *
+ * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
  */
+@Deprecated
 interface AlignmentDecider {
 
     /**
@@ -43,5 +46,6 @@ interface AlignmentDecider {
      * @return All found or created {@link MergingWorkPackage}s for the {@link SeqTrack}, regardless of whether the
      * method triggered an alignment for it.
      */
+    @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign)
 }

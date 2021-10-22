@@ -23,15 +23,25 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import groovy.transform.TupleConstructor
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
+ */
 @TupleConstructor
+@Deprecated
 enum AlignmentDeciderBeanName {
+    @Deprecated
     NO_ALIGNMENT('noAlignmentDecider', 'No Alignment'),
+    @Deprecated
     OTP_ALIGNMENT('defaultOtpAlignmentDecider', 'OTP Alignment'),
+    @Deprecated
     PAN_CAN_ALIGNMENT('panCanAlignmentDecider', 'PanCan Alignment'),
 
+    @Deprecated
     final String beanName
+    @Deprecated
     final String displayName
 
+    @Deprecated
     static String findByBeanName(String bean) {
         values().find { it.beanName == bean }
     }

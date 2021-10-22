@@ -25,6 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
@@ -208,6 +209,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(seqTypeName, layout, singleCell), customErrorMessage)
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
                 exomePairedSeqType,
@@ -215,6 +220,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getPanCanAlignableSeqTypes() {
         return [
                 exomePairedSeqType,
@@ -225,6 +234,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getRnaAlignableSeqTypes() {
         return [
                 rnaPairedSeqType,
@@ -232,6 +245,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getRoddyAlignableSeqTypes() {
         return [
                 panCanAlignableSeqTypes,
@@ -239,12 +256,20 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ].flatten()
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getCellRangerAlignableSeqTypes() {
         return [
                 get10xSingleCellRnaSeqType(),
         ].flatten()
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getAllAlignableSeqTypes() {
         return [
                 defaultOtpAlignableSeqTypes,
@@ -264,6 +289,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getSnvPipelineSeqTypes() {
         return [
                 exomePairedSeqType,
@@ -271,6 +300,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getIndelPipelineSeqTypes() {
         return [
                 exomePairedSeqType,
@@ -278,6 +311,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getSophiaPipelineSeqTypes() {
         return [
                 exomePairedSeqType,
@@ -285,12 +322,20 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getAceseqPipelineSeqTypes() {
         return [
                 wholeGenomePairedSeqType,
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getRunYapsaPipelineSeqTypes() {
         return [
                 exomePairedSeqType,
@@ -298,6 +343,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getAllAnalysableSeqTypes() {
         return [
                 snvPipelineSeqTypes,
@@ -308,6 +357,10 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ].flatten().unique()
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     */
+    @Deprecated
     static List<SeqType> getAllProcessableSeqTypes() {
         return [
                 allAlignableSeqTypes,

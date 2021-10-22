@@ -26,10 +26,17 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link Workflow}, {@link OtpWorkflow} instead
+ */
+@Deprecated
 class Pipeline implements Entity {
 
     @TupleConstructor
+    @Deprecated
     static enum Name {
         @Deprecated DEFAULT_OTP(Type.ALIGNMENT, false, 'bwa\u00A0aln', { SeqTypeService.defaultOtpAlignableSeqTypes }),
         PANCAN_ALIGNMENT       (Type.ALIGNMENT, true,  'bwa\u00A0mem', { SeqTypeService.panCanAlignableSeqTypes }),
@@ -43,11 +50,16 @@ class Pipeline implements Entity {
         RODDY_ACESEQ           (Type.ACESEQ, true, null, { SeqTypeService.aceseqPipelineSeqTypes }),
         RUN_YAPSA              (Type.MUTATIONAL_SIGNATURE, false, null, { SeqTypeService.runYapsaPipelineSeqTypes }),
 
+        @Deprecated
         final Type type
+        @Deprecated
         final boolean usesRoddy
+        @Deprecated
         final String displayName
+        @Deprecated
         final Closure<List<SeqType>> seqTypes
 
+        @Deprecated
         static Name forSeqType(SeqType seqType) {
             assert seqType
             switch (SeqTypeNames.fromSeqTypeName(seqType.name)) {
@@ -66,6 +78,7 @@ class Pipeline implements Entity {
             }
         }
 
+        @Deprecated
         Pipeline getPipeline() {
             CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                     type,
@@ -73,10 +86,12 @@ class Pipeline implements Entity {
             ))
         }
 
+        @Deprecated
         List<SeqType> getSeqTypes() {
             return seqTypes()
         }
 
+        @Deprecated
         static List<Name> getAlignmentPipelineNames() {
             return values().findAll {
                 it.type == Type.ALIGNMENT
@@ -87,22 +102,32 @@ class Pipeline implements Entity {
             }
         }
     }
+    @Deprecated
     Name name
 
+    @Deprecated
     static enum Type {
+        @Deprecated
         ACESEQ,
+        @Deprecated
         ALIGNMENT,
+        @Deprecated
         INDEL,
+        @Deprecated
         MUTATIONAL_SIGNATURE,
+        @Deprecated
         SNV,
+        @Deprecated
         SOPHIA,
 
+        @Deprecated
         static Pipeline.Type findByName(String name) {
             return values().find {
                 it.name() == name
             }
         }
     }
+    @Deprecated
     Type type
 
     static constraints = {
@@ -110,19 +135,23 @@ class Pipeline implements Entity {
         type validator: { Type type, Pipeline pipeline -> type == pipeline?.name?.type }
     }
 
+    @Deprecated
     boolean usesRoddy() {
         return name.usesRoddy
     }
 
+    @Deprecated
     String getDisplayName() {
         return name.displayName
     }
 
     @Override
+    @Deprecated
     String toString() {
         return "${name} ${type}"
     }
 
+    @Deprecated
     final List<SeqType> getSeqTypes() {
         return name.getSeqTypes()
     }

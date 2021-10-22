@@ -23,11 +23,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
 
 /**
  * Represents connection between {@link Project}, {@link SeqType}
  * and {@link ReferenceGenome}
+ * @deprecated class is part of the old workflow system, use {@link ReferenceGenomeSelector} instead
  */
+@Deprecated
 class ReferenceGenomeProjectSeqType implements Entity {
 
     static final String TAB_FILE_PATTERN = /[0-9a-zA-Z-_\.]+\.tab/
@@ -41,6 +44,7 @@ class ReferenceGenomeProjectSeqType implements Entity {
      * of this reference genome for these project and seqType
      * has been deprecated.
      */
+    @Deprecated
     Date deprecatedDate = null
 
     /**
@@ -48,14 +52,20 @@ class ReferenceGenomeProjectSeqType implements Entity {
      * The file ends with '.tab' and is located in the stat subdirectory of the reference genome.
      * The value has to be set for alignment with Roddy and has to be null for OTP alignment.
      */
+    @Deprecated
     String statSizeFileName
 
+    @Deprecated
     Project project
+    @Deprecated
     SeqType seqType
+    @Deprecated
     SampleType sampleType
 
+    @Deprecated
     ReferenceGenome referenceGenome
 
+    @Deprecated
     Set<ReferenceGenomeProjectSeqTypeAlignmentProperty> alignmentProperties
 
     static hasMany = [
@@ -88,6 +98,7 @@ class ReferenceGenomeProjectSeqType implements Entity {
     }
 
     @Override
+    @Deprecated
     String toString() {
         return "RGPST ${id}: [${deprecatedDate ? "deprecated ${deprecatedDate}" : "not deprecated"}] " +
                 "(${project.name} ${seqType.name} ${seqType.libraryLayout} sampleType ${sampleType?.name}) -> " +

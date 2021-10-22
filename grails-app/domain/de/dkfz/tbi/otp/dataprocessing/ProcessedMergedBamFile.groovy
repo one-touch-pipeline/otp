@@ -25,6 +25,7 @@ import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * Represents a merged bam file stored on the file system
@@ -134,7 +135,11 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return new File(baseDirectory, bamFileName)
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+     */
     @Override
+    @Deprecated
     AlignmentConfig getAlignmentConfig() {
         throw new MissingPropertyException('AlignmentConfig is not implemented for processed merged BAM files')
     }

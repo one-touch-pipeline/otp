@@ -26,10 +26,15 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
+ */
+@Deprecated
 abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
     // See integration test for explanation in which cases workpackages needs processing
     @Override
+    @Deprecated
     void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign) {
         RoddyBamFile latestValidBamFile = getLatestBamFileWhichHasBeenOrCouldBeCopied(workPackage)
 
@@ -56,6 +61,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     }
 
     /** this method returns the latest bam file for the work packages which is transferred or not withdrawn */
+    @Deprecated
     private static RoddyBamFile getLatestBamFileWhichHasBeenOrCouldBeCopied(MergingWorkPackage workPackage) {
         List<RoddyBamFile> bamFiles = RoddyBamFile.findAllByWorkPackage(workPackage, [sort: "identifier", order: "desc"])
 
@@ -68,6 +74,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     }
 
     @Override
+    @Deprecated
     boolean canPipelineAlign(SeqTrack seqTrack) {
         boolean canAlign = SeqTypeService.getRoddyAlignableSeqTypes().contains(seqTrack.seqType)
         if (canAlign && (RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, getPipeline(seqTrack)) == null)) {

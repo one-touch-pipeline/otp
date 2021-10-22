@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 @SuppressWarnings('JavaIoPackageAccess')
 class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
@@ -126,7 +127,11 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         return "${bamFileName}.md5"
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+     */
     @Override
+    @Deprecated
     AlignmentConfig getAlignmentConfig() {
         return mergingWorkPackage.config
     }

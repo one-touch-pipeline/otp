@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -35,12 +36,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * The information about the config file is store in the "RoddyWorkflowConfig"-Domain.
  *
  * The script 'scripts/operations/pancan/LoadPanCanConfig.groovy' can be used to load a roddy config.
+ *
+ * @deprecated class is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
  */
+@Deprecated
 class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
     //dot makes problems in roddy config identifiers, therefore an underscore is used
+    @Deprecated
     final static String CONFIG_VERSION_PATTERN = /^v\d+_\d+$/
 
+    @Deprecated
     final static String CONFIG_PATH_ELEMENT = 'configFiles'
 
     /**
@@ -51,20 +57,26 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
      *
      * for example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.0.177_v1_0.xml
      */
+    @Deprecated
     String configFilePath
 
+    @Deprecated
     String configVersion
 
     /**
      * In general this field should not be used but only in cases where the standard configuration does not fit.
      */
+    @Deprecated
     Individual individual
 
+    @Deprecated
     String nameUsedInConfig
 
+    @Deprecated
     boolean adapterTrimmingNeeded = false
 
     /** md5sum of the config file */
+    @Deprecated
     String md5sum
 
     static constraints = {
@@ -120,10 +132,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     }
 
     @Override
+    @Deprecated
     AlignmentInfo getAlignmentInformation() {
         throw new UnsupportedOperationException("RoddyWorkflowConfig can not yet provide its own AlignmentInfo")
     }
 
+    @Deprecated
     protected static RoddyWorkflowConfig getLatest(final Project project, final Individual individual, final SeqType seqType, final Pipeline pipeline) {
         assert project: "The project is not allowed to be null"
         assert seqType: "The seqType is not allowed to be null"
@@ -135,15 +149,18 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
                 "Individual ${individual} and Pipeline ${pipeline}.")
     }
 
+    @Deprecated
     static RoddyWorkflowConfig getLatestForProject(final Project project, final SeqType seqType, final Pipeline pipeline) {
         return getLatest(project, null, seqType, pipeline)
     }
 
+    @Deprecated
     static RoddyWorkflowConfig getLatestForIndividual(final Individual individual, final SeqType seqType, final Pipeline pipeline) {
         assert individual: "The individual is not allowed to be null"
         return getLatest(individual.project, individual, seqType, pipeline) ?: getLatestForProject(individual.project, seqType, pipeline)
     }
 
+    @Deprecated
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginNameAndVersion, String configVersion) {
         assert pipelineName
         assert seqType
@@ -159,10 +176,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         ].join("_")
     }
 
+    @Deprecated
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String programVersion, String configVersion) {
         return getNameUsedInConfig(pipelineName, seqType, "${pluginName}:${programVersion}", configVersion)
     }
 
+    @Deprecated
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
         assert project
         assert pipelineName
@@ -173,6 +192,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         )
     }
 
+    @Deprecated
     static String getConfigFileName(Pipeline.Name pipelineName, SeqType seqType, String pluginNameAndVersion, String configVersion) {
         assert pipelineName
         assert seqType
@@ -184,6 +204,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         return "${getNameUsedInConfig(pipelineName, seqType, pluginNameAndVersion, configVersion)}.xml"
     }
 
+    @Deprecated
     static File getStandardConfigFile(Project project, Pipeline.Name pipelineName, SeqType seqType, String programVersion, String configVersion) {
         return new File(getStandardConfigDirectory(project, pipelineName), getConfigFileName(pipelineName, seqType, programVersion, configVersion))
     }

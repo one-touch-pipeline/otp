@@ -26,6 +26,7 @@ import org.hibernate.Hibernate
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * Represents a merged bam file stored on the file system
@@ -110,7 +111,11 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         })
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+     */
     @Override
+    @Deprecated
     AlignmentConfig getAlignmentConfig() {
         throw new MissingPropertyException('AlignmentConfig is not implemented for externally imported BAM files')
     }

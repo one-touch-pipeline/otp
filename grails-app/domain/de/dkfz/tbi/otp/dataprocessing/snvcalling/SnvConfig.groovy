@@ -23,7 +23,11 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+ */
 @Deprecated
 class SnvConfig extends ConfigPerProjectAndSeqType {
 
@@ -31,6 +35,7 @@ class SnvConfig extends ConfigPerProjectAndSeqType {
      * In this String the complete content of the config file is stored.
      * This solution was chosen to be as flexible as possible in case the style of the config file changes.
      */
+    @Deprecated
     String configuration
 
     static constraints = {

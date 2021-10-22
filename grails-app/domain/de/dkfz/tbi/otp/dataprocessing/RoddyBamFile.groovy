@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
@@ -449,7 +450,11 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
         return numberOfReads.sum()
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ExternalWorkflowConfigFragment} instead
+     */
     @Override
+    @Deprecated
     AlignmentConfig getAlignmentConfig() {
         return config
     }

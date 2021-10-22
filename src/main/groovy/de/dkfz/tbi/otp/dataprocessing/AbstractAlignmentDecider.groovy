@@ -31,6 +31,10 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+/**
+ * @deprecated class is part of the old workflow system, use {@link de.dkfz.tbi.otp.workflowExecution.decider.Decider} instead
+*/
+@Deprecated
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Autowired
@@ -42,6 +46,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Autowired
     OtrsTicketService otrsTicketService
 
+    @Deprecated
     Pipeline getPipeline(SeqTrack seqTrack) {
         return atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT)) ?: new Pipeline(
                 name: pipelineName(seqTrack),
@@ -51,6 +56,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     /** This method is used externally. Please discuss a change in the team */
     @Override
+    @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
         if (!SeqTrackService.mayAlign(seqTrack)) {
             return Collections.emptyList()
@@ -80,6 +86,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     // ignore: in case of an adaptation to the new workflow system
     // TODO: if this class will be adapt in the future, it should not throw RuntimeException
     @SuppressWarnings('ThrowRuntimeException ')
+    @Deprecated
     void ensureConfigurationIsComplete(SeqTrack seqTrack) {
         if (seqTrack.configuredReferenceGenome == null) {
             throw new RuntimeException("Reference genome is not configured for SeqTrack ${seqTrack}.")
@@ -89,6 +96,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
     }
 
+    @Deprecated
     static boolean hasLibraryPreparationKitAndBedFile(SeqTrack seqTrack) {
         assert seqTrack: "The input seqTrack of method hasLibraryPreparationKitAndBedFile is null"
 
@@ -102,6 +110,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return true
     }
 
+    @Deprecated
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
                                                           Pipeline pipeline) {
@@ -142,6 +151,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return [workPackage]
     }
 
+    @Deprecated
     Map<String, String> buildUnalignableSeqTrackMailContent(MergingWorkPackage workPackage, SeqTrack seqTrack) {
         return [
                 "subject"  : buildUnalignableSeqTrackMailSubject(seqTrack),
@@ -149,6 +159,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         ]
     }
 
+    @Deprecated
     String buildUnalignableSeqTrackMailSubject(SeqTrack seqTrack) {
         OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
         return [
@@ -161,6 +172,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         ].findAll().join(" ")
     }
 
+    @Deprecated
     String buildUnalignableSeqTrackMailBody(MergingWorkPackage workPackage, SeqTrack seqTrack) {
         List<String> propertyOverview = MergingWorkPackage.getMergingProperties(seqTrack).collect { key, value ->
             return getComparedPropertiesForMail(workPackage, key, value)
@@ -179,6 +191,7 @@ nevertheless to be merged or if you want to withdraw the old samples (would resu
 the current ones.""".stripMargin()
     }
 
+    @Deprecated
     String getComparedPropertiesForMail(MergingWorkPackage workPackage, String key, Object value) {
         List<String> props = ["- ${key}: ${transformObjectForMail(value ?: "None")}"]
         if (value != workPackage[key]) {
@@ -187,6 +200,7 @@ the current ones.""".stripMargin()
         return props.join("\n")
     }
 
+    @Deprecated
     String transformObjectForMail(Object object) {
         switch (object.class) {
             case Sample:
@@ -197,15 +211,19 @@ the current ones.""".stripMargin()
         }
     }
 
+    @Deprecated
     static void logNotAligning(SeqTrack seqTrack, String reason, boolean saveInSeqTrack = true) {
         seqTrack.log("Not aligning{0}, because ${reason}.", saveInSeqTrack)
     }
 
+    @Deprecated
     boolean canPipelineAlign(SeqTrack seqTrack) {
         return SeqTypeService.defaultOtpAlignableSeqTypes.contains(seqTrack.seqType)
     }
 
+    @Deprecated
     abstract void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign)
 
+    @Deprecated
     abstract Pipeline.Name pipelineName(SeqTrack seqTrack)
 }
