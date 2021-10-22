@@ -576,7 +576,7 @@ class ProcessingOption implements Entity {
 
         REGEX_PROJECT_NAME_NEW_PROJECT_REQUEST(
                 "Regex for project name",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
         ),
 
         DESCRIPTION_PROJECT_NAME_NEW_PROJECT_REQUEST(

@@ -461,7 +461,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 case SeqTypeNames._10X_SCRNA.seqTypeName:
                     qcTableRow << [
                             summary          : new TableCellValue(
-                                    value: "summary",
+                                    value: "Summary",
                                     linkTarget: "_blank",
                                     link: g.createLink(
                                             action: "viewCellRangerSummary",
