@@ -27,7 +27,7 @@ image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
 ## having multiple commands in one variable does not work
 ## putting the expire time to a variable does not work
 variables:
-  GRADLE_OPTS: '-Xms4g -Xms1g'
+  GRADLE_OPTS: '-Xms1g -Dorg.gradle.daemon=false'
   GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
@@ -35,7 +35,6 @@ variables:
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
-
 
 #----------------------------
 # templates
@@ -45,6 +44,7 @@ variables:
   image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
   stage: test
   dependencies: [ ]
+  needs: [ ]
   only:
     - branches
     - tags
@@ -64,17 +64,12 @@ variables:
 # jobs stage compile
 # ------------------------------------------------------
 
-compile:
-  extends: .abstract_base_template
-  stage: build
-  dependencies: [ ]
-  script:
-    - ./gradlew classes
 
 license:
   image: groovy:latest
-  stage: build
+  stage: scanning
   dependencies: [ ]
+  needs: [ ]
   only:
     - branches
     - tags
@@ -88,6 +83,7 @@ license:
 
 unit tests:
   extends: .abstract_base_template
+  stage: test
   script:
     - set -e
     - ./gradlew test
@@ -96,11 +92,13 @@ unit tests:
     paths:
       - build/test-results/test/*.xml
       - build/reports/tests
+    reports:
+      junit: build/test-results/test/*.xml
     when: always
-
 
 integration tests:
   extends: .abstract_base_template
+  stage: test
   script:
     - set -e
     - ./gradlew integrationTest
@@ -109,11 +107,14 @@ integration tests:
     paths:
       - build/test-results/integrationTest/*.xml
       - build/reports/tests
+    reports:
+      junit: build/test-results/integrationTest/*.xml
     when: always
 
 
 codenarc:
   extends: .abstract_base_template
+  stage: codestyle
   only:
     - branches
   script:
@@ -131,8 +132,9 @@ codenarc:
       metrics: metrics.txt
 
 
-war:
+create war:
   extends: .abstract_base_template
+  stage: war
   script:
     - set -e
     - ./gradlew war
@@ -140,6 +142,7 @@ war:
 
 create doc:
   extends: .abstract_base_template
+  stage: doc
   script:
     - set -e
     - ./gradlew generateHtml
@@ -151,6 +154,7 @@ create doc:
 
 test migration:
   extends: .abstract_base_template
+  stage: test
   services:
     - postgres:9.5.9
   variables:
@@ -179,6 +183,7 @@ test migration:
 
 generate_changelog:
   extends: .abstract_base_template
+  stage: doc
   script:
     - mkdir -p $ARTIFACTS_BASE_DIRECTORY
     - set +e

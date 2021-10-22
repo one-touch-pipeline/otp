@@ -28,8 +28,11 @@ include:
 
 
 stages:
-  - build
+  - scanning
   - test
+  - codestyle
+  - war
+  - doc
   - public doc
   - trigger deployment
 

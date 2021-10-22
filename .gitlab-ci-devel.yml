@@ -23,6 +23,9 @@ include:
   - local: '.gitlab-ci-core.yml'
 
 stages:
-  - build
+  - scanning
   - test
+  - codestyle
+  - war
+  - doc
   - public doc

@@ -29,6 +29,15 @@ variables:
   DS_DEFAULT_ANALYZERS: "retire.js, gemnasium-maven, bundler-audit"
 
 stages:
-  - build
+  - scanning
   - test
+  - codestyle
+  - war
+  - doc
   - public doc
+
+
+gemnasium-maven-dependency_scanning:
+  stage: scanning
+license_scanning:
+  stage: scanning
