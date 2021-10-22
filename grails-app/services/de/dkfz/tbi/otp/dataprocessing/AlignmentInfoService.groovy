@@ -41,10 +41,11 @@ class AlignmentInfoService {
     RemoteShellHelper remoteShellHelper
 
 
-    protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig config) {
-        assert config
-        ProcessOutput output = getRoddyProcessOutput(config)
-        return generateRoddyAlignmentInfo(output, config.seqType, config.programVersion)
+    protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
+        assert workflowConfig
+        ProcessOutput output = getRoddyProcessOutput(workflowConfig)
+        Map<String, String> config = extractConfigRoddyOutput(output)
+        return generateRoddyAlignmentInfo(config, workflowConfig.seqType, workflowConfig.programVersion)
     }
 
     /**
@@ -53,7 +54,7 @@ class AlignmentInfoService {
      */
     protected ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
         Realm realm = workflowConfig.project.realm
-        String nameInConfigFile = workflowConfig.getNameUsedInConfig()
+        String nameInConfigFile = workflowConfig.nameUsedInConfig
         String cmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
 
         ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
@@ -78,17 +79,14 @@ class AlignmentInfoService {
      * @param seqType
      * @return new Alignment info
      */
-    private RoddyAlignmentInfo generateRoddyAlignmentInfo(ProcessOutput output, SeqType seqType, String programVersion) {
-        Map<String, String> res = extractConfigRoddyOutput(output)
-
-        Map bwa = createAlignmentCommandOptionsMap(res, output, seqType)
-
-        Map merge = createMergeCommandOptionsMap(res, output, seqType)
+    private RoddyAlignmentInfo generateRoddyAlignmentInfo(Map<String, String> config, SeqType seqType, String programVersion) {
+        Map bwa = createAlignmentCommandOptionsMap(config, seqType)
+        Map merge = createMergeCommandOptionsMap(config, seqType)
 
         return new RoddyAlignmentInfo(
                 alignmentProgram  : bwa.command,
                 alignmentParameter: bwa.options,
-                samToolsCommand   : res.get("SAMTOOLS_VERSION") ? "Version ${res.get("SAMTOOLS_VERSION")}" : "",
+                samToolsCommand   : config.get("SAMTOOLS_VERSION") ? "Version ${config.get("SAMTOOLS_VERSION")}" : "",
                 mergeCommand      : merge.command,
                 mergeOptions      : merge.options,
                 programVersion    : programVersion,
@@ -102,35 +100,35 @@ class AlignmentInfoService {
      * @param seqType
      * @return Map that holds command and options for the Merging
      */
-    private Map createMergeCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
+    private Map createMergeCommandOptionsMap(Map<String, String> config, SeqType seqType) {
         Map merge = [:]
 
         // Default empty
         merge.options = ''
 
-        MergeTool tool = getMergeTool(res, seqType)
+        MergeTool tool = getMergeTool(config, seqType)
         switch (tool) {
             case MergeTool.BIOBAMBAM:
-                merge.command = res.get("BIOBAMBAM_VERSION") ? "Biobambam bammarkduplicates Version ${res.get("BIOBAMBAM_VERSION")}" : ""
-                merge.options = res.get("mergeAndRemoveDuplicates_argumentList")
+                merge.command = config.get("BIOBAMBAM_VERSION") ? "Biobambam bammarkduplicates Version ${config.get("BIOBAMBAM_VERSION")}" : ""
+                merge.options = config.get("mergeAndRemoveDuplicates_argumentList")
                 break
             case MergeTool.PICARD:
-                merge.command = res.get("PICARD_VERSION") ? "Picard Version ${res.get("PICARD_VERSION")}" : ""
+                merge.command = config.get("PICARD_VERSION") ? "Picard Version ${config.get("PICARD_VERSION")}" : ""
                 break
             case MergeTool.SAMBAMBA:
-                merge.command = res.get('SAMBAMBA_MARKDUP_VERSION') ? "Sambamba Version ${res.get('SAMBAMBA_MARKDUP_VERSION')}" : ""
-                merge.options = res.get('SAMBAMBA_MARKDUP_OPTS')
+                merge.command = config.get('SAMBAMBA_MARKDUP_VERSION') ? "Sambamba Version ${config.get('SAMBAMBA_MARKDUP_VERSION')}" : ""
+                merge.options = config.get('SAMBAMBA_MARKDUP_OPTS')
                 break
             case MergeTool.SAMBAMBA_RNA:
-                merge.command = res.get('SAMBAMBA_VERSION') ? "Sambamba Version ${res.get('SAMBAMBA_VERSION')}" : ""
+                merge.command = config.get('SAMBAMBA_VERSION') ? "Sambamba Version ${config.get('SAMBAMBA_VERSION')}" : ""
                 break
             default:
                 merge.command = "Unknown tool: ${tool}"
         }
 
         if (!merge.command) {
-            log?.debug("Could not extract merging configuration from output:\n${output}")
-            throw new ParsingException("Could not extract merging configuration value from the roddy output")
+            log?.debug("Could not extract merging configuration from config:\n${config}")
+            throw new ParsingException("Could not extract merging configuration value from Roddy config")
         }
 
         return merge
@@ -140,38 +138,38 @@ class AlignmentInfoService {
      * Generates and returns String that holds what Merging have to be done
      * @return String with the generated tool
      */
-    private MergeTool getMergeTool(Map<String, String> res, SeqType seqType) {
+    private MergeTool getMergeTool(Map<String, String> config, SeqType seqType) {
         if (seqType.isRna()) {
             return MergeTool.SAMBAMBA_RNA
         }
 
-        String tool = res.get('markDuplicatesVariant')
-        return MergeTool.getByName(tool) ?: res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeTool.BIOBAMBAM : MergeTool.PICARD
+        String tool = config.get('markDuplicatesVariant')
+        return MergeTool.getByName(tool) ?: config.get("useBioBamBamMarkDuplicates") == 'true' ? MergeTool.BIOBAMBAM : MergeTool.PICARD
     }
 
     /**
      * Creates a Map bwa with command and options for the alignment
      * @return Map that holds command and options for the alignment
      */
-    private Map createAlignmentCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
+    private Map createAlignmentCommandOptionsMap(Map<String, String> config, SeqType seqType) {
         Map bwa = [:]
 
         if (seqType.isRna()) {
-            bwa.command = res.get("STAR_VERSION") ? "STAR Version ${res.get("STAR_VERSION")}" : ""
+            bwa.command = config.get("STAR_VERSION") ? "STAR Version ${config.get("STAR_VERSION")}" : ""
             bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-                res.get("STAR_PARAMS_${name}".toString())
+                config.get("STAR_PARAMS_${name}".toString())
             }.join(' ')
-        } else if (res.get("useAcceleratedHardware") == "true") {
-            bwa.command = res.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${res.get("BWA_ACCELERATED_VERSION")}" : ""
-            bwa.options = res.get("BWA_MEM_OPTIONS") + ' ' + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
+        } else if (config.get("useAcceleratedHardware") == "true") {
+            bwa.command = config.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${config.get("BWA_ACCELERATED_VERSION")}" : ""
+            bwa.options = config.get("BWA_MEM_OPTIONS") + ' ' + config.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
         } else {
-            bwa.command = res.get("BWA_VERSION") ? "BWA Version ${res.get("BWA_VERSION")}" : ""
-            bwa.options = res.get("BWA_MEM_OPTIONS")
+            bwa.command = config.get("BWA_VERSION") ? "BWA Version ${config.get("BWA_VERSION")}" : ""
+            bwa.options = config.get("BWA_MEM_OPTIONS")
         }
 
         if (!bwa.command) {
-            log?.debug("Could not extract alignment configuration from output:\n${output}")
-            throw new ParsingException("Could not extract alignment configuration value from the roddy output")
+            log?.debug("Could not extract alignment configuration from config:\n${config}")
+            throw new ParsingException("Could not extract alignment configuration value from Roddy config")
         }
 
         return bwa
@@ -206,7 +204,7 @@ class AlignmentInfoService {
         if (config.class == RoddyWorkflowConfig.class) {
             return getRoddyAlignmentInformation((RoddyWorkflowConfig) config)
         }
-        return config.getAlignmentInformation()
+        return config.alignmentInformation
     }
 
     Map<String, AlignmentInfo> getAlignmentInformation(Project project) throws Exception {

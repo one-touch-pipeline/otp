@@ -54,7 +54,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.message.contains('assert config')
+        e.message.contains('assert workflowConfig')
     }
 
     @Unroll
@@ -99,12 +99,12 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
 
         then:
         alignmentInfo
-        alignCommand == alignmentInfo.alignmentProgram
-        alignOpt == alignmentInfo.alignmentParameter
-        mergeCommand == alignmentInfo.mergeCommand
-        mergeOpt == alignmentInfo.mergeOptions
-        'Version 6.0' == alignmentInfo.samToolsCommand
-        roddyPipelineVersion == alignmentInfo.programVersion
+        alignmentInfo.alignmentProgram == alignCommand
+        alignmentInfo.alignmentParameter == alignOpt
+        alignmentInfo.mergeCommand == mergeCommand
+        alignmentInfo.mergeOptions == mergeOpt
+        alignmentInfo.samToolsCommand == 'Version 6.0'
+        alignmentInfo.programVersion == roddyPipelineVersion
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
@@ -150,11 +150,11 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
         AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
 
         then:
-        'STAR Version 2.0' == alignmentInfo.alignmentProgram
-        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ') == alignmentInfo.alignmentParameter
-        'Sambamba Version 3.0' == alignmentInfo.mergeCommand
-        '' == alignmentInfo.mergeOptions
-        'Version 1.0' == alignmentInfo.samToolsCommand
+        alignmentInfo.alignmentProgram == 'STAR Version 2.0'
+        alignmentInfo.alignmentParameter == ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ')
+        alignmentInfo.mergeCommand == 'Sambamba Version 3.0'
+        alignmentInfo.mergeOptions == ''
+        alignmentInfo.samToolsCommand == 'Version 1.0'
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
@@ -193,8 +193,8 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
         'roddy error'         | 'some'                                          | 'some'                                                                      | 1        || 'Alignment information can\'t be detected. Is Roddy with support for printidlessruntimeconfig installed?'
         'file not found'      | 'some'                                          | 'The project configuration "roddyWorkflowConfig.config" could not be found' | 0        || 'Roddy could not find the configuration \'roddyWorkflowConfig\'. Probably some access problem.'
         'no config values'    | 'some'                                          | 'some'                                                                      | 0        || 'Could not extract any configuration value from the roddy output'
-        'no alignment values' | 'a=b\nc=d'                                      | 'some'                                                                      | 0        || 'Could not extract alignment configuration value from the roddy output'
-        'no merging values'   | 'useAcceleratedHardware=false\nBWA_VERSION=aln' | 'some'                                                                      | 0        || 'Could not extract merging configuration value from the roddy output'
+        'no alignment values' | 'a=b\nc=d'                                      | 'some'                                                                      | 0        || 'Could not extract alignment configuration value from Roddy config'
+        'no merging values'   | 'useAcceleratedHardware=false\nBWA_VERSION=aln' | 'some'                                                                      | 0        || 'Could not extract merging configuration value from Roddy config'
     }
 
     void "getAlignmentInformationFromConfig, when config is null, throw assert"() {
