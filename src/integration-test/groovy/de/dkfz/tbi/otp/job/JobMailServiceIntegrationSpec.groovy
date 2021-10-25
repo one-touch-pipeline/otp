@@ -57,9 +57,9 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         OtrsTicket otrsTicket = createOtrsTicket()
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.ilseSubmission = createIlseSubmission()
-        seqTrack.save()
+        seqTrack.save(flush: true)
         seqTrack.project.processingPriority = fasttrack ? findOrCreateProcessingPriorityFastrack() : findOrCreateProcessingPriorityNormal()
-        seqTrack.project.save()
+        seqTrack.project.save(flush: true)
 
         DomainFactory.createDataFile([
                 seqTrack: seqTrack,

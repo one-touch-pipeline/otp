@@ -498,7 +498,7 @@ echo \$TEMP_DIR
 
         ProcessingOption.findAllByName(OptionName.CLUSTER_SUBMISSIONS_OPTION).each {
             it.value = jobSubmissionOptions
-            it.save()
+            it.save(flush: true)
         }
     }
 
@@ -541,7 +541,7 @@ echo \$TEMP_DIR
             it.unixGroup = unixGroup
             it.realm = realm
             it.processingPriority = processingPriority
-            it.save()
+            it.save(flush: true)
         }
     }
 

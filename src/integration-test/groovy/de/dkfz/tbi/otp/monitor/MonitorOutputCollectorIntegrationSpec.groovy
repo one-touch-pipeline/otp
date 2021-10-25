@@ -92,7 +92,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         String workflowName = jobExecutionPlan.name
         if (hasComment) {
             process.comment = DomainFactory.createComment()
-            process.save()
+            process.save(flush: true)
         }
         MonitorOutputCollector collector = new MonitorOutputCollector()
 

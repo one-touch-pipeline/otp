@@ -87,20 +87,20 @@ class AbstractBamFileServiceIntegrationTests {
                 name: "project",
                 dirName: "project-dir",
                 )
-        assertNotNull(project.save())
+        assertNotNull(project.save([flush: true]))
 
         SeqCenter seqCenter = new SeqCenter(
                 name: "seq-center",
                 dirName: "seq-center-dir"
                 )
-        assertNotNull(seqCenter.save())
+        assertNotNull(seqCenter.save([flush: true]))
 
         SoftwareTool softwareTool = new SoftwareTool(
                 programName: "software-tool",
                 programVersion: "software-tool-version",
                 type: SoftwareTool.Type.BASECALLING
                 )
-        assertNotNull(softwareTool.save())
+        assertNotNull(softwareTool.save([flush: true]))
 
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
@@ -109,7 +109,7 @@ class AbstractBamFileServiceIntegrationTests {
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
                 )
-        assertNotNull(run.save())
+        assertNotNull(run.save([flush: true]))
 
         Individual individual = new Individual(
                 pid: "patient",
@@ -118,19 +118,19 @@ class AbstractBamFileServiceIntegrationTests {
                 type: Individual.Type.UNDEFINED,
                 project: project
                 )
-        assertNotNull(individual.save())
+        assertNotNull(individual.save([flush: true]))
 
         SampleType sampleType = new SampleType(
                 name: "sample-type",
                 specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
                 )
-        assertNotNull(sampleType.save())
+        assertNotNull(sampleType.save([flush: true]))
 
         Sample sample = new Sample(
                 individual: individual,
                 sampleType: sampleType
                 )
-        assertNotNull(sample.save())
+        assertNotNull(sample.save([flush: true]))
 
         DomainFactory.createAllAlignableSeqTypes()
         SeqType wholeGenomeSeqType = DomainFactory.createWholeGenomeSeqType()
@@ -152,20 +152,20 @@ class AbstractBamFileServiceIntegrationTests {
             seqType        : wholeGenomeSeqType,
             referenceGenome: referenceGenome,
         ])
-        assert referenceGenomeProjectSeqType.save()
+        assert referenceGenomeProjectSeqType.save([flush: true])
 
         referenceGenomeProjectSeqTypeForExome = new ReferenceGenomeProjectSeqType([
             project        : project,
             seqType        : exomeSeqType,
             referenceGenome: referenceGenome,
         ])
-        assert referenceGenomeProjectSeqTypeForExome.save()
+        assert referenceGenomeProjectSeqTypeForExome.save([flush: true])
 
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
                 name: "libraryPreparationKit",
                 shortDisplayName: "libraryPreparationKit",
                 )
-        assertNotNull(libraryPreparationKit.save())
+        assertNotNull(libraryPreparationKit.save([flush: true]))
 
         BedFile bedFile = new BedFile(
                 fileName: "bed_file",
@@ -174,7 +174,7 @@ class AbstractBamFileServiceIntegrationTests {
                 referenceGenome: referenceGenome,
                 libraryPreparationKit: libraryPreparationKit
                 )
-        assert bedFile.save()
+        assert bedFile.save([flush: true])
 
         seqTrack = new SeqTrack(
                 laneId: "0",
@@ -185,7 +185,7 @@ class AbstractBamFileServiceIntegrationTests {
                 pipelineVersion: softwareTool,
                 sampleIdentifier: "sampleIdentifier",
                 )
-        assertNotNull(seqTrack.save())
+        assertNotNull(seqTrack.save([flush: true]))
 
         exomeSeqTrack = new SeqTrack(
                 laneId: "1",
@@ -198,7 +198,7 @@ class AbstractBamFileServiceIntegrationTests {
                 kitInfoReliability: InformationReliability.KNOWN,
                 sampleIdentifier: "sampleIdentifier",
                 )
-        assertNotNull(exomeSeqTrack.save())
+        assertNotNull(exomeSeqTrack.save([flush: true]))
 
         processedBamFile = createAndSaveProcessedBamFileAndQAObjects(seqTrack, "1")
 
@@ -290,10 +290,18 @@ class AbstractBamFileServiceIntegrationTests {
     }
 
     @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_WholeGenome_AndReferenceGenomeIsNull() {
+        setupData()
+        changeStateOfBamFileToHavingPassedQC(processedBamFile)
+        processedBamFile.mergingWorkPackage.referenceGenome = null
+        abstractBamFileService.calculateCoverageWithN(processedBamFile)
+    }
+
+    @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_Exome_AndReferenceGenomeIsNull() {
         setupData()
         changeStateOfBamFileToHavingPassedQC(exomeProcessedBamFile)
-        assert referenceGenomeProjectSeqTypeForExome.delete()
+        assert referenceGenomeProjectSeqTypeForExome.delete([flush: true])
         abstractBamFileService.calculateCoverageWithN(exomeProcessedBamFile)
     }
 
@@ -333,12 +341,22 @@ class AbstractBamFileServiceIntegrationTests {
     }
 
     @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_WholeGenome_AndReferenceGenomeIsNull() {
+        setupData()
+        assignToMergingSet(mergingSet, processedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
+        changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
+        processedMergedBamFile.mergingWorkPackage.referenceGenome = null
+        abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
+    }
+
+    @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_Exome_AndReferenceGenomeIsNull() {
         setupData()
         assignToMergingSet(exomeMergingSet, exomeProcessedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
-        assert referenceGenomeProjectSeqTypeForExome.delete()
+        assert referenceGenomeProjectSeqTypeForExome.delete([flush: true])
         abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
     }
 
@@ -366,7 +384,7 @@ class AbstractBamFileServiceIntegrationTests {
                 identifier: 1,
                 mergingSet: mergingSet
         )
-        assertNotNull(mergingPass1.save())
+        assertNotNull(mergingPass1.save([flush: true]))
 
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass1, [
                     fileExists: true,
@@ -381,7 +399,7 @@ class AbstractBamFileServiceIntegrationTests {
                 identifier: 0,
                 mergingSet: mergingSet
                 )
-        assertNotNull(mergingPass.save())
+        assertNotNull(mergingPass.save([flush: true]))
 
         // Do not create as QC'ed in order to test assertions if no QC data exists. Tests explicitly change it if needed.
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
@@ -391,7 +409,7 @@ class AbstractBamFileServiceIntegrationTests {
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
             abstractMergedBamFile: processedMergedBamFile,
         ])
-        assert qualityAssessmentMergedPass.save()
+        assert qualityAssessmentMergedPass.save([flush: true])
 
         OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged(
             ARBITRARY_QA_VALUES + [
@@ -399,7 +417,7 @@ class AbstractBamFileServiceIntegrationTests {
             qcBasesMapped              : ARBITRARY_NUMBER_OF_READS,
             onTargetMappedBases        : ARBITRARY_NUMBER_OF_READS_FOR_EXOME,
         ])
-        assert overallQualityAssessmentMerged.save()
+        assert overallQualityAssessmentMerged.save([flush: true])
 
         return processedMergedBamFile
     }
@@ -411,7 +429,7 @@ class AbstractBamFileServiceIntegrationTests {
                 seqTrack: seqTrack,
                 description: "test"
                 )
-        assertNotNull(alignmentPass.save())
+        assertNotNull(alignmentPass.save([flush: true]))
 
         ProcessedBamFile processedBamFile = new ProcessedBamFile(
                 alignmentPass: alignmentPass,
@@ -419,12 +437,12 @@ class AbstractBamFileServiceIntegrationTests {
                 status: State.NEEDS_PROCESSING,
                 numberOfMergedLanes: 1,
                 )
-        assertNotNull(processedBamFile.save())
+        assertNotNull(processedBamFile.save([flush: true]))
 
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass([
             processedBamFile: processedBamFile,
         ])
-        assert qualityAssessmentPass.save()
+        assert qualityAssessmentPass.save([flush: true])
 
         OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment(
             ARBITRARY_QA_VALUES + [
@@ -432,7 +450,7 @@ class AbstractBamFileServiceIntegrationTests {
             qcBasesMapped: ARBITRARY_NUMBER_OF_READS,
             onTargetMappedBases: ARBITRARY_NUMBER_OF_READS_FOR_EXOME,
         ])
-        assert overallQualityAssessment.save()
+        assert overallQualityAssessment.save([flush: true])
 
         return processedBamFile
     }
@@ -442,14 +460,14 @@ class AbstractBamFileServiceIntegrationTests {
                 seqTrack,
                 seqTrack.configuredReferenceGenome,
                 )
-        assertNotNull(mergingWorkPackage.save())
+        assertNotNull(mergingWorkPackage.save([flush: true]))
 
         MergingSet mergingSet1 = new MergingSet(
                 identifier: 0,
                 mergingWorkPackage: mergingWorkPackage,
                 status: MergingSet.State.NEEDS_PROCESSING
                 )
-        assertNotNull(mergingSet1.save())
+        assertNotNull(mergingSet1.save([flush: true]))
         return mergingSet1
     }
 
@@ -458,13 +476,13 @@ class AbstractBamFileServiceIntegrationTests {
                 mergingSet: ms,
                 bamFile: bamFile,
                 )
-        assert mergingSetAssignment.save()
+        assert mergingSetAssignment.save([flush: true])
 
         return mergingSetAssignment
     }
 
     private static void changeStateOfBamFileToHavingPassedQC(AbstractBamFile bamFile) {
         bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-        assert bamFile.save()
+        assert bamFile.save([flush: true])
     }
 }

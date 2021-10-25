@@ -48,7 +48,7 @@ class MergingSetServiceIntegrationTests {
                         name: "name_1",
                         dirName: "dirName",
                         )
-        assertNotNull(project.save())
+        assertNotNull(project.save([flush: true]))
 
         Individual individual = new Individual(
                         pid: "pid_1",
@@ -57,18 +57,18 @@ class MergingSetServiceIntegrationTests {
                         type: Individual.Type.UNDEFINED,
                         project: project
                         )
-        assertNotNull(individual.save())
+        assertNotNull(individual.save([flush: true]))
 
         SampleType sampleType = new SampleType(
                         name: "name-1"
                         )
-        assertNotNull(sampleType.save())
+        assertNotNull(sampleType.save([flush: true]))
 
         sample = new Sample(
                         individual: individual,
                         sampleType: sampleType
                         )
-        assertNotNull(sample.save())
+        assertNotNull(sample.save([flush: true]))
 
         seqType = DomainFactory.createSeqType()
 
@@ -78,21 +78,21 @@ class MergingSetServiceIntegrationTests {
                         name: "name",
                         dirName: "dirName"
                         )
-        assertNotNull(seqCenter.save())
+        assertNotNull(seqCenter.save([flush: true]))
 
         Run run = new Run(
                         name: "name",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
                         )
-        assertNotNull(run.save())
+        assertNotNull(run.save([flush: true]))
 
         SoftwareTool softwareTool = new SoftwareTool(
                         programName: "name",
                         programVersion: "version",
                         type: Type.ALIGNMENT
                         )
-        assertNotNull(softwareTool.save())
+        assertNotNull(softwareTool.save([flush: true]))
 
         seqTrack = new SeqTrack(
                         laneId: "laneId",
@@ -103,7 +103,7 @@ class MergingSetServiceIntegrationTests {
                         pipelineVersion: softwareTool,
                         sampleIdentifier: "sampleIdentifier",
                         )
-        assertNotNull(seqTrack.save())
+        assertNotNull(seqTrack.save([flush: true]))
         seqTrack2 = new SeqTrack(
                         laneId: "laneId2",
                         run: run,
@@ -113,7 +113,7 @@ class MergingSetServiceIntegrationTests {
                         pipelineVersion: softwareTool,
                         sampleIdentifier: "sampleIdentifier",
         )
-        assertNotNull(seqTrack2.save())
+        assertNotNull(seqTrack2.save([flush: true]))
     }
 
     @After
@@ -138,13 +138,13 @@ class MergingSetServiceIntegrationTests {
                         identifier: 0,
                         mergingWorkPackage: mergingWorkPackage
                         )
-        assertNotNull(mergingSet.save())
+        assertNotNull(mergingSet.save([flush: true]))
         assertEquals(1, MergingSet.nextIdentifier(mergingWorkPackage))
         MergingSet mergingSet2 = new MergingSet(
                         identifier: 1,
                         mergingWorkPackage: mergingWorkPackage
                         )
-        assertNotNull(mergingSet2.save())
+        assertNotNull(mergingSet2.save([flush: true]))
         assertEquals(2, MergingSet.nextIdentifier(mergingWorkPackage))
     }
 
@@ -156,7 +156,7 @@ class MergingSetServiceIntegrationTests {
                 statSizeFileName: null,
                 pipeline: DomainFactory.createDefaultOtpPipeline(),
         ] + MergingWorkPackage.getMergingProperties(seqTrack))
-        assertNotNull(mergingWorkPackage.save())
+        assertNotNull(mergingWorkPackage.save([flush: true]))
         return mergingWorkPackage
     }
 }

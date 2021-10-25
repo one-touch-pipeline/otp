@@ -46,16 +46,16 @@ class SeqPlatformIntegrationSpec extends Specification {
 
     void setupData() {
         sp1 = new SeqPlatform(name: "sp1")
-        sp1.save()
+        sp1.save(flush: true)
 
         sp2 = new SeqPlatform(name: "sp2")
-        sp2.save()
+        sp2.save(flush: true)
 
         sp3 = new SeqPlatform(name: "sp3")
-        sp3.save()
+        sp3.save(flush: true)
 
         sp4 = new SeqPlatform(name: "sp4")
-        sp4.save()
+        sp4.save(flush: true)
 
 
         mergingCriteriaUseProject = DomainFactory.createMergingCriteriaLazy(
@@ -68,11 +68,11 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         spgProject1 = new SeqPlatformGroup()
         spgProject1.mergingCriteria = mergingCriteriaUseProject
-        spgProject1.save()
+        spgProject1.save(flush: true)
 
         spgProject2 = new SeqPlatformGroup()
         spgProject2.mergingCriteria = mergingCriteriaUseProject
-        spgProject2.save()
+        spgProject2.save(flush: true)
 
         spgUseDefault1 = DomainFactory.createSeqPlatformGroup()
 
@@ -80,17 +80,17 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         sp1.addToSeqPlatformGroups(spgProject1)
         sp1.addToSeqPlatformGroups(spgUseDefault1)
-        sp1.save()
+        sp1.save(flush: true)
 
         sp2.addToSeqPlatformGroups(spgProject1)
         sp2.addToSeqPlatformGroups(spgUseDefault1)
-        sp2.save()
+        sp2.save(flush: true)
 
         sp3.addToSeqPlatformGroups(spgUseDefault1)
-        sp3.save()
+        sp3.save(flush: true)
 
         sp4.addToSeqPlatformGroups(spgUseDefault1)
-        sp4.save()
+        sp4.save(flush: true)
     }
 
 
@@ -100,7 +100,7 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         when:
         sp3.addToSeqPlatformGroups(spgUseDefault2)
-        sp3.save()
+        sp3.save(flush: true)
 
         then:
         thrown(ValidationException)
@@ -113,7 +113,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         when:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
         seqPlatformGroup.addToSeqPlatforms(sp3)
-        seqPlatformGroup.save()
+        seqPlatformGroup.save(flush: true)
 
         then:
         thrown(ValidationException)
@@ -125,7 +125,7 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         when:
         sp4.addToSeqPlatformGroups(spgProject1)
-        sp4.save()
+        sp4.save(flush: true)
 
         then:
         noExceptionThrown()
@@ -137,7 +137,7 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         when:
         sp4.addToSeqPlatformGroups(spgProject2)
-        sp4.save()
+        sp4.save(flush: true)
 
         then:
         noExceptionThrown()
@@ -149,7 +149,7 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         when:
         spgProject2.addToSeqPlatforms(sp4)
-        spgProject2.save()
+        spgProject2.save(flush: true)
 
         then:
         noExceptionThrown()
@@ -165,7 +165,7 @@ class SeqPlatformIntegrationSpec extends Specification {
                 mergingCriteria: mergingCriteria
         )
         spg_project3.addToSeqPlatforms(sp2)
-        spg_project3.save()
+        spg_project3.save(flush: true)
 
         then:
         noExceptionThrown()
@@ -177,7 +177,7 @@ class SeqPlatformIntegrationSpec extends Specification {
 
         when:
         spgProject2.addToSeqPlatforms(sp2)
-        spgProject2.save()
+        spgProject2.save(flush: true)
 
         then:
         thrown(ValidationException)
@@ -192,7 +192,7 @@ class SeqPlatformIntegrationSpec extends Specification {
                 mergingCriteria: mergingCriteriaUseProject,
         )
         seqPlatformGroup.addToSeqPlatforms(sp2)
-        seqPlatformGroup.save()
+        seqPlatformGroup.save(flush: true)
 
         then:
         thrown(ValidationException)

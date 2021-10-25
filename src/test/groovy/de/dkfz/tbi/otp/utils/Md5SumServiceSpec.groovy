@@ -76,8 +76,6 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         e.message =~ /The md5sum file '[^']*' is not absolute/
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "extractMd5Sum, if md5sum file does not exist, then throw an assertion"() {
         given:
         File file = temporaryFolder.newFile()

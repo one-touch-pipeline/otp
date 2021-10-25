@@ -360,7 +360,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     )
             )
             ((MergingWorkPackage) (abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
-            abstractMergedBamFile.workPackage.save()
+            abstractMergedBamFile.workPackage.save(flush: true)
             ProcessingStatus expectedStatus = [
                     getInstallationProcessingStatus: { -> ALL_DONE },
                     getFastqcProcessingStatus      : { -> ALL_DONE },
@@ -809,7 +809,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
             seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
             ((MergingWorkPackage) (bamFile.workPackage)).seqTracks = seqTracks
-            bamFile.workPackage.save()
+            bamFile.workPackage.save(flush: true)
             seqTrack2Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         }
 
@@ -1051,7 +1051,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withNewSession {
             analysisInstance = BamFilePairAnalysis.get(analysisInstance.id)
             analysisInstance.withdrawn = true
-            analysisInstance.save()
+            analysisInstance.save(flush: true)
             notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
@@ -1083,7 +1083,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             [1, 2].each {
                 saveBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
             }
-            analysisInstance.delete()
+            analysisInstance.delete(flush: true)
         }
 
         when:
@@ -1124,23 +1124,23 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             referenceGenomeProcessingOptions.each {
                 it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-                it.save()
+                it.save(flush: true)
             }
 
             switch (pairAnalysis.analysisType) {
                 case OtrsTicket.ProcessingStep.ACESEQ:
                     analysisInstance.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-                    analysisInstance.samplePair.save()
+                    analysisInstance.samplePair.save(flush: true)
                     DomainFactory.createSophiaInstance(analysisInstance.samplePair)
                     break
                 case OtrsTicket.ProcessingStep.RUN_YAPSA:
                     analysisInstance.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-                    analysisInstance.samplePair.save()
+                    analysisInstance.samplePair.save(flush: true)
                     DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: analysisInstance.samplePair])
                     break
             }
 
-            analysisInstance.delete()
+            analysisInstance.delete(flush: true)
         }
 
         when:
@@ -1181,10 +1181,10 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             referenceGenomeProcessingOptions.each {
                 it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-                it.save()
+                it.save(flush: true)
             }
 
-            analysisInstance.delete()
+            analysisInstance.delete(flush: true)
         }
 
         when:
@@ -1215,7 +1215,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withNewSession {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
-            analysisInstance.delete()
+            analysisInstance.delete(flush: true)
         }
 
         when:
@@ -1475,7 +1475,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     private static AbstractMergedBamFile saveBamFileInProjectFolder(AbstractMergedBamFile bamFile) {
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
-        bamFile.mergingWorkPackage.save()
+        bamFile.mergingWorkPackage.save(flush: true)
 
         return bamFile
     }
@@ -1520,7 +1520,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             // "manually" add seqtrack with mismatching seqPlatformGroup
             mergePackageA.seqTracks.add(seqTrackB)
-            mergePackageA.save()
+            mergePackageA.save(flush: true)
         }
 
         when: "looking for B"
@@ -1574,7 +1574,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             // "manually" remove seqtrack with matching seqPlatformGroup
             mergePackageA.seqTracks.remove(seqTrackB)
-            mergePackageA.save()
+            mergePackageA.save(flush: true)
         }
 
         when: "looking for B"

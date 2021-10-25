@@ -91,7 +91,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 (OtpProperty.PATH_PROCESSING_ROOT): tmpOutputDir.path + "/processing",
         ])
         realm = roddyBamFile.project.realm
-        assert realm.save()
+        assert realm.save(flush: true)
 
         roddyBaseConfigsPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH))
         roddyBaseConfigsPath.mkdirs()
@@ -170,7 +170,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         setupData()
         DomainFactory.createRoddyAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqTypeService.wholeGenomePairedSeqType
-        assert roddyBamFile.mergingWorkPackage.save()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         assert SeqTypeService.wholeGenomePairedSeqType.roddyName == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
     }
@@ -180,7 +180,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         setupData()
         DomainFactory.createRoddyAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqTypeService.exomePairedSeqType
-        assert roddyBamFile.mergingWorkPackage.save()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         assert SeqTypeService.exomePairedSeqType.roddyName == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
     }
@@ -190,7 +190,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         setupData()
         DomainFactory.createRoddyAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createSeqType(name: "differentSeqType")
-        assert roddyBamFile.mergingWorkPackage.save()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         assert TestCase.shouldFail(RuntimeException) {
             executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
@@ -287,7 +287,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         roddyBamFile.roddyExecutionDirectoryNames = [
                 RODDY_EXECUTION_DIR_NAME_1,
         ]
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
         assert roddyBamFile.workDirectory.mkdirs()
 
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
@@ -304,7 +304,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
                 RODDY_EXECUTION_DIR_NAME_1,
                 RODDY_EXECUTION_DIR_NAME_2,
         ]
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
 

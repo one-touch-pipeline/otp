@@ -37,7 +37,7 @@ abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpe
         setupData()
         SamplePair samplePair = setupSamplePair()
         setDependencyProcessingStatus(samplePair, SamplePair.ProcessingStatus.NEEDS_PROCESSING)
-        samplePair.save()
+        samplePair.save(flush: true)
 
         expect:
         null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
@@ -48,7 +48,7 @@ abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpe
         setupData()
         SamplePair samplePair = setupSamplePair()
         setDependencyProcessingStatus(samplePair, SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED)
-        samplePair.save()
+        samplePair.save(flush: true)
 
         createDependeeInstance(samplePair, AnalysisProcessingStates.FINISHED)
         createDependeeInstance(samplePair, AnalysisProcessingStates.IN_PROGRESS)

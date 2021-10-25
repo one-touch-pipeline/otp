@@ -104,7 +104,7 @@ class SophiaInstanceSpec extends Specification implements DataTest {
     void "getLatestValidSophiaInstanceForSamplePair, test if no instance exists, return null"() {
         given:
         SamplePair samplePair = instance.samplePair
-        instance.delete(flush: true)
+        instance.delete()
 
         expect:
         null == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair)

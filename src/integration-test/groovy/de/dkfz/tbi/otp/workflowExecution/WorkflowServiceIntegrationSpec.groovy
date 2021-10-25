@@ -55,7 +55,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         workflowStep.workflowRun.state = WorkflowRun.State.FAILED
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "asdf")
         WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun, outputRole: "qwertz")
-        workflowStep.workflowRun.save()
+        workflowStep.workflowRun.save(flush: true)
 
         when:
         service.createRestartedWorkflow(workflowStep, false)
@@ -76,7 +76,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: oldRun, outputRole: "asdf")
         WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: oldRun, outputRole: "qwertz")
         oldRun.state = WorkflowRun.State.FAILED
-        oldRun.save()
+        oldRun.save(flush: true)
         WorkflowArtefact wa3 = createWorkflowRunInputArtefact([
                 workflowRun: oldRun,
         ]).workflowArtefact

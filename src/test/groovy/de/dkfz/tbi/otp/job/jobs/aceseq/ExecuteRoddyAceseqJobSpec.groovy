@@ -269,8 +269,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
     }
 
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:

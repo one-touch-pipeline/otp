@@ -221,13 +221,13 @@ class MetaDataServiceTests implements UserAndRoles {
     private MetaDataEntry mockEntry() {
         DataFile dataFile = DomainFactory.createDataFile()
         assertTrue(dataFile.validate())
-        assertNotNull(dataFile.save())
+        assertNotNull(dataFile.save(flush: true))
         MetaDataKey key = new MetaDataKey(name: "Test")
         assertTrue(key.validate())
-        assertNotNull(key.save())
+        assertNotNull(key.save(flush: true))
         MetaDataEntry entry = new MetaDataEntry(value: "test", dataFile: dataFile, key: key)
         assertTrue(entry.validate())
-        entry = entry.save()
+        entry = entry.save(flush: true)
         assertNotNull(entry)
         return entry
     }

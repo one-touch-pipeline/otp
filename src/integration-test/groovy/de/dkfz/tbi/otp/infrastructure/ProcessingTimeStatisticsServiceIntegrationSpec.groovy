@@ -86,14 +86,14 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         // values that are searched for are set explicitly, otherwise they could contain the search term depending on the order tests are executed
         def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122411111111",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
         seqTrackA.sample.individual.project.name = "proj_1"
-        seqTrackA.sample.individual.project.save()
+        seqTrackA.sample.individual.project.save(flush: true)
         seqTrackA.run.name = "run_1"
-        seqTrackA.run.save()
+        seqTrackA.run.save(flush: true)
         SeqTrack seqTrackB = createOtrsTicketWithSeqTrack([dateCreated: TimeUtils.toDate(dateFrom), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])[1] as SeqTrack
         seqTrackB.sample.individual.project.name = "proj_2"
-        seqTrackB.sample.individual.project.save()
+        seqTrackB.sample.individual.project.save(flush: true)
         seqTrackB.run.name = "run_2"
-        seqTrackB.run.save()
+        seqTrackB.run.save(flush: true)
 
         expect:
         [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, '234')
@@ -114,7 +114,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
     void "formatData, when all fine, return formatted ticket information"() {
         given:
         Comment comment = new Comment(comment: "comment", author: "me", modificationDate: new Date())
-        comment.save()
+        comment.save(flush: true)
 
         OtrsTicket ticket = DomainFactory.createOtrsTicket(
                 submissionReceivedNotice: new Date() - 1,

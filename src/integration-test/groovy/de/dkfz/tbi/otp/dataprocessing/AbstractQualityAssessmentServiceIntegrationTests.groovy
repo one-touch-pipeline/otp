@@ -60,7 +60,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
             length = REFERENCE_GENOME_LENGTH_WITH_N
             lengthWithoutN = REFERENCE_GENOME_LENGTH
         }
-        assert data.referenceGenome.save()
+        assert data.referenceGenome.save([flush: true])
         DomainFactory.createAllAlignableSeqTypes()
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
     }
@@ -87,11 +87,11 @@ class AbstractQualityAssessmentServiceIntegrationTests {
                 insertSizeCV: 123,
                 percentageMatesOnDifferentChr: 0.123,
         ])
-        assert mergedQa.save()
+        assert mergedQa.save(flush: true)
 
         roddyBamFile.referenceGenome.length = REFERENCE_GENOME_LENGTH_WITH_N
         roddyBamFile.referenceGenome.lengthWithoutN = REFERENCE_GENOME_LENGTH
-        assert roddyBamFile.referenceGenome.save()
+        assert roddyBamFile.referenceGenome.save(flush: true)
 
         abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
 

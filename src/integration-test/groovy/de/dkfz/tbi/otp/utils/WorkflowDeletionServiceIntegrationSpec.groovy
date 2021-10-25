@@ -47,7 +47,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         createWorkflowSteps(wria.workflowRun)
         wria.workflowArtefact.producedBy = workflowRun
         wria.workflowArtefact.outputRole = "someOutPutRole"
-        wria.save()
+        wria.save(flush: true)
 
         when:
         workflowDeletionService.deleteWorkflowRun(workflowRun)

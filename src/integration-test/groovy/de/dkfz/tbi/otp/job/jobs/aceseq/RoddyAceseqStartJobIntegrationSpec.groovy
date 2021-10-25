@@ -68,7 +68,7 @@ class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
 
         // prepare a "finished" sophia analysis, since we depend on that.
         samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        samplePair.save()
+        samplePair.save(flush: true)
         createDependeeInstance(samplePair, AnalysisProcessingStates.FINISHED)
 
         return samplePair

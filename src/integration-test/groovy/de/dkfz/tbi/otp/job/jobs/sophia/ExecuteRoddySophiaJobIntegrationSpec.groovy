@@ -90,10 +90,10 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         CreateRoddyFileHelper.createInsertSizeFiles(sophiaInstance)
 
         bamFileDisease.mergingWorkPackage.bamFileInProjectFolder = bamFileDisease
-        assert bamFileDisease.mergingWorkPackage.save()
+        assert bamFileDisease.mergingWorkPackage.save(flush: true)
 
         bamFileControl.mergingWorkPackage.bamFileInProjectFolder = bamFileControl
-        assert bamFileControl.mergingWorkPackage.save()
+        assert bamFileControl.mergingWorkPackage.save(flush: true)
 
         Path finalBamFileControlPath = job.sophiaService.getWorkDirectory(sophiaInstance).resolve("${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam")
         Path finalBamFileDiseasePath = job.sophiaService.getWorkDirectory(sophiaInstance).resolve("${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam")

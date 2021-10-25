@@ -187,8 +187,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         errorMessage == e.cause.message
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     @Unroll
     void "validate, when #file not exist, throw assert"() {
         given:

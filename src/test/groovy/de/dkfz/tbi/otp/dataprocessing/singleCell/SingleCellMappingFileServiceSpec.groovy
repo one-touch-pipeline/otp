@@ -80,8 +80,6 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         return data
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "addMappingFileEntryIfMissing, when file not exist, then create it with entry"() {
         given:
         List<DataFile> dataFiles = [createDataFile()]
@@ -134,8 +132,6 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         mappingFile.text == existingData
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "addMappingFileEntryIfMissingForAllViableDataFiles, creates file and adds the entry if not already contained"() {
         given:
         List<DataFile> dataFiles = [

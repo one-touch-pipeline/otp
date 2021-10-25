@@ -66,7 +66,7 @@ class SampleIdentifierIntegrationSpec extends Specification {
         sampleIdentifier.name = INCORRECT_NAME
 
         when:
-        sampleIdentifier.save()
+        sampleIdentifier.save(flush: true)
 
         then:
         thrown(ValidationException)
@@ -78,7 +78,7 @@ class SampleIdentifierIntegrationSpec extends Specification {
         createRegex(sampleIdentifier.sample.project)
 
         expect:
-        sampleIdentifier.save()
+        sampleIdentifier.save(flush: true)
     }
 
     void "validation passes, name does not match regex, but it is for a different project"() {
@@ -88,6 +88,6 @@ class SampleIdentifierIntegrationSpec extends Specification {
         sampleIdentifier.name = INCORRECT_NAME
 
         expect:
-        sampleIdentifier.save()
+        sampleIdentifier.save(flush: true)
     }
 }

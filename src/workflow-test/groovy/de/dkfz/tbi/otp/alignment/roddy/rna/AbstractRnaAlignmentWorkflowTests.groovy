@@ -249,7 +249,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                     .alignmentProperties.collect {
                 new MergingWorkPackageAlignmentProperty(name: it.name, value: it.value, mergingWorkPackage: workPackage)
             })
-            workPackage.save()
+            workPackage.save(flush: true)
         }
         assert ReferenceGenomeProjectSeqTypeAlignmentProperty.list().size() >= 1
         assert MergingWorkPackageAlignmentProperty.list().size() >= 1

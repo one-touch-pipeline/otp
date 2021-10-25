@@ -52,10 +52,10 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
             ])
             roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
                 seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-                assert seqTrack.save()
+                assert seqTrack.save(flush: true)
                 DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
                     dataFile.nReads = READ_COUNTS
-                    assert dataFile.save()
+                    assert dataFile.save(flush: true)
                 }
             }
         }
@@ -72,7 +72,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegr
                 RoddyBamFile roddyBamFile1 = RoddyBamFile.get(id)
                 roddyBamFile1.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
                 roddyBamFile1.md5sum = null
-                assert roddyBamFile1.save()
+                assert roddyBamFile1.save(flush: true)
                 return roddyBamFile1
             }
             movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->

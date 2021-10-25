@@ -71,7 +71,7 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
 
         // fake a "finished" SNV calling for us to analyse
         samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        samplePair.save()
+        samplePair.save(flush: true)
 
         createDependeeInstance(samplePair, AnalysisProcessingStates.FINISHED)
 

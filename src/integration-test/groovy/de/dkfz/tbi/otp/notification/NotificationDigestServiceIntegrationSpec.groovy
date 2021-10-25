@@ -76,7 +76,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         FastqImportInstance fastqImportInstance1 = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFiles1)
         dataFiles1.each {
             it.fastqImportInstance = fastqImportInstance1
-            it.save()
+            it.save(flush: true)
         }
 
         SeqTrack seqTrack3 = createSeqTrackWithOneDataFile()
@@ -84,7 +84,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         FastqImportInstance fastqImportInstance2 = createFastqImportInstance(otrsTicket: otrsTicket, dataFiles: dataFiles2)
         dataFiles2.each {
             it.fastqImportInstance = fastqImportInstance2
-            it.save()
+            it.save(flush: true)
         }
 
         List<OtrsTicket.ProcessingStep> processingSteps = [

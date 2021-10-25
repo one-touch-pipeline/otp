@@ -96,7 +96,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
         createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
-        projectGroup.save()
+        projectGroup.save(flush: true)
 
         Realm realm = DomainFactory.createDefaultRealmWithProcessingOption()
 
@@ -674,7 +674,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String analysisDirectory = "${temporaryFolder.newFolder()}/dirA"
         Project project = Project.findByName("testProject")
         project.unixGroup = configService.testingGroup
-        project.save()
+        project.save(flush: true)
 
         when:
         assert !project.dirAnalysis
@@ -1687,7 +1687,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         Project project = createProject()
         project.dateCreated = baseDate - 1
-        project.save()
+        project.save(flush: true)
 
         when:
         int projects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, [project])

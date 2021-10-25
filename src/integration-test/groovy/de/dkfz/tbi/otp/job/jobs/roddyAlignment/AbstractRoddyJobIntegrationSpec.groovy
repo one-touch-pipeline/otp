@@ -273,7 +273,7 @@ newLine"""
         ] as AbstractRoddyJob
 
         Realm realm = DomainFactory.createRealm()
-        realm.save()
+        realm.save(flush: true)
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep

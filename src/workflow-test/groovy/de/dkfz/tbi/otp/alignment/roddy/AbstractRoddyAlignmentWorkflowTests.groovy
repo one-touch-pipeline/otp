@@ -135,7 +135,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                         targetSize: 62085295,
                         mergedTargetSize: 62085286,
                 )
-                assert bedFile.save()
+                assert bedFile.save(flush: true)
             }
 
             setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
@@ -183,7 +183,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 shortDisplayName: "~* xX lPk Xx *~",
                 adapterFile: new File(inputRootDirectory, 'adapters/TruSeq3-PE.fa').absolutePath,
                 reverseComplementAdapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-        ).save()
+        ).save(flush: true)
 
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 pipeline: pipeline,
@@ -195,13 +195,13 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         )
 
         workPackage.individual.pid = 'pid_4'  // This name is encoded in @RG of the test BAM file
-        workPackage.individual.save()
+        workPackage.individual.save(flush: true)
 
         workPackage.sampleType.name = "control"
-        workPackage.sampleType.save()
+        workPackage.sampleType.save(flush: true)
 
         workPackage.project.realm = realm
-        workPackage.project.save()
+        workPackage.project.save(flush: true)
 
         workPackage.seqPlatformGroup.mergingCriteria = DomainFactory.createMergingCriteria(
                 project: workPackage.individual.project,
@@ -209,7 +209,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 useLibPrepKit: !seqType.wgbs,
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
-        workPackage.seqPlatformGroup.save()
+        workPackage.seqPlatformGroup.save(flush: true)
 
         return workPackage
     }
@@ -246,19 +246,19 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         if (findSeqType().wgbs || findSeqType().chipSeq) {
             seqTrack.libraryPreparationKit = exactlyOneElement(LibraryPreparationKit.findAll())
             seqTrack.kitInfoReliability = InformationReliability.KNOWN
-            seqTrack.save()
+            seqTrack.save(flush: true)
         }
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
             dataFile.nReads = NUMBER_OF_READS
-            dataFile.save()
+            dataFile.save(flush: true)
         }
 
         linkFastqFiles(seqTrack, testFastqFiles.get(readGroupNum))
 
         workPackage.needsProcessing = true
-        workPackage.save()
+        workPackage.save(flush: true)
         return seqTrack
     }
 
@@ -327,7 +327,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         if (!oldStructure) {
             firstBamFile.workDirectoryName = "${RoddyBamFile.WORK_DIR_PREFIX}_0"
         }
-        assert firstBamFile.save()
+        assert firstBamFile.save(flush: true)
 
         Map<File, String> filesWithContent = [:]
         Map<File, String> links = [:]
@@ -352,7 +352,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         workPackage.bamFileInProjectFolder = firstBamFile
         workPackage.needsProcessing = false
-        assert workPackage.save()
+        assert workPackage.save(flush: true)
 
         return firstBamFile
     }
@@ -360,7 +360,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     static void setUpFingerPrintingFile() {
         ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.list())
         referenceGenome.fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
-        assert referenceGenome.save()
+        assert referenceGenome.save(flush: true)
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
@@ -683,7 +683,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     void fastTrackSetup() {
         SeqTrack seqTrack = createSeqTrack("readGroup1")
-        assert seqTrack.project.save()
+        assert seqTrack.project.save(flush: true)
         updateProcessingPriorityToFastrack()
     }
 

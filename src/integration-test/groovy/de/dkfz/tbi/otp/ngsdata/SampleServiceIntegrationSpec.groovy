@@ -43,7 +43,7 @@ class SampleServiceIntegrationSpec extends Specification implements DomainFactor
 
         Sample sample = createSample()
         sample.dateCreated = baseDate - 1
-        sample.save()
+        sample.save(flush: true)
 
         when:
         int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, [sample.project])

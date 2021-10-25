@@ -189,7 +189,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
     private SamplePair setSamplePairStatusToNeedProcessing_setup(ProcessingStatus processingStatus, String analysisName) {
         SamplePair samplePair = DomainFactory.createDisease(DomainFactory.createRoddyBamFile().workPackage)
         samplePair."${analysisName}ProcessingStatus" = processingStatus
-        assert samplePair.save()
+        assert samplePair.save(flush: true)
         return samplePair
     }
 }

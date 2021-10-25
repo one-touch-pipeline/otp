@@ -404,9 +404,9 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         setupData()
         JobExecutionPlan plan = mockPlan()
         StartJobDefinition startJob = new StartJobDefinition(name: "StartJobTest", bean: "testStartJob", plan: plan)
-        assertNotNull(startJob.save())
+        assertNotNull(startJob.save(flush: true))
         plan.startJob = startJob
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
@@ -458,7 +458,7 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         setupData()
         ProcessingError processingError = mockProcessingError()
         processingError.stackTraceIdentifier = null
-        assertNotNull(processingError.save())
+        assertNotNull(processingError.save(flush: true))
         processService.getProcessingErrorStackTrace(processingError.id)
     }
 
@@ -515,25 +515,25 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
 
     private JobExecutionPlan mockPlan(String name = "test") {
         JobExecutionPlan plan = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         return plan
     }
 
     private Process mockProcess(JobExecutionPlan plan) {
         Process process = new Process(started: new Date(), startJobClass: "foo", jobExecutionPlan: plan)
-        assertNotNull(process.save())
+        assertNotNull(process.save(flush: true))
         return process
     }
 
     private ProcessingStep mockProcessingStep(Process process, JobDefinition job) {
         ProcessingStep processingStep = new ProcessingStep(jobDefinition: job, process: process)
-        assertNotNull(processingStep.save())
+        assertNotNull(processingStep.save(flush: true))
         return processingStep
     }
 
     private ProcessingStepUpdate mockProcessingStepUpdate(ProcessingStep step, ExecutionState state = ExecutionState.CREATED, ProcessingStepUpdate previous = null) {
         ProcessingStepUpdate update = new ProcessingStepUpdate(previous: previous, state: state, date: new Date(), processingStep: step)
-        assertNotNull(update.save())
+        assertNotNull(update.save(flush: true))
         return update
     }
 
@@ -544,14 +544,14 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
         update.state = ExecutionState.FAILURE
-        assertNotNull(update.save())
+        assertNotNull(update.save(flush: true))
 
         ProcessingError processingError = new ProcessingError(
                         processingStepUpdate: update,
                         errorMessage: "errorMessage",
                         stackTraceIdentifier: "stackTraceIdentifier"
                         )
-        assertNotNull(processingError.save())
+        assertNotNull(processingError.save(flush: true))
         return processingError
     }
 
@@ -566,15 +566,15 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
     @Deprecated
     private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save())
-        assertNotNull(test2.save())
-        assertNotNull(input.save())
-        assertNotNull(input2.save())
+        assertNotNull(test.save(flush: true))
+        assertNotNull(test2.save(flush: true))
+        assertNotNull(input.save(flush: true))
+        assertNotNull(input2.save(flush: true))
         return jobDefinition
     }
 }

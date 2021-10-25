@@ -103,11 +103,11 @@ class AbstractMultiJobTests implements UserAndRoles {
             JobDefinition.withTransaction {
                 ProcessingStepUpdate.list().each {
                     it.error = null
-                    it.save()
+                    it.save(flush: true)
                 }
                 JobExecutionPlan.list().each {
                     it.firstJob = null
-                    it.save()
+                    it.save(flush: true)
                 }
                 [
                         ClusterJob,
@@ -120,7 +120,7 @@ class AbstractMultiJobTests implements UserAndRoles {
                         JobExecutionPlan,
                 ].each {
                     it.list(sort: "id", order: "desc").each {
-                        it.delete()
+                        it.delete(flush: true)
                     }
                 }
             }
@@ -231,7 +231,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //first cluster job of phase 1 finished
             ClusterJob clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_2_ID)
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-            clusterJob.save()
+            clusterJob.save(flush: true)
 
             //check that the expected cluster jobs are in checking
             assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING)*.clusterJobId == [CLUSTER_JOB_1_ID]
@@ -256,7 +256,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //second cluster job of phase 1 finished
             clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_1_ID)
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-            clusterJob.save()
+            clusterJob.save(flush: true)
 
             //check that no further jobs are in checking
             assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).empty
@@ -279,7 +279,7 @@ class AbstractMultiJobTests implements UserAndRoles {
                 //plan otp shutdown
                 job.planSuspend()
                 assert job.resumable
-                assert createProcessingStepUpdate(step, ExecutionState.SUSPENDED).save()
+                assert createProcessingStepUpdate(step, ExecutionState.SUSPENDED).save(flush: true)
 
                 //simulate OTP restart, so new job instance are used
                 final AbstractMultiJob newJobInstance = createJob(mainLogic)
@@ -289,7 +289,7 @@ class AbstractMultiJobTests implements UserAndRoles {
                 job = newJobInstance
 
                 //init new job instance with state
-                assert createProcessingStepUpdate(step, ExecutionState.RESUMED).save()
+                assert createProcessingStepUpdate(step, ExecutionState.RESUMED).save(flush: true)
                 scheduler.executeJob(job)
                 assert atomicPhase.get() == 2
                 assert job.state == AbstractJobImpl.State.STARTED
@@ -302,7 +302,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //cluster job of phase 2 finished
             clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_3_ID)
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-            clusterJob.save()
+            clusterJob.save(flush: true)
 
             //check that no further cluster job is in checking
             assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).empty
@@ -385,7 +385,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //first cluster job of phase 1 finished
             ClusterJob clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_1_ID)
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-            clusterJob.save()
+            clusterJob.save(flush: true)
 
             oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
             assert atomicPhase.get() == 1
@@ -395,7 +395,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             //second cluster job of phase 1 finished
             clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_2_ID)
             clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-            clusterJob.save()
+            clusterJob.save(flush: true)
 
             oldClusterJobMonitor.handleFinishedClusterJobs(clusterJob)
             assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)

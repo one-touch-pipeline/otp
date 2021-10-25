@@ -108,10 +108,10 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
         roddyBamFile.fileSize = roddyBamFile.getFinalBamFile().size()
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
 
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         prepareDataFilesOnFileSystem(roddyBamFile2)
@@ -130,7 +130,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         SeqType exomeSeqType = DomainFactory.createExomeSeqType()
         roddyBamFile.mergingWorkPackage.seqType = exomeSeqType
-        assert roddyBamFile.mergingWorkPackage.save()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
@@ -154,7 +154,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         setupData()
         ReferenceGenome referenceGenome = roddyBamFile.referenceGenome
         referenceGenome.fingerPrintingFileName = "fingerprintingFile"
-        assert referenceGenome.save()
+        assert referenceGenome.save(flush: true)
 
         File fingerPrintingFile = executePanCanJob.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome, false)
         CreateFileHelper.createFile(fingerPrintingFile)
@@ -203,10 +203,10 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileSize = roddyBamFile.getWorkBaiFile().size()
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
 
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         prepareDataFilesOnFileSystem(roddyBamFile2)
@@ -249,7 +249,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     void testGetFilesToMerge_WrongCountOfDataFileForSeqTrack_ShouldFail() {
         setupData()
         DataFile dataFile = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).first()
-        dataFile.delete()
+        dataFile.delete(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.getFilesToMerge(roddyBamFile)
@@ -276,7 +276,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         setupData()
         DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).each {
             it.fileSize = 12345
-            assert it.save()
+            assert it.save(flush: true)
         }
 
         assert TestCase.shouldFail(AssertionError) {
@@ -328,7 +328,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     void testWorkflowSpecificValidation_RnaBamFile_AllFine() {
         setupData()
         RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile()
-        assert roddyBamFile.project.save()
+        assert roddyBamFile.project.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         executePanCanJob.workflowSpecificValidation(roddyBamFile)
@@ -338,7 +338,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     void testWorkflowSpecificValidation_RnaBamFile_ChimericFileDoesNotExist() {
         setupData()
         RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile()
-        assert roddyBamFile.project.save()
+        assert roddyBamFile.project.save(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.workflowSpecificValidation(roddyBamFile)
@@ -360,7 +360,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     private void createFileAndAddFileSize(File file, DataFile dataFile) {
         CreateFileHelper.createFile(file)
         dataFile.fileSize = file.length()
-        assert dataFile.save()
+        assert dataFile.save(flush: true)
     }
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {

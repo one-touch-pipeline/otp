@@ -39,125 +39,6 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
 
     private final EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 
-    void "createAndSaveSampleSubmissionObjects, when a #name, then throw an assertion"() {
-        given:
-        Sample sample = createSample()
-        SeqType seqType = createSeqType()
-        EgaSubmission submission = createEgaSubmission(project: projectMissmatch ? createProject() : sample.project)
-
-        String id = "${sample.id + offsetSample}-${seqType.id + offsetSeqType}"
-
-        when:
-        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains(message)
-
-        where:
-        name                      | offsetSample | offsetSeqType | projectMissmatch || message
-        'sample not found'        | 1            | 0             | false            || 'sample'
-        'seqType not found'       | 0            | 1             | false            || 'seqType'
-        'sample of other project' | 0            | 0             | true             || 'project'
-    }
-
-    void "createAndSaveSampleSubmissionObjects, when input is valid, then create the sampleSubmission objects"() {
-        given:
-        EgaSubmission submission = createEgaSubmission()
-        Sample sample1 = createSample(individual: createIndividual(project: submission.project))
-        Sample sample2 = createSample(individual: createIndividual(project: submission.project))
-        Sample sample3 = createSample(individual: createIndividual(project: submission.project))
-        //set name and dirname explicit, since it use the method of IsPipeline and not DomainFactoryCore
-        SeqType seqType1 = createSeqType(name: 'a', dirName: 'a')
-        SeqType seqType2 = createSeqType(name: 'b', dirName: 'b')
-        SeqType seqType3 = createSeqType(name: 'c', dirName: 'c')
-        List<String> ids = [
-                "${sample1.id}-${seqType1.id}",
-                "${sample1.id}-${seqType2.id}",
-                "${sample2.id}-${seqType3.id}",
-                "${sample3.id}-${seqType3.id}",
-        ]*.toString()
-
-        when:
-        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, ids)
-
-        then:
-        submission.refresh()
-        submission.samplesToSubmit.size() == 4
-        List<String> returnedValues = submission.samplesToSubmit.collect {
-            "${it.sample.id}-${it.seqType.id}".toString()
-        }
-        TestCase.assertContainSame(ids, returnedValues)
-        submission.selectionState == EgaSubmission.SelectionState.SAMPLE_INFORMATION
-    }
-
-    void "deleteSampleSubmissionObjects, when called, then all samples are removed from the submission"() {
-        given:
-        EgaSubmission submission = createEgaSubmission()
-        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
-        submission.addToSamplesToSubmit(sampleSubmissionObject)
-
-        when:
-        List l = egaSubmissionService.deleteSampleSubmissionObjects(submission)
-
-        then:
-        submission.samplesToSubmit.empty
-        l == ["${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType}"]
-    }
-
-    void "createDataFileSubmissionObjects, when called, then create the DataFileSubmissionObject and connect it with the submission"() {
-        given:
-        EgaSubmission submission = createEgaSubmission()
-        List<Boolean> selectBox = [
-                true,
-                null,
-                true,
-                false,
-                true,
-        ]
-        int size = selectBox.size()
-
-        List<String> fastQFileIds = (1..size).collect { createDataFile() }*.id*.toString()
-        List<String> egaSampleIds = (1..size).collect { createSampleSubmissionObject() }*.id*.toString()
-
-        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
-                submission: submission,
-                selectBox : selectBox,
-                fastqFile : fastQFileIds,
-                egaSample : egaSampleIds,
-        ])
-
-        when:
-        egaSubmissionService.createDataFileSubmissionObjects(cmd)
-
-        then:
-        submission.dataFilesToSubmit.size() == DataFileSubmissionObject.findAll().size()
-    }
-
-    void "updateDataFileSubmissionObjects, when called with new alias, then the aliases are adapted"() {
-        given:
-        EgaSubmission submission = createEgaSubmission()
-        String egaFileAlias = "someMagicAlias"
-        DataFile dataFile = createDataFile()
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
-                dataFile: dataFile,
-        )
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
-
-        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
-                submission  : submission,
-                fastqFile   : [dataFile.id.toString()],
-                egaSample   : [dataFileSubmissionObject.sampleSubmissionObject.id.toString()],
-                egaFileAlias: [egaFileAlias],
-        ])
-
-        when:
-        egaSubmissionService.updateDataFileSubmissionObjects(cmd)
-
-        then:
-        dataFileSubmissionObject.egaAliasName == egaFileAlias
-    }
-
     @Unroll
     void "checkFastqFiles, when withDataFile is #withDataFile and fileExists is #fileExists and withdrawn is #withdrawn, then result is #result"() {
         given:
@@ -181,7 +62,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
                 project: seqTrack.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
-        submission.save()
+        submission.save(flush: true)
 
         when:
         Map map = egaSubmissionService.checkFastqFiles(submission)
@@ -207,7 +88,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         )
         if (bamFileInProjectFolderSet) {
             roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
-            roddyBamFile.workPackage.save()
+            roddyBamFile.workPackage.save(flush: true)
         }
 
         SampleSubmissionObject sampleSubmissionObject
@@ -224,7 +105,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
                 project: sampleSubmissionObject.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
-        submission.save()
+        submission.save(flush: true)
 
         when:
         Map map = egaSubmissionService.checkBamFiles(submission)
@@ -384,7 +265,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         )
         if (bamFileInProjectFolderSet) {
             roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
-            roddyBamFile.workPackage.save()
+            roddyBamFile.workPackage.save(flush: true)
         }
 
         SampleSubmissionObject sampleSubmissionObject
@@ -498,7 +379,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         bamFile.addToSeqTracks(seqTrack2)
         bamFile.addToSeqTracks(seqTrack3)
         bamFile.numberOfMergedLanes = 3
-        bamFile.save()
+        bamFile.save(flush: true)
 
         EgaSubmission submission = createEgaSubmission(
                 bamFilesToSubmit: [bamFileSubmissionObject],

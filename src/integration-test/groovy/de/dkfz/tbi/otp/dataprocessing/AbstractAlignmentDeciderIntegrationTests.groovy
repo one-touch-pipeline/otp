@@ -107,7 +107,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save()
+        seqTrack.save(flush: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
         assert workPackages.empty
@@ -118,7 +118,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         setupData()
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.seqType = DomainFactory.createSeqType(name: "Invalid")
-        seqTrack.save()
+        seqTrack.save(flush: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
         assert workPackages.empty
@@ -169,7 +169,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.dataFiles*.fastqImportInstance = fastqImportInstance
-        seqTrack.dataFiles*.save()
+        seqTrack.dataFiles*.save(flush: true)
 
         boolean emailIsSent = false
 
@@ -197,7 +197,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
-        seqTrack.save()
+        seqTrack.save(flush: true)
 
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
@@ -206,7 +206,7 @@ class AbstractAlignmentDeciderIntegrationTests {
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
                 statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
-        workPackage.save()
+        workPackage.save(flush: true)
 
         return [seqTrack, workPackage]
     }
@@ -222,7 +222,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
         seqTrack.dataFiles*.fastqImportInstance = fastqImportInstance
-        seqTrack.dataFiles*.save()
+        seqTrack.dataFiles*.save(flush: true)
 
         boolean emailIsSent = false
 
@@ -275,7 +275,7 @@ class AbstractAlignmentDeciderIntegrationTests {
                 pipeline: findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
                 statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
-        workPackage.save()
+        workPackage.save(flush: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
 
@@ -323,7 +323,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         setupData()
         SeqTrack seqTrack = buildSeqTrack()
 
-        exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete()
+        exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete(flush: true)
 
         shouldFail(RuntimeException, {
             decider.ensureConfigurationIsComplete(seqTrack)
@@ -339,10 +339,10 @@ class AbstractAlignmentDeciderIntegrationTests {
         SeqTrack seqTrack = testData.createExomeSeqTrack(testData.run)
         seqTrack.libraryPreparationKit = null
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
-        seqTrack.save()
+        seqTrack.save(flush: true)
 
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save()
+        dataFile.save(flush: true)
 
         shouldFail(RuntimeException, {
             decider.ensureConfigurationIsComplete(seqTrack)
@@ -356,7 +356,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save()
+        seqTrack.save(flush: true)
 
         assert decider.canPipelineAlign(seqTrack)
     }
@@ -370,7 +370,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType(SequencingReadType.MATE_PAIR)
 
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
-        seqTrack.save()
+        seqTrack.save(flush: true)
 
         assert !decider.canPipelineAlign(seqTrack)
     }
@@ -380,10 +380,10 @@ class AbstractAlignmentDeciderIntegrationTests {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save()
+        seqTrack.save(flush: true)
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save()
+        dataFile.save(flush: true)
 
         return seqTrack
     }

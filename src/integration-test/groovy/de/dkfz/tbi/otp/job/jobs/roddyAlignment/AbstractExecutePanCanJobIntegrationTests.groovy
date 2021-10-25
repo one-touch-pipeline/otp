@@ -117,7 +117,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
         CreateFileHelper.createFile(configFile)
         RoddyWorkflowConfig config = roddyBamFile.config
         config.configFilePath = configFile.path
-        assert config.save()
+        assert config.save(flush: true)
 
         chromosomeStatSizeFile = abstractExecutePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false)
         CreateFileHelper.createFile(chromosomeStatSizeFile)
@@ -174,7 +174,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
     void testPrepareAndReturnWorkflowSpecificCommand_MinimalPriority_AllFine() {
         setupData()
         roddyBamFile.project.processingPriority = findOrCreateProcessingPriorityMinimum()
-        roddyBamFile.project.save()
+        roddyBamFile.project.save(flush: true)
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
                 "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${PRIORITY_NAME_MINIMUM}")
     }
@@ -183,7 +183,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
     void testPrepareAndReturnWorkflowSpecificCommand_FasttrackPriority_AllFine() {
         setupData()
         roddyBamFile.project.processingPriority = findOrCreateProcessingPriorityFastrack()
-        roddyBamFile.project.save()
+        roddyBamFile.project.save(flush: true)
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
                 "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${PRIORITY_NAME_FASTTRACK}")
     }
@@ -192,7 +192,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
     void testPrepareAndReturnWorkflowSpecificCommand_OverFasttrackPriority_AllFine() {
         setupData()
         roddyBamFile.project.processingPriority = findOrCreateProcessingPriorityMaximum()
-        roddyBamFile.project.save()
+        roddyBamFile.project.save(flush: true)
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper(
                 "${roddyBamFile.config.programVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-${PRIORITY_NAME_MAXIMUM}")
     }

@@ -121,7 +121,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
-            dataFile.save()
+            dataFile.save(flush: true)
             DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.SAMPLE_NAME.name(), "asdfg")
         }
 
@@ -152,7 +152,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
             crmwp.seqTracks = createNSeqTracks(p.nLanes)
             mwp.expectedCells = p.expected
             mwp.enforcedCells = p.enforced
-            crmwp.save()
+            crmwp.save(flush: true)
         }
 
         when:

@@ -171,7 +171,7 @@ class PlanValidatorServiceIntegrationTests {
         JobDefinition jobDefinition = JobDefinition.findByNameAndPlan('testJob', jep)
         JobDefinition jobDefinition2 = JobDefinition.findByNameAndPlan('testJob2', jep)
         jobDefinition2.next = jobDefinition
-        assertNotNull(jobDefinition2.save())
+        assertNotNull(jobDefinition2.save(flush: true))
         List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.CIRCULAR_JOBS, errors[0])
@@ -187,7 +187,7 @@ class PlanValidatorServiceIntegrationTests {
         JobExecutionPlan jep = JobExecutionPlan.list().last()
         JobDefinition jobDefinition = JobDefinition.findByNameAndPlan('testJob', jep)
         jobDefinition.next = null
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.NOT_ALL_JOBS_LINKED, errors[0])
@@ -197,13 +197,13 @@ class PlanValidatorServiceIntegrationTests {
     void testValidatorBeanIsValidatingJob() {
         JobExecutionPlan plan = createTestPlan()
         JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         ValidatingJobDefinition validator = new ValidatingJobDefinition(name: "validator", bean: "testEndStateAwareJob", validatorFor: jobDefinition, plan: plan)
-        assertNotNull(validator.save())
+        assertNotNull(validator.save(flush: true))
         jobDefinition.next = validator
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         List<String> errors = planValidatorService.validate(plan)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE + "${validator.id}, testEndStateAwareJob", errors[0])
@@ -213,15 +213,15 @@ class PlanValidatorServiceIntegrationTests {
     void testValidatorBeforeToValidateJobDefinition() {
         JobExecutionPlan plan = createTestPlan()
         JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testEndStateAwareJob", plan: plan)
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         ValidatingJobDefinition validatingJobDefinition = new ValidatingJobDefinition(name: "validator", bean: "validatingTestJob", validatorFor: jobDefinition, plan: plan)
-        assertNotNull(validatingJobDefinition.save())
+        assertNotNull(validatingJobDefinition.save(flush: true))
         validatingJobDefinition.next = jobDefinition
-        assertNotNull(validatingJobDefinition.save())
+        assertNotNull(validatingJobDefinition.save(flush: true))
         jobDefinition.next = null
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         plan.firstJob = validatingJobDefinition
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         List<String> errors = planValidatorService.validate(plan)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.VALIDATOR_LOOP, errors[0])
@@ -231,13 +231,13 @@ class PlanValidatorServiceIntegrationTests {
     void testValidatedJobNotEndstateAware() {
         JobExecutionPlan plan = createTestPlan()
         JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testEndStateAwareJob", plan: plan)
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         ValidatingJobDefinition validatingJobDefinition = new ValidatingJobDefinition(name: "validator", bean: "validatingTestJob", validatorFor: jobDefinition, plan: plan)
-        assertNotNull(validatingJobDefinition.save())
+        assertNotNull(validatingJobDefinition.save(flush: true))
         jobDefinition.next = validatingJobDefinition
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         List<String> errors = planValidatorService.validate(plan)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.VALIDATOR_ON_ENDSTATE + "${validatingJobDefinition.id}, validatingTestJob", errors[0])
@@ -247,28 +247,28 @@ class PlanValidatorServiceIntegrationTests {
     void testCorrectPlan() {
         JobExecutionPlan plan = createTestPlan()
         JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         JobDefinition jobDefinition2 = new JobDefinition(name: "testJob2", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition2.save())
+        assertNotNull(jobDefinition2.save(flush: true))
         jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         JobDefinition jobDefinition3 = new JobDefinition(name: "testJob3", bean: "testEndStateAwareJob", plan: plan)
-        assertNotNull(jobDefinition3.save())
+        assertNotNull(jobDefinition3.save(flush: true))
         jobDefinition2.next = jobDefinition3
-        assertNotNull(jobDefinition2.save())
+        assertNotNull(jobDefinition2.save(flush: true))
         plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
 
         assertTrue(planValidatorService.validate(plan).isEmpty())
     }
 
     private JobExecutionPlan createTestPlan() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", planVersion: 0, enabled: true)
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         StartJobDefinition startJob = new StartJobDefinition(name: "test", bean: "testStartJob", plan: plan)
-        assertNotNull(startJob.save())
+        assertNotNull(startJob.save(flush: true))
         plan.startJob = startJob
-        assertNotNull(plan.save())
+        assertNotNull(plan.save(flush: true))
         return plan
     }
 }

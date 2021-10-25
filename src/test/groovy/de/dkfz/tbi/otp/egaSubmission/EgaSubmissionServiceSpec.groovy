@@ -26,6 +26,7 @@ import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -247,6 +248,81 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         'three'    | '1-2-3'
     }
 
+    void "createAndSaveSampleSubmissionObjects, when a sample could not be found, then throw an assertion"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        String id = "${sample.id + 1}-${seqType.id}"
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('sample')
+    }
+
+    void "createAndSaveSampleSubmissionObjects, when a seqType could not be found, then throw an assertion"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        String id = "${sample.id}-${seqType.id + 1}"
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('seqType')
+    }
+
+    void "createAndSaveSampleSubmissionObjects, when a sample is of another project then the submission, then throw an assertion"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        String id = "${sample.id}-${seqType.id}"
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('project')
+    }
+
+    void "createAndSaveSampleSubmissionObjects, when input is valid, then create the sampleSubmission objects"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        Sample sample1 = createSample(individual: createIndividual(project: submission.project))
+        Sample sample2 = createSample(individual: createIndividual(project: submission.project))
+        Sample sample3 = createSample(individual: createIndividual(project: submission.project))
+        //set name and dirname explicit, since it use the method of IsPipeline and not DomainFactoryCore
+        SeqType seqType1 = createSeqType(name: 'a', dirName: 'a')
+        SeqType seqType2 = createSeqType(name: 'b', dirName: 'b')
+        SeqType seqType3 = createSeqType(name: 'c', dirName: 'c')
+        List<String> ids = [
+                "${sample1.id}-${seqType1.id}",
+                "${sample1.id}-${seqType2.id}",
+                "${sample2.id}-${seqType3.id}",
+                "${sample3.id}-${seqType3.id}",
+        ]*.toString()
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, ids)
+
+        then:
+        submission.refresh()
+        submission.samplesToSubmit.size() == 4
+        List<String> returnedValues = submission.samplesToSubmit.collect {
+            "${it.sample.id}-${it.seqType.id}".toString()
+        }
+        TestCase.assertContainSame(ids, returnedValues)
+        submission.selectionState == EgaSubmission.SelectionState.SAMPLE_INFORMATION
+    }
+
     void "test update submission object all fine"() {
         given:
         EgaSubmission submission = createEgaSubmission()
@@ -259,6 +335,73 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         sampleSubmissionObject.egaAliasName == "newAlias"
         sampleSubmissionObject.useBamFile
         !sampleSubmissionObject.useFastqFile
+    }
+
+    void "test remove sample submission objects"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
+
+        when:
+        List l = egaSubmissionService.deleteSampleSubmissionObjects(submission)
+
+        then:
+        submission.samplesToSubmit.empty
+        l == ["${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType}"]
+    }
+
+    void "test createDataFileSubmissionObjects"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        List<Boolean> selectBox = [
+                true,
+                null,
+                true,
+                false,
+                true,
+        ]
+        int size = selectBox.size()
+
+        List<String> fastQFileIds = (1..size).collect { createDataFile() }*.id*.toString()
+        List<String> egaSampleIds = (1..size).collect { createSampleSubmissionObject() }*.id*.toString()
+
+        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
+                submission: submission,
+                selectBox : selectBox,
+                fastqFile : fastQFileIds,
+                egaSample : egaSampleIds,
+        ])
+
+        when:
+        egaSubmissionService.createDataFileSubmissionObjects(cmd)
+
+        then:
+        submission.dataFilesToSubmit.size() == DataFileSubmissionObject.findAll().size()
+    }
+
+    void "test updateDataFileSubmissionObjects"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        String egaFileAlias = "someMagicAlias"
+        DataFile dataFile = createDataFile()
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
+                dataFile: dataFile,
+        )
+        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+
+        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
+                submission  : submission,
+                fastqFile   : [dataFile.id.toString()],
+                egaSample   : [dataFileSubmissionObject.sampleSubmissionObject.id.toString()],
+                egaFileAlias: [egaFileAlias],
+        ])
+
+        when:
+        egaSubmissionService.updateDataFileSubmissionObjects(cmd)
+
+        then:
+        dataFileSubmissionObject.egaAliasName == egaFileAlias
     }
 
     void "test update bam file submission objects"() {

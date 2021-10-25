@@ -79,7 +79,7 @@ class ProcessedMergedBamFileIntegrationTests {
         assert !secondBamFile.withdrawn
 
         secondBamFile.workPackage.bamFileInProjectFolder = secondBamFile
-        assert secondBamFile.workPackage.save()
+        assert secondBamFile.workPackage.save(flush: true)
 
         LogThreadLocal.withThreadLog(System.out) {
             bamFile.withdraw()
@@ -99,7 +99,7 @@ class ProcessedMergedBamFileIntegrationTests {
         assert !thirdBamFile.withdrawn
 
         thirdBamFile.workPackage.bamFileInProjectFolder = thirdBamFile
-        assert thirdBamFile.workPackage.save()
+        assert thirdBamFile.workPackage.save(flush: true)
 
         LogThreadLocal.withThreadLog(System.out) {
             secondBamFile.withdraw()
@@ -138,7 +138,7 @@ class ProcessedMergedBamFileIntegrationTests {
         ])
         File expected = new File(bamFile.baseDirectory, bamFile.bamFileName)
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
-        assert bamFile.mergingWorkPackage.save()
+        assert bamFile.mergingWorkPackage.save(flush: true)
 
         assert expected == bamFile.getPathForFurtherProcessing()
     }
@@ -160,14 +160,14 @@ class ProcessedMergedBamFileIntegrationTests {
                 abstractMergedBamFile: processedMergedBamFile,
                 identifier: QualityAssessmentMergedPass.nextIdentifier(processedMergedBamFile),
         ])
-        assert qualityAssessmentMergedPass.save()
+        assert qualityAssessmentMergedPass.save([flush: true])
 
         OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged(
                 AbstractBamFileServiceIntegrationTests.ARBITRARY_QA_VALUES + [
                 id                   : identifier,
                 qualityAssessmentMergedPass: qualityAssessmentMergedPass,
         ])
-        assert overallQualityAssessmentMerged.save()
+        assert overallQualityAssessmentMerged.save([flush: true])
 
         return overallQualityAssessmentMerged
     }
@@ -178,11 +178,11 @@ class ProcessedMergedBamFileIntegrationTests {
                 md5sum: HelperUtils.randomMd5sum,
                 fileSize: 1000,
         ])
-        bamFile.save()
+        bamFile.save(flush: true)
         assert !bamFile.withdrawn
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
-        assert bamFile.workPackage.save()
+        assert bamFile.workPackage.save(flush: true)
 
         return bamFile
     }

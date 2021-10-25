@@ -231,8 +231,6 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         }
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "test, if no result files exist and fastqc reports can not be copied. correct scripts are created for each data file"() {
         given:
         createData()

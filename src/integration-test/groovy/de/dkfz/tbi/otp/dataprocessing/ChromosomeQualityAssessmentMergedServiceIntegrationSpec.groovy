@@ -153,7 +153,7 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         given:
         setupData()
 
-        chromosomeQualityAssessmentMergedList*.delete()
+        chromosomeQualityAssessmentMergedList*.delete([flush: true])
 
         List<ChromosomeQualityAssessmentMerged> expected = []
 

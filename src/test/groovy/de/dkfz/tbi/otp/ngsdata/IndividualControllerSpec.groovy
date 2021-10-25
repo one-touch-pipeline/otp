@@ -41,8 +41,8 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         ]
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForSaveForUnitTestRule')
+    //save is controller method, no domain
+    @SuppressWarnings(['ExplicitFlushForSaveRule'])
     void "save, when save is called with valid input, then create the expected objects"() {
         given:
         SampleType sampleType1 = createSampleType()
@@ -117,8 +117,8 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         Sample.count() == 3
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForSaveForUnitTestRule')
+    //save is controller method, no domain
+    @SuppressWarnings(['ExplicitFlushForSaveRule'])
     void "save, when input for individual is invalid, then do not create any objects"() {
         given:
         Project project = createProject()
@@ -148,8 +148,8 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         Individual.list().size() == 0
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForSaveForUnitTestRule')
+    //save is controller method, no domain
+    @SuppressWarnings(['ExplicitFlushForSaveRule'])
     void "save, when input for sample name is invalid, then show error message"() {
         given:
         Project project = createProject()

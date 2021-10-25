@@ -150,8 +150,6 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
         definition.mailText == cmd.mailText
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "delete, when all fine, then create object and return it"() {
         given:
         WorkflowJobErrorDefinition definition = createWorkflowJobErrorDefinition()

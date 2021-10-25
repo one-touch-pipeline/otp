@@ -52,7 +52,7 @@ class ReferenceGenomeProjectSeqTypeTests {
                         sampleType: sampleType,
                         deprecatedDate: deprecatedDate)
         if (doSave) {
-            domain.save()
+            domain.save(flush: true)
         }
         return domain
     }

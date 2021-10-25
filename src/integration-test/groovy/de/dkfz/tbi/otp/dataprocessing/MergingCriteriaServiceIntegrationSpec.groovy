@@ -184,7 +184,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         SeqPlatform seqPlatform2 = createSeqPlatform()
         group.addToSeqPlatforms(seqPlatform1)
         group.addToSeqPlatforms(seqPlatform2)
-        group.save()
+        group.save(flush: true)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -205,7 +205,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         SeqPlatformGroup group = createSeqPlatformGroup()
         SeqPlatform seqPlatform = createSeqPlatform()
         group.addToSeqPlatforms(seqPlatform)
-        group.save()
+        group.save(flush: true)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -394,7 +394,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         createSeqPlatformGroup()
         SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroupWithMergingCriteria()
         seqPlatformGroup.addToSeqPlatforms(createSeqPlatform())
-        assert seqPlatformGroup.save()
+        assert seqPlatformGroup.save(flush: true)
         createSeqPlatformWithSeqPlatformGroup()
 
         expect:

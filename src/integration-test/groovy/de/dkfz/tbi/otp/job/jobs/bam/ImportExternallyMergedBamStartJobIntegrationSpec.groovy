@@ -48,7 +48,7 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
                         DomainFactory.createExternallyProcessedMergedBamFile()
                 ]
         )
-        importProcess.save()
+        importProcess.save(flush: true)
         ImportExternallyMergedBamStartJob importExternallyMergedBamStartJob = new ImportExternallyMergedBamStartJob()
         importExternallyMergedBamStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> null

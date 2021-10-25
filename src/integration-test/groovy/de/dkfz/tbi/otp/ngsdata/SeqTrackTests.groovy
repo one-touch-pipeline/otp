@@ -36,16 +36,16 @@ class SeqTrackTests {
     SeqTrack seqTrack
 
     void setupData() {
-        seqTrack = DomainFactory.createSeqTrack().save()
+        seqTrack = DomainFactory.createSeqTrack().save(flush: true)
         referenceGenomeProjectSeqTypeWithSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
                 sampleType: seqTrack.sampleType,
-        ).save()
+        ).save(flush: true)
         referenceGenomeProjectSeqTypeWithoutSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
-        ).save()
+        ).save(flush: true)
     }
 
 

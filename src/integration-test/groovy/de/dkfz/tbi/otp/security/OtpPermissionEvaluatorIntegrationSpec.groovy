@@ -200,7 +200,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         userProjectRole.manageUsersAndDelegate = manageUsersAndDelegate
         userProjectRole.manageUsers = manageUsers
-        userProjectRole.save()
+        userProjectRole.save(flush: true)
 
         when:
         boolean checkResult = permissionEvaluator.hasPermission(authentication, null, "ADD_USER")

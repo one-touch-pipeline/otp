@@ -92,8 +92,6 @@ class MetadataFileCopiedValidatorSpec extends Specification implements DataTest 
         "${CENTER_NAME}\t${ILSE_NO}\nCenter\tinvalid"   | true
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void 'validate, when seqCenterInbox metadataFile is not there, succeeds'() {
         given:
         MetadataValidationContext context = createContextAndSeqCenter(CONTEXT)
@@ -106,8 +104,6 @@ class MetadataFileCopiedValidatorSpec extends Specification implements DataTest 
         context.problems.empty
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void 'validate, when seqCenterInbox metadataFile is a directorys, succeeds'() {
         given:
         MetadataValidationContext context = createContextAndSeqCenter(CONTEXT)

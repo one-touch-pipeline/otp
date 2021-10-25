@@ -69,7 +69,7 @@ class ProcessedBamFileIntegrationTests {
 
     private ProcessedBamFile createProcessedBamFile() {
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
-        alignmentPass.save()
+        alignmentPass.save([flush: true])
 
         ProcessedBamFile processedBamFile = new ProcessedBamFile([
                 type                   : AbstractBamFile.BamType.SORTED,
@@ -78,7 +78,7 @@ class ProcessedBamFileIntegrationTests {
                 status                 : AbstractBamFile.State.PROCESSED,
                 alignmentPass          : alignmentPass,
         ])
-        assert processedBamFile.save()
+        assert processedBamFile.save([flush: true])
 
         return processedBamFile
     }
@@ -90,14 +90,14 @@ class ProcessedBamFileIntegrationTests {
                 processedBamFile: processedBamFile,
                 identifier      : QualityAssessmentPass.nextIdentifier(processedBamFile),
         ])
-        assert qualityAssessmentPass.save()
+        assert qualityAssessmentPass.save([flush: true])
 
         OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment(
                 AbstractBamFileServiceIntegrationTests.ARBITRARY_QA_VALUES + [
                 id                   : identifier,
                 qualityAssessmentPass: qualityAssessmentPass,
         ])
-        assert overallQualityAssessment.save()
+        assert overallQualityAssessment.save([flush: true])
 
         return overallQualityAssessment
     }

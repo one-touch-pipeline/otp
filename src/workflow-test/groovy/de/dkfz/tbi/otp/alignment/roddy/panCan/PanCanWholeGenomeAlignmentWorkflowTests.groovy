@@ -36,7 +36,7 @@ class PanCanWholeGenomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTes
 
             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))
             config.adapterTrimmingNeeded = true
-            assert config.save()
+            assert config.save(flush: true)
         }
 
         when:

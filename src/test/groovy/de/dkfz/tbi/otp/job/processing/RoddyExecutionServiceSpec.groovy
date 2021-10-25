@@ -296,8 +296,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         thrown(AssertionError)
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "test saveRoddyExecutionStoreDirectory, execution store directory doesn't exist on filesystem, should fail"() {
         given:
         setupData()
@@ -314,8 +312,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         thrown(AssertionError)
     }
 
-    //false positives, since rule can not recognize calling class
-    @SuppressWarnings('ExplicitFlushForDeleteForUnitTestRule')
     void "test saveRoddyExecutionStoreDirectory, execution store directory isn't a directory, should fail"() {
         given:
         setupData()

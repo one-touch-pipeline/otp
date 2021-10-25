@@ -73,21 +73,21 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         MergingWorkPackage tooLowPriority = createMergingWorkPackage()
         tooLowPriority.project.processingPriority = findOrCreateProcessingPriorityMinimum()
-        assert tooLowPriority.project.save()
+        assert tooLowPriority.project.save(flush: true)
 
         MergingWorkPackage lowPriority = createMergingWorkPackage()
         lowPriority.project.processingPriority = findOrCreateProcessingPriorityNormal()
-        assert lowPriority.project.save()
+        assert lowPriority.project.save(flush: true)
 
         MergingWorkPackage highPriority = createMergingWorkPackage()
         highPriority.project.processingPriority = findOrCreateProcessingPriorityFastrack()
-        assert highPriority.save()
+        assert highPriority.save(flush: true)
 
         MergingWorkPackage doesNotNeedProcessing = createMergingWorkPackage()
         doesNotNeedProcessing.project.processingPriority = findOrCreateProcessingPriorityFastrack()
-        assert doesNotNeedProcessing.project.save()
+        assert doesNotNeedProcessing.project.save(flush: true)
         doesNotNeedProcessing.needsProcessing = false
-        assert doesNotNeedProcessing.save()
+        assert doesNotNeedProcessing.save(flush: true)
 
         assert [highPriority, lowPriority] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.NORMAL)
     }
@@ -97,7 +97,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.seqTracks = null
-        mwp.save()
+        mwp.save(flush: true)
 
         assert [] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
@@ -291,7 +291,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mwp)]
         mwp.seqTracks = seqTracks
-        mwp.save()
+        mwp.save(flush: true)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
         RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, null)
@@ -318,7 +318,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
                 DomainFactory.createSeqTrackWithDataFiles(mwp),
         ]
         mwp.seqTracks.addAll(additionalSeqTracks)
-        mwp.save()
+        mwp.save(flush: true)
 
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
@@ -339,7 +339,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createSeqTrackWithDataFiles(mwp)
         DomainFactory.createRoddyProcessingOptions()
-        RoddyWorkflowConfig.list()*.delete()
+        RoddyWorkflowConfig.list()*.delete(flush: true)
         assert RoddyWorkflowConfig.list().size() == 0
 
         assert TestCase.shouldFail(AssertionError) {
@@ -352,7 +352,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.project.processingPriority = findOrCreateProcessingPriorityMinimum()
-        assert mwp.project.save()
+        assert mwp.project.save(flush: true)
 
         withJobExecutionPlan {
             testAbstractAlignmentStartJob.startAlignment()
@@ -414,14 +414,14 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         SeqTrack seqTrack = DomainFactory.createSeqTrack(mergingWorkPackage)
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         mergingWorkPackage.seqTracks = [seqTrack]
-        mergingWorkPackage.save()
+        mergingWorkPackage.save(flush: true)
         return mergingWorkPackage
     }
 
     MergingWorkPackage createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState dataInstallationState) {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
         mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])]
-        mergingWorkPackage.save()
+        mergingWorkPackage.save(flush: true)
         return mergingWorkPackage
     }
 
@@ -429,7 +429,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         try {
             JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(enabled: true)
             jep.firstJob = DomainFactory.createJobDefinition(plan: jep)
-            assert jep.save()
+            assert jep.save(flush: true)
             testAbstractAlignmentStartJob.jep = jep
             closure()
         } finally {

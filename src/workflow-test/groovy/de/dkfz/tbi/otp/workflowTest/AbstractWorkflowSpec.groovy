@@ -634,11 +634,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             it.unixGroup = unixGroup
             it.realm = realm
             it.processingPriority = processingPriority
-            it.save()
+            it.save(flush: true)
         }
         WorkflowRun.list().each {
             it.priority = processingPriority
-            it.save()
+            it.save(flush: true)
         }
     }
 

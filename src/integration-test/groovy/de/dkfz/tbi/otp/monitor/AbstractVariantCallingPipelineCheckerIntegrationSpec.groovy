@@ -98,10 +98,10 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         BamFilePairAnalysis analysis1 = createAnalysis([processingState: AnalysisProcessingStates.FINISHED])
         BamFilePairAnalysis analysis2 = createAnalysis([processingState: AnalysisProcessingStates.IN_PROGRESS])
         analysis2.withdrawn = true
-        analysis2.save()
+        analysis2.save(flush: true)
         BamFilePairAnalysis analysis3 = createAnalysis([processingState: AnalysisProcessingStates.FINISHED])
         analysis3.withdrawn = true
-        analysis3.save()
+        analysis3.save(flush: true)
         BamFilePairAnalysis analysis4 = createAnalysis([processingState: AnalysisProcessingStates.IN_PROGRESS])
 
         BamFilePairAnalysis analysis5 = createAnalysisForCrosschecking([processingState: AnalysisProcessingStates.IN_PROGRESS])
@@ -220,7 +220,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         BamFilePairAnalysis crossCheckingAnalysis = createAnalysisForCrosschecking()
         BamFilePairAnalysis withdrawnAnalysis = createAnalysis()
         withdrawnAnalysis.withdrawn = true //because of constraint in SnvCallingInstance it can not be given in the parameter map
-        withdrawnAnalysis.save()
+        withdrawnAnalysis.save(flush: true)
 
         List<SamplePair> samplePairs = [
                 samplePair,
@@ -363,7 +363,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 samplePair: samplePairWithWithdrawnRunningAnalysis,
         ])
         runningWithdrawnAnalysis.withdrawn = true
-        runningWithdrawnAnalysis.save()
+        runningWithdrawnAnalysis.save(flush: true)
 
         //sample pair with no processing needed and analysis running
         SamplePair samplePairWithRunningAnalysis = createSamplePair([
@@ -382,7 +382,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 processingState: AnalysisProcessingStates.FINISHED,
         ])
         finishedWithdrawnAnalysis.withdrawn = true
-        finishedWithdrawnAnalysis.save()
+        finishedWithdrawnAnalysis.save(flush: true)
 
         //sample pair with no processing needed and analysis finished
         SamplePair samplePairWithFinishedAnalysis = createSamplePair([

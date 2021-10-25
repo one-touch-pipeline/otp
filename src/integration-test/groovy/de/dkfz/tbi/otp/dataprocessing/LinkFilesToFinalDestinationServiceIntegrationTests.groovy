@@ -60,18 +60,18 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
         roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
 
         realm = roddyBamFile.project.realm
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assert seqTrack.save()
+        assert seqTrack.save(flush: true)
 
         DataFile.findAllBySeqTrack(seqTrack).each {
             it.nReads = numberOfReads
-            assert it.save()
+            assert it.save(flush: true)
         }
         DomainFactory.createRoddyMergedBamQa(roddyBamFile, [pairedRead1: numberOfReads, pairedRead2: numberOfReads])
 
@@ -157,7 +157,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     void testCleanupWorkDirectory_bamHasOldStructure_shouldFail() {
         setupData()
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
@@ -200,7 +200,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         if (wgbs) {
             SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
             seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
-            seqType.save()
+            seqType.save(flush: true)
         }
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -299,11 +299,11 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [libraryName: 'library14', normalizedLibraryName: SeqTrack.normalizeLibraryName('library14')])
-        assert seqTrack.save()
+        assert seqTrack.save(flush: true)
 
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes = 2
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
 
         linkNewResults_methylation_setup()
 
@@ -336,7 +336,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     void testLinkNewResults_bamHasOldStructure_shouldFail() {
         setupData()
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
@@ -346,7 +346,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     private void linkNewResults_methylation_setup() {
         SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
         seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
-        seqType.save()
+        seqType.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
     }
@@ -417,7 +417,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         setupData()
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
@@ -464,7 +464,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
 
     void helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
@@ -519,7 +519,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
     void testCleanupOldResults_bamHasOldStructure_shouldFail() {
         setupData()
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile, realm)
@@ -567,11 +567,11 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         setupData()
         setUp_allFine()
         roddyBamFile.config.adapterTrimmingNeeded = true
-        assert roddyBamFile.config.save()
+        assert roddyBamFile.config.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
         qa.pairedRead1--
-        assert qa.save()
+        assert qa.save(flush: true)
         assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
 
         linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
@@ -583,7 +583,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         setUp_allFine()
         RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
         qa.pairedRead1--
-        assert qa.save()
+        assert qa.save(flush: true)
         assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
 
         assert TestCase.shouldFail(AssertionError) {
@@ -607,7 +607,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         setupData()
         setUp_allFine()
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
@@ -675,7 +675,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         setupData()
         setUp_allFine()
         roddyBamFile.withdrawn = true
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
 
         linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new UnsupportedOperationException("Should not reach this method")
@@ -702,6 +702,6 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.fileSize = 1000
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
     }
 }

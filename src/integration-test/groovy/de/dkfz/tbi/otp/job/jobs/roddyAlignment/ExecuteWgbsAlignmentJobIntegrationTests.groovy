@@ -60,7 +60,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
         roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
-        roddyBamFile.referenceGenome.save()
+        roddyBamFile.referenceGenome.save(flush: true)
         File referenceGenomeDirectory = new File("${tmpDir.root}/processing/reference_genomes")
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         cpiFile = CreateFileHelper.createFile(
@@ -153,7 +153,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
         setupData(executeWgbsAlignmentJob)
         roddyBamFile.referenceGenome.cytosinePositionsIndex = null
-        roddyBamFile.referenceGenome.save()
+        roddyBamFile.referenceGenome.save(flush: true)
 
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
@@ -253,7 +253,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             seqTrack.libraryName = libraryName
             seqTrack.normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
-            assert seqTrack.save()
+            assert seqTrack.save(flush: true)
         }
 
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
@@ -296,7 +296,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         roddyBamFile.seqTracks.add(DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage, [libraryName: "lib1", normalizedLibraryName: "1"]))
         roddyBamFile.numberOfMergedLanes = 2
         MergingCriteria.list()*.useLibPrepKit = false
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         File methylationLibraryDir = new File(roddyBamFile.getWorkMethylationDirectory(), "libNA")
@@ -319,6 +319,6 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
     private void createFileAndAddFileSize(File file, DataFile dataFile) {
         CreateFileHelper.createFile(file)
         dataFile.fileSize = file.length()
-        assert dataFile.save()
+        assert dataFile.save(flush: true)
     }
 }
