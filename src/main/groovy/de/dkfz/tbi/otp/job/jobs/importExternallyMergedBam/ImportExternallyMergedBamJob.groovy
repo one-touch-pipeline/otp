@@ -262,9 +262,9 @@ touch ${checkpoint}
         bamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         bamFile.fileSize = Files.size(bamFilePath)
         bamFile.fileExists = true
-        assert bamFile.save()
+        assert bamFile.save(flush: true)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
-        assert bamFile.workPackage.save()
+        assert bamFile.workPackage.save(flush: true)
     }
 }

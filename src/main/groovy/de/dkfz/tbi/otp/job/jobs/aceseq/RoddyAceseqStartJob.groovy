@@ -45,7 +45,7 @@ class RoddyAceseqStartJob extends AbstractBamFilePairAnalysisStartJob implements
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
         notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.ACESEQ)
         bamFilePairAnalysis.samplePair.aceseqProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        bamFilePairAnalysis.samplePair.save()
+        bamFilePairAnalysis.samplePair.save(flush: true)
     }
 
     @Override

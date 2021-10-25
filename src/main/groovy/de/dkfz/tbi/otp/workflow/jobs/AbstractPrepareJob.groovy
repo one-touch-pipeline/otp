@@ -55,7 +55,7 @@ abstract class AbstractPrepareJob extends AbstractJob {
                     workflowStep.workflowRun.project.unixGroup,
             )
             workflowStep.workflowRun.workDirectory = workDirectory
-            workflowStep.workflowRun.save()
+            workflowStep.workflowRun.save(flush: true)
         }
         generateMapForLinking(workflowStep).each { LinkEntry entry ->
             logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")

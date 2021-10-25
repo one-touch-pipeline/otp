@@ -61,10 +61,10 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
 
         seqTrack.dataFiles*.fileLinked = true
         seqTrack.dataFiles*.dateLastChecked = new Date()
-        seqTrack.dataFiles*.save()
+        seqTrack.dataFiles*.save(flush: true)
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-        assert (seqTrack.save())
+        assert (seqTrack.save(flush: true))
         succeed()
     }
 

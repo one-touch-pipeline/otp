@@ -35,7 +35,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
         def setNeedsProcessing = {
             workPackage.needsProcessing = true
-            assert workPackage.save()
+            assert workPackage.save(flush: true)
             seqTrack.log("Will align{0} for ${workPackage}.")
         }
 

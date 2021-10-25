@@ -139,7 +139,7 @@ abstract class AbstractClusterJobMonitor {
             log.warn("${name}: Failed to fill in runtime statistics for ${clusterJob}", e)
         }
         clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-        clusterJob.save()
+        clusterJob.save(flush: true)
     }
 
     /**

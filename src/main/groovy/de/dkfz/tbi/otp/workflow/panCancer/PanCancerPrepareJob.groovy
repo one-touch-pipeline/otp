@@ -62,6 +62,6 @@ class PanCancerPrepareJob extends AbstractPrepareJob implements PanCancerShared 
         notificationCreator.setStartedForSeqTracks(seqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
         MergingWorkPackage mergingWorkPackage = getRoddyBamFile(workflowStep).mergingWorkPackage
         mergingWorkPackage.needsProcessing = false
-        mergingWorkPackage.save()
+        mergingWorkPackage.save(flush: true)
     }
 }

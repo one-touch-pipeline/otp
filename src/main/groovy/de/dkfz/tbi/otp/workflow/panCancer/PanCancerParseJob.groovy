@@ -64,7 +64,7 @@ class PanCancerParseJob extends AbstractJob implements PanCancerShared {
         abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
         roddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, (QcTrafficLightValue) qa)
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
     }
 
     @Override

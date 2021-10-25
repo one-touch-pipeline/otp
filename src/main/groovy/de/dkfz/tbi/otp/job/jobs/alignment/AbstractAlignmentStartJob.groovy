@@ -55,7 +55,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
             MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
             if (mergingWorkPackage) {
                 mergingWorkPackage.needsProcessing = false
-                assert mergingWorkPackage.save()
+                assert mergingWorkPackage.save(flush: true)
                 AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
                 notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
                 createProcess(bamFile)
@@ -75,7 +75,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
             mergingWorkPackage.needsProcessing = false
             AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
 
-            assert bamFile.save()
+            assert bamFile.save(flush: true)
             return createProcess(bamFile)
         }
     }
@@ -167,7 +167,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
         // has to be set explicitly to old value due strange behavior of GORM (?)
         mergingWorkPackage.bamFileInProjectFolder = previousBamFile
         bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
-        assert bamFile.save()
+        assert bamFile.save(flush: true)
         return bamFile
     }
 

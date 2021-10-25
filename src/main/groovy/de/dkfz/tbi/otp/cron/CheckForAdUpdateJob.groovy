@@ -67,7 +67,7 @@ class CheckForAdUpdateJob extends ScheduledJob {
                     log.debug("File access of user ${user} in project ${userProjectRole.project.name} now matches the target")
                     UserProjectRole.withTransaction {
                         userProjectRole.fileAccessChangeRequested = false
-                        userProjectRole.save()
+                        userProjectRole.save(flush: true)
                     }
                 }
             }

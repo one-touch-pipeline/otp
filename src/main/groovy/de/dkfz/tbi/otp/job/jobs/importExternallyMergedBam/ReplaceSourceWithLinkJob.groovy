@@ -97,7 +97,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
 
         ImportProcess.withTransaction {
             importProcess.state = ImportProcess.State.FINISHED
-            importProcess.save()
+            importProcess.save(flush: true)
         }
         succeed()
     }

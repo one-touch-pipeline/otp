@@ -57,12 +57,12 @@ class ParseSophiaQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
         SophiaInstance.withTransaction {
             SophiaQc sophiaQc = qcJson.values()
             sophiaQc.sophiaInstance = sophiaInstance
-            assert sophiaQc.save()
+            assert sophiaQc.save(flush: true)
 
             //TODO OTP-3097: triger qc handling here
 
             sophiaInstance.processingState = AnalysisProcessingStates.FINISHED
-            assert sophiaInstance.save()
+            assert sophiaInstance.save(flush: true)
 
             succeed()
         }

@@ -62,16 +62,16 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
             IndelQualityControl indelQc = qcJson.values()
             indelQc.file = new File(indelQc.file.replace('./', '')).path
             indelQc.indelCallingInstance = instance
-            assert indelQc.save()
+            assert indelQc.save(flush: true)
 
             IndelSampleSwapDetection sampleSwap = sampleSwapJson
             sampleSwap.indelCallingInstance = instance
-            assert sampleSwap.save()
+            assert sampleSwap.save(flush: true)
 
             //TODO OTP-3097: triger qc handling here, please consider both qc class: indelQc, sampleSwap
 
             instance.processingState = AnalysisProcessingStates.FINISHED
-            instance.save()
+            instance.save(flush: true)
 
             succeed()
         }

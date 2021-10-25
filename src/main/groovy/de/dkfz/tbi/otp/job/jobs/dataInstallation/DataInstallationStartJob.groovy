@@ -56,7 +56,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
                 SeqTrack.withTransaction {
                     notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
                     seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
-                    assert seqTrack.save()
+                    assert seqTrack.save(flush: true)
                     createProcess(seqTrack)
                     log.debug "Installing SeqTrack ${seqTrack} of run ${seqTrack.run.name}"
                 }

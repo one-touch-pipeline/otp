@@ -172,7 +172,7 @@ class Scheduler {
                     previous: existingUpdates.sort { it.date }.last(),
                     processingStep: step
             )
-            if (!update.save()) {
+            if (!update.save(flush: true)) {
                 log.error("Could not create a STARTED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a STARTED Update for Job")
             }
@@ -243,7 +243,7 @@ class Scheduler {
                     previous: step.latestProcessingStepUpdate,
                     processingStep: step
             )
-            update.save()
+            update.save(flush: true)
             String errorHash = null
             try {
                 errorHash = errorLogService.log(exceptionToBeHandled)
@@ -259,9 +259,9 @@ class Scheduler {
                     processingStepUpdate: update,
                     stackTraceIdentifier: errorHash
             )
-            error.save()
+            error.save(flush: true)
             update.error = error
-            if (!update.save()) {
+            if (!update.save(flush: true)) {
                 // TODO: trigger error handling
                 log.error("Could not create a FAILURE Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job")

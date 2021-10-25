@@ -55,7 +55,7 @@ class ParseCellRangerQcJob extends AbstractEndStateAwareJobImpl implements AutoR
             qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(singleCellBamFile, (QcTrafficLightValue) qa)
 
             singleCellBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-            singleCellBamFile.save()
+            singleCellBamFile.save(flush: true)
             succeed()
         }
     }

@@ -74,7 +74,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
             Collection<ClusterJob> monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
             log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs*.clusterJobId.sort()}"
             monitoredClusterJobs*.checkStatus = ClusterJob.CheckStatus.CHECKING
-            monitoredClusterJobs*.save()
+            monitoredClusterJobs*.save(flush: true)
         }
     }
 
@@ -128,7 +128,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
                     assert finishedClusterJob.processingStep.id == processingStep.id
                     assert !finishedClusterJob.validated
                     finishedClusterJob.validated = true
-                    assert finishedClusterJob.save()
+                    assert finishedClusterJob.save(flush: true)
                 }
                 performAction(ACTION)
             }

@@ -51,7 +51,7 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
         notificationCreator.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.FASTQC)
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
-        seqTrack.save()
+        seqTrack.save(flush: true)
     }
 
     @Override

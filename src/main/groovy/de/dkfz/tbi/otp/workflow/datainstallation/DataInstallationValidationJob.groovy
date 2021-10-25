@@ -76,7 +76,7 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
             dataFile.fileSize = Files.size(targetPath)
             dataFile.dateFileSystem = new Date(Files.getLastModifiedTime(targetPath).toMillis())
             dataFile.fileExists = true
-            assert dataFile.save()
+            assert dataFile.save(flush: true)
         }
     }
 }
