@@ -28,7 +28,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class DataInstallationInitializationServiceSpec extends Specification
@@ -70,11 +69,6 @@ class DataInstallationInitializationServiceSpec extends Specification
             mergeSortedFragments(_) >> "{}"
         }
         service.workflowArtefactService = new WorkflowArtefactService()
-
-        GroovyMock([global: true], SessionUtils)
-        _ * SessionUtils.manualFlush(_) >> { Closure closure ->
-            closure()
-        }
 
         when:
         List<WorkflowRun> runs = service.createWorkflowRuns(instance)

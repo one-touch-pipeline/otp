@@ -21,28 +21,10 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import org.hibernate.FlushMode
-
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 class SessionUtils {
     static <T> T withNewSession(Closure<T> closure) {
         Realm.withNewSession closure
-    }
-
-    static <T> T manualFlush(Closure<T> closure) {
-        return Realm.withSession { session ->
-            //Attention: unit test use another class then production and integration test
-            //unit test: javax.persistence.FlushModeType
-            //otherwise: integration org.hibernate.FlushMode
-            //therefore, in unit test, the method 'manualFlush' needs to be mocked.
-            FlushMode flushMode = session.flushMode
-            session.flushMode = FlushMode.MANUAL
-            try {
-                return closure()
-            } finally {
-                session.flushMode = flushMode  // reactivate origin flush mode
-            }
-        }
     }
 }

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -45,15 +44,18 @@ class DataInstallationInitializationService {
      * with role {@link #{DataInstallationWorkflow.WORKFLOW}} connecting the {@link WorkflowRun} with the {@link SeqTrack}.
      */
     List<WorkflowRun> createWorkflowRuns(FastqImportInstance instance, ProcessingPriority priority = null) {
-        return SessionUtils.manualFlush {
-            Workflow workflow = Workflow.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
-            List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
-                it.seqTrack
-            }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
-                createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
-            }
-            return workflowRuns
+        Workflow workflow = Workflow.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
+        List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
+            it.seqTrack
+        }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
+            createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
         }
+
+        WorkflowRun.withTransaction { status ->
+            status.flush()
+        }
+
+        return workflowRuns
     }
 
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {

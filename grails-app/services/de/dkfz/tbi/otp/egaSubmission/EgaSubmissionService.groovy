@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 @CompileStatic
 @Transactional
@@ -60,6 +59,7 @@ class EgaSubmissionService {
     EgaSubmission getEgaSubmission(Long id) {
         return EgaSubmission.get(id)
     }
+
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateSubmissionState(EgaSubmission submission, EgaSubmission.State state) {
@@ -112,22 +112,20 @@ class EgaSubmissionService {
         }
         Map<Long, SeqType> seqTypeMap = fetchAndReturnSeqTypePerIdMap(seqTypeIds)
         Map<Long, Sample> sampleMap = fetchAndReturnSamplePerIdMap(sampleIds)
-        SessionUtils.manualFlush {
-            List<SampleSubmissionObject> sampleSubmissionObjects = listOfPairOfSampleIdAndSeqTypeId.collect { SampleIdSeqTypeId sampleIdSeqTypeId ->
-                Sample sample = sampleMap[sampleIdSeqTypeId.sampleId]
-                SeqType seqType = seqTypeMap[sampleIdSeqTypeId.seqTypeId]
-                assert sample: "no sample for ${sampleIdSeqTypeId.sampleId} could be found"
-                assert seqType: "no seqType for ${sampleIdSeqTypeId.seqTypeId} could be found"
-                assert sample.project == project
-                new SampleSubmissionObject(
-                        sample: sample,
-                        seqType: seqType,
-                ).save()
-            }
-            submission.samplesToSubmit.addAll(sampleSubmissionObjects)
-            submission.selectionState = EgaSubmission.SelectionState.SAMPLE_INFORMATION
+        List<SampleSubmissionObject> sampleSubmissionObjects = listOfPairOfSampleIdAndSeqTypeId.collect { SampleIdSeqTypeId sampleIdSeqTypeId ->
+            Sample sample = sampleMap[sampleIdSeqTypeId.sampleId]
+            SeqType seqType = seqTypeMap[sampleIdSeqTypeId.seqTypeId]
+            assert sample: "no sample for ${sampleIdSeqTypeId.sampleId} could be found"
+            assert seqType: "no seqType for ${sampleIdSeqTypeId.seqTypeId} could be found"
+            assert sample.project == project
+            new SampleSubmissionObject(
+                    sample: sample,
+                    seqType: seqType,
+            ).save(flush: false)
         }
-        submission.save()
+        submission.samplesToSubmit.addAll(sampleSubmissionObjects)
+        submission.selectionState = EgaSubmission.SelectionState.SAMPLE_INFORMATION
+        submission.save(flush: true)
     }
 
     @CompileDynamic
@@ -229,16 +227,14 @@ class EgaSubmissionService {
 
     List deleteSampleSubmissionObjects(EgaSubmission submission) {
         List samplesWithSeqType = []
-        SessionUtils.manualFlush {
-            submission.samplesToSubmit*.seqType.unique()*.refresh()
-            submission.samplesToSubmit.toArray().each { SampleSubmissionObject sampleSubmissionObject ->
-                submission.samplesToSubmit.remove(sampleSubmissionObject)
-                samplesWithSeqType.add("${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType}")
-                sampleSubmissionObject.delete()
-            }
-            submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
+        submission.samplesToSubmit*.seqType.unique()*.refresh()
+        submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
+            submission.samplesToSubmit.remove(it)
+            samplesWithSeqType.add("${it.sample.id}${it.seqType}")
+            it.delete(flush: false)
         }
-        submission.save()
+        submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
+        submission.save(flush: true)
 
         return samplesWithSeqType
     }
@@ -250,18 +246,16 @@ class EgaSubmissionService {
             [(it.dataFile.id): it]
         }
 
-        SessionUtils.manualFlush {
-            cmd.fastqFile.eachWithIndex { fastqIdString, i ->
-                long fastqId = fastqIdString as long
-                DataFileSubmissionObject dataFileSubmissionObject = dataFileSubmissionObjectMap[fastqId]
-                dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
-                dataFileSubmissionObject.save()
-            }
-            if (submission.samplesToSubmit.any { it.useBamFile }) {
-                submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
-            }
+        cmd.fastqFile.eachWithIndex { fastqIdString, i ->
+            long fastqId = fastqIdString as long
+            DataFileSubmissionObject dataFileSubmissionObject = dataFileSubmissionObjectMap[fastqId]
+            dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
+            dataFileSubmissionObject.save(flush: false)
         }
-        submission.save()
+        if (submission.samplesToSubmit.any { it.useBamFile }) {
+            submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
+        }
+        submission.save(flush: true)
     }
 
     List<DataFileAndSampleAlias> getDataFilesAndAlias(EgaSubmission egaSubmission) {
@@ -342,33 +336,29 @@ class EgaSubmissionService {
     @CompileDynamic
     void createDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
         EgaSubmission submission = cmd.submission
-        SessionUtils.manualFlush {
-            cmd.selectBox.eachWithIndex { selectBox, i ->
-                if (selectBox) {
-                    DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
-                            dataFile: DataFile.get(cmd.fastqFile[i]),
-                            sampleSubmissionObject: SampleSubmissionObject.get(cmd.egaSample[i])
-                    ).save()
-                    submission.addToDataFilesToSubmit(dataFileSubmissionObject)
-                }
+        cmd.selectBox.eachWithIndex { it, i ->
+            if (it) {
+                DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
+                        dataFile: DataFile.get(cmd.fastqFile[i]),
+                        sampleSubmissionObject: SampleSubmissionObject.get(cmd.egaSample[i])
+                ).save(flush: false)
+                submission.addToDataFilesToSubmit(dataFileSubmissionObject)
             }
         }
-        submission.save()
+        submission.save(flush: true)
     }
 
     void createBamFileSubmissionObjects(EgaSubmission submission) {
-        SessionUtils.manualFlush {
-            getBamFilesAndAlias(submission).findAll {
-                it.producedByOtp && !it.bamFile.withdrawn
-            }.each {
-                BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
-                        bamFile: it.bamFile,
-                        sampleSubmissionObject: it.sampleSubmissionObject,
-                ).save()
-                submission.addToBamFilesToSubmit(bamFileSubmissionObject)
-            }
+        getBamFilesAndAlias(submission).findAll {
+            it.producedByOtp && !it.bamFile.withdrawn
+        }.each {
+            BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
+                    bamFile: it.bamFile,
+                    sampleSubmissionObject: it.sampleSubmissionObject,
+            ).save(flush: false)
+            submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         }
-        submission.save()
+        submission.save(flush: true)
     }
 
     @CompileDynamic

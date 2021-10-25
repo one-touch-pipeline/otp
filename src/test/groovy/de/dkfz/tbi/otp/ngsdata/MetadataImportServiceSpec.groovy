@@ -50,7 +50,9 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.Data
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
@@ -1809,13 +1811,5 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
             _ * decide(_, _) >> []
         }
         service.processingThresholdsService = Mock(ProcessingThresholdsService)
-
-        GroovyMock([global: true], SessionUtils)
-        _ * SessionUtils.manualFlush(_) >> { Closure closure ->
-            Realm.withSession { session ->
-                closure()
-                session.flush()
-            }
-        }
     }
 }
