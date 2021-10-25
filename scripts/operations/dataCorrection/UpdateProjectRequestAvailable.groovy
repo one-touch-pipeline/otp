@@ -49,7 +49,7 @@ Project.withTransaction {
     projectValueMap.each { String projectName, Boolean value ->
         Project project = Project.findByName(projectName)
         project.projectRequestAvailable = value
-        project.save()
+        project.save(flush: true)
     }
     assert(false)
 }

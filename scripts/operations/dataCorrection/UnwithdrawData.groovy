@@ -209,6 +209,6 @@ class UnWithdrawer {
             dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n" : ""}${comment}"
         }
         dataFile.fileWithdrawn = false
-        assert dataFile.save()
+        assert dataFile.save(flush: true)
     }
 }

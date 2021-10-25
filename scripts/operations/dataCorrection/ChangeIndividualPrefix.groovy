@@ -67,13 +67,13 @@ Project.withTransaction {
         if (oldProject && newPrefix) {
             Project.findAllByIndividualPrefix(newPrefix).each {
                 it.uniqueIndividualPrefix = !oldProject
-                it.save()
+                it.save(flush: true)
             }
         }
 
         project.individualPrefix = newPrefix
         project.uniqueIndividualPrefix = !oldProject
-        project.save()
+        project.save(flush: true)
 
         println "changed"
 

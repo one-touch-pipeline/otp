@@ -131,4 +131,4 @@ ReferenceGenomeIndex index = new ReferenceGenomeIndex(
         path: '1.2.0',
         indexToolVersion: '1.2.0',
 )
-index.save()
+index.save(flush: true)

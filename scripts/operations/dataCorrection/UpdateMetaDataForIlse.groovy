@@ -244,10 +244,10 @@ IlseSubmission.withTransaction { def transaction ->
     println '\n'
     assert !testRun: "only test, change testRun to false to do the changes"
 
-    toDelete*.delete()
+    toDelete*.delete(flush: false)
     toUpdate.each { MetaDataEntry entry, String value ->
         entry.value = value
-        entry.save()
+        entry.save(flush: false)
     }
     transaction.flush()
     println 'Values delete and updated as announced'

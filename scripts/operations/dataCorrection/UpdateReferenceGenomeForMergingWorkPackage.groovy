@@ -62,7 +62,7 @@ MergingWorkPackage mergingWorkPackage = CollectionUtils.exactlyOneElement(Mergin
 SeqTrack.withTransaction {
     mergingWorkPackage.referenceGenome = referenceGenome
     mergingWorkPackage.statSizeFileName = statSizeFileName
-    mergingWorkPackage.save()
+    mergingWorkPackage.save(flush: true)
 
     assert false
 }

@@ -42,7 +42,7 @@ SampleType.withTransaction {
         println "create: " + new SampleType (
                 name: it.toString().toLowerCase(),
                 specificReferenceGenome: specificReferenceGenome,
-        ).save()
+        ).save(flush: true)
     }
 
     assert false: "DEBUG: transaction intentionally failed to rollback changes"

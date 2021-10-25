@@ -53,7 +53,7 @@ Individual.withTransaction() {
     clusterJobs.each { ClusterJob clusterJob ->
         output << "    * ${clusterJob.id}: ${clusterJob.clusterJobId} ${clusterJob.clusterJobName}"
         clusterJob.individual = null
-        clusterJob.save()
+        clusterJob.save(flush: true)
     }
 
     output << "  - Samples with Identifiers:"
@@ -62,15 +62,15 @@ Individual.withTransaction() {
 
         output << "    * ${sample.id}: ${sample.sampleType.name} ${sampleIdentifiers.collect { it.name }}"
 
-        sampleIdentifiers*.delete()
+        sampleIdentifiers*.delete(flush: true)
 
         List<SeqTrack> seqTracks = seqTracksPerSample[sample]
         assert !seqTracks || DataFile.findAllBySeqTrackInList(seqTracks).isEmpty(): "Found data for Sample ${sample}. Take care of the data before deleting the individual"
 
-        sample.delete()
+        sample.delete(flush: true)
     }
 
-    individual.delete()
+    individual.delete(flush: true)
 
     println(output.join("\n"))
     assert false: "Debug"

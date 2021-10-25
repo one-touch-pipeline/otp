@@ -83,7 +83,7 @@ ExternallyProcessedMergedBamFile.withTransaction {
 
         ExternalMergingWorkPackage workPackage = epmbf.workPackage
         workPackage.bamFileInProjectFolder = null
-        workPackage.save()
+        workPackage.save(flush: true)
 
         dirsToDelete << epmbf.importFolder
         BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(epmbf, epmbf).each {
@@ -117,8 +117,8 @@ ExternallyProcessedMergedBamFile.withTransaction {
         }.each { ExternalProcessedMergedBamFileQualityAssessment qualityAssessment ->
             println "  --> delete qa: ${qualityAssessment}"
             QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessment.qualityAssessmentMergedPass
-            qualityAssessment.delete()
-            qualityAssessmentMergedPass.delete()
+            qualityAssessment.delete(flush: true)
+            qualityAssessmentMergedPass.delete(flush: true)
 
         }
 
@@ -129,16 +129,16 @@ ExternallyProcessedMergedBamFile.withTransaction {
         }.each { ImportProcess importProcess->
             println "  --> remove from: ${importProcess}"
             importProcess.externallyProcessedMergedBamFiles.remove(epmbf)
-            importProcess.save()
+            importProcess.save(flush: true)
             if (importProcess.externallyProcessedMergedBamFiles.empty) {
                 println "    --> is now empty --> delete it"
-                importProcess.delete()
+                importProcess.delete(flush: true)
             }
         }
 
-        epmbf.delete()
+        epmbf.delete(flush: true)
 
-        workPackage.delete()
+        workPackage.delete(flush: true)
         println "  ==> deleted"
     }
     it.flush()

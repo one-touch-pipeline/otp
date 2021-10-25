@@ -105,7 +105,7 @@ AbstractMergedBamFile.withTransaction {
         if (bamFile.comment) {
             bamFile.comment.with {
                 comment = newComment
-                save()
+                save(flush: true)
             }
         } else {
             commentService.createOrUpdateComment(bamFile, newComment, author)

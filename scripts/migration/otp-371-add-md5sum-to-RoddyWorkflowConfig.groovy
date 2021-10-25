@@ -95,7 +95,7 @@ RoddyWorkflowConfig.findAllByObsoleteDateIsNullAndMd5sumIsNull().each { RoddyWor
 
         if (configContent =~ expectedConfigContent) {
             config.md5sum = configContent.encodeAsMD5()
-            config.save()
+            config.save(flush: true)
         }
     }
 }

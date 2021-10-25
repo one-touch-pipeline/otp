@@ -69,7 +69,7 @@ SamplePair.withTransaction {
                 sampleType1BamFile: sampleType1BamFile,
                 sampleType2BamFile: sampleType2BamFile,
         )
-        analysis.save()
+        analysis.save(flush: true)
         roddySnvCallingStartJob.prepareCreatingTheProcessAndTriggerTracking(analysis)
         roddySnvCallingStartJob.createProcess(analysis)
         log.debug "Analysis started for: ${analysis.toString()}"

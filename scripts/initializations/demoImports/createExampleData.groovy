@@ -266,7 +266,7 @@ class ExampleData {
     SampleType findOrCreateSampleType(String name) {
         return SampleType.findByName(name) ?: new SampleType([
                 name: name,
-        ]).save()
+        ]).save(flush: true)
     }
 
     ProcessingPriority findOrCreateProcessingPriority() {
@@ -278,7 +278,7 @@ class ExampleData {
                 errorMailPrefix            : "error",
                 roddyConfigSuffix          : "error",
                 allowedParallelWorkflowRuns: 10,
-        ]).save()
+        ]).save(flush: true)
     }
 
     FileType findOrCreateFileType() {
@@ -294,7 +294,7 @@ class ExampleData {
         return LibraryPreparationKit.last() ?: new LibraryPreparationKit([
                 name            : "ExampleLibPrep",
                 shortDisplayName: "ExampleLibPrep",
-        ]).save()
+        ]).save(flush: true)
     }
 
     Realm findOrCreateRealm() {
@@ -306,7 +306,7 @@ class ExampleData {
                 port                       : 22,
                 timeout                    : 0,
                 defaultJobSubmissionOptions: "",
-        ]).save()
+        ]).save(flush: true)
     }
 
     ReferenceGenome findOrCreateReferenceGenome() {
@@ -325,12 +325,12 @@ class ExampleData {
                 lengthRefChromosomes        : 100,
                 lengthRefChromosomesWithoutN: 100,
                 length                      : 100,
-        ]).save()
+        ]).save(flush: true)
 
         new StatSizeFileName([
                 name           : "ExampleReferenceGenome_realChromosomes.tab",
                 referenceGenome: referenceGenome,
-        ]).save()
+        ]).save(flush: true)
         return referenceGenome
     }
 
@@ -339,7 +339,7 @@ class ExampleData {
         return SeqCenter.findByName(name) ?: new SeqCenter([
                 name   : name,
                 dirName: "center",
-        ]).save()
+        ]).save(flush: true)
     }
 
     SeqPlatform findOrCreateSeqPlatform() {
@@ -348,11 +348,11 @@ class ExampleData {
                 name                 : name,
                 seqPlatformModelLabel: new SeqPlatformModelLabel([
                         name: "ExampleModel",
-                ]).save(),
+                ]).save(flush: true),
                 sequencingKitLabel   : new SequencingKitLabel([
                         name: "ExampleKit",
-                ]).save(),
-        ]).save()
+                ]).save(flush: true),
+        ]).save(flush: true)
     }
 
     SeqPlatformGroup findOrCreateSeqPlatformGroup() {
@@ -363,7 +363,7 @@ class ExampleData {
             isNull('mergingCriteria')
         } ?: new SeqPlatformGroup([
                 seqPlatforms: [seqPlatform] as Set
-        ]).save()
+        ]).save(flush: true)
     }
 
     SoftwareTool findOrCreateSoftwareTool() {
@@ -372,13 +372,13 @@ class ExampleData {
                 programName   : "ExampleSoftwareTool",
                 programVersion: "1.2.3",
                 type          : SoftwareTool.Type.BASECALLING,
-        ]).save()
+        ]).save(flush: true)
     }
 
     FastqImportInstance createFastqImportInstance() {
         return new FastqImportInstance([
                 importMode: FastqImportInstance.ImportMode.MANUAL,
-        ]).save()
+        ]).save(flush: true)
     }
 
     Project findOrCreateProject(String projectName) {
@@ -391,7 +391,7 @@ class ExampleData {
                 projectType        : Project.ProjectType.SEQUENCING,
                 qcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
                 unixGroup          : "developer",
-        ]).save()
+        ]).save(flush: true)
     }
 
     Individual createIndividual(Project project, String pid) {
@@ -401,14 +401,14 @@ class ExampleData {
                 mockPid     : pid,
                 mockFullName: pid,
                 type        : Individual.Type.REAL,
-        ]).save()
+        ]).save(flush: true)
     }
 
     Sample createSample(Individual individual, SampleType sampleType) {
         return new Sample([
                 sampleType: sampleType,
                 individual: individual,
-        ]).save()
+        ]).save(flush: true)
     }
 
     SeqTrack createSeqTrack(FastqImportInstance fastqImportInstance, Sample sample, SeqType seqType) {
@@ -419,7 +419,7 @@ class ExampleData {
                 laneId          : (SeqTrack.count() % 8) + 1,
                 sampleIdentifier: "sample_${SeqTrack.count() + 1}",
                 pipelineVersion : softwareTool,
-        ]).save()
+        ]).save(flush: true)
 
         (1..2).each {
             createDataFile(seqTrack, it)
@@ -435,7 +435,7 @@ class ExampleData {
                 blacklisted : false,
                 seqCenter   : seqCenter,
                 seqPlatform : seqPlatform,
-        ]).save()
+        ]).save(flush: true)
     }
 
     DataFile createDataFile(SeqTrack seqTrack, int mateNumber) {
@@ -457,7 +457,7 @@ class ExampleData {
                 fileLinked         : true,
                 fileSize           : 1000000000,
                 nReads             : 185000000,
-        ]).save()
+        ]).save(flush: true)
 
         dataFiles << dataFile
         createFastqcProcessedFiles(dataFile)
@@ -468,7 +468,7 @@ class ExampleData {
     FastqcProcessedFile createFastqcProcessedFiles(DataFile dataFile) {
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
                 dataFile: dataFile,
-        ]).save()
+        ]).save(flush: true)
 
         fastqcProcessedFiles << fastqcProcessedFile
         return fastqcProcessedFile
@@ -486,7 +486,7 @@ class ExampleData {
                 statSizeFileName     : pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? StatSizeFileName.findByReferenceGenome(referenceGenome).name : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
-        ]).save()
+        ]).save(flush: true)
     }
 
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
@@ -506,15 +506,15 @@ class ExampleData {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 qcTrafficLightStatus   : AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
                 comment                : createComment(),
-        ]).save()
+        ]).save(flush: true)
 
         mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        mergingWorkPackage.save()
+        mergingWorkPackage.save(flush: true)
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
                 abstractMergedBamFile: roddyBamFile,
                 identifier           : 0,
-        ]).save()
+        ]).save(flush: true)
 
         createRoddyMergedBamQaAll(qualityAssessmentMergedPass)
         chromosomeXY.each {
@@ -535,7 +535,7 @@ class ExampleData {
                 nameUsedInConfig     : "name",
                 md5sum               : "0" * 32,
                 adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs(),
-        ]).save()
+        ]).save(flush: true)
     }
 
     Comment createComment() {
@@ -543,7 +543,7 @@ class ExampleData {
                 comment         : "comment_${Comment.count()}",
                 author          : "author",
                 modificationDate: new Date(),
-        ]).save()
+        ]).save(flush: true)
     }
 
     RoddyMergedBamQa createRoddyMergedBamQaAll(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
@@ -578,7 +578,7 @@ class ExampleData {
                 qualityAssessmentMergedPass  : qualityAssessmentMergedPass,
                 referenceLength              : 100,
                 genomeWithoutNCoverageQcBases: 100,
-        ] + map).save()
+        ] + map).save(flush: true)
     }
 }
 

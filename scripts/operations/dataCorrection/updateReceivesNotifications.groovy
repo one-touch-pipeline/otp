@@ -61,7 +61,7 @@ User.withTransaction {
         println "************"
         println userProjectRole.project
         userProjectRole.receivesNotifications = receivesNotifications
-        userProjectRole.save()
+        userProjectRole.save(flush: true)
         println "receives notifications set to ${receivesNotifications}"
     }
 

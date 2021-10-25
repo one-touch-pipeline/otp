@@ -39,7 +39,7 @@ def sampleToDelete = []
 
 def deleteSample(Sample sample) {
     if (!SampleIdentifier.findBySample(sample) && !SeqTrack.findBySample(sample)) {
-        sample.delete()
+        sample.delete(flush: true)
         println "The following sample was deleted: ${sample}"
     } else {
         println "The sample ${sample} can not be deleted since either sampleIdentifier or data is connected"
@@ -58,7 +58,7 @@ SampleIdentifier.withTransaction {
             notFoundSampleIdentifier << sitd
         } else {
             samplesToDelete << si.sample
-            si.delete()
+            si.delete(flush: true)
             println "The following sample name was deleted: ${si}"
         }
     }

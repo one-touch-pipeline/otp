@@ -69,7 +69,7 @@ DataFile.withTransaction {
                     previous + (previous? "\n\n" : "") + newComment,
                     executingUser
             )
-            assert dataFile.save()
+            assert dataFile.save(flush: true)
         } else {
             println "Nothing done for ${fileName} with md5sum ${newMd5sum}"
         }

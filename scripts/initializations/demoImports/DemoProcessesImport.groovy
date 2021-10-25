@@ -36,33 +36,33 @@ JobExecutionPlan jobExecutionPlan1 = new JobExecutionPlan(
         obsoleted: false,
         enabled: true,
 
-).save()
+).save(flush: true)
 
 Process process1 = new Process(
         started: new Date(),
         startJobClass: 'Test Job Class 1',
         finished: false,
         jobExecutionPlan: jobExecutionPlan1,
-).save()
+).save(flush: true)
 
 JobDefinition jobDefinition1 = new JobDefinition(
         plan: jobExecutionPlan1,
         name: 'Sample Job Definition 1',
         bean: 'Test',
-).save()
+).save(flush: true)
 
 ProcessingStep processingStep1 = new ProcessingStep(
         process: process1,
         jobClass: 'Test Job Class 1',
         jobDefinition: jobDefinition1,
-).save()
+).save(flush: true)
 
 new ProcessingStepUpdate(
         state: ExecutionState.CREATED,
         date: new Date(),
         processingStep: processingStep1,
         version: 0,
-).save()
+).save(flush: true)
 
 Realm realm = Realm.findAll().first()
 
@@ -79,4 +79,4 @@ new ClusterJob([
         checkStatus: ClusterJob.CheckStatus.CREATED,
         oldSystem: true,
         processingStep: processingStep1,
-]).save()
+]).save(flush: true)

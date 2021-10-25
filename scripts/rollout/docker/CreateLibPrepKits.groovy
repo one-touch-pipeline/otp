@@ -58,6 +58,6 @@ def libPrepKitParameter = [
 
 LibraryPreparationKit.withTransaction {
     libPrepKitParameter.each {
-        new LibraryPreparationKit(it).save()
+        new LibraryPreparationKit(it).save(flush: true)
     }
 }

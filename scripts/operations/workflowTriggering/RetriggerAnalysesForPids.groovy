@@ -130,14 +130,14 @@ LogThreadLocal.withThreadLog(System.out, {
                         // only withdraw instances IN_PROGRESS (still running or failed), keep FINISHED
                         if (instance.processingState == AnalysisProcessingStates.IN_PROGRESS && !instance.withdrawn) {
                             instance.withdrawn = true
-                            instance.save()
+                            instance.save(flush: true)
                             actions << "withdraw: ${instance.class.simpleName}:${instance.id}"
                         }
                     }
 
                     actions << "${processingStatusName}: ${samplePair."$processingStatusName"} -> ${SamplePair.ProcessingStatus.NEEDS_PROCESSING}"
                     samplePair."$processingStatusName" = SamplePair.ProcessingStatus.NEEDS_PROCESSING
-                    samplePair.save()
+                    samplePair.save(flush: true)
                 }
                 output << sprintf("  * %-10s : %s", [analysis, actions.join('; ')])
             }
