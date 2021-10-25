@@ -92,8 +92,6 @@ class EgaSubmissionService {
         return seqTypes
     }
 
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     void createAndSaveSampleSubmissionObjects(EgaSubmission submission, List<String> sampleIdSeqTypeIdList) {
         assert submission
         assert sampleIdSeqTypeIdList
@@ -124,7 +122,7 @@ class EgaSubmissionService {
                 new SampleSubmissionObject(
                         sample: sample,
                         seqType: seqType,
-                ).save(flush: false)
+                ).save()
             }
             submission.samplesToSubmit.addAll(sampleSubmissionObjects)
             submission.selectionState = EgaSubmission.SelectionState.SAMPLE_INFORMATION
@@ -211,19 +209,14 @@ class EgaSubmissionService {
         return map
     }
 
-    //for performance we handle flushs manually
-    @CompileDynamic
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     void updateSampleSubmissionObjects(EgaSubmission submission, List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
         if (sampleObjectId.size() == alias.size() && sampleObjectId.size() == fileType.size()) {
-            SessionUtils.manualFlush { session ->
-                sampleObjectId.eachWithIndex { it, i ->
-                    SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.get(it as Long)
-                    sampleSubmissionObject.egaAliasName = alias[i]
-                    sampleSubmissionObject.useBamFile = fileType[i] == FileType.BAM
-                    sampleSubmissionObject.useFastqFile = fileType[i] == FileType.FASTQ
-                    sampleSubmissionObject.save(flush: false)
-                }
+            sampleObjectId.eachWithIndex { it, i ->
+                SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.get(it as Long)
+                sampleSubmissionObject.egaAliasName = alias[i]
+                sampleSubmissionObject.useBamFile = fileType[i] == FileType.BAM
+                sampleSubmissionObject.useFastqFile = fileType[i] == FileType.FASTQ
+                sampleSubmissionObject.save()
             }
             if (submission.samplesToSubmit.any { it.useFastqFile }) {
                 submission.selectionState = EgaSubmission.SelectionState.SELECT_FASTQ_FILES
@@ -234,8 +227,6 @@ class EgaSubmissionService {
         }
     }
 
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForDeleteRule')
     List deleteSampleSubmissionObjects(EgaSubmission submission) {
         List samplesWithSeqType = []
         SessionUtils.manualFlush {
@@ -243,7 +234,7 @@ class EgaSubmissionService {
             submission.samplesToSubmit.toArray().each { SampleSubmissionObject sampleSubmissionObject ->
                 submission.samplesToSubmit.remove(sampleSubmissionObject)
                 samplesWithSeqType.add("${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType}")
-                sampleSubmissionObject.delete(flush: false)
+                sampleSubmissionObject.delete()
             }
             submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
         }
@@ -252,8 +243,6 @@ class EgaSubmissionService {
         return samplesWithSeqType
     }
 
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     void updateDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
         EgaSubmission submission = cmd.submission
         List<String> egaFileAlias = cmd.egaFileAlias
@@ -266,7 +255,7 @@ class EgaSubmissionService {
                 long fastqId = fastqIdString as long
                 DataFileSubmissionObject dataFileSubmissionObject = dataFileSubmissionObjectMap[fastqId]
                 dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
-                dataFileSubmissionObject.save(flush: false)
+                dataFileSubmissionObject.save()
             }
             if (submission.samplesToSubmit.any { it.useBamFile }) {
                 submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
@@ -350,8 +339,6 @@ class EgaSubmissionService {
         }
     }
 
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     @CompileDynamic
     void createDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
         EgaSubmission submission = cmd.submission
@@ -361,7 +348,7 @@ class EgaSubmissionService {
                     DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
                             dataFile: DataFile.get(cmd.fastqFile[i]),
                             sampleSubmissionObject: SampleSubmissionObject.get(cmd.egaSample[i])
-                    ).save(flush: false)
+                    ).save()
                     submission.addToDataFilesToSubmit(dataFileSubmissionObject)
                 }
             }
@@ -369,8 +356,6 @@ class EgaSubmissionService {
         submission.save()
     }
 
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     void createBamFileSubmissionObjects(EgaSubmission submission) {
         SessionUtils.manualFlush {
             getBamFilesAndAlias(submission).findAll {
@@ -379,7 +364,7 @@ class EgaSubmissionService {
                 BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
                         bamFile: it.bamFile,
                         sampleSubmissionObject: it.sampleSubmissionObject,
-                ).save(flush: false)
+                ).save()
                 submission.addToBamFilesToSubmit(bamFileSubmissionObject)
             }
         }
