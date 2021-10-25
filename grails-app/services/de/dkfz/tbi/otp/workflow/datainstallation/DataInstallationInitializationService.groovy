@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -40,21 +41,21 @@ class DataInstallationInitializationService {
     WorkflowRunService workflowRunService
 
     /**
-     * Create for all {@link SeqTrack}s of the {@link FastqImportInstance} an unflushed {@link WorkflowRun} and an unflushed output {@link WorkflowArtefact}
+     * Create for all {@link SeqTrack}s of the {@link FastqImportInstance} a {@link WorkflowRun} and an output {@link WorkflowArtefact}
      * with role {@link #{DataInstallationWorkflow.WORKFLOW}} connecting the {@link WorkflowRun} with the {@link SeqTrack}.
      */
     List<WorkflowRun> createWorkflowRuns(FastqImportInstance instance, ProcessingPriority priority = null) {
-        Workflow workflow = Workflow.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
-        List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
-            it.seqTrack
-        }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
-            createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
+        return SessionUtils.manualFlush {
+            Workflow workflow = Workflow.getExactlyOneWorkflow(DataInstallationWorkflow.WORKFLOW)
+            List<WorkflowRun> workflowRuns = instance.dataFiles.groupBy {
+                it.seqTrack
+            }.collect { SeqTrack seqTrack, List<DataFile> dataFiles ->
+                createRunForSeqTrack(workflow, seqTrack, dataFiles, priority ?: seqTrack.processingPriority)
+            }
+            return workflowRuns
         }
-        return workflowRuns
     }
 
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     private WorkflowRun createRunForSeqTrack(Workflow workflow, SeqTrack seqTrack, List<DataFile> dataFiles, ProcessingPriority priority) {
         List<String> runDisplayName = []
         runDisplayName.with {
@@ -79,7 +80,7 @@ class DataInstallationInitializationService {
                 run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, artefactDisplayName
         ))
         seqTrack.workflowArtefact = artefact
-        seqTrack.save(flush: false)
+        seqTrack.save()
         return run
     }
 

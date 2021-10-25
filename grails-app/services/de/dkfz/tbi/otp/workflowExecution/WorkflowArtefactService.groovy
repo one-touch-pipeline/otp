@@ -38,8 +38,6 @@ class WorkflowArtefactService {
      * @param values as wrapper for workflow artefact properties
      * @return the created, saved but not flushed WorkflowArtefact
      */
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     WorkflowArtefact buildWorkflowArtefact(WorkflowArtefactValues values) {
         String displayName = StringUtils.generateMultiLineDisplayName(values.displayNameLines)
 
@@ -51,7 +49,7 @@ class WorkflowArtefactService {
                 state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
                 artefactType    : values.artefactType,
                 displayName     : displayName,
-        ]).save(flush: false)
+        ]).save()
     }
 }
 

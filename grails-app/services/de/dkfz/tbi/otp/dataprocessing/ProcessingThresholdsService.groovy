@@ -76,8 +76,6 @@ class ProcessingThresholdsService {
      * @param seqTracks with configured alignment
      * @return generated processing thresholds
      */
-    //for performance we handle flushs manually
-    @SuppressWarnings('NoExplicitFlushForSaveRule')
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingThresholds> generateDefaultThresholds(List<SeqTrack> seqTracks) {
         if (!seqTracks) {
