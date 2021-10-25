@@ -150,7 +150,7 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
         individual.pid = data.pidSwap.new
         individual.mockPid = data.pidSwap.new
         individual.mockFullName = data.pidSwap.new
-        individual.save()
+        individual.save(flush: true)
         data.individualSwap = new Swap<>(data.individualSwap.old, individual)
     }
 
@@ -165,9 +165,9 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
                 data.sampleTypeSwaps.find { it.old == sample.sampleType.name }.new
         ))
         data.log << "\n    change ${sample.sampleType.name} to ${newSampleType.name}"
-        SampleIdentifier.findAllBySample(sample)*.delete()
+        SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
         sample.sampleType = newSampleType
-        sample.save()
+        sample.save(flush: true)
     }
 
     /**

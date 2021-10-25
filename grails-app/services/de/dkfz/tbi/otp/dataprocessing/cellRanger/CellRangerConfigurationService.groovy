@@ -176,7 +176,7 @@ class CellRangerConfigurationService {
     void resetTicketForCellRangerExecution(OtrsTicket ticket) {
         ticket.finalNotificationSent = false
         ticket.alignmentFinished = null
-        ticket.save()
+        ticket.save(flush: true)
     }
 
     List<CellRangerMergingWorkPackage> createMergingWorkPackagesForSamples(List<Sample> samples, CellRangerMwpParameter parameter, User requester) {
@@ -205,7 +205,7 @@ class CellRangerConfigurationService {
                     libraryPreparationKit: platformGroupAndKit.libraryPreparationKit,
                     needsProcessing      : true,
                     requester            : requester,
-            ]).save()
+            ]).save(flush: true)
         }
     }
 
@@ -216,7 +216,7 @@ class CellRangerConfigurationService {
         )
         deleteMwps(allMwps - mwpToKeep)
         mwpToKeep.status = CellRangerMergingWorkPackage.Status.FINAL
-        mwpToKeep.save()
+        mwpToKeep.save(flush: true)
         cellRangerWorkflowService.correctFilePermissions(mwpToKeep.bamFileInProjectFolder as SingleCellBamFile)
     }
 
@@ -243,7 +243,7 @@ class CellRangerConfigurationService {
         }
         mwpToDelete.each {
             it.status = CellRangerMergingWorkPackage.Status.DELETED
-            it.save()
+            it.save(flush: true)
             SingleCellBamFile.findAllByWorkPackage(it).each {
                 cellRangerWorkflowService.deleteOutputDirectory(it)
             }
@@ -252,6 +252,6 @@ class CellRangerConfigurationService {
 
     void setInformedFlag(CellRangerMergingWorkPackage crmwp, Date date) {
         crmwp.informed = date
-        crmwp.save()
+        crmwp.save(flush: true)
     }
 }

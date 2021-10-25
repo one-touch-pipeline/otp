@@ -240,7 +240,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
                     abstractMergedBamFile: this,
                     identifier: 0,
             )
-            assessmentMergedPass.save()
+            assessmentMergedPass.save(flush: true)
         }
         return assessmentMergedPass
     }

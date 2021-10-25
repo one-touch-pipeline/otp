@@ -48,7 +48,7 @@ class ProcessingOptionService {
             project: project,
             value: value,
         )
-        assert(option.save())
+        assert(option.save(flush: true))
         return option
     }
 
@@ -74,7 +74,7 @@ class ProcessingOptionService {
 
     private void obsoleteOption(ProcessingOption option) {
         option.dateObsoleted = new Date()
-        assert(option.save())
+        assert(option.save(flush: true))
     }
 
     String findOptionAsString(OptionName name, String type = null) {

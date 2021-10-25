@@ -71,7 +71,7 @@ class AbstractMergedBamFileService {
                     SeqTypeService.runYapsaPipelineSeqTypes.contains(seqType)) {
                 samplePair.runYapsaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            assert samplePair.save()
+            assert samplePair.save(flush: true)
         }
     }
 

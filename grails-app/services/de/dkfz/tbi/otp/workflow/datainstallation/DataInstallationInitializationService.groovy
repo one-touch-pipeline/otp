@@ -80,7 +80,7 @@ class DataInstallationInitializationService {
                 run, DataInstallationWorkflow.OUTPUT_FASTQ, ArtefactType.FASTQ, artefactDisplayName
         ))
         seqTrack.workflowArtefact = artefact
-        seqTrack.save()
+        seqTrack.save(flush: false)
         return run
     }
 

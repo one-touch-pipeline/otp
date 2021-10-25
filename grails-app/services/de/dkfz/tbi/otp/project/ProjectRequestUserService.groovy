@@ -80,7 +80,7 @@ class ProjectRequestUserService {
     ProjectRequestUser setApprovalStateAsCurrentUser(ProjectRequest request, ApprovalState state) {
         return getProjectRequestUserOfCurrentUser(request).with {
             approvalState = state
-            save()
+            save(flush: true)
         }
     }
 

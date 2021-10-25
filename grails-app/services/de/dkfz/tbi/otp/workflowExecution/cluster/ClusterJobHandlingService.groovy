@@ -177,7 +177,7 @@ class ClusterJobHandlingService {
         logService.addSimpleLogEntry(workflowStep, "Begin starting of checking of cluster jobs: ${clusterJobToString(clusterJobs)}")
         clusterJobs.each { ClusterJob clusterJob ->
             clusterJob.checkStatus = ClusterJob.CheckStatus.CHECKING
-            clusterJob.save()
+            clusterJob.save(flush: true)
         }
         logService.addSimpleLogEntry(workflowStep, "All cluster jobs are now checked by the cluster monitor: ${clusterJobToString(clusterJobs)}")
     }

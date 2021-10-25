@@ -41,7 +41,7 @@ class RolesService {
     }
 
     static void createUserRole(User user, Role role) {
-        new UserRole(user: user, role: role).save(insert: true)
+        new UserRole(user: user, role: role).save(flush: true, insert: true)
     }
 
     boolean isAdministrativeUser(User user) {

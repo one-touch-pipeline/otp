@@ -155,7 +155,7 @@ class FastqcDataFilesService {
     }
 
     void createFastqcProcessedFile(DataFile dataFile) {
-        assert (new FastqcProcessedFile(dataFile: dataFile).save())
+        assert (new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
     }
 
     void updateFastqcProcessedFiles(List<FastqcProcessedFile> fastqcList) {
@@ -172,7 +172,7 @@ class FastqcDataFilesService {
             fastqc.fileSize = fastqcFile.length()
             fastqc.dateFromFileSystem = new Date(fastqcFile.lastModified())
         }
-        assert (fastqc.save())
+        assert (fastqc.save(flush: true))
     }
 
     FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile, WorkflowArtefact workflowArtefact) {
@@ -190,7 +190,7 @@ class FastqcDataFilesService {
 
     void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
         fastqc.contentUploaded = true
-        assert (fastqc.save())
+        assert (fastqc.save(flush: true))
     }
 
     /**

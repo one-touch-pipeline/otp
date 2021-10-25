@@ -50,28 +50,28 @@ class AnalysisDeletionService {
             case { it instanceof IndelCallingInstance } :
                 List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 indelQualityControl.each {
-                    it.delete()
+                    it.delete(flush: true)
                 }
                 List<IndelSampleSwapDetection> indelSampleSwapDetections = IndelSampleSwapDetection.findAllByIndelCallingInstance(
                         analysisInstance, [sort: 'id', order: 'desc'])
                 indelSampleSwapDetections.each {
-                    it.delete()
+                    it.delete(flush: true)
                 }
                 break
             case { it instanceof SophiaInstance } :
                 List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 sophiaQc.each {
-                    it.delete()
+                    it.delete(flush: true)
                 }
                 break
             case { it instanceof AceseqInstance } :
                 List<AceseqQc> aceseqQc = AceseqQc.findAllByAceseqInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 aceseqQc.each {
-                    it.delete()
+                    it.delete(flush: true)
                 }
                 break
         }
-        analysisInstance.delete()
+        analysisInstance.delete(flush: true)
         return fileService.toFile(directory)
     }
 
@@ -99,7 +99,7 @@ class AnalysisDeletionService {
                 directoriesToDelete << runYapsaService.getSamplePairPath(samplePair)
             }
             if (!BamFilePairAnalysis.findAllBySamplePair(samplePair)) {
-                samplePair.delete()
+                samplePair.delete(flush: true)
             }
         }
         return directoriesToDelete.collect { fileService.toFile(it) }

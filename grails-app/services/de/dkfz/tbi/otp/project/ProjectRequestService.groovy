@@ -147,7 +147,7 @@ class ProjectRequestService {
                 requester: securityService.currentUserAsUser,
                 users: projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users),
         )
-        req.save()
+        req.save(flush: true)
 
         if (cmd.additionalFieldValue) {
             cmd.additionalFieldValue.each { entry ->
@@ -184,7 +184,7 @@ class ProjectRequestService {
 
             users = projectRequestUserService.createProjectRequestUsersFromCommands(cmd.users)
         }
-        projectRequest.save()
+        projectRequest.save(flush: true)
 
         if (cmd.additionalFieldValue) {
             cmd.additionalFieldValue.each { entry ->
@@ -214,13 +214,13 @@ class ProjectRequestService {
                 if (afv.definition.projectFieldType == ProjectFieldType.TEXT) {
                     TextFieldValue tfv = afv
                     tfv.textValue = fieldValue
-                    tfv.save()
+                    tfv.save(flush: true)
                 } else if (afv.definition.projectFieldType == ProjectFieldType.INTEGER) {
                     IntegerFieldValue ifv = afv
                     ifv.integerValue = fieldValue.toInteger()
-                    ifv.save()
+                    ifv.save(flush: true)
                 }
-                projectRequest.save()
+                projectRequest.save(flush: true)
             }
         }
     }
@@ -390,12 +390,12 @@ class ProjectRequestService {
             request.project = project
         }
         request.status = status
-        request.save()
+        request.save(flush: true)
     }
 
     ProjectRequest setComments(ProjectRequest request, String comments) {
         request.comments = comments
-        request.save()
+        request.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -425,16 +425,16 @@ class ProjectRequestService {
             TextFieldValue tfv = new TextFieldValue()
             tfv.definition = afd
             tfv.textValue = fieldValue
-            tfv.save()
+            tfv.save(flush: true)
             projectRequest.projectFields.add(tfv)
         } else if (afd.projectFieldType == ProjectFieldType.INTEGER) {
             IntegerFieldValue ifv = new IntegerFieldValue()
             ifv.definition = afd
             ifv.integerValue = fieldValue.toInteger()
-            ifv.save()
+            ifv.save(flush: true)
             projectRequest.projectFields.add(ifv)
         }
-        projectRequest.save()
+        projectRequest.save(flush: true)
     }
 
     void sendEmailOnMaintenanceApproval(ProjectRequest request) {

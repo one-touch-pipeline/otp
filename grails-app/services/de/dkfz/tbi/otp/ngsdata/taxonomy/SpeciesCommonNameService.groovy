@@ -49,7 +49,7 @@ class SpeciesCommonNameService extends MetadataFieldsService<SpeciesCommonName> 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SpeciesCommonName createAndGetSpeciesCommonName(String name) throws ValidationException {
         SpeciesCommonName speciesCommonName = new SpeciesCommonName(name: name)
-        return speciesCommonName.save()
+        return speciesCommonName.save(flush: true)
     }
 
     @Override

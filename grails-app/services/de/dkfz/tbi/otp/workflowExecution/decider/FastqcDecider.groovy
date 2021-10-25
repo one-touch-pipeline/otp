@@ -94,7 +94,7 @@ class FastqcDecider implements Decider {
                 workflowRun: run,
                 role: FastqcWorkflow.INPUT_FASTQ,
                 workflowArtefact: inputArtefact,
-        ).save()
+        ).save(flush: true)
 
         List<WorkflowArtefact> result = []
 
@@ -104,11 +104,11 @@ class FastqcDecider implements Decider {
                     "${FastqcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
                     artefactDisplayName,
-            )).save()
+            )).save(flush: true)
 
             FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.findOrCreateWhere(dataFile: it)
             fastqcProcessedFile.workflowArtefact = workflowArtefact
-            fastqcProcessedFile.save()
+            fastqcProcessedFile.save(flush: true)
             result << workflowArtefact
         }
         return result

@@ -61,7 +61,7 @@ class LinkFilesToFinalDestinationService {
                 }
                 assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
                 roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
-                assert roddyBamFile.save()
+                assert roddyBamFile.save(flush: true)
                 validateAndSetBamFileInProjectFolder(roddyBamFile)
             }
         }
@@ -77,7 +77,7 @@ class LinkFilesToFinalDestinationService {
                     fileOperationStatus: FileOperationStatus.INPROGRESS
             )) == bamFile
             bamFile.workPackage.bamFileInProjectFolder = bamFile
-            assert bamFile.workPackage.save()
+            assert bamFile.workPackage.save(flush: true)
         }
     }
 
@@ -120,7 +120,7 @@ class LinkFilesToFinalDestinationService {
             roddyBamFile.fileExists = true
             roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
 
-            assert roddyBamFile.save()
+            assert roddyBamFile.save(flush: true)
             abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
         }
     }

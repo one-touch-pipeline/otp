@@ -115,7 +115,7 @@ class WorkflowRunService {
                 workflow        : workflow,
                 displayName     : displayName,
                 shortDisplayName: shortName,
-        ]).save()
+        ]).save(flush: false)
     }
 
     /**
@@ -128,7 +128,7 @@ class WorkflowRunService {
             //needs to fetch it new, otherwise a "illegally attempted to associate a proxy with two open Sessions" exception occurred
             WorkflowRun workflowRun2 = WorkflowRun.get(workflowRun.id)
             workflowRun2.jobCanBeRestarted = false
-            workflowRun2.save()
+            workflowRun2.save(flush: true)
         }
         workflowRun.refresh()
     }

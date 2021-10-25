@@ -158,7 +158,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
     static void withdraw(BamFilePairAnalysis bamFilePairAnalysis) {
         BamFilePairAnalysis.withTransaction {
             bamFilePairAnalysis.withdrawn = true
-            assert bamFilePairAnalysis.save()
+            assert bamFilePairAnalysis.save(flush: true)
         }
     }
 

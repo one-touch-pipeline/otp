@@ -77,7 +77,7 @@ class UserService {
                 password: "*",
                 realName: realName,
         ])
-        user.save()
+        user.save(flush: true)
         return user
     }
 
@@ -95,7 +95,7 @@ class UserService {
         assert newName: "the input newName '${newName}' must not be null"
         assert user: "the input user must not be null"
         user.realName = newName
-        assert user.save()
+        assert user.save(flush: true)
         return user
     }
 
@@ -104,7 +104,7 @@ class UserService {
         assert email: "the input Email '${email}' must not be null"
         assert user: "the input user must not be null"
         user.email = email
-        assert user.save()
+        assert user.save(flush: true)
         return user
     }
 
@@ -112,7 +112,7 @@ class UserService {
     User enableUser(User user, boolean enable) {
         assert user: "the input user must not be null"
         user.enabled = enable
-        assert user.save()
+        assert user.save(flush: true)
         return user
     }
 
@@ -153,7 +153,7 @@ class UserService {
         assert role : "Role can not be null"
         UserRole userRole = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRole(user, role))
         if (userRole) {
-            userRole.delete()
+            userRole.delete(flush: true)
         }
     }
 
@@ -186,12 +186,12 @@ class UserService {
 
     void setAcceptPrivacyPolicy(User user, boolean flag) {
         user.acceptedPrivacyPolicy = flag
-        user.save()
+        user.save(flush: true)
     }
 
     void setPlannedDeactivationDateOfUser(User user, Date date) {
         user.plannedDeactivationDate = date
-        user.save()
+        user.save(flush: true)
     }
 
     /**
@@ -219,13 +219,13 @@ No user exists yet, create user ${currentUser} with admin rights.
                         passwordExpired: false,
                         password       : "*", //need for plugin, but unused in OTP
                         realName       : currentUser,
-                ]).save()
+                ]).save(flush: true)
 
                 [Role.ROLE_ADMIN].each {
                     new UserRole([
                             user: user,
                             role: CollectionUtils.exactlyOneElement(Role.findAllByAuthority(it)),
-                    ]).save()
+                    ]).save(flush: true)
                 }
             }
         }

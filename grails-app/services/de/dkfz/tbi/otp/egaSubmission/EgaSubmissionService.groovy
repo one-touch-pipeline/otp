@@ -51,7 +51,7 @@ class EgaSubmissionService {
                 state         : EgaSubmission.State.SELECTION,
                 selectionState: EgaSubmission.SelectionState.SELECT_SAMPLES,
         ])
-        assert submission.save()
+        assert submission.save(flush: true)
 
         return submission
     }
@@ -64,13 +64,13 @@ class EgaSubmissionService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateSubmissionState(EgaSubmission submission, EgaSubmission.State state) {
         submission.state = state
-        submission.save()
+        submission.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updatePubMedId(EgaSubmission submission, String pubMedId) {
         submission.pubMedId = pubMedId
-        submission.save()
+        submission.save(flush: true)
     }
 
     @CompileDynamic
@@ -216,14 +216,14 @@ class EgaSubmissionService {
                 sampleSubmissionObject.egaAliasName = alias[i]
                 sampleSubmissionObject.useBamFile = fileType[i] == FileType.BAM
                 sampleSubmissionObject.useFastqFile = fileType[i] == FileType.FASTQ
-                sampleSubmissionObject.save()
+                sampleSubmissionObject.save(flush: true)
             }
             if (submission.samplesToSubmit.any { it.useFastqFile }) {
                 submission.selectionState = EgaSubmission.SelectionState.SELECT_FASTQ_FILES
             } else {
                 submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
             }
-            submission.save()
+            submission.save(flush: true)
         }
     }
 
@@ -335,7 +335,7 @@ class EgaSubmissionService {
                 it.bamFile.id == fileId as long
             }
             bamFileSubmissionObject.egaAliasName = egaFileAliases[i]
-            bamFileSubmissionObject.save()
+            bamFileSubmissionObject.save(flush: true)
         }
     }
 

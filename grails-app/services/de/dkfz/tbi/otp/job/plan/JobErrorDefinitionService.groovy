@@ -90,7 +90,7 @@ class JobErrorDefinitionService {
                 action: action,
                 errorExpression: errorExpression,
         )
-        newJobErrorDefinition.save()
+        newJobErrorDefinition.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -100,20 +100,20 @@ class JobErrorDefinitionService {
                 action: action,
                 errorExpression: errorExpression,
         )
-        newJobErrorDefinition.save()
+        newJobErrorDefinition.save(flush: true)
         jobErrorDefinition.checkFurtherJobErrors.add(newJobErrorDefinition)
-        jobErrorDefinition.save()
+        jobErrorDefinition.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void updateErrorExpression(JobErrorDefinition jobErrorDefinition, String errorExpression) {
         jobErrorDefinition.errorExpression = errorExpression
-        jobErrorDefinition.save()
+        jobErrorDefinition.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void addNewJob(JobErrorDefinition jobErrorDefinition, JobDefinition jobDefinition) {
         jobErrorDefinition.jobDefinitions.add(jobDefinition)
-        jobErrorDefinition.save()
+        jobErrorDefinition.save(flush: true)
     }
 }

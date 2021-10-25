@@ -35,26 +35,26 @@ class WorkflowStateChangeService {
         assert step
         assert message
         step.state = WorkflowStep.State.OMITTED
-        step.save()
+        step.save(flush: true)
 
         step.workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
         step.workflowRun.omittedMessage = message
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
             workflowArtefact.state = WorkflowArtefact.State.OMITTED
-            workflowArtefact.save()
+            workflowArtefact.save(flush: true)
         }
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
             if (workflowRun.state == WorkflowRun.State.PENDING) {
                 workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
                 workflowRun.omittedMessage = message
-                workflowRun.save()
+                workflowRun.save(flush: true)
                 workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
                         workflowArtefact.state = WorkflowArtefact.State.OMITTED
-                        workflowArtefact.save()
+                        workflowArtefact.save(flush: true)
                     }
                 }
             }
@@ -64,19 +64,19 @@ class WorkflowStateChangeService {
     void changeStateToWaitingOnUser(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.WAITING_FOR_USER
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.SUCCESS
-        step.save()
+        step.save(flush: true)
     }
 
     void changeStateToWaitingOnSystem(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.RUNNING_WES
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.SUCCESS
-        step.save()
+        step.save(flush: true)
     }
 
     void changeStateToFinalFailed(List<WorkflowStep> steps) {
@@ -88,11 +88,11 @@ class WorkflowStateChangeService {
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
             workflowArtefact.state = WorkflowArtefact.State.FAILED
-            workflowArtefact.save()
+            workflowArtefact.save(flush: true)
         }
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
@@ -101,13 +101,13 @@ class WorkflowStateChangeService {
                 workflowRun.omittedMessage = new OmittedMessage(
                         message: "Previous run failed",
                         category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
-                ).save()
-                workflowRun.save()
+                ).save(flush: true)
+                workflowRun.save(flush: true)
 
                 workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
                         workflowArtefact.state = WorkflowArtefact.State.OMITTED
-                        workflowArtefact.save()
+                        workflowArtefact.save(flush: true)
                     }
                 }
             }
@@ -117,21 +117,21 @@ class WorkflowStateChangeService {
     void changeStateToFailed(WorkflowStep step, Throwable throwable) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.workflowError = new WorkflowError(message: throwable.message, stacktrace: StackTraceUtils.getStackTrace(throwable))
         step.state = WorkflowStep.State.FAILED
-        step.save()
+        step.save(flush: true)
     }
 
     void changeStateToFailedAfterRestart(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.workflowError = new WorkflowError(message: "The step was still running while OTP was shut down. ", stacktrace: "")
         step.state = WorkflowStep.State.FAILED
-        step.save()
+        step.save(flush: true)
     }
 
     /**
@@ -146,7 +146,7 @@ class WorkflowStateChangeService {
     void changeStateToSuccess(WorkflowStep step) {
         assert step
         step.state = WorkflowStep.State.SUCCESS
-        step.save()
+        step.save(flush: true)
 
         String lastBeanName = null
         if (step.workflowRun.workflow.beanName) {
@@ -156,10 +156,10 @@ class WorkflowStateChangeService {
 
         if (step.beanName == lastBeanName) {
             step.workflowRun.state = WorkflowRun.State.SUCCESS
-            step.workflowRun.save()
+            step.workflowRun.save(flush: true)
             step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                 workflowArtefact.state = WorkflowArtefact.State.SUCCESS
-                workflowArtefact.save()
+                workflowArtefact.save(flush: true)
             }
         }
     }
@@ -167,10 +167,10 @@ class WorkflowStateChangeService {
     void changeStateToRunning(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.RUNNING_OTP
-        step.workflowRun.save()
+        step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.RUNNING
-        step.save()
+        step.save(flush: true)
     }
 
     private Collection<WorkflowRun> getDependingWorkflowRuns(WorkflowRun run) {

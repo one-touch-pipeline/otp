@@ -49,7 +49,7 @@ class WorkflowArtefactService {
                 state           : WorkflowArtefact.State.PLANNED_OR_RUNNING,
                 artefactType    : values.artefactType,
                 displayName     : displayName,
-        ]).save()
+        ]).save(flush: false)
     }
 }
 

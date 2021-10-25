@@ -157,7 +157,7 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
             }
             it.seqType = data.seqTypeSwap.new
             it.sample = data.sampleSwap.new
-            assert it.save()
+            assert it.save(flush: true)
             return it
         }
     }
@@ -244,7 +244,7 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
         List<Sample> sampleList = Sample.findAllByIndividualAndSampleType(individualSwap.new, sampleTypeSwap.new)
         if (parameters.sampleNeedsToBeCreated) {
             assert sampleList.isEmpty(): "The new Sample (${individualSwap.new} ${sampleTypeSwap.new}) does exist, but should not"
-            newSample = new Sample(individual: individualSwap.new, sampleType: sampleTypeSwap.new).save()
+            newSample = new Sample(individual: individualSwap.new, sampleType: sampleTypeSwap.new).save(flush: true)
         } else {
             newSample = CollectionUtils.exactlyOneElement(sampleList,
                     "The new Sample (${individualSwap.new} ${sampleTypeSwap.new}) does not exist")

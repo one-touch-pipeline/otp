@@ -182,7 +182,7 @@ class CellRangerService {
             }
         }
         qa.qualityAssessmentMergedPass = singleCellBamFile.findOrSaveQaPass()
-        qa.save()
+        qa.save(flush: true)
         return qa
     }
 
@@ -208,7 +208,7 @@ class CellRangerService {
         updateBamFile(singleCellBamFile)
 
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
-        assert singleCellBamFile.workPackage.save()
+        assert singleCellBamFile.workPackage.save(flush: true)
 
         abstractMergedBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
     }
@@ -227,7 +227,7 @@ class CellRangerService {
         singleCellBamFile.md5sum = md5SumFile
         singleCellBamFile.fileExists = true
         singleCellBamFile.dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFile).toMillis())
-        assert singleCellBamFile.save()
+        assert singleCellBamFile.save(flush: true)
     }
 
     String sampleIdentifierForDirectoryStructure(String sampleIdentifier) {

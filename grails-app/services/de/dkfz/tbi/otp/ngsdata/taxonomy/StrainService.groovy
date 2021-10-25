@@ -33,7 +33,7 @@ class StrainService {
     Errors createStrain(String name) {
         Strain strain = new Strain(name: name)
         try {
-            strain.save()
+            strain.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }

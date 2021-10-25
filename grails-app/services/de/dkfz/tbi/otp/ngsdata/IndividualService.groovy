@@ -230,7 +230,7 @@ class IndividualService {
                 type: cmd.type,
                 project: cmd.individualProject,
         )
-        individual.save()
+        individual.save(flush: true)
         createSamples(individual, cmd.samples)
         return individual
     }
@@ -262,7 +262,7 @@ class IndividualService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateField(Individual individual, String key, String value) throws IndividualUpdateException {
         individual[key] = value
-        if (!individual.save()) {
+        if (!individual.save(flush: true)) {
             throw new IndividualUpdateException(individual)
         }
     }
@@ -306,7 +306,7 @@ class IndividualService {
         Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
         if (!sample) {
             sample = new Sample(individual: individual, sampleType: sampleType)
-            sample.save()
+            sample.save(flush: true)
         }
         return sample
     }
@@ -320,7 +320,7 @@ class IndividualService {
         SampleType sampleType = SampleTypeService.findSampleTypeByName(name)
         if (!sampleType) {
             sampleType = new SampleType(name: name)
-            sampleType.save()
+            sampleType.save(flush: true)
         }
         return sampleType
     }

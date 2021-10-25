@@ -136,7 +136,7 @@ class SamplePairDeciderService {
                     mergingWorkPackage1: disease,
                     mergingWorkPackage2: control,
             )
-            samplePair.save()
+            samplePair.save(flush: true)
         }
         return samplePair
     }

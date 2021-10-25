@@ -46,7 +46,7 @@ class ProcessingThresholdsService {
         )
         if (!numberOfLanes && !coverage) {
             if (processingThresholds) {
-                processingThresholds.delete()
+                processingThresholds.delete(flush: true)
             }
             return null
         }
@@ -62,7 +62,7 @@ class ProcessingThresholdsService {
                     coverage: coverage,
             )
         }
-        processingThresholds.save()
+        processingThresholds.save(flush: true)
         return processingThresholds
     }
 

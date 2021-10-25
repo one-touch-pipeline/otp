@@ -192,7 +192,7 @@ class CrashRecoveryService {
             log.error("Could not create a ${state} Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a ${state} Update for ProcessingStep ${step.id}")
         }
-        return update.save()
+        return update.save(flush: true)
     }
 
     /**
@@ -229,7 +229,7 @@ class CrashRecoveryService {
                         throw new RuntimeException("Parameter for type ${parameterType.id} has not been set")
                     }
                 }
-                step.save()
+                step.save(flush: true)
             }
         }
     }
@@ -238,16 +238,16 @@ class CrashRecoveryService {
         createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
         ProcessingStepUpdate update = createNewProcessingStepUpdate(step, ExecutionState.FAILURE)
         ProcessingError error = new ProcessingError(errorMessage: reason, processingStepUpdate: update)
-        error.save()
+        error.save(flush: true)
         update.error = error
-        if (!update.save()) {
+        if (!update.save(flush: true)) {
             // TODO: trigger error handling
             log.error("Could not create a FAILURE Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a FAILURE Update for ProcessingStep ${step.id}")
         }
         Process process = Process.get(step.process.id)
         process.finished = true
-        if (!process.save()) {
+        if (!process.save(flush: true)) {
             // TODO: trigger error handling
             log.error("Could not set Process ${step.process.id} to finished")
             throw new ProcessingException("Could not set Process ${step.process.id} to finished")

@@ -145,6 +145,6 @@ ${search ? """
 
             ticket."${property}" = date
         }
-        assert ticket.save()
+        assert ticket.save(flush: true)
     }
 }

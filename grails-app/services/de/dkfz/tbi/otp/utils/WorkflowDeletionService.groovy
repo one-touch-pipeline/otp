@@ -43,7 +43,7 @@ class WorkflowDeletionService {
 
         OmittedMessage omittedMessage = workflowRun.omittedMessage
 
-        workflowRun.delete()
+        workflowRun.delete(flush: true)
 
         deleteOmittedMessage(omittedMessage)
     }
@@ -51,11 +51,11 @@ class WorkflowDeletionService {
     void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {
         WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact).each {
             WorkflowRun workflowRun = it.workflowRun
-            it.delete()
+            it.delete(flush: true)
             deleteWorkflowRun(workflowRun)
         }
-        workflowArtefact.artefact.ifPresent { it.delete() }
-        workflowArtefact.delete()
+        workflowArtefact.artefact.ifPresent { it.delete(flush: true) }
+        workflowArtefact.delete(flush: true)
     }
 
     void deleteWorkflowStep(WorkflowStep workflowStep) {
@@ -67,30 +67,30 @@ class WorkflowDeletionService {
             deleteWorkflowLog(it)
         }
         ClusterJob.findAllByWorkflowStep(workflowStep).each {
-            it.delete()
+            it.delete(flush: true)
         }
         WorkflowError error = workflowStep.workflowError
 
-        workflowStep.delete()
+        workflowStep.delete(flush: true)
 
         deleteWorkflowError(error)
     }
 
     void deleteWorkflowError(WorkflowError workflowError) {
         if (workflowError) {
-            workflowError.delete()
+            workflowError.delete(flush: true)
         }
     }
 
     void deleteOmittedMessage(OmittedMessage omittedMessage) {
         if (omittedMessage) {
-            omittedMessage.delete()
+            omittedMessage.delete(flush: true)
         }
     }
 
     void deleteWorkflowLog(WorkflowLog workflowLog) {
         if (workflowLog) {
-            workflowLog.delete()
+            workflowLog.delete(flush: true)
         }
     }
 
@@ -105,7 +105,7 @@ class WorkflowDeletionService {
 
             activeProjectWorkflowList.each {
                 referenceGenomeSelector.activeProjectWorkflows.remove(it)
-                it.delete()
+                it.delete(flush: true)
             }
             deleteReferenceGenomeSelector(referenceGenomeSelector)
         }
@@ -113,7 +113,7 @@ class WorkflowDeletionService {
 
     void deleteReferenceGenomeSelector(ReferenceGenomeSelector referenceGenomeSelector) {
         if (referenceGenomeSelector) {
-            referenceGenomeSelector.delete()
+            referenceGenomeSelector.delete(flush: true)
         }
     }
 }

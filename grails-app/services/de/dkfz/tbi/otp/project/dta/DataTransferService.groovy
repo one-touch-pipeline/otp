@@ -62,7 +62,7 @@ class DataTransferService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     DataTransfer persistDataTransferWithTransferDocuments(DataTransfer dataTransfer, List<MultipartFile> files) throws FileIsEmptyException {
         dataTransfer.performingUser = springSecurityService.currentUser as User
-        dataTransfer.dataTransferAgreement.addToTransfers(dataTransfer).save()
+        dataTransfer.dataTransferAgreement.addToTransfers(dataTransfer).save(flush: true)
         return addFilesToDataTransfer(dataTransfer, files)
     }
 
@@ -84,7 +84,7 @@ class DataTransferService {
                 fileName: FileNameGenerator.getUniqueFileNameWithTimestamp(file.originalFilename),
         ])
 
-        dataTransfer.addToDataTransferDocuments(dataTransferDocument).save()
+        dataTransfer.addToDataTransferDocuments(dataTransferDocument).save(flush: true)
         uploadDataTransferDocumentToRemoteFileSystem(dataTransferDocument, file.bytes)
 
         return dataTransfer
@@ -148,13 +148,13 @@ class DataTransferService {
     void markTransferAsCompleted(DataTransfer transfer) {
         assert !transfer.completionDate: "DataTransfer already completed"
         transfer.completionDate = new Date()
-        transfer.save()
+        transfer.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     DataTransfer updateDataTransferComment(DataTransfer dataTransfer, String comment) {
         dataTransfer.comment = comment
-        return dataTransfer.save()
+        return dataTransfer.save(flush: true)
     }
 
     /**

@@ -60,8 +60,8 @@ class ProjectInfoService {
         )
 
         project.addToProjectInfos(projectInfo)
-        project.save()
-        projectInfo.save()
+        project.save(flush: true)
+        projectInfo.save(flush: true)
 
         uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
 
@@ -76,8 +76,8 @@ class ProjectInfoService {
         )
 
         project.addToProjectInfos(projectInfo)
-        project.save()
-        projectInfo.save()
+        project.save(flush: true)
+        projectInfo.save(flush: true)
 
         uploadProjectInfoToProjectFolder(projectInfo, path.bytes)
 
@@ -93,7 +93,7 @@ class ProjectInfoService {
         Path path = fs.getPath(projectInfo.path)
         fileService.deleteDirectoryRecursively(path)
         projectInfo.project = null
-        projectInfo.delete()
+        projectInfo.delete(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -123,6 +123,6 @@ class ProjectInfoService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProjectInfo updateProjectInfoComment(ProjectInfo projectInfo, String comment) {
         projectInfo.comment = comment
-        projectInfo.save()
+        projectInfo.save(flush: true)
     }
 }

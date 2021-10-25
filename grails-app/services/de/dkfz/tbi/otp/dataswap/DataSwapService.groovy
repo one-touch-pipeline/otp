@@ -255,7 +255,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                 assert it.seqTrack.seqType.libraryLayout == SequencingReadType.SINGLE: "sequencing read type is not ${SequencingReadType.SINGLE}"
                 it.mateNumber = 1
             }
-            it.save()
+            it.save(flush: true)
             data.log << "\n    changed ${oldFilename} to ${it.fileName}"
 
             bashScriptToMoveFiles += createRenameDataFileCommands(oldFilename, it, data)
@@ -542,7 +542,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                 data.dirsToDelete.addAll(dirsToDelete)
             }
             seqTrack.swapped = true
-            seqTrack.save()
+            seqTrack.save(flush: true)
         }
     }
 

@@ -64,7 +64,7 @@ class AbstractBamFileService {
     void assignedToMergingSet(AbstractBamFile bamFile) {
         notNull(bamFile, "the input bam file for the method assignedToMergingSet is null")
         bamFile.status = State.PROCESSED
-        bamFile.save()
+        bamFile.save(flush: true)
     }
 
     /**
@@ -172,6 +172,6 @@ class AbstractBamFileService {
      */
     @Deprecated
     static AbstractBamFile saveBamFile(AbstractBamFile bamFile) {
-        return bamFile.save()
+        return bamFile.save(flush: true)
     }
 }

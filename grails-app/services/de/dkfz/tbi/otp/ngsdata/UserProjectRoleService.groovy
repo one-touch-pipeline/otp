@@ -71,7 +71,7 @@ class UserProjectRoleService {
         projectRoles.each {
             userProjectRole.addToProjectRoles(it)
         }
-        userProjectRole.save()
+        userProjectRole.save(flush: true)
         auditLogService.logAction(
                 AuditLog.Action.PROJECT_USER_CREATED_PROJECT_USER,
                 "Created Project User: ${userProjectRole.toStringWithAllProperties()}"
@@ -318,7 +318,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToOtp = accessToOtp
-            assert upr.save()
+            assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_OTP, message)
         }
@@ -344,7 +344,7 @@ class UserProjectRoleService {
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = value
             upr.fileAccessChangeRequested = !force
-            assert upr.save()
+            assert upr.save(flush: true)
             if (force) {
                 String message = getFlagChangeLogMessage("Take the state over of file access over from the ldap",
                         upr.accessToFiles, upr.user.username, upr.project.name)
@@ -380,7 +380,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsers = value
-            assert upr.save()
+            assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Manage Users", upr.manageUsers, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_MANAGE_USER, message)
         }
@@ -394,7 +394,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsersAndDelegate = value
-            assert upr.save()
+            assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Delegate Manage Users", upr.manageUsersAndDelegate, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_DELEGATE_MANAGE_USER, message)
         }
@@ -408,7 +408,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.receivesNotifications = value
-            assert upr.save()
+            assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Receives Notification", upr.receivesNotifications, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_RECEIVES_NOTIFICATION, message)
         }
@@ -454,7 +454,7 @@ class UserProjectRoleService {
             upr.manageUsers = false
             upr.manageUsersAndDelegate = false
             upr.receivesNotifications = false
-            assert upr.save()
+            assert upr.save(flush: true)
         }
     }
 
@@ -466,7 +466,7 @@ class UserProjectRoleService {
             }
             applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
                 upr.projectRoles.add(newProjectRole)
-                assert upr.save()
+                assert upr.save(flush: true)
             }
         }
         return userProjectRole
@@ -483,7 +483,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.projectRoles.remove(currentProjectRole)
-            assert upr.save()
+            assert upr.save(flush: true)
         }
         return userProjectRole
     }
@@ -524,9 +524,9 @@ class UserProjectRoleService {
                 properties.each { String property, Object value ->
                     existingUserProjectRole."$property" = value
                 }
-                existingUserProjectRole.save()
+                existingUserProjectRole.save(flush: true)
             } else {
-                new UserProjectRole(properties).save()
+                new UserProjectRole(properties).save(flush: true)
             }
         }
     }

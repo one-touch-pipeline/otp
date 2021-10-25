@@ -59,11 +59,11 @@ class ProcessingPriorityService {
     }
 
     ProcessingPriority savePriority(ProcessingPriority processingPriority) {
-        return processingPriority.save()
+        return processingPriority.save(flush: true)
     }
 
     void deletePriority(Long id) {
-        ProcessingPriority.get(id).delete()
+        ProcessingPriority.get(id).delete(flush: true)
     }
 
     Map getReferences(ProcessingPriority processingPriority) {

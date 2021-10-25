@@ -149,7 +149,7 @@ class BamMetadataImportService {
                         pipeline: Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
                         libraryPreparationKit: libraryPreparationKit ? libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit) : null,
                 )
-                assert emwp.save()
+                assert emwp.save(flush: true)
 
                 ExternallyProcessedMergedBamFile epmbf = new ExternallyProcessedMergedBamFile(
                         workPackage: emwp,
@@ -160,7 +160,7 @@ class BamMetadataImportService {
                         maximumReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
                         furtherFiles: [] as Set,
                         insertSizeFile: insertSizeFile
-                ).save()
+                ).save(flush: true)
 
                 Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
 
@@ -192,8 +192,8 @@ class BamMetadataImportService {
                             insertSizeCV: qcValues.all.insertSizeCV,
                             qualityAssessmentMergedPass: new QualityAssessmentMergedPass([
                                     abstractMergedBamFile: epmbf,
-                            ]).save(),
-                    ).save()
+                            ]).save(flush: true),
+                    ).save(flush: true)
 
                     if (!epmbf.furtherFiles.find {
                         Path furtherPath = bamFileParent.resolve(it)
@@ -204,11 +204,11 @@ class BamMetadataImportService {
                 }
 
                 emwp.bamFileInProjectFolder = null
-                assert epmbf.save()
+                assert epmbf.save(flush: true)
                 importProcess.externallyProcessedMergedBamFiles.add(epmbf)
             }
 
-            assert importProcess.save()
+            assert importProcess.save(flush: true)
 
             if (importProcess.triggerAnalysis) {
                 samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedMergedBamFiles*.workPackage)

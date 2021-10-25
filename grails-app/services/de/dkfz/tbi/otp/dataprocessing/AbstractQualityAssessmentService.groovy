@@ -98,7 +98,7 @@ class AbstractQualityAssessmentService {
                 qa.seqTrack = seqTrack
                 assert qa.chromosome == chromosome
                 qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
-                assert qa.save()
+                assert qa.save(flush: true)
             }
         }
     }
@@ -111,7 +111,7 @@ class AbstractQualityAssessmentService {
             RoddyMergedBamQa qa = new RoddyMergedBamQa(handleNaValue(chromosomeValues))
             assert qa.chromosome == chromosome
             qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
-            assert qa.save()
+            assert qa.save(flush: true)
             return qa
         }
         return chromosomeInformationQa.find {
@@ -133,7 +133,7 @@ class AbstractQualityAssessmentService {
         RnaQualityAssessment rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
         rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
         rnaQualityAssessment.qualityAssessmentMergedPass = rnaRoddyBamFile.findOrSaveQaPass()
-        assert rnaQualityAssessment.save()
+        assert rnaQualityAssessment.save(flush: true)
         return rnaQualityAssessment
     }
 
@@ -147,7 +147,7 @@ class AbstractQualityAssessmentService {
                 qa.libraryDirectoryName = lib
                 assert qa.chromosome == chromosome
                 qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
-                assert qa.save()
+                assert qa.save(flush: true)
             }
         }
     }
@@ -156,6 +156,6 @@ class AbstractQualityAssessmentService {
         RoddyMergedBamQa mergedQa = roddyBamFile.overallQualityAssessment
         roddyBamFile.coverage = mergedQa.genomeWithoutNCoverageQcBases
         roddyBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(roddyBamFile)
-        assert roddyBamFile.save()
+        assert roddyBamFile.save(flush: true)
     }
 }

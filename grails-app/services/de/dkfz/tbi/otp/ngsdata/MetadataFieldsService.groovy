@@ -56,7 +56,7 @@ abstract class MetadataFieldsService<T extends MetadataField> {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void changeLegacyState(T domainObject, boolean legacy) {
         domainObject.legacy = legacy
-        assert domainObject.save()
+        assert domainObject.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -65,7 +65,7 @@ abstract class MetadataFieldsService<T extends MetadataField> {
         checkProperties(properties)
         checkNameAndAliases(name, properties, importAliases)
         T t = clazz.newInstance([name: name, importAlias: importAliases] + properties)
-        assert t.save()
+        assert t.save(flush: true)
         return t
     }
 
@@ -86,7 +86,7 @@ abstract class MetadataFieldsService<T extends MetadataField> {
         assert t: "No ${clazz} with name or importAlias ${name} exists"
         assert !t.importAlias.contains(importAlias): "the importAlias was already created"
         t.importAlias.add(importAlias)
-        assert t.save()
+        assert t.save(flush: true)
     }
 
     protected T findByName(String name, Map properties = [:]) {

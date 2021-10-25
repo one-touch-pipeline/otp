@@ -50,9 +50,9 @@ class JobService {
                 beanName: beanName,
                 state: WorkflowStep.State.CREATED,
                 previous: workflowRun.workflowSteps ? workflowRun.workflowSteps.last() : null,
-        ).save()
+        ).save(flush: true)
         workflowRun.state = WorkflowRun.State.RUNNING_OTP
-        workflowRun.save()
+        workflowRun.save(flush: true)
     }
 
     private void createRestartedJob(WorkflowStep stepToRestart) {
@@ -68,10 +68,10 @@ class JobService {
         List<WorkflowStep> workflowSteps = stepToRestart.workflowRun.workflowSteps
         workflowSteps[workflowSteps.indexOf(stepToRestart)..(workflowSteps.size() - 1)].each { WorkflowStep step ->
             step.obsolete = true
-            step.save()
+            step.save(flush: true)
         }
         stepToRestart.workflowRun.state = WorkflowRun.State.PENDING
-        stepToRestart.workflowRun.save()
+        stepToRestart.workflowRun.save(flush: true)
 
         new WorkflowStep(
                 beanName: stepToRestart.beanName,
@@ -79,7 +79,7 @@ class JobService {
                 previous: stepToRestart.workflowRun.workflowSteps.last(),
                 restartedFrom: stepToRestart,
                 workflowRun: stepToRestart.workflowRun,
-        ).save()
+        ).save(flush: true)
     }
 
     void createRestartedJobAfterJobFailures(List<WorkflowStep> stepsToRestart) {

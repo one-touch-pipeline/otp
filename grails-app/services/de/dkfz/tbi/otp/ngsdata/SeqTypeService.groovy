@@ -97,7 +97,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     void changeLegacyState(SeqType seqType, boolean legacy) {
         SeqType.findAllByNameAndSingleCell(seqType.name, seqType.singleCell).each {
             it.legacy = legacy
-            assert it.save()
+            assert it.save(flush: true)
         }
     }
 
@@ -116,7 +116,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
             if (seqType) {
                 assert !seqType.importAlias.contains(importAlias): "the importAlias was already created"
                 seqType.importAlias.add(importAlias)
-                assert seqType.save()
+                assert seqType.save(flush: true)
             }
         }
     }

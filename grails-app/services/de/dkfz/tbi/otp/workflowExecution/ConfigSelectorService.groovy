@@ -235,7 +235,7 @@ class ConfigSelectorService {
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
                 name: cmd.fragmentName,
                 configValues: cmd.value,
-        ).save()
+        ).save(flush: true)
 
         ExternalWorkflowConfigSelector selector = new ExternalWorkflowConfigSelector(
                 name: cmd.selectorName,
@@ -248,7 +248,7 @@ class ConfigSelectorService {
                 externalWorkflowConfigFragment: fragment,
                 selectorType: cmd.type,
                 customPriority: cmd.customPriority,
-        ).save()
+        ).save(flush: true)
         return selector
     }
 
@@ -273,11 +273,11 @@ class ConfigSelectorService {
                     name: cmd.fragmentName,
                     configValues: cmd.value,
                     previous: cmd.fragment,
-            ).save()
+            ).save(flush: true)
             cmd.selector.externalWorkflowConfigFragment = fragment
         }
 
-        cmd.selector.save()
+        cmd.selector.save(flush: true)
         return cmd.selector
     }
 
@@ -285,8 +285,8 @@ class ConfigSelectorService {
     void deprecate(ExternalWorkflowConfigFragment fragment) {
         fragment.selector.ifPresent { assert it.selectorType != SelectorType.DEFAULT_VALUES }
         fragment.deprecationDate = LocalDate.now()
-        fragment.save()
-        fragment.selector.ifPresent { it.delete() }
+        fragment.save(flush: true)
+        fragment.selector.ifPresent { it.delete(flush: true) }
     }
 }
 

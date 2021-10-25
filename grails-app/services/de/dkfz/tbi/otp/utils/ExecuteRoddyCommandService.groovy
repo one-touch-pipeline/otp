@@ -82,7 +82,7 @@ class ExecuteRoddyCommandService {
 
         if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
             roddyResult.roddyExecutionDirectoryNames.clear()
-            roddyResult.save()
+            roddyResult.save(flush: true)
         }
 
         File workOutputDir = roddyResult.workDirectory
