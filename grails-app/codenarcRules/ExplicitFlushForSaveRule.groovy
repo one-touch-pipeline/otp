@@ -25,24 +25,22 @@ import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
 @CompileStatic
-class NoExplicitFlushForSaveRule extends AbstractAstVisitorRule {
+class ExplicitFlushForSaveRule extends AbstractAstVisitorRule {
     int priority = 1
-    String name = 'NoExplicitFlushForSaveRule'
-    String description = 'Ensures that every time .save() is executed on a DomainClass that its parameters don\'t contain flush: ' +
-            'Setting it doesn\'t have an effect. The default is auto; to disable flushing use "SessionUtils.manualFlush".'
-    Class astVisitorClass = NoExplicitFlushForSaveVisitor
-    String doNotApplyToFilesMatching = "(.*/test/.*)|(.*/test-helper/.*)"
+    String name = 'ExplicitFlushForSaveRule'
+    String description = 'Ensures that every time .save() is executed on a DomainClass that its parameters contain flush with either true or false.'
+    Class astVisitorClass = ExplicitFlushForSaveVisitor
 }
 
 @CompileStatic
-class NoExplicitFlushForSaveVisitor extends AbstractAstVisitor {
+class ExplicitFlushForSaveVisitor extends AbstractAstVisitor {
 
     @Override
     void visitMethodCallExpression(MethodCallExpression call) {
         if (call.methodAsString == 'save') {
             String parameter = call.arguments.text
-            if (parameter.contains('flush')) {
-                addViolation(call, "${parameter} contains 'flush'")
+            if (!parameter.contains('flush')) {
+                addViolation(call, "${parameter} does not contain 'flush'")
             }
         }
     }
