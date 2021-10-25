@@ -92,7 +92,6 @@ class FastqcJobIntegrationTests {
         dataFile = null
     }
 
-
     @Test
     void testMaybeSubmit_FastQcResultsNotAvailable_executesFastQcCommand() {
         setupData()
@@ -132,6 +131,8 @@ class FastqcJobIntegrationTests {
         fastqcJob.maybeSubmit()
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testMaybeSubmit_FastQcResultsAvailable_executesCopyCommand() {
         setupData()
@@ -165,7 +166,6 @@ class FastqcJobIntegrationTests {
             TestCase.cleanTestDirectory()
         }
     }
-
 
     @Test
     void testValidate_FastqcAreCreatedByClusterJob_shallBeUploadToDB() {

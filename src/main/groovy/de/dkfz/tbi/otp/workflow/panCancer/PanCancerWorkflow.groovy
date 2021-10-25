@@ -77,7 +77,7 @@ class PanCancerWorkflow implements OtpWorkflow {
                 seqTracks          : roddyBamFile.seqTracks.collect() as Set,
                 config             : roddyBamFile.config,
                 numberOfMergedLanes: roddyBamFile.containedSeqTracks.size(),
-        ]).save()
+        ]).save(flush: true)
 
         return outputRoddyBamFile
     }

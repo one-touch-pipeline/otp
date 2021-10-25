@@ -48,6 +48,8 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
         }
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test setFileExistsForAllDataFiles"() {
         given:
         setupData()

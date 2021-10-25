@@ -309,7 +309,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         processingPriority.with {
             queue = configService.workflowTestFasttrackQueue
             roddyConfigSuffix = configService.workflowTestFasttrackConfigSuffix
-            save()
+            save(flush: true)
         }
     }
 

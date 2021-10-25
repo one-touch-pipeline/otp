@@ -20,26 +20,29 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.ast.expr.MethodCallExpression
+import org.codenarc.rule.AbstractAstVisitor
+import org.codenarc.rule.AbstractAstVisitorRule
 
-int importId = 0// set it to delete the import process and related wrong metadata
+@CompileStatic
+class ExplicitFlushForDeleteRule extends AbstractAstVisitorRule {
+    int priority = 1
+    String name = 'ExplicitFlushForDeleteRule'
+    String description = 'Ensures that every time .delete() is executed on a DomainClass that its parameters contain flush with either true or false.'
+    Class astVisitorClass = ExplicitFlushForDeleteVisitor
+}
 
-ImportProcess importProcess = ImportProcess.findById(importId)
+@CompileStatic
+class ExplicitFlushForDeleteVisitor extends AbstractAstVisitor {
 
-if (importProcess) {
-    ExternallyProcessedMergedBamFile.withTransaction {
-        Set<ExternallyProcessedMergedBamFile> bamFiles = importProcess.externallyProcessedMergedBamFiles
-        println "ImportProcess ${importProcess.id} deleted"
-        importProcess.delete(flush: true)
-        bamFiles.each {
-            ExternalMergingWorkPackage workPackage = it.workPackage
-            println "${it} deleted"
-            it.delete(flush: true)
-            workPackage.delete(flush: true)
+    @Override
+    void visitMethodCallExpression(MethodCallExpression call) {
+        if (call.methodAsString == 'delete') {
+            String parameter = call.arguments.text
+            if (!parameter.contains('flush')) {
+                addViolation(call, "${parameter} does not contain 'flush'")
+            }
         }
-        it.flush()
-        assert false
     }
 }

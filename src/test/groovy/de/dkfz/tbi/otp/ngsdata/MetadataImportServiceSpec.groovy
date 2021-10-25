@@ -440,7 +440,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
     }
 
-
     @Unroll
     void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, FastqImportInstance.ImportMode importMode) {
         given:
@@ -866,7 +865,6 @@ ${ILSE_NO}                      -             1234          1234          -     
         false     | true            | false | FastqImportInstance.ImportMode.AUTOMATIC
         true      | false           | true  | FastqImportInstance.ImportMode.MANUAL
     }
-
 
     void "importMetadataFile imports correctly data withAntibodyTarget"() {
         given:
@@ -1402,7 +1400,6 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         result.value == 'ACGTACGT'
         result.cells == [row.getCellByColumnTitle(INDEX.name())] as Set
     }
-
 
     void "extractMateNumber, when READ columns is missing, returns null"() {
         given:

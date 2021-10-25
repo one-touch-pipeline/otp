@@ -60,7 +60,6 @@ class EgaSubmissionService {
         return EgaSubmission.get(id)
     }
 
-
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateSubmissionState(EgaSubmission submission, EgaSubmission.State state) {
         submission.state = state

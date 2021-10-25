@@ -38,7 +38,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AclSid,
                 Document,
                 DocumentType,
@@ -168,7 +168,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
         Document document = createDocument(documentType: documentType)
 
         when:
-        def model = controller.manage()
+        Map model = controller.manage()
 
         then:
         controller.response.status == SC_OK

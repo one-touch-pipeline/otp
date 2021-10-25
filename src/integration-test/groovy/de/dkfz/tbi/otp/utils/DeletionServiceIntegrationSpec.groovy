@@ -205,7 +205,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         IlseSubmission ilseSubmission = createIlseSubmission(ilseNumber: 1234)
         ilseSubmission.warning = true
         ilseSubmission.comment = new Comment(author: "user", comment: "test", modificationDate: new Date())
-        ilseSubmission.save()
+        ilseSubmission.save(flush: true)
 
         SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
 
@@ -223,7 +223,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         IlseSubmission ilseSubmission = createIlseSubmission(ilseNumber: 1234)
         ilseSubmission.warning = true
         ilseSubmission.comment = new Comment(author: "user", comment: "test", modificationDate: new Date())
-        ilseSubmission.save()
+        ilseSubmission.save(flush: true)
 
         SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
         createSeqTrack(ilseSubmission: ilseSubmission)

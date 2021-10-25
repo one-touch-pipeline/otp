@@ -50,6 +50,8 @@ class ProcessStatusServiceIntegrationTests {
         }
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @After
     void tearDown() {
         file.writable = true

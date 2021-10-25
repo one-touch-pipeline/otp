@@ -60,7 +60,7 @@ MetaDataEntry.withTransaction {
             }
         }.each { MetaDataEntry entry ->
             entry.value = newComment
-            entry.save()
+            entry.save(flush: true)
         }
     }
 }

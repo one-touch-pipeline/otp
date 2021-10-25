@@ -78,7 +78,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
                 dataFile {
                     eq "seqTrack", seqTrack
                 }
-            }*.delete()
+            }*.delete(flush: true)
             return createProcess(seqTrack)
         }
     }

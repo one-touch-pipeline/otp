@@ -81,7 +81,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
                 workflow.deprecatedDate = null
             }
 
-            workflow.save()
+            workflow.save(flush: true)
             Map output = buildWorkflowOutputObject(workflow)
             render output as JSON
         }

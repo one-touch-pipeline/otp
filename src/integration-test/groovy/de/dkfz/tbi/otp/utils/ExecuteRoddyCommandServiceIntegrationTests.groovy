@@ -229,6 +229,8 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         }.contains("The input realm is not allowed to be null")
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail() {
         setupData()
@@ -345,6 +347,8 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         }
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testCreateWorkOutputDirectory_DirectoryCreationFailed_ShouldFail() {
         setupData()
@@ -355,6 +359,8 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         }
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testCreateWorkOutputDirectory_AllFine() {
         setupData()

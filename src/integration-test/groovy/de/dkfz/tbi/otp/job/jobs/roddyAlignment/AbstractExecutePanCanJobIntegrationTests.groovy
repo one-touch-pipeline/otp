@@ -152,6 +152,8 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
         }.contains("realm must not be null")
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_ConfigFileIsNotInFileSystem_ShouldFail() {
         setupData()

@@ -47,7 +47,7 @@ UserProjectRole.withTransaction {
         if (fileAccessInOtp != fileAccessInLdap) {
             println "${userProjectRole.user.username} ${userProjectRole.project.name} ${userProjectRole.projectRoles.name.join(", ")}: ${fileAccessInOtp} -> ${fileAccessInLdap}"
             userProjectRole.accessToFiles = fileAccessInLdap
-            userProjectRole.save()
+            userProjectRole.save(flush: false)
         }
     }
     allUPRs.last().save(flush: true)

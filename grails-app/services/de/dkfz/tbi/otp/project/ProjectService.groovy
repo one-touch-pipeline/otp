@@ -422,12 +422,10 @@ class ProjectService {
 
         if (fieldName == 'speciesWithStrains') {
             project.speciesWithStrains.clear()
-            project.save()
-            fieldValue.each { String it ->
-                if (it) {
-                    project.speciesWithStrains.add(SpeciesWithStrain.get(Long.valueOf(it)))
-                }
-            }
+            project.save(flush: true)
+            project.speciesWithStrains.addAll(fieldValue.findAll().collect {
+                SpeciesWithStrain.get(Long.valueOf(it))
+            })
         } else {
             project."${fieldName}" = fieldValue
         }

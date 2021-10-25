@@ -315,10 +315,10 @@ class DeletionService {
         IlseSubmission ilseSubmission = seqTrack.ilseSubmission
         List<SeqTrack> otherSeqTracks = SeqTrack.findAllByIlseSubmission(ilseSubmission)
         seqTrack.ilseSubmission = null
-        seqTrack.save()
+        seqTrack.save(flush: true)
         if (otherSeqTracks.size() == 1 && ilseSubmission) {
             if (!ilseSubmission.warning) {
-                ilseSubmission.delete()
+                ilseSubmission.delete(flush: true)
             }
         }
 
@@ -408,7 +408,7 @@ class DeletionService {
             }
         }
         mergingWorkPackages.each {
-            SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it, it)*.delete()
+            SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it, it)*.delete(flush: true)
             it.delete(flush: true)
         }
 
@@ -440,12 +440,12 @@ class DeletionService {
         List<SeqScan> seqScans = mergingAssignments*.seqScan.unique()
         if (seqScans) {
             List<MergingLog> mergingLogs = MergingLog.findAllBySeqScanInList(seqScans)
-            MergingAssignment.findAllBySeqScanInList(seqScans)*.delete()
+            MergingAssignment.findAllBySeqScanInList(seqScans)*.delete(flush: true)
             if (mergingLogs) {
-                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete()
-                mergingLogs*.delete()
+                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete(flush: true)
+                mergingLogs*.delete(flush: true)
             }
-            seqScans*.delete()
+            seqScans*.delete(flush: true)
         }
     }
 
@@ -626,9 +626,9 @@ class DeletionService {
         } else if (abstractBamFile instanceof SingleCellBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
-                CellRangerQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+                CellRangerQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
-            qualityAssessmentMergedPasses*.delete()
+            qualityAssessmentMergedPasses*.delete(flush: true)
         } else {
             throw new RuntimeException("This BamFile type " + abstractBamFile + " is not supported")
         }

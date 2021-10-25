@@ -232,7 +232,8 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         'dir/dir2/dir3/dir4' | 'dir/dir2'    | 'dir/dir2/dir3' | 'dir/dir2/dir3/dir4/file'
     }
 
-
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test execute when everything files already linked, do not delete copied files"() {
         given:
         createHelperObjects()

@@ -257,6 +257,8 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     }
 
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testGetFilesToMerge_DataFilesAreNotOnFileSystem_ShouldFail() {
         setupData()

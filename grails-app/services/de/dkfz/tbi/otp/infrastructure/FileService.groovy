@@ -450,6 +450,8 @@ class FileService {
      *
      * It won't fail if the directory does not exist.
      */
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     void deleteDirectoryRecursively(Path path) {
         assert path
         assert path.absolute
@@ -543,6 +545,8 @@ class FileService {
      * When outputFolder not exist yet, it is created automatically including missing parent directories with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, Realm realm) {
         Path p = outputFolder.resolve(fileName)
 
@@ -580,7 +584,8 @@ class FileService {
      * @param groupString the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
-    @SuppressWarnings('Instanceof')
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings(['ExplicitFlushForDeleteRule', 'Instanceof'])
     void createLink(Path link, Path target, Realm realm, String groupString = '', CreateLinkOption... options) {
         assert link
         assert target

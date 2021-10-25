@@ -296,6 +296,7 @@ class LdapService implements InitializingBean {
     }
 }
 
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class LdapServiceAwareAttributesMapper<T> implements AttributesMapper<T> {
     LdapService ldapService
 }

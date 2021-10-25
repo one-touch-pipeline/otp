@@ -37,12 +37,12 @@ class DocumentService {
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<DocumentType> listDocumentTypes() {
-        DocumentType.all
+        return DocumentType.all
     }
 
     @CompileDynamic
     List<Document> listDocuments() {
-        Document.all.sort { a, b ->
+        return Document.all.sort { a, b ->
             a.documentType.sortOrder <=> b.documentType.sortOrder ?: a.documentType.title <=> b.documentType.title
         }
     }

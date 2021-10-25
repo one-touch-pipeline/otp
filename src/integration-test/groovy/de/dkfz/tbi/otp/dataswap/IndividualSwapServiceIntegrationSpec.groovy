@@ -68,6 +68,8 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         configService.clean()
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
         setupData()

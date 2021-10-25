@@ -58,7 +58,7 @@ FastqImportInstance.withTransaction {
             entry.delete(flush: true)
         }
         assert MetaDataEntry.countByDataFile(dataFile) == 0
-        CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.delete()
+        CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))?.delete(flush: true)
         SeqTrack seqTrack = dataFile.seqTrack
         deletionService.deleteProcessingFilesOfProject(seqTrack.individual.project.name, baseOutputDir, false, false, [seqTrack])
 
@@ -77,7 +77,7 @@ FastqImportInstance.withTransaction {
     }
     assert MetaDataFile.countByFastqImportInstance(fastqImportInstance) == 0
     assert FastqImportInstance.get(fastqImportInstanceId) == fastqImportInstance
-    fastqImportInstance.delete()
+    fastqImportInstance.delete(flush: true)
     assert FastqImportInstance.get(fastqImportInstanceId) == null
     assert false
 }

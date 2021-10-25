@@ -187,6 +187,8 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         errorMessage == e.cause.message
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Unroll
     void "validate, when #file not exist, throw assert"() {
         given:
@@ -295,6 +297,8 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         configService.clean()
     }
 
+    //false positives, since rule can not recognize calling class
+    @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "validate, when all fine and seqtype is RNA, return without exception"() {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
