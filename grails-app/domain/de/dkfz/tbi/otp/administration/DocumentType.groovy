@@ -21,11 +21,8 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.compiler.GrailsCompileStatic
-
 import de.dkfz.tbi.otp.utils.Entity
 
-@GrailsCompileStatic
 class DocumentType implements Entity {
 
     String title

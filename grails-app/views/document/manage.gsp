@@ -64,7 +64,7 @@
                             <input type="file" name="content" />
                             <g:select id="formatType-${document.key.title}" class="use-select-2" style="min-width: 20ch;"
                                       name="formatType" from="${Document.FormatType}" optionValue="displayName"
-                                      noSelection="${[(""): "Select file format"]}" />
+                                      noSelection="${[(""): "Select format type"]}" />
                             <g:submitButton class="btn btn-primary" name="${g.message(code: "document.update")}"/>
                         </g:uploadForm>
                     </td>

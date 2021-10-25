@@ -24,35 +24,34 @@ package de.dkfz.tbi.otp.administration
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.repository.administration.document.DocumentDataService
-import de.dkfz.tbi.otp.repository.administration.document.DocumentTypeDataService
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 @GrailsCompileStatic
 class DocumentService {
-    DocumentDataService documentDataService
-    DocumentTypeDataService documentTypeDataService
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<DocumentType> listDocumentTypes() {
-        return documentTypeDataService.findAll()
+        DocumentType.all
     }
 
+    @CompileDynamic
     List<Document> listDocuments() {
-        return documentDataService.findAll().sort { a, b ->
+        Document.all.sort { a, b ->
             a.documentType.sortOrder <=> b.documentType.sortOrder ?: a.documentType.title <=> b.documentType.title
         }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors createDocumentType(String title, String description) {
+        DocumentType documentType = new DocumentType(title: title, description: description)
         try {
-            documentTypeDataService.save(title, description)
+            documentType.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }
@@ -63,12 +62,12 @@ class DocumentService {
     Errors deleteDocumentType(DocumentType documentType) {
         assert documentType: "documentType is null"
 
-        Document document = atMostOneElement(documentDataService.findAllByDocumentType(documentType))
+        Document document = CollectionUtils.atMostOneElement(Document.findAllByDocumentType(documentType))
         try {
             if (document) {
-                documentDataService.delete(document.id)
+                document.delete(flush: true)
             }
-            documentTypeDataService.delete(documentType.id)
+            documentType.delete(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }
@@ -77,13 +76,11 @@ class DocumentService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors updateDocument(DocumentType documentType, byte[] content, Document.FormatType formatType) {
-        Document document = atMostOneElement(documentDataService.findAllByDocumentType(documentType))
+        Document document = Document.findByDocumentType(documentType) ?: new Document(documentType: documentType)
+        document.content = content
+        document.formatType = formatType
         try {
-            if (document) {
-                documentDataService.updateDocument(document.id, content, formatType)
-            } else {
-                documentDataService.saveDocument(documentType, content, formatType)
-            }
+            document.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }
@@ -94,7 +91,7 @@ class DocumentService {
     Errors updateSortOrder(DocumentType documentType, int sortOrder) {
         documentType.sortOrder = sortOrder
         try {
-            documentTypeDataService.save(documentType)
+            documentType.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }
@@ -105,7 +102,7 @@ class DocumentService {
     Errors updateDescription(DocumentType documentType, String description) {
         documentType.description = description
         try {
-            documentTypeDataService.save(documentType)
+            documentType.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }
