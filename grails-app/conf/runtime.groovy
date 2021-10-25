@@ -95,7 +95,6 @@ dataSource {
     password = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
     url = "jdbc:postgresql://${server}:${port}/${database}"
     dbCreate = "none"
-    //logSql = true
 }
 
 hibernate {
@@ -103,7 +102,7 @@ hibernate {
     cache.use_query_cache = true
     cache.region.factory_class = 'org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory'
     singleSession = true // configure OSIV singleSession mode
-    flush.mode = 'auto'
+    flush.mode = 'manual' // OSIV session flush mode outside of transactional context
 }
 
 // environment specific settings
@@ -136,7 +135,12 @@ environments {
             }
         }
     }
-
+    // Everything is set in general data source
+    development {
+        dataSource {
+            //loggingSql = true
+        }
+    }
     test {
         hibernate {
             cache.use_second_level_cache = false

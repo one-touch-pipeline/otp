@@ -205,7 +205,6 @@ grails.gorm.default.constraints = {
 }
 grails.gorm.default.mapping = {
     id generator:'sequence'
-    autoTimestamp true
 }
 
 // Restore old data-binding behaviour (before 2.3)
