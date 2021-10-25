@@ -121,10 +121,20 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
     $('#modal-max-runs', modal).val(workflow.maxParallelWorkflows);
     $('#modal-enabled', modal).prop("checked", workflow.enabled);
     $('#modal-deprecated', modal).prop("checked", workflow.deprecationDate !== 'na');
-    $('#modal-seqTypes', modal).val(workflow.supportedSeqTypes?.map((s) => s.id));
     $('#modal-seqTypes', modal).trigger("change");
-    $('#modal-refGenomes', modal).val(workflow.allowedRefGenomes?.map((rg) => rg.id));
     $('#modal-refGenomes', modal).trigger("change");
+
+    if (workflow.supportedSeqTypes) {
+        $('#modal-seqTypes', modal).val(workflow.supportedSeqTypes.map((s) => s.id));
+    } else {
+        $('#modal-seqTypes', modal).val();
+    }
+
+    if (workflow.allowedRefGenomes) {
+        $('#modal-refGenomes', modal).val(workflow.allowedRefGenomes.map((rg) => rg.id));
+    } else {
+        $('#modal-refGenomes', modal).val();
+    }
 }
 
 /**
