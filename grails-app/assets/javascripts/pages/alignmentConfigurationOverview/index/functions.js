@@ -79,6 +79,7 @@ $.otp.projectConfig = {
   /**
      * Asynchronous calls the getAlignmentInfo from the  ProjectOverviewController.
      * While loading displays a Loading text until the data arrived.
+     * @deprecated method is part of the old workflow system
      */
   asynchronousCallAlignmentInfo() {
     'use strict';
@@ -103,6 +104,7 @@ $.otp.projectConfig = {
      * If the loaded Data is empty no Alginment is displayed. If not,
      * the AlginmentInfo table is displayed.
      * @param data holds the data that have been loaded
+     * @deprecated method is part of the old workflow system
      */
   initialiseAlignmentInfo(data) {
     $('#loader').remove();
@@ -116,6 +118,7 @@ $.otp.projectConfig = {
 
   /**
      * Adds a loading animation to the top of the alignment Info.
+     * @deprecated method is part of the old workflow system
      */
   displayLoading() {
     $('#alignment_info').css(
@@ -128,6 +131,7 @@ $.otp.projectConfig = {
      * Adds rows and columns including content to the Table
      * which is taken from the achieved data.
      * @param data holds the data that have been loaded
+     * @deprecated method is part of the old workflow system
      */
   createAlignmentTable(data) {
     $.each(data.alignmentInfo, (key, value) => {

@@ -76,6 +76,28 @@
                     </ul>
                 </div>
             </sec:ifAllGranted>
+
+            <g:if test="${alignmentInfo}">
+                <h3>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration')}</h3>
+                <div class="fixed-table-header">
+                    <table>
+                        <tr>
+                            <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
+                            <th>${g.message(code: 'projectOverview.alignmentInformation.version')}</th>
+                            <th>${g.message(code: 'projectOverview.alignmentInformation.arguments')}</th>
+                        </tr>
+                        <g:each in="${alignmentInfo}" var="info">
+                            <tr><td colspan="3"><strong>${info.key}</strong></td></tr>
+                            <tr><td style="padding: 5px; white-space: nowrap;">${g.message(code: "projectOverview.alignmentInformation.tool.aligning")}<td>${info.value.alignmentProgram}</td><td>${info.value.alignmentParameter}</td></tr>
+                            <tr><td style="padding: 5px; white-space: nowrap;">${g.message(code: "projectOverview.alignmentInformation.tool.merging")}</td><td>${info.value.mergeCommand}</td><td>${info.value.mergeOptions}</td></tr>
+                            <tr><td style="padding: 5px; white-space: nowrap;">${g.message(code: "projectOverview.alignmentInformation.tool.samtools")}</td><td>${info.value.samToolsCommand}</td><td></td></tr>
+                            <tr><td style="padding: 5px; white-space: nowrap;">${g.message(code: "projectOverview.alignmentInformation.tool.roddy")}</td><td>${info.value.programVersion}</td><td></td></tr>
+                        </g:each>
+                    </table>
+                </div>
+            </g:if>
+
+            <h3>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration.old')}</h3>
             <div id="alignment_info" class="fixed-table-header">
                 <table style="visibility: hidden" id="alignment_info_table">
                     <tr>

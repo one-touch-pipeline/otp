@@ -50,16 +50,22 @@ class AlignmentConfigurationOverviewController {
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
 
+        Map<SeqType, AlignmentInfo> alignmentInfo = alignmentInfoService.getAlignmentInformationForProject(project)
 
         return [
                 seqTypeMergingCriteria         : seqTypeMergingCriteria,
                 roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
                     it.displayNameWithLibraryLayout
                 },
+                alignmentInfo                  : alignmentInfo,
         ]
     }
 
+    /**
+     * @deprecated method is part of the old workflow system
+     */
     @SuppressWarnings('CatchThrowable')
+    @Deprecated
     JSON getAlignmentInfo() {
         Project project = projectSelectionService.requestedProject
         Map<String, AlignmentInfo> alignmentInfo = null
