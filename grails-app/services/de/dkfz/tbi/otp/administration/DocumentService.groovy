@@ -30,6 +30,8 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 @Transactional
 @GrailsCompileStatic
 class DocumentService {
@@ -76,7 +78,7 @@ class DocumentService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors updateDocument(DocumentType documentType, byte[] content, Document.FormatType formatType) {
-        Document document = Document.findByDocumentType(documentType) ?: new Document(documentType: documentType)
+        Document document = (Document)atMostOneElement(Document.findAllByDocumentType(documentType)) ?: new Document(documentType: documentType)
         document.content = content
         document.formatType = formatType
         try {

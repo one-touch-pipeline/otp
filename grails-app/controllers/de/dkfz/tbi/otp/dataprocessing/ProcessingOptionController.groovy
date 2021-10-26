@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.ValidationException
 import groovy.transform.Canonical
 import org.springframework.http.HttpStatus
 
@@ -32,8 +33,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.util.TimeFormats
-
-import javax.xml.bind.ValidationException
 
 @Secured("hasRole('ROLE_ADMIN')")
 class ProcessingOptionController {
