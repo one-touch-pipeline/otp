@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
@@ -31,16 +33,65 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.util.regex.Matcher
 
 @Transactional
 class AlignmentInfoService {
 
+    ConfigFragmentService configFragmentService
     ExecuteRoddyCommandService executeRoddyCommandService
     RemoteShellHelper remoteShellHelper
 
+    private static final ObjectMapper MAPPER = new ObjectMapper()
 
+    AlignmentInfo getAlignmentInformationForRun(WorkflowRun run) {
+        assert run: "No run provided"
+
+        if (run.workflow.name == PanCancerWorkflow.WORKFLOW) {
+            Map<String, String> config = extractCValuesMapFromJsonConfigString(run.combinedConfig)
+            return generateRoddyAlignmentInfo(config, (run.outputArtefacts[PanCancerWorkflow.OUTPUT_BAM].artefact.get() as AbstractBamFile).seqType,
+                    run.workflowVersion.workflowVersion)
+        }
+        return null
+    }
+
+    Map<SeqType, AlignmentInfo> getAlignmentInformationForProject(Project project) {
+        assert project: "No project provided"
+
+        return SelectedProjectSeqTypeWorkflowVersion.findAllByProjectAndDeprecationDateIsNull(project)
+                .collectEntries { SelectedProjectSeqTypeWorkflowVersion projectWorkflow ->
+                    if (projectWorkflow.workflowVersion.workflow.name == PanCancerWorkflow.WORKFLOW) {
+                        Map<String, String> config = extractCValuesMapFromJsonConfigString(
+                                configFragmentService.mergeSortedFragments(configFragmentService.getSortedFragments(
+                                        new SingleSelectSelectorExtendedCriteria(
+                                                workflow: projectWorkflow.workflowVersion.workflow,
+                                                workflowVersion: projectWorkflow.workflowVersion,
+                                                project: project,
+                                                seqType: projectWorkflow.seqType,
+                                        )
+                                ))
+                        )
+                        RoddyAlignmentInfo info = generateRoddyAlignmentInfo(config, projectWorkflow.seqType, projectWorkflow.workflowVersion.workflowVersion)
+                        return [(projectWorkflow.seqType): info]
+                    }
+                    return [:]
+                }
+    }
+
+    private Map<String, String> extractCValuesMapFromJsonConfigString(String config) {
+        JsonNode node = MAPPER.readTree(config)
+        return node.get('RODDY').get('cvalues').fields().collectEntries {
+            [(it.key): it.value.get('value').asText()]
+        }
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
     protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
         assert workflowConfig
         ProcessOutput output = getRoddyProcessOutput(workflowConfig)
@@ -51,7 +102,10 @@ class AlignmentInfoService {
     /**
      * get the output check it and returns result if successful
      * @param workflowConfig
+     *
+     * @deprecated method is part of the old workflow system
      */
+    @Deprecated
     protected ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
         Realm realm = workflowConfig.project.realm
         String nameInConfigFile = workflowConfig.nameUsedInConfig
@@ -75,7 +129,7 @@ class AlignmentInfoService {
     /**
      * Generate a new RoddyAlignmentInfo by calling necessary Methods
      * for res, bwa and merge
-     * @param output ProcessOutput of Roddy File
+     * @param config Configuration values map
      * @param seqType
      * @return new Alignment info
      */
@@ -96,7 +150,7 @@ class AlignmentInfoService {
     /**
      * Generates Merge Map that holds Command and Options
      * for the required MergeTool
-     * @param res Map with roddy config output values
+     * @param config Configuration values map
      * @param seqType
      * @return Map that holds command and options for the Merging
      */
@@ -179,7 +233,10 @@ class AlignmentInfoService {
      * Extracts Configurations from the roddy Output as a map
      * @param output of Roddy
      * @return Map with Roddy config value output
+     *
+     * @deprecated method is part of the old workflow system
      */
+    @Deprecated
     private Map<String, String> extractConfigRoddyOutput(ProcessOutput output) {
         Map<String, String> res = [:]
         output.stdout.eachLine { String line ->
@@ -199,6 +256,10 @@ class AlignmentInfoService {
         return res
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link #getAlignmentInformationForRun(WorkflowRun)} instead
+     */
+    @Deprecated
     AlignmentInfo getAlignmentInformationFromConfig(AlignmentConfig config) {
         assert config
         if (config.class == RoddyWorkflowConfig.class) {
@@ -207,6 +268,10 @@ class AlignmentInfoService {
         return config.alignmentInformation
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link #getAlignmentInformationForProject(Project)} instead
+     */
+    @Deprecated
     Map<String, AlignmentInfo> getAlignmentInformation(Project project) throws Exception {
         try {
             switch (project.alignmentDeciderBeanName) {
@@ -232,6 +297,10 @@ class AlignmentInfoService {
         }
     }
 
+    /**
+     * @deprecated method is part of the old workflow system, use {@link ReferenceGenomeSelector} instead
+     */
+    @Deprecated
     List listReferenceGenome(Project project) {
         return ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
     }

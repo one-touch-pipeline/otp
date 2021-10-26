@@ -26,25 +26,32 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 
-class AlignmentInfoServiceSpec extends Specification implements DataTest {
+class AlignmentInfoServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
                 Individual,
                 Pipeline,
-                Project,
                 ProcessingOption,
+                Project,
                 Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyWorkflowConfig,
+                SelectedProjectSeqTypeWorkflowVersion,
                 SeqType,
+                Workflow,
+                WorkflowVersion,
         ]
     }
 
@@ -218,6 +225,128 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest {
 
         expect:
         alignmentInfo == service.getAlignmentInformationFromConfig(alignmentConfig)
+    }
+
+    @Unroll
+    void "test getAlignmentInformationForProject, when workflow is PanCancer alignment, useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
+        given:
+        String config = """{"RODDY": {"cvalues": {
+        "useAcceleratedHardware": {"value": "${useConvey}", "type": "string"},
+        "markDuplicatesVariant": {"value": "${mergeTool.name}", "type": "string"},
+        "BWA_VERSION": {"value": "1.0", "type": "string"},
+        "BWA_MEM_OPTIONS": {"value": "alnOpt", "type": "string"},
+        "BWA_ACCELERATED_VERSION": {"value": "2.0", "type": "string"},
+        "BWA_MEM_CONVEY_ADDITIONAL_OPTIONS": {"value": "conveyOpt", "type": "string"},
+        "BIOBAMBAM_VERSION": {"value": "3.0", "type": "string"},
+        "mergeAndRemoveDuplicates_argumentList": {"value": "bioBamBamOpt", "type": "string"},
+        "PICARD_VERSION": {"value": "4.0", "type": "string"},
+        "SAMBAMBA_MARKDUP_VERSION": {"value": "5.0", "type": "string"},
+        "SAMBAMBA_MARKDUP_OPTS": {"value": "sambambaOpt", "type": "string"},
+        "SAMTOOLS_VERSION": {"value": "6.0", "type": "string"}
+        }}}"""
+        AlignmentInfoService service = new AlignmentInfoService()
+        service.configFragmentService = Mock(ConfigFragmentService) {
+            getSortedFragments(_) >> { }
+            mergeSortedFragments(_) >> { config }
+        }
+
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW), workflowVersion: roddyPipelineVersion)
+        Project project = createProject()
+        createSelectedProjectSeqTypeWorkflowVersion(project: project, seqType: seqType, workflowVersion: version)
+
+        when:
+        Map<SeqType, AlignmentInfo> alignmentInfos = service.getAlignmentInformationForProject(project)
+
+        then:
+        alignmentInfos.size() == 1
+        RoddyAlignmentInfo alignmentInfo = alignmentInfos.get(seqType)
+        alignmentInfo.alignmentProgram == alignCommand
+        alignmentInfo.alignmentParameter == alignOpt
+        alignmentInfo.mergeCommand == mergeCommand
+        alignmentInfo.mergeOptions == mergeOpt
+        alignmentInfo.samToolsCommand == 'Version 6.0'
+        alignmentInfo.programVersion == roddyPipelineVersion
+
+        cleanup:
+
+        where:
+        useConvey | mergeTool           || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
+        false     | MergeTool.BIOBAMBAM || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
+        false     | MergeTool.PICARD    || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'programVersion:1.1.0'
+        false     | MergeTool.SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'programVersion:1.1.0'
+        true      | MergeTool.BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'programVersion:1.1.0'
+    }
+
+    void "test getAlignmentInformationForProject, when rna, return alignment info with the correct data"() {
+        given:
+        String config = """{"RODDY": {"cvalues": {
+        "SAMTOOLS_VERSION": {"value": "1.0", "type": "string"},
+        "SAMBAMBA_VERSION": {"value": "3.0", "type": "string"},
+        "STAR_VERSION": {"value": "2.0", "type": "string"},
+        "STAR_PARAMS_2PASS": {"value": "2PASS", "type": "string"},
+        "STAR_PARAMS_OUT": {"value": "OUT", "type": "string"},
+        "STAR_PARAMS_CHIMERIC": {"value": "CHIMERIC", "type": "string"},
+        "STAR_PARAMS_INTRONS": {"value": "INTRONS", "type": "string"}
+        }}}"""
+
+        AlignmentInfoService service = new AlignmentInfoService()
+        service.configFragmentService = Mock(ConfigFragmentService) {
+            getSortedFragments(_) >> { }
+            mergeSortedFragments(_) >> { config }
+        }
+
+        SeqType seqType = DomainFactory.createRnaPairedSeqType()
+        WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW))
+        Project project = createProject()
+        createSelectedProjectSeqTypeWorkflowVersion(project: project, seqType: seqType, workflowVersion: version)
+
+        when:
+        Map<SeqType, AlignmentInfo> alignmentInfos = service.getAlignmentInformationForProject(project)
+
+        then:
+        alignmentInfos.size() == 1
+        RoddyAlignmentInfo alignmentInfo = alignmentInfos.get(seqType)
+        alignmentInfo.alignmentProgram == 'STAR Version 2.0'
+        alignmentInfo.alignmentParameter == ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ')
+        alignmentInfo.mergeCommand == 'Sambamba Version 3.0'
+        alignmentInfo.mergeOptions == ''
+        alignmentInfo.samToolsCommand == 'Version 1.0'
+    }
+
+    @Unroll
+    void "test getAlignmentInformationForProject, when #name, throw exception"() {
+        given:
+        AlignmentInfoService service = new AlignmentInfoService()
+        service.configFragmentService = Mock(ConfigFragmentService) {
+            getSortedFragments(_) >> { }
+            mergeSortedFragments(_) >> { """{"RODDY": {"cvalues": { ${config}}}}""" }
+        }
+
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW))
+        Project project = createProject()
+        createSelectedProjectSeqTypeWorkflowVersion(project: project, seqType: seqType, workflowVersion: version)
+
+        when:
+        service.getAlignmentInformationForProject(project)
+
+        then:
+        Exception e = thrown()
+        e.message.contains(expectedError)
+
+        where:
+        name                  | config                                                                                                                 || expectedError
+        'no alignment values' | """"a": {"value": "b", "type": "string"},"c": {"value": "d", "type": "string"}"""                                      || 'Could not extract alignment configuration value from Roddy config'
+        'no merging values'   | """"useAcceleratedHardware": {"value": "false", "type": "string"},"BWA_VERSION": {"value": "aln", "type": "string"}""" || 'Could not extract merging configuration value from Roddy config'
+    }
+
+    void "test getAlignmentInformationForProject, from Roddy WorkflowConfig and AlignmentInfo"() {
+        when:
+        new AlignmentInfoService().getAlignmentInformationForProject(null)
+
+        then:
+        thrown(AssertionError)
     }
 
     void "listReferenceGenome, when one item, show one item in listing"() {

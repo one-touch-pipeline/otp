@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.Canonical
+
+@Canonical
 abstract class AlignmentInfo {
     String alignmentProgram
     String alignmentParameter
@@ -29,6 +32,7 @@ abstract class AlignmentInfo {
     abstract Map<String, Object> getAlignmentSpecificMessageAttributes()
 }
 
+@Canonical
 class RoddyAlignmentInfo extends AlignmentInfo {
     String samToolsCommand
     String mergeCommand
@@ -48,6 +52,7 @@ class RoddyAlignmentInfo extends AlignmentInfo {
     }
 }
 
+@Canonical
 class SingleCellAlignmentInfo extends AlignmentInfo {
 
     @Override
