@@ -37,6 +37,9 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
@@ -238,11 +241,17 @@ class CreateNotificationTextService {
 
         String directories = getMergingDirectories(allGoodBamFiles)
 
-        Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = allGoodBamFiles*.alignmentConfig.unique().collectEntries {
+        List<AbstractMergedBamFile> bamFilesOldSystem = allGoodBamFiles.findAll {
+            return !(it instanceof RoddyBamFile && it.workflowArtefact?.producedBy && it.workflowArtefact.producedBy.state != WorkflowRun.State.LEGACY)
+        }
+
+        Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = bamFilesOldSystem*.alignmentConfig.unique().collectEntries {
             [it, alignmentInfoService.getAlignmentInformationFromConfig(it)]
         }
 
-        String processingValues = alignmentInformationProcessingValuesOldSystem(allGoodBamFiles, alignmentInfoByConfig)
+        String processingValues = alignmentInformationProcessingValues((allGoodBamFiles - bamFilesOldSystem))
+
+        processingValues += alignmentInformationProcessingValuesOldSystem(bamFilesOldSystem, alignmentInfoByConfig)
 
         String message = messageSourceService.createMessage("notification.template.alignment.base", [
                 samples         : sampleNames,
@@ -272,6 +281,7 @@ class CreateNotificationTextService {
         }
 
         message += getUserDocumentationOldSystem(alignmentInfoByConfig)
+        message += getUserDocumentation(((allGoodBamFiles - bamFilesOldSystem) as List<RoddyBamFile>)*.workflowArtefact)
 
         return message
     }
@@ -316,6 +326,41 @@ class CreateNotificationTextService {
         return builder.toString()
     }
 
+    private String alignmentInformationProcessingValues(List<AbstractMergedBamFile> bamFiles) {
+        Map<Project, List<AbstractMergedBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
+        boolean multipleProject = bamFilesByProject.size() > 1
+        StringBuilder builder = new StringBuilder()
+
+        bamFilesByProject.sort {
+            it.key.name
+        }.each { Project project, List<AbstractMergedBamFile> projectBamFiles ->
+            if (multipleProject) {
+                builder << "\n***********************\n"
+                builder << project
+            }
+            projectBamFiles.groupBy {
+                it.seqType
+            }.sort {
+                it.key.displayNameWithLibraryLayout
+            }.each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
+                Map<AlignmentInfo, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
+                    alignmentInfoService.getAlignmentInformationForRun(it.workflowArtefact.producedBy)
+                }
+                bamFilePerConfig.each { AlignmentInfo alignmentInfo, List<AbstractMergedBamFile> configBamFiles ->
+                    builder << messageSourceService.createMessage("notification.template.alignment.processing", [
+                            seqType           : seqType.displayNameWithLibraryLayout,
+                            referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
+                            alignmentProgram  : alignmentInfo.alignmentProgram,
+                            alignmentParameter: alignmentInfo.alignmentParameter,
+                    ])
+                    Map<String, Object> codeAndParams = alignmentInfo.alignmentSpecificMessageAttributes
+                    builder << messageSourceService.createMessage(codeAndParams.code as String, codeAndParams.params as Map)
+                }
+            }
+        }
+        return builder.toString()
+    }
+
     private String getUserDocumentationOldSystem(Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig) {
         String message = ""
         alignmentInfoByConfig.keySet()*.pipeline*.name.sort().unique().each {
@@ -335,6 +380,12 @@ class CreateNotificationTextService {
             }
         }
         return message
+    }
+
+    private String getUserDocumentation(List<WorkflowArtefact> workflowArtefacts) {
+        return workflowArtefacts*.producedBy*.workflow.sort().unique()
+                .collect { applicationContext.getBean(it.beanName) as OtpWorkflow }*.userDocumentation.findAll()
+                .collect { messageSourceService.createMessage(it) }.collect { "\n${it}" }.join("")
     }
 
     private String cellRangerAlignmentNotificationHelper(Set<SingleCellBamFile> bams) {

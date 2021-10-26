@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.notification
 import grails.testing.gorm.DataTest
 import grails.web.mapping.LinkGenerator
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,15 +37,19 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 //TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
-class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, DataTest {
+class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, WorkflowSystemDomainFactory, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -202,8 +207,8 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 lsdfFilesService: new LsdfFilesService(),
         ).getSeqTypeDirectories([seqTrack1, seqTrack2])
         String expected = [
-                new File("${configService.getRootPath()}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}"),
-                new File("${configService.getRootPath()}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}"),
+                new File("${configService.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}"),
+                new File("${configService.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}"),
         ].sort().join('\n')
 
         then:
@@ -239,9 +244,9 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
         String expected = [
-                new File("${configService.getRootPath()}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
+                new File("${configService.rootPath}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
                         "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
-                new File("${configService.getRootPath()}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
+                new File("${configService.rootPath}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
                         "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
         ].sort().join('\n')
 
@@ -260,7 +265,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
-        String expected = new File("${configService.getRootPath()}/${roddyBamFile.project.dirName}/sequencing/" +
+        String expected = new File("${configService.rootPath}/${roddyBamFile.project.dirName}/sequencing/" +
                 "${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/" +
                 "${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
 
@@ -285,10 +290,10 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair1, samplePair2], analysis)
 
         String expected = [
-                new File("${configService.getRootPath()}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/" +
+                new File("${configService.rootPath}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/" +
                         "view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/" +
                         "${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
-                new File("${configService.getRootPath()}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/" +
+                new File("${configService.rootPath}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/" +
                         "view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/" +
                         "${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
         ].sort().join('\n')
@@ -376,7 +381,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                     (projectCount + (singleCell ? 1 : 0)) * link(_) >> 'link'
                 },
                 lsdfFilesService: new LsdfFilesService(),
-                messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
+                messageSourceService: messageSourceServiceWithMockedMessageSource,
                 processingOptionService: new ProcessingOptionService(),
         )
 
@@ -465,7 +470,7 @@ ${expectedAlign}"""
         Map data2 = createData(
                 sampleId1: 'sampleId2a',
                 sampleId2: 'sampleId2b',
-                project: multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
+                project: multipleProjects ? createProject() : data1.seqTrack.project,
                 seqType: multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
                 run: data1.seqTrack.run,
                 alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE :
@@ -498,20 +503,22 @@ ${expectedAlign}"""
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
+                messageSourceService: messageSourceServiceWithMockedMessageSource,
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
-        List<SeqTrack> seqTracks = [data1.seqTrack]
-        List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair]
+        SeqTrack seqTrack1 = data1.seqTrack as SeqTrack
+        SeqTrack seqTrack2 = data2.seqTrack as SeqTrack
+        List<SeqTrack> seqTracks = [seqTrack1]
+        List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair as SamplePair]
         List<SamplePair> samplePairWithVariantCalling = []
-        List<String> expectedSamples = ["${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.seqTrack.sampleIdentifier})"]
+        List<String> expectedSamples = ["${createNotificationTextService.getSampleName(seqTrack1)} (${seqTrack1.sampleIdentifier})"]
         List<String> variantCallingPipelines = []
         if (secondSampleAligned) {
-            seqTracks.add(data2.seqTrack)
-            expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.seqTrack.sampleIdentifier})"
+            seqTracks.add(seqTrack2)
+            expectedSamples << "${createNotificationTextService.getSampleName(seqTrack2)} (${seqTrack2.sampleIdentifier})"
             if (indel || snv || sophia || aceseq || runYapsa) {
-                samplePairWithVariantCalling.add(data2.samplePair)
+                samplePairWithVariantCalling.add(data2.samplePair as SamplePair)
                 // the If-cases have to be ordered alphabetically
                 if (aceseq) {
                     variantCallingPipelines << 'CNV (from ACEseq)'
@@ -529,7 +536,7 @@ ${expectedAlign}"""
                     variantCallingPipelines << 'SV (from SOPHIA)'
                 }
             } else {
-                samplePairWithoutVariantCalling.add(data2.samplePair)
+                samplePairWithoutVariantCalling.add(data2.samplePair as SamplePair)
             }
         }
 
@@ -537,39 +544,196 @@ ${expectedAlign}"""
         List<String> alignments = []
         if (projectCount == 2) {
             alignments << "***********************"
-            alignments << data1.seqTrack.project.name
+            alignments << seqTrack1.project.name
         }
         alignments << createAlignmentInfoString(data1) + "\n" + createRoddyAlignmentInfoString(data1)
         if (alignmentCount == 2) {
             alignments << ''
             if (projectCount == 2) {
                 alignments << "***********************"
-                alignments << data2.seqTrack.project.name
+                alignments << seqTrack2.project.name
             }
             alignments << createAlignmentInfoString(data2) + "\n" + createRoddyAlignmentInfoString(data2)
         }
         String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
         String expectedAlignment = alignments.join('\n').trim()
         String expectedVariantCallingRunning = samplePairWithVariantCalling ? """\n
-run variant calling
-variantCallingPipelines: ${variantCallingPipelines.join(', ')}
-samplePairsWillProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithVariantCalling)}
-""" : ''
+            |run variant calling
+            |variantCallingPipelines: ${variantCallingPipelines.join(', ')}
+            |samplePairsWillProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithVariantCalling)}
+            |""".stripMargin() : ''
 
         String expectedVariantCallingNotRunning = """\n
-no variant calling
-samplePairsWontProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithoutVariantCalling)}
-"""
+            |no variant calling
+            |samplePairsWontProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithoutVariantCalling)}
+            |""".stripMargin()
 
         String expected = """
-alignment finished
-samples: ${expectedSamples.sort().join('\n')}
-links: ${expectedLinks}
-processingValues: ${expectedAlignment}
-paths: ${expectedPaths}
-${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}
-pancan alignment infos
-"""
+            |alignment finished
+            |samples: ${expectedSamples.sort().join('\n')}
+            |links: ${expectedLinks}
+            |processingValues: ${expectedAlignment}
+            |paths: ${expectedPaths}
+            |${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}
+            |pancan alignment infos
+            |""".stripMargin()
+
+        when:
+        String message = createNotificationTextService.alignmentNotification(processingStatus)
+
+        then:
+        expected == message
+
+        where:
+        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel | sophia | aceseq | runYapsa
+        false            | false            | false               | false | false | false  | false  | false
+        false            | false            | true                | false | false | false  | false  | false
+        false            | true             | true                | false | false | false  | false  | false
+        true             | false            | true                | false | false | false  | false  | false
+        false            | false            | true                | false | true  | false  | false  | false
+        false            | false            | true                | true  | true  | false  | false  | false
+        false            | false            | true                | false | false | true   | true   | true
+        false            | false            | true                | false | true  | true   | false  | false
+        false            | false            | true                | true  | true  | true   | true   | true
+        false            | false            | true                | false | false | true   | true   | false
+        true             | true             | true                | true  | true  | true   | true   | true
+
+        name = [
+                multipleProjects ? 'two projects' : '',
+                multipleSeqTypes ? 'two seq types' : '',
+                secondSampleAligned ? 'two alignments' : '',
+                snv ? 'snv' : '',
+                indel ? 'indel' : '',
+                sophia ? 'sophia' : '',
+                aceseq ? 'aceseq' : '',
+                runYapsa ? 'runYapsa' : '',
+        ].findAll().join(', ')
+    }
+
+    @Unroll
+    void "alignmentNotification for new workflow system, return message (#name)"() {
+        given:
+        DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+
+        Map data1 = createData([
+                sampleId1                : 'sampleId1',
+                alignmentProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+        ], true)
+        Map data2 = createData([
+                sampleId1: 'sampleId2a',
+                sampleId2: 'sampleId2b',
+                project: multipleProjects ? createProject() : data1.seqTrack.project,
+                seqType: multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
+                run: data1.seqTrack.run,
+                alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                sophiaProcessingStatus: sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                runYapsaProcessingStatus: runYapsa ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                workflow: data1.workflow,
+        ], true)
+
+        ProcessingStatus processingStatus = new ProcessingStatus([
+                data1.seqTrackProcessingStatus,
+                data2.seqTrackProcessingStatus,
+        ])
+
+        int projectCount = multipleProjects && secondSampleAligned ? 2 : 1
+        int alignmentCount = (multipleProjects || multipleSeqTypes) && secondSampleAligned ? 2 : 1
+
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                alignmentInfoService: Mock(AlignmentInfoService) {
+                    (secondSampleAligned ? 2 : 1) * getAlignmentInformationForRun(_) >> data1.alignmentInfo >> data2.alignmentInfo
+                    0 * _
+                },
+                linkGenerator: Mock(LinkGenerator) {
+                    projectCount * link(_) >> 'link'
+                },
+                messageSourceService: messageSourceServiceWithMockedMessageSource,
+                applicationContext: Mock(ApplicationContext) {
+                    getBean(_) >> new PanCancerWorkflow()
+                }
+        )
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
+
+        SeqTrack seqTrack1 = data1.seqTrack as SeqTrack
+        SeqTrack seqTrack2 = data2.seqTrack as SeqTrack
+        List<SeqTrack> seqTracks = [seqTrack1]
+        List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair as SamplePair]
+        List<SamplePair> samplePairWithVariantCalling = []
+        List<String> expectedSamples = ["${createNotificationTextService.getSampleName(seqTrack1)} (${seqTrack1.sampleIdentifier})"]
+        List<String> variantCallingPipelines = []
+        if (secondSampleAligned) {
+            seqTracks.add(seqTrack2)
+            expectedSamples << "${createNotificationTextService.getSampleName(seqTrack2)} (${seqTrack2.sampleIdentifier})"
+            if (indel || snv || sophia || aceseq || runYapsa) {
+                samplePairWithVariantCalling.add(data2.samplePair as SamplePair)
+                // the If-cases have to be ordered alphabetically
+                if (aceseq) {
+                    variantCallingPipelines << 'CNV (from ACEseq)'
+                }
+                if (indel) {
+                    variantCallingPipelines << 'Indel'
+                }
+                if (runYapsa) {
+                    variantCallingPipelines << 'RunYapsa'
+                }
+                if (snv) {
+                    variantCallingPipelines << 'SNV'
+                }
+                if (sophia) {
+                    variantCallingPipelines << 'SV (from SOPHIA)'
+                }
+            } else {
+                samplePairWithoutVariantCalling.add(data2.samplePair as SamplePair)
+            }
+        }
+
+        String expectedLinks = seqTracks*.project.unique().collect { 'link' }.join('\n')
+        List<String> alignments = []
+        if (projectCount == 2) {
+            alignments << "***********************"
+            alignments << seqTrack1.project.name
+        }
+        alignments << createAlignmentInfoString(data1) + "\n" + createRoddyAlignmentInfoString(data1)
+        if (alignmentCount == 2) {
+            alignments << ''
+            if (projectCount == 2) {
+                alignments << "***********************"
+                alignments << seqTrack2.project.name
+            }
+            alignments << createAlignmentInfoString(data2) + "\n" + createRoddyAlignmentInfoString(data2)
+        }
+        String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
+        String expectedAlignment = alignments.join('\n').trim()
+        String expectedVariantCallingRunning = samplePairWithVariantCalling ? """\n
+            |run variant calling
+            |variantCallingPipelines: ${variantCallingPipelines.join(', ')}
+            |samplePairsWillProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithVariantCalling)}
+            |""".stripMargin() : ''
+
+        String expectedVariantCallingNotRunning = """\n
+            |no variant calling
+            |samplePairsWontProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithoutVariantCalling)}
+            |""".stripMargin()
+
+        String expected = """
+            |alignment finished
+            |samples: ${expectedSamples.sort().join('\n')}
+            |links: ${expectedLinks}
+            |processingValues: ${expectedAlignment}
+            |paths: ${expectedPaths}
+            |${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}
+            |pancan alignment infos
+            |""".stripMargin()
 
         when:
         String message = createNotificationTextService.alignmentNotification(processingStatus)
@@ -667,7 +831,7 @@ pancan alignment infos
 
         ProcessingStatus processingStatus = new ProcessingStatus([
                 new SeqTrackProcessingStatus(
-                        abstractMergedBamFile.getContainedSeqTracks().first(),
+                        abstractMergedBamFile.containedSeqTracks.first(),
                         ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                         ProcessingStatus.WorkflowProcessingStatus.ALL_DONE, [
                         new MergingWorkPackageProcessingStatus(
@@ -720,7 +884,7 @@ pancan alignment infos
         true
 
         where:
-        pipeline << Pipeline.Name.getAlignmentPipelineNames()
+        pipeline << Pipeline.Name.alignmentPipelineNames
     }
 
     void "alignmentNotification, test for multiple pipelines"() {
@@ -728,13 +892,13 @@ pancan alignment infos
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
-        List<AbstractMergedBamFile> abstractMergedBamFiles = Pipeline.Name.getAlignmentPipelineNames().collect {
+        List<AbstractMergedBamFile> abstractMergedBamFiles = Pipeline.Name.alignmentPipelineNames.collect {
             createBamFileForPipelineName(it)
         }
 
         ProcessingStatus processingStatus = new ProcessingStatus(abstractMergedBamFiles.collect {
             new SeqTrackProcessingStatus(
-                    it.getContainedSeqTracks().first(),
+                    it.containedSeqTracks.first(),
                     ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                     ProcessingStatus.WorkflowProcessingStatus.ALL_DONE, [
                     new MergingWorkPackageProcessingStatus(
@@ -832,7 +996,7 @@ pancan alignment infos
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
+                messageSourceService: messageSourceServiceWithMockedMessageSource,
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
@@ -913,7 +1077,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         thrown(MissingMethodException)
     }
 
-    private Map createData(Map properties = [:]) {
+    private Map createData(Map properties = [:], boolean newWorkflowSystem = false) {
         Project project = properties.project ?: DomainFactory.createProject()
         String pid = properties.pid ?: "pid_${DomainFactory.counter++}"
         boolean singeCell = properties.singleCell
@@ -980,6 +1144,12 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
             ])
             abstractMergedBamFile = DomainFactory.createRoddyBamFile([workPackage: mergingWorkPackage])
         }
+        Workflow workflow
+        if (newWorkflowSystem) {
+            workflow = properties.workflow ?: createWorkflow()
+            WorkflowRun workflowRun = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.SUCCESS)
+            abstractMergedBamFile.workflowArtefact = createWorkflowArtefact(producedBy: workflowRun)
+        }
 
         SamplePair samplePair = DomainFactory.createDisease(mergingWorkPackage)
 
@@ -1019,6 +1189,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 alignmentInfo           : alignmentInfo,
                 seqTrackProcessingStatus: seqTrackProcessingStatus,
                 samplePair              : samplePair,
+                workflow                : workflow,
         ]
     }
 
@@ -1059,7 +1230,7 @@ samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
         return new MessageSourceService(
-            messageSource: getMessageSource()
+            messageSource: messageSource
         )
     }
 

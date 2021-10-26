@@ -67,4 +67,6 @@ class FastqcWorkflow implements OtpWorkflow {
     @Override
     void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
+
+    final String userDocumentation = null
 }

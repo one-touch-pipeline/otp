@@ -88,4 +88,6 @@ class PanCancerWorkflow implements OtpWorkflow {
     @Override
     void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
+
+    final String userDocumentation = "notification.template.references.alignment.pancancer"
 }

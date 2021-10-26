@@ -74,4 +74,6 @@ class DataInstallationWorkflow implements OtpWorkflow {
     boolean useOutputArtefactAlsoAsInputArtefact() {
         return true
     }
+
+    final String userDocumentation = null
 }

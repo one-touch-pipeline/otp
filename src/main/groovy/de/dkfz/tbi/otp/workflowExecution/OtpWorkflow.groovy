@@ -60,4 +60,12 @@ trait OtpWorkflow {
     boolean useOutputArtefactAlsoAsInputArtefact() {
         return false
     }
+
+    /**
+     * Return message code for user documentation and code links,
+     * to include in notification emails or show in user interface
+     *
+     * @return message code or null if not available
+     */
+    abstract String getUserDocumentation()
 }
