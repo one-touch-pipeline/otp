@@ -207,14 +207,6 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.fastqcOutputDirectory(seqTrack) == expectedPath
     }
 
-    void "test getAndUpdateFastqcProcessedFile"() {
-        given:
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
-
-        expect:
-        service.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile) == fastqcProcessedFile
-    }
-
     void "test updateFastqcProcessedFile, with existing FastqcProcessedFile"() {
         given:
         WorkflowArtefact workflowArtefact = createWorkflowArtefact()
@@ -223,10 +215,5 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         expect:
         service.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile, workflowArtefact) == fastqcProcessedFile
         fastqcProcessedFile.workflowArtefact == workflowArtefact
-    }
-
-    void "test pathToFastQcResultFromSeqCenter"() {
-        expect:
-        service.pathToFastQcResultFromSeqCenter(dataFile).toString() == "${dataFile.initialDirectory}/${service.fastqcFileName(dataFile)}"
     }
 }

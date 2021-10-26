@@ -22,9 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
-import groovy.sql.GroovyRowResult
-import groovy.sql.Sql
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PostAuthorize
@@ -61,10 +58,6 @@ class SeqTrackService {
      * Required for exporting the view by pid path of a datafile
      */
     LsdfFilesService lsdfFilesService
-    /**
-     * Dependency Injection of Spring Security Service.
-     */
-    SpringSecurityService springSecurityService
 
     AlignmentDeciderService alignmentDeciderService
 
@@ -217,50 +210,6 @@ class SeqTrackService {
         return true
     }
 
-    /**
-     * returns the most high prioritized, oldest alignable {@link SeqTrack} waiting for fastqc if possible,
-     * otherwise the most high prioritized, oldest {@link SeqTrack} waiting for fastqc.
-     *
-     * @return a seqTrack without fastqc
-     */
-    SeqTrack getSeqTrackReadyForFastqcProcessing(int minPriority) {
-        List<SeqType> seqTypes = SeqTypeService.allAlignableSeqTypes
-        List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
-                     minPriority,
-        ] + seqTypes*.id
-
-        // this workaround is used because
-        // HQL would support IN but doesn't support expressions in ORDER BY clauses,
-        // JDBC doesn't support IN directly,
-        // and the H2 driver doesn't support PreparedStatement.setArray()
-        String questionMarksSeparatedByCommas = (["?"] * seqTypes.size()).join(",")
-
-        String query = """\
-SELECT st.id
-FROM seq_track AS st
-JOIN sample ON st.sample_id = sample.id
-JOIN individual ON sample.individual_id = individual.id
-JOIN project ON individual.project_id = project.id
-join processing_priority ON project.processing_priority_id = processing_priority.id
-
-WHERE st.fastqc_state = ?
-AND processing_priority.priority >= ?
-AND NOT EXISTS (SELECT seq_track_id FROM data_file WHERE file_withdrawn = true AND seq_track_id = st.id)
-
-ORDER BY processing_priority.priority DESC, (st.seq_type_id IN (${questionMarksSeparatedByCommas})) DESC, st.id ASC
-LIMIT 1
-;
-"""
-
-        GroovyRowResult seqTrack = new Sql(dataSource).firstRow(query, args)
-        return SeqTrack.get(seqTrack?.id)
-    }
-
-    static void markFastqcInProgress(SeqTrack seqTrack) {
-        seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
-        assert (seqTrack.save(flush: true))
-    }
-
     void markFastqcFinished(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         assert (seqTrack.save(flush: true))
@@ -271,17 +220,6 @@ LIMIT 1
         List<DataFile> filteredFiles = []
         files.each {
             if (fileTypeService.isGoodSequenceDataFile(it)) {
-                filteredFiles.add(it)
-            }
-        }
-        return filteredFiles
-    }
-
-    List<DataFile> getSequenceFilesForSeqTrackIncludingWithdrawn(SeqTrack seqTrack) {
-        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        List<DataFile> filteredFiles = []
-        files.each {
-            if (fileTypeService.isSequenceDataFile(it)) {
                 filteredFiles.add(it)
             }
         }
@@ -364,24 +302,6 @@ LIMIT 1
                     }
             )
         }.unique().findAll()
-    }
-
-    SeqTrack seqTrackReadyToInstall(int minPriority) {
-        return SeqTrack.createCriteria().get {
-            eq('dataInstallationState', SeqTrack.DataProcessingState.NOT_STARTED)
-            sample {
-                individual {
-                    project {
-                        processingPriority {
-                            ge('priority', minPriority)
-                            order('priority', 'desc')
-                        }
-                    }
-                }
-            }
-            order('id')
-            maxResults(1)
-        }
     }
 
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {

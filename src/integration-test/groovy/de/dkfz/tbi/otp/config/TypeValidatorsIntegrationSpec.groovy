@@ -26,15 +26,12 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ReplaceSourceWithLinkJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 
 @Rollback
 @Integration
 class TypeValidatorsIntegrationSpec extends Specification {
-
-    private static final String JOB_NAME = CopyFilesJob.class.getSimpleName()
 
     @Unroll
     void "check JOB_NAME for value '#name' should return '#ret'"() {
@@ -43,7 +40,6 @@ class TypeValidatorsIntegrationSpec extends Specification {
 
         where:
         name                       | valueClosure                                       || returnValue
-        JOB_NAME                   | { JOB_NAME }                                       || true
         'empty'                    | { '' }                                             || false
         'null'                     | { null }                                           || false
         'OtherName'                | { 'OtherJobName' }                                 || false

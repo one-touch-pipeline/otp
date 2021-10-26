@@ -26,12 +26,10 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -58,16 +56,6 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
                         seqType            : createSeqType(singleCell: singleCell),
                 ]),
         ] + properties)
-    }
-
-    private List<DataFile> createSingleAndBulkDataFiles() {
-        createDataFileHelper(WELL, false)
-        createDataFileHelper(null, false)
-        createDataFileHelper(null, true)
-        return [
-                createDataFileHelper(WELL, true),
-                createDataFileHelper(WELL, true),
-        ]
     }
 
     void "buildMappingFileName, from DataFile"() {
@@ -117,35 +105,6 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         expected == path
     }
 
-    void "getAllSingleCellMappingFiles, when all fine, then return path to mapping files of all DataFiles that should have one"() {
-        given:
-        new TestConfigService()
-
-        List<DataFile> scDataFiles = createSingleAndBulkDataFiles()
-        scDataFiles << createDataFileHelper(WELL, true, [seqTrack: scDataFiles[0].seqTrack])
-
-        Closure<String> vbpSubdirectory = { DataFile df ->
-            return "/${df.individual.pid}/${df.sampleType.name}/0_all"
-        }
-
-        SingleCellService service = new SingleCellService([
-                lsdfFilesService: Mock(LsdfFilesService) {
-                    3 * createSingleCellAllWellDirectoryPath(_) >> { DataFile df -> vbpSubdirectory(df) }
-                    0 * _
-                },
-        ])
-
-        List<Path> expectedPaths = scDataFiles.collect { DataFile dataFile ->
-            return Paths.get(vbpSubdirectory(dataFile), service.buildMappingFileName(dataFile))
-        }.unique()
-
-        when:
-        List<Path> resultPaths = service.allSingleCellMappingFiles
-
-        then:
-        CollectionUtils.containSame(expectedPaths, resultPaths)
-    }
-
     void "mappingEntry, when all fine, then return entry"() {
         given:
         new TestConfigService()
@@ -166,14 +125,5 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
 
         then:
         expected == entry
-    }
-
-    void "getAllDataFilesWithMappingFile, only returns DataFiles of SeqTracks with a single cell SeqType and a well label"() {
-        given:
-        SingleCellService service = new SingleCellService()
-        List<DataFile> expectedDataFiles = createSingleAndBulkDataFiles()
-
-        expect:
-        TestCase.assertContainSame(expectedDataFiles, service.allDataFilesWithMappingFile)
     }
 }

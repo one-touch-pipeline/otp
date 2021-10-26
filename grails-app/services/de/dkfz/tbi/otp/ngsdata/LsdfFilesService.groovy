@@ -34,7 +34,6 @@ import java.nio.file.*
 import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 @Transactional
 class LsdfFilesService {
@@ -266,40 +265,6 @@ class LsdfFilesService {
         FileService.ensureDirIsReadable(dir.toPath())
     }
 
-    /**
-     * Deletes the specified file. Throws an exception if the path is not absolute, if the file does not exist, if the
-     * path points to something different than a file, or if the deletion fails.
-     * @deprecated use {@link Files#delete(Path)}
-     */
-    @Deprecated
-    void deleteFile(final Realm realm, final File file) {
-        assert file.isAbsolute() && file.exists() && file.isFile()
-        try {
-            assert remoteShellHelper.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
-            waitUntilDoesNotExist(file)
-        } catch (final Throwable e) {
-            throw new RuntimeException("Could not delete file ${file}.", e)
-        }
-        threadLog.info "Deleted file ${file}"
-    }
-
-    /**
-     * Deletes the specified empty directory. Throws an exception if the path is not absolute, if the directory does not
-     * exist, if the path points to something different than a directory, or if the deletion fails.
-     * @deprecated use {@link Files#delete(Path)}
-     */
-    @Deprecated
-    void deleteDirectory(final Realm realm, final File directory) {
-        assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
-        try {
-            assert remoteShellHelper.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
-            waitUntilDoesNotExist(directory)
-        } catch (final Throwable e) {
-            throw new RuntimeException("Could not delete directory ${directory}.", e)
-        }
-        threadLog.info "Deleted directory ${directory}"
-    }
-
     String[] getAllPathsForRun(Run run, boolean fullPath = false) {
         assert run: "No run given"
 
@@ -314,7 +279,6 @@ class LsdfFilesService {
         }
         return (String[]) paths.toArray()
     }
-
 
     private String getPathToRun(DataFile file, boolean fullPath = false) {
         if (!checkFinalPathDefined(file)) {

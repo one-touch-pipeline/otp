@@ -48,36 +48,10 @@ class SingleCellService {
         return Paths.get(lsdfFilesService.createSingleCellAllWellDirectoryPath(dataFile), buildMappingFileName(dataFile))
     }
 
-    List<Path> getAllSingleCellMappingFiles() {
-        return allDataFilesWithMappingFile.findResults { DataFile dataFile ->
-            return singleCellMappingFile(dataFile)
-        }.unique() as List<Path>
-    }
-
-    /**
-     * Returns a list of all DataFiles that should be in a mapping file.
-     *
-     * A DataFile should be in a mapping file, if they belong to a SeqTrack of a single cell SeqType
-     * which also has a well label.
-     *
-     * @return list of DataFiles that should be listed in a mapping file
-     */
-    List<DataFile> getAllDataFilesWithMappingFile() {
-        return DataFile.withCriteria {
-            seqTrack {
-                seqType {
-                    'in'("id", SeqTypeService.allSingleCellSeqTypes*.id)
-                }
-                isNotNull("singleCellWellLabel")
-            }
-        } as List<DataFile>
-    }
-
     /**
      * Defines the structure of a mapping entry inside the mapping file.
      *
      * When changing this you will have to recreate all existing files after the change is released.
-     * To help with this use: 'SingleCellMappingFileService.recreateAllMappingFiles()'
      *
      * @param dataFile to build an entry for
      * @return an entry in the expected format for the mapping file

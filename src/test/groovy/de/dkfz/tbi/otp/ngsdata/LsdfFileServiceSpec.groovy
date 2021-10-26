@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import org.codehaus.groovy.control.io.NullWriter
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -34,7 +33,6 @@ import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class LsdfFileServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
@@ -134,36 +132,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         e.message =~ /(?i)size/
     }
 
-    void "test deleteFile"() {
-        given:
-        File file = tempFolder.newFile()
-        Realm realm = new Realm()
-        LsdfFilesService service = createInstanceWithMockedExecuteCommand(realm)
-
-        when:
-        LogThreadLocal.withThreadLog(new NullWriter()) {
-            service.deleteFile(realm, file)
-        }
-
-        then:
-        !file.exists()
-    }
-
-    void "test deleteDirectory"() {
-        given:
-        File file = tempFolder.newFolder()
-        Realm realm = new Realm()
-        LsdfFilesService service = createInstanceWithMockedExecuteCommand(realm)
-
-        when:
-        LogThreadLocal.withThreadLog(new NullWriter()) {
-            service.deleteDirectory(realm, file)
-        }
-
-        then:
-        !file.exists()
-    }
-
     void "test deleteFilesRecursive"() {
         given:
         Realm realm = DomainFactory.createRealm()
@@ -248,17 +216,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         files.each {
             assert it.exists()
         }
-    }
-
-    private LsdfFilesService createInstanceWithMockedExecuteCommand(Realm expectedRealm) {
-        LsdfFilesService service = new LsdfFilesService()
-        service.remoteShellHelper = [
-                executeCommand: { Realm realm, String command ->
-                    assert realm.is(expectedRealm)
-                    return ['bash', '-c', command].execute().getText()
-                }
-        ] as RemoteShellHelper
-        return service
     }
 
     private Map<String, ?> setUpViewByPidTests(String antiBody, String well, String sampleType, String sampleTypeDirPart) {

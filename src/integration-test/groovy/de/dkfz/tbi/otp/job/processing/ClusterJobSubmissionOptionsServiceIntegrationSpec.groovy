@@ -28,7 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
+import de.dkfz.tbi.otp.job.jobs.runYapsa.ExecuteRunYapsaJob
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Rollback
@@ -47,7 +47,7 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends Specification {
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         ProcessParameterObject ppo = DomainFactory.createSeqTrack(seqType: seqType)
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(CopyFilesJob.simpleName, ppo)
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(ExecuteRunYapsaJob.simpleName, ppo)
 
         service.processingOptionService.createOrUpdate(
                 ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION,

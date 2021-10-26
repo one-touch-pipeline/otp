@@ -54,13 +54,6 @@ class ChecksumFileService {
         return "${fileName}.md5sum"
     }
 
-    /**
-     * example: BLOOD_SomePid_WHOLE_GENOME_PAIRED_merged.mdup.bam.md5
-     */
-    String picardMd5FileName(String fileName) {
-        return "${fileName}.md5"
-    }
-
     boolean compareMd5(DataFile file) {
         String path = pathToMd5File(file)
 
@@ -78,7 +71,6 @@ class ChecksumFileService {
         }
         return (md5sum.trim().toLowerCase(Locale.ENGLISH) == file.md5sum)
     }
-
 
     /**
      * @param file, the checksum file

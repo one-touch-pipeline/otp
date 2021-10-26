@@ -65,38 +65,4 @@ class SingleCellMappingFileService {
         }
         fileService.setPermission(mappingFile, FileService.DEFAULT_FILE_PERMISSION)
     }
-
-    /**
-     * Attempts to add all viable DataFiles to their mapping file.
-     */
-    @Synchronized
-    void addMappingFileEntryIfMissingForAllViableDataFiles() {
-        singleCellService.allDataFilesWithMappingFile.each { DataFile dataFile ->
-            addMappingFileEntryIfMissing(dataFile)
-        }
-    }
-
-    /**
-     * Removes all single cell mapping files from the filesystem.
-     */
-    @Synchronized
-    void deleteAllMappingFiles() {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
-        singleCellService.allSingleCellMappingFiles.each { Path localMappingFilePath ->
-            Files.deleteIfExists(fileService.changeFileSystem(localMappingFilePath, fileSystem))
-        }
-    }
-
-    /**
-     * Recreates all mapping files from scratch.
-     *
-     * Mapping files are deleted and recreated for all viable DataFiles. This basically resets the "caching" of the
-     * DataFile filenames in the mapping files. Normally this should not be needed, but some changes, like changes
-     * to the structure will require a complete recreation.
-     */
-    @Synchronized
-    void recreateAllMappingFiles() {
-        deleteAllMappingFiles()
-        addMappingFileEntryIfMissingForAllViableDataFiles()
-    }
 }

@@ -150,14 +150,6 @@ class FastqcDataFilesService {
         }
     }
 
-    Realm fastqcRealm(SeqTrack seqTrack) {
-        return seqTrack.project.realm
-    }
-
-    void createFastqcProcessedFile(DataFile dataFile) {
-        assert (new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
-    }
-
     void updateFastqcProcessedFiles(List<FastqcProcessedFile> fastqcList) {
         fastqcList.each {
             updateFastqcProcessedFile(it)
@@ -182,17 +174,6 @@ class FastqcDataFilesService {
         return fastqc
     }
 
-    FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile) {
-        FastqcProcessedFile fastqc = CollectionUtils.exactlyOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
-        updateFastqcProcessedFile(fastqc)
-        return fastqc
-    }
-
-    void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
-        fastqc.contentUploaded = true
-        assert (fastqc.save(flush: true))
-    }
-
     /**
      * Returns an inputStream from the contents of a fastqc zip file
      * @param dataFile The dataFile the zip file belongs to
@@ -214,26 +195,10 @@ class FastqcDataFilesService {
         return zipFile.getInputStream(zipEntry)
     }
 
-    /**
-     * @Deprecated old workflow system
-     */
-    @Deprecated
-    Path pathToFastQcResultFromSeqCenter(DataFile dataFile) {
-        return pathToFastQcResultFromSeqCenter(fileSystemService.filesystemForFastqImport, dataFile)
-    }
-
     Path pathToFastQcResultFromSeqCenter(FileSystem fileSystem, DataFile dataFile) {
         String fastqcFileName = fastqcFileName(dataFile)
         File pathToSeqCenterFastQcFile = new File(lsdfFilesService.getFileInitialPath(dataFile)).parentFile
         return fileSystem.getPath(pathToSeqCenterFastQcFile.path, fastqcFileName)
-    }
-
-    /**
-     * @Deprecated old workflow system
-     */
-    @Deprecated
-    Path pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
-        return pathToFastQcResultMd5SumFromSeqCenter(fileSystemService.filesystemForFastqImport, dataFile)
     }
 
     Path pathToFastQcResultMd5SumFromSeqCenter(FileSystem fileSystem, DataFile dataFile) {

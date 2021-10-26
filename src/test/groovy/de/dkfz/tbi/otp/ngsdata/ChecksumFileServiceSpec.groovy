@@ -54,18 +54,6 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         expectedFileName == fileName
     }
 
-    void "picardMd5FileName, when call then return picard md5 file name"() {
-        given:
-        ChecksumFileService checksumFileService = new ChecksumFileService()
-        String expectedFileName = "${BAM_FILE_NAME}.md5"
-
-        when:
-        String fileName = checksumFileService.picardMd5FileName(BAM_FILE_NAME)
-
-        then:
-        expectedFileName == fileName
-    }
-
     private void setupFirstMD5ChecksumFromFile() {
         checksumFileService = new ChecksumFileService()
         file = tempFolder.newFile("asdf.md5").toPath()

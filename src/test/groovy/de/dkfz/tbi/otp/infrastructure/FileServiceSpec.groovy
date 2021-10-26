@@ -581,48 +581,6 @@ class FileServiceSpec extends Specification implements DataTest {
     }
 
     //----------------------------------------------------------------------------------------------------
-    // test for moveFile
-
-    void "moveFile, if input is valid, then move file"() {
-        given:
-        Path basePath = temporaryFolder.newFolder().toPath()
-        Path oldFile = basePath.resolve('oldFile')
-        Path newFile = basePath.resolve('newFile')
-
-        oldFile.text = 'text'
-
-        when:
-        fileService.moveFile(oldFile, newFile, new Realm())
-
-        then:
-        Files.exists(newFile)
-        !Files.exists(oldFile)
-    }
-
-    @Unroll
-    void "moveFile, if input is #type, then throw an assertion"() {
-        given:
-        Path oldFile = oldFileName ? Paths.get(oldFileName) : null
-        Path newFile = newFileName ? Paths.get(newFileName) : null
-
-        when:
-        fileService.moveFile(oldFile, newFile, new Realm())
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains(message)
-
-        where:
-        type                      | oldFileName       | newFileName || message
-        'oldFile is null'         | null              | '/somthing' || 'source'
-        'newFile is null'         | '/tmp'            | null        || 'destination'
-        'oldFile is not absolute' | 'tmp'             | '/somthing' || 'source.absolute'
-        'newFile is not absolute' | '/tmp'            | 'somthing'  || 'destination.absolute'
-        'oldFile does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(source)'
-        'newFile does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(destination)'
-    }
-
-    //----------------------------------------------------------------------------------------------------
     // test for correctPathPermissionRecursive
 
     void "correctPathPermissionRecursive, correct permission of output folder"() {
