@@ -18,6 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# This Docker image is for the default development case.
+# It provides the possibility for hot reloading and the backdoor user.
+
 FROM registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci:latest
 
 ARG APP_HOME=/home/otp/app
@@ -44,6 +47,6 @@ RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
     echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties \
     ; fi
 
-ENTRYPOINT ./gradlew $GRADLE_COMMAND --stacktrace
+ENTRYPOINT ./gradlew $GRADLE_COMMAND
 
 EXPOSE 8080

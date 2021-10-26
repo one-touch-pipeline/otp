@@ -19,32 +19,11 @@
 # SOFTWARE.
 
 # Main docker-compose file.
-# Run `docker-compose up` to start otp with database, ldap, ssh, mail and admin tool servers.
+# Run `docker-compose up` to start a otp database, ldap, ssh, mail and admin tool servers.
+# To run it with otp, you should also run docker-compose.dev.yml or docker-compose.war.yml
 
 version: '3.0'
 services:
-  otp:
-    container_name: otp-dev
-    restart: on-failure
-    build:
-      dockerfile: docker/otp/Dockerfile
-      context: .
-      args:
-        GRADLE_PROXY_ENABLED: $GRADLE_PROXY_ENABLED
-        GRADLE_PROXY_HOST: $GRADLE_PROXY_HOST
-        GRADLE_PROXY_PORT: $GRADLE_PROXY_PORT
-    env_file:
-      - .env
-    ports:
-      - 8080:8080
-    volumes:
-      - gradle_dependencies:/home/otp/.gradle
-      - filesystem:/home/otp/filesystem
-    depends_on:
-      - postgres
-    networks:
-      otp:
-
   postgres:
     container_name: otp-dev-postgres
     env_file:

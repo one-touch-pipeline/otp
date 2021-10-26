@@ -18,19 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# This file can be used only together with the main composition file.
-# It is for a development instance of otp with enabled hot reloading.
-# Run docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.source.yml up
+# This Docker image takes a prebuilt war file and deploys it on a production like tomcat server.
+# It is helpful to test scenarios in a prod-like way. Hot reloading and backdoor user is not available.
 
-version: '3.0'
-services:
-  otp:
-    volumes:
-      # the LOCAL_SOURCE_PATH has to be set in the .env file
-      - $LOCAL_SOURCE_PATH/src:/home/otp/app/src
-      - $LOCAL_SOURCE_PATH/grails-app:/home/otp/app/grails-app
-      - $LOCAL_SOURCE_PATH/scripts:/home/otp/app/scripts
-      - $LOCAL_SOURCE_PATH/docs:/home/otp/app/docs
-      - $LOCAL_SOURCE_PATH/workflows:/home/otp/app/workflows
-      - $LOCAL_SOURCE_PATH/migrations:/home/otp/app/migrations
-      - $LOCAL_SOURCE_PATH/.otp.properties:/home/otp/app/.otp.properties
+FROM tomcat:8.5.34-jre8
+
+COPY .otp.war.properties /root/.otp.properties
+COPY build/libs/otp.war /usr/local/tomcat/webapps/
+
+EXPOSE 8080

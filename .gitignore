@@ -44,6 +44,7 @@ out
 /metrics.txt
 ## config files for docker build
 *.otp.properties
+*.otp.war.properties
 *.env
 ##sprint review
 review/

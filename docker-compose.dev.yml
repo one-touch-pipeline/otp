@@ -18,19 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# This file can be used only together with the main composition file.
-# It is for a development instance of otp with enabled hot reloading.
-# Run docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.source.yml up
+# Docker file for a development instance of otp.
+# Run docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 version: '3.0'
 services:
   otp:
+    container_name: otp-dev
+    restart: on-failure
+    build:
+      dockerfile: docker/otp/Dockerfile
+      context: .
+      args:
+        GRADLE_PROXY_ENABLED: $GRADLE_PROXY_ENABLED
+        GRADLE_PROXY_HOST: $GRADLE_PROXY_HOST
+        GRADLE_PROXY_PORT: $GRADLE_PROXY_PORT
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
     volumes:
-      # the LOCAL_SOURCE_PATH has to be set in the .env file
-      - $LOCAL_SOURCE_PATH/src:/home/otp/app/src
-      - $LOCAL_SOURCE_PATH/grails-app:/home/otp/app/grails-app
-      - $LOCAL_SOURCE_PATH/scripts:/home/otp/app/scripts
-      - $LOCAL_SOURCE_PATH/docs:/home/otp/app/docs
-      - $LOCAL_SOURCE_PATH/workflows:/home/otp/app/workflows
-      - $LOCAL_SOURCE_PATH/migrations:/home/otp/app/migrations
-      - $LOCAL_SOURCE_PATH/.otp.properties:/home/otp/app/.otp.properties
+      - gradle_dependencies:/home/otp/.gradle
+      - filesystem:/home/otp/filesystem
+    depends_on:
+      - postgres
+    networks:
+      otp:
