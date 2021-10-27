@@ -25,12 +25,22 @@
 
 $.otp.egaTable = {
 
+    makeLandingTable: function() {
+        "use strict";
+        $('#dataTable').dataTable({
+            sDom: '<i> T rt<"clear">',
+            bSort: true,
+            paging: false,
+            order: [[1,"asc"]],
+        });
+    },
+
     makeDataTable: function () {
         "use strict";
         $('#dataTable').dataTable({
             sDom: '<i> T rt<"clear">',
             bSort: false,
-            paging: false
+            paging: false,
         });
     },
 
@@ -41,5 +51,5 @@ $.otp.egaTable = {
             buttons: $.otp.getDownloadButton(),
             paging: false,
         });
-    }
+    },
 };

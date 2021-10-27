@@ -28,6 +28,7 @@
     <meta name="layout" content="main" />
     <title><g:message code="egaSubmission.title"/></title>
     <asset:javascript src="taglib/EditorSwitch.js"/>
+    <asset:javascript src="pages/egaSubmission/datatable.js"/>
 </head>
 <body>
     <div class="body">
@@ -39,37 +40,48 @@
             <g:link action="newSubmission"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
         </div>
         <h1><g:message code="egaSubmission.overview.header"/></h1>
-        <table>
-            <tr>
-                <th><g:message code="egaSubmission.overview.submissionID"/></th>
-                <th><g:message code="egaSubmission.submissionName"/></th>
-                <th><g:message code="egaSubmission.overview.submissionState"/></th>
-                <th></th>
-            </tr>
-            <g:each in="${submissions}">
+        <div class="otpDataTables">
+            <table id="dataTable">
+                <thead>
                 <tr>
-                    <td>${it.id}</td>
-                    <td>${it.studyName}</td>
-                    <td><otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: 'egaSubmission', action: "updateSubmissionState", params: ['submission.id': it.id])}"
-                            values="${submissionStates}"
-                            value="${it.state}"/></td>
-                    <td>
-                        <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
-                            <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
-                        </g:if><g:else>
-                            <g:link action="studyMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.studyMetadata"/></g:link>
-                            <br>
-                            <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.sampleMetadata"/></g:link>
-                            <br>
-                            <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.experimentalMetadata"/></g:link>
-                        </g:else>
-                    </td>
+                    <th><g:message code="egaSubmission.overview.submissionID"/></th>
+                    <th><g:message code="egaSubmission.submissionName"/></th>
+                    <th><g:message code="egaSubmission.overview.submissionState"/></th>
+                    <th></th>
                 </tr>
-            </g:each>
-        </table>
+                </thead>
+                <tbody>
+                <g:each in="${submissions}">
+                    <tr>
+                        <td>${it.id}</td>
+                        <td>${it.studyName}</td>
+                        <td><otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'egaSubmission', action: "updateSubmissionState", params: ['submission.id': it.id])}"
+                                values="${submissionStates}"
+                                value="${it.state}"/></td>
+                        <td>
+                            <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
+                                <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
+                            </g:if><g:else>
+                                <g:link action="studyMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.studyMetadata"/></g:link>
+                                <br>
+                                <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.sampleMetadata"/></g:link>
+                                <br>
+                                <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.experimentalMetadata"/></g:link>
+                            </g:else>
+                        </td>
+                    </tr>
+                </g:each>
+                </tbody>
+            </table>
+        </div>
     </div>
+    <asset:script type="text/javascript">
+        $(function() {
+            $.otp.egaTable.makeLandingTable();
+        });
+    </asset:script>
 </body>
 </html>
