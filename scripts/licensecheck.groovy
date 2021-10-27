@@ -72,24 +72,13 @@ class LicenseCheck {
             "logs",
             "out",
             "target",
-
-            "workflows/cwl/dataInstallation/testInput",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
-            ".gitignore",
-            "NOTICE.txt",
-            "scripts/ReferenceGenome/README.txt",
-            "scripts/rollout/readme.txt",
-
             ".project",
             ".classpath",
             "otp-grailsPlugins.iml",
             "otp.iml",
-
-            "gradle.properties",
-            "settings.gradle",
-            "src/main/webapp/WEB-INF/web.xml",
 
             "gradlew.bat",
             "gradlew",
@@ -98,9 +87,6 @@ class LicenseCheck {
 
             "src/main/resources/wes-api/workflow_execution_service.swagger.config.json",
             "src/main/resources/wes-api/workflow_execution_service.swagger.yaml",
-
-            "workflows/cwl/dataInstallation/cromwell/config.conf",
-            "workflows/cwl/dataInstallation/wes-service-with-cromwell/config.conf",
     ].collect { Paths.get(it) }
 
 

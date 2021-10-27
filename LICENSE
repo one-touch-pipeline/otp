@@ -27,13 +27,18 @@ technical reasons, however they are also licensed under this license.
  - src/docs/
 
 Different licenses may apply to the following folders and files therein,
-please see the respective licenses in the files themselves:
- - grails-app/assets/fonts
  - grails-app/assets/lib
- - misc/fonts
  - scripts/gitchangelog
 
 The following folders contain proprietary images which are exempted from this license.
 Their exclusive copyright remains with their respective holders.
- - grails-app/assets/images/non-free
+
+please see the respective licenses in the files themselves:
+ - gradle
+ - gradlew
+ - gradlew.bat
+ - gradle-wrapper.jar
+ - grailsw
+ - grailsw.bat
+ - grails-app/assets/images
  - misc/logo
