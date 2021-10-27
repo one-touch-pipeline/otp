@@ -33,14 +33,14 @@
             <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${step.workflowRun.id}">
                 ${g.message(code: "workflow.navigation.details")} (${step.workflowRun.id})</g:link>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.logs")}</li>
+            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.logs")} (${step.id})</li>
         </ol>
     </nav>
 
     <nav class="navbar">
         <div class="navbar-brand">
             <div id="statusDot" title="${step.state}" data-status="${step.state}" class="d-inline-block"></div>
-            <span class="d-inline-flex align-top">${g.message(code: "workflowRun.details.log")} for ${step.beanName}</span>
+            <span class="d-inline-flex align-top pt-1 ml-2">${g.message(code: "workflowRun.details.log")} for ${step.beanName} (${step.id})</span>
         </div>
     </nav>
 
@@ -48,14 +48,40 @@
 
     ${raw(step.workflowRun.displayName.replace("\n", "<br>"))}
 
-    <g:each in="${messages}" var="message">
-        <div class="dropdown-divider"></div>
-        <pre>${message}</pre>
-    </g:each>
-    <g:if test="${messages.empty}">
+    <g:if test="${logs.empty}">
         <div class="dropdown-divider"></div>
         <pre>${g.message(code: "workflowRun.details.log.none")}</pre>
     </g:if>
+    <g:else>
+        <table class="table table-sm table-bordered table-striped mt-3">
+            <thead>
+            <tr>
+                <th scope="col">Type</th>
+                <th scope="col">Log message</th>
+                <th scope="col">Created</th>
+                <th scope="col">Database id</th>
+            </tr>
+            </thead>
+            <tbody>
+            <g:each in="${logs}" var="log">
+                <tr>
+                    <td>
+                        ${log.type}
+                    </td>
+                    <td>
+                        <pre>${log.message}</pre>
+                    </td>
+                    <td>
+                        ${log.dateCreated}
+                    </td>
+                    <td>
+                        ${log.id}
+                    </td>
+               </tr>
+            </g:each>
+            </tbody>
+        </table>
+    </g:else>
 </div>
 </body>
 </html>

@@ -24,6 +24,9 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.TupleConstructor
+import org.hibernate.NullPrecedence
+import org.hibernate.criterion.Order
+import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.utils.DataTablesCommand
 import de.dkfz.tbi.util.TimeFormats
@@ -58,8 +61,17 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         List data = WorkflowRun.createCriteria().list {
             criteria.delegate = delegate
             criteria()
-            cmd.orderList.each {
-                order(Column.fromDataTable(it.column).columnName, it.direction.name())
+            cmd.orderList.each { DataTablesCommand.Order dtOrder ->
+                if (Column.fromDataTable(dtOrder.column) == Column.COMMENT) {
+                    createAlias("comment", "comment", JoinType.LEFT_OUTER_JOIN)
+                    if (dtOrder.direction == DataTablesCommand.Order.Dir.asc) {
+                        addOrder(Order.asc("comment.modificationDate").nulls(NullPrecedence.LAST))
+                    } else {
+                        addOrder(Order.desc("comment.modificationDate").nulls(NullPrecedence.LAST))
+                    }
+                } else {
+                    order(Column.fromDataTable(dtOrder.column).orderColumn, dtOrder.direction.name())
+                }
             }
             firstResult(cmd.start)
             if (cmd.pagingEnabled) {
@@ -115,8 +127,8 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
     @TupleConstructor
     enum Column {
         CHECKBOX("", ""),
-        STATUS("Status", "state"),
-        COMMENT("Comment", "comment"),
+        STATUS("workflowRun.list.state", "state"),
+        COMMENT("workflowRun.list.comment", "modificationDate"),
         WORKFLOW("workflowRun.list.workflow", ""),
         NAME("workflowRun.list.name", "displayName"),
         STEP("workflowRun.list.step", ""),
@@ -127,7 +139,7 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         BUTTONS("", ""),
 
         final String message
-        final String columnName
+        final String orderColumn
 
         static Column fromDataTable(int column) {
             if (column >= values().size() || column < 0) {

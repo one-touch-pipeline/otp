@@ -69,7 +69,7 @@
         <tbody>
         <g:each in="${workflows}" var="workflow">
             <tr>
-                <td><div class="${workflow.enabled ? "dot green" : "dot grey"}" title="${workflow.enabled ? "Enabled" : "Disabled"}"></div></td>
+                <td><div class="${workflow.enabled ? "dot green" : "dot grey"} small" title="${workflow.enabled ? "Enabled" : "Disabled"}"></div></td>
                 <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id]}">${workflow}</g:link></td>
                 <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id]}">
                     ${states.collect { state -> state.value.sum { runs[new Pair(it, workflow)] ?: 0 } }.sum()}

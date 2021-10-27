@@ -49,7 +49,6 @@ class WorkflowCommandLog extends WorkflowLog {
     @Override
     String displayLog() {
         return """\
-            |${this.class.simpleName}:${this.id}
             |Command:
             |${command}
             |

@@ -43,14 +43,11 @@ $(function () {
             },
             {
                 'data': function (row, type, set, meta) {
-                    if (type === "sort") {
-                        return row.comment;
-                    }
                     if (row.comment) {
                         return '<i class="bi-info-circle" title="' + row.comment + '"></i>';
                     }
                     return "";
-                }
+                },
             },
             {'data': 'workflow', 'orderable': false},
             {
@@ -84,13 +81,13 @@ $(function () {
                     var stepsDisabled = (row.steps.length === 0) ? " disabled " : ""
 
                     var result = "<form method='POST' class='single'>" +
-                        "          <div class='btn-group'>" +
+                        "          <div class='btn-group float-right'>" +
                                      button($.otp.createLink({controller: "workflowRunList", action: "setFailedFinal"}), row.stepId , "Set failed final",
                                           buttonsDisabled, "file-earmark-x") +
                                      button($.otp.createLink({controller: "workflowRunList", action: "restartStep"}), row.stepId , "Restart \"" + row.step + "\" step",
                                           buttonsDisabled, "reply") +
                         "            <div class='btn-group' role='group'>" +
-                        "              <button type='button' class='btn btn-primary dropdown-toggle dropdown-toggle-split' data-toggle='dropdown' " +
+                        "              <button type='button' class='btn btn-xs btn-primary dropdown-toggle dropdown-toggle-split' data-toggle='dropdown' " +
                         "                      aria-haspopup='true' aria-expanded='false' title='Restart previous steps'" + buttonsDisabled + stepsDisabled + ">" +
                         "                <span class='sr-only'>Toggle Dropdown</span>" +
                         "              </button>" +

@@ -32,11 +32,11 @@
             <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${nav.workflowRun?.id}">
                 ${g.message(code: "workflow.navigation.details")} (${nav.workflowRun?.id})</g:link>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.clusterLog")}</li>
+            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.clusterLog")} (${job.id})</li>
         </ol>
     </nav>
 
-    <h1>${g.message(code: "clusterJob.log")} (job ID <g:link action="show" id="${job.id}">${job.id}</g:link>)</h1>
+    <h1>${g.message(code: "clusterJob.log")} (<g:link action="show" id="${job.id}">${job.id}</g:link>)</h1>
         <g:if test="${job.oldSystem}">
             <g:link controller="processes" action="processingStep"
                     id="${job.processingStep.id}"><i>${job.processingStep.jobDefinition.name} (${job.processingStep.jobClass})</i></g:link>

@@ -144,9 +144,16 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         }
 
         return [
-                nav     : navParams,
-                step    : step,
-                messages: step.logs*.displayLog(),
+                nav : navParams,
+                step: step,
+                logs: step.logs.collect {
+                    return [
+                            type: it.class.simpleName,
+                            message: it.displayLog(),
+                            dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.dateCreated),
+                            id: it.id,
+                    ]
+                },
         ]
     }
 }

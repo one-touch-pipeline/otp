@@ -45,7 +45,7 @@ To be used in conjunction with: common/CommentBox.js
             <button id="button-cancel" class="btn btn-sm btn-secondary float-right" type="button" disabled>
                 <g:message code="commentBox.cancel"/>
             </button>
-            <span id="authorSpan">${TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(comment?.modificationDate)} ${comment?.author}</span>
+            <span id="authorSpan">${comment?.modificationDate ? TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(comment?.modificationDate) : ''} ${comment?.author}</span>
         </div>
     </sec:ifAllGranted>
 </div>

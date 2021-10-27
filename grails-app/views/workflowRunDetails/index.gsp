@@ -26,6 +26,7 @@
     <asset:javascript src="pages/workflowRunList/common.js"/>
     <asset:javascript src="pages/workflowRunDetails/index.js"/>
     <asset:javascript src="common/CommentBox.js"/>
+    <asset:stylesheet src="pages/workflowRunDetails/style.less"/>
 </head>
 
 <body>
@@ -40,7 +41,7 @@
     <nav class="navbar">
         <div class="navbar-brand">
             <div id="statusDot" title="${workflowRun.state}" data-status="${workflowRun.state}" class="d-inline-block"></div>
-            <span class="d-inline-flex align-top">
+            <span class="d-inline-flex align-top pt-1 ml-2">
                 ${g.message(code: "workflowRun.details.title")} (${workflowRun.id}) ${g.message(code: "workflowRun.details.of")} ${workflowRun.workflow.name}
             </span>
         </div>
@@ -127,7 +128,7 @@
         </div>
     </g:if>
 
-    <table id="steps" class="table table-sm table-striped table-hover table-bordered w-100"
+    <table id="steps" class="table table-sm table-striped table-bordered w-100"
            data-wf-run-state="${workflowRun.state}"
            data-id="${workflowRun.id}"
            data-wf-id="${cmd.workflow?.id}"
@@ -135,7 +136,7 @@
            data-name="${cmd.name}"
            data-wf-run-id="${workflowRun.id}">
         <thead>
-        <tr>
+        <tr class="table-secondary">
             <th></th>
             <th></th>
             <th>${g.message(code: "workflowRun.details.step")}</th>
@@ -146,7 +147,7 @@
             <th></th>
         </tr>
         </thead>
-        <tbody>
+        <tbody></tbody>
     </table>
 
     <br>
@@ -174,6 +175,13 @@
     <g:if test="${!workflowRun.outputArtefacts}">
         ${g.message(code: "workflowRun.details.no.output")}
     </g:if>
+    <h2>${g.message(code: "workflowRun.details.config")}</h2>
+    <g:if test="${workflowRun.combinedConfig != "{}"}">
+        <textarea id="configurationHolder" class="configurationHolder" disabled>${workflowRun.combinedConfig}</textarea>
+    </g:if>
+    <g:else>
+        ${g.message(code: "workflowRun.details.no.config")}
+    </g:else>
 </div>
 </body>
 </html>

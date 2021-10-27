@@ -33,14 +33,14 @@
             <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${step.workflowRun.id}">
                 ${g.message(code: "workflow.navigation.details")} (${step.workflowRun.id})</g:link>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.error")}</li>
+            <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.error")} (${step.id})</li>
         </ol>
     </nav>
 
     <nav class="navbar">
         <div class="navbar-brand">
             <div id="statusDot" title="${step.state}" data-status="${step.state}" class="d-inline-block"></div>
-            <span class="d-inline-flex align-top">${g.message(code: "workflowRun.details.log")} for ${step.beanName}</span>
+            <span class="d-inline-flex align-top pt-1 ml-2">${g.message(code: "workflowRun.details.log")} for ${step.beanName} (${step.id})</span>
         </div>
     </nav>
 

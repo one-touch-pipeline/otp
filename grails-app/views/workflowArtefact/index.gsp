@@ -54,7 +54,7 @@
             <nav class="navbar">
                 <div class="navbar-brand">
                     <div id="statusDot" title="${artefact.state}" data-status="${artefact.state}" class="d-inline-block"></div>
-                    <span class="d-inline-flex align-top"><g:message code="workflowArtefact.title" args="[artefact.id.toString()]"/></span>
+                    <span class="d-inline-flex align-top pt-1 ml-2"><g:message code="workflowArtefact.title" args="[artefact.id.toString()]"/></span>
                 </div>
             </nav>
 
