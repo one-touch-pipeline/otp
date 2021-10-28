@@ -194,10 +194,11 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 users             : [
                         null, // null objects should be disregarded
                         new ProjectRequestUserCommand(
-                                username     : user1.username,
-                                projectRoles : [pi],
+                                username: user1.username,
+                                projectRoles: [pi],
                                 accessToFiles: true,
-                                manageUsers  : true,
+                                accessToOtp: true,
+                                manageUsers: true,
                         ),
                         new ProjectRequestUserCommand(
                                 username     : user2.username,

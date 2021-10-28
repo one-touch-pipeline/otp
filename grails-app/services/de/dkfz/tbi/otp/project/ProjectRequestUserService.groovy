@@ -47,9 +47,10 @@ class ProjectRequestUserService {
         userProjectRoleService.createUserWithLdapData(cmd.username)
         User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(cmd.username))
         return createProjectRequestUser(user, cmd.projectRoles, startingStateFromRoles(cmd.projectRoles), [
-            accessToFiles         : cmd.accessToFiles,
-            manageUsers           : ProjectRoleService.projectRolesContainAuthoritativeRole(cmd.projectRoles) ? true : cmd.manageUsers,
-            manageUsersAndDelegate: ableToDelegateManagement(cmd.projectRoles),
+                accessToOtp           : cmd.accessToOtp,
+                accessToFiles         : cmd.accessToFiles,
+                manageUsers           : ProjectRoleService.projectRolesContainAuthoritativeRole(cmd.projectRoles) ? true : cmd.manageUsers,
+                manageUsersAndDelegate: ableToDelegateManagement(cmd.projectRoles),
         ])
     }
 
@@ -91,7 +92,7 @@ class ProjectRequestUserService {
                 projectRequestUser.projectRoles,
         )
         userProjectRoleService.with {
-            provideAccessToOtp(upr)
+            setAccessToOtp(upr, projectRequestUser.accessToOtp)
             setAccessToFiles(upr, projectRequestUser.accessToFiles)
             setManageUsers(upr, projectRequestUser.manageUsers)
             setManageUsersAndDelegate(upr, projectRequestUser.manageUsersAndDelegate)

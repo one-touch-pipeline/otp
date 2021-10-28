@@ -590,6 +590,10 @@ databaseChangeLog = {
 
     include file: 'changelogs/2021/otp-1255-add-column-maxParallelWorkflows.groovy'
 
+    changeSet(author: "waackj", id: "otp-1213") {
+        sqlFile(path: 'changelogs/2021/otp-1213-add-accesstootp-row-projectrequestuser.sql')
+    }
+
     include file: 'changelogs/2021/otp-1285-add-species-info-to-individual-and-sample.groovy'
 
     changeSet(author: "sunakshi", id: "otp-1127") {

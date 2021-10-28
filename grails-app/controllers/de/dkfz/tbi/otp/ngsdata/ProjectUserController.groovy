@@ -54,6 +54,7 @@ class ProjectUserController implements CheckAndCall {
             addUserToProject         : "POST",
             addRoleToUserProjectRole : "POST",
             deleteProjectRole        : "POST",
+            setAccessToOtp           : "POST",
             setAccessToFiles         : "POST",
             setManageUsers           : "POST",
             setManageUsersAndDelegate: "POST",
@@ -93,7 +94,7 @@ class ProjectUserController implements CheckAndCall {
                     !userProjectRole?.fileAccessChangeRequested) {
                 userProjectRole = userProjectRoleService.setAccessToFiles(userProjectRole, true, true)
             } else if (((ldapUserDetails?.username ?: false) && userProjectRole?.accessToFiles) &&
-                    !(userProjectRole?.project?.unixGroup in ldapUserDetails?.memberOfGroupList)  &&
+                    !(userProjectRole?.project?.unixGroup in ldapUserDetails?.memberOfGroupList) &&
                     !userProjectRole?.fileAccessChangeRequested) {
                 userProjectRole = userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
             }
@@ -133,7 +134,7 @@ class ProjectUserController implements CheckAndCall {
                             ProjectRole.findAllByNameInList(cmd.projectRoleNameList) as Set<ProjectRole>,
                             cmd.searchString,
                             [
-                                    accessToOtp           : true,
+                                    accessToOtp           : cmd.accessToOtp,
                                     accessToFiles         : cmd.accessToFiles,
                                     manageUsers           : cmd.manageUsers,
                                     manageUsersAndDelegate: cmd.manageUsersAndDelegate,
@@ -192,6 +193,12 @@ class ProjectUserController implements CheckAndCall {
             userProjectRoleService.deleteProjectUserRole(cmd.userProjectRole, CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(cmd.currentRole)))
         }) {
             return [currentRole: cmd.currentRole]
+        }
+    }
+
+    JSON setAccessToOtp(SetFlagCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.setAccessToOtp(cmd.userProjectRole, cmd.value)
         }
     }
 
@@ -301,7 +308,7 @@ class UserEntry {
         this.availableRoles = fetchAvailableRoles(userProjectRole, hasAdministrativeRole)
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
-        this.otpAccess = getPermissionStatus(inLdap)
+        this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
         this.fileAccess = getFilePermissionStatus(inLdap && userProjectRole.accessToFiles,
                 project.unixGroup in ldapUserDetails?.memberOfGroupList, userProjectRole.fileAccessChangeRequested)
         this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)
@@ -412,6 +419,7 @@ class AddUserToProjectCommand implements Serializable {
 
     String searchString
     List<String> projectRoleNameList
+    boolean accessToOtp = true
     boolean accessToFiles = false
     boolean manageUsers = false
     boolean manageUsersAndDelegate = false
@@ -436,6 +444,7 @@ class AddUserToProjectCommand implements Serializable {
                 return "empty"
             }
         })
+        accessToOtp(blank: false)
         accessToFiles(blank: false)
         manageUsers(blank: false)
         manageUsersAndDelegate(blank: false)

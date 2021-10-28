@@ -23,6 +23,16 @@
 /*jslint browser: true */
 /*global $ */
 
+function disableNotification(){
+    let otpcheckbox = $('input[type = checkbox][name=accessToOtp]');
+    let notificationcheckbox = $('input[type=checkbox][name=receivesNotifications]');
+    if(!otpcheckbox.is(':checked')){
+        notificationcheckbox.prop('checked', false);
+        notificationcheckbox.value = false;
+    }
+}
+
+
 function onToggleAccessToFiles(context){
     const modalText = $("input:hidden[name=confirmationTextHtml]").val();
 

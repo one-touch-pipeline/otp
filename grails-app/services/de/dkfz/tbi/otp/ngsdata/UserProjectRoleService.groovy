@@ -311,8 +311,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole provideAccessToOtp(UserProjectRole userProjectRole) {
-        boolean accessToOtp = ldapService.isUserInLdapAndActivated(userProjectRole.user)
+    UserProjectRole setAccessToOtp(UserProjectRole userProjectRole, boolean accessToOtp) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == accessToOtp }) {
             return userProjectRole
         }
@@ -448,8 +447,8 @@ class UserProjectRoleService {
     void doSetEnabled(UserProjectRole userProjectRole, boolean value) {
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.enabled = value
-            upr.accessToOtp = value && ldapService.isUserInLdapAndActivated(upr.user)
             // users should be reactivated without any further permissions
+            upr.accessToOtp = false
             upr.accessToFiles = false
             upr.manageUsers = false
             upr.manageUsersAndDelegate = false

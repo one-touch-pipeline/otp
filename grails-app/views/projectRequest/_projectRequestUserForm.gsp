@@ -48,6 +48,10 @@
             </td>
         </tr>
         <tr>
+            <td><label for="users[${i}].accessToOtp"><g:message code="projectUser.addMember.accessToOtp"/></label></td>
+            <td><g:checkBox name="users[${i}].accessToOtp" class="inputField" value="true" checked="${user?.accessToOtp}"/></td>
+        </tr>
+        <tr>
             <td><label for="users[${i}].accessToFiles"><g:message code="projectUser.addMember.accessToFiles"/></label></td>
             <td><g:checkBox name="users[${i}].accessToFiles" class="inputField" value="true" checked="${user?.accessToFiles}"/></td>
         </tr>

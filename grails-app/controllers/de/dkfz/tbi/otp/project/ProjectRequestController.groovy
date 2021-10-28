@@ -398,6 +398,7 @@ class ProjectRequestUserCommand {
     String username
 
     Set<ProjectRole> projectRoles
+    boolean accessToOtp
     boolean accessToFiles
     boolean manageUsers
 

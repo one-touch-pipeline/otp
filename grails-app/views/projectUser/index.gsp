@@ -94,6 +94,11 @@
                             </div>
                         </td>
                     </tr>
+
+                    <tr>
+                        <td><g:message code="projectUser.addMember.accessToOtp"/></td>
+                        <td><g:checkBox name="accessToOtp" onclick ="disableNotification(this)" class="inputField ldapUser" value="true" checked ="true" /></td>
+                    </tr>
                     <tr>
                         <td><g:message code="projectUser.addMember.accessToFiles"/></td>
                         <td><g:checkBox name="accessToFiles" class="inputField ldapUser" value="true" checked="false"/></td>
@@ -237,7 +242,23 @@
                             </g:each>
                         </sec:noAccess>
                     </td>
-                    <td><span class="icon-${userEntry.otpAccess}"></span></td>
+                    <td>
+                        <g:if test="${userEntry.inLdap}">
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                            <otp:editorSwitch
+                                    template="toggle"
+                                    link="${g.createLink(controller: "projectUser", action: "setAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"
+                                    value="${userEntry.otpAccess.toBoolean()}"
+                                    confirmation="${confirmationText}"/>
+                            </sec:access>
+                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                                <span class="icon-${userEntry.otpAccess}"></span>
+                            </sec:noAccess>
+                        </g:if>
+                        <g:else>
+                            <span class="icon-${userEntry.otpAccess}"></span>
+                        </g:else>
+                    </td>
                     <g:if test="${userEntry.inLdap}">
                         <td class="bootstrapped">
                             <div class="filesAccessHandler-${userEntry.fileAccess}">

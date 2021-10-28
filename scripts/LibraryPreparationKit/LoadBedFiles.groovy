@@ -54,7 +54,6 @@ assert refGenomeNames: 'At least one reference genome have to be provided'
 LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.findByName(libPrepKitName)
 assert libraryPreparationKit: "The LibraryPreparationKit '${libPrepKitName} could not found in OTP"
 
-
 List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
     ReferenceGenome referenceGenome = ReferenceGenome.findByName(it)
     assert referenceGenome: "The ReferenceGenome '${it} could not found in OTP"

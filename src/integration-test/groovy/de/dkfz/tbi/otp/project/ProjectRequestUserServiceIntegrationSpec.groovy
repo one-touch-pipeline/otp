@@ -98,7 +98,7 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
         )
 
         ProjectRequestUserCommand cmd = createProjectRequestUserCommand(
-                username    : user.username,
+                username: user.username,
                 projectRoles: [pi, other],
         )
 
@@ -126,7 +126,7 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
         )
 
         ProjectRequestUserCommand cmd = createProjectRequestUserCommand(
-                username    : user.username,
+                username: user.username,
                 projectRoles: roles as Set<ProjectRole>,
         )
 
@@ -231,33 +231,34 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
     void "toUserProjectRole"() {
         given:
         ProjectRequestUserService service = new ProjectRequestUserService(
-            userProjectRoleService: new UserProjectRoleService(
-                    auditLogService        : Mock(AuditLogService),
-                    configService          : Mock(ConfigService) {
-                        _ * getRootPath() >> TestCase.uniqueNonExistentPath
-                    },
-                    springSecurityService  : new SpringSecurityService(
-                            authenticationTrustResolver: Mock(AuthenticationTrustResolver) {
-                                isAnonymous(_) >> false
-                            }
-                    ),
-                    mailHelperService      : Mock(MailHelperService),
-                    messageSourceService   : Mock(MessageSourceService),
-                    processingOptionService: Mock(ProcessingOptionService) {
-                        _ * findOptionAsString(_) >> "option"
-                    },
-                    ldapService: Mock(LdapService) {
-                        isUserInLdapAndActivated(_) >> true
-                    }
-            )
+                userProjectRoleService: new UserProjectRoleService(
+                        auditLogService: Mock(AuditLogService),
+                        configService: Mock(ConfigService) {
+                            _ * getRootPath() >> TestCase.uniqueNonExistentPath
+                        },
+                        springSecurityService: new SpringSecurityService(
+                                authenticationTrustResolver: Mock(AuthenticationTrustResolver) {
+                                    isAnonymous(_) >> false
+                                }
+                        ),
+                        mailHelperService: Mock(MailHelperService),
+                        messageSourceService: Mock(MessageSourceService),
+                        processingOptionService: Mock(ProcessingOptionService) {
+                            _ * findOptionAsString(_) >> "option"
+                        },
+                        ldapService: Mock(LdapService) {
+                            isUserInLdapAndActivated(_) >> true
+                        }
+                )
         )
         createUserAndRoles()
         createAllBasicProjectRoles()
         Project project = createProject()
         ProjectRequestUser projectRequestUser = DomainFactory.createProjectRequestUser(
-                projectRoles          : [other, pi],
-                accessToFiles         : accessToFiles,
-                manageUsers           : manageUsers,
+                projectRoles: [other, pi],
+                accessToOtp: accessToOtp,
+                accessToFiles: accessToFiles,
+                manageUsers: manageUsers,
                 manageUsersAndDelegate: manageUsersAndDelegate,
         )
 
@@ -277,13 +278,13 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
         result.manageUsersAndDelegate == manageUsersAndDelegate
         result.fileAccessChangeRequested == accessToFiles
 
-        result.accessToOtp
+        result.accessToOtp == accessToOtp
         result.receivesNotifications
         result.enabled
 
         where:
-        accessToFiles | manageUsers | manageUsersAndDelegate
-        true          | true        | true
-        false         | false       | false
+        accessToOtp | accessToFiles | manageUsers | manageUsersAndDelegate
+        true        | true          | true        | true
+        false       | false         | false       | false
     }
 }

@@ -346,8 +346,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then: "new enabled status was set"
         userProjectRole.enabled == !enabledStatus
 
-        and: "all permissions are taken and non are granted, except accessToOtp which depends on the ldap system"
-        userProjectRole.accessToOtp == (!enabledStatus && accountInLdap)
+        and: "all permissions are taken and non are granted"
+        !userProjectRole.accessToOtp
         !userProjectRole.accessToFiles
         !userProjectRole.manageUsers
         !userProjectRole.manageUsersAndDelegate
@@ -896,6 +896,31 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "manageUsersAndDelegate" | 0
         "receivesNotifications"  | 0
         "enabled"                | 0
+    }
+
+    @Unroll
+    void "setAccessToOtp, when called with UserProjectRole where accessToOtp is #accessToOtpVar with #accessToOtpCall, then database entry should be set to #accessToOtpCall"() {
+        given:
+        setupData()
+        createUser([username: SYSTEM_USER])
+        UserProjectRole userProjectRole = createUserProjectRole(
+                accessToOtp: accessToOtpVar,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(USER) {
+            userProjectRoleService.setAccessToOtp(userProjectRole, accessToOtpCall)
+        }
+
+        then:
+        userProjectRole.accessToOtp == accessToOtpCall
+
+        where:
+        accessToOtpVar | accessToOtpCall
+        true           | true
+        true           | false
+        false          | true
+        false          | false
     }
 
     @Unroll

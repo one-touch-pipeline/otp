@@ -24,7 +24,6 @@ import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.project.Project
 
-
 /**
  * Search for analyses run with a specific version and list these, other analyses run for the sample pair and a list of pids.
  * The pid list can be used for trigger the analyses with the script RetriggerAnalysesForPids.

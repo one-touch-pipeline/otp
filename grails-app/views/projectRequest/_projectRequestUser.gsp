@@ -20,7 +20,11 @@
   - SOFTWARE.
   --}%
 
-<div style="margin-bottom: 5px; margin-top: 5px">
+<asset:stylesheet src="pages/projectRequest/styles.less"/>
+
+<div class="user-entry">
     <strong>${user.user}</strong> as ${user.projectRolesAsSemanticString}<br>
-    File access: ${user.accessToFiles ? "Yes" : "No"}, User manager: ${user.manageUsers ? "Yes" : "No"}
+    OTP access: <span class="icon-${user.accessToOtp}"></span>,
+    File access: <span class="icon-${user.accessToFiles}">,
+    User manager: <span class="icon-${user.manageUsers}"></span> &nbsp
 </div>

@@ -33,6 +33,7 @@ class ProjectRequestUser implements Entity {
     User user
 
     Set<ProjectRole> projectRoles
+    boolean accessToOtp
     boolean accessToFiles
     boolean manageUsers
     boolean manageUsersAndDelegate
