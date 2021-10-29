@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.IndividualService
@@ -55,6 +56,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
+import java.nio.file.FileSystems
 import java.nio.file.Path
 
 class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnitTest<LaneSwapService>, DomainFactoryCore, GrailsWebUnitTest {
@@ -114,6 +116,9 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         service.deletionService = Mock(DeletionService) {
             _ * deleteAllMergingAssignmentsWithAlignmentDataFilesAndSeqScans(_) >> _
+        }
+        service.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // Domain

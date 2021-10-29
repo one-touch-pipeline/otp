@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
@@ -711,6 +712,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
             _ * getFileFinalPath(_) >> newFile.toString()
             _ * getFileViewByPidPath(_) >> newFileViewByPid.toString()
         }
+        service.fileSystemService = Mock(FileSystemService) {
+            getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+        }
 
         // DTO
         final List<Swap<String>> dataFileSwaps = [new Swap(dataFile.fileName, newDataFileName)]
@@ -767,6 +771,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         service.lsdfFilesService = Mock(LsdfFilesService) {
             _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
             _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
+        }
+        service.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // DTO
@@ -900,6 +907,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
             _ * getFileFinalPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newPath.toString() }
             _ * getFileViewByPidPath(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newVbpPath.toString() }
         }
+        service.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+        }
 
         // DTO
         final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
@@ -993,6 +1003,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
             _ * singleCellMappingFile(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newWellMappingFile }
             _ * mappingEntry(_) >> { DataFile dataFile -> dataFilePaths[dataFile].newWellMappingFileEntryName }
         }
+        service.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+        }
 
         final List<Swap<String>> dataFileSwaps = dataFileList.collect { new Swap(dataFilePaths[it].oldFileName, dataFilePaths[it].newFileName) }
         StringBuilder log = new StringBuilder()
@@ -1077,6 +1090,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         service.lsdfFilesService = Mock(LsdfFilesService) {
             _ * getFileFinalPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
             _ * getFileViewByPidPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
+        }
+        service.fileSystemService = Mock(FileSystemService) {
+            _  * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // DTO

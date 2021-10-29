@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
@@ -82,6 +83,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     DataProcessingFilesService dataProcessingFilesService
     ProcessedAlignmentFileService processedAlignmentFileService
     AnalysisDeletionService analysisDeletionService
+    FileSystemService fileSystemService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -460,25 +462,26 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @return outPutBashCommands with added bash commands.
      */
     private String createRenameDataFileCommands(String oldFilename, DataFile dataFile, D data) throws FileNotFoundException {
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
         String outPutBashCommands = ""
         // fill local variables
         String oldDirectFileName = data.oldDataFileNameMap[dataFile][DIRECT_FILE_NAME]
         String oldVbpFileName = data.oldDataFileNameMap[dataFile][VBP_FILE_NAME]
         String oldWellName = data.oldDataFileNameMap[dataFile][WELL_FILE_NAME]
-        File directFile = new File(oldDirectFileName)
+        Path directFilePath = fileSystem.getPath(oldDirectFileName)
 
         // check if old files are already gone and moved
-        boolean filesAlreadyMoved = !directFile.exists()
+        boolean filesAlreadyMoved = !Files.exists(directFilePath)
 
         String bashMoveVbpFile = "rm -f '${oldVbpFileName}';\n"
         String bashMoveDirectFile
 
         String newDirectFileName = lsdfFilesService.getFileFinalPath(dataFile)
         String newVbpFileName = lsdfFilesService.getFileViewByPidPath(dataFile)
-        directFile = new File(newDirectFileName)
-        File vbpFile = new File(newVbpFileName)
+        directFilePath = fileSystem.getPath(newDirectFileName)
+        Path vbpFile = fileSystem.getPath(newVbpFileName)
 
-        if (directFile.exists()) {
+        if (Files.exists(directFilePath)) {
             if (!filesAlreadyMoved && (oldDirectFileName != newDirectFileName)) {
                 bashMoveDirectFile = "# rm -f '${oldDirectFileName}'"
             } else {
@@ -491,16 +494,16 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
             }
             bashMoveDirectFile = """\n
                                      # ${dataFile.seqTrack} ${dataFile}
-                                     mkdir -p -m 2750 '${directFile.parent}';""".stripIndent()
+                                     mkdir -p -m 2750 '${directFilePath.parent}';""".stripIndent()
 
             bashMoveDirectFile += """
                                           |mv '${oldDirectFileName}' \\
                                           |   '${newDirectFileName}';
-                                          |${getFixGroupCommand(directFile.toPath())}
+                                          |${getFixGroupCommand(directFilePath)}
                                           |if [ -e '${oldDirectFileName}.md5sum' ]; then
                                           |  mv '${oldDirectFileName}.md5sum' \\
                                           |     '${newDirectFileName}.md5sum';
-                                          |  ${getFixGroupCommand(directFile.toPath().resolveSibling("${directFile.name}.md5sum"))}
+                                          |  ${getFixGroupCommand(directFilePath.resolveSibling("${directFilePath.fileName}.md5sum"))}
                                           |fi\n""".stripMargin()
         }
         bashMoveVbpFile += """\
