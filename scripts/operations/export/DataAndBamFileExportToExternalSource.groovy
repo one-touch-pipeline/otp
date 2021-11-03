@@ -21,48 +21,66 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataExport.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.ScriptInputHelperService
 
-import java.nio.file.*
-import java.time.ZonedDateTime
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 /**
  * Script to export data (fastq-, bam-file(s) and analysis) to external source.
  *
  * The following options are available:
  *
+ *      - scriptOutputFile: absolute path to the desired script file
  *      - targetOutputFolder: absolute path to the desired output location
  *      - copyFastqFiles: enable to copy fastq files
  *      - copyBamFiles: enable to copy bam files
- *      - copyAnalyses: enable to copy the analysis files
+ *      - copyAnalyses: enable to copy the analysis files for each analysis instance individually
  *      - checkFileStatus: if enabled script only checks files and prints information. To get an output script disable this option.
  *      - getFileList: if enabled a list of files is additionally provided
  *      - unixGroup: set a new unix group for the copied data
  *      - external: if enabled, copied data is additionally granted read and execute permissions at the group level
- *      - seqTypesToCopy: enable the sequence types to copy by removing "//" from the corresponding line
- *      - sampleTypes: additionally filters for sample types (optional)
  */
 
 //input area
-//************ Select patients ************//
-String patients = """
-#patient1
-#patient2
+/**
+ * List of pids, one per line
+ */
+String selectByIndividual = """
+#pid1
+#pid2
 
 """
 
-//************ Path to save creation script to filesystem. (absolute path) ************//
-String outputDir = "/..."
+/**
+ * Multi selector using:
+ * - pid: required
+ * - sample type
+ * - seqType name or alias (for example WGS, WES, RNA, ...
+ * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
+ * - single cell flag: true = single cell, false = bulk
+ * - sampleName
+ *
+ * The columns can be separated by comma, semicolon or tab. Each value is trimmed
+ */
+String multiColumnInput = """
+#pid1,tumor,WGS,PAIRED,false,sampleName1
+#pid3,control,WES,PAIRED,false,
+#pid5,control,RNA,SINGLE,true,sampleName2
 
-//************ Name of the file, in which the creation script is saved.************//
-String outputFileName = "data_bamfile_export_script"
+"""
+
+//************ Path to save creation script to filesystem including filename. (absolute path) ************//
+String scriptOutputFile = ""
 
 //************ Path to copy files. Underneath, 'PID folders' will be created. (absolute path) ************//
-String targetOutputFolder = "/..."
+String targetOutputFolder = ""
 
 //************ Select whether FASTQ files should be copied (true/false) ************//
 boolean copyFastqFiles = false
@@ -71,7 +89,16 @@ boolean copyFastqFiles = false
 boolean copyBamFiles = false
 
 //************ Select whether analyses should be copied (true/false) ************//
-boolean copyAnalyses = false
+Map<PipelineType, Boolean> copyAnalyses = [:]
+
+copyAnalyses.put(PipelineType.INDEL,        false)
+copyAnalyses.put(PipelineType.SOPHIA,       false)
+copyAnalyses.put(PipelineType.ACESEQ,       false)
+copyAnalyses.put(PipelineType.SNV,          false)
+copyAnalyses.put(PipelineType.RUN_YAPSA,    false)
+
+//! Note: RNA_ANALYSIS will be exported only if copyBamFile is also set to be true !//
+copyAnalyses.put(PipelineType.RNA_ANALYSIS, false)
 
 //************ Check if and which files exist (true/false) ************//
 boolean checkFileStatus = true
@@ -82,330 +109,305 @@ boolean getFileList = false
 //************ Select new unix group ************//
 String unixGroup = ""
 
-//************ Select if data goes external ************//
+//************ Select the permissions of the files. If true group can read/execute. If false group/others can read/execute************//
 boolean external = true
 
-//************ Select seq types ************//
-def seqTypesToCopy = [
-        //SeqTypeService.wholeGenomePairedSeqType,
-        //SeqTypeService.exomePairedSeqType,
-        //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-        //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
-        //SeqTypeService.rnaPairedSeqType,
-        //SeqTypeService.chipSeqPairedSeqType,
-        //SeqType.findByNameAndLibraryLayoutAndSingleCell("ATAC", SequencingReadType.PAIRED, false)
-]
-
-//************ Select sampleTypes (optional) ************//
-String sampleTypes = """
-#sampleType1
-#sampleType2
-
-"""
+//************ adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync************//
+boolean copyExternal = false
 
 // work area
-LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+assert scriptOutputFile  : "scriptOutputPath should not be empty"
+assert targetOutputFolder: "targetOutputFolder should not be empty"
+assert unixGroup         : "no group given"
+
+ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
-BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 FileService fileService = ctx.fileService
+SeqTypeService seqTypeService = ctx.seqTypeService
+SeqTrackService seqTrackService = ctx.seqTrackService
+AbstractMergedBamFileService abstractMergedBamFileService = ctx.abstractMergedBamFileService
+SamplePairService samplePairService = ctx.samplePairService
+DataExportService dataExportService = ctx.dataExportService
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-StringBuilder output = new StringBuilder()
-StringBuilder outputList = new StringBuilder()
-
-Path targetFolder = Paths.get(targetOutputFolder)
-List sampleTypesFilter = splitSampleType(sampleTypes)
-
+Path targetFolder = fileSystem.getPath(targetOutputFolder)
 
 // where to put output
+Path scriptOutputPath = fileSystem.getPath(scriptOutputFile)
+
+String outputFileName = scriptOutputPath.getFileName()
+String outputDir = scriptOutputPath.getParent().toString()
+
 Path outputDirPath = fileService.toPath(new File(outputDir), fileSystem)
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, realm)
-Path outputFile = fileService.createOrOverwriteScriptOutputFile(
-        outputDirPath,outputFileName + "${outputFileName}-${TimeFormats.DATE.getFormattedZonedDateTime(ZonedDateTime.now())}.sh",realm)
+Path outputFile = fileService.createOrOverwriteScriptOutputFile(outputDirPath, outputFileName, realm)
 
+assert scriptOutputPath.absolute: "scriptOutputPath is not an absolute path"
+assert targetFolder.absolute    : "targetOutputFolder is not an absolute path"
 
-String rsyncChmod
-String umask
-if (external) {
-    umask = "027"
-    rsyncChmod = "Du=rwx,Dg=rx,Fu=rw,Fg=r"
-} else {
-    umask = "022"
-    rsyncChmod = "Du=rwx,Dgo=rx,Fu=rw,Fog=r"
+// Data structure for processing
+List<SeqTrack> seqTrackList = []
+List<AbstractMergedBamFile> bamFileList = []
+Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [:]
+
+class DataExportOverviewItem {
+    PipelineType pipelineType
+
+    Individual individual
+    SampleType sampleType, sampleType2
+    SeqType seqType
+    String sampleIdentifier
+
+    List<SeqTrack> withdrawnFastQs = []
+    List<SeqTrack> swappedFastQs = []
+    List<SeqTrack> allFastQs = []
+
+    List<AbstractMergedBamFile> externalBamFiles = []
 }
 
-assert targetFolder.absolute : "targetOutputFolder is not an absolute path"
-assert seqTypesToCopy : "no seq type selected"
-assert unixGroup : "no group given"
+List<DataExportOverviewItem> dataExportOverview = []
 
-def addToOutput = { String s ->
-    output.append("${s}\n")
-}
+// parse the input
+scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInput].join("\n")).each {List<String> params ->
+    int paramsCount = params.size()
+    assert paramsCount > 0: "Input must contain at least one column of PID"
+    assert paramsCount in [1,2,5,6]: "Missing input data for seqType determination"
 
-def addToOutputList = { String s ->
-    outputList.append("${s}\n")
-}
+    //required column
+    Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPidOrMockPidOrMockFullName(params[0], params[0], params[0]),
+            "Could not find one individual with name ${params[0]}")
 
-if (!checkFileStatus) {
-    addToOutput("#!/bin/bash\n\nset -e\numask ${umask}\n")
-    addToOutputList("#!/bin/bash\n\nset -e\numask ${umask}\n")
-}
+    //optional columns
+    SampleType sampleType = null
+    if (paramsCount > 1) {
+        sampleType = SampleTypeService.findSampleTypeByName(params[1])
+        assert sampleType: "Could not find one sampleType with name ${params[1]}"
+    }
 
-patients.split('\n')*.trim().findAll {
-    it && !it.startsWith('#')
-}.each { String pid ->
-    Path targetFolderWithPid = Paths.get(
-            targetFolder.toString(),
-            pid,
+    SeqType seqType = null
+    if (paramsCount > 4) {
+        SequencingReadType libraryLayout = SequencingReadType.findByName(params[3])
+        assert libraryLayout: "${params[3]} is no valid sequencingReadType"
+        boolean singleCell = Boolean.parseBoolean(params[4])
+        seqType = seqTypeService.findByNameOrImportAlias(params[2], [
+                libraryLayout: libraryLayout,
+                singleCell   : singleCell,
+        ])
+        assert seqType: "Could not find one seqType for ${params[2]}, ${params[3]}, ${params[4]}"
+    }
+
+    String sampleName = null
+    if (paramsCount > 5) {
+        sampleName = params[5]
+    }
+
+    //find the seqTracks, which might be used for analysis
+    List<SeqTrack> seqTracks = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleName(
+            individual,
+            sampleType,
+            seqType,
+            sampleName
+    )
+    assert seqTracks: "Could not find any seqtracks for ${params.join(' ')}"
+    seqTrackList.addAll(seqTracks)
+
+    //find the bam files, which might be used for analysis
+    List<AbstractMergedBamFile> bamFiles = abstractMergedBamFileService.findAllByIndividualSampleTypeSeqType(
+            individual,
+            sampleType,
+            seqType
     )
 
-    if (checkFileStatus) {
-        println "${pid}"
-    } else {
-        addToOutput("mkdir -p ${targetFolderWithPid}")
-    }
-
+    // FastQ files
     if (copyFastqFiles) {
-        List<SeqTrack> seqTrackList = SeqTrack.createCriteria().list {
-            sample {
-                individual {
-                    eq("pid", pid)
-                }
-            }
-            'in'("seqType", seqTypesToCopy)
-            if (sampleTypesFilter) {
-                sample {
-                    'in'('sampleType', sampleTypesFilter)
-                }
-            }
-        }
-
-        if (checkFileStatus) {
-            println "\n************************************ FASTQ ************************************"
-            println "Found ${seqTrackList.size()} lanes:\n"
-            seqTypesToCopy.each { seqType ->
-                println seqType.toString()
-                List l = []
-                seqTrackList.each { seqTrack ->
-
-                    if (seqTrack.seqType == seqType) {
-                        l.add(seqTrack.sampleType.name)
-                    }
-                }
-                println "\t${l.unique().sort().join("\n\t")}\n"
-            }
-        }
-
-        seqTrackList.each { seqTrack ->
-            String seqTrackPid = seqTrack.individual.pid
-            String seqType = seqTrack.seqType.dirName
-            String sampleType = seqTrack.sampleType.dirName
-            seqTrack.dataFiles.findAll { !it.fileWithdrawn }.each { DataFile dataFile ->
-                Path currentFile = Paths.get(lsdfFilesService.getFileFinalPath(dataFile))
-                if (currentFile.toFile().exists()) {
-                    if (!checkFileStatus) {
-                        Path targetFastqFolder = Paths.get(
-                                targetFolderWithPid.toString(),
-                                seqTrack.seqType.dirName,
-                                lsdfFilesService.getFilePathInViewByPid(dataFile)
-                        ).parent
-                        addToOutput("echo ${currentFile}")
-                        addToOutput("mkdir -p ${targetFastqFolder}")
-                        String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"
-                        addToOutput("rsync -uvpL --chmod=${rsyncChmod} ${search} ${targetFastqFolder}")
-                        if (getFileList) {
-                            addToOutputList("ls -l ${search}")
-                        }
-                    }
-                } else {
-                    if (checkFileStatus) {
-                        println("WARNING: FastQ file ${currentFile} for ${seqTrackPid} ${sampleType} ${seqType} doesn't exist\n")
-                    }
-                }
-            }
-        }
-        addToOutput("")
-    }
-
-    if (copyBamFiles) {
-        addToOutput("\n")
-        List<AbstractMergedBamFile> bamFiles = AbstractMergedBamFile.createCriteria().list {
-            eq("withdrawn", false)
-            eq("fileOperationStatus",
-                    AbstractMergedBamFile.FileOperationStatus.PROCESSED)
-            workPackage {
-                sample {
-                    individual {
-                        eq("pid", pid)
-                    }
-                }
-                'in'("seqType", seqTypesToCopy)
-                if (sampleTypesFilter) {
-                    sample {
-                        'in'('sampleType', sampleTypesFilter)
-                    }
-                }
-            }
-        }.findAll { it.isMostRecentBamFile() }
-
-        if (checkFileStatus) {
-            println "\n************************************ BAM ************************************"
-            println "Found BAM files ${bamFiles.size()}"
-            bamFiles.each { bamFile ->
-                println "\n" + bamFile.toString()
-            }
-        }
-
-        bamFiles.each { bamFile ->
-            Path basePath = Paths.get(bamFile.getBaseDirectory().getAbsolutePath())
-            Path sourceBam
-            Path qcFolder = Paths.get(basePath.toString(), "qualitycontrol")
-            if (bamFile instanceof ExternallyProcessedMergedBamFile) {
-                sourceBam = Paths.get(bamFile.bamFile.toString())
-            } else {
-                sourceBam = Paths.get(basePath.toString(), bamFile.bamFileName)
-            }
-
-
-            Path targetBamFolder = Paths.get(
-                    targetFolderWithPid.toString(),
-                    bamFile.seqType.dirName,
-                    bamFile.sampleType.getDirName() + (bamFile.workPackage.seqType.hasAntibodyTarget ? "-${bamFile.workPackage.antibodyTarget.name}" : "")
+        seqTracks.collect { SeqTrack seqTrack ->
+            [seqTrack.individual, seqTrack.sampleType, seqTrack.seqType]
+        }.unique().each {
+            List<SeqTrack> lanes = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleName(
+                    it[0],it[1],it[2]
             )
-            if (sourceBam.toFile().exists()) {
-                if (!checkFileStatus) {
-                    if (bamFile.seqType == SeqTypeService.rnaPairedSeqType && copyAnalyses) {
-                        addToOutput("echo ${basePath}")
-                        addToOutput("mkdir -p ${targetBamFolder}")
-                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=.* --chmod=${rsyncChmod} ${basePath} ${targetBamFolder}")
-                        if (getFileList) {
-                            addToOutputList("ls -l --ignore=\"*roddyExec*\" ${basePath}")
-                        }
+            dataExportOverview.add(new DataExportOverviewItem(
+                    pipelineType    : PipelineType.FASTQ,
+                    individual      : it[0],
+                    sampleType      : it[1],
+                    seqType         : it[2],
+                    sampleIdentifier: sampleName ? sampleName : "",
+                    allFastQs       : lanes,
+                    swappedFastQs   : lanes.findAll { SeqTrack st ->
+                        st.swapped
+                    },
+                    withdrawnFastQs : lanes.findAll { SeqTrack st ->
+                        st.isWithdrawn()
+                    },
+            ))
+        }
+    }
+
+    // Bam Files
+    if (copyBamFiles) {
+        if (bamFiles) {
+            bamFileList.addAll(bamFiles)
+            bamFiles.collect { AbstractMergedBamFile bam ->
+                [bam.individual, bam.sampleType, bam.seqType]
+            }.unique().each {
+                dataExportOverview.add(new DataExportOverviewItem(
+                        pipelineType: PipelineType.BAM,
+                        individual  : it[0],
+                        sampleType  : it[1],
+                        seqType     : it[2],
+                        externalBamFiles: bamFiles.findAll { AbstractMergedBamFile bamFile ->
+                            bamFile.workPackage.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED
+                        },
+                ))
+            }
+        }
+    }
+
+    // Analysis Files
+    copyAnalyses.findAll { Map.Entry<PipelineType, Boolean> entry ->
+        entry.value
+    }.each { Map.Entry<PipelineType, Boolean> instance ->
+        List<BamFilePairAnalysis> analysisPerMultiImport = analysisListMap.get(instance.key)
+        samplePairService.findAllByIndividualSampleTypeSeqType(
+                individual,
+                sampleType,
+                seqType
+        ).each { samplePair ->
+            List<SampleType> sampleTypeOfIndividual = seqTrackList.findAll { SeqTrack seqTrack ->
+                seqTrack.individual == samplePair.individual
+            }.collect {
+                it.sampleType
+            }.unique()
+            if (sampleTypeOfIndividual.containsAll([samplePair.sampleType1, samplePair.sampleType2])) {
+                List<BamFilePairAnalysis> bamFilePairAnalyses = BamFilePairAnalysis.withCriteria {
+                    eq('samplePair', samplePair)
+                    eq('processingState', AnalysisProcessingStates.FINISHED)
+                    like('instanceName', "%${instance.key}%")
+                    order("id", "desc")
+                }
+                if (!bamFilePairAnalyses.isEmpty()) {
+                    BamFilePairAnalysis analysis = bamFilePairAnalyses.first()
+                    if (analysisPerMultiImport) {
+                        analysisPerMultiImport.add(analysis)
                     } else {
-                        addToOutput("echo ${sourceBam}")
-                        addToOutput("mkdir -p ${targetBamFolder}")
-                        addToOutput("rsync -uvpL --chmod=${rsyncChmod} ${sourceBam}* ${targetBamFolder}")
-                        if (getFileList) {
-                            addToOutputList("ls -l ${sourceBam}*")
-                        }
+                        analysisListMap.put(instance.key, [analysis])
                     }
-                    if (qcFolder.toFile().exists()) {
-                        addToOutput("echo ${qcFolder}")
-                        addToOutput("rsync -uvrpL --chmod=${rsyncChmod} ${qcFolder}* ${targetBamFolder}")
-                        if (getFileList) {
-                            addToOutputList("ls -l ${qcFolder}*")
-                        }
-                    }
-                }
-            } else {
-                if (checkFileStatus) {
-                    println "WARNING: BAM File ${sourceBam} for ${bamFile.individual.pid} ${bamFile.sampleType.getDirName()} ${bamFile.seqType.dirName} doesn't exist\n"
+                    dataExportOverview.add(new DataExportOverviewItem(
+                            pipelineType    : instance.key,
+                            individual      : analysis.individual,
+                            sampleType      : analysis.sampleType1BamFile.sampleType,
+                            sampleType2     : analysis.sampleType2BamFile.sampleType,
+                            seqType         : analysis.sampleType1BamFile.seqType,
+                    ))
                 }
             }
         }
-        addToOutput("")
-    }
-
-    if (copyAnalyses) {
-        if (checkFileStatus) {
-            println "\n************************************ Analyses ************************************ "
-        }
-        ["Indel", "Sophia", "ACEseq", "SNV", "RunYapsa"].each { instanceName ->
-            List<BamFilePairAnalysis> analyses = getBamFilePairAnalysis(seqTypesToCopy, pid, instanceName, sampleTypesFilter)
-            if (analyses) {
-                if (!checkFileStatus) {
-                    analyses.each {
-                        Path resultFolder = Paths.get(
-                                targetFolderWithPid.toString(),
-                                it.seqType.dirName,
-                                "${instanceName.toLowerCase()}_results",
-                                "${it.samplePair.sampleType1.dirName}_${it.samplePair.sampleType2.dirName}"
-                        )
-                        File instancePath = fileService.toFile(bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it))
-                        addToOutput("echo ${instancePath}")
-                        addToOutput("mkdir -p ${resultFolder}")
-                        addToOutput("rsync -uvrpL --exclude=*roddyExec* --exclude=*bam* --chmod=${rsyncChmod} ${instancePath} ${resultFolder}")
-                        if (getFileList) {
-                            addToOutputList("ls -l --ignore=\"*roddyExec*\" ${instancePath}")
-                        }
-                    }
-                } else {
-                    println "\nFound following ${instanceName} analyse:"
-                    analyses.each {
-                        println "\t${it.sampleType1BamFile.sampleType.name}-${it.sampleType2BamFile.sampleType.name}:  " +
-                                "${it.instanceName}"
-                    }
-                }
-            }
-        }
-    }
-
-    if (!checkFileStatus) {
-        addToOutput("chgrp -R ${unixGroup} ${targetFolderWithPid}")
     }
 }
 
-List<BamFilePairAnalysis> getBamFilePairAnalysis (List seqTypesToCopy, String pid, String instanceName, List sampleTypesHelper) {
-    List<BamFilePairAnalysis> analyses = []
+DataExportInput dataExportParameters = new DataExportInput([
+        //input parameters
+        targetFolder        : targetFolder,
+        checkFileStatus     : checkFileStatus,
+        getFileList         : getFileList,
+        unixGroup           : unixGroup,
+        external            : external,
+        copyExternal        : copyExternal,
+        copyAnalyses        : copyAnalyses,
+        //preprocessed data for export
+        seqTrackList        : seqTrackList,
+        bamFileList         : bamFileList,
+        analysisListMap     : analysisListMap,
+])
 
-    SamplePair.withCriteria {
-        mergingWorkPackage1 {
-            sample {
-                individual {
-                    eq('pid', pid)
-                }
-            }
-            'in'('seqType', seqTypesToCopy)
-            if (sampleTypesHelper) {
-                sample {
-                    'in'('sampleType', sampleTypesHelper)
-                }
-            }
-        }
-        mergingWorkPackage2 {
-            if (sampleTypesHelper) {
-                sample {
-                    'in'('sampleType', sampleTypesHelper)
-                }
-            }
-        }
-    }.each { samplePair1 ->
-        List l = BamFilePairAnalysis.withCriteria {
-            eq('samplePair', samplePair1)
-            eq('processingState', AnalysisProcessingStates.FINISHED)
-            like('instanceName', "%${instanceName}%")
-            order("id", "desc")
-        }
-        if (!l.isEmpty()) {
-            analyses.add(l.first())
-        }
-    }
+DataExportOutput emptyOutput = new DataExportOutput(
+        bashScript: "",
+        listScript: "",
+        consoleLog: "")
+List<DataExportOutput> outputList = [
+    //Output header information
+    headerInfoOutput = dataExportService.exportHeaderInfo(dataExportParameters),
+    //Processing FASTQ Files
+    seqTrackOutput = copyFastqFiles ? dataExportService.exportDataFiles(dataExportParameters) : emptyOutput,
+    //Processing BAM Files
+    bamFileOutput = copyBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
+    //Processing Analysis Files
+    analysisOutput = dataExportService.exportAnalysisFiles(dataExportParameters),
+]
 
-
-    if (analyses) {
-        return analyses
-    } else {
-        return null
-    }
+String getConsoleLog(List<DataExportOutput> outputList) {
+    return outputList.collect {
+        it.consoleLog
+    }.join("\n")
 }
 
-List<SampleType> splitSampleType (String input) {
-    return input.split('\n')*.trim().findAll {
-        it && !it.startsWith('#')
-    }.collect {
-        SampleType.findAllByName(it)
-    }.flatten()
+String getBashScript(List<DataExportOutput> outputList) {
+    return outputList.collect {
+        it.bashScript
+    }.join("\n")
 }
 
-outputFile << output.toString()
+String getListScript(List<DataExportOutput> outputList) {
+    return outputList.collect {
+        it.listScript
+    }.join("\n")
+}
+
+StringBuilder summaryString = new StringBuilder()
+
+summaryString.append("PID\tSAMPLE-TPYE-1\tSAMPLE-TPYE-2\tSEQ-TPYE\tFILE-TPYE\tMORE INFOS\n")
+dataExportOverview.findAll { DataExportOverviewItem dataExportOverviewItem ->
+    dataExportOverviewItem.pipelineType == PipelineType.BAM &&
+    (dataExportOverviewItem.seqType == SeqTypeService.rnaSingleSeqType || dataExportOverviewItem.seqType == SeqTypeService.rnaPairedSeqType)
+}.each { DataExportOverviewItem dataExportOverviewItem ->
+    int idx = dataExportOverview.findLastIndexOf { it.individual == dataExportOverviewItem.individual}
+    dataExportOverview.add(idx + 1, new DataExportOverviewItem(
+            pipelineType    : PipelineType.RNA_ANALYSIS,
+            individual      : dataExportOverviewItem.individual,
+            sampleType      : dataExportOverviewItem.sampleType,
+            sampleType2     : null,
+            seqType         : dataExportOverviewItem.seqType,
+    ))
+}
+dataExportOverview.each {
+    summaryString.append("${it.individual.mockPid}")
+
+    summaryString.append("\t" + (it.sampleType   ? "${it.sampleType.name}"     : "-"))
+    summaryString.append("\t" + (it.sampleType2  ? "${it.sampleType2.name}"    : "-"))
+    summaryString.append("\t" + (it.seqType      ? "${it.seqType.displayNameWithLibraryLayout}" : "-"))
+    summaryString.append("\t" + (it.pipelineType ? "${it.pipelineType}"        : "-"))
+
+    summaryString.append("\t")
+    int count = it.swappedFastQs.size()
+    if (count) {
+        summaryString.append("${count} out of ${it.allFastQs.size()} swapped FastQ files; ")
+    }
+
+    count = it.withdrawnFastQs.size()
+    if (count) {
+        summaryString.append("${count} out of ${it.allFastQs.size()} withdrawn FastQ files; ")
+    }
+    count = it.externalBamFiles.size()
+    if (count) {
+        summaryString.append("${count} external BAM files; ")
+    }
+
+    summaryString.append("\n")
+}
+
+//Out put the result
+outputFile << getBashScript(outputList)
 
 println "\nCreation script has been saved to ${outputFile}"
 
-println "\n----------- ${checkFileStatus? "to get an output script -> set checkFileStatus = false" : "output script"} -----------"
-println output
+println "\n----------- ${checkFileStatus ? "to get an output script -> set checkFileStatus = false" : "output script"} -----------"
+println getConsoleLog(outputList)
 
-println "\n\n----------- ${!getFileList? "to get an output list -> set getFileList = true and checkFileStatus = false" : "output list"} -----------"
-println outputList
+println "\n\n----------- ${!getFileList ? "to get an output list -> set getFileList = true and checkFileStatus = false" : "output list"} -----------"
+println getListScript(outputList)
+
+println "\n*********************** Summary of Data Export ********************"
+println summaryString.toString()
