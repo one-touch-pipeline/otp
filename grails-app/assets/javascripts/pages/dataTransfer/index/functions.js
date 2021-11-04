@@ -21,19 +21,21 @@
  */
 
 function confirmDataTransferDeletion() {
-    if (!window.confirm('Are you sure that you want to permanently delete this document and any transfers based on it?')) {
-        event.preventDefault();
-        return;
-    }
-    if (!window.confirm('Are you really sure? This can not be undone!')) {
-        event.preventDefault();
-    }
+  if (!window.confirm(`Are you sure that you want to permanently
+   delete this document and any transfers based on it?`)) {
+    event.preventDefault();
+    return;
+  }
+  if (!window.confirm('Are you really sure? This can not be undone!')) {
+    event.preventDefault();
+  }
 }
 
 function confirmCompleteTransfer(event) {
-    if (!window.confirm('Are you sure that this transfer is completed? (receipt acknowledged? files deleted? disks wiped? etc..)')) {
-        event.preventDefault();
-    }
+  if (!window.confirm(`Are you sure that this transfer is completed?
+   (receipt acknowledged? files deleted? disks wiped? etc..)`)) {
+    event.preventDefault();
+  }
 }
 
 /**
@@ -42,23 +44,24 @@ function confirmCompleteTransfer(event) {
  * @param fileInputFieldId
  */
 function updateFileNameOfFileInput(fileInputFieldId) {
-    const inputField = $(fileInputFieldId);
-    const fileName = Array.from(inputField.prop("files")).map((val) => val.name).reduce((acc, val) => acc + ", " + val)
-    inputField.next(".custom-file-label").html(fileName);
+  const inputField = $(fileInputFieldId);
+  const fileName = Array.from(inputField.prop('files')).map((val) => val.name).reduce((acc, val) => acc + ', ' + val);
+  inputField.next('.custom-file-label').html(fileName);
 }
 
 /**
- * Update the visible label of the file input field. It replaces the names of the selected files with the default placeholder.
+ * Update the visible label of the file input field.
+ * It replaces the names of the selected files with the default placeholder.
  * It is triggered when the upload response from the server is received.
  *
  * @param id to find the correct input field
  */
 function updateFileNameOfFileInputToDefaultPlaceholder(id) {
-    const fileInputField = $("#dtaFileInput-" + id);
-    const defaultPlaceholder = "Choose one or more files";
+  const fileInputField = $('#dtaFileInput-' + id);
+  const defaultPlaceholder = 'Choose one or more files';
 
-    fileInputField.val("")
-    fileInputField.next(".custom-file-label").html(defaultPlaceholder);
+  fileInputField.val('');
+  fileInputField.next('.custom-file-label').html(defaultPlaceholder);
 }
 
 /**
@@ -70,55 +73,55 @@ function updateFileNameOfFileInputToDefaultPlaceholder(id) {
  * @param action for the ajax query target
  */
 function onUploadFiles(submitBtn, id, action) {
-    const uploadForm = submitBtn.closest("form");
-    const data = new FormData(uploadForm);
-    const loadingContent = $(submitBtn).children(".loading-content");
-    const actionContent = $(submitBtn).children(".action-content");
+  const uploadForm = submitBtn.closest('form');
+  const data = new FormData(uploadForm);
+  const loadingContent = $(submitBtn).children('.loading-content');
+  const actionContent = $(submitBtn).children('.action-content');
 
-    if (!data.get("files")) {
-        $.otp.toaster.showErrorToast("Upload Failed", "No file has been selected. Please select one or more files.");
-        return;
+  if (!data.get('files')) {
+    $.otp.toaster.showErrorToast('Upload Failed', 'No file has been selected. Please select one or more files.');
+    return;
+  }
+
+  loadingContent.show();
+  actionContent.hide();
+  $(submitBtn).prop('disabled', true);
+
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'dataTransfer',
+      action
+    }),
+    data,
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    type: 'POST',
+    success: (updatedDocuments) => {
+      if (action === 'addFilesToTransferAgreement') {
+        rerenderDtaFiles(updatedDocuments, id);
+      } else if (action === 'addFilesToTransfer') {
+        rerenderDataTransferFiles(updatedDocuments, id);
+      }
+      $.otp.toaster.showSuccessToast('Success', 'Files are added.');
+      $(submitBtn).prop('disabled', false);
+      loadingContent.hide();
+      actionContent.show();
+      updateFileNameOfFileInputToDefaultPlaceholder(id);
+    },
+    error: (error) => {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        $.otp.toaster.showErrorToast('Upload Failed', error.responseJSON.message);
+      } else {
+        $.otp.toaster.showErrorToast('Upload Failed', 'Unknown error during the upload occurred.');
+      }
+      $(submitBtn).prop('disabled', false);
+      loadingContent.hide();
+      actionContent.show();
+      updateFileNameOfFileInputToDefaultPlaceholder(id);
     }
-
-    loadingContent.show();
-    actionContent.hide();
-    $(submitBtn).prop("disabled", true);
-
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'dataTransfer',
-            action: action,
-        }),
-        data: data,
-        cache: false,
-        contentType: false,
-        processData: false,
-        method: "POST",
-        type: "POST",
-        success: (updatedDocuments) => {
-            if (action === 'addFilesToTransferAgreement') {
-                rerenderDtaFiles(updatedDocuments, id);
-            } else if (action === 'addFilesToTransfer') {
-                rerenderDataTransferFiles(updatedDocuments, id);
-            }
-            $.otp.toaster.showSuccessToast("Success", "Files are added.");
-            $(submitBtn).prop("disabled", false);
-            loadingContent.hide();
-            actionContent.show();
-            updateFileNameOfFileInputToDefaultPlaceholder(id);
-        },
-        error: (error) => {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                $.otp.toaster.showErrorToast("Upload Failed", error.responseJSON.message);
-            } else {
-                $.otp.toaster.showErrorToast("Upload Failed", "Unknown error during the upload occurred.");
-            }
-            $(submitBtn).prop("disabled", false);
-            loadingContent.hide();
-            actionContent.show();
-            updateFileNameOfFileInputToDefaultPlaceholder(id);
-        }
-    });
+  });
 }
 
 /**
@@ -128,16 +131,13 @@ function onUploadFiles(submitBtn, id, action) {
  * @param domPositionId position in the DOM of the file list
  */
 function rerenderDtaFiles(dtaDocuments, domPositionId) {
-    const dtaFilesList = $('#dtaDocuments-' + domPositionId);
+  const dtaFilesList = $('#dtaDocuments-' + domPositionId);
 
-    dtaFilesList.html(dtaDocuments.map((document) => {
-            return "<li><a href='" + $.otp.createLink({
-                controller: 'dataTransfer',
-                action: 'downloadDataTransferAgreementDocument',
-                parameters: {'dataTransferAgreementDocument.id': document.id}
-            }) + "'>" + document.fileName + "</a>" + "</li>";
-        }).reduce((acc, val) => acc + val))
-
+  dtaFilesList.html(dtaDocuments.map((document) => "<li><a href='" + $.otp.createLink({
+    controller: 'dataTransfer',
+    action: 'downloadDataTransferAgreementDocument',
+    parameters: { 'dataTransferAgreementDocument.id': document.id }
+  }) + "'>" + document.fileName + '</a>' + '</li>').reduce((acc, val) => acc + val));
 }
 
 /**
@@ -147,14 +147,11 @@ function rerenderDtaFiles(dtaDocuments, domPositionId) {
  * @param domPositionId position in the DOM of the file list
  */
 function rerenderDataTransferFiles(transferDocuments, domPositionId) {
-    const dtaFilesList = $('#transferDocuments-' + domPositionId);
+  const dtaFilesList = $('#transferDocuments-' + domPositionId);
 
-    dtaFilesList.html(transferDocuments.map((document) => {
-        return "<li><a href='" + $.otp.createLink({
-            controller: 'dataTransfer',
-            action: 'downloadDataTransferDocument',
-            parameters: {'dataTransferDocument.id': document.id}
-        }) + "'>" + document.fileName + "</a>" + "</li>";
-    }).reduce((acc, val) => acc + val))
-
+  dtaFilesList.html(transferDocuments.map((document) => "<li><a href='" + $.otp.createLink({
+    controller: 'dataTransfer',
+    action: 'downloadDataTransferDocument',
+    parameters: { 'dataTransferDocument.id': document.id }
+  }) + "'>" + document.fileName + '</a>' + '</li>').reduce((acc, val) => acc + val));
 }

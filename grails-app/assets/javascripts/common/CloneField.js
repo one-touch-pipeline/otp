@@ -20,41 +20,42 @@
  * SOFTWARE.
  */
 
-$(function () {
-    "use strict";
-    $(".clone-add").on("click", function (e) {
-        e.preventDefault();
-        var target = $(".clone-target");
-        target.data("highest-index", target.data("highest-index") + 1);
-        var index = target.data("highest-index");
+$(() => {
+  'use strict';
 
-        var clone = $(".clone-template").clone(true, true);
+  $('.clone-add').on('click', (e) => {
+    e.preventDefault();
+    const target = $('.clone-target');
+    target.data('highest-index', target.data('highest-index') + 1);
+    const index = target.data('highest-index');
 
-        // replace the template-index with the current index to fulfill the array like indexing
-        // prop[0], prop[1], ...
-        clone.find("input, select, label").each(function () {
-            var component = this;
-            $.each(["name", "id", "for", "data-select2-id"], function () {
-                var attribute = this;
-                $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
-            });
-        });
+    const clone = $('.clone-template').clone(true, true);
 
-        // Add the cloned and cleaned element to the clone-target container
-        target.append(clone);
-
-        $.otp.applySelect2($('select.use-select-2-after-clone', clone));
-
-        // Remove the clone-template class, as only the actual template should have it
-        $(".clone-target > .clone-template").removeClass("clone-template").removeClass("hidden");
-
-        return false;
+    // replace the template-index with the current index to fulfill the array like indexing
+    // prop[0], prop[1], ...
+    clone.find('input, select, label').each(function () {
+      const component = this;
+      $.each(['name', 'id', 'for', 'data-select2-id'], function () {
+        const attribute = this;
+        $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
+      });
     });
 
-    $(".clone-remove").on("click", function (e) {
-        e.preventDefault();
-        $(this).closest('.clone-remove-target').remove();
-    });
+    // Add the cloned and cleaned element to the clone-target container
+    target.append(clone);
+
+    $.otp.applySelect2($('select.use-select-2-after-clone', clone));
+
+    // Remove the clone-template class, as only the actual template should have it
+    $('.clone-target > .clone-template').removeClass('clone-template').removeClass('hidden');
+
+    return false;
+  });
+
+  $('.clone-remove').on('click', function (e) {
+    e.preventDefault();
+    $(this).closest('.clone-remove-target').remove();
+  });
 });
 
 /**
@@ -62,12 +63,13 @@ $(function () {
  * Guards against unset attribute.
  */
 $.otp.cloneField = {
-    replaceTemplateIndexInProperty: function (target, attribute, index) {
-        "use strict";
-        var attr = $(target).attr(attribute);
-        // Result can differ based on browser, need to check both options
-        if (typeof attr !== typeof undefined && attr !== false) {
-            $(target).attr(attribute, $(target).attr(attribute).replace(/template-index/, index));
-        }
+  replaceTemplateIndexInProperty(target, attribute, index) {
+    'use strict';
+
+    const attr = $(target).attr(attribute);
+    // Result can differ based on browser, need to check both options
+    if (typeof attr !== typeof undefined && attr !== false) {
+      $(target).attr(attribute, $(target).attr(attribute).replace(/template-index/, index));
     }
+  }
 };

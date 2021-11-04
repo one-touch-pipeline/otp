@@ -20,21 +20,18 @@
  * SOFTWARE.
  */
 
-/*global $: false
- */
-
-$(function () {
-    var update = function () {
-        var val = $('#restartAction').val();
-        if (val === "RESTART_JOB") {
-            $('#beanToRestart').parent().show();
-            $('#beanToRestart').attr('required', true)
-        } else {
-            $('#beanToRestart').parent().hide();
-            $('#beanToRestart').attr('required', false)
-            $('#beanToRestart').val('').trigger('change');
-        }
-    };
-    $('#restartAction').on("change", update);
-    update()
+$(() => {
+  const update = function () {
+    const val = $('#restartAction').val();
+    if (val === 'RESTART_JOB') {
+      $('#beanToRestart').parent().show();
+      $('#beanToRestart').attr('required', true);
+    } else {
+      $('#beanToRestart').parent().hide();
+      $('#beanToRestart').attr('required', false);
+      $('#beanToRestart').val('').trigger('change');
+    }
+  };
+  $('#restartAction').on('change', update);
+  update();
 });

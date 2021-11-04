@@ -19,48 +19,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-var statusToClassName = function (status) {
-    "use strict";
-    switch (status) {
-        case "WAITING_FOR_USER":
-            return "dot blue";
-        case "FAILED":
-        case "FINISHED/FAILED":
-            return "dot red";
-        case "PENDING":
-        case "CREATED":
-            return "dot grey";
-        case "RUNNING_WES":
-            return "sm-loader darkgreen";
-        case "PLANNED_OR_RUNNING":
-        case "RUNNING":
-        case "RUNNING_OTP":
-        case "CHECKING":
-            return "sm-loader green";
-        case "SUCCESS":
-        case "FINISHED/COMPLETED":
-            return "dot green";
-        case "OMITTED":
-        case "OMITTED_MISSING_PRECONDITION":
-            return "dot purple";
-        case "FAILED_FINAL":
-            return "dot darkorange";
-        case "RESTARTED":
-            return "dot orange";
-        case "KILLED":
-            return "dot black";
-    }
-    return "";
+const statusToClassName = function (status) {
+  'use strict';
+
+  switch (status) {
+    case 'WAITING_FOR_USER':
+      return 'dot blue';
+    case 'FAILED':
+    case 'FINISHED/FAILED':
+      return 'dot red';
+    case 'PENDING':
+    case 'CREATED':
+      return 'dot grey';
+    case 'RUNNING_WES':
+      return 'sm-loader darkgreen';
+    case 'PLANNED_OR_RUNNING':
+    case 'RUNNING':
+    case 'RUNNING_OTP':
+    case 'CHECKING':
+      return 'sm-loader green';
+    case 'SUCCESS':
+    case 'FINISHED/COMPLETED':
+      return 'dot green';
+    case 'OMITTED':
+    case 'OMITTED_MISSING_PRECONDITION':
+      return 'dot purple';
+    case 'FAILED_FINAL':
+      return 'dot darkorange';
+    case 'RESTARTED':
+      return 'dot orange';
+    case 'KILLED':
+      return 'dot black';
+  }
+  return '';
 };
 
-var button = function (action, value, title, buttonsDisabled, icon) {
-    return "<button class='btn btn-xs btn-primary' formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + ">" +
-        "<i class='bi-" + icon + "'></i>" +
-        "</button>"
+const button = function (action, value, title, buttonsDisabled, icon) {
+  return "<button class='btn btn-xs btn-primary' " +
+    "formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + '>' +
+    "<i class='bi-" + icon + "'></i>" +
+    '</button>';
 };
 
-$(function () {
-    const statusDot = $('#statusDot');
-    statusDot.addClass(statusToClassName(statusDot.data("status")));
-    statusDot.tooltip();
-})
+$(() => {
+  const statusDot = $('#statusDot');
+  statusDot.addClass(statusToClassName(statusDot.data('status')));
+  statusDot.tooltip();
+});

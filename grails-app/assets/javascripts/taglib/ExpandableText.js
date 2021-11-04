@@ -20,18 +20,15 @@
  * SOFTWARE.
  */
 
-/*global $: false, window: false
- */
-
-$(function() {
-    $(".expandable-more").on("click", function(e) {
-        e.preventDefault();
-        $(this).parent().css("display", "none");
-        $(this).parent().siblings(".expandable-full").css("display", "");
-    });
-    $(".expandable-less").on("click", function(e) {
-        e.preventDefault();
-        $(this).parent().css("display", "none");
-        $(this).parent().siblings(".expandable-shortened").css("display", "");
-    });
+$(() => {
+  $('.expandable-more').on('click', function (e) {
+    e.preventDefault();
+    $(this).parent().css('display', 'none');
+    $(this).parent().siblings('.expandable-full').css('display', '');
+  });
+  $('.expandable-less').on('click', function (e) {
+    e.preventDefault();
+    $(this).parent().css('display', 'none');
+    $(this).parent().siblings('.expandable-shortened').css('display', '');
+  });
 });

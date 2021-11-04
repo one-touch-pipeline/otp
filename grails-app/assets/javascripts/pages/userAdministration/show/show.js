@@ -20,60 +20,59 @@
  * SOFTWARE.
  */
 
-/*global $: false
- */
 $.otp.userAdministration = {};
 $.otp.userAdministration.editUser = {
-    /*
+  /*
      The Role Domain is split in "ROLE_*" and "GROUP_*" Authorities. These are
      kept in different places in the GUI, named after their respective authority.
      To select the right values the parameter "type" is used.
       */
-    addOrRemoveUserRole: function (origin, userId, roleId, type) {
-        "use strict";
-        if (!(['Group', 'Role'].includes(type))) { return; }
-        var action = $(origin).attr('class');
-        if (!(['add', 'remove'].includes(action))) { return; }
+  addOrRemoveUserRole(origin, userId, roleId, type) {
+    'use strict';
 
-        var labels = {
-            "add"    : { opposite: "remove", appendToSection: "user" },
-            "remove" : { opposite: "add",    appendToSection: "available" }
-        };
+    if (!(['Group', 'Role'].includes(type))) { return; }
+    const action = $(origin).attr('class');
+    if (!(['add', 'remove'].includes(action))) { return; }
 
-        var messages = {
-            "user.administration.role.addRole": "Add Role to User",
-            "user.administration.role.removeRole": "Remove Role from User",
-            "user.administration.role.addGroup": "Add User to this Group",
-            "user.administration.role.removeGroup": "Remove User from this Group"
-        };
+    const labels = {
+      add: { opposite: 'remove', appendToSection: 'user' },
+      remove: { opposite: 'add', appendToSection: 'available' }
+    };
 
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'userAdministration',
-                action: action+'Role',
-                parameters: {
-                    user: userId,
-                    role: roleId
-                }
-            }),
-            dataType: 'json',
-            cache: 'false',
-            success: function (data) {
-                if (data.success) {
-                    var tableRow = $(origin).parents("tr");
-                    var opposite = labels[action].opposite;
-                    $("a", tableRow).text(messages["user.administration.role."+opposite+""+type]);
-                    $("a", tableRow).attr('class', opposite);
-                    tableRow.detach();
-                    tableRow.appendTo($("table tbody", $("#"+labels[action].appendToSection+""+type)));
-                } else {
-                    $.otp.warningMessage(data.error);
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
-            }
-        });
-    }
+    const messages = {
+      'user.administration.role.addRole': 'Add Role to User',
+      'user.administration.role.removeRole': 'Remove Role from User',
+      'user.administration.role.addGroup': 'Add User to this Group',
+      'user.administration.role.removeGroup': 'Remove User from this Group'
+    };
+
+    $.ajax({
+      type: 'GET',
+      url: $.otp.createLink({
+        controller: 'userAdministration',
+        action: action + 'Role',
+        parameters: {
+          user: userId,
+          role: roleId
+        }
+      }),
+      dataType: 'json',
+      cache: 'false',
+      success(data) {
+        if (data.success) {
+          const tableRow = $(origin).parents('tr');
+          const { opposite } = labels[action];
+          $('a', tableRow).text(messages['user.administration.role.' + opposite + '' + type]);
+          $('a', tableRow).attr('class', opposite);
+          tableRow.detach();
+          tableRow.appendTo($('table tbody', $('#' + labels[action].appendToSection + '' + type)));
+        } else {
+          $.otp.warningMessage(data.error);
+        }
+      },
+      error(jqXHR, textStatus, errorThrown) {
+        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+      }
+    });
+  }
 };

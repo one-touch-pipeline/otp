@@ -20,10 +20,10 @@
  * SOFTWARE.
  */
 
-$(function () {
-    var form = $("form.projectCreationBasisSelection");
+$(() => {
+  const form = $('form.projectCreationBasisSelection');
 
-    $(form).find("select").on("change", function (e) {
-        form.submit();
-    });
+  $(form).find('select').on('change', (e) => {
+    form.submit();
+  });
 });

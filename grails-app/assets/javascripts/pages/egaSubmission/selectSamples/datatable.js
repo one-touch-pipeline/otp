@@ -20,12 +20,9 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.selectSamplesTable = {
 
-    /**
+  /**
      * Gathers all samples of the selected project and displays them with PID, SeqType and SampleType.
      * It also adds a checkbox for selection in the first column.
      *
@@ -33,73 +30,76 @@ $.otp.selectSamplesTable = {
      * @param preSelectedSamples a list of samples to preselect, defined by "<Sample ID><SampleType Name>"
      * @returns datatable object
      */
-    selectableSampleList: function (header, preSelectedSamples) {
-        "use strict";
-        return $('#selectSamplesTable').dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools: $.otp.tableTools,
-            bFilter: true,
-            bProcessing: true,
-            bServerSide: false,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: $.otp.createLink({
-                controller: 'egaSubmission',
-                action: 'dataTableSelectSamples'
-            }),
-            bScrollCollapse: true,
-            sScrollY: ($(window).height() - 480),
-            bPaginate: false,
-            bDeferRender: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "egaProject",
-                    value: $('#sampleTable').data("project")
-                });
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    "error": function () {
-                        // clear the table
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                    },
-                    "success": function (json) {
-                        for (var i = 0; i < json.aaData.length; i += 1) {
-                            var entry = json.aaData[i];
-                            var checked = preSelectedSamples.includes(entry["sampleId"] + entry["seqType"]) ? 'checked' : '';
-                            json.aaData[i][0] = '<input type="checkbox" name="sampleAndSeqType" value="' + entry["identifier"] + '" ' + checked + '/>';
-                            for (var c = 0; c < header.length; c++) {
-                                json.aaData[i][c + 1] = entry[header[c]]
-                            }
-                        }
-                        fnCallback(json);
-                    }
-                });
-            }
-        });
-    },
+  selectableSampleList(header, preSelectedSamples) {
+    'use strict';
 
-    /**
+    return $('#selectSamplesTable').dataTable({
+      sDom: '<i> T rt<"clear">',
+      oTableTools: $.otp.tableTools,
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: false,
+      bSort: true,
+      bJQueryUI: false,
+      bAutoWidth: false,
+      sAjaxSource: $.otp.createLink({
+        controller: 'egaSubmission',
+        action: 'dataTableSelectSamples'
+      }),
+      bScrollCollapse: true,
+      sScrollY: ($(window).height() - 480),
+      bPaginate: false,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
+        aoData.push({
+          name: 'egaProject',
+          value: $('#sampleTable').data('project')
+        });
+        $.ajax({
+          dataType: 'json',
+          type: 'POST',
+          url: sSource,
+          data: aoData,
+          error() {
+            // clear the table
+            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+          },
+          success(json) {
+            for (let i = 0; i < json.aaData.length; i += 1) {
+              const entry = json.aaData[i];
+              const checked = preSelectedSamples.includes(entry.sampleId + entry.seqType) ? 'checked' : '';
+              json.aaData[i][0] = '<input type="checkbox" name="sampleAndSeqType" value="' +
+                  entry.identifier + '" ' +
+                  checked + '/>';
+              for (let c = 0; c < header.length; c++) {
+                json.aaData[i][c + 1] = entry[header[c]];
+              }
+            }
+            fnCallback(json);
+          }
+        });
+      }
+    });
+  },
+
+  /**
      * Applies a filter on the SeqType column of the datatable.
      *
      * @param table the target datatable
      * @param seqTypeColumnIndex index of the column containing the SeqType
      */
-    applySeqTypeFilter: function (table, seqTypeColumnIndex) {
-        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), function () {
-            var select = $('#searchCriteriaTableSeqType').find('select')[0];
-            if (select.selectedIndex !== 0) {
-                table.fnFilter('^' + select.value + '$', seqTypeColumnIndex, true);
-            } else {
-                table.fnFilter('', seqTypeColumnIndex);
-            }
-        });
-    },
-
-    removeFilterOnColumn: function (table, seqTypeColumnIndex) {
+  applySeqTypeFilter(table, seqTypeColumnIndex) {
+    $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
+      const select = $('#searchCriteriaTableSeqType').find('select')[0];
+      if (select.selectedIndex !== 0) {
+        table.fnFilter('^' + select.value + '$', seqTypeColumnIndex, true);
+      } else {
         table.fnFilter('', seqTypeColumnIndex);
-    }
+      }
+    });
+  },
+
+  removeFilterOnColumn(table, seqTypeColumnIndex) {
+    table.fnFilter('', seqTypeColumnIndex);
+  }
 };

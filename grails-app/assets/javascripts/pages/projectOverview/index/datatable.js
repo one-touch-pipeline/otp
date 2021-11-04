@@ -20,143 +20,144 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
-$(function() {
-    $.otp.projectOverviewTable.register();
-    $.otp.graph.project.init();
+$(() => {
+  $.otp.projectOverviewTable.register();
+  $.otp.graph.project.init();
 });
 
 $.otp.projectOverviewTable = {
-    /*
+  /*
      * This function returns the passed value without modifying it.
      * It can be used for not modified output.
      */
-    returnParameterUnchanged: function (json) {
-        return json;
-    },
+  returnParameterUnchanged(json) {
+    return json;
+  },
 
-    registerDataTable: function (selector, url, successUpdate) {
-        "use strict";
-        const fileName = $(selector).parent().attr("data-csv-title") + "-" + $(".selected-project-value strong").text();
+  registerDataTable(selector, url, successUpdate) {
+    'use strict';
 
-        var oTable = $(selector).dataTable({
-            sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton("", fileName),
-            oTableTools: $.otp.tableTools,
-            bFilter: true,
-            bProcessing: true,
-            bServerSide: false,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: url,
-            bScrollCollapse: true,
-            sScrollY: 200,
-            bPaginate: false,
-            bDeferRender: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    "error": function () {
-                        // clear the table
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                        oTable.fnSettings().oFeatures.bServerSide = false;
-                    },
-                    "success": function (json) {
-                        json = successUpdate(json);
-                        fnCallback(json);
-                        oTable.fnSettings().oFeatures.bServerSide = false;
-                    }
-                });
-            }
-        });
-        return oTable;
-    },
+    const fileName = $(selector).parent().attr('data-csv-title') + '-' + $('.selected-project-value strong').text();
 
-    updatePatientCount: function () {
-        "use strict";
+    var oTable = $(selector).dataTable({
+      sDom: '<i> B rt<"clear">',
+      buttons: $.otp.getDownloadButton('', fileName),
+      oTableTools: $.otp.tableTools,
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: false,
+      bSort: true,
+      bJQueryUI: false,
+      bAutoWidth: false,
+      sAjaxSource: url,
+      bScrollCollapse: true,
+      sScrollY: 200,
+      bPaginate: false,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
         $.ajax({
-            url: $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'individualCountByProject'
-            }),
-            dataType: 'json',
-            type: 'GET',
-            success: function (data) {
-                var message, i;
-                if (data.individualCount >= 0) {
-                    $('#patient-count').html(data.individualCount);
-                } else if (data.error) {
-                    $.otp.warningMessage(data.error);
-                    $('#patient-count').html("");
-                } else if (data.errors) {
-                    $('#patient-count').html("");
-                    message = "<ul>";
-                    for (i = 0; i < data.errors.length; i += 1) {
-                        message += "<li>" + data.errors[i].message + "</li>";
-                    }
-                    message += "</ul>";
-                    $.otp.warningMessage(message);
-                }
-            },
-            error: function (jqXHR) {
-                $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
-            }
+          dataType: 'json',
+          type: 'POST',
+          url: sSource,
+          data: aoData,
+          error() {
+            // clear the table
+            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+            oTable.fnSettings().oFeatures.bServerSide = false;
+          },
+          success(json) {
+            json = successUpdate(json);
+            fnCallback(json);
+            oTable.fnSettings().oFeatures.bServerSide = false;
+          }
         });
-    },
+      }
+    });
+    return oTable;
+  },
 
-    register: function () {
-        "use strict";
-        $.otp.projectOverviewTable.registerDataTable(
-            '#projectOverviewTable',
-            $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableSource'
-            }),
-            function (json) {
-                for (var i = 0; i < json.aaData.length; i += 1) {
-                    var row = json.aaData[i];
-                    row[0] = $.otp.createLinkMarkup({
-                        controller: 'individual',
-                        action: 'show',
-                        text: row[0],
-                        parameters: {
-                            mockPid: row[0]
-                        }
-                    });
-                }
-                return json;
+  updatePatientCount() {
+    'use strict';
+
+    $.ajax({
+      url: $.otp.createLink({
+        controller: 'projectOverview',
+        action: 'individualCountByProject'
+      }),
+      dataType: 'json',
+      type: 'GET',
+      success(data) {
+        let message; let
+          i;
+        if (data.individualCount >= 0) {
+          $('#patient-count').html(data.individualCount);
+        } else if (data.error) {
+          $.otp.warningMessage(data.error);
+          $('#patient-count').html('');
+        } else if (data.errors) {
+          $('#patient-count').html('');
+          message = '<ul>';
+          for (i = 0; i < data.errors.length; i += 1) {
+            message += '<li>' + data.errors[i].message + '</li>';
+          }
+          message += '</ul>';
+          $.otp.warningMessage(message);
+        }
+      },
+      error(jqXHR) {
+        $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
+      }
+    });
+  },
+
+  register() {
+    'use strict';
+
+    $.otp.projectOverviewTable.registerDataTable(
+      '#projectOverviewTable',
+      $.otp.createLink({
+        controller: 'projectOverview',
+        action: 'dataTableSource'
+      }),
+      (json) => {
+        for (let i = 0; i < json.aaData.length; i += 1) {
+          const row = json.aaData[i];
+          row[0] = $.otp.createLinkMarkup({
+            controller: 'individual',
+            action: 'show',
+            text: row[0],
+            parameters: {
+              mockPid: row[0]
             }
-        );
-        $.otp.projectOverviewTable.registerDataTable(
-            '#patientsAndSamplesGBCountPerProject',
-            $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableSourcePatientsAndSamplesGBCountPerProject'
-            }),
-            $.otp.projectOverviewTable.returnParameterUnchanged
-        );
-        $.otp.projectOverviewTable.registerDataTable(
-            '#sampleTypeNameCountBySample',
-            $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableSourceSampleTypeNameCountBySample'
-            }),
-            $.otp.projectOverviewTable.returnParameterUnchanged
-        );
-        $.otp.projectOverviewTable.registerDataTable(
-            "#centerNameRunId",
-            $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableSourceCenterNameRunId'
-            }),
-            $.otp.projectOverviewTable.returnParameterUnchanged
-        );
-        $.otp.projectOverviewTable.updatePatientCount();
-    }
+          });
+        }
+        return json;
+      }
+    );
+    $.otp.projectOverviewTable.registerDataTable(
+      '#patientsAndSamplesGBCountPerProject',
+      $.otp.createLink({
+        controller: 'projectOverview',
+        action: 'dataTableSourcePatientsAndSamplesGBCountPerProject'
+      }),
+      $.otp.projectOverviewTable.returnParameterUnchanged
+    );
+    $.otp.projectOverviewTable.registerDataTable(
+      '#sampleTypeNameCountBySample',
+      $.otp.createLink({
+        controller: 'projectOverview',
+        action: 'dataTableSourceSampleTypeNameCountBySample'
+      }),
+      $.otp.projectOverviewTable.returnParameterUnchanged
+    );
+    $.otp.projectOverviewTable.registerDataTable(
+      '#centerNameRunId',
+      $.otp.createLink({
+        controller: 'projectOverview',
+        action: 'dataTableSourceCenterNameRunId'
+      }),
+      $.otp.projectOverviewTable.returnParameterUnchanged
+    );
+    $.otp.projectOverviewTable.updatePatientCount();
+  }
 };

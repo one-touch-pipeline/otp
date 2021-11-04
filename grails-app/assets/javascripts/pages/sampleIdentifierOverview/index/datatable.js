@@ -20,87 +20,88 @@
  * SOFTWARE.
  */
 
-$(function() {
-    "use strict";
-    $.otp.sampleIdentifierOverviewTable.registerDataTable(
-        '#sampleIdentifierOverviewTable',
-        $.otp.createLink({
-            controller: 'sampleIdentifierOverview',
-            action    : 'dataTableSourceSampleIdentifierOverview'
-        })
-    );
+$(() => {
+  'use strict';
+
+  $.otp.sampleIdentifierOverviewTable.registerDataTable(
+    '#sampleIdentifierOverviewTable',
+    $.otp.createLink({
+      controller: 'sampleIdentifierOverview',
+      action: 'dataTableSourceSampleIdentifierOverview'
+    })
+  );
 });
 
 $.otp.sampleIdentifierOverviewTable = {
 
-    registerDataTable: function (selector, url) {
-        "use strict";
+  registerDataTable(selector, url) {
+    'use strict';
 
-        const fileName = "Sample_Identifier-" + $(".selected-project-value strong").text();
+    const fileName = 'Sample_Identifier-' + $('.selected-project-value strong').text();
 
-        var oTable = $(selector).dataTable({
-            sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton("", fileName),
-            bFilter: true,
-            bProcessing: true,
-            bServerSide: false,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: url,
-            bScrollCollapse: true,
-            sScrollY: 500,
-            bPaginate: false,
-            bDeferRender: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    "error": function () {
-                        // clear the table
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                        oTable.fnSettings().oFeatures.bServerSide = false;
-                    },
-                    "success": function (json) {
-                        oTable.fnSettings().oFeatures.bServerSide = false;
-                        var i, rowData, row;
-                        for (i = 0; i < json.aaData.length; i += 1) {
-                            row = json.aaData[i];
-                            rowData = [
-                                $.otp.createLinkMarkup({
-                                    controller: "individual",
-                                    action    : "show",
-                                    id        : row.individual.id,
-                                    text      : row.individual.name
-                                }),
-                                $.otp.createLinkMarkup({
-                                    controller: "seqTrack",
-                                    action    : "seqTrackSet",
-                                    parameters: {
-                                        "individual": row.individual.id,
-                                        "sampleType": row.sampleType.id,
-                                        "seqType"   : row.seqType.id
-                                    },
-                                    text      : row.sampleType.name
-                                }),
-                                row.seqType.displayText,
-                                $.otp.sampleIdentifierOverviewTable.formatSampleIdentifier(row.sampleIdentifier)
-                            ];
-                            json.aaData[i] = rowData;
-                        }
-                        fnCallback(json);
-                    }
-                });
+    var oTable = $(selector).dataTable({
+      sDom: '<i> B rt<"clear">',
+      buttons: $.otp.getDownloadButton('', fileName),
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: false,
+      bSort: true,
+      bJQueryUI: false,
+      bAutoWidth: false,
+      sAjaxSource: url,
+      bScrollCollapse: true,
+      sScrollY: 500,
+      bPaginate: false,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
+        $.ajax({
+          dataType: 'json',
+          type: 'POST',
+          url: sSource,
+          data: aoData,
+          error() {
+            // clear the table
+            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+            oTable.fnSettings().oFeatures.bServerSide = false;
+          },
+          success(json) {
+            oTable.fnSettings().oFeatures.bServerSide = false;
+            let i; let rowData; let
+              row;
+            for (i = 0; i < json.aaData.length; i += 1) {
+              row = json.aaData[i];
+              rowData = [
+                $.otp.createLinkMarkup({
+                  controller: 'individual',
+                  action: 'show',
+                  id: row.individual.id,
+                  text: row.individual.name
+                }),
+                $.otp.createLinkMarkup({
+                  controller: 'seqTrack',
+                  action: 'seqTrackSet',
+                  parameters: {
+                    individual: row.individual.id,
+                    sampleType: row.sampleType.id,
+                    seqType: row.seqType.id
+                  },
+                  text: row.sampleType.name
+                }),
+                row.seqType.displayText,
+                $.otp.sampleIdentifierOverviewTable.formatSampleIdentifier(row.sampleIdentifier)
+              ];
+              json.aaData[i] = rowData;
             }
+            fnCallback(json);
+          }
         });
-        return oTable;
-    },
+      }
+    });
+    return oTable;
+  },
 
-    formatSampleIdentifier: function (data) {
-        return $.map(data, function (it) {
-            return "<span class=\"" + (it.withdrawn ? "withdrawn" : "") + "\" title=\"" + it.comments + "\">" + it.text + "</span>";
-        }).join(", ");
-    },
+  formatSampleIdentifier(data) {
+    return $.map(data, (it) => '<span class="' + (it.withdrawn ? 'withdrawn' : '') + '" title="' + it.comments + '">' +
+        it.text + '</span>').join(', ');
+  }
 };

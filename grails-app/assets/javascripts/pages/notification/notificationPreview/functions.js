@@ -20,17 +20,12 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  const sendButton = $('#send-button');
 
-$(function() {
-    var sendButton = $("#send-button");
+  sendButton.on('click', () => confirm('Really send the notification?'));
 
-    sendButton.on("click", function () {
-        return confirm('Really send the notification?');
-    });
-
-    $("div#notification-selection-container").find("input[type=checkbox]").on("click", function () {
-        sendButton.prop("disabled", true);
-    });
+  $('div#notification-selection-container').find('input[type=checkbox]').on('click', () => {
+    sendButton.prop('disabled', true);
+  });
 });

@@ -20,177 +20,172 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.sequence = {
 
-    register: function () {
-        "use strict";
-        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), function (searchCriteria) {
-            $("#sequenceTable").dataTable().fnDraw()
+  register() {
+    const searchCriteria = $.otp.dataTableFilter.register($('#searchCriteriaTable'), (searchCriteria) => {
+      $('#sequenceTable').dataTable().fnDraw();
+    });
+    const showRunLinks = document.getElementById('showRunLinks').value;
+
+    $('#sequenceTable').dataTable({
+      dom: '<i> B rt<"clear">S',
+      buttons: $.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+        controller: 'sequence',
+        action: 'exportAll',
+        parameters: {
+          filtering: JSON.stringify(searchCriteria())
+        }
+      })),
+      bFilter: false,
+      bProcessing: true,
+      bServerSide: true,
+      bSort: true,
+      bJQueryUI: false,
+      bAutoWidth: false,
+      sAjaxSource: $.otp.createLink({
+        controller: 'sequence',
+        action: 'dataTableSource'
+      }),
+      sScrollX: 'auto',
+      sScrollXInner: '100%',
+      sScrollY: 490,
+      iDisplayLength: 100,
+      bDeferRender: true,
+      scroller: true,
+      fnServerData(sSource, aoData, fnCallback) {
+        aoData.push({
+          name: 'filtering',
+          value: JSON.stringify(searchCriteria())
         });
-        var showRunLinks = document.getElementById("showRunLinks").value;
-
-        $("#sequenceTable").dataTable({
-            dom: '<i> B rt<"clear">S',
-            buttons: $.otp.getDownloadButtonServerSide(function () {
-                return $.otp.createLink({
-                    controller: 'sequence',
-                    action: 'exportAll',
-                    parameters: {
-                        filtering: JSON.stringify(searchCriteria()),
-                    }
-                })
-            }),
-            bFilter: false,
-            bProcessing: true,
-            bServerSide: true,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: $.otp.createLink({
-                controller: 'sequence',
-                action: 'dataTableSource'
-            }),
-            sScrollX: 'auto',
-            sScrollXInner: "100%",
-            sScrollY: 490,
-            iDisplayLength: 100,
-            bDeferRender: true,
-            scroller: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "filtering",
-                    value: JSON.stringify(searchCriteria())
+        $.ajax({
+          dataType: 'json',
+          type: 'POST',
+          url: sSource,
+          data: aoData,
+          scroller: {
+            loadingIndicator: true
+          },
+          error() {
+            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+          },
+          success(json) {
+            $('#withdrawn_description').hide();
+            let i; let j; let rowData; let row; let
+              fastQC;
+            for (i = 0; i < json.aaData.length; i += 1) {
+              row = json.aaData[i];
+              if (row.fastQCFiles !== undefined) {
+                fastQC = '';
+                for (j = 0; j < row.fastQCFiles.length; j += 1) {
+                  fastQC += $.otp.createLinkMarkup({
+                    controller: 'fastqcResults',
+                    action: 'show',
+                    id: row.fastQCFiles[j].fastqId,
+                    text: row.fastQCFiles[j].readName
+                  });
+                  fastQC += ' ';
+                }
+              } else {
+                fastQC = row.fastqcState;
+              }
+              let runLink = row.name ?
+                "<span title='" + row.name + "'>" + row.name + '</span>' : '';
+              if (showRunLinks === 'true') {
+                runLink = $.otp.createLinkMarkup({
+                  controller: 'run',
+                  action: 'show',
+                  id: row.runId,
+                  title: row.name,
+                  text: row.name
                 });
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    scroller: {
-                        loadingIndicator: true
-                    },
-                    "error": function () {
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                    },
-                    "success": function (json) {
-                        $("#withdrawn_description").hide();
-                        var i, j, rowData, row, fastQC;
-                        for (i = 0; i < json.aaData.length; i += 1) {
-                            row = json.aaData[i];
-                            if (row.fastQCFiles !== undefined) {
-                                fastQC = "";
-                                for (j = 0; j < row.fastQCFiles.length; j += 1) {
-                                    fastQC += $.otp.createLinkMarkup({
-                                        controller: 'fastqcResults',
-                                        action: 'show',
-                                        id: row.fastQCFiles[j].fastqId,
-                                        text: row.fastQCFiles[j].readName
-                                    });
-                                    fastQC += " ";
-                                }
-                            } else {
-                                fastQC = row.fastqcState;
-                            }
-                            var runLink = row.name ?
-                                "<span title='" + row.name + "'>" + row.name + "</span>" : "";
-                            if (showRunLinks === "true") {
-                                runLink = $.otp.createLinkMarkup({
-                                    controller: 'run',
-                                    action: 'show',
-                                    id: row.runId,
-                                    title: row.name,
-                                    text: row.name
-                                })
-                            }
-                            //changes here may require changes in fnRowCallback, where for some column additional values are set
-                            rowData = [
-                                $.otp.createLinkMarkup({
-                                    controller: 'projectOverview',
-                                    action: 'index',
-                                    parameters: {
-                                        [$.otp.projectParameter]: row.projectName
-                                    },
-                                    text: row.projectName,
-                                    title: row.projectName
-                                }),
-                                "<div class='trim-text-with-ellipsis-left-based'><bdi>" + $.otp.createLinkMarkup({
-                                    controller: 'individual',
-                                    action: 'show',
-                                    id: row.individualId,
-                                    title: row.mockPid,
-                                    text: row.mockPid
-                                }) + "</bdi></div>",
-                                row.sampleTypeName,
-                                row.seqTypeDisplayName,
-                                row.libraryLayout,
-                                row.singleCell,
-                                row.seqCenterName,
-                                row.libraryPreparationKit ?
-                                    "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + "</span>" : "",
-                                row.antibodyTarget,
-                                runLink,
-                                row.laneId ?
-                                    "<span title='" + row.laneId + "'>" + row.laneId + "</span>" : "",
-                                row.libraryName,
-                                row.singleCellWellLabel,
-                                fastQC,
-                                row.ilseId,
-                                row.problem ?
-                                    "<span title='" + row.problemDescription + "'>" + row.problem + "</span>" : "",
-                                row.fileExists,
-                                row.dateCreated,
-                            ];
+              }
+              // changes here may require changes in fnRowCallback, where for some column additional values are set
+              rowData = [
+                $.otp.createLinkMarkup({
+                  controller: 'projectOverview',
+                  action: 'index',
+                  parameters: {
+                    [$.otp.projectParameter]: row.projectName
+                  },
+                  text: row.projectName,
+                  title: row.projectName
+                }),
+                "<div class='trim-text-with-ellipsis-left-based'><bdi>" + $.otp.createLinkMarkup({
+                  controller: 'individual',
+                  action: 'show',
+                  id: row.individualId,
+                  title: row.mockPid,
+                  text: row.mockPid
+                }) + '</bdi></div>',
+                row.sampleTypeName,
+                row.seqTypeDisplayName,
+                row.libraryLayout,
+                row.singleCell,
+                row.seqCenterName,
+                row.libraryPreparationKit ?
+                  "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + '</span>' : '',
+                row.antibodyTarget,
+                runLink,
+                row.laneId ?
+                  "<span title='" + row.laneId + "'>" + row.laneId + '</span>' : '',
+                row.libraryName,
+                row.singleCellWellLabel,
+                fastQC,
+                row.ilseId,
+                row.problem ?
+                  "<span title='" + row.problemDescription + "'>" + row.problem + '</span>' : '',
+                row.fileExists,
+                row.dateCreated
+              ];
 
-                            if (row.withdrawn) {
-                                $("#withdrawn_description").show();
-                                var withdrawnRow = [];
-                                rowData.forEach(function(rowEntry) {
-                                    rowEntry = rowEntry != null ? "<span class='withdrawn'>" + rowEntry + "</span>" : ""
-                                    withdrawnRow.push(rowEntry)
-                                });
-                                rowData = withdrawnRow;
-                            }
-
-                            json.aaData[i] = rowData;
-                        }
-                        fnCallback(json);
-                    }
+              if (row.withdrawn) {
+                $('#withdrawn_description').show();
+                var withdrawnRow = [];
+                rowData.forEach((rowEntry) => {
+                  rowEntry = rowEntry != null ? "<span class='withdrawn'>" + rowEntry + '</span>' : '';
+                  withdrawnRow.push(rowEntry);
                 });
-            },
-            fnRowCallback: function (nRow) {
-                var fastqc;
-                fastqc = $("td:eq(13)", nRow);
-                if ($("a", fastqc).length > 0) {
-                    fastqc.addClass("true");
-                } else {
-                    fastqc.attr("title", fastqc.text());
-                    fastqc.addClass("false");
-                    fastqc.text("");
-                }
-                var contamination = $("td:eq(15)", nRow);
-                if (contamination.text() === "") {
-                    contamination.attr("title", "No known problems");
-                    contamination.addClass("VALID");
-                } else {
-                    contamination.addClass("warning");
-                }
-                var fileExists = $("td:eq(16)", nRow);
-                var fileExistsWithdrawn = $("td:eq(16) span", nRow);
-                if (fileExists.text() === "true" || fileExistsWithdrawn.text() === "true") {
-                    fileExists.addClass("VALID");
-                } else {
-                    fileExists.addClass("false");
-                }
-                fileExists.attr("title", fileExists.text());
-                fileExists.text('');
+                rowData = withdrawnRow;
+              }
+
+              json.aaData[i] = rowData;
             }
+            fnCallback(json);
+          }
         });
-    }
+      },
+      fnRowCallback(nRow) {
+        let fastqc;
+        fastqc = $('td:eq(13)', nRow);
+        if ($('a', fastqc).length > 0) {
+          fastqc.addClass('true');
+        } else {
+          fastqc.attr('title', fastqc.text());
+          fastqc.addClass('false');
+          fastqc.text('');
+        }
+        const contamination = $('td:eq(15)', nRow);
+        if (contamination.text() === '') {
+          contamination.attr('title', 'No known problems');
+          contamination.addClass('VALID');
+        } else {
+          contamination.addClass('warning');
+        }
+        const fileExists = $('td:eq(16)', nRow);
+        const fileExistsWithdrawn = $('td:eq(16) span', nRow);
+        if (fileExists.text() === 'true' || fileExistsWithdrawn.text() === 'true') {
+          fileExists.addClass('VALID');
+        } else {
+          fileExists.addClass('false');
+        }
+        fileExists.attr('title', fileExists.text());
+        fileExists.text('');
+      }
+    });
+  }
 };
 
-$(function() {
-    $.otp.sequence.register();
+$(() => {
+  $.otp.sequence.register();
 });

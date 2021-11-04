@@ -20,37 +20,34 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  'use strict';
 
-$(function(){
-    "use strict";
+  $('.add-button').on('click', (event) => {
+    event.preventDefault();
+    // Subtract the hidden element
+    const existingSamples = $('tr.sample').not('.hidden');
 
-    $(".add-button").on("click", function (event) {
-        event.preventDefault();
-        // Subtract the hidden element
-        var existingSamples = $("tr.sample").not(".hidden");
+    // also copy event handlers on clone
+    const sampleBoxes = $('tr.hidden.template').clone(true, true).removeClass('hidden');
+    sampleBoxes.insertAfter($('.sampleIdentifier:last'));
+    sampleBoxes.find('select').attr('name', 'samples[' + existingSamples.length + '].sampleType');
+    sampleBoxes.find('input').attr('name', 'samples[' + existingSamples.length + '].sampleIdentifiers');
+    // The templates contains a select-tag that needs to become a select2 searchable dropdown.
+    $.otp.applySelect2($('select.use-select-2-after-clone', sampleBoxes));
+  });
 
-        // also copy event handlers on clone
-        var sampleBoxes = $("tr.hidden.template").clone(true, true).removeClass("hidden");
-        sampleBoxes.insertAfter($(".sampleIdentifier:last"));
-        sampleBoxes.find("select").attr("name", "samples["+existingSamples.length+"].sampleType");
-        sampleBoxes.find("input").attr("name", "samples["+existingSamples.length+"].sampleIdentifiers");
-        // The templates contains a select-tag that needs to become a select2 searchable dropdown.
-        $.otp.applySelect2($('select.use-select-2-after-clone', sampleBoxes))
-    });
-
-    var lastPid = $("#identifier").val();
-    $("#identifier").on("keyup", function() {
-        var pid = $("#identifier").val();
-        var mockPid = $("#alias").val();
-        var mockFullName = $("#displayedIdentifier").val();
-        if (lastPid == mockPid) {
-            $("#alias").val(pid);
-        }
-        if (lastPid == mockFullName) {
-            $("#displayedIdentifier").val(pid);
-        }
-        lastPid = $("#identifier").val();
-    });
+  let lastPid = $('#identifier').val();
+  $('#identifier').on('keyup', () => {
+    const pid = $('#identifier').val();
+    const mockPid = $('#alias').val();
+    const mockFullName = $('#displayedIdentifier').val();
+    if (lastPid == mockPid) {
+      $('#alias').val(pid);
+    }
+    if (lastPid == mockFullName) {
+      $('#displayedIdentifier').val(pid);
+    }
+    lastPid = $('#identifier').val();
+  });
 });

@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-$(function () {
-    $("button.workflow").on("click", function (e) {
-        $(".workflow").toggle();
-    });
+$(() => {
+  $('button.workflow').on('click', (e) => {
+    $('.workflow').toggle();
+  });
 });

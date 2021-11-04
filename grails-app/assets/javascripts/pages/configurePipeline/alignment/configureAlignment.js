@@ -20,107 +20,107 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  'use strict';
 
-$(function() {
-    "use strict";
+  const setStatSizeFileNames = function () {
+    $.ajax({
+      type: 'GET',
+      url: $.otp.createLink({
+        controller: 'configurePipeline',
+        action: 'getStatSizeFileNames'
+      }),
+      dataType: 'json',
+      cache: 'false',
+      data: {
+        referenceGenomeName: $('#referenceGenome').val()
+      },
+      success(data) {
+        $('#statSizeFileNames').empty();
+        if (data.data) {
+          $.each(data.data, (i, p) => {
+            $('#statSizeFileNames').append($('<option></option>').val(p).html(p));
+          });
+        } else {
+          $('#statSizeFileNames').append($('<option></option>'));
+        }
+      },
+      error(jqXHR, textStatus, errorThrown) {
+        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+      }
+    });
+  };
 
-    var setStatSizeFileNames = function() {
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'configurePipeline',
-                action: 'getStatSizeFileNames'
-            }),
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                referenceGenomeName: $('#referenceGenome').val()
-            },
-            success: function (data) {
-                $('#statSizeFileNames').empty();
-                if (data.data) {
-                    $.each(data.data, function(i, p) {
-                        $('#statSizeFileNames').append($('<option></option>').val(p).html(p));
-                    });
-                } else {
-                    $('#statSizeFileNames').append($('<option></option>'));
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
-            }
+  const setGeneModels = function () {
+    $.ajax({
+      type: 'GET',
+      url: $.otp.createLink({
+        controller: 'configurePipeline',
+        action: 'getGeneModels'
+      }),
+      dataType: 'json',
+      cache: 'false',
+      data: {
+        referenceGenome: $('#referenceGenome').val()
+      },
+      success(data) {
+        $('.geneModelSelect').empty();
+        if (data.data) {
+          $.each(data.data, (i, p) => {
+            $('.geneModelSelect').append($('<option></option>').val(p.id).html(p.fileName));
+          });
+        } else {
+          $('.geneModelSelect').append($('<option></option>'));
+        }
+      },
+      error(jqXHR, textStatus, errorThrown) {
+        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+      }
+    });
+  };
+
+  const setToolVersion = function () {
+    $.ajax({
+      type: 'GET',
+      url: $.otp.createLink({
+        controller: 'configurePipeline',
+        action: 'getToolVersions'
+      }),
+      dataType: 'json',
+      cache: 'false',
+      data: {
+        referenceGenome: $('#referenceGenome').val()
+      },
+      success(data) {
+        $('.toolVersionSelect').empty();
+        $.each(data.data, (index, value) => {
+          const search = (index.indexOf('GENOME_STAR_INDEX') !== -1) ? 'GENOME_STAR_INDEX' : index;
+          if (value) {
+            $.each(value, (i, p) => {
+              const outputValue = index.toLowerCase().replace('genome_', '')
+                .replace('_index', '') + ' - ' + p.indexToolVersion;
+              if (outputValue === data.defaultGenomeStarIndex) {
+                $('#toolVersionSelect_' + search).append($('<option></option>')
+                  .prop('selected', true).val(p.id).html(outputValue));
+              } else {
+                $('#toolVersionSelect_' + search).append($('<option></option>')
+                  .val(p.id).html(outputValue));
+              }
+            });
+          } else {
+            $('#toolVersionSelect_' + index).append($('<option></option>'));
+          }
         });
-    };
+      },
+      error(jqXHR, textStatus, errorThrown) {
+        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+      }
+    });
+  };
 
-    var setGeneModels = function() {
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'configurePipeline',
-                action: 'getGeneModels'
-            }),
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                referenceGenome: $('#referenceGenome').val()
-            },
-            success: function (data) {
-                $('.geneModelSelect').empty();
-                if (data.data) {
-                    $.each(data.data, function(i, p) {
-                        $('.geneModelSelect').append($('<option></option>').val(p.id).html(p.fileName));
-                    });
-                } else {
-                    $('.geneModelSelect').append($('<option></option>'));
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
-            }
-        });
-    };
-
-    var setToolVersion = function() {
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'configurePipeline',
-                action: 'getToolVersions'
-            }),
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                referenceGenome: $('#referenceGenome').val()
-            },
-            success: function (data) {
-                $('.toolVersionSelect').empty();
-                $.each(data.data, function(index, value) {
-                    var search = (index.indexOf("GENOME_STAR_INDEX") !== -1) ? "GENOME_STAR_INDEX" : index;
-                    if (value) {
-                        $.each(value, function (i, p) {
-                            var outputValue = index.toLowerCase().replace("genome_", "").replace("_index", "") + " - " + p.indexToolVersion;
-                            if (outputValue === data.defaultGenomeStarIndex) {
-                                $('#toolVersionSelect_' + search).append($('<option></option>').prop("selected", true).val(p.id).html(outputValue));
-                            } else {
-                                $('#toolVersionSelect_' + search).append($('<option></option>').val(p.id).html(outputValue));
-                            }
-                        });
-                    } else {
-                        $('#toolVersionSelect_' + index).append($('<option></option>'));
-                    }
-                });
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
-            }
-        });
-    };
-
-    $('#referenceGenome').on("change", function() {
-        setStatSizeFileNames();
-        setGeneModels();
-        setToolVersion();
-    }).trigger("change");
+  $('#referenceGenome').on('change', () => {
+    setStatSizeFileNames();
+    setGeneModels();
+    setToolVersion();
+  }).trigger('change');
 });

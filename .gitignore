@@ -75,3 +75,6 @@ out
 ##sprint review
 review/
 /otp_local_setup.sh
+
+### Node ###
+node_modules/

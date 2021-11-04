@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-$(document).ready(function () {
-    $('select.use-select-2').select2({
-        theme: 'bootstrap4',
-        minimumResultsForSearch: 7,
-    });
+$(document).ready(() => {
+  $('select.use-select-2').select2({
+    theme: 'bootstrap4',
+    minimumResultsForSearch: 7
+  });
 });

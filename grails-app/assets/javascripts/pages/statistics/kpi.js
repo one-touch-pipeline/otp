@@ -20,16 +20,16 @@
  * SOFTWARE.
  */
 
-$(function () {
-    "use strict";
+$(() => {
+  'use strict';
 
-    $('#start').on("change", function () {
-        var date = $("#start").val();
-        $('#end').attr("min", date);
-    });
+  $('#start').on('change', () => {
+    const date = $('#start').val();
+    $('#end').attr('min', date);
+  });
 
-    $('#end').on("change", function () {
-        var date = $("#end").val();
-        $('#start').attr("max", date);
-    });
+  $('#end').on('change', () => {
+    const date = $('#end').val();
+    $('#start').attr('max', date);
+  });
 });

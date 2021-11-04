@@ -21,87 +21,90 @@
  */
 
 function onEditUnixGroup() {
-    $("#button-edit-unixGroup").hide();
-    $("#button-save-unixGroup").show();
-    $("#unixGroupInput").prop("disabled", false)
+  $('#button-edit-unixGroup').hide();
+  $('#button-save-unixGroup').show();
+  $('#unixGroupInput').prop('disabled', false);
 }
 
 function onSaveUnixGroup() {
-    const unixGroupInputField = $("#unixGroupInput");
-    const oldUnixGroup = unixGroupInputField.attr("data-fixed");
+  const unixGroupInputField = $('#unixGroupInput');
+  const oldUnixGroup = unixGroupInputField.attr('data-fixed');
 
-    $("#button-edit-unixGroup").show();
-    $("#button-save-unixGroup").hide();
-    unixGroupInputField.prop("disabled", true);
+  $('#button-edit-unixGroup').show();
+  $('#button-save-unixGroup').hide();
+  unixGroupInputField.prop('disabled', true);
 
-    updateUnixGroup(oldUnixGroup)
+  updateUnixGroup(oldUnixGroup);
 }
 
 function updateUnixGroup(oldUnixGroup, force = false) {
-    const unixGroupInputField = $("#unixGroupInput");
-    const newUnixGroup = unixGroupInputField.val();
+  const unixGroupInputField = $('#unixGroupInput');
+  const newUnixGroup = unixGroupInputField.val();
 
-    if(oldUnixGroup === newUnixGroup) {
-        return;
-    }
+  if (oldUnixGroup === newUnixGroup) {
+    return;
+  }
 
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'projectConfig',
-            action: 'updateUnixGroup',
-        }),
-        dataType: 'json',
-        type: 'POST',
-        data: {
-            force: force,
-            unixGroup: newUnixGroup,
-        },
-        success: function(result) {
-            unixGroupInputField.val(result.unixGroup);
-            unixGroupInputField.attr("data-fixed", result.unixGroup)
-            $.otp.toaster.showSuccessToast("Update was successful", "Unix group has successfully been changed to <b>" + result.unixGroup + "</b>.");
-        },
-        error: function(error) {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                if (error.status === 409) {
-                    openConfirmationModal(error.responseJSON.message, () => {
-                        updateUnixGroup(oldUnixGroup, true);
-                    }, () => {
-                        unixGroupInputField.val(oldUnixGroup);
-                    });
-                } else {
-                    unixGroupInputField.val(oldUnixGroup);
-                    $.otp.toaster.showErrorToast("Update unix group failed", error.responseJSON.message);
-                }
-            } else {
-                unixGroupInputField.val(oldUnixGroup);
-                $.otp.toaster.showErrorToast("Update unix group failed",  "Unknown error during the unix group update.");
-            }
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'projectConfig',
+      action: 'updateUnixGroup'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      force,
+      unixGroup: newUnixGroup
+    },
+    success(result) {
+      unixGroupInputField.val(result.unixGroup);
+      unixGroupInputField.attr('data-fixed', result.unixGroup);
+      $.otp.toaster.showSuccessToast(
+        'Update was successful',
+        'Unix group has successfully been changed to <b>' + result.unixGroup + '</b>.'
+      );
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        if (error.status === 409) {
+          openConfirmationModal(error.responseJSON.message, () => {
+            updateUnixGroup(oldUnixGroup, true);
+          }, () => {
+            unixGroupInputField.val(oldUnixGroup);
+          });
+        } else {
+          unixGroupInputField.val(oldUnixGroup);
+          $.otp.toaster.showErrorToast('Update unix group failed', error.responseJSON.message);
         }
-    });
+      } else {
+        unixGroupInputField.val(oldUnixGroup);
+        $.otp.toaster.showErrorToast('Update unix group failed', 'Unknown error during the unix group update.');
+      }
+    }
+  });
 }
 
 function openConfirmationModal(text, confirmCallback, cancelCallback) {
-    const modal = $("#confirmationUserGroupModal");
-    const modalBody = $(".modal-body", modal);
-    const confirmButton = modal.find("#confirmModal");
-    const cancelButton = modal.find(".closeModal");
+  const modal = $('#confirmationUserGroupModal');
+  const modalBody = $('.modal-body', modal);
+  const confirmButton = modal.find('#confirmModal');
+  const cancelButton = modal.find('.closeModal');
 
-    confirmButton.unbind("click");
-    confirmButton.on("click", function () {
-        modal.hide();
-        confirmCallback();
-    });
+  confirmButton.unbind('click');
+  confirmButton.on('click', () => {
+    modal.hide();
+    confirmCallback();
+  });
 
-    cancelButton.unbind("click");
-    cancelButton.on("click", function () {
-        modal.hide();
+  cancelButton.unbind('click');
+  cancelButton.on('click', () => {
+    modal.hide();
 
-        if (cancelCallback) {
-            cancelCallback();
-        }
-    });
+    if (cancelCallback) {
+      cancelCallback();
+    }
+  });
 
-    modalBody.html(text);
-    modal.modal("toggle").show();
+  modalBody.html(text);
+  modal.modal('toggle').show();
 }

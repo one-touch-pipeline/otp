@@ -20,13 +20,10 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
-$(function () {
-    $("form.confirm").on("submit", function (e) {
-        if (!confirm("Are you sure you want to create these thresholds?")) {
-            e.preventDefault();
-        }
-    });
+$(() => {
+  $('form.confirm').on('submit', (e) => {
+    if (!confirm('Are you sure you want to create these thresholds?')) {
+      e.preventDefault();
+    }
+  });
 });

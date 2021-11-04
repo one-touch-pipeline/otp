@@ -19,6 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-$(function () {
-    $('#loginForm').find('#account').focus();
+$(() => {
+  $('#loginForm').find('#account').focus();
 });

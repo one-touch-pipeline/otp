@@ -21,127 +21,134 @@
  */
 
 $.otp.dataTableFilter = {
-    /**
+  /**
      * Filter for datatables.
      * @param searchCriteriaTable jQuery object containing the inputs/selectors to filter
      * @param onUpdateFunction function that is executed after changes
      * @returns searchCriteria function returning an object containing the currently set filters
      */
-    register : function (searchCriteriaTable, onUpdateFunction) {
-        "use strict";
+  register(searchCriteriaTable, onUpdateFunction) {
+    'use strict';
 
-        var searchCriteria = function () {
-            var result = [];
-            searchCriteriaTable.find("tr").each(function (index, element) {
-                var selection = $("td.attribute select", element).val();
-                if (selection !== "none") {
-                    if ($("td.value span#" + selection, element).hasClass('dateSelection')) {
-                        result.push({type: selection, value: {
-                                start: $("td input[name=" + selection + "_start]", element).val(),
-                                end:   $("td input[name=" + selection + "_end]", element).val(),
-                            }});
-                    } else {
-                        result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
-                    }
-                }
+    const searchCriteria = function () {
+      const result = [];
+      searchCriteriaTable.find('tr').each((index, element) => {
+        const selection = $('td.attribute select', element).val();
+        if (selection !== 'none') {
+          if ($('td.value span#' + selection, element).hasClass('dateSelection')) {
+            result.push({
+              type: selection,
+              value: {
+                start: $('td input[name=' + selection + '_start]', element).val(),
+                end: $('td input[name=' + selection + '_end]', element).val()
+              }
             });
-            return result;
-        };
+          } else {
+            result.push({
+              type: selection,
+              value: $('td select[name=' + selection + '], td input[name=' + selection + ']', element).val()
+            });
+          }
+        }
+      });
+      return result;
+    };
 
-        var updateSearchCriteria = function () {
-            if (onUpdateFunction !== undefined) {
-                onUpdateFunction(searchCriteria);
-            }
-        };
+    const updateSearchCriteria = function () {
+      if (onUpdateFunction !== undefined) {
+        onUpdateFunction(searchCriteria);
+      }
+    };
 
-        var removeRowOrHideInputs = function (tr) {
-            // if there's more than one filter row, remove it, otherwise reset it
-            if (tr.siblings("tr").size() > 0) {
-                // remove row and determine whether to show an add button
-                var lastTr;
-                if (tr.is(":last-child")) {
-                    lastTr = tr.prev();
-                } else {
-                    lastTr = tr.nextAll().last();
-                }
-                tr.detach();
-                if ($("td.remove", lastTr).is(":visible")) {
-                    $("td.add", lastTr).show();
-                }
-            } else {
-                /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
+    const removeRowOrHideInputs = function (tr) {
+      // if there's more than one filter row, remove it, otherwise reset it
+      if (tr.siblings('tr').size() > 0) {
+        // remove row and determine whether to show an add button
+        let lastTr;
+        if (tr.is(':last-child')) {
+          lastTr = tr.prev();
+        } else {
+          lastTr = tr.nextAll().last();
+        }
+        tr.detach();
+        if ($('td.remove', lastTr).is(':visible')) {
+          $('td.add', lastTr).show();
+        }
+      } else {
+        /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
                  * 'raw' select-tag and the select2 visuals.
                  * We can't use a normal 'trigger(change)' because this function is an event handler, so
                  * would trigger a recursive stack overflow. (Ask me how I know this ;-) )
                  *
                  * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event
                  *     and:  https://github.com/select2/select2/issues/3620 */
-                $("td.attribute select", tr).val("none").trigger('change.select2');
-                $("td.add", tr).hide();
-                $("td.remove", tr).hide();
-            }
-        };
+        $('td.attribute select', tr).val('none').trigger('change.select2');
+        $('td.add', tr).hide();
+        $('td.remove', tr).hide();
+      }
+    };
 
-        var searchCriteriaChangeHandler = function (event) {
-            var tr = $(event.target).parents(".dtf_row");
-            $("td.value span.dtf_value_span", tr).hide();
-            var attribute = $(event.target).val();
-            if (attribute !== "none") {
-                $("td span[id='dtf_" + attribute + "']", tr).show();
-                $("td.add", tr).show();
-                $("td.remove", tr).show();
-            } else {
-                $("td.add", tr).hide();
-                removeRowOrHideInputs(tr);
-            }
-            updateSearchCriteria();
-        };
-        var searchCriteriaAddRow = function (event) {
-            var tr, cloned;
+    const searchCriteriaChangeHandler = function (event) {
+      const tr = $(event.target).parents('.dtf_row');
+      $('td.value span.dtf_value_span', tr).hide();
+      const attribute = $(event.target).val();
+      if (attribute !== 'none') {
+        $("td span[id='dtf_" + attribute + "']", tr).show();
+        $('td.add', tr).show();
+        $('td.remove', tr).show();
+      } else {
+        $('td.add', tr).hide();
+        removeRowOrHideInputs(tr);
+      }
+      updateSearchCriteria();
+    };
+    const searchCriteriaAddRow = function (event) {
+      let tr; let
+        cloned;
 
-            tr = $(event.target).parents(".dtf_row");
-            $("td.add", tr).hide();
+      tr = $(event.target).parents('.dtf_row');
+      $('td.add', tr).hide();
 
-            // select2 doesn't take well to cloning, do the required voodoo dance.
-            $("select.select2-hidden-accessible", tr).select2("destroy");
-            cloned = tr.clone();
-            $.otp.applySelect2($("select.use-select-2", tr));
+      // select2 doesn't take well to cloning, do the required voodoo dance.
+      $('select.select2-hidden-accessible', tr).select2('destroy');
+      cloned = tr.clone();
+      $.otp.applySelect2($('select.use-select-2', tr));
 
-            $("td.value span.dtf_value_span", cloned).hide();
-            $("td.add", cloned).hide();
-            $("td.remove", cloned).hide();
+      $('td.value span.dtf_value_span', cloned).hide();
+      $('td.add', cloned).hide();
+      $('td.remove', cloned).hide();
 
-            /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
+      /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
              * 'raw' select-tag and the select2 visuals.
              * We can't use a normal 'trigger(change)' because this function is an event handler, so
              * would trigger a recursive stack overflow. (Ask me how I know this ;-) )
              *
              * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event
              *     and:  https://github.com/select2/select2/issues/3620 */
-            $("td.attribute select", cloned).val("none").trigger("change.select2");
-            cloned.appendTo(searchCriteriaTable);
+      $('td.attribute select', cloned).val('none').trigger('change.select2');
+      cloned.appendTo(searchCriteriaTable);
 
-            /*
+      /*
              * Add select2 to new element only _after_ all other DOM-objects have reached their final state.
              * Doing it earlier results in unstable width-estimations, and jumping elements on reflow/adding new lines.
              */
-            $.otp.applySelect2($("select.use-select-2", cloned));
-        };
+      $.otp.applySelect2($('select.use-select-2', cloned));
+    };
 
-        var searchCriteriaRemoveRow = function (event) {
-            var tr = $(event.target).parents(".dtf_row");
-            $("td.value span.dtf_value_span", tr).hide();
-            removeRowOrHideInputs(tr);
-            updateSearchCriteria();
-        };
+    const searchCriteriaRemoveRow = function (event) {
+      const tr = $(event.target).parents('.dtf_row');
+      $('td.value span.dtf_value_span', tr).hide();
+      removeRowOrHideInputs(tr);
+      updateSearchCriteria();
+    };
 
-        searchCriteriaTable.on("change", "select.dtf_criterium",         searchCriteriaChangeHandler);
-        searchCriteriaTable.on("click",  "td.add input[type=button]",    searchCriteriaAddRow);
-        searchCriteriaTable.on("click",  "td.remove input[type=button]", searchCriteriaRemoveRow);
-        searchCriteriaTable.on("change", "td.value select",              updateSearchCriteria);
-        searchCriteriaTable.on("change", "td.value input",               updateSearchCriteria);
-        searchCriteriaTable.on("keyup",  "td.value input[type=text]",    updateSearchCriteria);
+    searchCriteriaTable.on('change', 'select.dtf_criterium', searchCriteriaChangeHandler);
+    searchCriteriaTable.on('click', 'td.add input[type=button]', searchCriteriaAddRow);
+    searchCriteriaTable.on('click', 'td.remove input[type=button]', searchCriteriaRemoveRow);
+    searchCriteriaTable.on('change', 'td.value select', updateSearchCriteria);
+    searchCriteriaTable.on('change', 'td.value input', updateSearchCriteria);
+    searchCriteriaTable.on('keyup', 'td.value input[type=text]', updateSearchCriteria);
 
-        return searchCriteria;
-    }
+    return searchCriteria;
+  }
 };

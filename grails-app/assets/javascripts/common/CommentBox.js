@@ -20,47 +20,43 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.setDisableForControls = function (value) {
-    $("#button-save").prop("disabled", value);
-    $("#button-cancel").prop("disabled", value);
+  $('#button-save').prop('disabled', value);
+  $('#button-cancel').prop('disabled', value);
 };
 
-$(function () {
-    var container = $("#comment-box-container");
-    var commentContent = container.find("#comment-content");
-    var lastSavedComment = commentContent.val();
+$(() => {
+  const container = $('#comment-box-container');
+  const commentContent = container.find('#comment-content');
+  let lastSavedComment = commentContent.val();
 
-    commentContent.on("input", function() {
-        "use strict";
-        $.setDisableForControls(false);
-    });
-    $("#button-save").on("click", function() {
-        "use strict";
-        var controller = $(this).data('controller');
-        var action = $(this).data('action');
+  commentContent.on('input', () => {
+    $.setDisableForControls(false);
+  });
+  $('#button-save').on('click', function () {
+    const controller = $(this).data('controller');
+    const action = $(this).data('action');
 
-        var id = container.find("#entity-id").val();
-        var comment = commentContent.val();
+    const id = container.find('#entity-id').val();
+    const comment = commentContent.val();
 
-        $.setDisableForControls(true);
-        $.ajax({
-            url: $.otp.createLink({ controller: controller, action: action }),
-            dataType: "json",
-            data: { id: id, comment: comment },
-            type: "POST",
-            encoding: "UTF-8",
-            success: function (data) {
-                lastSavedComment = commentContent.val();
-                $("#authorSpan").text(data.date + " " + data.author);
-            }
-        });
+    $.setDisableForControls(true);
+    $.ajax({
+      url: $.otp.createLink({ controller, action }),
+      dataType: 'json',
+      data: { id, comment },
+      type: 'POST',
+      encoding: 'UTF-8',
+      success(data) {
+        lastSavedComment = commentContent.val();
+        $('#authorSpan').text(data.date + ' ' + data.author);
+      }
     });
-    $("#button-cancel").on("click", function() {
-        "use strict";
-        $.setDisableForControls(true);
-        commentContent.val(lastSavedComment);
-    });
+  });
+  $('#button-cancel').on('click', () => {
+    'use strict';
+
+    $.setDisableForControls(true);
+    commentContent.val(lastSavedComment);
+  });
 });

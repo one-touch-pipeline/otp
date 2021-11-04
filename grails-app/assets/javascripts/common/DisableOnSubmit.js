@@ -22,11 +22,12 @@
 /**
  * Disable all input fields of type submit on submit event of any form.
  */
-$(function () {
-    "use strict";
-    $('form').each(function (idx, form) {
-        form.addEventListener("submit", function () {
-            $(':submit').prop("hidden", true);
-        });
+$(() => {
+  'use strict';
+
+  $('form').each((idx, form) => {
+    form.addEventListener('submit', () => {
+      $(':submit').prop('hidden', true);
     });
+  });
 });

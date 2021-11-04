@@ -33,7 +33,7 @@ buildscript {
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
         classpath "org.grails.plugins:hibernate5:${gormVersion-".RELEASE"}"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.14.8"
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.15.1"
         classpath "com.bertramlabs.plugins:less-asset-pipeline:2.15.1"
         classpath 'org.grails.plugins:database-migration:3.0.4'
     }
@@ -44,6 +44,7 @@ plugins {
     id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
     id "com.gradle.build-scan" version "1.16"
     id 'org.hidetake.swagger.generator' version '2.18.1'
+    id "com.github.node-gradle.node" version "2.2.4"
 }
 
 buildScan {
@@ -398,4 +399,30 @@ generateHtml {
     transformRelativeMarkdownLinks = true
     headerHtmlFile = new File("docs/support/header.html")
     footerHtmlFile = new File("docs/support/footer.html")
+}
+
+node {
+    version = '14.17.6'
+    download = true
+}
+
+task esLint(type: NpmTask) {
+    dependsOn npmInstall
+    args = ['run', 'lint']
+}
+
+task esLintExport(type: NpmTask) {
+    dependsOn npmInstall
+    args = ['run', 'lint-export']
+}
+
+task esLintExportCi(type: NpmTask) {
+    dependsOn npmInstall
+    environment = ['CI':'true']
+    args = ['run', 'lint-export']
+}
+
+task esLintAutoFix(type: NpmTask) {
+    dependsOn npmInstall
+    args = ['run', 'lint-fix']
 }

@@ -20,36 +20,36 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.egaTable = {
 
-    makeLandingTable: function() {
-        "use strict";
-        $('#dataTable').dataTable({
-            sDom: '<i> T rt<"clear">',
-            bSort: true,
-            paging: false,
-            order: [[1,"asc"]],
-        });
-    },
+  makeLandingTable() {
+    'use strict';
 
-    makeDataTable: function () {
-        "use strict";
-        $('#dataTable').dataTable({
-            sDom: '<i> T rt<"clear">',
-            bSort: false,
-            paging: false,
-        });
-    },
+    $('#dataTable').dataTable({
+      sDom: '<i> T rt<"clear">',
+      bSort: true,
+      paging: false,
+      order: [[1, 'asc']]
+    });
+  },
 
-    makeDownloadableDataTable: function () {
-        "use strict";
-        $('#dataTable').dataTable({
-            sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton(),
-            paging: false,
-        });
-    },
+  makeDataTable() {
+    'use strict';
+
+    $('#dataTable').dataTable({
+      sDom: '<i> T rt<"clear">',
+      bSort: false,
+      paging: false
+    });
+  },
+
+  makeDownloadableDataTable() {
+    'use strict';
+
+    $('#dataTable').dataTable({
+      sDom: '<i> B rt<"clear">',
+      buttons: $.otp.getDownloadButton(),
+      paging: false
+    });
+  }
 };

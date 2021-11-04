@@ -22,74 +22,71 @@
 
 //= require ../shared/workflowConfigBase
 
-$(function () {
-    $('select').select2({
-        allowClear: true,
-        theme: 'bootstrap4',
-    });
+$(() => {
+  $('select').select2({
+    allowClear: true,
+    theme: 'bootstrap4'
+  });
 
-    const form = $("form.selector");
-    form.on("change", "select", build);
-    form.on("change", "input", build);
-    form.on("keyup", "input[type=text]", build);
+  const form = $('form.selector');
+  form.on('change', 'select', build);
+  form.on('change', 'input', build);
+  form.on('keyup', 'input[type=text]', build);
 
-    function build() {
-        const workflowId = $("#workflowSelector").val();
-        const workflowVersionId = $("#workflowVersionSelector").val();
-        const projectId = $("#projectSelector").val();
-        const seqTypeId = $("#seqTypeSelector").val();
-        const refGenId = $("#refGenSelector").val();
-        const libPrepKitId = $("#libPrepKitSelector").val();
+  function build() {
+    const workflowId = $('#workflowSelector').val();
+    const workflowVersionId = $('#workflowVersionSelector').val();
+    const projectId = $('#projectSelector').val();
+    const seqTypeId = $('#seqTypeSelector').val();
+    const refGenId = $('#refGenSelector').val();
+    const libPrepKitId = $('#libPrepKitSelector').val();
 
-        const configValue = $("#configValue");
-        const relatedSelectors = $("#relatedSelectors");
+    const configValue = $('#configValue');
+    const relatedSelectors = $('#relatedSelectors');
 
-        if (workflowId || workflowVersionId || projectId || seqTypeId || refGenId || libPrepKitId) {
-            $.ajax({
-                url: $.otp.createLink({
-                    controller: 'workflowConfigViewer',
-                    action: 'build',
-                }),
-                dataType: "json",
-                type: "POST",
-                data: {
-                    workflow: workflowId,
-                    workflowVersion: workflowVersionId,
-                    project: projectId,
-                    seqType: seqTypeId,
-                    referenceGenome: refGenId,
-                    libraryPreparationKit: libPrepKitId,
-                },
-                success: function (response) {
+    if (workflowId || workflowVersionId || projectId || seqTypeId || refGenId || libPrepKitId) {
+      $.ajax({
+        url: $.otp.createLink({
+          controller: 'workflowConfigViewer',
+          action: 'build'
+        }),
+        dataType: 'json',
+        type: 'POST',
+        data: {
+          workflow: workflowId,
+          workflowVersion: workflowVersionId,
+          project: projectId,
+          seqType: seqTypeId,
+          referenceGenome: refGenId,
+          libraryPreparationKit: libPrepKitId
+        },
+        success(response) {
+          const selectorHtml = (response.selectors);
+          relatedSelectors.html(selectorHtml);
 
-                    const selectorHtml = (response.selectors);
-                    relatedSelectors.html(selectorHtml);
+          $('.expandable-button').on('click', function () {
+            $(this).siblings('.expandable-container').toggleClass('collapsed');
+            $(this).siblings('.expandable-container').toggleClass('expanded');
+          });
 
-                    $(".expandable-button").on("click", function () {
-                        $(this).siblings(".expandable-container").toggleClass("collapsed");
-                        $(this).siblings(".expandable-container").toggleClass("expanded");
-                    });
-
-                    if (/<\/?[a-z][\s\S]*>/i.test(selectorHtml)) {
-                        configValue.val(JSON.stringify(JSON.parse(response.config), null, 2));
-                    } else {
-                        configValue.val("");
-                        $.otp.toaster.showInfoToast('No selectors found', 'There are no related selectors to this selection');
-                    }
-
-                },
-                error: function (error) {
-                    if (error && error.responseJSON && error.responseJSON.message) {
-                        $.otp.toaster.showErrorToast('Error while processing', error.responseJSON.message);
-                    } else {
-                        $.otp.toaster.showErrorToast('Error while processing', "Unknown error");
-                    }
-                }
-            });
-        } else {
-            configValue.val("");
-            relatedSelectors.html("");
+          if (/<\/?[a-z][\s\S]*>/i.test(selectorHtml)) {
+            configValue.val(JSON.stringify(JSON.parse(response.config), null, 2));
+          } else {
+            configValue.val('');
+            $.otp.toaster.showInfoToast('No selectors found', 'There are no related selectors to this selection');
+          }
+        },
+        error(error) {
+          if (error && error.responseJSON && error.responseJSON.message) {
+            $.otp.toaster.showErrorToast('Error while processing', error.responseJSON.message);
+          } else {
+            $.otp.toaster.showErrorToast('Error while processing', 'Unknown error');
+          }
         }
+      });
+    } else {
+      configValue.val('');
+      relatedSelectors.html('');
     }
+  }
 });
-

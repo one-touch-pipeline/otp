@@ -20,49 +20,50 @@
  * SOFTWARE.
  */
 
-$(function () {
-    "use strict";
+$(() => {
+  'use strict';
 
-    var wrapper = $(".multi-input-field");
-    wrapper.on("click", ".add-field", function (e) {
-        e.preventDefault();
+  const wrapper = $('.multi-input-field');
+  wrapper.on('click', '.add-field', (e) => {
+    e.preventDefault();
 
-        // basic context
-        var parent = $(e.target).parents(".multi-input-field").first();
-        var baseField = $(".field", parent).first();
+    // basic context
+    const parent = $(e.target).parents('.multi-input-field').first();
+    const baseField = $('.field', parent).first();
 
-        // select2, with all its custom event handlers, doesn't take well to cloning.
-        // Remove any that might be in there, to be recreated afterwards.
-        var orig_select2 = $("select.use-select-2", baseField).select2("destroy");
+    // select2, with all its custom event handlers, doesn't take well to cloning.
+    // Remove any that might be in there, to be recreated afterwards.
+    const orig_select2 = $('select.use-select-2', baseField).select2('destroy');
 
-        // use base field as template for new one, but empty any selections.
-        var clonedField = baseField.clone();
-        $("input, textarea, select", clonedField).val("");
+    // use base field as template for new one, but empty any selections.
+    const clonedField = baseField.clone();
+    $('input, textarea, select', clonedField).val('');
 
-        // update buttons on our new field; only the first field can be cloned, user-added fields can only be removed.
-        $("button.add-field", clonedField).remove();
-        // the whitespace at the start prevents the button from sticking to the input element
-        clonedField.append(" <button class=\"remove-field\">-</button>");
+    // update buttons on our new field; only the first field can be cloned, user-added fields can only be removed.
+    $('button.add-field', clonedField).remove();
+    // the whitespace at the start prevents the button from sticking to the input element
+    clonedField.append(' <button class="remove-field">-</button>');
 
-        // add our shiny new field to the DOM
-        // must be done before applying any potential select2; styling rules don't apply yet to elements outside the DOM,
-        // so select2 can't copy them to its generated elements.
-        parent.append(clonedField);
+    // add our shiny new field to the DOM
+    // must be done before applying any potential select2; styling rules don't apply yet to elements outside the DOM,
+    // so select2 can't copy them to its generated elements.
+    parent.append(clonedField);
 
-        // if there are any select2-wannabe's in there, (re-)apply now that we're done.
-        $.otp.applySelect2(orig_select2);
-        $.otp.applySelect2($("select.use-select-2", clonedField));
-    });
+    // if there are any select2-wannabe's in there, (re-)apply now that we're done.
+    $.otp.applySelect2(orig_select2);
+    $.otp.applySelect2($('select.use-select-2', clonedField));
+  });
 
-    wrapper.on("click", ".remove-field", function (e) {
-        e.preventDefault();
-        $(e.target).parent("div.field").remove();
-    });
+  wrapper.on('click', '.remove-field', (e) => {
+    e.preventDefault();
+    $(e.target).parent('div.field').remove();
+  });
 });
 
 $.otp.multiInputField = {
-    cancel: function (target) {
-        "use strict";
-        target.find($(".remove-field").trigger("click"));
-    }
+  cancel(target) {
+    'use strict';
+
+    target.find($('.remove-field').trigger('click'));
+  }
 };

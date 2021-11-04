@@ -25,6 +25,8 @@ Some files in the following folders might not have a license header for
 technical reasons, however they are also licensed under this license.
  - migrations/
  - src/docs/
+ - package.json
+ - package-lock.json
 
 Different licenses may apply to the following folders and files therein,
  - grails-app/assets/lib

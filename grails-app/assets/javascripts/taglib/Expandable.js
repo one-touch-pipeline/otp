@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-/*global $: false, window: false
+/* global $: false, window: false
  */
 
-$(function() {
-    $(".expandable-button").on("click", function() {
-        $(this).siblings(".expandable-container").toggleClass("collapsed");
-        $(this).siblings(".expandable-container").toggleClass("expanded");
-    });
+$(() => {
+  $('.expandable-button').on('click', function () {
+    $(this).siblings('.expandable-container').toggleClass('collapsed');
+    $(this).siblings('.expandable-container').toggleClass('expanded');
+  });
 });

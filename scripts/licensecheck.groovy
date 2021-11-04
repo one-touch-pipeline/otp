@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.CompileStatic
 
 import java.nio.charset.MalformedInputException
@@ -87,8 +86,10 @@ class LicenseCheck {
 
             "src/main/resources/wes-api/workflow_execution_service.swagger.config.json",
             "src/main/resources/wes-api/workflow_execution_service.swagger.yaml",
-    ].collect { Paths.get(it) }
 
+            "package-lock.json",
+            "package.json",
+    ].collect { Paths.get(it) }
 
     static void checkLicense(Path path, List<String> problems) {
         List<String> code = []
@@ -123,14 +124,15 @@ class LicenseCheck {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
                 FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (!Files.isSymbolicLink(file) && !ignoredFiles.any { file.normalize() == it } ) {
+                    if (!Files.isSymbolicLink(file) && !ignoredFiles.any { file.normalize() == it }) {
                         checkLicense(file, problems)
                     }
                     return FileVisitResult.CONTINUE
                 }
+
                 @Override
                 FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attrs) throws IOException {
-                    if (ignoredDirs.any { directory.normalize().startsWith(it) } ) {
+                    if (ignoredDirs.any { directory.normalize().startsWith(it) }) {
                         return FileVisitResult.SKIP_SUBTREE
                     }
                     return FileVisitResult.CONTINUE
@@ -144,17 +146,16 @@ class LicenseCheck {
         if (Files.isDirectory(path)) {
             checkDir(path, problems)
         } else {
-            if (ignoredDirs.any { path.startsWith(it) } ) {
+            if (ignoredDirs.any { path.startsWith(it) }) {
                 return
             }
-            if (!ignoredFiles.any { path == it } ) {
+            if (!ignoredFiles.any { path == it }) {
                 if (Files.exists(path)) {
                     checkLicense(path, problems)
                 }
             }
         }
     }
-
 
     static void main(String... args) {
         InputStreamReader stdinReader = new InputStreamReader(System.in)

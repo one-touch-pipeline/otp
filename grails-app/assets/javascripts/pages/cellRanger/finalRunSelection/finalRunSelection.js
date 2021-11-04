@@ -20,33 +20,32 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  $('form').on('submit', (e) => {
+    $(e.target).find('input:submit').addClass('submitting');
+  });
 
-$(function () {
-    $("form").on("submit", function (e) {
-        $(e.target).find("input:submit").addClass("submitting");
-    });
+  const removeSubmitted = function (target) {
+    $(target).find('input:submit').removeClass('submitting');
+  };
+  removeSubmitted(document);
 
-    var removeSubmitted = function(target) {
-        $(target).find("input:submit").removeClass("submitting");
-    };
-    removeSubmitted(document);
-
-    $(".js-confirm").on("submit", function (e) {
-        var submit;
-        var radios = $(e.target).find(":input:checked");
-        if (radios.size() !== 1) {
-            alert("Please select a run.");
-            submit = false;
-        } else if (radios.filter("[value=delete]").size() === 1) {
-            submit = confirm("All runs of this individual/sample type/seq. type/version/reference combination will be deleted on the filesystem. Continue?");
-        } else {
-            submit = confirm("If existing, all other runs of this individual/sample type/seq. type/version/reference combination will be deleted on the filesystem. Continue?");
-        }
-        if (submit === false) {
-            e.preventDefault();
-            removeSubmitted(e.target);
-        }
-    });
+  $('.js-confirm').on('submit', (e) => {
+    let submit;
+    const radios = $(e.target).find(':input:checked');
+    if (radios.size() !== 1) {
+      alert('Please select a run.');
+      submit = false;
+    } else if (radios.filter('[value=delete]').size() === 1) {
+      submit = confirm(`All runs of this individual/sample type/seq.
+       type/version/reference combination will be deleted on the filesystem. Continue?`);
+    } else {
+      submit = confirm(`If existing, all other runs of this individual/sample type/seq.
+       type/version/reference combination will be deleted on the filesystem. Continue?`);
+    }
+    if (submit === false) {
+      e.preventDefault();
+      removeSubmitted(e.target);
+    }
+  });
 });

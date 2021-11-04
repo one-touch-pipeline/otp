@@ -20,71 +20,69 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  'use strict';
 
-$(function () {
-        "use strict";
-        $("#overviewTableMMMLMappingId").dataTable({
-            sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton(),
-            bFilter : true,
-            bProcessing : true,
-            bServerSide : false,
-            bSort : true,
-            bJQueryUI : false,
-            bAutoWidth : false,
-            sAjaxSource : $.otp.createLink({
-                controller : 'mmml',
-                action : 'dataTableMMMLMapping'
-            }),
-            bPaginate : false,
-            sScrollY:  540,
-            sScrollX: 'auto',
-            bScrollCollapse : false,
-            bDeferRender : true,
-            fnServerData : function (sSource, aoData, fnCallback) {
-                $.ajax({
-                    "dataType" : 'json',
-                    "type" : "POST",
-                    "url" : sSource,
-                    "data" : aoData,
-                    "error" : function () {
-                        // clear the table
-                        fnCallback({aaData : [], iTotalRecords : 0, iTotalDisplayRecords : 0});
-                    },
-                    "success" : function (json) {
-                        for (var i = 0; i < json.aaData.length; i += 1) {
-                            var row = json.aaData[i];
-                            var mockPid = row[1];
-                            row[0] = $.otp.createLinkMarkup({
-                                controller: 'individual',
-                                action: 'show',
-                                text: row[0],
-                                parameters: {
-                                    mockPid: mockPid
-                                }
-                            });
-                            row[1] = $.otp.createLinkMarkup({
-                                controller: 'individual',
-                                action: 'show',
-                                text: row[1],
-                                parameters: {
-                                    mockPid: mockPid
-                                }
-                            });
-                            row[2] = $.otp.createLinkMarkup({
-                                    controller: 'individual',
-                                    action: 'show',
-                                    text: row[2],
-                                    parameters: {
-                                        mockPid: mockPid
-                                    }
-                                });
-                        }
-                        fnCallback(json);
-                    }
-                });
-            }
-        });
+  $('#overviewTableMMMLMappingId').dataTable({
+    sDom: '<i> B rt<"clear">',
+    buttons: $.otp.getDownloadButton(),
+    bFilter: true,
+    bProcessing: true,
+    bServerSide: false,
+    bSort: true,
+    bJQueryUI: false,
+    bAutoWidth: false,
+    sAjaxSource: $.otp.createLink({
+      controller: 'mmml',
+      action: 'dataTableMMMLMapping'
+    }),
+    bPaginate: false,
+    sScrollY: 540,
+    sScrollX: 'auto',
+    bScrollCollapse: false,
+    bDeferRender: true,
+    fnServerData(sSource, aoData, fnCallback) {
+      $.ajax({
+        dataType: 'json',
+        type: 'POST',
+        url: sSource,
+        data: aoData,
+        error() {
+          // clear the table
+          fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+        },
+        success(json) {
+          for (let i = 0; i < json.aaData.length; i += 1) {
+            const row = json.aaData[i];
+            const mockPid = row[1];
+            row[0] = $.otp.createLinkMarkup({
+              controller: 'individual',
+              action: 'show',
+              text: row[0],
+              parameters: {
+                mockPid
+              }
+            });
+            row[1] = $.otp.createLinkMarkup({
+              controller: 'individual',
+              action: 'show',
+              text: row[1],
+              parameters: {
+                mockPid
+              }
+            });
+            row[2] = $.otp.createLinkMarkup({
+              controller: 'individual',
+              action: 'show',
+              text: row[2],
+              parameters: {
+                mockPid
+              }
+            });
+          }
+          fnCallback(json);
+        }
+      });
+    }
+  });
 });

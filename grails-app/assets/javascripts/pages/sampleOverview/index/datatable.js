@@ -20,107 +20,104 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  'use strict';
 
-$(function () {
-    "use strict";
-    const fileName = "Sample_Overview-" + $(".selected-project-value strong").text();
+  const fileName = 'Sample_Overview-' + $('.selected-project-value strong').text();
 
-    var oTableLaneOverview = $("#laneOverviewId").dataTable({
-        sDom: '<i> B rt<"clear">',
-        buttons: $.otp.getDownloadButton("", fileName),
-        bFilter: true,
-        bProcessing: true,
-        bServerSide: false,
-        bSort: true,
-        bJQueryUI: false,
-        bAutoWidth: false,
-        sAjaxSource: $.otp.createLink({
-            controller: 'sampleOverview',
-            action: 'dataTableSourceLaneOverview'
-        }),
-        sScrollY: 'auto',
-        sScrollX: 'auto',
-        bScrollCollapse: false,
-        bPaginate: false,
-        bDeferRender: true,
-        fnServerData: function (sSource, aoData, fnCallback) {
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "error": function () {
-                    // clear the table
-                    fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                    oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
-                },
-                "success": function (json) {
-                    for (var j = 0; j < json.columnsToHide.length; j++) {
-                        oTableLaneOverview.fnSetColumnVis(json.columnsToHide[j], false);
-                    }
-                    if (json.anythingWithdrawn) {
-                        $("#withdrawn_description").show();
-                    }
-                    for (var i = 0; i < json.aaData.length; i += 1) {
-                        var row = json.aaData[i];
-                        var mockPid = row[0];
-                        row[0] = $.otp.createLinkMarkup({
-                            controller: 'individual',
-                            action: 'show',
-                            text: row[0],
-                            parameters: {
-                                mockPid: mockPid
-                            }
-                        });
-                    }
-                    fnCallback(json);
-                    oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
-                }
-            });
+  var oTableLaneOverview = $('#laneOverviewId').dataTable({
+    sDom: '<i> B rt<"clear">',
+    buttons: $.otp.getDownloadButton('', fileName),
+    bFilter: true,
+    bProcessing: true,
+    bServerSide: false,
+    bSort: true,
+    bJQueryUI: false,
+    bAutoWidth: false,
+    sAjaxSource: $.otp.createLink({
+      controller: 'sampleOverview',
+      action: 'dataTableSourceLaneOverview'
+    }),
+    sScrollY: 'auto',
+    sScrollX: 'auto',
+    bScrollCollapse: false,
+    bPaginate: false,
+    bDeferRender: true,
+    fnServerData(sSource, aoData, fnCallback) {
+      $.ajax({
+        dataType: 'json',
+        type: 'POST',
+        url: sSource,
+        data: aoData,
+        error() {
+          // clear the table
+          fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+          oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
         },
-
-        fnInitComplete: function () {
-            new $.fn.dataTable.FixedColumns(this, {
-                "leftColumns": 2
+        success(json) {
+          for (let j = 0; j < json.columnsToHide.length; j++) {
+            oTableLaneOverview.fnSetColumnVis(json.columnsToHide[j], false);
+          }
+          if (json.anythingWithdrawn) {
+            $('#withdrawn_description').show();
+          }
+          for (let i = 0; i < json.aaData.length; i += 1) {
+            const row = json.aaData[i];
+            const mockPid = row[0];
+            row[0] = $.otp.createLinkMarkup({
+              controller: 'individual',
+              action: 'show',
+              text: row[0],
+              parameters: {
+                mockPid
+              }
             });
+          }
+          fnCallback(json);
+          oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
         }
+      });
+    },
+
+    fnInitComplete() {
+      new $.fn.dataTable.FixedColumns(this, {
+        leftColumns: 2
+      });
+    }
+  });
+
+  $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
+    const ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns'));
+    const workflowSize = parseInt($('#laneOverviewId').data('workflow-size'));
+    const seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size'));
+    const step = workflowSize + 1;
+    const tableSize = seqTypeSize * step + ignoredColumns;
+    const result = [];
+    let i;
+
+    $('#searchCriteriaTableSeqType').find('tr').each((index, element) => {
+      const idx = $('td.attribute select', element)[0].selectedIndex;
+      if (idx !== 0) {
+        result.push((idx - 1) * step + ignoredColumns);
+      }
     });
 
-    $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), function () {
-        var ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
-            workflowSize = parseInt($('#laneOverviewId').data('workflow-size')),
-            seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size')),
-            step = workflowSize + 1,
-            tableSize = seqTypeSize * step + ignoredColumns,
-            result = [],
-            i;
+    for (i = ignoredColumns; i < tableSize; i += step) {
+      if (result.indexOf(i) !== -1) {
+        oTableLaneOverview.fnFilter('.+', i, true);
+      } else {
+        oTableLaneOverview.fnFilter('', i);
+      }
+    }
+  });
 
-        $('#searchCriteriaTableSeqType').find('tr').each(function (index, element) {
-            var idx = $('td.attribute select', element)[0].selectedIndex;
-            if (idx !== 0) {
-                result.push((idx - 1) * step + ignoredColumns);
-            }
-        });
-
-        for (i = ignoredColumns; i < tableSize; i += step) {
-            if (result.indexOf(i) !== -1) {
-                oTableLaneOverview.fnFilter('.+', i, true);
-            } else {
-                oTableLaneOverview.fnFilter('', i);
-            }
-        }
-    });
-
-    $.otp.dataTableFilter.register($('#searchCriteriaTableSampleType'), function () {
-        var select = $('#searchCriteriaTableSampleType').find('select')[0],
-            column = 1;
-        if (select.selectedIndex !== 0) {
-            oTableLaneOverview.fnFilter('^' + select.value + '$', column, true);
-        } else {
-            oTableLaneOverview.fnFilter('', column);
-
-        }
-    });
+  $.otp.dataTableFilter.register($('#searchCriteriaTableSampleType'), () => {
+    const select = $('#searchCriteriaTableSampleType').find('select')[0];
+    const column = 1;
+    if (select.selectedIndex !== 0) {
+      oTableLaneOverview.fnFilter('^' + select.value + '$', column, true);
+    } else {
+      oTableLaneOverview.fnFilter('', column);
+    }
+  });
 });

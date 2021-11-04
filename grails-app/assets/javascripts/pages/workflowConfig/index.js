@@ -22,35 +22,34 @@
 
 //= require ../shared/workflowConfigBase
 
-$(function () {
-    var update = function (e) {
-        $(e.target).parents("form").submit();
+$(() => {
+  const update = function (e) {
+    $(e.target).parents('form').submit();
+  };
+  const form = $('form.selector');
+  form.on('change', 'select', update);
+  form.on('change', 'input', update);
+  form.on('keyup', 'input[type=text]', update);
+
+  $('.format').on('click', (e) => {
+    e.preventDefault();
+    const value = $('#configValue');
+    value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
+  });
+
+  // disable buttons if default values are selected
+  const editForm = $('form.editor');
+  const disableButtons = function () {
+    const disable = ($('select.type', editForm).val() === 'DEFAULT_VALUES');
+    $('input[type=submit]', editForm).prop('disabled', disable);
+    if (disable) {
+      $('.disabledMessage', editForm).show();
+    } else {
+      $('.disabledMessage', editForm).hide();
     }
-    var form = $("form.selector");
-    form.on("change", "select", update);
-    form.on("change", "input", update);
-    form.on("keyup", "input[type=text]", update);
-
-
-    $(".format").on("click", function (e) {
-        e.preventDefault();
-        var value = $("#configValue");
-        value.val(JSON.stringify(JSON.parse(value.val()), null, 2));
-    });
-
-    // disable buttons if default values are selected
-    var editForm = $("form.editor");
-    var disableButtons = function () {
-        var disable = ($("select.type", editForm).val() === "DEFAULT_VALUES")
-        $("input[type=submit]", editForm).prop("disabled", disable);
-        if (disable) {
-            $(".disabledMessage", editForm).show()
-        } else {
-            $(".disabledMessage", editForm).hide()
-        }
-    }
-    editForm.on("change", "select.type", function (e) {
-        disableButtons();
-    });
+  };
+  editForm.on('change', 'select.type', (e) => {
     disableButtons();
+  });
+  disableButtons();
 });

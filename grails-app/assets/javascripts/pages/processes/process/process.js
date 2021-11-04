@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-/*jslint continue: true */
-/*global $ */
+/* jslint continue: true */
+/* global $ */
 
 /**
  * Creates the datatables view for the list of all ProcessingSteps for a given Process.
@@ -29,61 +29,62 @@
  * @param processId The id of the Process for which the list of ProcessingSteps should be retrieved.
  */
 $.otp.workflows.registerProcessingStep = function (selector, processId) {
-    "use strict";
-    $.otp.createListView(selector, $.otp.createLink({
+  'use strict';
+
+  $.otp.createListView(selector, $.otp.createLink({
+    controller: 'processes',
+    action: 'processData',
+    id: processId + '/'
+  }), false, (json) => {
+    json.aaData.forEach((data, index) => {
+      const row = [];
+      row[0] = $.otp.createLinkMarkup({
         controller: 'processes',
-        action: 'processData',
-        id: processId + '/'
-    }), false, function (json) {
-        json.aaData.forEach(function (data, index) {
-            var row = [];
-            row[0] = $.otp.createLinkMarkup({
-                controller: 'processes',
-                action    : 'processingStep',
-                id        : data.processingStep.id,
-                text      : "<div style='padding: 17px 0px 17px 10px;'>" + data.processingStep.id + "</div>"
-            });
-            row[1] = $.otp.workflows.statusDivHtml(data.lastUpdate.state);
-            row[2] = data.processingStep.jobName;
+        action: 'processingStep',
+        id: data.processingStep.id,
+        text: "<div style='padding: 17px 0px 17px 10px;'>" + data.processingStep.id + '</div>'
+      });
+      row[1] = $.otp.workflows.statusDivHtml(data.lastUpdate.state);
+      row[2] = data.processingStep.jobName;
 
-            var jobClass = "-";
-            if (data.processingStep) {
-                jobClass = data.processingStep.jobClass
-            }
-            row[3] = '<span title="' + jobClass + '">' + jobClass.split("\.").pop() + "</span><br/>";
+      let jobClass = '-';
+      if (data.processingStep) {
+        jobClass = data.processingStep.jobClass;
+      }
+      row[3] = '<span title="' + jobClass + '">' + jobClass.split('\.').pop() + '</span><br/>';
 
-            row[4] = $.otp.workflows.renderDate(data.times.creation);
-            row[5] = $.otp.workflows.renderDate(data.times.lastUpdate);
+      row[4] = $.otp.workflows.renderDate(data.times.creation);
+      row[5] = $.otp.workflows.renderDate(data.times.lastUpdate);
 
-            row[6] = "-";
-            if (data.times.duration) {
-                row[6] = $.otp.workflows.formatTimespan(data.times.duration);
-            }
+      row[6] = '-';
+      if (data.times.duration) {
+        row[6] = $.otp.workflows.formatTimespan(data.times.duration);
+      }
 
-            row[7] = data.lastUpdate.state;
+      row[7] = data.lastUpdate.state;
 
-            row[8] = "";
-            for (var action of data.actions) {
-                switch (action) {
-                    case "restart":
-                        row[8] += $.otp.workflows.createRestartProcessingStepLink(data.processingStep.id, selector);
-                        break;
-                    default:
-                        // nothing
-                        break;
-                }
-            }
-            json.aaData[index] = row
-        });
-    }, [
-        { "bSortable": true,  "aTargets": [0] },
-        { "bSortable": false, "aTargets": [1] },
-        { "bSortable": false, "aTargets": [2] },
-        { "bSortable": false, "aTargets": [3] },
-        { "bSortable": false, "aTargets": [4] },
-        { "bSortable": false, "aTargets": [5] },
-        { "bSortable": false, "aTargets": [6] },
-        { "bSortable": false, "aTargets": [7] },
-        { "bSortable": false, "aTargets": [8] }
-    ], undefined, 100);
+      row[8] = '';
+      for (const action of data.actions) {
+        switch (action) {
+          case 'restart':
+            row[8] += $.otp.workflows.createRestartProcessingStepLink(data.processingStep.id, selector);
+            break;
+          default:
+            // nothing
+            break;
+        }
+      }
+      json.aaData[index] = row;
+    });
+  }, [
+    { bSortable: true, aTargets: [0] },
+    { bSortable: false, aTargets: [1] },
+    { bSortable: false, aTargets: [2] },
+    { bSortable: false, aTargets: [3] },
+    { bSortable: false, aTargets: [4] },
+    { bSortable: false, aTargets: [5] },
+    { bSortable: false, aTargets: [6] },
+    { bSortable: false, aTargets: [7] },
+    { bSortable: false, aTargets: [8] }
+  ], undefined, 100);
 };

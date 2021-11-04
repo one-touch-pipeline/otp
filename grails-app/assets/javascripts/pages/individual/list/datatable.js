@@ -20,95 +20,94 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 /**
  * Generates the list of individuals
  */
 $.otp.individual = {
-    register: function () {
-        "use strict";
-        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), function (searchCriteria) {
-            $("#individualTable").dataTable().fnDraw()
-        });
+  register() {
+    'use strict';
 
-        $("#individualTable").dataTable({
-            sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton(),
-            bFilter: true,
-            bProcessing: true,
-            bServerSide: true,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: $.otp.createLink({
-                controller: 'individual',
-                action: 'dataTableSource'
-            }),
-            bScrollCollapse: true,
-            sScrollY:'auto',
-            bDeferRender: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "filtering",
-                    value: JSON.stringify(searchCriteria())
-                });
-                aoData.push({
-                    name: "filter",
-                    value: $.otp.individual.search
-                });
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    "error": function () {
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                    },
-                    "success": function (json) {
-                        var i, j, rowData, row;
-                        for (i = 0; i < json.aaData.length; i += 1) {
-                            row = json.aaData[i];
-                            rowData = [
-                                $.otp.createLinkMarkup({
-                                    controller: 'individual',
-                                    action: 'show',
-                                    id: row.id,
-                                    text: row.pid
-                                }),
-                                $.otp.createLinkMarkup({
-                                    controller: 'individual',
-                                    action: 'show',
-                                    id: row.id,
-                                    text: row.mockFullName
-                                }),
-                                $.otp.createLinkMarkup({
-                                    controller: 'individual',
-                                    action: 'show',
-                                    id: row.id,
-                                    text:row.mockPid
-                                }),
-                                $.otp.createLinkMarkup({
-                                    controller: 'projectOverview',
-                                    action: 'index',
-                                    parameters: {
-                                                [$.otp.projectParameter]: row.project
-                                    },
-                                    text: row.project
-                                }),
-                                row.type
-                            ];
-                            json.aaData[i] = rowData;
-                        }
-                        fnCallback(json);
-                    }
-                });
-            }
+    const searchCriteria = $.otp.dataTableFilter.register($('#searchCriteriaTable'), (searchCriteria) => {
+      $('#individualTable').dataTable().fnDraw();
+    });
+
+    $('#individualTable').dataTable({
+      sDom: '<i> B rt<"clear">',
+      buttons: $.otp.getDownloadButton(),
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: true,
+      bSort: true,
+      bJQueryUI: false,
+      bAutoWidth: false,
+      sAjaxSource: $.otp.createLink({
+        controller: 'individual',
+        action: 'dataTableSource'
+      }),
+      bScrollCollapse: true,
+      sScrollY: 'auto',
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
+        aoData.push({
+          name: 'filtering',
+          value: JSON.stringify(searchCriteria())
         });
-    }
+        aoData.push({
+          name: 'filter',
+          value: $.otp.individual.search
+        });
+        $.ajax({
+          dataType: 'json',
+          type: 'POST',
+          url: sSource,
+          data: aoData,
+          error() {
+            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+          },
+          success(json) {
+            let i; let j; let rowData; let
+              row;
+            for (i = 0; i < json.aaData.length; i += 1) {
+              row = json.aaData[i];
+              rowData = [
+                $.otp.createLinkMarkup({
+                  controller: 'individual',
+                  action: 'show',
+                  id: row.id,
+                  text: row.pid
+                }),
+                $.otp.createLinkMarkup({
+                  controller: 'individual',
+                  action: 'show',
+                  id: row.id,
+                  text: row.mockFullName
+                }),
+                $.otp.createLinkMarkup({
+                  controller: 'individual',
+                  action: 'show',
+                  id: row.id,
+                  text: row.mockPid
+                }),
+                $.otp.createLinkMarkup({
+                  controller: 'projectOverview',
+                  action: 'index',
+                  parameters: {
+                    [$.otp.projectParameter]: row.project
+                  },
+                  text: row.project
+                }),
+                row.type
+              ];
+              json.aaData[i] = rowData;
+            }
+            fnCallback(json);
+          }
+        });
+      }
+    });
+  }
 };
 
-$(function() {
-    $.otp.individual.register();
+$(() => {
+  $.otp.individual.register();
 });

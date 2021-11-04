@@ -20,13 +20,10 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  'use strict';
 
-$(function(){
-    "use strict";
-
-    $(".sample-identifier-edit-form").on("reset", function (e) {
-        $.otp.multiInputField.cancel($(this).find($(".multi-input-field")));
-    });
+  $('.sample-identifier-edit-form').on('reset', function (e) {
+    $.otp.multiInputField.cancel($(this).find($('.multi-input-field')));
+  });
 });

@@ -20,39 +20,39 @@
  * SOFTWARE.
  */
 
-$(function () {
-    // hide and show the date picker for storageUntil when defined by a user
-    var storageUntil = $("input#storageUntil");
-    $("select#storagePeriod").on("change", function (e) {
-        if ($(e.target).val() === "USER_DEFINED") {
-            storageUntil.show()
-        } else {
-            storageUntil.hide()
-        }
-    }).trigger("change");
+$(() => {
+  // hide and show the date picker for storageUntil when defined by a user
+  const storageUntil = $('input#storageUntil');
+  $('select#storagePeriod').on('change', (e) => {
+    if ($(e.target).val() === 'USER_DEFINED') {
+      storageUntil.show();
+    } else {
+      storageUntil.hide();
+    }
+  }).trigger('change');
 
-    // hide and show the textbox to provide a custom SpeciesWithStrain
-    var customSpecies = $("input#customSpeciesWithStrain");
-    $("select#speciesWithStrains").on("change", function (e) {
-        if ($(e.target).val() === "other") {
-            customSpecies.show();
-            customSpecies.prop("disabled", false);
-        } else {
-            customSpecies.hide();
-            customSpecies.prop("disabled", true);
-        }
-    }).trigger("change");
+  // hide and show the textbox to provide a custom SpeciesWithStrain
+  const customSpecies = $('input#customSpeciesWithStrain');
+  $('select#speciesWithStrains').on('change', (e) => {
+    if ($(e.target).val() === 'other') {
+      customSpecies.show();
+      customSpecies.prop('disabled', false);
+    } else {
+      customSpecies.hide();
+      customSpecies.prop('disabled', true);
+    }
+  }).trigger('change');
 
-    // if the PI role is selected, manage users should be checked
-    $(".project-role-select").on("change", function () {
-        $(".project-role-select option:selected").each(function () {
-            var manageUsersBox = $(this).closest(".project-request-user-table").find(".set-for-authority");
-            if (this.text === "PI") {
-                manageUsersBox.prop('checked', true);
-                manageUsersBox.prop('disabled', true);
-            } else {
-                manageUsersBox.prop('disabled', false);
-            }
-        })
-    }).trigger("change");
+  // if the PI role is selected, manage users should be checked
+  $('.project-role-select').on('change', () => {
+    $('.project-role-select option:selected').each(function () {
+      const manageUsersBox = $(this).closest('.project-request-user-table').find('.set-for-authority');
+      if (this.text === 'PI') {
+        manageUsersBox.prop('checked', true);
+        manageUsersBox.prop('disabled', true);
+      } else {
+        manageUsersBox.prop('disabled', false);
+      }
+    });
+  }).trigger('change');
 });

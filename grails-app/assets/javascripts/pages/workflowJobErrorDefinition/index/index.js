@@ -20,37 +20,35 @@
  * SOFTWARE.
  */
 
-/*global $: false
- */
-
-//no namespace, since method name is given as string and execute using
-//window[$method]
+// no namespace, since method name is given as string and execute using
+// window[$method]
 workflowJobErrorDefinitionActionChangeSuccessHandler = function (container, additionalData) {
-    "use strict";
-    var row = container.parent().parent().parent();
-    var select = $(".restartJob select", row);
-    var editSwitch = $(".restartJob .edit-switch-label", row);
-    var display = $("span", editSwitch);
-    if (additionalData.restartBean) {
-        display.text(additionalData.restartBean);
-        select.val(additionalData.restartBean).trigger('change');
-        editSwitch.show()
-    } else {
-        display.text("");
-        select.val("").trigger('change');
-        editSwitch.hide()
-    }
+  'use strict';
+
+  const row = container.parent().parent().parent();
+  const select = $('.restartJob select', row);
+  const editSwitch = $('.restartJob .edit-switch-label', row);
+  const display = $('span', editSwitch);
+  if (additionalData.restartBean) {
+    display.text(additionalData.restartBean);
+    select.val(additionalData.restartBean).trigger('change');
+    editSwitch.show();
+  } else {
+    display.text('');
+    select.val('').trigger('change');
+    editSwitch.hide();
+  }
 };
 
-$(function () {
-    var rows = $('.errorDefinitions tr')
-    rows.each(function () {
-        var row = $(this);
-        var action = $('.restartAction select', row);
-        var val = action.val();
-        if (val !== "RESTART_JOB") {
-            var editSwitch = $(".restartJob .edit-switch-label", row);
-            editSwitch.hide();
-        }
-    });
+$(() => {
+  const rows = $('.errorDefinitions tr');
+  rows.each(function () {
+    const row = $(this);
+    const action = $('.restartAction select', row);
+    const val = action.val();
+    if (val !== 'RESTART_JOB') {
+      const editSwitch = $('.restartJob .edit-switch-label', row);
+      editSwitch.hide();
+    }
+  });
 });

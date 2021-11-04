@@ -20,15 +20,13 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.bulkSampleCreation = {
 
-    toggleEnable: function (source, target, invert) {
-        "use strict";
-        $('#'+source).on("change", function() {
-            $('#'+target).attr('disabled', invert ? this.checked : !this.checked);
-        });
-    }
+  toggleEnable(source, target, invert) {
+    'use strict';
+
+    $('#' + source).on('change', function () {
+      $('#' + target).attr('disabled', invert ? this.checked : !this.checked);
+    });
+  }
 };

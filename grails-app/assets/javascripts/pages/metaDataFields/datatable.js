@@ -20,19 +20,17 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.exportableMetaDataFieldsTable = function () {
-    "use strict";
-    return $('#metadatafields-datatable').dataTable({
-        sDom: 'B t',
-        buttons: $.otp.getDownloadButton('.export_column'),
-        bPaginate: false,
-        ordering: false
-    });
+  'use strict';
+
+  return $('#metadatafields-datatable').dataTable({
+    sDom: 'B t',
+    buttons: $.otp.getDownloadButton('.export_column'),
+    bPaginate: false,
+    ordering: false
+  });
 };
 
-$(function() {
-    $.otp.exportableMetaDataFieldsTable();
+$(() => {
+  $.otp.exportableMetaDataFieldsTable();
 });

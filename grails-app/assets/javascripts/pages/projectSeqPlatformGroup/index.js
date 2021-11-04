@@ -20,45 +20,44 @@
  * SOFTWARE.
  */
 
-$(function () {
-    "use strict";
-    // configure merging criteria
-    $('#useSeqPlatformGroup').on('change', function () {
-        this.form.submit();
-    });
-    $('#libPrepKit').on('change', function () {
-        this.form.submit();
-    });
+$(() => {
+  'use strict';
 
-    // seq. platform search
-    const copyFromProjectSelector = $('#selectedProjectToCopyFrom');
-    const copyFromSeqTypeSelector = $('#selectedSeqTypeToCopyFrom');
+  // configure merging criteria
+  $('#useSeqPlatformGroup').on('change', function () {
+    this.form.submit();
+  });
+  $('#libPrepKit').on('change', function () {
+    this.form.submit();
+  });
 
-    copyFromProjectSelector.on('change', function () {
-        if (this.value === "null") {
-            // Switch to system default seq. platforms
-            this.form.submit();
-        } else {
-            if (copyFromSeqTypeSelector.prop("value") === "null") {
-                setTimeout(function () {
-                    copyFromSeqTypeSelector.prop("disabled", false);
-                }, 0);
-                setTimeout(function () {
-                    copyFromSeqTypeSelector.select2('open');
-                    $(copyFromSeqTypeSelector, '.select2-search__field').focus();
-                }, 0);
-            } else {
-                this.form.submit();
-            }
-        }
-    })
+  // seq. platform search
+  const copyFromProjectSelector = $('#selectedProjectToCopyFrom');
+  const copyFromSeqTypeSelector = $('#selectedSeqTypeToCopyFrom');
 
-    copyFromSeqTypeSelector.on('change', function () {
-        if (copyFromProjectSelector.prop("value") !== "null" && copyFromSeqTypeSelector.prop("value") !== "null") {
-            // Search for the seq. platforms of the other projects
-            this.form.submit();
-        } else {
-            copyFromSeqTypeSelector.addClass("is-invalid")
-        }
-    })
-})
+  copyFromProjectSelector.on('change', function () {
+    if (this.value === 'null') {
+      // Switch to system default seq. platforms
+      this.form.submit();
+    } else if (copyFromSeqTypeSelector.prop('value') === 'null') {
+      setTimeout(() => {
+        copyFromSeqTypeSelector.prop('disabled', false);
+      }, 0);
+      setTimeout(() => {
+        copyFromSeqTypeSelector.select2('open');
+        $(copyFromSeqTypeSelector, '.select2-search__field').focus();
+      }, 0);
+    } else {
+      this.form.submit();
+    }
+  });
+
+  copyFromSeqTypeSelector.on('change', function () {
+    if (copyFromProjectSelector.prop('value') !== 'null' && copyFromSeqTypeSelector.prop('value') !== 'null') {
+      // Search for the seq. platforms of the other projects
+      this.form.submit();
+    } else {
+      copyFromSeqTypeSelector.addClass('is-invalid');
+    }
+  });
+});

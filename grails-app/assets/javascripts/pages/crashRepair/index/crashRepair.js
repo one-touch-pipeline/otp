@@ -21,56 +21,66 @@
  */
 
 function syncWorkflowStepData() {
-    const table = $('#jobTable');
-    const noDataAlert = $('#noDataAlert');
-    const loadingSpinner = $('#tableLoadingSpinner');
+  const table = $('#jobTable');
+  const noDataAlert = $('#noDataAlert');
+  const loadingSpinner = $('#tableLoadingSpinner');
 
-    noDataAlert.hide();
-    loadingSpinner.show();
-    table.DataTable().clear().draw()
+  noDataAlert.hide();
+  loadingSpinner.show();
+  table.DataTable().clear().draw();
 
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'crashRepair',
-            action: 'runningWorkflowSteps',
-        }),
-        dataType: 'json',
-        type: 'GET',
-        success: function (result) {
-            loadingSpinner.hide();
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'crashRepair',
+      action: 'runningWorkflowSteps'
+    }),
+    dataType: 'json',
+    type: 'GET',
+    success(result) {
+      loadingSpinner.hide();
 
-            if (!result || Object.keys(result).length === 0) {
-                noDataAlert.show();
-            } else {
-                renderStepDataTable(result);
-            }
-        },
-        error: function (error) {
-            $.otp.toaster.showErrorToast("Data Loading", "An error occurred while trying to load the jobs data. Please try again.");
-            loadingSpinner.hide();
-        }
-    });
+      if (!result || Object.keys(result).length === 0) {
+        noDataAlert.show();
+      } else {
+        renderStepDataTable(result);
+      }
+    },
+    error(error) {
+      $.otp.toaster.showErrorToast(
+        'Data Loading',
+        'An error occurred while trying to load the jobs data. Please try again.'
+      );
+      loadingSpinner.hide();
+    }
+  });
 }
 
 function renderStepDataTable(steps) {
-    const table = $("#jobTable");
-    const dataTable = table.DataTable()
+  const table = $('#jobTable');
+  const dataTable = table.DataTable();
 
-    steps.forEach((step) => {
-        dataTable.row.add([
-            '<input type="checkbox" name="stepId" value="' + step.id + '" class="tableCheckbox">',
-            '<a href="' + $.otp.createLink({controller: 'workflowRunList', action: 'index', parameters: {'workflow.id': step.workflowId}}) + '">' +
-            step.workflowName + '</a>',
-            '<a href="' + $.otp.createLink({
-                controller: 'workflowRunDetails', action: 'index',
-                parameters: {'id': step.workflowRunId, 'workflow.id': step.workflowId}
-            }) + '" title="' + step.workflowRunName.replaceAll('\n', '<br>') + '" data-toggle="tooltip" data-placement="bottom">' +
-            step.workflowRunShortName + '</a>',
-            step.beanName,
-            step.id,
-            step.lastUpdated,
-            step.workflowRunJobCanBeRestarted ? '<i class="bi bi-check"></i>' : '<i class="bi bi-x"></i>',
-            '<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">' +
+  steps.forEach((step) => {
+    dataTable.row.add([
+      '<input type="checkbox" name="stepId" value="' + step.id + '" class="tableCheckbox">',
+      '<a href="' + $.otp.createLink({
+        controller: 'workflowRunList',
+        action: 'index',
+        parameters: { 'workflow.id': step.workflowId }
+      }) + '">' +
+      step.workflowName + '</a>',
+      '<a href="' + $.otp.createLink({
+        controller: 'workflowRunDetails',
+        action: 'index',
+        parameters: { id: step.workflowRunId, 'workflow.id': step.workflowId }
+      }) + '" title="' + step.workflowRunName.replaceAll('\n', '<br>') +
+        '" data-toggle="tooltip" data-placement="bottom">' +
+      step.workflowRunShortName + '</a>',
+      step.beanName,
+      step.id,
+      step.lastUpdated,
+      step.workflowRunJobCanBeRestarted ? '<i class="bi bi-check"></i>' : '<i class="bi bi-x"></i>',
+      /* eslint-disable max-len */
+      '<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">' +
             '<button class="btn btn-primary" onclick="restartStep(' + step.id + ')"' + (!step.workflowRunJobCanBeRestarted ? 'disabled' : '') +
             '       data-toggle="tooltip" data-placement="top" title="Restart step #' + step.id + '">' +
             '   <i class="bi bi-reply"></i></button>' +
@@ -84,15 +94,16 @@ function renderStepDataTable(steps) {
             '       data-toggle="tooltip" data-placement="top" title="Mark #' + step.workflowRunId + ' as final failed">' +
             '   <i class="bi bi-file-earmark-x"></i></button>' +
             '</div>'
-        ]).draw();
+      /* eslint-enable max-len */
+    ]).draw();
 
-        $('a').tooltip({html: true});
-    });
+    $('a').tooltip({ html: true });
+  });
 
-    // enable the new tooltips
-    table.tooltip({
-        selector: 'button'
-    });
+  // enable the new tooltips
+  table.tooltip({
+    selector: 'button'
+  });
 }
 
 /**
@@ -100,28 +111,31 @@ function renderStepDataTable(steps) {
  * @param stepId which should be restarted
  */
 function restartStep(stepId) {
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'crashRepair',
-            action: 'restartWorkflowStep',
-        }),
-        dataType: 'json',
-        type: 'POST',
-        data: {
-            workflowStep: stepId
-        },
-        success: function (result) {
-            $.otp.toaster.showSuccessToast("Step #" + stepId + " restarted", "Restart of the step #" + stepId + " was successful.");
-            syncWorkflowStepData();
-        },
-        error: function (error) {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                $.otp.toaster.showErrorToast("Restart Failed", error.responseJSON.message);
-            } else {
-                $.otp.toaster.showErrorToast("Restart Failed", "Unknown error during job restart.");
-            }
-        }
-    });
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'crashRepair',
+      action: 'restartWorkflowStep'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      workflowStep: stepId
+    },
+    success(result) {
+      $.otp.toaster.showSuccessToast(
+        'Step #' + stepId + ' restarted',
+        'Restart of the step #' + stepId + ' was successful.'
+      );
+      syncWorkflowStepData();
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        $.otp.toaster.showErrorToast('Restart Failed', error.responseJSON.message);
+      } else {
+        $.otp.toaster.showErrorToast('Restart Failed', 'Unknown error during job restart.');
+      }
+    }
+  });
 }
 
 /**
@@ -129,28 +143,31 @@ function restartStep(stepId) {
  * @param stepId referring to the workflow run
  */
 function restartWorkflowRun(stepId) {
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'crashRepair',
-            action: 'restartWorkflowRun',
-        }),
-        dataType: 'json',
-        type: 'POST',
-        data: {
-            workflowStep: stepId
-        },
-        success: function (result) {
-            $.otp.toaster.showSuccessToast("Workflow run of step #" + stepId + " restarted", "Restart of the step #" + stepId + " was successful.");
-            syncWorkflowStepData();
-        },
-        error: function (error) {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                $.otp.toaster.showErrorToast("Restart Failed", error.responseJSON.message);
-            } else {
-                $.otp.toaster.showErrorToast("Restart Failed", "Unknown error during workflow restart.");
-            }
-        }
-    });
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'crashRepair',
+      action: 'restartWorkflowRun'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      workflowStep: stepId
+    },
+    success(result) {
+      $.otp.toaster.showSuccessToast(
+        'Workflow run of step #' + stepId + ' restarted',
+        'Restart of the step #' + stepId + ' was successful.'
+      );
+      syncWorkflowStepData();
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        $.otp.toaster.showErrorToast('Restart Failed', error.responseJSON.message);
+      } else {
+        $.otp.toaster.showErrorToast('Restart Failed', 'Unknown error during workflow restart.');
+      }
+    }
+  });
 }
 
 /**
@@ -158,28 +175,28 @@ function restartWorkflowRun(stepId) {
  * @param stepId
  */
 function setWorkflowStepAsFailed(stepId) {
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'crashRepair',
-            action: 'markWorkflowStepAsFailed',
-        }),
-        dataType: 'json',
-        type: 'POST',
-        data: {
-            workflowStep: stepId
-        },
-        success: function (result) {
-            $.otp.toaster.showSuccessToast("Failed set", "Workflow step #" + stepId + " has successful been set as failed.");
-            syncWorkflowStepData();
-        },
-        error: function (error) {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                $.otp.toaster.showErrorToast("Mark as failed", error.responseJSON.message);
-            } else {
-                $.otp.toaster.showErrorToast("Mark as failed", "Unknown error during mark as failed.");
-            }
-        }
-    });
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'crashRepair',
+      action: 'markWorkflowStepAsFailed'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      workflowStep: stepId
+    },
+    success(result) {
+      $.otp.toaster.showSuccessToast('Failed set', 'Workflow step #' + stepId + ' has successful been set as failed.');
+      syncWorkflowStepData();
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        $.otp.toaster.showErrorToast('Mark as failed', error.responseJSON.message);
+      } else {
+        $.otp.toaster.showErrorToast('Mark as failed', 'Unknown error during mark as failed.');
+      }
+    }
+  });
 }
 
 /**
@@ -187,106 +204,109 @@ function setWorkflowStepAsFailed(stepId) {
  * @param stepId which is part of the final failed workflow run
  */
 function setWorkflowRunAsFinalFailed(stepId) {
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'crashRepair',
-            action: 'markWorkflowRunAsFinalFailed',
-        }),
-        dataType: 'json',
-        type: 'POST',
-        data: {
-            workflowStep: stepId
-        },
-        success: function (result) {
-            $.otp.toaster.showSuccessToast("Final failed set", "Workflow run of the step #" + stepId + " has successful been set as final failed.");
-            syncWorkflowStepData();
-        },
-        error: function (error) {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                $.otp.toaster.showErrorToast("Mark as final failed", error.responseJSON.message);
-            } else {
-                $.otp.toaster.showErrorToast("Mark as final failed", "Unknown error during mark as final failed.");
-            }
-        }
-    });
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'crashRepair',
+      action: 'markWorkflowRunAsFinalFailed'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    data: {
+      workflowStep: stepId
+    },
+    success(result) {
+      $.otp.toaster.showSuccessToast(
+        'Final failed set',
+        'Workflow run of the step #' + stepId + ' has successful been set as final failed.'
+      );
+      syncWorkflowStepData();
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        $.otp.toaster.showErrorToast('Mark as final failed', error.responseJSON.message);
+      } else {
+        $.otp.toaster.showErrorToast('Mark as final failed', 'Unknown error during mark as final failed.');
+      }
+    }
+  });
 }
 
 function startWorkflowSystem() {
-    $.ajax({
-        url: $.otp.createLink({
-            controller: 'crashRepair',
-            action: 'startWorkflowSystem',
-        }),
-        dataType: 'json',
-        type: 'POST',
-        success: function (result) {
-            $.otp.toaster.showSuccessToast("Workflow System", "Workflow system has been started.");
-            window.setTimeout(() => {
-                window.location.reload(true);
-            }, 3000);
-        },
-        error: function (error) {
-            if (error && error.responseJSON && error.responseJSON.message) {
-                $.otp.toaster.showErrorToast("Workflow System", error.responseJSON.message);
-            } else {
-                $.otp.toaster.showErrorToast("Workflow System", "Workflow system start failed.");
-            }
-        }
-    });
+  $.ajax({
+    url: $.otp.createLink({
+      controller: 'crashRepair',
+      action: 'startWorkflowSystem'
+    }),
+    dataType: 'json',
+    type: 'POST',
+    success(result) {
+      $.otp.toaster.showSuccessToast('Workflow System', 'Workflow system has been started.');
+      window.setTimeout(() => {
+        window.location.reload(true);
+      }, 3000);
+    },
+    error(error) {
+      if (error && error.responseJSON && error.responseJSON.message) {
+        $.otp.toaster.showErrorToast('Workflow System', error.responseJSON.message);
+      } else {
+        $.otp.toaster.showErrorToast('Workflow System', 'Workflow system start failed.');
+      }
+    }
+  });
 }
 
 function restartSelectedSteps() {
-    getSelectedSteps((steps) => {
-        steps.forEach((step) => {
-            restartStep(step);
-        });
+  getSelectedSteps((steps) => {
+    steps.forEach((step) => {
+      restartStep(step);
     });
+  });
 }
 
 function restartSelectedWorkflowRuns() {
-    getSelectedSteps((steps) => {
-        steps.forEach((step) => {
-            restartWorkflowRun(step);
-        });
+  getSelectedSteps((steps) => {
+    steps.forEach((step) => {
+      restartWorkflowRun(step);
     });
+  });
 }
 
 function markSelectedStepsAsFailed() {
-    getSelectedSteps((steps) => {
-        steps.forEach((step) => {
-            setWorkflowStepAsFailed(step);
-        });
+  getSelectedSteps((steps) => {
+    steps.forEach((step) => {
+      setWorkflowStepAsFailed(step);
     });
+  });
 }
 
 function markSelectedRunsAsFinalFailed() {
-    getSelectedSteps((steps) => {
-        steps.forEach((step) => {
-            setWorkflowRunAsFinalFailed(step);
-        });
+  getSelectedSteps((steps) => {
+    steps.forEach((step) => {
+      setWorkflowRunAsFinalFailed(step);
     });
+  });
 }
 
 function getSelectedSteps(callback) {
-    const selectedSteps = $(".tableCheckbox:checked");
+  const selectedSteps = $('.tableCheckbox:checked');
 
-    const selectedStepIds = [];
+  const selectedStepIds = [];
 
-    selectedSteps.map((step) => {
-        selectedStepIds.push(selectedSteps[step].value);
-    });
+  selectedSteps.map((step) => {
+    selectedStepIds.push(selectedSteps[step].value);
+  });
 
-    callback(selectedStepIds);
+  callback(selectedStepIds);
 }
 
 function initializeDataTable() {
-    const table = $("#jobTable");
-    table.DataTable( {
-        paging: false
-    });
+  const table = $('#jobTable');
+  table.DataTable({
+    paging: false
+  });
 }
 
-$(document).ready(function () {
-    initializeDataTable();
-    syncWorkflowStepData();
+$(document).ready(() => {
+  initializeDataTable();
+  syncWorkflowStepData();
 });

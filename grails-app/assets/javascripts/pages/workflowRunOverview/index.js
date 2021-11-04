@@ -19,40 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-$(function () {
-    var tableElement = $("table#runs");
-    var buttonElements = $(".toggleButton");
+$(() => {
+  const tableElement = $('table#runs');
+  const buttonElements = $('.toggleButton');
 
-    var numberOfColumns = tableElement.find("thead tr:last th").length;
-    var fixedColumnsLeft = 3;
-    var fixedColumnsRight = 2;
+  const numberOfColumns = tableElement.find('thead tr:last th').length;
+  const fixedColumnsLeft = 3;
+  const fixedColumnsRight = 2;
 
-    var columnsToShow = [];
-    var i = fixedColumnsLeft;
-    tableElement.find("thead tr:first th[colspan]").each(function () {
-        columnsToShow.push(i)
-        i = i + +$(this).attr("colspan") + 1;
-    })
+  const columnsToShow = [];
+  var i = fixedColumnsLeft;
+  tableElement.find('thead tr:first th[colspan]').each(function () {
+    columnsToShow.push(i);
+    i = i + +$(this).attr('colspan') + 1;
+  });
 
-    var columnsToHide = [];
-    for (var i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
-        if (columnsToShow.indexOf(i) === -1) {
-            columnsToHide.push(i)
-        }
+  const columnsToHide = [];
+  for (var i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
+    if (columnsToShow.indexOf(i) === -1) {
+      columnsToHide.push(i);
     }
+  }
 
-    var dataTable = tableElement.dataTable({
-        "aoColumnDefs": [
-            {"bVisible": false, "aTargets": columnsToHide},
-        ],
-        bPaginate: false,
-        bSort: false,
-    });
+  const dataTable = tableElement.dataTable({
+    aoColumnDefs: [
+      { bVisible: false, aTargets: columnsToHide }
+    ],
+    bPaginate: false,
+    bSort: false
+  });
 
-    buttonElements.on("click", function (e) {
-        buttonElements.toggle();
-        for (var i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
-            dataTable.fnSetColumnVis(i, !dataTable.fnSettings().aoColumns[i].bVisible);
-        }
-    });
+  buttonElements.on('click', (e) => {
+    buttonElements.toggle();
+    for (let i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
+      dataTable.fnSetColumnVis(i, !dataTable.fnSettings().aoColumns[i].bVisible);
+    }
+  });
 });

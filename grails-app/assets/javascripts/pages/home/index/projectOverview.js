@@ -20,12 +20,10 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
+$(() => {
+  'use strict';
 
-$(function () {
-    "use strict";
-    $('#projectGroup_select').on("change", function () {
-        $.otp.graph.overview.init();
-    }).trigger("change");
+  $('#projectGroup_select').on('change', () => {
+    $.otp.graph.overview.init();
+  }).trigger('change');
 });

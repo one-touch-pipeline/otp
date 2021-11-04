@@ -25,127 +25,123 @@
  * It can be used to fire success, warning, error or info toasts.
  */
 $.otp.toaster = {
-    /**
+  /**
      * Fires an info toast message.
      *
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showInfoToast: function (title = 'Info', message = '') {
-        this.showToast(title, message, 'info');
-    },
-    /**
+  showInfoToast(title = 'Info', message = '') {
+    this.showToast(title, message, 'info');
+  },
+  /**
      * Fires a success toast message.
      *
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showSuccessToast: function (title = 'Success', message = 'Operation has been successful.') {
-        this.showToast(title, message, 'success');
-    },
-    /**
+  showSuccessToast(title = 'Success', message = 'Operation has been successful.') {
+    this.showToast(title, message, 'success');
+  },
+  /**
      * Fires a warning toast message.
      *
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showWarningToast: function (title = 'Warning', message = 'A warning occurred during the operation.') {
-        this.showToast(title, message, 'warning');
-    },
-    /**
+  showWarningToast(title = 'Warning', message = 'A warning occurred during the operation.') {
+    this.showToast(title, message, 'warning');
+  },
+  /**
      * Fires an error toast message.
      *
      * @param title: title of the toast
      * @param message: the toasts message
      */
-    showErrorToast: function (title = 'Error', message = 'Unknown error. Please try again.' ) {
-        this.showToast(title, message, 'danger');
-    },
-    /**
+  showErrorToast(title = 'Error', message = 'Unknown error. Please try again.') {
+    this.showToast(title, message, 'danger');
+  },
+  /**
      * Fires a toast message.
      *
      * @param title: title of the toast
      * @param message: the toasts message
      * @param state: allowed states: info, success, warning, danger. default is info
      */
-    showToast: function (title, message, state = 'info') {
-        const stateProps = this.getStateProps(state);
-        const date = new Date().toLocaleTimeString('en-US', {hour12: false, hour: 'numeric', minute: 'numeric'});
+  showToast(title, message, state = 'info') {
+    const stateProps = this.getStateProps(state);
+    const date = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
 
-        let otpToast =
-            '        <div class="toast ' + stateProps.toastClass + '" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">\n' +
-            '            <div class="toast-header">\n' +
-            '                <span class="otp-toast-icon-wrapper text-' + state + '">' + stateProps.icon + '</span>\n' +
-            '                <strong class="mr-auto">' + title + '</strong>\n' +
-            '                <small class="text-muted otp-toast-time-txt">' + date + '</small>\n' +
-            '                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">\n' +
-            '                    <span aria-hidden="true">&times;</span>\n' +
-            '                </button>\n' +
-            '            </div>\n' +
-            '            <div class="toast-body">\n' +
-                        '<div class="alert alert-' + state + '" role="alert">' +
-                        message +
-                        '</div>' +
-            '            </div>\n' +
-            '        </div>'
+    const otpToast = '<div class="toast ' + stateProps.toastClass +
+              '" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">\n' +
+              '<div class="toast-header">\n' +
+              '<span class="otp-toast-icon-wrapper text-' + state + '">' + stateProps.icon + '</span>\n' +
+              '<strong class="mr-auto">' + title + '</strong>\n' +
+              '<small class="text-muted otp-toast-time-txt">' + date + '</small>\n' +
+              '<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">\n' +
+              '<span aria-hidden="true">&times;</span>\n' +
+              '</button>\n' +
+              '</div>\n' +
+              ' <div class="toast-body">\n' +
+              '<div class="alert alert-' + state + '" role="alert">' + message + '</div>' +
+              '</div>\n' +
+              '</div>';
 
-        this.getToastBox().append(otpToast);
+    this.getToastBox().append(otpToast);
 
-        let toast = $('.toast');
+    const toast = $('.toast');
 
-        toast.on("hidden.bs.toast", function() {
-            $(this).remove();
-        });
-        toast.toast('show');
-    },
-    /**
+    toast.on('hidden.bs.toast', function () {
+      $(this).remove();
+    });
+    toast.toast('show');
+  },
+  /**
      * This method returns the wrapper for the toaster.
      * If it not exists in the DOM, it will be created then.
      *
      * @returns {*|Window.jQuery|HTMLElement}
      */
-    getToastBox: function () {
-        const toastBoxId = 'otpToastBox';
-        const toastBox = '<div id="' + toastBoxId + '" class="otpToastBox"></div>';
-        const getToastBoxFromDOM = () => {
-            return $('#' + toastBoxId)
-        };
+  getToastBox() {
+    const toastBoxId = 'otpToastBox';
+    const toastBox = '<div id="' + toastBoxId + '" class="otpToastBox"></div>';
+    const getToastBoxFromDOM = () => $('#' + toastBoxId);
 
-        if (getToastBoxFromDOM().length) {
-            return getToastBoxFromDOM();
-        }
+    if (getToastBoxFromDOM().length) {
+      return getToastBoxFromDOM();
+    }
 
-        $('body').append(toastBox);
-        return getToastBoxFromDOM();
-    },
-    /**
+    $('body').append(toastBox);
+    return getToastBoxFromDOM();
+  },
+  /**
      * Convert the state into a css class name.
      *
      * @param state: info, success, warning, danger
      * @returns {string}: css class
      */
-    getStateProps: function (state) {
-        switch (state) {
-            case "info": return {
-                toastClass: 'otpInfoToast',
-                icon: '<i class="bi bi-info-circle"></i>'
-            };
-            case "success": return {
-                toastClass: 'otpSuccessToast',
-                icon: '<i class="bi bi-check-circle"></i>'
-            };
-            case "warning": return {
-                toastClass: 'otpWarningToast',
-                icon: '<i class="bi bi-exclamation-circle"></i>'
-            };
-            case "danger": return {
-                toastClass: 'otpErrorToast',
-                icon: '<i class="bi bi-bug"></i>'
-            };
-            default: return {
-                toastClass: 'otpInfoToast',
-                icon: '<i class="bi bi-info-circle"></i>'
-            };
-        }
+  getStateProps(state) {
+    switch (state) {
+      case 'info': return {
+        toastClass: 'otpInfoToast',
+        icon: '<i class="bi bi-info-circle"></i>'
+      };
+      case 'success': return {
+        toastClass: 'otpSuccessToast',
+        icon: '<i class="bi bi-check-circle"></i>'
+      };
+      case 'warning': return {
+        toastClass: 'otpWarningToast',
+        icon: '<i class="bi bi-exclamation-circle"></i>'
+      };
+      case 'danger': return {
+        toastClass: 'otpErrorToast',
+        icon: '<i class="bi bi-bug"></i>'
+      };
+      default: return {
+        toastClass: 'otpInfoToast',
+        icon: '<i class="bi bi-info-circle"></i>'
+      };
     }
-}
+  }
+};

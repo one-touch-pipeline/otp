@@ -20,23 +20,22 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.projectInfo = {
-    confirmCompleteTransfer: function(event) {
-        if (!window.confirm('Are you sure that this transfer is completed? (receipt acknowledged? files deleted? disks wiped? etc..)')) {
-            event.preventDefault();
-        }
-    },
-
-    confirmProjectInfoDelete: function(event) {
-        if (!window.confirm('Are you sure that you want to permanently delete this document and any transfers based on it?')) {
-            event.preventDefault();
-            return;
-        }
-        if (!window.confirm('Are you really sure? This can not be undone!')) {
-            event.preventDefault();
-        }
+  confirmCompleteTransfer(event) {
+    if (!window.confirm(`Are you sure that this transfer is completed?
+     (receipt acknowledged? files deleted? disks wiped? etc..)`)) {
+      event.preventDefault();
     }
+  },
+
+  confirmProjectInfoDelete(event) {
+    if (!window.confirm(`Are you sure that you want to permanently
+     delete this document and any transfers based on it?`)) {
+      event.preventDefault();
+      return;
+    }
+    if (!window.confirm('Are you really sure? This can not be undone!')) {
+      event.preventDefault();
+    }
+  }
 };

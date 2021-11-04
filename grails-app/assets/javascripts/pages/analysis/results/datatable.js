@@ -20,261 +20,256 @@
  * SOFTWARE.
  */
 
-/*jslint browser: true */
-/*global $ */
-
 $.otp.resultsTable = {
 
-    registerDataTable: function (tableElement, source, columnDefs, convertRowData) {
-        const fileName = document.title.replaceAll(" ", "_") + "-" + $(".selected-project-value strong").text();
+  registerDataTable(tableElement, source, columnDefs, convertRowData) {
+    const fileName = document.title.replaceAll(' ', '_') + '-' + $('.selected-project-value strong').text();
 
-        "use strict";
-        var oTable = tableElement.dataTable({
-            sDom: '<i> B rt<"clear">',
-            buttons: $.otp.getDownloadButton("", fileName),
-            columnDefs: columnDefs,
-            bFilter: true,
-            bProcessing: true,
-            bServerSide: false,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: source,
-            bScrollCollapse: true,
-            sScrollY: 'auto',
-            sScrollX: 'auto',
-            bPaginate: false,
-            bDeferRender: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    "error": function () {
-                        // clear the table
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                        oTable.fnSettings().oFeatures.bServerSide = false;
-                    },
-                    "success": function (json) {
-                        var i;
-                        for (i = 0; i < json.aaData.length; i += 1) {
-                            json.aaData[i] = convertRowData(json.aaData[i]);
-                        }
-                        fnCallback(json);
-                        oTable.fnSettings().oFeatures.bServerSide = false;
-                    }
-                });
-            },
-            fnInitComplete: function () {
-                new $.fn.dataTable.FixedColumns( this, {
-                    "leftColumns": 2
-                } );
+    'use strict';
+
+    var oTable = tableElement.dataTable({
+      sDom: '<i> B rt<"clear">',
+      buttons: $.otp.getDownloadButton('', fileName),
+      columnDefs,
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: false,
+      bSort: true,
+      bJQueryUI: false,
+      bAutoWidth: false,
+      sAjaxSource: source,
+      bScrollCollapse: true,
+      sScrollY: 'auto',
+      sScrollX: 'auto',
+      bPaginate: false,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
+        $.ajax({
+          dataType: 'json',
+          type: 'POST',
+          url: sSource,
+          data: aoData,
+          error() {
+            // clear the table
+            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+            oTable.fnSettings().oFeatures.bServerSide = false;
+          },
+          success(json) {
+            let i;
+            for (i = 0; i < json.aaData.length; i += 1) {
+              json.aaData[i] = convertRowData(json.aaData[i]);
             }
+            fnCallback(json);
+            oTable.fnSettings().oFeatures.bServerSide = false;
+          }
         });
-        return oTable;
-    },
+      },
+      fnInitComplete() {
+        new $.fn.dataTable.FixedColumns(this, {
+          leftColumns: 2
+        });
+      }
+    });
+    return oTable;
+  },
 
-    /**
+  /**
      * Get a render function which wraps the data in a div shortened with ellipsis.
      *
      * The max width is given in 'em' and the unshortened data is provided in the title.
      */
-    getEllipsisRenderer: function (nCharacters) {
-        "use strict";
-        return function ( data, type, row ) {
-            return "<div " +
+  getEllipsisRenderer(nCharacters) {
+    'use strict';
+
+    return function (data, type, row) {
+      return '<div ' +
                 "class='trim-text-with-ellipsis' " +
                 "style='max-width: " + nCharacters + "em'" +
                 "title='" + data + "'" +
-                ">" + data + "</div>"
-        };
-    },
+                '>' + data + '</div>';
+    };
+  },
 
-    /**
+  /**
      * Helper function to return a link to the plots depending on if an instance exists.
      *
      * Returns the link if there is an instance, otherwise an empty string.
      */
-    plotLinkHelper: function (instanceId, controller, plotType) {
-        "use strict";
-        return instanceId ? $.otp.createLinkMarkup({
-            controller: controller,
-            action    : 'plots',
-            parameters: { 'bamFilePairAnalysis.id': instanceId, 'plotType': plotType },
-            text      : 'Plots'
-        }) : "";
-    },
+  plotLinkHelper(instanceId, controller, plotType) {
+    'use strict';
 
-    registerAceseq: function () {
-        "use strict";
-        $.otp.resultsTable.registerDataTable(
-            $('#resultsTable'),
-            $.otp.createLink({
-                controller: 'aceseq',
-                action: 'dataTableResults'
-            }),
-            [],
-            function (row) {
-                return [
-                    $.otp.createLinkMarkup({
-                        controller: 'individual',
-                        action: 'show',
-                        id: row.individualId,
-                        text: row.individualPid,
-                    }),
-                    row.sampleTypes,
-                    row.tcc,
-                    row.ploidy,
-                    row.ploidyFactor,
-                    row.goodnessOfFit,
-                    row.gender,
-                    row.solutionPossible,
-                    $.otp.resultsTable.plotLinkHelper(row.instanceId, "aceseq", "ACESEQ_ALL"),
-                    row.version,
-                    row.dateCreated,
-                    row.processingState,
-                ];
-            }
-        );
-    },
+    return instanceId ? $.otp.createLinkMarkup({
+      controller,
+      action: 'plots',
+      parameters: { 'bamFilePairAnalysis.id': instanceId, plotType },
+      text: 'Plots'
+    }) : '';
+  },
 
-    registerIndel: function () {
-        "use strict";
-        $.otp.resultsTable.registerDataTable(
-            $('#resultsTable'),
-            $.otp.createLink({
-                controller: 'indel',
-                action: 'dataTableResults'
-            }),
-            [],
-            function (row) {
-                return [
-                    $.otp.createLinkMarkup({
-                        controller: 'individual',
-                        action    : 'show',
-                        id        : row.individualId,
-                        text      : row.individualPid,
-                    }),
-                    row.sampleTypes,
-                    row.seqType,
-                    row.libPrepKits,
-                    // Indels
-                    row.numIndels,
-                    row.numIns,
-                    row.numDels,
-                    row.numSize1_3,
-                    row.numSize4_10,
-                    $.otp.resultsTable.plotLinkHelper(row.instanceId, "indel", "INDEL"),
-                    // Swap Checker
-                    row.somaticSmallVarsInTumor,
-                    row.somaticSmallVarsInControl,
-                    row.somaticSmallVarsInTumorCommonInGnomad,
-                    row.somaticSmallVarsInControlCommonInGnomad,
-                    row.somaticSmallVarsInTumorPass,
-                    row.somaticSmallVarsInControlPass,
-                    row.germlineSmallVarsInBothRare,
-                    // TINDA
-                    row.tindaSomaticAfterRescue,
-                    row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
-                    $.otp.resultsTable.plotLinkHelper(row.instanceId, "indel", "INDEL_TINDA"),
-                    row.version,
-                    row.dateCreated,
-                    row.processingState,
-                ];
-            }
-        );
-    },
+  registerAceseq() {
+    'use strict';
 
-    registerSophia: function () {
-        "use strict";
-        $.otp.resultsTable.registerDataTable(
-            $('#resultsTable'),
-            $.otp.createLink({
-                controller: 'sophia',
-                action: 'dataTableResults'
-            }),
-            [{
-                targets: 7,
-                render : $.otp.resultsTable.getEllipsisRenderer(20),
-            }],
-            function (row) {
-                return [
-                    $.otp.createLinkMarkup({
-                        controller: 'individual',
-                        action: 'show',
-                        id: row.individualId,
-                        text: row.individualPid,
-                    }),
-                    row.sampleTypes,
-                    row.seqType,
-                    row.controlMassiveInvPrefilteringLevel,
-                    row.tumorMassiveInvFilteringLevel,
-                    row.rnaContaminatedGenesCount,
-                    row.rnaDecontaminationApplied,
-                    row.rnaContaminatedGenesMoreThanTwoIntron,
-                    $.otp.resultsTable.plotLinkHelper(row.instanceId, "sophia", "SOPHIA"),
-                    row.version,
-                    row.dateCreated,
-                    row.processingState,
-                ];
-            }
-        );
-    },
+    $.otp.resultsTable.registerDataTable(
+      $('#resultsTable'),
+      $.otp.createLink({
+        controller: 'aceseq',
+        action: 'dataTableResults'
+      }),
+      [],
+      (row) => [
+        $.otp.createLinkMarkup({
+          controller: 'individual',
+          action: 'show',
+          id: row.individualId,
+          text: row.individualPid
+        }),
+        row.sampleTypes,
+        row.tcc,
+        row.ploidy,
+        row.ploidyFactor,
+        row.goodnessOfFit,
+        row.gender,
+        row.solutionPossible,
+        $.otp.resultsTable.plotLinkHelper(row.instanceId, 'aceseq', 'ACESEQ_ALL'),
+        row.version,
+        row.dateCreated,
+        row.processingState
+      ]
+    );
+  },
 
-    registerSnv: function () {
-        "use strict";
-        $.otp.resultsTable.registerDataTable(
-            $('#resultsTable'),
-            $.otp.createLink({
-                controller: 'snv',
-                action: 'dataTableResults'
-            }),
-            [],
-            function (row) {
-                return [
-                    $.otp.createLinkMarkup({
-                        controller: 'individual',
-                        action: 'show',
-                        id: row.individualId,
-                        text: row.individualPid,
-                    }),
-                    row.sampleTypes,
-                    row.seqType,
-                    row.libPrepKits,
-                    $.otp.resultsTable.plotLinkHelper(row.instanceId, "snv", "SNV"),
-                    row.version,
-                    row.dateCreated,
-                    row.processingState,
-                ];
-            }
-        );
-    },
-    registerRunYapsa: function () {
-        "use strict";
-        $.otp.resultsTable.registerDataTable(
-            $('#resultsTable'),
-            $.otp.createLink({
-                controller: 'runYapsa',
-                action: 'dataTableResults'
-            }),
-            [],
-            function (row) {
-                return [
-                    $.otp.createLinkMarkup({
-                        controller: 'individual',
-                        action    : 'show',
-                        id        : row.individualId,
-                        text      : row.individualPid,
-                    }),
-                    row.sampleTypes,
-                    row.seqType,
-                    row.libPrepKits,
-                    row.version,
-                    row.dateCreated,
-                    row.processingState,
-                ];
-            }
-        );
-    }
+  registerIndel() {
+    'use strict';
+
+    $.otp.resultsTable.registerDataTable(
+      $('#resultsTable'),
+      $.otp.createLink({
+        controller: 'indel',
+        action: 'dataTableResults'
+      }),
+      [],
+      (row) => [
+        $.otp.createLinkMarkup({
+          controller: 'individual',
+          action: 'show',
+          id: row.individualId,
+          text: row.individualPid
+        }),
+        row.sampleTypes,
+        row.seqType,
+        row.libPrepKits,
+        // Indels
+        row.numIndels,
+        row.numIns,
+        row.numDels,
+        row.numSize1_3,
+        row.numSize4_10,
+        $.otp.resultsTable.plotLinkHelper(row.instanceId, 'indel', 'INDEL'),
+        // Swap Checker
+        row.somaticSmallVarsInTumor,
+        row.somaticSmallVarsInControl,
+        row.somaticSmallVarsInTumorCommonInGnomad,
+        row.somaticSmallVarsInControlCommonInGnomad,
+        row.somaticSmallVarsInTumorPass,
+        row.somaticSmallVarsInControlPass,
+        row.germlineSmallVarsInBothRare,
+        // TINDA
+        row.tindaSomaticAfterRescue,
+        row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
+        $.otp.resultsTable.plotLinkHelper(row.instanceId, 'indel', 'INDEL_TINDA'),
+        row.version,
+        row.dateCreated,
+        row.processingState
+      ]
+    );
+  },
+
+  registerSophia() {
+    'use strict';
+
+    $.otp.resultsTable.registerDataTable(
+      $('#resultsTable'),
+      $.otp.createLink({
+        controller: 'sophia',
+        action: 'dataTableResults'
+      }),
+      [{
+        targets: 7,
+        render: $.otp.resultsTable.getEllipsisRenderer(20)
+      }],
+      (row) => [
+        $.otp.createLinkMarkup({
+          controller: 'individual',
+          action: 'show',
+          id: row.individualId,
+          text: row.individualPid
+        }),
+        row.sampleTypes,
+        row.seqType,
+        row.controlMassiveInvPrefilteringLevel,
+        row.tumorMassiveInvFilteringLevel,
+        row.rnaContaminatedGenesCount,
+        row.rnaDecontaminationApplied,
+        row.rnaContaminatedGenesMoreThanTwoIntron,
+        $.otp.resultsTable.plotLinkHelper(row.instanceId, 'sophia', 'SOPHIA'),
+        row.version,
+        row.dateCreated,
+        row.processingState
+      ]
+    );
+  },
+
+  registerSnv() {
+    'use strict';
+
+    $.otp.resultsTable.registerDataTable(
+      $('#resultsTable'),
+      $.otp.createLink({
+        controller: 'snv',
+        action: 'dataTableResults'
+      }),
+      [],
+      (row) => [
+        $.otp.createLinkMarkup({
+          controller: 'individual',
+          action: 'show',
+          id: row.individualId,
+          text: row.individualPid
+        }),
+        row.sampleTypes,
+        row.seqType,
+        row.libPrepKits,
+        $.otp.resultsTable.plotLinkHelper(row.instanceId, 'snv', 'SNV'),
+        row.version,
+        row.dateCreated,
+        row.processingState
+      ]
+    );
+  },
+  registerRunYapsa() {
+    'use strict';
+
+    $.otp.resultsTable.registerDataTable(
+      $('#resultsTable'),
+      $.otp.createLink({
+        controller: 'runYapsa',
+        action: 'dataTableResults'
+      }),
+      [],
+      (row) => [
+        $.otp.createLinkMarkup({
+          controller: 'individual',
+          action: 'show',
+          id: row.individualId,
+          text: row.individualPid
+        }),
+        row.sampleTypes,
+        row.seqType,
+        row.libPrepKits,
+        row.version,
+        row.dateCreated,
+        row.processingState
+      ]
+    );
+  }
 };
