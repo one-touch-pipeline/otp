@@ -23,7 +23,7 @@
 $.otp.sequence = {
 
   register() {
-    const searchCriteria = $.otp.dataTableFilter.register($('#searchCriteriaTable'), (searchCriteria) => {
+    const searchCriteria = $.otp.dataTableFilter.register($('#searchCriteriaTable'), () => {
       $('#sequenceTable').dataTable().fnDraw();
     });
     const showRunLinks = document.getElementById('showRunLinks').value;

@@ -353,11 +353,11 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         xmax: json.xMax,
         eventsClick(e, shape) {
           const index = shape[4];
-          const id = shape.object.data[0][index][3];
+          const jobId = shape.object.data[0][index][3];
           location.href = $.otp.createLink({
             controller: 'clusterJobDetail',
             action: 'show',
-            id
+            id: jobId
           });
         },
         eventsMousemove(e, shape) {

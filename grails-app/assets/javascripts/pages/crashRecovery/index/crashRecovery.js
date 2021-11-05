@@ -109,9 +109,9 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
               controller: target.controller,
               action: target.action,
               parameters: { ids }
-            }), 'parameters=' + JSON.stringify(parameters), (data) => {
+            }), 'parameters=' + JSON.stringify(parameters), (response) => {
               $('#crashRecoveryTable').dataTable().fnDraw();
-              $.otp.infoMessage(data.success);
+              $.otp.infoMessage(response.success);
             });
             $(this).dialog('close');
           }

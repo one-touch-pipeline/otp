@@ -35,9 +35,9 @@ $(() => {
   });
 
   const columnsToHide = [];
-  for (let i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
-    if (columnsToShow.indexOf(i) === -1) {
-      columnsToHide.push(i);
+  for (let j = fixedColumnsLeft; j < numberOfColumns - fixedColumnsRight; j++) {
+    if (columnsToShow.indexOf(j) === -1) {
+      columnsToHide.push(j);
     }
   }
 
@@ -51,8 +51,8 @@ $(() => {
 
   buttonElements.on('click', (e) => {
     buttonElements.toggle();
-    for (let i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
-      dataTable.fnSetColumnVis(i, !dataTable.fnSettings().aoColumns[i].bVisible);
+    for (let j = fixedColumnsLeft; j < numberOfColumns - fixedColumnsRight; j++) {
+      dataTable.fnSetColumnVis(j, !dataTable.fnSettings().aoColumns[j].bVisible);
     }
   });
 });

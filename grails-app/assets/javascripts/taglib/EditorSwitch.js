@@ -610,12 +610,12 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data,
-      success(data) {
-        if (data.success) {
+      success(response) {
+        if (response.success) {
           success('Success', 'Data stored successfully');
           window.setTimeout(() => { location.reload(); }, 300);
         } else {
-          failure('Data could not be stored', data.error);
+          failure('Data could not be stored', response.error);
         }
       },
       error(jqXHR, textStatus, errorThrown) {

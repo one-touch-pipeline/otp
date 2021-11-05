@@ -107,14 +107,14 @@ $(() => {
         }
 
         $t
-          .find('thead th').each(function (i) {
-            $stickyHead.find('th').eq(i).width($(this).width());
+          .find('thead th').each(function (element) {
+            $stickyHead.find('th').eq(element).width($(this).width());
           })
           .end()
           .find('tr')
-          .each(function (i) {
-            $stickyCol.find('tr').eq(i).height($(this).height());
-            $stickyInsct.find('tr').eq(i).height($(this).height());
+          .each(function (element) {
+            $stickyCol.find('tr').eq(element).height($(this).height());
+            $stickyInsct.find('tr').eq(element).height($(this).height());
           });
 
         // Set width of sticky table head
