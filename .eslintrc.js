@@ -62,7 +62,6 @@ if (process.env.CI) {
     'no-template-curly-in-string': 'off',
     'no-useless-concat': 'off',
     'block-scoped-var': 'off',
-    'no-lonely-if': 'off',
     'no-prototype-builtins': 'off',
     'no-useless-call': 'off',
     'no-self-assign': 'off',

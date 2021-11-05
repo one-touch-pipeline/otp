@@ -148,26 +148,25 @@ $(() => {
               top: 0
             });
           }
-        } else {
+        } else if ($w.scrollTop() > $t.offset().top &&
+           $w.scrollTop() < $t.offset().top + $t.outerHeight() - allowance) {
           // If it is not overflowing (basic layout)
           // Position sticky header based on viewport scrollTop
-          if ($w.scrollTop() > $t.offset().top && $w.scrollTop() < $t.offset().top + $t.outerHeight() - allowance) {
-            // When top of viewport is in the table itself
-            $stickyHead.css({
-              opacity: 1,
-              top: $w.scrollTop() - $t.offset().top
-            });
-            $stickyInsct.css({
-              opacity: 1,
-              top: $w.scrollTop()
-            });
-          } else {
-            // When top of viewport is above or below table
-            $stickyHead.add($stickyInsct).css({
-              opacity: 0,
-              top: 0
-            });
-          }
+          // When top of viewport is in the table itself
+          $stickyHead.css({
+            opacity: 1,
+            top: $w.scrollTop() - $t.offset().top
+          });
+          $stickyInsct.css({
+            opacity: 1,
+            top: $w.scrollTop()
+          });
+        } else {
+          // When top of viewport is above or below table
+          $stickyHead.add($stickyInsct).css({
+            opacity: 0,
+            top: 0
+          });
         }
       };
       var calcAllowance = function () {
