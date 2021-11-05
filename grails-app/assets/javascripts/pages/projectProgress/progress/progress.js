@@ -27,7 +27,7 @@ $(() => {
     dateFormat: 'yy-mm-dd',
     maxDate: $('#endDate').val()
   });
-  var oTableProgress = $('#progressId').dataTable({
+  const oTableProgress = $('#progressId').dataTable({
     sDom: '<i> B rt<"clear">',
     buttons: $.otp.getDownloadButton(),
     bFilter: true,

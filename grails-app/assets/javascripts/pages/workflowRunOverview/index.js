@@ -28,14 +28,14 @@ $(() => {
   const fixedColumnsRight = 2;
 
   const columnsToShow = [];
-  var i = fixedColumnsLeft;
+  let i = fixedColumnsLeft;
   tableElement.find('thead tr:first th[colspan]').each(function () {
     columnsToShow.push(i);
     i = i + +$(this).attr('colspan') + 1;
   });
 
   const columnsToHide = [];
-  for (var i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
+  for (let i = fixedColumnsLeft; i < numberOfColumns - fixedColumnsRight; i++) {
     if (columnsToShow.indexOf(i) === -1) {
       columnsToHide.push(i);
     }

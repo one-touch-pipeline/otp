@@ -50,7 +50,6 @@ if (process.env.CI) {
     'prefer-const': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',
-    'no-var': 'off',
     radix: 'off',
     'no-plusplus': 'off',
     'no-new': 'off',

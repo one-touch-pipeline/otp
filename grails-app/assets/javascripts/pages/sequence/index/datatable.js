@@ -141,7 +141,7 @@ $.otp.sequence = {
 
               if (row.withdrawn) {
                 $('#withdrawn_description').show();
-                var withdrawnRow = [];
+                const withdrawnRow = [];
                 rowData.forEach((rowEntry) => {
                   rowEntry = rowEntry != null ? "<span class='withdrawn'>" + rowEntry + '</span>' : '';
                   withdrawnRow.push(rowEntry);

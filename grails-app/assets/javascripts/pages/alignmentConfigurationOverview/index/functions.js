@@ -29,7 +29,7 @@ $.otp.projectConfig = {
   registerDataTable(selector, url, successUpdate) {
     'use strict';
 
-    var oTable = $(selector).dataTable({
+    const oTable = $(selector).dataTable({
       sDom: '<i> T rt<"clear">',
       oTableTools: $.otp.tableTools,
       bFilter: true,

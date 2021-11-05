@@ -39,7 +39,7 @@ $.otp.sampleIdentifierOverviewTable = {
 
     const fileName = 'Sample_Identifier-' + $('.selected-project-value strong').text();
 
-    var oTable = $(selector).dataTable({
+    const oTable = $(selector).dataTable({
       sDom: '<i> B rt<"clear">',
       buttons: $.otp.getDownloadButton('', fileName),
       bFilter: true,

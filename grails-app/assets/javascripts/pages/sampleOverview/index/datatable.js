@@ -25,7 +25,7 @@ $(() => {
 
   const fileName = 'Sample_Overview-' + $('.selected-project-value strong').text();
 
-  var oTableLaneOverview = $('#laneOverviewId').dataTable({
+  const oTableLaneOverview = $('#laneOverviewId').dataTable({
     sDom: '<i> B rt<"clear">',
     buttons: $.otp.getDownloadButton('', fileName),
     bFilter: true,

@@ -39,7 +39,7 @@ $.otp.projectOverviewTable = {
 
     const fileName = $(selector).parent().attr('data-csv-title') + '-' + $('.selected-project-value strong').text();
 
-    var oTable = $(selector).dataTable({
+    const oTable = $(selector).dataTable({
       sDom: '<i> B rt<"clear">',
       buttons: $.otp.getDownloadButton('', fileName),
       oTableTools: $.otp.tableTools,

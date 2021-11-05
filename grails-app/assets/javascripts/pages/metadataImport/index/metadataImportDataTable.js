@@ -169,7 +169,7 @@ $(() => {
           });
         }
       };
-      var calcAllowance = function () {
+      const calcAllowance = function () {
         let a = 0;
         // Calculate allowance
         $t.find('tbody tr:lt(3)').each(function () {
