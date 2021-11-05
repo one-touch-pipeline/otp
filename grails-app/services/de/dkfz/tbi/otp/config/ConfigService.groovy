@@ -70,6 +70,7 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
+    @Deprecated
     static ConfigService getInstance() {
         return context.getBean("configService")
     }

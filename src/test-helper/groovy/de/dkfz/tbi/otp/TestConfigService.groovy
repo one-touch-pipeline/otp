@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
+import java.nio.file.Path
 import java.time.*
 
 @SuppressWarnings('JavaIoPackageAccess')
@@ -39,6 +40,9 @@ class TestConfigService extends ConfigService {
 
     static Map cleanProperties
 
+    /**
+     * Do no use the constructor in integration and workflow tests, but use the autowired config service instead
+     */
     @SuppressWarnings('UnsafeImplementationAsMap')
     TestConfigService(Map<OtpProperty, String> properties = [:]) {
         super()
@@ -100,6 +104,9 @@ class TestConfigService extends ConfigService {
         ] as ApplicationContext
     }
 
+    /**
+     * Do no use the constructor in integration and workflow tests, but use the autowired config service instead
+     */
     TestConfigService(File baseFolder, Map<OtpProperty, String> properties = [:]) {
         this([
                 (OtpProperty.PATH_PROJECT_ROOT)    : new File(baseFolder, 'root').path,
@@ -108,8 +115,19 @@ class TestConfigService extends ConfigService {
         ] + properties)
     }
 
-    void setOtpProperty(OtpProperty key, String value) {
+    void addOtpProperty(OtpProperty key, String value) {
         otpProperties.put(key, value)
+    }
+
+    void addOtpProperties(Map<OtpProperty, String> properties) {
+        otpProperties.putAll(properties)
+    }
+
+    void addOtpProperties(Path baseFolder, Map<OtpProperty, String> properties = [:]) {
+        addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, baseFolder.resolve('root').toString())
+        addOtpProperty(OtpProperty.PATH_PROCESSING_ROOT, baseFolder.resolve('processing').toString())
+        addOtpProperty(OtpProperty.PATH_CLUSTER_LOGS_OTP, baseFolder.resolve('logging').toString())
+        addOtpProperties(properties)
     }
 
     void clean() {
