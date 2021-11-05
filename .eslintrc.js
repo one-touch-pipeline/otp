@@ -35,7 +35,6 @@ const lintRules = {
 if (process.env.CI) {
   Object.assign(lintRules, {
     strict: 'off',
-    'no-redeclare': 'off',
     'func-names': 'off',
     'no-use-before-define': 'off',
     'prefer-template': 'off',

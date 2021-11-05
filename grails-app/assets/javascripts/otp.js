@@ -20,9 +20,6 @@
  * SOFTWARE.
  */
 
-/* jslint browser: true */
-/* global $ */
-
 $.otp = {
   contextPath: $('head meta[name=contextPath]').attr('content'),
   uriWithParams: $('head meta[name=uriWithParams]').attr('content'),

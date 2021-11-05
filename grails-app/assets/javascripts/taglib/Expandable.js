@@ -20,9 +20,6 @@
  * SOFTWARE.
  */
 
-/* global $: false, window: false
- */
-
 $(() => {
   $('.expandable-button').on('click', function () {
     $(this).siblings('.expandable-container').toggleClass('collapsed');

@@ -20,9 +20,6 @@
  * SOFTWARE.
  */
 
-/* global $: false, window: false
- */
-
 $(() => {
   $('.no-switched-user').find('input , button , select , textarea').prop('disabled', true);
 });

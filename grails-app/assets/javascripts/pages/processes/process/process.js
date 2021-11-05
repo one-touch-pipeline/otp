@@ -20,9 +20,6 @@
  * SOFTWARE.
  */
 
-/* jslint continue: true */
-/* global $ */
-
 /**
  * Creates the datatables view for the list of all ProcessingSteps for a given Process.
  * @param selector The JQuery selector for the table to create the datatable into
