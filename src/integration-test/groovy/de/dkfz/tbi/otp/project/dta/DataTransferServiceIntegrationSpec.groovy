@@ -31,7 +31,6 @@ import org.springframework.web.multipart.MultipartFile
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -72,10 +71,7 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
                     _ * getCurrentUser() >> getUser(ADMIN)
                 },
         )
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
-                (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
-        ])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
 
     void cleanup() {

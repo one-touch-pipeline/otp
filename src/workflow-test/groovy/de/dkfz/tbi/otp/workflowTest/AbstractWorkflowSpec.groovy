@@ -462,7 +462,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void initFileSystem() {
         log.debug("initializing fileSystem and depending options")
-        configService.setOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
+        configService.addOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
 
         remoteFileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
@@ -485,7 +485,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 (OtpProperty.PATH_PROJECT_ROOT)    : "${workflowResultDirectory}/projectPath",
                 (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${workflowResultDirectory}/loggingPath",
         ].each { key, value ->
-            configService.setOtpProperty(key, value)
+            configService.addOtpProperty(key, value)
         }
 
         log.debug "Base directory: ${workflowResultDirectory}"

@@ -34,7 +34,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -82,11 +81,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void baseSetupData() {
         createUserAndRoles()
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
-                (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
-        ])
-        configService.processingOptionService = new ProcessingOptionService()
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
 
     void setupData() {

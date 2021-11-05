@@ -75,7 +75,7 @@ class DataTransferAgreementServiceIntegrationSpec extends Specification implemen
                         }
                 ]),
         )
-        configService = new TestConfigService(temporaryFolder.newFolder())
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
 
     void cleanup() {

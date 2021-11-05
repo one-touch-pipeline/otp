@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -82,11 +81,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
             )
         }
 
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
-        ])
-
+        configService.addOtpProperties(tmpDir.root.toPath())
 
         // prepareDataFilesOnFileSystem
         assert 1 == roddyBamFile.seqTracks.size()

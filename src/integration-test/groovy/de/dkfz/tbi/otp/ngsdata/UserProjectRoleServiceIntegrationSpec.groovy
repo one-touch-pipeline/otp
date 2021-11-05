@@ -37,7 +37,6 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -67,6 +66,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     GrailsApplication grailsApplication
 
     UserProjectRoleService userProjectRoleService
+    TestConfigService configService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -82,6 +82,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 }
         )
 
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
+
         userProjectRoleService = new UserProjectRoleService()
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
         userProjectRoleService.springSecurityService = springSecurityService
@@ -90,7 +92,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.auditLogService.securityService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
-        userProjectRoleService.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        userProjectRoleService.configService = configService
         userProjectRoleService.userService = new UserService()
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
@@ -119,6 +121,10 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM,
                 value: EMAIL_TICKET_SYSTEM,
         )
+    }
+
+    void cleanup() {
+        configService.clean()
     }
 
     /**

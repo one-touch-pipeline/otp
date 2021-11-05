@@ -42,13 +42,14 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
     static final String TICKET_EMAIL = HelperUtils.randomEmail
 
     MailHelperService mailHelperService
+    TestConfigService configService
 
     void setupData() {
         findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM, value: TICKET_EMAIL)
 
         mailHelperService = new MailHelperService()
         mailHelperService.processingOptionService = new ProcessingOptionService()
-        mailHelperService.configService = new TestConfigService()
+        mailHelperService.configService = configService
         mailHelperService.mailService = Mock(MailService)
     }
 

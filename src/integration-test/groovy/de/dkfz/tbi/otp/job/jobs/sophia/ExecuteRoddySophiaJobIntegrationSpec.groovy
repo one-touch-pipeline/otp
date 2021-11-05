@@ -29,7 +29,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -45,6 +44,8 @@ import java.nio.file.Path
 @Integration
 class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
+    TestConfigService configService
+
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -59,7 +60,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 sophiaService    : Spy(SophiaService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -142,7 +143,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -180,7 +181,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
@@ -209,7 +210,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {

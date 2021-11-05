@@ -31,7 +31,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.*
@@ -72,7 +71,6 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         realm = roddyBamFile.project.realm
-        configService = new TestConfigService()
 
         outputNoClusterJobsSubmitted = new ProcessOutput(
                 stderr: "Creating the following execution directory to store information about this process:\n" +
@@ -107,7 +105,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
     }
 
     private File setRootPathAndCreateWorkExecutionStoreDirectory() {
-        configService.setOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tmpDir.newFolder().path)
+        configService.addOtpProperties(tmpDir.newFolder().toPath())
         File workRoddyExecutionDir = new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
         assert workRoddyExecutionDir.mkdirs()
         return workRoddyExecutionDir

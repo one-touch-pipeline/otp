@@ -32,7 +32,6 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
@@ -76,10 +75,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
                         }
                 ]),
         )
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
-                (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
-        ])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
 
     void cleanup() {

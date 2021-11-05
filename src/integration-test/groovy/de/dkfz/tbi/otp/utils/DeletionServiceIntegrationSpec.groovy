@@ -65,6 +65,10 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.workflowDeletionService = new WorkflowDeletionService()
     }
 
+    void cleanup() {
+        configService.clean()
+    }
+
     void "assertNoEgaSubmissionsForProject, throws assertion error when there are connected EgaSubmissions"() {
         given:
         setupData()
@@ -499,7 +503,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         setupData()
 
         final File basePath = new File("/dev/null/otp-test/")
-        configService = new TestConfigService(basePath)
+        configService.addOtpProperties(basePath.toPath())
         final String projectPath = "projectPath"
         final Individual individual = createIndividual(
                 project: createProject(

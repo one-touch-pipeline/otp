@@ -30,7 +30,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
@@ -60,6 +59,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
     AbstractMergedBamFile bamFile2
 
     SnvCallingService snvCallingService
+    TestConfigService configService
 
     void setupData() {
         Map map = DomainFactory.createProcessableSamplePair()
@@ -419,7 +419,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         SnvCallingService snvCallingService = new SnvCallingService(
                 configService: configService,
                 fileService: new FileService(),

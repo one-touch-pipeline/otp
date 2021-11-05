@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
@@ -62,7 +61,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         }
         assert data.referenceGenome.save([flush: true])
         DomainFactory.createAllAlignableSeqTypes()
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
 
     @After

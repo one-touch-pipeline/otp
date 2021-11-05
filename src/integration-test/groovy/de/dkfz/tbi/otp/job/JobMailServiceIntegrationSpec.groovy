@@ -29,7 +29,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
@@ -44,6 +43,8 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 @Integration
 class JobMailServiceIntegrationSpec extends Specification implements DomainFactoryCore, DomainFactoryProcessingPriority {
 
+    TestConfigService configService
+
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -51,7 +52,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
     void "sendErrorNotification, when with #completedCount completed cluster jobs and with #failedCount failed cluster job, send expected email"() {
         given:
         JobStatusLoggingService jobStatusLoggingService = new JobStatusLoggingService()
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         jobStatusLoggingService.configService = configService
 
         OtrsTicket otrsTicket = createOtrsTicket()

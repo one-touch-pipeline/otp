@@ -30,7 +30,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
@@ -77,7 +76,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         roddyBamFile = createBamFile()
 
         realm = roddyBamFile.project.realm
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
     }
 
     void cleanup() {

@@ -50,8 +50,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
     TestConfigService configService
 
     void setupData() {
-        configService = new TestConfigService()
-
         project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
@@ -102,10 +100,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                 fileName: "FILE_NAME",
                 workPackage: externalMergingWorkPackage
         )
-    }
-
-    void cleanup() {
-        configService.clean()
     }
 
     @Test

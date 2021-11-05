@@ -99,7 +99,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test failedOrNotFinishedClusterJobs, when job state log file does not exist, should fail"() {
         given:
-        testConfigService.setOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
+        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
 
         String execDirName = "exec_890420_133730004_user_analysis"
         File roddyExecDir = new File(roddyBamFile.getWorkExecutionStoreDirectory(), execDirName)
@@ -118,7 +118,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test failedOrNotFinishedClusterJobs, with correct job state log file"() {
         given:
-        testConfigService.setOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
+        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
 
         String execDirName = "exec_890420_133730004_user_analysis"
         File roddyExecDir = new File(roddyBamFile.getWorkExecutionStoreDirectory(), execDirName)
@@ -137,7 +137,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
     void "test failedOrNotFinishedClusterJobs, with multiple job state log files"() {
         given:
-        testConfigService.setOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
+        testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
         Realm realm = DomainFactory.createRealm()
         ClusterJobIdentifier identifierA = new ClusterJobIdentifier(realm, "pbsId1")
         ClusterJobIdentifier identifierB = new ClusterJobIdentifier(realm, "pbsId2")

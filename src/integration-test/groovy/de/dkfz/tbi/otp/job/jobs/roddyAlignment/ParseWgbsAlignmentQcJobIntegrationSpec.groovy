@@ -33,7 +33,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -64,7 +63,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
     RoddyBamFile roddyBamFile
 
     void setupData() {
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
 
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.commentService = new CommentService()

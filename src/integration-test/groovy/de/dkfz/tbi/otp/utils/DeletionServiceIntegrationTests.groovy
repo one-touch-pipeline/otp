@@ -29,7 +29,6 @@ import org.junit.rules.TemporaryFolder
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
@@ -70,10 +69,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     void setupData() {
         createUserAndRoles()
         outputFolder = temporaryFolder.newFolder("outputFolder").toPath()
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.toString(),
-                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.toString(),
-        ])
+        configService.addOtpProperties(outputFolder)
         snvCallingService.configService = configService
         DomainFactory.createDefaultRealmWithProcessingOption()
     }

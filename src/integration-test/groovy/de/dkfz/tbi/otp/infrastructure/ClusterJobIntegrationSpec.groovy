@@ -26,7 +26,6 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -51,16 +50,10 @@ class ClusterJobIntegrationSpec extends Specification implements WorkflowSystemD
     static final ZonedDateTime STARTED = QUEUED.plusDays(1)
     static final ZonedDateTime ENDED = STARTED.plusDays(1)
 
-    TestConfigService configService
     ProcessingOptionService processingOptionService
 
     void setupData() {
-        configService = new TestConfigService()
         findOrCreateProcessingOption([name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, value: "1.0"])
-    }
-
-    void cleanupData() {
-        configService.clean()
     }
 
     void "test getter"() {

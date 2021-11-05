@@ -407,7 +407,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
     }
 
     private File setRootPathAndCreateWorkExecutionStoreDirectory() {
-        configService.setOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tmpDir.newFolder().path)
+        configService.addOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tmpDir.newFolder().path)
         File workRoddyExecutionDir = new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
         assert workRoddyExecutionDir.mkdirs()
         return workRoddyExecutionDir

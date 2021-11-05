@@ -29,7 +29,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
@@ -57,10 +56,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
     }
 
     void setupData() {
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
-        ])
+        configService.addOtpProperties(tmpDir.root.toPath())
     }
 
     void cleanup() {

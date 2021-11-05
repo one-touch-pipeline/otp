@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -50,7 +49,7 @@ class ReferenceGenomeServiceTests {
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     private MergingWorkPackage createDataForChromosomeSizeInformationFiles()  {
-        configService = new TestConfigService([(OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
                 referenceGenome: DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),

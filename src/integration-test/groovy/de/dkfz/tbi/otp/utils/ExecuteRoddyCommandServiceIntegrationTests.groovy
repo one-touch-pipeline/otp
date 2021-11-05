@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -86,10 +85,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
         roddyCommand = new File(roddyPath, 'roddy.sh')
         tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
         roddyBamFile = DomainFactory.createRoddyBamFile()
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : tmpOutputDir.path + "/root",
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpOutputDir.path + "/processing",
-        ])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
         realm = roddyBamFile.project.realm
         assert realm.save(flush: true)
 

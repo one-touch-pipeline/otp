@@ -43,12 +43,13 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     ReferenceGenomeService referenceGenomeService
+    TestConfigService configService
 
     ReferenceGenome referenceGenome
 
     void setupData() {
         referenceGenomeService = new ReferenceGenomeService(
-                configService          : new TestConfigService(),
+                configService          : configService,
                 fileService            : new FileService(),
                 fileSystemService      : new TestFileSystemService(),
                 processingOptionService: new ProcessingOptionService(),

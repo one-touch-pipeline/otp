@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -73,11 +72,8 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
         ])
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path + "/root",
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path + "/processing",
-        ]
-        )
+        configService.addOtpProperties(tmpDir.root.toPath())
+
         realm = DomainFactory.createRealm()
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },

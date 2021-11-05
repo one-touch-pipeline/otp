@@ -256,7 +256,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         File rootDirectory = inputRootDirectory
         assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
 
-        configService.setOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
+        configService.addOtpProperty((OtpProperty.SSH_USER), configService.workflowTestAccountName)
 
         Map realmParams = [
                 name                       : 'REALM_NAME',
@@ -277,7 +277,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 (OtpProperty.PATH_PROCESSING_ROOT) : "${baseDirectory}/processing_root_path",
                 (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${baseDirectory}/logging_root_path",
         ].each { key, value ->
-            configService.setOtpProperty(key, value)
+            configService.addOtpProperty(key, value)
         }
 
         createDirectories([

@@ -29,17 +29,11 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
@@ -61,10 +55,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
     void setupData() {
         createUserAndRoles()
         outputFolder = temporaryFolder.newFolder("outputFolder").toPath()
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.toString(),
-                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.toString(),
-        ])
+        configService.addOtpProperties(outputFolder)
     }
 
     void cleanup() {

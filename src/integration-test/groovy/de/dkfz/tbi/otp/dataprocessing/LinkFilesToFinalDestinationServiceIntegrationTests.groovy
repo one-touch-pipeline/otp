@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
@@ -63,7 +62,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         assert roddyBamFile.save(flush: true)
 
         realm = roddyBamFile.project.realm
-        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        configService.addOtpProperties(temporaryFolder.newFolder().toPath())
 
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED

@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
@@ -64,10 +63,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         DomainFactory.createRoddyAlignableSeqTypes()
 
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
-        ])
+        configService.addOtpProperties(tmpDir.root.toPath())
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 md5sum                      : null,
