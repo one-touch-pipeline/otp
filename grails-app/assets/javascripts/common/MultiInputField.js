@@ -33,7 +33,7 @@ $(() => {
 
     // select2, with all its custom event handlers, doesn't take well to cloning.
     // Remove any that might be in there, to be recreated afterwards.
-    const orig_select2 = $('select.use-select-2', baseField).select2('destroy');
+    const origSelect2 = $('select.use-select-2', baseField).select2('destroy');
 
     // use base field as template for new one, but empty any selections.
     const clonedField = baseField.clone();
@@ -50,7 +50,7 @@ $(() => {
     parent.append(clonedField);
 
     // if there are any select2-wannabe's in there, (re-)apply now that we're done.
-    $.otp.applySelect2(orig_select2);
+    $.otp.applySelect2(origSelect2);
     $.otp.applySelect2($('select.use-select-2', clonedField));
   });
 

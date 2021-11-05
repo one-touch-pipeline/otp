@@ -225,7 +225,7 @@ $.otp.clusterJobGeneralGraph = {
     'use strict';
 
     const step = Math.floor(labels.length / 24);
-    const newLabels = labels.filter((value_ignored, index) => index % step === 0);
+    const newLabels = labels.filter((ignoredValue, index) => index % step === 0);
     return newLabels;
   }
 };

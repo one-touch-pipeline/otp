@@ -43,7 +43,6 @@ if (process.env.CI) {
     'no-unused-vars': 'off',
     eqeqeq: 'off',
     'no-undef': 'off',
-    camelcase: 'off',
     'no-shadow': 'off',
     'no-restricted-globals': 'off',
     'default-case': 'off',
