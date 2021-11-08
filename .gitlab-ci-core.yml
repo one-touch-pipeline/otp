@@ -134,6 +134,8 @@ codenarc:
 eslint:
   extends: .abstract_base_template
   stage: codestyle
+  only:
+    - branches
   script:
     - set -e
     - ./gradlew esLintExportCi
@@ -142,20 +144,6 @@ eslint:
     paths:
       - build/reports/eslint
     when: always
-  allow_failure: true
-
-eslint:
-  extends: .abstract_base_template
-  stage: codestyle
-  script:
-    - set -e
-    - ./gradlew npm_run_lint-export
-  artifacts:
-    <<: *artifacts_template
-    paths:
-      - build/reports/eslint
-    when: always
-  allow_failure: true
 
 create war:
   extends: .abstract_base_template
