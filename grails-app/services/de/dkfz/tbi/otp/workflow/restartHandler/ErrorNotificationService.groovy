@@ -24,17 +24,13 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
 import java.time.LocalDateTime
@@ -46,8 +42,6 @@ class ErrorNotificationService {
     MailHelperService mailHelperService
 
     OtrsTicketService otrsTicketService
-
-    ProcessingOptionService processingOptionService
 
     LinkGenerator grailsLinkGenerator
 
@@ -73,7 +67,7 @@ class ErrorNotificationService {
                 StackTraceUtils.getStackTrace(exceptionInExceptionHandling),
         ].join('\n')
 
-        mailHelperService.sendEmail(subject, body, recipients)
+        mailHelperService.sendEmailToTicketSystem(subject, body)
     }
 
     void send(WorkflowStep workflowStep, WorkflowJobErrorDefinition.Action action, String checkText, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
@@ -89,11 +83,7 @@ class ErrorNotificationService {
                 createWorkflowStepInformation(workflowStep),
                 createLogInformation(workflowStep),
         ].join('\n')
-        mailHelperService.sendEmail(subject, body, recipients)
-    }
-
-    private List<String> getRecipients() {
-        return processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
+        mailHelperService.sendEmailToTicketSystem(subject, body)
     }
 
     protected String createSubject(WorkflowStep workflowStep, WorkflowJobErrorDefinition.Action action) {

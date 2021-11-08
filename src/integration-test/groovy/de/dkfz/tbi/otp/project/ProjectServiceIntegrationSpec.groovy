@@ -76,7 +76,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     static final String FILE_NAME = "fileName"
     static final byte[] CONTENT = 0..3
-    static final String EMAIL_RECIPIENT = "email-recipient@notification.com"
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -142,11 +141,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name : OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
                 type : null,
                 value: "sambamba",
-        ])
-        DomainFactory.createProcessingOptionLazy([
-                name : OptionName.EMAIL_RECIPIENT_ERRORS,
-                type : null,
-                value: HelperUtils.randomEmail,
         ])
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.rootPath, "reference_genome").path)
@@ -315,7 +309,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 storageUntil: LocalDate.now(),
         )
         projectService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _) >> { String emailSubject, String content, String recipient ->
+            1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
                 assert emailSubject == "Could not automatically create analysisDir '${projectParams.dirAnalysis}' for Project '${projectParams.name}'."
                 assert content.contains("mkdir: cannot create directory ‘${projectParams.dirAnalysis}’: Permission denied")
             }
@@ -1773,11 +1767,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         Project project = createProject()
 
-        DomainFactory.createProcessingOptionLazy(
-                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
-                value: EMAIL_RECIPIENT,
-        )
-
         DomainFactory.createUserProjectRole(
                 project: project,
                 user: userPi,
@@ -1810,8 +1799,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                             analysisFolder            : project.dirAnalysis,
                             linkUserManagementConfig  : 'link',
                             clusterName               : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
-                            clusterAdministrationEmail: processingOptionService.findOptionAsString(OptionName.EMAIL_CLUSTER_ADMINISTRATION),
-                            contactEmail              : processingOptionService.findOptionAsString(OptionName.EMAIL_OTP_MAINTENANCE),
                             teamSignature             : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                     ]) >> "body"
                 },
@@ -1831,7 +1818,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.sendProjectCreationMailToUserAndTicketSystem(project)
 
         then:
-        1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort(), [EMAIL_RECIPIENT])
+        1 * projectService.mailHelperService.sendEmail('subject', 'body', [userPi.email, userBioinf.email].sort())
     }
 
     void "updateUnixGroup, should fail with UnixGroupIsInvalidException when it contains invalid chars"() {

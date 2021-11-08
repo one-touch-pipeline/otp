@@ -61,6 +61,7 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
             getMessageSourceService() >> Mock(MessageSourceService)
         }
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
+        DomainFactory.createProcessingOptionForTicketSystemEmail()
 
         GroovyMock([global : true], GrailsArtefactCheckHelper)
     }
@@ -166,15 +167,9 @@ ILSe 1234, runB, lane 2, ${sampleText}
 ILSe 5678, runA, lane 1, ${sampleText}
 """
 
-        String notificationRecipient = HelperUtils.randomEmail
-        DomainFactory.createProcessingOptionForNotificationRecipient(notificationRecipient)
-        int callCount = 0
-        notificationCreator.mailHelperService = new MailHelperService() {
-            @Override
-            void sendEmail(String emailSubject, String content, List<String> recipient) {
-                callCount++
+        notificationCreator.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
                 assert "${ticket.prefixedTicketNumber} Processing Status Update".toString() == emailSubject
-                assert [notificationRecipient] == recipient
                 assert content.startsWith(expectedContent)
             }
         }
@@ -183,16 +178,14 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendProcessingStatusOperatorNotification(ticket, seqTracks, status, false)
 
         then:
-        callCount == 1
+        true
     }
 
     void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
-        String recipient = HelperUtils.randomEmail
-        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail("${ticket.prefixedTicketNumber} Final Processing Status Update", _, [recipient])
+            1 * sendEmailToTicketSystem("${ticket.prefixedTicketNumber} Final Processing Status Update", _)
         }
 
         expect:
@@ -203,11 +196,10 @@ ILSe 5678, runA, lane 1, ${sampleText}
         given:
         OtrsTicket ticket = createOtrsTicket()
         SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(createProject(), createIlseSubmission(), ticket)
-        String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
         String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
                 "(${seqTrack.seqType.displayName})"
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(expectedHeader, _, [recipient])
+            1 * sendEmailToTicketSystem(expectedHeader, _)
         }
 
         expect:
@@ -224,14 +216,13 @@ ILSe 5678, runA, lane 1, ${sampleText}
                 createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
         ]
 
-        String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
         String ilseString = seqTracks*.ilseId.sort().join(',')
         String pidString = seqTracks*.individual*.pid.sort().join(', ')
         String seqTypeStringString = seqTracks*.seqType*.displayName.sort().join(', ')
         String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
 
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(expectedHeader, _, [recipient])
+            1 * sendEmailToTicketSystem(expectedHeader, _)
         }
 
         expect:
@@ -240,9 +231,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the import detail page'() {
         given:
-        String recipient = HelperUtils.randomEmail
-        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
-
         //one ticket with three imports
         OtrsTicket ticket = createOtrsTicket()
         List<FastqImportInstance> fastqImportInstances = [
@@ -284,7 +272,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
             assert templateName.contains("notification.import.detail.link")
             return "Details about metadata import can be found"
         }
-        1 * notificationCreator.mailHelperService.sendEmail(_, _, _) >> { String subject, String content, _ ->
+        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String subject, String content ->
             assert content.contains(ticket.ticketNumber)
             fastqImportInstances.each {
                 assert content.contains(pathMetadataImportDetail + "/${it.id}")

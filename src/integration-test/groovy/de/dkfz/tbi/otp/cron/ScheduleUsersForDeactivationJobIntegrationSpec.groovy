@@ -155,8 +155,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    2 * sendEmail(_, _, _, _) >> { }
-                    1 * sendEmail(_, _, _) >> { }
+                    2 * sendEmail(_, _, _) >> { }
+                    1 * sendEmailToTicketSystem(_, _) >> { }
                 },
         ])
         Map<User, Set<UserProjectRole>> map = [
@@ -257,8 +257,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmail(_, _, _, _) >> { }
                     1 * sendEmail(_, _, _) >> { }
+                    1 * sendEmailToTicketSystem(_, _) >> { }
                 },
                 userService: new UserService(),
                 linkGenerator: Mock(LinkGenerator) {

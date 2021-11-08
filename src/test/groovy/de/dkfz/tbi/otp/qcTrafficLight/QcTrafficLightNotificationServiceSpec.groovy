@@ -90,7 +90,6 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
 
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
         DomainFactory.createProcessingOptionForOtrsTicketPrefix()
-        DomainFactory.createProcessingOptionForNotificationRecipient()
         Set<OtrsTicket> otrsTickets = [
                 createOtrsTicket([
                         finalNotificationSent: finalNotificationSent,
@@ -142,12 +141,17 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         }
 
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
-                assert emailSubject == subjectHeader + HEADER
-                assert content == BODY
-                assert recipients
-                assert recipients.size() == recipientsCount
-                assert !recipients.contains(null)
+            if (emails && !finalNotificationSent && automaticNotification && qcTrafficLightNotification && !ilseNumbers) {
+                1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> receivers ->
+                    assert emailSubject == subjectHeader + HEADER
+                    assert content == BODY
+                    assert receivers == emails
+                }
+            } else {
+                1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+                    assert emailSubject == subjectHeader + HEADER
+                    assert content == BODY
+                }
             }
         }
 

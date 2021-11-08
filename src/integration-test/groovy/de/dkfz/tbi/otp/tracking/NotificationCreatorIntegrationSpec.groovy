@@ -62,6 +62,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     final static String EMAIL = HelperUtils.getRandomEmail()
     final static String PREFIX = "TICKET_PREFIX"
+    final static String EMAIL_TICKET_SYSTEM = HelperUtils.randomEmail
 
     static List listPairAnalysis = [
             [
@@ -111,6 +112,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             DomainFactory.createAllAnalysableSeqTypes()
 
             referenceGenomeProcessingOptions = DomainFactory.createReferenceGenomeAndAnalysisProcessingOptions()
+
+            findOrCreateProcessingOption(
+                    name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM,
+                    value: EMAIL_TICKET_SYSTEM,
+            )
         }
     }
 
@@ -161,7 +167,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticketB), fileLinked: true])
 
             DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
-            DomainFactory.createProcessingOptionForNotificationRecipient()
         }
 
         when: "running our tracking update"
@@ -280,17 +285,14 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String prefix = "the prefix"
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
-            String otrsRecipient = HelperUtils.randomEmail
-            DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
-
             String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
             String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
+                1 * sendEmailToTicketSystem(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
                     assert content.contains(expectedStatus.toString())
                 }
-                1 * sendEmail(expectedEmailSubjectCustomer, _, [otrsRecipient])
+                1 * sendEmailToTicketSystem(expectedEmailSubjectCustomer, _)
                 0 * _
             }
         }
@@ -371,10 +373,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String prefix = "the prefix"
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
-            String otrsRecipient = HelperUtils.randomEmail
             String notificationText1 = HelperUtils.uniqueString
             String notificationText2 = HelperUtils.uniqueString
-            DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
             String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
             String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
@@ -382,11 +382,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
+                1 * sendEmailToTicketSystem(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
                     assert content.contains(expectedStatus.toString())
                 }
-                1 * sendEmail(expectedEmailSubjectCustomer1, notificationText1, [otrsRecipient])
-                1 * sendEmail(expectedEmailSubjectCustomer2, notificationText2, [otrsRecipient])
+                1 * sendEmailToTicketSystem(expectedEmailSubjectCustomer1, notificationText1)
+                1 * sendEmailToTicketSystem(expectedEmailSubjectCustomer2, notificationText2)
                 0 * _
             }
 
@@ -466,9 +466,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String prefix = "the prefix"
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
-            String otrsRecipient = HelperUtils.randomEmail
-            DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
-
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * _
             }
@@ -494,8 +491,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         ticket.runYapsaFinished == null
         !ticket.finalNotificationSent
     }
-
-    private static final String OTRS_RECIPIENT = HelperUtils.randomEmail
 
     @SuppressWarnings('Indentation')
     @Unroll
@@ -584,14 +579,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String prefix = HelperUtils.uniqueString
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
             String finalSubject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
-            int callCount = recipients.isEmpty() ? 0 : 1
+            int callCount = subject ? 1 : 0
             String content = HelperUtils.randomEmail
-            DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                callCount * sendEmail(finalSubject, content, recipients)
+                if (recipients.isEmpty() && callCount == 1) {
+                    1 * sendEmailToTicketSystem(finalSubject, content)
+                } else if (callCount == 1) {
+                    1 * sendEmail(finalSubject, content, recipients)
+                }
+                0 * sendEmailToTicketSystem(_, _)
                 0 * sendEmail(_, _, _)
             }
+
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 Project project = exactlyOneElement(seqTracks*.project.unique())
                 callCount * notification(ticket, _, notificationStep, project) >> {
@@ -609,14 +609,14 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         where:
-        dataCase | automaticNotification | processingNotification | notificationStep                       | recipients              | subject
-        1        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | 'Project1 sequencing data installed'
-        2        | false                 | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]        | 'TO BE SENT: Project1 sequencing data installed'
-        3        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
-        4        | true                  | true                   | OtrsTicket.ProcessingStep.FASTQC       | []                      | null
-        5        | true                  | true                   | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]        | 'TO BE SENT: Project2 sequencing data aligned'
-        6        | true                  | true                   | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]        | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
-        7        | true                  | false                  | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]        | 'TO BE SENT: Project1 sequencing data installed'
+        dataCase | automaticNotification | processingNotification | notificationStep                       | recipients | subject
+        1        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL]    | 'Project1 sequencing data installed'
+        2        | false                 | true                   | OtrsTicket.ProcessingStep.INSTALLATION | []         | 'TO BE SENT: Project1 sequencing data installed'
+        3        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL]    | '[S#1234] Project1 sequencing data installed'
+        4        | true                  | true                   | OtrsTicket.ProcessingStep.FASTQC       | []         | null
+        5        | true                  | true                   | OtrsTicket.ProcessingStep.ALIGNMENT    | []         | 'TO BE SENT: Project2 sequencing data aligned'
+        6        | true                  | true                   | OtrsTicket.ProcessingStep.SNV          | []         | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
+        7        | true                  | false                  | OtrsTicket.ProcessingStep.INSTALLATION | []         | 'TO BE SENT: Project1 sequencing data installed'
     }
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
@@ -641,13 +641,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             })
             String prefix = HelperUtils.uniqueString
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
-            DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
-                        'Project_X1', ['project1@test.com', OTRS_RECIPIENT])
+                        'Project_X1', ['project1@test.com'])
                 1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",
-                        'Project_X2', ['project2@test.com', OTRS_RECIPIENT])
+                        'Project_X2', ['project2@test.com'])
                 0 * sendEmail(_, _, _)
             }
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
@@ -688,7 +687,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             String prefix = HelperUtils.uniqueString
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
-            DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * sendEmail(_, _, _)
@@ -1625,10 +1623,9 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     ],
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticket), fileLinked: true])
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-            String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
             String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail(expectedHeader, _, [recipient, userProjectRole.user.email])
+                1 * sendEmail(expectedHeader, _, [userProjectRole.user.email])
             }
         }
 
@@ -1671,10 +1668,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     dataFile.fullInitialPath,
             ].collect { "rm ${it}" }.join("\n")
 
-            String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
-
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail(expectedHeader, { it.endsWith(expectedEnd) }, [recipient])
+                1 * sendEmailToTicketSystem(expectedHeader, { it.endsWith(expectedEnd) })
             }
         }
 

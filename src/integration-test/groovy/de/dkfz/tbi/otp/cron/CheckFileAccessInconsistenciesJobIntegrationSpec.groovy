@@ -87,7 +87,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    mailCount * sendEmail(_, _, _) >> { String subject, String body, String recipient ->
+                    mailCount * sendEmailToTicketSystem(_, _) >> { String subject, String body ->
                         assert subject.startsWith(CheckFileAccessInconsistenciesJob.SUBJECT)
                         assert body.contains(CheckFileAccessInconsistenciesJob.HEADER)
                         assert body.contains(USER_ACCOUNT)

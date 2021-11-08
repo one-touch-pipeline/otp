@@ -40,48 +40,58 @@ class MailHelperService {
     ConfigService configService
     ProcessingOptionService processingOptionService
 
-    void sendEmail(String emailSubject, String content, String recipient) {
-        assert recipient
-        sendEmail(emailSubject, content, Arrays.asList(recipient))
-    }
-
-    void sendEmail(String emailSubject, String content, String recipient, String replyToAddress) {
-        sendEmail(emailSubject, content, Arrays.asList(recipient), replyToAddress)
-    }
-
-    void sendEmail(String emailSubject, String content, List<String> recipients) {
-        sendEmail(emailSubject, content, recipients, defaultReplyToAddress)
-    }
-
-    void sendEmail(String emailSubject, String content, String recipient, List<String> ccs) {
+    void sendEmail(String emailSubject, String content, String recipient, List<String> ccs = []) {
         sendEmail(emailSubject, content, Arrays.asList(recipient), ccs)
     }
 
-    void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs) {
-        sendEmail(emailSubject, content, recipients, ccs, [], defaultReplyToAddress)
+    void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs = []) {
+        sendEmail(emailSubject, content, recipients, defaultReplyToAddress, ccs)
     }
 
-    void sendEmail(String emailSubject, String content, List<String> recipients, String replyToAddress) {
-        sendEmail(emailSubject, content, recipients, [], [], replyToAddress)
+    /**
+     * Send an email to the ticket system only.
+     *
+     * @param emailSubject of the email
+     * @param content of the email
+     * @param replyTo of the email
+     */
+    void sendEmailToTicketSystem(String emailSubject, String content, String replyTo) {
+        sendEmail(emailSubject, content, [ticketSystemEmailAddress], replyTo)
     }
 
-    void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs, List<String> bccs, String replyToAddress) {
+    /**
+     * Send an email to the ticket system only.
+     *
+     * @param emailSubject of the email
+     * @param content of the email
+     */
+    void sendEmailToTicketSystem(String emailSubject, String content) {
+        sendEmail(emailSubject, content, ticketSystemEmailAddress)
+    }
+
+    /**
+     * Send an email to the given recipients and also to the ticket system in CC.
+     *
+     * @param emailSubject of the email
+     * @param content of the email
+     * @param recipients of the email
+     * @param ccs of the email
+     * @param replyToAddress of the email
+     */
+    void sendEmail(String emailSubject, String content, List<String> recipients, String replyToAddress, List<String> ccs = []) {
         assert emailSubject
         assert content
         assert recipients
-        [recipients, ccs, bccs].each {
+
+        [recipients, ccs].each {
             assert it.every(isValidMail)
         }
 
-        log.info """
-            Send email:
-            to: '${recipients}'
-            cc: '${ccs}'
-            bcc: '${bccs}'
-            subject: '${emailSubject}'
-            content:
-            ${content}
-        """.stripIndent().toString()
+        if (!recipients.contains(ticketSystemEmailAddress)) {
+            ccs.add(ticketSystemEmailAddress)
+        }
+
+        logEmail(recipients, ccs, emailSubject, content)
 
         if (configService.otpSendsMails()) {
             mailService.sendMail {
@@ -89,22 +99,35 @@ class MailHelperService {
                 replyTo replyToAddress
                 to recipients
                 if (ccs) { cc ccs }
-                if (bccs) { bcc bccs }
                 subject emailSubject
                 body content
             }
         }
     }
 
+    String getTicketSystemEmailAddress() {
+        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM)
+    }
+
     private static Closure<Boolean> isValidMail = { String mail ->
         return mail.contains("@")
     }
 
-    String getDefaultReplyToAddress() {
+    private String getDefaultReplyToAddress() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO)
     }
 
-    String getEmailRecipientNotification() {
-        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
+    private logEmail(List<String> recipients, List<String> ccs, String subject, String content) {
+        String status = configService.otpSendsMails() ? "enabled" : "disabled"
+
+        log.info("Email system is ${status}.")
+        log.info """
+            Triggered email:
+            to: '${recipients}'
+            cc: '${ccs}'
+            subject: '${subject}'
+            content:
+            ${content}
+        """.stripIndent().toString()
     }
 }

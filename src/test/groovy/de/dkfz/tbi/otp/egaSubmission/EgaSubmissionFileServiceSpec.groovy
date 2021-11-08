@@ -338,7 +338,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         String emailSubject = "New ${egaSubmission}"
         String content = "some content"
-        String recipient = "a.b@c.de"
         User user = new User(
                 realName: "Real Name",
                 email: "ua.ub@uc.ude",
@@ -352,14 +351,11 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.springSecurityService = Mock(SpringSecurityService) {
             1 * getCurrentUser() >> user
         }
-        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
-            1 * findOptionAsString(_) >> recipient
-        }
         egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {
             1 * createMessage(_, _) >> content
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(emailSubject, content, [recipient], user.email)
+            1 * sendEmailToTicketSystem(emailSubject, content, user.email)
         }
 
         when:
@@ -382,7 +378,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         String emailSubject = "New ${egaSubmission}"
         String content = "some content"
-        String recipient = "a.b@c.de"
         User user = new User(
                 realName: "Real Name",
                 email: "ua.ub@uc.ude",
@@ -406,14 +401,11 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.springSecurityService = Mock(SpringSecurityService) {
             1 * getCurrentUser() >> user
         }
-        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
-            1 * findOptionAsString(_) >> recipient
-        }
         egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {
             1 * createMessage(_, _) >> content
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(emailSubject, content, [recipient], user.email)
+            1 * sendEmailToTicketSystem(emailSubject, content, user.email)
         }
 
         when:

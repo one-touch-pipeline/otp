@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
@@ -42,9 +41,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Autowired
     OtrsTicketService otrsTicketService
-
-    @Autowired
-    ProcessingOptionService processingOptionService
 
     Pipeline getPipeline(SeqTrack seqTrack) {
         return atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT)) ?: new Pipeline(
@@ -123,7 +119,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
                 Map<String, String> content = buildUnalignableSeqTrackMailContent(workPackage, seqTrack)
-                mailHelperService.sendEmail(content["subject"], content["body"], content["recipient"])
+                mailHelperService.sendEmailToTicketSystem(content["subject"], content["body"])
                 return Collections.emptyList()
             }
         } else {
@@ -150,7 +146,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return [
                 "subject"  : buildUnalignableSeqTrackMailSubject(seqTrack),
                 "body"     : buildUnalignableSeqTrackMailBody(workPackage, seqTrack),
-                "recipient": processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION),
         ]
     }
 
@@ -179,7 +174,7 @@ be merged because of incompatible sequencing platforms or used chemistry.
             |${propertyOverview.join("\n\n")}
             |
             |Please be aware that OTP can currently only handle one bam file, therefore your current samples will not be aligned.
-            |Please contact ${processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)} if you wish the samples \
+            |Please contact ${mailHelperService.getTicketSystemEmailAddress()} if you wish the samples \
 nevertheless to be merged or if you want to withdraw the old samples (would result in deletion of the old bam files), to align \
 the current ones.""".stripMargin()
     }

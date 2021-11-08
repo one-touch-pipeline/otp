@@ -126,8 +126,12 @@ class QcTrafficLightNotificationService {
         List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project) : []
         String subject = createResultsAreBlockedSubject(bamFile, recipients.empty)
         String content = createResultsAreBlockedMessage(bamFile)
-        recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
-        mailHelperService.sendEmail(subject, content, recipients)
+
+        if (recipients) {
+            mailHelperService.sendEmail(subject, content, recipients)
+        } else {
+            mailHelperService.sendEmailToTicketSystem(subject, content)
+        }
     }
 
     String getThresholdPageLink(Project project) {

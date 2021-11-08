@@ -1472,10 +1472,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         service.fileService = new FileService()
         service.fileSystemService = new TestFileSystemService()
         service.configService.processingOptionService = processingOptionService
-        service.processingOptionService = processingOptionService
         service.fileService.configService = service.configService
-
-        service.processingOptionService.createOrUpdate(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS, "error@recipient.com")
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 content,
@@ -1497,7 +1494,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         Map data = setupForCopyMetaDataFileIfRequested('something')
 
         data.service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _)
+            1 * sendEmailToTicketSystem(_, _)
         }
         data.service.fileService = Mock(FileService) {
             1 * createFileWithContentOnDefaultRealm(_, _)
@@ -1529,7 +1526,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         Map data = setupForCopyMetaDataFileIfRequested(null, false)
 
         data.service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _)
+            1 * sendEmailToTicketSystem(_, _)
         }
 
         when:
@@ -1547,7 +1544,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         data.targetFile.text = 'something'
 
         data.service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _)
+            1 * sendEmailToTicketSystem(_, _)
         }
 
         when:

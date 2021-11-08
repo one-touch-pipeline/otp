@@ -82,7 +82,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsLong(_) { return 0L }
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmail({ it.contains(expectedContent) }, _, _) >> { }
+                    1 * sendEmailToTicketSystem({ it.contains(expectedContent) }, _) >> { }
                 },
                 userProjectRoleService: Mock(UserProjectRoleService) {
                     _ * commandTemplate(_, _) >> "removal command"
@@ -110,7 +110,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userService: new UserService(),
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmail(_, _, _) >> { }
+                    1 * sendEmailToTicketSystem(_, _) >> { }
                 },
                 userProjectRoleService: new UserProjectRoleService(),
         ])
@@ -151,7 +151,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userService: new UserService(),
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmail(_, _, _) >> { }
+                    1 * sendEmailToTicketSystem(_, _) >> { }
                 },
                 userProjectRoleService: new UserProjectRoleService(),
         ])

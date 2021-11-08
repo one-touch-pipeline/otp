@@ -24,8 +24,6 @@ package de.dkfz.tbi.otp.job
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
@@ -34,6 +32,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.TimeFormats
+
 import java.time.ZonedDateTime
 
 @Transactional
@@ -48,8 +47,6 @@ class JobMailService {
     JobStatusLoggingService jobStatusLoggingService
 
     OtrsTicketService otrsTicketService
-
-    ProcessingOptionService processingOptionService
 
     void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
         assert job: 'job may not be null'
@@ -144,13 +141,9 @@ Failed OTP Header: ${mapForLog.keySet().join(';')}
 Failed OTP Values: ${mapForLog.values().join(';')}""")
         }
 
-        String recipientsString = processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_ERRORS)
-        if (recipientsString) {
-            List<String> recipients = recipientsString.split(' ') as List
-            String subject = "${subjectPrefix}: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"
+        String subject = "${subjectPrefix}: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"
 
-            mailHelperService.sendEmail(subject, message.toString(), recipients)
-        }
+        mailHelperService.sendEmailToTicketSystem(subject, message.toString())
     }
 
     private String dateString(Date date) {

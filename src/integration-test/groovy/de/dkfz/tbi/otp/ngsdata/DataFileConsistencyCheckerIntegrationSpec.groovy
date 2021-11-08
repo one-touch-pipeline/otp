@@ -118,9 +118,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
 
         DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
         DataFile dataFile
-        String errorRecipient = "test@test.com"
         SessionUtils.withNewSession {
-            DomainFactory.createProcessingOptionForErrorRecipient(errorRecipient)
             FileType fileType = DomainFactory.createFileType(type: FileType.Type.SEQUENCE, subType: 'fastq', vbpPath: "/sequence/")
             SeqTrack seqTrack = DomainFactory.createSeqTrack(dataInstallationState: SeqTrack.DataProcessingState.FINISHED)
             dataFile = DomainFactory.createDataFile(fileType: fileType, seqTrack: seqTrack, fileLinked: false)
@@ -132,7 +130,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecW
             1 * isActive() >> true
         }
         dataFileConsistencyChecker.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail('Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _, errorRecipient) >> { String emailSubject, String content, String recipients ->
+            1 * sendEmailToTicketSystem('Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _) >> { String emailSubject, String content ->
                 assert content.contains("Error while saving datafile with id: ${dataFile.id}")
                 assert content.contains("on field 'mateNumber': rejected value [null]")
             }

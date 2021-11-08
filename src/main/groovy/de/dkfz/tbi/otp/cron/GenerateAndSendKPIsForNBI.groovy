@@ -27,8 +27,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.tracking.DeNbiKpi
 import de.dkfz.tbi.otp.tracking.DeNbiKpiService
 import de.dkfz.tbi.otp.utils.MailHelperService
@@ -43,9 +41,6 @@ import java.time.ZoneId
 @Component
 @Slf4j
 class GenerateAndSendKPIsForNBI extends ScheduledJob {
-
-    @Autowired
-    ProcessingOptionService processingOptionService
 
     @Autowired
     MailHelperService mailHelperService
@@ -73,7 +68,6 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
 
         List<DeNbiKpi> kpiList = generateKpiList(fromDate, toDate)
 
-        String kpiMailReceiver = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_MONTHLY_KPI_RECEIVER)
         String kpiMailContent = kpiList.groupBy { DeNbiKpi kpi ->
             kpi.name
         }.collect { String workflow, List<DeNbiKpi> resultDatasOfWorkflow ->
@@ -93,7 +87,7 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
             ].join('\n')
         }.join('\n\n')
 
-        mailHelperService.sendEmail("KPIs for de.NBI - " + fromDate.month.name(), kpiMailContent, kpiMailReceiver)
+        mailHelperService.sendEmailToTicketSystem("KPIs for de.NBI - " + fromDate.month.name(), kpiMailContent)
     }
 
     /**

@@ -54,7 +54,6 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
     static final int REMINDER_DAYS = REMINDER_WEEKS * 7
     static final int DELETION_WEEKS = 4
     static final int DELETION_DAYS = DELETION_WEEKS * 7
-    static final String EMAIL_RECIPIENT = "email-recipient@notification.com"
 
     void setupData() {
         createAllBasicProjectRoles()
@@ -66,10 +65,6 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.CELLRANGER_CLEANUP_WEEKS_TILL_DELETION_AFTER_REMINDER,
                 value: DELETION_WEEKS,
-        )
-        findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
-                value: EMAIL_RECIPIENT,
         )
     }
 
@@ -165,7 +160,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
                 "${type.templateName} subject",
                 "${type.templateName} body",
-                [user.email, requester.email, EMAIL_RECIPIENT, requester2.email]
+                [user.email, requester.email, requester2.email]
         )
 
         where:
@@ -329,7 +324,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         0 * cellRangerDataCleanupJob.cellRangerConfigurationService._
         1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", [:]) >> header
         1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.body", _) >> body
-        1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(header, body, [EMAIL_RECIPIENT])
+        1 * cellRangerDataCleanupJob.mailHelperService.sendEmailToTicketSystem(header, body)
     }
 
     void "deleteOfOldFailedWorkflows, if no old not finished mwp exist, do not call deleteMwp and do not send mail"() {
@@ -369,7 +364,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         0 * cellRangerDataCleanupJob.cellRangerConfigurationService._
         0 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", _)
         0 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.body", _)
-        0 * cellRangerDataCleanupJob.mailHelperService.sendEmail(_, _, _)
+        0 * cellRangerDataCleanupJob.mailHelperService.sendEmailToTicketSystem(_, _)
     }
 
     void "notifyAndDeletion, uses results of getResultsToDelete"() {

@@ -28,7 +28,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
@@ -84,11 +83,9 @@ class DataFileConsistencyChecker {
             } catch (RuntimeException e) {
                 log.error("error ${e.getLocalizedMessage()}", e)
                 SessionUtils.withNewSession {
-                    String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
-                    if (recipientsString) {
-                        mailHelperService.sendEmail("Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
-                                "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
-                    }
+                    mailHelperService.sendEmailToTicketSystem(
+                            "Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
+                            "${e.getLocalizedMessage()}\n${e.getCause()}")
                 }
             }
             log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: " +

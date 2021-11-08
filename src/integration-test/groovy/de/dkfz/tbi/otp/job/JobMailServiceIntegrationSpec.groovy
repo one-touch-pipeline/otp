@@ -30,7 +30,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -78,7 +78,6 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         ])
         String url = otrsTicket.url
 
-        DomainFactory.createProcessingOptionForErrorRecipient()
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
 
         List<ClusterJob> completedClusterJobs = []
@@ -113,7 +112,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
 
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
+                    1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
                         assert emailSubject.startsWith(fasttrack ? "FASTTRACK ERROR:" : "NORMAL ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
@@ -136,7 +135,6 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                 jobStatusLoggingService: jobStatusLoggingService,
                 otrsTicketService      : new OtrsTicketService(),
         ])
-        jobMailService.processingOptionService = new ProcessingOptionService()
 
         when:
         jobMailService.sendErrorNotification(job, new RuntimeException("RuntimeException"))

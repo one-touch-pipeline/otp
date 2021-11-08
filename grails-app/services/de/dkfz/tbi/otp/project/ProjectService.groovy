@@ -39,9 +39,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.additionalField.*
@@ -161,7 +159,7 @@ class ProjectService {
         assert OtpPathValidator.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Path rootPath = configService.rootPath.toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
-        assert rootPathElements.every { !projectParams.dirName.startsWith("${it}${File.separator}") } :
+        assert rootPathElements.every { !projectParams.dirName.startsWith("${it}${File.separator}") }:
                 "project directory (${projectParams.dirName}) contains (partial) data processing root path (${rootPath})"
 
         Project project = new Project([
@@ -195,7 +193,7 @@ class ProjectService {
 
         if (projectParams.additionalFieldValue) {
             projectParams.additionalFieldValue.each {
-                    saveAdditionalFieldValuesForProject(it.value, it.key, project)
+                saveAdditionalFieldValuesForProject(it.value, it.key, project)
             }
         }
 
@@ -227,7 +225,7 @@ class ProjectService {
 
         if (projectParams.projectInfoFile) {
             AddProjectInfoCommand projectInfoCmd = new AddProjectInfoCommand(
-                    project        : project,
+                    project: project,
                     projectInfoFile: projectParams.projectInfoFile,
             )
             projectInfoService.createProjectInfoAndUploadFile(project, projectInfoCmd)
@@ -328,31 +326,13 @@ class ProjectService {
             executeScript(buildCreateProjectDirectory(project.unixGroup, project.dirAnalysis, '2770', '2775'), project, "0002")
             FileService.waitUntilExists(analysisDirectory)
         } catch (AssertionError e) {
-            String recipientsString = processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_ERRORS)
             String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
-            if (recipientsString) {
-                mailHelperService.sendEmail(
-                        header,
-                        "Automatic creation of analysisDir '${project.dirAnalysis}' for Project '${project.name}' failed. " +
-                                "Make sure that the share exists and that OTP has write access to the already existing base directory," +
-                                " so that the new subfolder can be created.\n ${e.localizedMessage}",
-                        recipientsString)
-            } else {
-                log.warn("ProcessingOption 'EMAIL_RECIPIENT_ERRORS' is not set.")
-                log.warn(header, e)
-                assert false: "ProcessingOption EMAIL_RECIPIENT_ERRORS has to be set so OTP can sent emails about needed manual steps"
-            }
+            mailHelperService.sendEmailToTicketSystem(
+                    header,
+                    "Automatic creation of analysisDir '${project.dirAnalysis}' for Project '${project.name}' failed. " +
+                            "Make sure that the share exists and that OTP has write access to the already existing base directory," +
+                            " so that the new subfolder can be created.\n ${e.localizedMessage}")
         }
-    }
-
-    /**
-     * Send project creation email to the ticket system.
-     *
-     * @param project which was just created
-     */
-    void sendProjectCreationMailOnlyToTicketSystem(Project project) {
-        List<String> ticketSystemMails = processingOptionService.findOptionAsList(OptionName.EMAIL_RECIPIENT_NOTIFICATION)
-        sendProjectCreationMail(project, ticketSystemMails, [])
     }
 
     /**
@@ -363,38 +343,33 @@ class ProjectService {
      */
     void sendProjectCreationMailToUserAndTicketSystem(Project project) {
         List<String> userMails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project).sort().unique()
-        List<String> ccMails = processingOptionService.findOptionAsList(OptionName.EMAIL_RECIPIENT_NOTIFICATION)
-
-        if (userMails.empty) {
-            sendProjectCreationMailOnlyToTicketSystem(project)
-        } else {
-            sendProjectCreationMail(project, userMails, ccMails)
-        }
+        sendProjectCreationMail(project, userMails)
     }
 
     /**
-     * Generate project creation email and send it to the given receivers and ccs.
+     * Generate project creation email and send it to the given receivers.
      *
      * @param project which was just created
      * @param receivers mail addresses
-     * @param cc mail addresses
      */
-    private void sendProjectCreationMail(Project project, List<String> receivers, List<String> cc) {
+    private void sendProjectCreationMail(Project project, List<String> receivers) {
         String subject = messageSourceService.createMessage("notification.projectCreation.subject", [projectName: project.displayName])
         String content = messageSourceService.createMessage("notification.projectCreation.message",
                 [
-                        projectName               : project.displayName,
-                        linkProjectConfig         : createNotificationTextService.createOtpLinks([project], 'projectConfig', 'index'),
-                        projectFolder             : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
-                        analysisFolder            : project.dirAnalysis,
-                        linkUserManagementConfig  : createNotificationTextService.createOtpLinks([project], 'projectUser', 'index'),
-                        clusterName               : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
-                        clusterAdministrationEmail: processingOptionService.findOptionAsString(OptionName.EMAIL_CLUSTER_ADMINISTRATION),
-                        contactEmail              : processingOptionService.findOptionAsString(OptionName.EMAIL_OTP_MAINTENANCE),
-                        teamSignature             : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                        projectName             : project.displayName,
+                        linkProjectConfig       : createNotificationTextService.createOtpLinks([project], 'projectConfig', 'index'),
+                        projectFolder           : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
+                        analysisFolder          : project.dirAnalysis,
+                        linkUserManagementConfig: createNotificationTextService.createOtpLinks([project], 'projectUser', 'index'),
+                        clusterName             : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
+                        teamSignature           : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 ])
 
-        mailHelperService.sendEmail(subject, content, receivers, cc)
+        if (receivers) {
+            mailHelperService.sendEmail(subject, content, receivers)
+        } else {
+            mailHelperService.sendEmailToTicketSystem(subject, content)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -752,11 +727,11 @@ class ProjectService {
         deprecateAllReferenceGenomesByProjectAndSeqType(targetProject, seqType)
 
         ReferenceGenomeProjectSeqType refGenProjectSeqType = new ReferenceGenomeProjectSeqType(
-            project: targetProject,
-            seqType: baseRefGenSeqType.seqType,
-            referenceGenome: baseRefGenSeqType.referenceGenome,
-            sampleType: baseRefGenSeqType.sampleType,
-            statSizeFileName: baseRefGenSeqType.statSizeFileName,
+                project: targetProject,
+                seqType: baseRefGenSeqType.seqType,
+                referenceGenome: baseRefGenSeqType.referenceGenome,
+                sampleType: baseRefGenSeqType.sampleType,
+                statSizeFileName: baseRefGenSeqType.statSizeFileName,
         )
         refGenProjectSeqType.save(flush: true)
         return refGenProjectSeqType
@@ -906,7 +881,8 @@ class ProjectService {
         )
     }
 
-    @SuppressWarnings('Indentation')//auto format and codenarc does not match
+    @SuppressWarnings('Indentation')
+//auto format and codenarc does not match
     Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
@@ -1067,8 +1043,8 @@ echo 'OK'
      * You can force to update the unixGroup in this case by the force parameter.
      *
      * @param project for which the unixGroup is
-     * @param unixGroup, the new value
-     * @param force, default is false
+     * @param unixGroup , the new value
+     * @param force , default is false
      * @throws UnixGroupException when validation fails
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

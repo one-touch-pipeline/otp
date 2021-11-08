@@ -26,9 +26,8 @@ import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInSameDirectory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
@@ -37,7 +36,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
 @Integration
-class MetadataImportServiceIntegrationSpec extends Specification {
+class MetadataImportServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     @Autowired
     MetadataImportService metadataImportService
@@ -71,7 +70,7 @@ class MetadataImportServiceIntegrationSpec extends Specification {
             getSeqTracksWithoutProcessingThreshold(_) >> [st2]
         }
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _)  >> { String subject, String body, String recipient ->
+            1 * sendEmailToTicketSystem(_, _) >> { String subject, String body ->
                 assert subject.contains("threshold")
                 assert subject.contains("category")
                 assert body.contains(st1.project.displayName)
@@ -81,11 +80,7 @@ class MetadataImportServiceIntegrationSpec extends Specification {
                 assert body.contains(p2.project.displayName)
                 assert body.contains(p2.sampleType.displayName)
                 assert body.contains(p2.seqType.displayName)
-                assert recipient == "operator"
             }
-        }
-        service.processingOptionService = Mock(ProcessingOptionService) {
-            findOptionAsString(_) >> "operator"
         }
 
         when:

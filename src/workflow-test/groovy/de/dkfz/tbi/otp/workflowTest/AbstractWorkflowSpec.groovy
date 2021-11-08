@@ -502,11 +502,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     private void initProcessingOption() {
         log.debug("creating processingOptions")
         //emails addresses
-        findOrCreateProcessingOption(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
-        findOrCreateProcessingOption(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
-        findOrCreateProcessingOption(name: OptionName.EMAIL_OTP_MAINTENANCE, value: HelperUtils.randomEmail)
-        findOrCreateProcessingOption(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
-        findOrCreateProcessingOption(name: OptionName.EMAIL_RECIPIENT_NOTIFICATION, value: HelperUtils.randomEmail)
+        findOrCreateProcessingOption(name: OptionName.EMAIL_TICKET_SYSTEM, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
@@ -532,7 +528,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
         findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "url ${nextId}")
         findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix${nextId}")
-        findOrCreateProcessingOption(name: OptionName.EMAIL_MONTHLY_KPI_RECEIVER, value: HelperUtils.randomEmail)
     }
 
     /**

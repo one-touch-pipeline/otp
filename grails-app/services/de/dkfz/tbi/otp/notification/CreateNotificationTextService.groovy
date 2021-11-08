@@ -334,7 +334,7 @@ class CreateNotificationTextService {
         message << messageSourceService.createMessage("notification.template.annotation.cellRanger.selfservice", [finalRunSelectionLink: finalRunSelectionLink])
         if (bams*.mergingWorkPackage.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }) {
             message << messageSourceService.createMessage("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [
-                    serviceMail: processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_NOTIFICATION),
+                    serviceMail: processingOptionService.findOptionAsString(OptionName.EMAIL_TICKET_SYSTEM),
             ])
         }
         return message.join('\n\n')

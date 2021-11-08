@@ -25,9 +25,9 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
@@ -64,10 +64,9 @@ class CheckFileAccessInconsistenciesJob extends ScheduledJob {
 
     @Override
     void wrappedExecute() {
-        String mailReceiver = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)
         String mailContent = createMailContent()
         if (mailContent) {
-            mailHelperService.sendEmail(SUBJECT, mailContent, mailReceiver)
+            mailHelperService.sendEmailToTicketSystem(SUBJECT, mailContent)
         }
     }
 

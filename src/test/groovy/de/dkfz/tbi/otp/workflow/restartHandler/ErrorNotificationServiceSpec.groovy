@@ -28,11 +28,9 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -55,11 +53,9 @@ class ErrorNotificationServiceSpec extends Specification
     void "test sendMaintainer"() {
         given:
         ErrorNotificationService service = Spy(ErrorNotificationService)
-        service.processingOptionService = new ProcessingOptionService()
         service.mailHelperService = Mock(MailHelperService)
 
         WorkflowStep step = createWorkflowStep()
-        DomainFactory.createProcessingOptionForErrorRecipient("error@example.com")
         OtpRuntimeException e1 = new OtpRuntimeException('error job')
         OtpRuntimeException e2 = new OtpRuntimeException('error restart handler')
 
@@ -67,7 +63,7 @@ class ErrorNotificationServiceSpec extends Specification
         service.sendMaintainer(step, e1, e2)
 
         then:
-        1 * service.mailHelperService.sendEmail(_ as String, _ as String, ["error@example.com"]) >> { String subject, String content, recipient ->
+        1 * service.mailHelperService.sendEmailToTicketSystem(_ as String, _ as String) >> { String subject, String content ->
             assert subject.contains(step.workflowRun.priority.errorMailPrefix)
             assert subject.contains('RestartHandler')
             assert subject.contains(step.workflowRun.workflow.name)
@@ -84,11 +80,9 @@ class ErrorNotificationServiceSpec extends Specification
     void "test send"() {
         given:
         ErrorNotificationService service = Spy(ErrorNotificationService)
-        service.processingOptionService = new ProcessingOptionService()
         service.mailHelperService = Mock(MailHelperService)
 
         WorkflowStep step = createWorkflowStep()
-        DomainFactory.createProcessingOptionForErrorRecipient("error@example.com")
 
         when:
         service.send(step, WorkflowJobErrorDefinition.Action.STOP, "text", [])
@@ -99,7 +93,7 @@ class ErrorNotificationServiceSpec extends Specification
         1 * service.createArtefactsInformation(step) >> "artefact"
         1 * service.createWorkflowStepInformation(step) >> "workflow step"
         1 * service.createLogInformation(step) >> "log"
-        1 * service.mailHelperService.sendEmail(_ as String, _ as String, ["error@example.com"]) >> { String subject, String content, recipient ->
+        1 * service.mailHelperService.sendEmailToTicketSystem(_ as String, _ as String) >> { String subject, String content ->
             assert subject.contains("header")
             assert content.contains('workflow full')
             assert content.contains('artefact')

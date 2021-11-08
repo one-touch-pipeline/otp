@@ -27,7 +27,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.FileNotFoundException
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -54,9 +53,6 @@ class JobSchedulerIntegrationSpec extends AbstractIntegrationSpecWithoutRollback
 
         SessionUtils.withNewSession {
             createWorkflowStep(beanName: BEAN_NAME, state: WorkflowStep.State.CREATED)
-            if (!notificationError) {
-                findOrCreateProcessingOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS, "recipient@otp.de")
-            }
         }
 
         when:

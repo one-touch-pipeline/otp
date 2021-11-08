@@ -605,4 +605,8 @@ databaseChangeLog = {
     include file: 'changelogs/2021/otp-1284-gui-metaDataEntry.groovy'
 
     include file: 'changelogs/2021/otp-1133.groovy'
+
+    changeSet(author: "gabkol", id: "otp-708") {
+        sqlFile(path: 'changelogs/2021/otp-708.sql')
+    }
 }

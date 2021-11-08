@@ -172,7 +172,7 @@ class ProjectCreationController {
                     if (cmd.sendProjectCreationNotification) {
                         projectService.sendProjectCreationMailToUserAndTicketSystem(project)
                     } else {
-                        projectService.sendProjectCreationMailOnlyToTicketSystem(project)
+                        projectService.sendProjectCreationMail(project, [])
                     }
                     redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
                     return

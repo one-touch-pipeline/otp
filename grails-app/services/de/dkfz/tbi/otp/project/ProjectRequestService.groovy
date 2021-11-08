@@ -33,8 +33,6 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.ProjectRequestUser.ApprovalState
 import de.dkfz.tbi.otp.project.additionalField.*
@@ -52,8 +50,6 @@ class ProjectRequestService {
     LdapService ldapService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
-    @Autowired
-    ProcessingOptionService processingOptionService
     SecurityService securityService
     UserProjectRoleService userProjectRoleService
     UserService userService
@@ -452,9 +448,7 @@ class ProjectRequestService {
         String subject = messageSourceService.createMessage("notification.template.projectRequest.submit.subject", [
                 projectName: request.name,
         ])
-        List<String> recipients = [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)]
-        List<String> ccs = [mailHelperService.emailRecipientNotification]
-        mailHelperService.sendEmail(subject, message, recipients, ccs)
+        mailHelperService.sendEmailToTicketSystem(subject, message)
     }
 
     void sendEmailOnCompleteApproval(ProjectRequest request) {
@@ -475,7 +469,7 @@ class ProjectRequestService {
         String subject = messageSourceService.createMessage("notification.template.projectRequest.create.subject", [
                 projectName: request.name,
         ])
-        mailHelperService.sendEmail(subject, message, mailHelperService.emailRecipientNotification)
+        mailHelperService.sendEmailToTicketSystem(subject, message)
     }
 
     void sendEmailOnEdit(ProjectRequest request) {
@@ -494,8 +488,7 @@ class ProjectRequestService {
                 projectName: request.name,
         ])
         List<String> recipients = getApproversOfProjectRequest(request)*.user*.email
-        List<String> ccs = [mailHelperService.emailRecipientNotification]
-        mailHelperService.sendEmail(subject, message, recipients, ccs)
+        mailHelperService.sendEmail(subject, message, recipients)
     }
 
     AuditLog logAction(ProjectRequest request, String description) {

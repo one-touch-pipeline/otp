@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -39,7 +38,6 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
 @CompileStatic
@@ -54,7 +52,6 @@ class EgaSubmissionFileService {
     LsdfFilesService lsdfFilesService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
-    ProcessingOptionService processingOptionService
     SpringSecurityService springSecurityService
 
     enum EgaColumnName {
@@ -248,7 +245,7 @@ class EgaSubmissionFileService {
                 numberOfFiles: submission.dataFilesToSubmit.size() + submission.bamFilesToSubmit.size(),
                 path         : basePath,
         ])
-        mailHelperService.sendEmail(subject, content, [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)], user.email)
+        mailHelperService.sendEmailToTicketSystem(subject, content, user.email)
     }
 
     void prepareSubmissionForUpload(EgaSubmission submission) {

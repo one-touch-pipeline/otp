@@ -110,8 +110,7 @@ class CellRangerDataCleanupJob extends ScheduledJob {
             cellRangerConfigurationService.deleteMwps(mwps)
             String subject = messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", [:])
             String content = buildDeletionForFailedMergingWorkPackageMessageBody(mwps)
-            mailHelperService.sendEmail(subject, content,
-                    processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION))
+            mailHelperService.sendEmailToTicketSystem(subject, content)
         }
     }
 
@@ -166,7 +165,7 @@ class CellRangerDataCleanupJob extends ScheduledJob {
                 throw new OtpRuntimeException("Invalid state ${informationType} for informationType")
         }
         mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project) +
-                processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION) + cellRangerMwps*.requester*.email).unique())
+                cellRangerMwps*.requester*.email).unique())
     }
 
     String buildDeletionForFailedMergingWorkPackageMessageBody(List<CellRangerMergingWorkPackage> cellRangerMwps) {

@@ -104,8 +104,6 @@ class NotificationDigestService {
 
     void sendPreparedNotification(PreparedNotification preparedNotification) {
         List<String> recipients = userProjectRoleService.getMails(preparedNotification.toBeNotifiedProjectUsers) ?: []
-        recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
-
         mailHelperService.sendEmail(preparedNotification.subject, preparedNotification.notification, recipients)
     }
 }

@@ -456,7 +456,6 @@ ${expectedAlign}"""
     void "alignmentNotification, return message (#name)"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         Map data1 = createData([
@@ -608,7 +607,6 @@ pancan alignment infos
     void "alignmentNotification, test difference between Cell Ranger and Roddy (#name)"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
-        DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         Map data1 = createData([
@@ -663,7 +661,6 @@ pancan alignment infos
     void "alignmentNotification, test for pipeline #pipeline"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
-        DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         AbstractMergedBamFile abstractMergedBamFile = createBamFileForPipelineName(pipeline)
@@ -729,7 +726,6 @@ pancan alignment infos
     void "alignmentNotification, test for multiple pipelines"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
-        DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         List<AbstractMergedBamFile> abstractMergedBamFiles = Pipeline.Name.getAlignmentPipelineNames().collect {

@@ -28,19 +28,24 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 @Rollback
 @Integration
-class MailHelperServiceIntegrationSpec extends Specification {
+class MailHelperServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     static final String SUBJECT = 'subject'
     static final String BODY = 'body'
-    static final String RECIPIENT = 'a@b.c'
+    static final String RECIPIENT = HelperUtils.randomEmail
+    static final String TICKET_EMAIL = HelperUtils.randomEmail
 
     MailHelperService mailHelperService
 
     void setupData() {
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM, value: TICKET_EMAIL)
+
         mailHelperService = new MailHelperService()
         mailHelperService.processingOptionService = new ProcessingOptionService()
         mailHelperService.configService = new TestConfigService()

@@ -99,7 +99,6 @@ class MetadataImportService {
     MailHelperService mailHelperService
     MergingCriteriaService mergingCriteriaService
     OtrsTicketService otrsTicketService
-    ProcessingOptionService processingOptionService
     ProcessingThresholdsService processingThresholdsService
     SampleIdentifierService sampleIdentifierService
     SamplePairDeciderService samplePairDeciderService
@@ -168,11 +167,8 @@ class MetadataImportService {
         } catch (Exception e) {
             if (!e.message.startsWith('Copying of metadata file')) {
                 TransactionUtils.withNewTransaction {
-                    String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
-                    if (recipientsString) {
-                        mailHelperService.sendEmail("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}\n" +
-                                "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
-                    }
+                    mailHelperService.sendEmailToTicketSystem("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}\n" +
+                            "${e.getLocalizedMessage()}\n${e.getCause()}")
                 }
             }
             throw new OtpRuntimeException("Error while importing metadata file with paths: ${metadataPaths*.path.join('\n')}", e)
@@ -219,11 +215,8 @@ class MetadataImportService {
 
                 assert Files.readAllBytes(targetFile) == context.content
             } catch (Throwable t) {
-                String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
-                if (recipientsString) {
-                    mailHelperService.sendEmail("Error: Copying of metadatafile ${source} failed",
-                            "${t.getLocalizedMessage()}\n${t.getCause()}", recipientsString)
-                }
+                mailHelperService.sendEmailToTicketSystem("Error: Copying of metadatafile ${source} failed",
+                        "${t.getLocalizedMessage()}\n${t.getCause()}")
                 throw new RuntimeException("Copying of metadata file ${source} failed", t)
             }
         }
@@ -416,11 +409,7 @@ class MetadataImportService {
                 body += "\n"
             }
 
-            mailHelperService.sendEmail(
-                    subject.toString(),
-                    body,
-                    processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
-            )
+            mailHelperService.sendEmailToTicketSystem(subject.toString(), body)
         }
     }
 

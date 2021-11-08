@@ -162,17 +162,16 @@ class UserProjectRoleService {
         ])
 
         String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
-        String clusterAdministrationEmail = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION)
         String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
         String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", [
-                username                  : user.realName,
-                requester                 : requester.realName,
-                projectName               : project.name,
-                dirAnalysis               : project.dirAnalysis ?: "-",
-                clusterName               : clusterName,
-                clusterAdministrationEmail: clusterAdministrationEmail,
-                supportTeamSalutation     : supportTeamName,
-                linkProjectDirectory      : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
+                username             : user.realName,
+                requester            : requester.realName,
+                projectName          : project.name,
+                dirAnalysis          : project.dirAnalysis ?: "-",
+                clusterName          : clusterName,
+                ticketSystemEmail    : mailHelperService.ticketSystemEmailAddress,
+                supportTeamSalutation: supportTeamName,
+                linkProjectDirectory : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
         ])
 
         List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()
@@ -221,11 +220,10 @@ class UserProjectRoleService {
                 scriptCommand         : scriptCommand,
         ])
 
-        String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
-        mailHelperService.sendEmail(subject, body, email)
+        mailHelperService.sendEmailToTicketSystem(subject, body)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
-                "Sent mail to ${email} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} ${userProjectRole.project.name} " +
-                        "at the request of ${requester.username + switchedUserAnnotation}")
+                "Sent mail to ${mailHelperService.ticketSystemEmailAddress} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} " +
+                        "${userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
     }
 
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
@@ -262,10 +260,9 @@ class UserProjectRoleService {
 
         List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
         List<String> recipients = projectAuthoritiesAndUserManagers*.email.unique().sort() + [userProjectRole.user.email]
-        List<String> ccMails = processingOptionService.findOptionAsList(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
 
         if (recipients) {
-            mailHelperService.sendEmail(subject, body, recipients, ccMails)
+            mailHelperService.sendEmail(subject, body, recipients)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
                     "Notified project authorities (${projectAuthoritiesAndUserManagers*.realName.join(", ")}) and user (${userProjectRole.user.username})")
         }

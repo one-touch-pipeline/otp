@@ -59,12 +59,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     private final static String AD_GROUP_TOOL_PATH = "path/to/script.sh"
 
-    private final static String EMAIL_LINUX_GROUP_ADMINISTRATION = HelperUtils.randomEmail
-    private final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
-
     private static final String EMAIL_INTERN = 'intern@de.de'
     private static final String EMAIL_EXTERN = 'extern@de.de'
-    private static final String EMAIL_RECIPIENT_NOTIFICATION = 'email-recipient@notification.com'
+    private static final String EMAIL_TICKET_SYSTEM = HelperUtils.randomEmail
 
     @Autowired
     GrailsApplication grailsApplication
@@ -92,17 +89,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.auditLogService.securityService = new SecurityService()
         userProjectRoleService.auditLogService.securityService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService.processingOptionService = new ProcessingOptionService()
-        userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         userProjectRoleService.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         userProjectRoleService.userService = new UserService()
 
-        findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION,
-                type: null,
-                project: null,
-                value: EMAIL_LINUX_GROUP_ADMINISTRATION,
-        )
+        userProjectRoleService.mailHelperService = Mock(MailHelperService) {
+            getTicketSystemEmailAddress() >> EMAIL_TICKET_SYSTEM
+        }
+
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION,
                 type: null,
@@ -116,20 +110,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 value: CLUSTER_NAME,
         )
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION,
-                type: null,
-                project: null,
-                value: EMAIL_CLUSTER_ADMINISTRATION,
-        )
-        findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.OTP_SYSTEM_USER,
                 type: null,
                 project: null,
                 value: SYSTEM_USER,
         )
         findOrCreateProcessingOption(
-                name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
-                value: EMAIL_RECIPIENT_NOTIFICATION,
+                name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM,
+                value: EMAIL_TICKET_SYSTEM,
         )
     }
 
@@ -202,7 +190,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(
                 """addToUnixGroup
                 |${requesterUserProjectRole.user.username}
                 |${formattedAction}
@@ -215,8 +203,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 |${operatorAction}
                 |${scriptCommand}
                 |${affectedUserUserDetail}
-                |${requesterUserDetail}""".stripMargin(),
-                EMAIL_LINUX_GROUP_ADMINISTRATION,
+                |${requesterUserDetail}""".stripMargin()
         )
 
         where:
@@ -245,7 +232,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_, { it.contains(projectList) }, EMAIL_LINUX_GROUP_ADMINISTRATION)
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_, { it.contains(projectList) })
     }
 
     @Unroll
@@ -281,7 +268,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(
                 """addToUnixGroup
                 |${switchedUser.username}
                 |${formattedAction}
@@ -294,8 +281,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 |${operatorAction}
                 |${scriptCommand}
                 |${affectedUserUserDetail}
-                |${requesterUserDetail}""".stripMargin(),
-                EMAIL_LINUX_GROUP_ADMINISTRATION,
+                |${requesterUserDetail}""".stripMargin()
         )
 
         where:
@@ -354,12 +340,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         !userProjectRole.receivesNotifications
 
         and: "notification for unix group administration was sent"
-        removeMailCount * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
+        removeMailCount * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("REMOVE") })
 
         and: "notification for user managers that a user has been enabled was sent"
         notifyEnableUser * userProjectRoleService.mailHelperService.sendEmail({
             it.contains("newProjectMember")
-        }, _ as String, [requesterUserProjectRole.user.email, userProjectRole.user.email], [EMAIL_RECIPIENT_NOTIFICATION])
+        }, _ as String, [requesterUserProjectRole.user.email, userProjectRole.user.email])
 
         0 * userProjectRoleService.mailHelperService.sendEmail(*_)
 
@@ -504,14 +490,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then: "notification for unix group administration was sent"
-        expectedInvocations * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as String)
+        expectedInvocations * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, _ as String)
 
         and: "notification for user managers regarding file access was sent"
         expectedInvocations * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, user.email, _ as List<String>)
 
         and: "notification for user managers regarding new user was sent"
         1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String,
-                [requesterUserProjectRole.user.email, user.email], [EMAIL_RECIPIENT_NOTIFICATION])
+                [requesterUserProjectRole.user.email, user.email])
 
         and:
         UserProjectRole.findAllByIdNotEqual(requesterUserProjectRole.id)*.fileAccessChangeRequested == [accessToFiles]
@@ -621,7 +607,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>, _ as List<String>)
+        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>)
     }
 
     void "addExternalUserToProject, when user with same external email already exists, throws error"() {
@@ -705,7 +691,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 _ as String,
                 _ as String,
                 recipients + [newUserProjectRole.user.email],
-                [EMAIL_RECIPIENT_NOTIFICATION],
         )
     }
 
@@ -729,7 +714,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String,
-                [uprToBeNotified.user.email, newUPR.user.email], [EMAIL_RECIPIENT_NOTIFICATION])
+                [uprToBeNotified.user.email, newUPR.user.email])
     }
 
     @Unroll
@@ -771,7 +756,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 expectedSubject,
                 expectedContent,
                 [executingUPR.user.email, newUPR.user.email],
-                [EMAIL_RECIPIENT_NOTIFICATION],
         )
 
         where:
@@ -806,7 +790,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             ${projectName}
             ${project.dirAnalysis}
             ${CLUSTER_NAME}
-            ${EMAIL_CLUSTER_ADMINISTRATION}
+            ${EMAIL_TICKET_SYSTEM}
             ${EMAIL_SENDER_SALUTATION}""".stripIndent()
 
         when:
@@ -876,7 +860,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles[0]."${flag}" == true
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, _ as String)
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("ADD") })
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -886,7 +870,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         userProjectRoles[0]."${flag}" == false
 
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, _ as String)
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("REMOVE") })
         _ * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
@@ -996,7 +980,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles.accessToFiles.each { it == true }
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, _ as String)
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("ADD") })
         1 * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
 
         when:
@@ -1006,7 +990,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles.accessToFiles.each { it == false }
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, _ as String)
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("REMOVE") })
     }
 
     @Unroll
@@ -1221,7 +1205,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         createUserProjectRole(
                 user: createUser([
                         enabled: userEnabled,
-                        email  : EMAIL_LINUX_GROUP_ADMINISTRATION
+                        email  : EMAIL_INTERN
                 ]),
                 project: project,
                 receivesNotifications: receivesNotifications,
@@ -1238,7 +1222,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         where:
         receivesNotifications | roleEnabled | userEnabled || result
-        true                  | true        | true        || EMAIL_LINUX_GROUP_ADMINISTRATION
+        true                  | true        | true        || EMAIL_INTERN
         true                  | true        | false       || ''
         true                  | false       | true        || ''
         true                  | false       | false       || ''
@@ -1639,7 +1623,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     |${projectName}
                     |${dirAnalysis}
                     |${clusterName}
-                    |${clusterAdministrationEmail}
+                    |${ticketSystemEmail}
                     |${supportTeamSalutation}'''.stripMargin()
         }
     }

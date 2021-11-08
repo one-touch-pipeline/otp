@@ -102,7 +102,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
                     0 * _
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmail(_, { usersToNotBeFound.every { User user -> it.contains(user.username) } }, _) >> { }
+                    1 * sendEmailToTicketSystem(_, { usersToNotBeFound.every { User user -> it.contains(user.username) } }) >> { }
                 },
         ])
 
@@ -123,7 +123,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
                     0 * _
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    0 * sendEmail(_, _, _) >> { }
+                    0 * sendEmailToTicketSystem(_, _) >> { }
                 },
         ])
 

@@ -92,10 +92,6 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         return processingOptionService.findOptionAsLong(ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD)
     }
 
-    String getLinuxGroupAdministrationMail() {
-        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
-    }
-
     String getOtpServiceSalutation() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
     }
@@ -152,7 +148,7 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         |""".stripMargin()
 
 
-        mailHelperService.sendEmail(subject, body, authority.email, [linuxGroupAdministrationMail])
+        mailHelperService.sendEmail(subject, body, authority.email)
 
         log.info("Sent deactivation mail to ${authority} concerning the following users: ${invalidUsers}")
     }
@@ -164,7 +160,7 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         |${getMailBodyWithInvalidUsers(invalidUsers)}
         |""".stripMargin()
 
-        mailHelperService.sendEmail(subject, body, linuxGroupAdministrationMail)
+        mailHelperService.sendEmailToTicketSystem(subject, body)
 
         log.info("Sent deactivation mail to service concerning the following users: ${invalidUsers}")
     }

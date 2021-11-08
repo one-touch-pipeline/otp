@@ -57,7 +57,7 @@ class GenerateAndSendKPIsForNBIIntegrationSpec extends Specification {
     void "wrappedExecute, sends mail with list of all required workflows when job runs"() {
         when:
         job.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _)  >> { String subject, String body, String recipient ->
+            1 * sendEmailToTicketSystem(_, _)  >> { String subject, String body ->
                 assert subject.startsWith("KPIs for de.NBI - ")
                 assert body.contains("Workflow: PanCan")
                 assert body.contains("Workflow: Rna alignment")

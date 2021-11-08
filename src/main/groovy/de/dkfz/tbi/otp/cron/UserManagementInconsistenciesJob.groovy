@@ -27,9 +27,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
@@ -52,9 +50,6 @@ class UserManagementInconsistenciesJob {
 
     @Autowired
     MailHelperService mailHelperService
-
-    @Autowired
-    ProcessingOptionService processingOptionService
 
     static String mailSubject = "Detected divergence in user management"
 
@@ -103,11 +98,7 @@ class UserManagementInconsistenciesJob {
     }
 
     private void notify(String content) {
-        mailHelperService.sendEmail(mailSubject, content, recipients)
-    }
-
-    private List<String> getRecipients() {
-        return [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)]
+        mailHelperService.sendEmailToTicketSystem(mailSubject, content)
     }
 
     private static boolean allEqual(List<UserProjectRole> userProjectRoles) {

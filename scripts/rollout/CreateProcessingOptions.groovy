@@ -42,8 +42,7 @@ import org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebAppl
 Map<ProcessingOption.OptionName, String> processingOptions = [
         (ProcessingOption.OptionName.EMAIL_SENDER)                     : '',
         (ProcessingOption.OptionName.EMAIL_REPLY_TO)                   : '',
-        (ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)     : '',
-        (ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)           : '',
+        (ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM)              : '',
         (ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)             : 'otp',
         (ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME)       : '',
 

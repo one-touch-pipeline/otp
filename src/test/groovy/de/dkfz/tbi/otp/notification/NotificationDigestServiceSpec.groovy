@@ -58,7 +58,6 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
 
     void setupData() {
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix")
-        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION, value: "service@otp.de")
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, value: "salutation")
     }
 

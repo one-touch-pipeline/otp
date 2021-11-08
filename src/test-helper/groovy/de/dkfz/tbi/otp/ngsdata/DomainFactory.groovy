@@ -422,21 +422,12 @@ class DomainFactory {
         )
     }
 
-    static ProcessingOption createProcessingOptionForNotificationRecipient(String recipientEmail = HelperUtils.randomEmail) {
+    static ProcessingOption createProcessingOptionForTicketSystemEmail(String ticketSystemEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
-                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                name: OptionName.EMAIL_TICKET_SYSTEM,
                 type: null,
                 project: null,
-                value: recipientEmail,
-        )
-    }
-
-    static ProcessingOption createProcessingOptionForErrorRecipient(String recipientEmail = HelperUtils.randomEmail) {
-        createProcessingOptionLazy(
-                name: OptionName.EMAIL_RECIPIENT_ERRORS,
-                type: null,
-                project: null,
-                value: recipientEmail,
+                value: ticketSystemEmail,
         )
     }
 

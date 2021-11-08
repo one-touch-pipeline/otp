@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 
@@ -86,8 +86,7 @@ class DeactivateUsersJob extends ScheduledJob {
             body += "The user has no groups left to remove."
         }
 
-        String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
-        mailHelperService.sendEmail(subject, body, email)
+        mailHelperService.sendEmailToTicketSystem(subject, body)
     }
 
     boolean isInGroup(User user, String unixGroup) {

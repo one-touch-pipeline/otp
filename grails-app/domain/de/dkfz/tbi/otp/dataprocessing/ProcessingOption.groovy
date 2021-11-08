@@ -376,12 +376,8 @@ class ProcessingOption implements Entity {
         ),
 
         //email
-        EMAIL_RECIPIENT_NOTIFICATION(
-                "Additional recipient for notifications (use ticket system if available)",
-                Necessity.REQUIRED, null, TypeValidators.MAIL
-        ),
-        EMAIL_RECIPIENT_ERRORS(
-                "Recipient of error messages",
+        EMAIL_TICKET_SYSTEM(
+                "Email address to the ticket system. It gets all (!) emails in CC.",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
         EMAIL_REPLY_TO(
@@ -395,22 +391,6 @@ class ProcessingOption implements Entity {
         EMAIL_SENDER_SALUTATION(
                 "The name and optionally email of the helpdesk team, to be used in the middle of sentences",
                 Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
-        ),
-        EMAIL_LINUX_GROUP_ADMINISTRATION(
-                "Email address of the entity responsible for adding users to linux groups",
-                Necessity.REQUIRED, null, TypeValidators.MAIL
-        ),
-        EMAIL_CLUSTER_ADMINISTRATION(
-                "Email address of the entity managing the cluster",
-                Necessity.REQUIRED, null, TypeValidators.MAIL
-        ),
-        EMAIL_OTP_MAINTENANCE(
-                "Email address for all mails to be handled by an OTP maintainer",
-                Necessity.REQUIRED, null, TypeValidators.MAIL
-        ),
-        EMAIL_MONTHLY_KPI_RECEIVER(
-                "Email address for the receiver of the de.NBI monthly KPI reports",
-                Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE(

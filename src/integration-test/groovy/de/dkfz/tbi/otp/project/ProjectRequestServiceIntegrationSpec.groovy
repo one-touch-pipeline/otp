@@ -31,8 +31,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.OtpRuntimeException
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.*
@@ -55,7 +53,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectRequestUserService: new ProjectRequestUserService(
                         securityService: mockedSecurityService
                 ),
-                processingOptionService  : new ProcessingOptionService(),
                 rolesService             : new RolesService(),
         )
     }
@@ -183,10 +180,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         User user1 = DomainFactory.createUser()
         User user2 = DomainFactory.createUser()
-        DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION,
-                value: "service@mail.com",
-        ])
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand(
                 name              : "name",
                 description       : "description",
@@ -217,7 +210,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             2 * createMessage(_, _) >> "message"
         }
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _, _) >> null
+            1 * sendEmailToTicketSystem(_, _) >> null
         }
         service.projectRequestUserService = new ProjectRequestUserService(
                 userProjectRoleService: Mock(UserProjectRoleService) {
@@ -258,7 +251,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             0 * createMessage(_, _) >> "message"
         }
         service.mailHelperService = Mock(MailHelperService) {
-            0 * sendEmail(_, _, _) >> null
+            0 * sendEmailToTicketSystem(_, _) >> null
         }
         service.projectRequestUserService = new ProjectRequestUserService(
             userProjectRoleService: Mock(UserProjectRoleService) {
@@ -373,7 +366,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         ProjectRequestService service = getServiceWithMockedCurrentUser(user.user)
         service.mailHelperService = Mock(MailHelperService) {
-            0 * sendEmail(_, _, _) >> null
+            0 * sendEmailToTicketSystem(_, _) >> null
         }
 
         when:
@@ -412,7 +405,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             2 * createMessage(_, _) >> "message"
         }
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _, _) >> null
+            1 * sendEmail(_, _, _) >> null
         }
 
         when:
@@ -463,7 +456,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
             2 * createMessage(_, _) >> "message"
         }
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _) >> null
+            1 * sendEmailToTicketSystem(_, _) >> null
         }
 
         when:

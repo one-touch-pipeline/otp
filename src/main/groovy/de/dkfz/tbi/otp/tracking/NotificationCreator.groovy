@@ -41,7 +41,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -165,7 +164,6 @@ class NotificationCreator {
             if (!recipients) {
                 subject.append('TO BE SENT: ')
             }
-            recipients << processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)
 
             if (ilseSubmissions) {
                 subject.append("[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] ")
@@ -177,7 +175,12 @@ class NotificationCreator {
                 log.debug("No Email was sent! Subject would have been '${subject}.")
                 return
             }
-            mailHelperService.sendEmail(subject.toString(), content, recipients)
+
+            if (recipients) {
+                mailHelperService.sendEmail(subject.toString(), content, recipients)
+            } else {
+                mailHelperService.sendEmailToTicketSystem(subject.toString(), content)
+            }
         }
     }
 
@@ -190,7 +193,7 @@ class NotificationCreator {
         }
         subject.append(' Processing Status Update')
 
-        List<String> recipients = [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)]
+        List<String> recipients = []
 
         List<Project> projects = seqTracks*.project.unique()
 
@@ -224,7 +227,11 @@ class NotificationCreator {
         content.append(createNotificationTextService.messageSourceService.createMessage("notification.import.detail.link"))
         content.append(createLinksToImportDetailPage(ticket))
 
-        mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
+        if (recipients) {
+            mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
+        } else {
+            mailHelperService.sendEmailToTicketSystem(subject.toString(), content.toString())
+        }
     }
 
     private StringBuilder createLinksToImportDetailPage(OtrsTicket ticket) {
@@ -249,8 +256,6 @@ class NotificationCreator {
     }
 
     void sendImportSourceOperatorNotification(OtrsTicket ticket) {
-        List<String> recipients = [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)]
-
         String prefixedTicketNumber = ticket.prefixedTicketNumber
         String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
 
@@ -269,7 +274,7 @@ class NotificationCreator {
         content += pathsToDelete.collect { "rm ${it}" }.join("\n")
 
         if (pathsToDelete) {
-            mailHelperService.sendEmail(subject, content, recipients)
+            mailHelperService.sendEmailToTicketSystem(subject, content)
         }
     }
 

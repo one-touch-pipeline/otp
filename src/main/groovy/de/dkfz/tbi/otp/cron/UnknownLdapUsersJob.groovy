@@ -27,8 +27,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
 
@@ -49,9 +47,6 @@ class UnknownLdapUsersJob extends ScheduledJob {
     @Autowired
     LdapService ldapService
 
-    @Autowired
-    ProcessingOptionService processingOptionService
-
     static final String MAIL_SUBJECT = "Found unknown LDAP users in the OTP user management"
 
     static final String MAIL_CONTEXT = """\
@@ -64,10 +59,6 @@ class UnknownLdapUsersJob extends ScheduledJob {
             eq("enabled", true)
             isNotNull("username")
         } as List<User>
-    }
-
-    List<String> getRecipients() {
-        return [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)]
     }
 
     static String buildMailBody(List<User> unresolvableUsers) {
@@ -83,7 +74,7 @@ class UnknownLdapUsersJob extends ScheduledJob {
     }
 
     void sendNotification(String body) {
-        mailHelperService.sendEmail(MAIL_SUBJECT, body, recipients)
+        mailHelperService.sendEmailToTicketSystem(MAIL_SUBJECT, body)
     }
 
     List<User> getUsersThatCanNotBeFoundInLdap(List<User> users) {
