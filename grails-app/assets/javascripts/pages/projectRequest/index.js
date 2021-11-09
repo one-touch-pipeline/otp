@@ -45,13 +45,12 @@ $(() => {
 
   // if the PI role is selected, manage users should be checked
   $('.project-role-select').on('change', () => {
+    const manageUsersBox = $('.project-request-user-table').find('.set-for-authority');
+    manageUsersBox.prop('disabled', false);
     $('.project-role-select option:selected').each(function () {
-      const manageUsersBox = $(this).closest('.project-request-user-table').find('.set-for-authority');
       if (this.text === 'PI') {
         manageUsersBox.prop('checked', true);
         manageUsersBox.prop('disabled', true);
-      } else {
-        manageUsersBox.prop('disabled', false);
       }
     });
   }).trigger('change');
