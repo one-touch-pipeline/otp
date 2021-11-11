@@ -57,6 +57,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.FileSystems
+import java.nio.file.Files
 import java.nio.file.Path
 
 class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnitTest<LaneSwapService>, DomainFactoryCore, GrailsWebUnitTest {
@@ -83,6 +84,11 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
+        final Path scriptFolder = temporaryFolder.newFolder("files").toPath()
+        final String scriptName = "TEST-Swap-Lane"
+        Files.createDirectories(scriptFolder)
+        Path bashScriptPath = Files.createFile(scriptFolder.resolve("${scriptName}.sh"))
+
         // Services
         Path path = temporaryFolder.newFile().toPath()
         service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
@@ -103,6 +109,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
         }
         service.fileService = Mock(FileService) {
+            1 * createOrOverwriteScriptOutputFile(scriptFolder, "${scriptName}.sh", realm) >> bashScriptPath
             _ * createOrOverwriteScriptOutputFile(_, _, _) >> temporaryFolder.newFile().toPath()
         }
         CommentService mockedCommendService = Mock(CommentService) {
@@ -111,7 +118,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         service.commentService = mockedCommendService
         service.individualService = new IndividualService([
                 commentService: mockedCommendService,
-                configService: service.configService,
+                configService : service.configService,
         ])
 
         service.deletionService = Mock(DeletionService) {
@@ -137,8 +144,10 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         Sample correctlyLabeledSample = createSample([
                 individual: oldIndividual,
         ])
+        final SeqType falsySampleSeqType = createSeqType()
         SeqTrack seqTrackWithFalsySample1 = createSeqTrackWithOneDataFile([
-                sample: falsyLabeledSample,
+                seqType: falsySampleSeqType,
+                sample : falsyLabeledSample,
         ])
         SeqTrack seqTrackWithFalsySample2 = createSeqTrackWithOneDataFile([
                 sample : falsyLabeledSample,
@@ -152,11 +161,8 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         createSeqTrack()  // a unconnected SeqTrack
 
         // prepare input
-        String seqTrack1FileName = DataFile.findAllBySeqTrack(seqTrackWithFalsySample1).first().fileName
-        String seqTrack2FileName = DataFile.findAllBySeqTrack(seqTrackWithFalsySample2).first().fileName
-        Map<String, String> dataFileMap = [:]
-        dataFileMap.put(seqTrack1FileName, 'newFileName1')
-        dataFileMap.put(seqTrack2FileName, 'newFileName2')
+        DataFile seqTrack1File = DataFile.findAllBySeqTrack(seqTrackWithFalsySample1).first()
+        DataFile seqTrack2File = DataFile.findAllBySeqTrack(seqTrackWithFalsySample2).first()
 
         LaneSwapParameters parameters = new LaneSwapParameters(
                 projectNameSwap: new Swap(falsyLabeledSample.individual.project.name, newIndividual.project.name),
@@ -171,11 +177,11 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                         seqTrackWithFalsySample2.laneId,
                 ],
                 sampleNeedsToBeCreated: true,
-                dataFileSwaps: [new Swap(seqTrack1FileName, 'newFileName1'), new Swap(seqTrack2FileName, 'newFileName2')],
-                bashScriptName: 'newUniqueScriptName',
+                dataFileSwaps: [new Swap(seqTrack1File.fileName, 'newFileName1'), new Swap(seqTrack2File.fileName, 'newFileName2')],
+                bashScriptName: scriptName,
                 log: new StringBuilder(),
                 failOnMissingFiles: true,
-                scriptOutputDirectory: temporaryFolder.newFolder() as Path,
+                scriptOutputDirectory: scriptFolder,
                 linkedFilesVerified: true
         )
 
@@ -184,6 +190,18 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         then: "no errors"
         noExceptionThrown()
+
+        and: "bash script created correctly"
+        File bashScript = scriptFolder.resolve("${scriptName}.sh").toFile()
+        bashScript.exists()
+        String bashScriptContent = bashScript.text
+        bashScriptContent.startsWith(DataSwapService.BASH_HEADER)
+        bashScriptContent.contains(
+                "rm -rf ${oldIndividual.getViewByPidPath(falsySampleSeqType).absoluteDataManagementPath.toPath().resolve(falsyLabeledSample.sampleType.dirName)}"
+        )
+        !bashScriptContent.contains(
+                "rm -rf ${oldIndividual.getViewByPidPath(falsySampleSeqType).absoluteDataManagementPath.toPath()}\n"
+        )
 
         and: "SeqTracks have the new attributes"
         List<SeqTrack> seqTracks = SeqTrack.findAllBySample(CollectionUtils.exactlyOneElement(Sample.findAllByIndividual(newIndividual)))
@@ -209,7 +227,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         CollectionUtils.containSame(SeqTrack.findAllBySampleInList(Sample.findAllByIndividual(oldIndividual))*.id, [seqTrackWithCorrectlyLabeledSample.id])
         SeqTrack.findAllBySample(falsyLabeledSample) == []
 
-        and: "Falsy labeled sample is NOT removed from oldIndividual"
-        CollectionUtils.containSame(Sample.findAllByIndividual(oldIndividual), [falsyLabeledSample, correctlyLabeledSample])
+        and: "Falsy labeled sample is removed from oldIndividual but correctly is still there"
+        CollectionUtils.containSame(Sample.findAllByIndividual(oldIndividual), [correctlyLabeledSample])
     }
 }

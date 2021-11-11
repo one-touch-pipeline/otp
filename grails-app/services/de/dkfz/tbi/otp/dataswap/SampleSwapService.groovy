@@ -36,6 +36,9 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.FileSystem
+import java.nio.file.Path
+
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwapData> {
@@ -64,6 +67,13 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
         List<DataFile> bamDataFiles = getBAMDataFilesBySeqTrackInList(seqTrackList, parameters)
         List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
 
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        List<Path> individualPaths = seqTrackList*.seqType.unique().collect {
+            fileSystem.getPath(individualSwap.old
+                    .getViewByPidPath(it).absoluteDataManagementPath
+                    .toString())
+        }
+
         return new SampleSwapData(
                 parameters: parameters,
                 projectSwap: getProjectSwap(parameters),
@@ -75,7 +85,9 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
                 dataFiles: dataFiles,
                 oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
                 oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
-                seqTrackService: seqTrackService
+                seqTrackService: seqTrackService,
+                cleanupIndividualPaths: individualPaths,
+                cleanupSampleDir: sampleTypeSwap.old.dirName
         )
     }
 
@@ -150,6 +162,11 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
                 sampleType: data.sampleTypeSwap.new.name,
         ])
         createCommentForSwappedDatafiles(data)
+    }
+
+    @Override
+    protected void cleanupLeftOvers(SampleSwapData data) {
+        cleanupLeftOverSamples(data)
     }
 
     /**

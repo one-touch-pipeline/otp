@@ -30,13 +30,16 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
@@ -44,14 +47,14 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class SampleSwapServiceIntegrationSpec extends Specification implements UserAndRoles {
+class SampleSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
 
     SampleSwapService sampleSwapService
     LsdfFilesService lsdfFilesService
     TestConfigService configService
 
     @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder
 
     Path outputFolder
 
@@ -72,9 +75,11 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         given:
         setupData()
         DomainFactory.createDefaultRealmWithProcessingOption()
-        DomainFactory.createAllAlignableSeqTypes()
+        final SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
+        MergingWorkPackage workPackage = createMergingWorkPackage(seqType: seqType)
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                workPackage                 : workPackage,
         ])
         String script = "TEST-MOVE_SAMPLE"
         Individual individual = DomainFactory.createIndividual(project: bamFile.project)
@@ -96,12 +101,15 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
 
         Path scriptFolder = temporaryFolder.newFolder("files").toPath()
 
+        Individual oldIndividual = bamFile.individual
+        Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.swap(
                     new SampleSwapParameters(
                             projectNameSwap: new Swap(bamFile.project.name, bamFile.project.name),
-                            pidSwap: new Swap(bamFile.individual.pid, individual.pid),
+                            pidSwap: new Swap(oldIndividual.pid, individual.pid),
                             sampleTypeSwap: new Swap(bamFile.sampleType.name, bamFile.sampleType.name),
                             dataFileSwaps: [new Swap(dataFileName1, ""), new Swap(dataFileName2, "")],
                             bashScriptName: script,
@@ -125,13 +133,14 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         File copyScript = scriptFolder.resolve("${script}.sh").toFile()
         copyScript.exists()
         String copyScriptContent = copyScript.text
-        copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         copyScriptContent.startsWith(DataSwapService.BASH_HEADER)
+        copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
-            copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
-            copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
-            copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
-            it.comment.comment == "Attention: Datafile swapped!"
+            assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
+            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
+            assert it.comment.comment == "Attention: Datafile swapped!"
         }
+        copyScriptContent.contains("rm -rf ${cleanupPath}")
     }
 }

@@ -32,7 +32,7 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
- * Template to move/rename a patient call. It can also change the SampleTypes of the patient and rename the file names.
+ * Template to move/rename a patient. It can also change the SampleTypes of the patient and rename the file names.
  *
  * Therefore the following input are needed:
  * - OldProject: The name of the project the patient is in currently

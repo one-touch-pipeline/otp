@@ -110,6 +110,11 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
             protected void createSwapComments(DataSwapData<DataSwapParameters> data) {
                 // Is not functionally tested here
             }
+
+            @Override
+            protected void cleanupLeftOvers(DataSwapData<DataSwapParameters> data) {
+                // Is not functionally tested here
+            }
         }.class) as DataSwapService
     }
 
@@ -169,6 +174,9 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         then:
         1 * service.createSwapComments(_ as DataSwapData<DataSwapParameters>) >> _
+
+        then:
+        1 * service.cleanupLeftOvers(_ as DataSwapData<DataSwapParameters>) >> _
 
         then:
         1 * service.createMoveFilesScript(_ as DataSwapData<DataSwapParameters>) >> null
@@ -1092,7 +1100,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
             _ * getFileViewByPidPath(_) >> Paths.get(dataFile.pathName).resolve(newDataFileName)
         }
         service.fileSystemService = Mock(FileSystemService) {
-            _  * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+            _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         // DTO
@@ -1122,6 +1130,64 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         then:
         thrown FileNotFoundException
+    }
+
+    @Unroll
+    void "cleanupLeftOverSamples, should create cleanup commands for samples and individual data if it has no samples left: #futherSample"() {
+        given:
+        final Individual individual = createIndividual()
+        if (futherSample) {
+            createSample(individual: individual)
+        }
+        final Path vbpPath = Paths.get("/vbpPath/")
+        final String sampleDir = "samplePath"
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                individualSwap: new Swap(individual, null),
+                cleanupIndividualPaths: [vbpPath],
+                cleanupSampleDir: sampleDir,
+        )
+
+        when:
+        service.cleanupLeftOverSamples(dataSwapData)
+
+        then:
+        futherSample && Individual.count || !Individual.count
+        String bashScriptSnippet = dataSwapData.moveFilesCommands.join("\n")
+        bashScriptSnippet.contains("################ cleanup empty sample directories ################")
+        bashScriptSnippet.contains("rm -rf ${vbpPath.resolve(sampleDir)}")
+
+        String cleanupIndividualHeader = "################ cleanup empty individual directories ################"
+        String cleanupIndividualCommand = "rm -rf ${vbpPath}\n"
+        futherSample && !cleanupIndividualHeader || cleanupIndividualHeader
+        futherSample && !cleanupIndividualCommand || cleanupIndividualCommand
+
+        where:
+        futherSample << [true, false]
+    }
+
+    @Unroll
+    void "cleanupLeftOverIndividual, should create cleanup bash commands for individual and also delete it when cleanupDatabase is set"() {
+        given:
+        final Individual individual = createIndividual()
+        final Path vbpPath = Paths.get("/vbpPath/")
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                individualSwap: new Swap(individual, null),
+                cleanupIndividualPaths: [vbpPath],
+        )
+
+        when:
+        service.cleanupLeftOverIndividual(dataSwapData, cleanupDatabase)
+
+        then:
+        cleanupDatabase && !Individual.count || Individual.count
+        String bashScriptSnippet = dataSwapData.moveFilesCommands.join("\n")
+        bashScriptSnippet.contains("################ cleanup empty individual directories ################")
+        bashScriptSnippet.contains("rm -rf ${vbpPath}")
+
+        where:
+        cleanupDatabase << [true, false]
     }
 
     private static Path createNonExistingFilePath(String fileName) {

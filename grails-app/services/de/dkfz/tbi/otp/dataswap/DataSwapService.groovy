@@ -45,8 +45,8 @@ import java.nio.file.*
  * Abstract class for an data swap service. Defines basic steps necessary to perform some sort of an data swap.
  * Used as base of {@link SampleSwapService}.
  *
- * @param <P> of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
- * @param <D> of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
+ * @param < P >  of type DataSwapParameters build in the scripts containing only the names/ids of the entities to swap.
+ * @param < D >  of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
  *        necessary to perform swap.
  */
 @SuppressWarnings("JavaIoPackageAccess")
@@ -129,6 +129,13 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     protected abstract void createSwapComments(D data)
 
     /**
+     * Clean up left over empty data and create bash commands for empty file structures after a swap.
+     *
+     * @param data build by buildDataDTO(P parameters) containing all entities necessary to perform a swap.
+     */
+    protected abstract void cleanupLeftOvers(D data)
+
+    /**
      * Takes a {@link grails.validation.Validateable} and perform a validation.
      *
      * @param validateable object to validate
@@ -176,6 +183,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
         markSeqTracksAsSwappedAndDeleteDependingObjects(data)
         performDataSwap(data)
         createSwapComments(data)
+        cleanupLeftOvers(data)
         createMoveFilesScript(data)
     }
 
@@ -345,7 +353,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @param data DTO containing all entities necessary to perform a swap
      */
     void createRemoveAnalysisAndAlignmentsCommands(DataSwapData data) {
-        data.moveFilesCommands << "\n\n################ delete analysis files ################\n"
+        data.moveFilesCommands << "\n\n################ delete bam and analysis files ################\n"
         data.dirsToDelete.flatten()*.path.each {
             data.moveFilesCommands << "#rm -rf ${it}\n"
         }
@@ -454,6 +462,40 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     }
 
     /**
+     * Creates bash commands to delete empty directories on the file system after SampleSwap and LaneSwap.
+     *
+     * Also cleanups Individual if it has no other samples left.
+     *
+     * @param data DTO containing all entities necessary to perform a swap
+     */
+    void cleanupLeftOverSamples(D data) {
+        data.moveFilesCommands << "\n\n################ cleanup empty sample directories ################\n\n"
+        data.moveFilesCommands << data.cleanupIndividualPaths*.resolve(data.cleanupSampleDir).collect { "rm -rf ${it}" }.join("\n")
+
+        if (!data.individualSwap.old.samples) {
+            data.moveFilesCommands << "\n\n"
+            cleanupLeftOverIndividual(data, true)
+        }
+    }
+
+    /**
+     * Deletes individual data after IndividualSwap, SampleSwap and LaneSwap and
+     * creates bash commands to delete empty directories on the file system.
+     *
+     * It is not necessary to delete the Individual in case of an IndividualSwap, because it will be reused.
+     *
+     * @param data DTO containing all entities necessary to perform a swap
+     * @param cleanupDatabase flag for delete the
+     */
+    void cleanupLeftOverIndividual(D data, boolean cleanupDatabase = false) {
+        if (cleanupDatabase) {
+            data.individualSwap.old.delete(flush: true)
+        }
+        data.moveFilesCommands << "\n\n################ cleanup empty individual directories ################\n\n"
+        data.moveFilesCommands << data.cleanupIndividualPaths.collect { "rm -rf ${it}" }.join("\n")
+    }
+
+    /**
      * Creates rename/move commands for one data file and adds them to an given bash script.
      *
      * @param oldFilename which the data file had before it was changed in the database
@@ -462,7 +504,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
      * @return outPutBashCommands with added bash commands.
      */
     private String createRenameDataFileCommands(String oldFilename, DataFile dataFile, D data) throws FileNotFoundException {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         String outPutBashCommands = ""
         // fill local variables
         String oldDirectFileName = data.oldDataFileNameMap[dataFile][DIRECT_FILE_NAME]

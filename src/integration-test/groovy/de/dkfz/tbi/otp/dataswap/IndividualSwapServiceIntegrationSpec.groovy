@@ -30,12 +30,16 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
@@ -44,7 +48,7 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles {
+class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
 
     IndividualSwapService individualSwapService
     LsdfFilesService lsdfFilesService
@@ -74,9 +78,11 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         given:
         setupData()
         DomainFactory.createDefaultRealmWithProcessingOption()
-        DomainFactory.createAllAlignableSeqTypes()
+        final SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
+        MergingWorkPackage workPackage = createMergingWorkPackage(seqType: seqType)
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                workPackage: workPackage,
         ])
         Project newProject = DomainFactory.createProject(realm: bamFile.project.realm)
         String scriptName = "TEST-MOVE-INDIVIDUAL"
@@ -103,12 +109,15 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
 
         StringBuilder outputLog = new StringBuilder()
 
+        Individual oldIndividual = bamFile.individual
+        Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
             individualSwapService.swap(
                     new IndividualSwapParameters(
                             projectNameSwap: new Swap(bamFile.project.name, newProject.name),
-                            pidSwap: new Swap(bamFile.individual.pid, bamFile.individual.pid),
+                            pidSwap: new Swap(oldIndividual.pid, oldIndividual.pid),
                             sampleTypeSwaps: [
                                     new Swap((bamFile.sampleType.name), ""),
                             ],
@@ -145,5 +154,6 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
+        copyScriptContent.contains("rm -rf ${cleanupPath}")
     }
 }

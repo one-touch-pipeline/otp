@@ -57,6 +57,7 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
                 return "DataFiles: ${difference} not found in database, and ${dataFilesFound} were missed in map"
             }
         }
+        cleanupSampleDir nullable: true
     }
 
     P parameters
@@ -69,6 +70,8 @@ class DataSwapData<P extends DataSwapParameters> implements Validateable {
     List<String> oldFastQcFileNames
     List<File> dirsToDelete = []
     List<String> moveFilesCommands = [DataSwapService.BASH_HEADER]
+    List<Path> cleanupIndividualPaths
+    String cleanupSampleDir
 
     Swap<String> getPidSwap() {
         return parameters.pidSwap

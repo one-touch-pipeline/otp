@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataswap
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -37,6 +38,9 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
@@ -63,8 +67,14 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
         Run run = getRunByName(parameters)
         Swap sampleSwap = getSampleSwap(parameters, individualSwap, sampleTypeSwap)
         Swap<SequencingReadType> sequencingReadTypeSwap = getSequencingReadTypeSwaps(parameters)
+        Swap<SeqType> seqTypeSwap = getSeqTypeSwap(parameters, sequencingReadTypeSwap)
         List<SeqTrack> seqTrackList = getSeqTracksBySampleAndRunAndLaneIdInList(parameters, sampleSwap, run)
         List<DataFile> dataFiles = getFastQDataFilesBySeqTrackInList(seqTrackList, parameters)
+
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
+        Path individualPath = fileSystem.getPath(individualSwap.old
+                .getViewByPidPath(seqTypeSwap.old).absoluteDataManagementPath
+                .toString())
 
         return new LaneSwapData(
                 parameters: parameters,
@@ -74,11 +84,13 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
                 run: run,
                 sampleSwap: sampleSwap,
                 sequencingReadTypeSwap: sequencingReadTypeSwap,
-                seqTypeSwap: getSeqTypeSwap(parameters, sequencingReadTypeSwap),
+                seqTypeSwap: seqTypeSwap,
                 seqTrackList: seqTrackList,
                 dataFiles: dataFiles,
                 oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
-                oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles)
+                oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
+                cleanupIndividualPaths: [individualPath],
+                cleanupSampleDir: sampleTypeSwap.old.dirName
         )
     }
 
@@ -139,6 +151,21 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
                 "run: ${data.run.name}\nlane: ${data.lanes}"
         )
         createCommentForSwappedDatafiles(data)
+    }
+
+    @Override
+    protected void cleanupLeftOvers(LaneSwapData data) {
+        List<SeqTrack> leftOverSeqTracks = SeqTrack.findAllBySample(data.sampleSwap.old)
+        List<ExternallyProcessedMergedBamFile> leftOverBamFiles = ExternallyProcessedMergedBamFile.withCriteria {
+            'workPackage' {
+                eq('sample', data.sampleSwap.old)
+            }
+        } as List<ExternallyProcessedMergedBamFile>
+
+        if (!leftOverSeqTracks && !leftOverBamFiles) {
+            data.sampleSwap.old.delete(flush: true) // needs to be done here since only LaneSwapData has a sampleSwap object
+            cleanupLeftOverSamples(data)
+        }
     }
 
     /**

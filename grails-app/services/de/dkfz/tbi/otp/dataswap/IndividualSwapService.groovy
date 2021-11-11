@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService
 import de.dkfz.tbi.otp.dataswap.data.IndividualSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -33,6 +32,9 @@ import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
@@ -66,6 +68,13 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
         List<DataFile> bamDataFiles = getBAMDataFilesBySeqTrackInList(seqTrackList, parameters)
         List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten() as List<DataFile>
 
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        List<Path> individualPaths = seqTrackList*.seqType.unique().collect {
+            fileSystem.getPath(individualSwap.old
+                    .getViewByPidPath(it).absoluteDataManagementPath
+                    .toString())
+        }
+
         return new IndividualSwapData(
                 parameters: parameters,
                 projectSwap: getProjectSwap(parameters),
@@ -74,7 +83,8 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
                 seqTrackList: seqTrackList,
                 dataFiles: dataFiles,
                 oldDataFileNameMap: collectFileNamesOfDataFiles(dataFiles),
-                oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles)
+                oldFastQcFileNames: getFastQcOutputFileNamesByDataFilesInList(dataFiles),
+                cleanupIndividualPaths: individualPaths
         )
     }
 
@@ -103,15 +113,6 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
         }
 
         createRemoveAnalysisAndAlignmentsCommands(data)
-
-        data.moveFilesCommands << "\n\n\n ################ delete old Individual ################ \n"
-        data.moveFilesCommands << "# rm -rf ${data.projectSwap.old.projectSequencingDirectory}/*/view-by-pid/${data.pidSwap.old}/\n"
-
-        String processingPathToOldIndividual = dataProcessingFilesService.getOutputDirectory(
-                data.individualSwap.old,
-                DataProcessingFilesService.OutputDirectories.BASE
-        )
-        data.moveFilesCommands << "# rm -rf ${processingPathToOldIndividual}\n"
     }
 
     @Override
@@ -136,6 +137,11 @@ class IndividualSwapService extends DataSwapService<IndividualSwapParameters, In
                         "old individual ${parameters.pidSwap.old} not found"),
                 CollectionUtils.atMostOneElement(Individual.findAllByPid(parameters.pidSwap.new))
         )
+    }
+
+    @Override
+    protected void cleanupLeftOvers(IndividualSwapData data) {
+        cleanupLeftOverIndividual(data)
     }
 
     /**
