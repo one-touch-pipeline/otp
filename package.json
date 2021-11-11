@@ -5,8 +5,8 @@
     "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
+    "eslint": "^8.1.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.24.2"
+    "eslint-plugin-import": "^2.25.2"
   }
 }

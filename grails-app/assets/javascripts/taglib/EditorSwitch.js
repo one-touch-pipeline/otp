@@ -136,7 +136,6 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  /* jslint unparam: true */
   $('div.edit-switch-text-area p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
@@ -177,7 +176,6 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  /* jslint unparam: true */
   $('div.edit-switch-url p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
@@ -462,7 +460,6 @@ $(() => {
     $('p.edit-switch-label', outerContainer).show();
   });
 
-  /* jslint unparam: true */
   $('div.edit-switch-checkboxes p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
@@ -516,7 +513,6 @@ $(() => {
     });
   }
 
-  /* jslint unparam: true */
   $('div.edit-switch-new-value p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
@@ -552,7 +548,6 @@ $(() => {
     window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
-  /* jslint unparam: true */
   $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
@@ -588,7 +583,6 @@ $(() => {
     window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
-  /* jslint unparam: true */
   $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
@@ -734,7 +728,6 @@ $(() => {
     $('.multi-input-field .field', outerContainer).remove();
   });
 
-  /* jslint unparam: true */
   $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', function () {
     'use strict';
 
