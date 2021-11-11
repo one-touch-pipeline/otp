@@ -80,8 +80,10 @@ class SeqTrackService {
      */
     List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
+            Closure filteringClosure = createSequenceFilteringClosure()
             return Sequence.withCriteria {
                 filteringClosure.delegate = delegate
+                filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
                 filteringClosure(filtering)
                 if (max != -1) { //-1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
                     maxResults(max)
@@ -106,8 +108,10 @@ class SeqTrackService {
      */
     int countSequences(SequenceFiltering filtering) {
         if (filtering.enabled) {
+            Closure filteringClosure = createSequenceFilteringClosure()
             return Sequence.createCriteria().get {
                 filteringClosure.delegate = delegate
+                filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
                 filteringClosure(filtering)
                 projections { count('mockPid') }
             }
@@ -117,46 +121,48 @@ class SeqTrackService {
         return projects ? Sequence.countByProjectIdInList(projects*.id) : 0
     }
 
-    Closure filteringClosure = { SequenceFiltering filtering ->
-        'in'('projectId', projectService.allProjects*.id)
-        if (filtering.project) {
-            'in'('projectId', filtering.project)
-        }
-        if (filtering.individual) {
-            or {
-                filtering.individual.each {
-                    ilike('mockPid', "%${it}%")
+    Closure createSequenceFilteringClosure() {
+        return { SequenceFiltering filtering ->
+            'in'('projectId', projectService.allProjects*.id)
+            if (filtering.project) {
+                'in'('projectId', filtering.project)
+            }
+            if (filtering.individual) {
+                or {
+                    filtering.individual.each {
+                        ilike('mockPid', "%${it}%")
+                    }
                 }
             }
-        }
-        if (filtering.sampleType) {
-            'in'('sampleTypeId', filtering.sampleType)
-        }
-        if (filtering.seqType) {
-            'in'('seqTypeDisplayName', filtering.seqType)
-        }
-        if (filtering.libraryLayout) {
-            'in'('libraryLayout', filtering.libraryLayout)
-        }
-        if (filtering.singleCell) {
-            'in'('singleCell', filtering.singleCell)
-        }
-        if (filtering.seqCenter) {
-            'in'('seqCenterId', filtering.seqCenter)
-        }
-        if (filtering.libraryPreparationKit) {
-            'in'('libraryPreparationKit', filtering.libraryPreparationKit)
-        }
-        if (filtering.antibodyTarget) {
-            'in'('antibodyTarget', filtering.antibodyTarget)
-        }
-        if (filtering.ilseId) {
-            'in'('ilseId', filtering.ilseId)
-        }
-        if (filtering.run) {
-            or {
-                filtering.run.each {
-                    ilike('name', "%${it}%")
+            if (filtering.sampleType) {
+                'in'('sampleTypeId', filtering.sampleType)
+            }
+            if (filtering.seqType) {
+                'in'('seqTypeDisplayName', filtering.seqType)
+            }
+            if (filtering.libraryLayout) {
+                'in'('libraryLayout', filtering.libraryLayout)
+            }
+            if (filtering.singleCell) {
+                'in'('singleCell', filtering.singleCell)
+            }
+            if (filtering.seqCenter) {
+                'in'('seqCenterId', filtering.seqCenter)
+            }
+            if (filtering.libraryPreparationKit) {
+                'in'('libraryPreparationKit', filtering.libraryPreparationKit)
+            }
+            if (filtering.antibodyTarget) {
+                'in'('antibodyTarget', filtering.antibodyTarget)
+            }
+            if (filtering.ilseId) {
+                'in'('ilseId', filtering.ilseId)
+            }
+            if (filtering.run) {
+                or {
+                    filtering.run.each {
+                        ilike('name', "%${it}%")
+                    }
                 }
             }
         }
