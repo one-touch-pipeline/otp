@@ -59,23 +59,6 @@ Individual.findAllByProject(project).each { Individual individual ->
         SeqTrack.findAllBySample(sample).each { SeqTrack seqTrack ->
             output << "\t\t\t${seqTrack}"
         }
-
-        SeqScan.findAllBySample(sample).each { SeqScan seqScan ->
-            output << "\t\tSeqScan ${seqScan}"
-
-            output << "\t\t\tMergingLogs:"
-            List<MergingLog> mergingLogs = MergingLog.findAllBySeqScan(seqScan)
-            mergingLogs.each { MergingLog mergingLog ->
-                output << "\t\t\t${mergingLog}"
-            }
-
-            output << "\t\t\tMergedAlignmentDataFile:"
-            if (mergingLogs) {
-                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs).each { MergedAlignmentDataFile mergedAlignmentDataFile ->
-                    output << "\t\t\t${mergedAlignmentDataFile}"
-                }
-            }
-        }
     }
     output << "\n"
 }

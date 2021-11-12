@@ -45,7 +45,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.IndividualService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.MergingAssignment
+
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleType
@@ -75,7 +75,6 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 ExternallyProcessedMergedBamFile,
                 RoddyBamFile,
                 AlignmentPass,
-                MergingAssignment,
         ]
     }
 
@@ -121,12 +120,10 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 configService : service.configService,
         ])
 
-        service.deletionService = Mock(DeletionService) {
-            _ * deleteAllMergingAssignmentsWithAlignmentDataFilesAndSeqScans(_) >> _
-        }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
+        service.deletionService = Mock(DeletionService)
 
         // Domain
         SampleType newSampleType = createSampleType()

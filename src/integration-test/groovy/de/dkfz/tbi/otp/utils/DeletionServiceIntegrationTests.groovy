@@ -42,7 +42,6 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.MergingAssignment
 import de.dkfz.tbi.otp.ngsdata.MetaDataEntry
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -309,13 +308,11 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     void testDeleteSeqTrack() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        MergingAssignment mergingAssignment = DomainFactory.createMergingAssignment(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
 
         deletionService.deleteSeqTrack(seqTrack)
 
         assert !SeqTrack.get(seqTrack.id)
-        assert !MergingAssignment.get(mergingAssignment.id)
         assert !DataFile.get(dataFile.id)
     }
 
@@ -323,7 +320,6 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
     void testDeleteSeqTrack_seqTrackIsOnlyLinked() {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
-        DomainFactory.createMergingAssignment(seqTrack: seqTrack)
         DomainFactory.createDataFile(seqTrack: seqTrack)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {

@@ -66,8 +66,6 @@ FastqImportInstance.withTransaction {
 
         dataFile.delete(flush: true)
         if (!seqTrack.dataFiles) {
-            MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
-
             seqTrack.delete(flush: true)
         }
     }

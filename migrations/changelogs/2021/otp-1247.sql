@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,38 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.job.jobs.createSeqScans
 
-import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.ngsdata.SeqScanService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-
-@Component
-@Scope("prototype")
-@Slf4j
-class CreateSeqScanJob extends AbstractEndStateAwareJobImpl {
-
-    /**
-     * dependency injection of meta data service
-     */
-    @Autowired
-    SeqScanService seqScanService
-
-    /**
-     * Check if all files are in the final location
-     *
-     * @throws Exception The execution of the Job may throw any exception.
-     */
-    @Override
-    void execute() throws Exception {
-        long seqTrackId = Long.parseLong(getProcessParameterValue())
-        SeqTrack seqTrack = SeqTrack.get(seqTrackId)
-        seqScanService.buildSeqScan(seqTrack)
-        succeed()
-    }
-}
+DROP TABLE merging_assignment;
+DROP TABLE Merged_Alignment_Data_File;
+ALTER TABLE data_file DROP COLUMN merging_log_id;
+DROP TABLE merging_log;
+DROP TABLE seq_scan;

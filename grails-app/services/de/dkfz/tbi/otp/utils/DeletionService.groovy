@@ -121,7 +121,6 @@ class DeletionService {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
             }
 
-            SeqScan.findAllBySample(sample)*.delete(flush: true)
             SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
             sample.delete(flush: true)
         }
@@ -293,7 +292,7 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      *
-     * !! Be aware that the run information, alignmentLog information, mergingLog information and the seqTrack are not deleted.
+     * !! Be aware that the run information, alignmentLog information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
@@ -431,24 +430,6 @@ class DeletionService {
         }
     }
 
-    /**
-     * Delete all MergingAssignments, MergedAlignmentDataFiles and seqScans.
-     *
-     * @param mergingAssignments to be deleted.
-     */
-    void deleteAllMergingAssignmentsWithAlignmentDataFilesAndSeqScans(List<MergingAssignment> mergingAssignments) {
-        List<SeqScan> seqScans = mergingAssignments*.seqScan.unique()
-        if (seqScans) {
-            List<MergingLog> mergingLogs = MergingLog.findAllBySeqScanInList(seqScans)
-            MergingAssignment.findAllBySeqScanInList(seqScans)*.delete(flush: true)
-            if (mergingLogs) {
-                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete(flush: true)
-                mergingLogs*.delete(flush: true)
-            }
-            seqScans*.delete(flush: true)
-        }
-    }
-
     private void deleteProjectDependencies(Project project) {
         // Deletes the connection of the project to the reference genome
         ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete(flush: true)
@@ -555,7 +536,6 @@ class DeletionService {
         DataFile.findAllBySeqTrack(seqTrack).each { DataFile df ->
             dirsToDelete.addAll(deleteDataFile(df))
         }
-        MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
 
         seqTrack.delete(flush: true)
 

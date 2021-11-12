@@ -58,7 +58,6 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
                 ExternallyProcessedMergedBamFile,
                 RoddyBamFile,
                 AlignmentPass,
-                MergingAssignment,
                 Comment,
                 BamFilePairAnalysis,
                 ReferenceGenomeProjectSeqType,

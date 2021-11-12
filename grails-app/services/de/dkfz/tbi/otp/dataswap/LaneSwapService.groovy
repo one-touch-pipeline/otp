@@ -29,8 +29,7 @@ import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
-import de.dkfz.tbi.otp.ngsdata.MergingAssignment
+
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleType
@@ -45,8 +44,6 @@ import java.nio.file.Path
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> {
-
-    MergedAlignmentDataFileService mergedAlignmentDataFileService
 
     @Override
     protected void logSwapParameters(LaneSwapParameters parameters) {
@@ -117,10 +114,6 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
         data.oldFastQcFileNames.eachWithIndex { oldFastQcFileName, i ->
             data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames.get(i), data)
         }
-
-        List<MergingAssignment> mergingAssignments = MergingAssignment.findAllBySeqTrackInList(data.seqTrackList)
-        data.log << "\n${mergingAssignments.size()} MergingAssignment found"
-        deletionService.deleteAllMergingAssignmentsWithAlignmentDataFilesAndSeqScans(mergingAssignments)
 
         checkForRemainingSeqTracks(data)
     }

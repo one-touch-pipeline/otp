@@ -97,7 +97,6 @@ class DataFile implements CommentableWithProject, Entity {
      * SeqTrack, so actually this field should be defined in the SeqTrack class. */
     FastqImportInstance fastqImportInstance
     SeqTrack seqTrack
-    MergingLog mergingLog
     AlignmentLog alignmentLog
     FileType fileType
 
@@ -105,7 +104,6 @@ class DataFile implements CommentableWithProject, Entity {
             run                : Run,
             fastqImportInstance: FastqImportInstance,
             seqTrack           : SeqTrack,
-            mergingLog         : MergingLog,
             alignmentLog       : AlignmentLog,
             fileType           : FileType,
     ]
@@ -127,7 +125,6 @@ class DataFile implements CommentableWithProject, Entity {
 
         run(validator: { Run val, DataFile obj -> obj.seqTrack == null || val == obj.seqTrack.run })
         seqTrack(nullable: true)  // Shall not be null, but legacy data exists
-        mergingLog(nullable: true)
         alignmentLog(nullable: true)
 
         nReads(nullable: true)
@@ -210,7 +207,6 @@ class DataFile implements CommentableWithProject, Entity {
         run index: "data_file_run_idx"
         fastqImportInstance index: "data_file_fastq_import_instance_idx"
         seqTrack index: "data_file_seq_track_idx"
-        mergingLog index: "data_file_merging_log_idx"
         md5sum index: 'data_file_md5sum_idx'
         alignmentLog index: "data_file_alignment_log_idx"
         fileType index: "data_file_file_type_idx"

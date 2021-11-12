@@ -838,36 +838,6 @@ class DomainFactory {
         ], properties)
     }
 
-    static MergingLog createMergingLog(Map properties = [:]) {
-        return createDomainObject(MergingLog, [
-                qcState        : MergingLog.QCState.NON,
-                executedBy     : MergingLog.Execution.UNKNOWN,
-                status         : MergingLog.Status.DECLARED,
-                alignmentParams: { createAlignmentParams() },
-                seqScan        : { createSeqScan() },
-        ], properties)
-    }
-
-    static MergedAlignmentDataFile createMergedAlignmentDataFile(Map properties = [:]) {
-        return createDomainObject(MergedAlignmentDataFile, [
-                fileSystem     : "fileSystem_${counter++}",
-                filePath       : "filePath_${counter++}",
-                fileName       : "fileName_${counter++}",
-                createdDate    : { new Date() },
-                fileSystemDate : { new Date() },
-                fileExists     : false,
-                indexFileExists: false,
-                fileSize       : 0,
-                mergingLog     : { createMergingLog() },
-        ], properties)
-    }
-    static MergingAssignment createMergingAssignment(Map properties = [:]) {
-        return createDomainObject(MergingAssignment, [
-                seqTrack: { createSeqTrack() },
-                seqScan: { createSeqScan() },
-        ], properties)
-    }
-
     /**
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
@@ -1546,22 +1516,6 @@ class DomainFactory {
 
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         return createSeqType([libraryLayout: SequencingReadType.PAIRED] + seqTypeProperties, saveAndValidate)
-    }
-
-    @Deprecated
-    static SeqScan createSeqScan(Map properties = [:]) {
-        return createDomainObject(SeqScan, [
-                nLanes     : 0,
-                nBasePairs : 0,
-                coverage   : 0.0,
-                seqCenters : "seqCenters_${counter++}",
-                insertSize : "insertSize_${counter++}",
-                qcState    : SeqScan.QCState.NON,
-                dateCreated: { new Date() },
-                sample     : { createSample() },
-                seqType    : { createSeqType() },
-                seqPlatform: { createSeqPlatform() },
-        ], properties)
     }
 
     @Deprecated
