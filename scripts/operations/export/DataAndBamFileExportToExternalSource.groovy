@@ -400,6 +400,8 @@ dataExportOverview.each {
 
 //Out put the result
 outputFile << getBashScript(outputList)
+//set the correct permission (440) to the script file
+fileService.setPermission(outputFile, FileService.DEFAULT_FILE_PERMISSION)
 
 println "\nCreation script has been saved to ${outputFile}"
 
