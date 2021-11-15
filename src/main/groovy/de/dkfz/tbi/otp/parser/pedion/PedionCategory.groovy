@@ -26,6 +26,20 @@ enum PedionCategory {
     TUMOR('T'),
     METASTASIS('M'),
 
+    INFILTRATION_FRONT_RIGHT('A'),
+    INFILTRATION_FRONT_LEFT('B'),
+
+    TUMOR_CENTER('Z'),
+    TUMOR_CENTER_LEFT('D'),
+    TUMOR_CENTER_RIGHT('E'),
+    TUMOR_CENTER_UP('F'),
+    TUMOR_CENTER_DOWN('G'),
+    TUMOR_MARGIN('H'),
+    TUMOR_MARGIN_LEFT('L'),
+    TUMOR_MARGIN_RIGHT('R'),
+    TUMOR_MARGIN_UP('O'),
+    TUMOR_MARGIN_DOWN('U'),
+
     final String letter
     final String usedName
 

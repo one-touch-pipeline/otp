@@ -47,65 +47,77 @@ class PedionParserSpec extends Specification {
         validPid
 
         where:
-        input                  || project | pid           | sampleTypeDbName             | useSpecificReferenceGenome
-        'A02P-ABCDEF-C1AAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other funding
-        'B02P-ABCDEF-C1AAAAAA' || 'B02P'  | 'B02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'C02P-ABCDEF-C1AAAAAA' || 'C02P'  | 'C02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other project numbersnumbers
-        'A08P-ABCDEF-C1AAAAAA' || 'A08P'  | 'A08P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A35P-ABCDEF-C1AAAAAA' || 'A35P'  | 'A35P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //retrospective project
-        'A02R-ABCDEF-C1AAAAAA' || 'A02R'  | 'A02R-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other pseudonyms
-        'A02P-EFGHIJ-C1AAAAAA' || 'A02P'  | 'A02P-EFGHIJ' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-AAAAAA-C1AAAAAA' || 'A02P'  | 'A02P-AAAAAA' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ZZZZZZ-C1AAAAAA' || 'A02P'  | 'A02P-ZZZZZZ' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other categories
-        'A02P-ABCDEF-T1AAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'tumor-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-M1AAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'metastasis-blood-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other tissues
-        'A02P-ABCDEF-C1AAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1BAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-liver-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1CAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-pancreas-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1DAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-ovary-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1EAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-brain-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1FAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-prostate-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1GAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-neural-tissue-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1HAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-rectum-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1IAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-small-intestine-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1JAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-bone-marrow-01'     | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1KAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-bladder-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1LAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-tongue-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1MAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-gingiva-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1NAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-diaphragma-oris-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1OAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lips-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1PAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lymph-node-01'      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1QAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-colon-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1RAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-sigmoid-colon-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1SAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-adrenal-gland-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1TAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-muscle-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1UAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-skin-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1VAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lung-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1WAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-fat-tissue-01'      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1XAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-lower-jaw-01'       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1YAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-salivary-gland-01'  | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1ZAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-unknown-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other biol replicate
-        'A02P-ABCDEF-C1ACAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-03'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AHAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-08'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1ANAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-14'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AZAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-26'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other analyte
-        'A02P-ABCDEF-C1AABAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AAGAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AAACAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AAAHAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //other sequencing assay
-        'A02P-ABCDEF-C1AAAABA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AAAAHA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AAAAAC' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'A02P-ABCDEF-C1AAAAAH' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        input                  || project | pid           | sampleTypeDbName   | useSpecificReferenceGenome
+        'A02P-ABCDEF-C1AAAAAA' || 'A02P'  | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other funding'
+        'B02P-ABCDEF-C1AAAAAA' || 'B02P' | 'B02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'C02P-ABCDEF-C1AAAAAA' || 'C02P' | 'C02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other project numbersnumbers'
+        'A08P-ABCDEF-C1AAAAAA' || 'A08P' | 'A08P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A35P-ABCDEF-C1AAAAAA' || 'A35P' | 'A35P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'retrospective project'
+        'A02R-ABCDEF-C1AAAAAA' || 'A02R' | 'A02R-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other pseudonyms'
+        'A02P-EFGHIJ-C1AAAAAA' || 'A02P' | 'A02P-EFGHIJ' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-AAAAAA-C1AAAAAA' || 'A02P' | 'A02P-AAAAAA' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ZZZZZZ-C1AAAAAA' || 'A02P' | 'A02P-ZZZZZZ' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other categories'
+        'A02P-ABCDEF-T1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-blood-01'                    | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-M1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'metastasis-blood-01'               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-A1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'infiltration-front-right-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-B1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'infiltration-front-left-blood-01'  | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-Z1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-center-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-D1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-center-left-blood-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-E1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-center-right-blood-01'       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-F1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-center-up-blood-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-G1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-center-down-blood-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-H1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-margin-blood-01'             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-L1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-margin-left-blood-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-R1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-margin-right-blood-01'       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-O1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-margin-up-blood-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-U1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'tumor-margin-down-blood-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other tissues'
+        'A02P-ABCDEF-C1AAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1BAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-liver-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1CAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-pancreas-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1DAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-ovary-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1EAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-brain-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1FAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-prostate-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1GAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-neural-tissue-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1HAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-rectum-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1IAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-small-intestine-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1JAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-bone-marrow-01'     | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1KAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-bladder-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1LAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-tongue-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1MAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-gingiva-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1NAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-diaphragma-oris-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1OAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-lips-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1PAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-lymph-node-01'      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1QAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-colon-01'           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1RAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-sigmoid-colon-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1SAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-adrenal-gland-01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1TAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-muscle-01'          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1UAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-skin-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1VAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-lung-01'            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1WAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-fat-tissue-01'      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1XAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-lower-jaw-01'       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1YAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-salivary-gland-01'  | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1ZAAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-unknown-01'         | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other biol replicate'
+        'A02P-ABCDEF-C1ACAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-03' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AHAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-08' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1ANAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-14' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AZAAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-26' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other analyte'
+        'A02P-ABCDEF-C1AABAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AAGAAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AAACAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AAAHAA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        and: 'other sequencing assay'
+        'A02P-ABCDEF-C1AAAABA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AAAAHA' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AAAAAC' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'A02P-ABCDEF-C1AAAAAH' || 'A02P' | 'A02P-ABCDEF' | 'control-blood-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     }
 
     @Unroll
@@ -120,48 +132,48 @@ class PedionParserSpec extends Specification {
         defaultParsedSampleIdentifier == null
 
         where:
-        input                   | problem
-        ''                      | 'empty'
-        null                    | 'null'
-        //invalid project
-        'a02P-ABCDEF-C1AAAAAA'  | 'invalid founding: low letter founding'
-        '202P-ABCDEF-C1AAAAAA'  | 'invalid founding: number as founding'
-        'ABCP-ABCDEF-C1AAAAAA'  | 'invalid project number: letter instead of numbers'
-        'A1P-ABCDEF-C1AAAAAA'   | 'invalid project number: only one digit'
-        'A123P-ABCDEF-C1AAAAAA' | 'invalid project number: three digits'
-        'A12A-ABCDEF-C1AAAAAA'  | 'invalid char for retrospective/ prospective: A'
-        'A12Z-ABCDEF-C1AAAAAA'  | 'invalid char for retrospective/ prospective: Z'
-        //invalid pseudonym
-        'A02P-abcdef-C1AAAAAA'  | 'invalid pseudonym: lowercase letter'
-        'A02P-123456-C1AAAAAA'  | 'invalid pseudonym: digit letter'
-        'A02P-ABCDEFG-C1AAAAAA' | 'invalid pseudonym: to many letter'
-        'A02P-ABCDE-C1AAAAAA'   | 'invalid pseudonym: to less letter'
-        //invalid category
-        'A02P-ABCDEF-D1AAAAAA'  | 'invalid category: invalid char: D'
-        'A02P-ABCDEF-H1AAAAAA'  | 'invalid category: invalid char: H'
-        'A02P-ABCDEF-Y1AAAAAA'  | 'invalid category: invalid char: Y'
-        //invalid tissue type
-        'A02P-ABCDEF-CKAAAAA'   | 'invalid tissue type: invalid char: K'
-        'A02P-ABCDEF-CMAAAAA'   | 'invalid tissue type: invalid char: M'
-        'A02P-ABCDEF-CPSAAAAAA' | 'invalid tissue type: invalid char: PSA'
-        'A02P-ABCDEF-CZZZAAAAA' | 'invalid tissue type: invalid char: ZZZ'
-        //invalid bio replicate
-        'A02P-ABCDEF-C1AaAAAA'  | 'invalid bio replicate: lower case'
-        'A02P-ABCDEF-C1A5AAAA'  | 'invalid bio replicate: digit'
-        //invalid analyte
-        'A02P-ABCDEF-C1AAaAA'   | 'invalid analyte type: lower case for technical replicate'
-        'A02P-ABCDEF-C1AA3AAA'  | 'invalid analyte type: number for analyte'
-        'A02P-ABCDEF-C1AAA1AA'  | 'invalid analyte type: number 1 instead of char for replicate'
-        'A02P-ABCDEF-C1AAA9AA'  | 'invalid analyte type: number 9 instead of char for replicate'
-        //invalid sequencing assay
-        'A02P-ABCDEF-C1AAAAaA'  | 'invalid sequencing assay: lower case for sequencing assay'
-        'A02P-ABCDEF-C1AAAA5A'  | 'invalid sequencing assay: number for sequencing assay'
-        'A02P-ABCDEF-C1AAAAA1'  | 'invalid sequencing assay: number 1 instead of char for sequencing assay'
-        'A02P-ABCDEF-C1AAAAA9'  | 'invalid sequencing assay: number 9 instead of char for sequencing assay'
-        //invalid format
-        'A02P-ABCDEF-kh-C1AAAAAA'  | 'invalid format: after pseudonym must follow the category'
-        'A02P-ABCDEF-C1AAAAAA-kh'  | 'invalid format: Nothing should follow after sequencing assay!'
-        'kh-A02P-ABCDEF-C1AAAAAA'  | 'invalid format: Nothing should preceded sequencing assay!'
+        input                     | problem
+        ''                        | 'empty'
+        null                      | 'null'
+        and: 'invalid project'
+        'a02P-ABCDEF-C1AAAAAA'    | 'invalid founding: low letter founding'
+        '202P-ABCDEF-C1AAAAAA'    | 'invalid founding: number as founding'
+        'ABCP-ABCDEF-C1AAAAAA'    | 'invalid project number: letter instead of numbers'
+        'A1P-ABCDEF-C1AAAAAA'     | 'invalid project number: only one digit'
+        'A123P-ABCDEF-C1AAAAAA'   | 'invalid project number: three digits'
+        'A12A-ABCDEF-C1AAAAAA'    | 'invalid char for retrospective/ prospective: A'
+        'A12Z-ABCDEF-C1AAAAAA'    | 'invalid char for retrospective/ prospective: Z'
+        and: 'invalid pseudonym'
+        'A02P-abcdef-C1AAAAAA'    | 'invalid pseudonym: lowercase letter'
+        'A02P-123456-C1AAAAAA'    | 'invalid pseudonym: digit letter'
+        'A02P-ABCDEFG-C1AAAAAA'   | 'invalid pseudonym: to many letter'
+        'A02P-ABCDE-C1AAAAAA'     | 'invalid pseudonym: to less letter'
+        and: 'invalid category'
+        'A02P-ABCDEF-I1AAAAAA'    | 'invalid category: invalid char: I'
+        'A02P-ABCDEF-N1AAAAAA'    | 'invalid category: invalid char: N'
+        'A02P-ABCDEF-Y1AAAAAA'    | 'invalid category: invalid char: Y'
+        and: 'invalid tissue type'
+        'A02P-ABCDEF-CKAAAAA'     | 'invalid tissue type: invalid char: K'
+        'A02P-ABCDEF-CMAAAAA'     | 'invalid tissue type: invalid char: M'
+        'A02P-ABCDEF-CPSAAAAAA'   | 'invalid tissue type: invalid char: PSA'
+        'A02P-ABCDEF-CZZZAAAAA'   | 'invalid tissue type: invalid char: ZZZ'
+        and: 'invalid bio replicate'
+        'A02P-ABCDEF-C1AaAAAA'    | 'invalid bio replicate: lower case'
+        'A02P-ABCDEF-C1A5AAAA'    | 'invalid bio replicate: digit'
+        and: 'invalid analyte'
+        'A02P-ABCDEF-C1AAaAA'     | 'invalid analyte type: lower case for technical replicate'
+        'A02P-ABCDEF-C1AA3AAA'    | 'invalid analyte type: number for analyte'
+        'A02P-ABCDEF-C1AAA1AA'    | 'invalid analyte type: number 1 instead of char for replicate'
+        'A02P-ABCDEF-C1AAA9AA'    | 'invalid analyte type: number 9 instead of char for replicate'
+        and: 'invalid sequencing assay'
+        'A02P-ABCDEF-C1AAAAaA'    | 'invalid sequencing assay: lower case for sequencing assay'
+        'A02P-ABCDEF-C1AAAA5A'    | 'invalid sequencing assay: number for sequencing assay'
+        'A02P-ABCDEF-C1AAAAA1'    | 'invalid sequencing assay: number 1 instead of char for sequencing assay'
+        'A02P-ABCDEF-C1AAAAA9'    | 'invalid sequencing assay: number 9 instead of char for sequencing assay'
+        and: 'invalid format'
+        'A02P-ABCDEF-kh-C1AAAAAA' | 'invalid format: after pseudonym must follow the category'
+        'A02P-ABCDEF-C1AAAAAA-kh' | 'invalid format: Nothing should follow after sequencing assay!'
+        'kh-A02P-ABCDEF-C1AAAAAA' | 'invalid format: Nothing should preceded sequencing assay!'
     }
 
     @Unroll
