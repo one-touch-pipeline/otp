@@ -51,13 +51,15 @@ ${SEQUENCING_TYPE},${SEQUENCING_READ_TYPE},${ANTIBODY_TARGET},${ANTIBODY}
 ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
 """.replaceAll(',', '\t')
         )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator([
+        AntibodyAntibodyTargetSeqTypeValidator validator = new AntibodyAntibodyTargetSeqTypeValidator([
                 seqTypeService: Mock(SeqTypeService) {
                     1 * findByNameOrImportAlias(_, _) >> seqType
                 }
-        ]).validate(context)
+        ])
+        validator.validatorHelperService = new ValidatorHelperService()
+
+        when:
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -88,13 +90,15 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, level, message, message2),
         ]
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator([
+        AntibodyAntibodyTargetSeqTypeValidator validator = new AntibodyAntibodyTargetSeqTypeValidator([
                 seqTypeService: Mock(SeqTypeService) {
                     1 * findByNameOrImportAlias(_, _) >> seqType
                 }
-        ]).validate(context)
+        ])
+        validator.validatorHelperService = new ValidatorHelperService()
+
+        when:
+        validator.validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)
@@ -113,13 +117,15 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
                 "${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\n" +
                         "some seqType\tPAIRED"
         )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator([
+        AntibodyAntibodyTargetSeqTypeValidator validator = new AntibodyAntibodyTargetSeqTypeValidator([
                 seqTypeService: Mock(SeqTypeService) {
                     1 * findByNameOrImportAlias(_, _) >> new SeqType()
                 }
-        ]).validate(context)
+        ])
+        validator.validatorHelperService = new ValidatorHelperService()
+
+        when:
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -131,13 +137,15 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
                 "${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${ANTIBODY_TARGET}\n" +
                         "ChIP Seq\tPAIRED\tsome_antibody_target"
         )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator([
+        AntibodyAntibodyTargetSeqTypeValidator validator = new AntibodyAntibodyTargetSeqTypeValidator([
                 seqTypeService: Mock(SeqTypeService) {
                     1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true)
                 }
-        ]).validate(context)
+        ])
+        validator.validatorHelperService = new ValidatorHelperService()
+
+        when:
+        validator.validate(context)
 
         then:
         assertContainSame(context.problems, [])
@@ -149,13 +157,15 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
                 "${SEQUENCING_TYPE}\t${SEQUENCING_READ_TYPE}\t${ANTIBODY}\n" +
                         "ChIP Seq\tPAIRED\tsome_antibody"
         )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator([
+        AntibodyAntibodyTargetSeqTypeValidator validator = new AntibodyAntibodyTargetSeqTypeValidator([
                 seqTypeService: Mock(SeqTypeService) {
                     1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true, displayName: 'seqType', libraryLayout: SequencingReadType.PAIRED)
                 }
-        ]).validate(context)
+        ])
+        validator.validatorHelperService = new ValidatorHelperService()
+
+        when:
+        validator.validate(context)
 
         then:
         Collection<Problem> expectedProblems = [

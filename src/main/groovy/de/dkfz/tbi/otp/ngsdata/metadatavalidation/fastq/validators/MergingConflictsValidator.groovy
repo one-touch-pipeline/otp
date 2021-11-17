@@ -30,16 +30,16 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
 class MergingConflictsValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    ValidatorHelperService validatorHelperService
 
     @Autowired
     MetadataImportService metadataImportService
@@ -80,20 +80,20 @@ class MergingConflictsValidator extends ValueTuplesValidator<MetadataValidationC
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.groupBy { values ->
-            SeqType seqType = metadataImportService.getSeqTypeFromMetadata(values)
+            SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(values)
 
             return new MwpDetermingValues(
-                    getSampleIdentifier(values),
-                    getSampleType(values),
+                    validatorHelperService.getPid(values),
+                    validatorHelperService.getSampleType(values),
                     seqType,
-                    seqType ? mergingPreventionService.findAntibodyTarget(values, seqType) : null,
-                    getMergingCriteria(values, seqType),
+                    seqType ? validatorHelperService.findAntibodyTarget(values, seqType) : null,
+                    validatorHelperService.getMergingCriteria(values, seqType),
             )
         }.findAll { key, values ->
             key.individual && key.sampleType && key.seqType
         }.findAll { key, values ->
             values.collect { ValueTuple valueTuple ->
-                findSeqPlatformGroup(valueTuple, key.seqType) ?: mergingPreventionService.findSeqPlatform(valueTuple)
+                validatorHelperService.findSeqPlatformGroup(valueTuple, key.seqType) ?: validatorHelperService.findSeqPlatform(valueTuple)
             }.unique().size() > 1
         }.each { key, values ->
             if (key.mergingCriteria == null || key.mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
@@ -104,58 +104,6 @@ class MergingConflictsValidator extends ValueTuplesValidator<MetadataValidationC
                 )
             }
         }
-    }
-
-    SeqPlatformGroup findSeqPlatformGroup(ValueTuple valueTuple, SeqType seqType) {
-        SeqPlatform seqPlatform = mergingPreventionService.findSeqPlatform(valueTuple)
-        return seqPlatform ? seqPlatform.getSeqPlatformGroupForMergingCriteria(
-                metadataImportService.getProjectFromMetadata(valueTuple),
-                seqType,
-        ) : null
-    }
-
-    String getSampleIdentifier(ValueTuple valueTuple) {
-        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
-        if (sampleIdentifier) {
-            return sampleIdentifier.individual.pid
-        }
-
-        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
-        if (!project) {
-            return
-        }
-
-        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
-        if (!parsedSampleIdentifier) {
-            return
-        }
-        return parsedSampleIdentifier.pid
-    }
-
-    String getSampleType(ValueTuple valueTuple) {
-        String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
-        if (sampleIdentifier) {
-            return sampleIdentifier.sample.sampleType.displayName
-        }
-
-        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
-        if (!project) {
-            return
-        }
-
-        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleName, project)
-        if (!parsedSampleIdentifier) {
-            return
-        }
-
-        return parsedSampleIdentifier.sampleTypeDbName
-    }
-
-    MergingCriteria getMergingCriteria(ValueTuple valueTuple, SeqType seqType) {
-        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
-        return atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
     }
 
     @Canonical

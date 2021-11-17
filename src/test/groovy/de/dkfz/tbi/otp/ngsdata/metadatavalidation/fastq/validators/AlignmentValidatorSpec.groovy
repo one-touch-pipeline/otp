@@ -83,7 +83,7 @@ ${seqType.seqTypeName},${seqType.libraryLayout}
 """.replaceAll(',', '\t'))
 
         when:
-        new AlignmentValidator([metadataImportService: new MetadataImportService([seqTypeService: new SeqTypeService()])]).validate(context)
+        new AlignmentValidator([validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()])]).validate(context)
 
         then:
         containSame(context.problems, [])
@@ -105,7 +105,7 @@ ${seqType.name},${createProject().name},,DNA,${SequencingReadType.SINGLE}
         ]
 
         when:
-        new AlignmentValidator([metadataImportService: new MetadataImportService([seqTypeService: new SeqTypeService()])]).validate(context)
+        new AlignmentValidator([validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()])]).validate(context)
 
         then:
         containSame(context.problems, expectedProblems)
@@ -133,7 +133,7 @@ ${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadTyp
 
         when:
         new AlignmentValidator([
-                metadataImportService: new MetadataImportService([seqTypeService: new SeqTypeService()]),
+                validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()]),
                 projectService: new ProjectService(),
         ]).validate(context)
 
@@ -160,7 +160,7 @@ ${seqType2.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${SequencingReadTyp
 
         when:
         new AlignmentValidator([
-                metadataImportService: new MetadataImportService([seqTypeService: new SeqTypeService()]),
+                validatorHelperService: new ValidatorHelperService([seqTypeService: new SeqTypeService()]),
                 projectService: new ProjectService(),
         ]).validate(context)
 

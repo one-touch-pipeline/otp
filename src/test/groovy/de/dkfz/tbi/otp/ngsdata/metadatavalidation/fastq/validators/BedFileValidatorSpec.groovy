@@ -121,6 +121,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         when:
         new BedFileValidator(
                 libraryPreparationKitService: new LibraryPreparationKitService(),
+                validatorHelperService: new ValidatorHelperService(),
                 sampleIdentifierService: [
                         getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                             new TestSampleIdentifierParser()

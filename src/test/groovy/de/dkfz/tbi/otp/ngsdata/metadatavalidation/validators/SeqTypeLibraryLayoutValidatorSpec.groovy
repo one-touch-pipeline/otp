@@ -121,6 +121,7 @@ SeqType3\t${SequencingReadType.MATE_PAIR}\t${SeqType.SINGLE_CELL_DNA}
 
         when:
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias('SeqType1', [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> seqType1ll1
             1 * findByNameOrImportAlias('SeqType1', [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> seqType1ll2
@@ -153,6 +154,7 @@ SeqType1\t${SequencingReadType.SINGLE}\twer
         SeqType seqType = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: SequencingReadType.SINGLE)
 
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias('SeqTypeUnknown') >> null
             1 * findByNameOrImportAlias('SeqType1') >> seqType
@@ -195,6 +197,7 @@ SeqType2\t${SequencingReadType.PAIRED}\t${SeqType.SINGLE_CELL_RNA}
         DomainFactory.createSeqType(libraryLayout: SequencingReadType.MATE_PAIR)
 
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias('SeqType1', [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> seqType1ll1
             1 * findByNameOrImportAlias('SeqType1', [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> null

@@ -54,7 +54,6 @@ import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
 import java.nio.file.*
 import java.util.regex.Matcher
@@ -704,41 +703,6 @@ class MetadataImportService {
             return new ExtractedValue(mateNumberCell.text, [mateNumberCell] as Set)
         }
         return null
-    }
-
-    static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
-        return tuple.getValue(SEQUENCING_TYPE.name()) + ''
-    }
-
-    static Project getProjectFromMetadata(ValueTuple tuple) {
-        String sampleName = tuple.getValue(SAMPLE_NAME.name())
-        String projectName = tuple.getValue(PROJECT.name()) ?: ''
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))
-        if (sampleIdentifier) {
-            return sampleIdentifier.project
-        }
-        Project projectFromProjectColumn = Project.getByNameOrNameInMetadataFiles(projectName)
-        if (projectFromProjectColumn) {
-            return projectFromProjectColumn
-        }
-        return null
-    }
-
-    SeqType getSeqTypeFromMetadata(ValueTuple tuple) {
-        boolean isSingleCell = seqTypeService.isSingleCell(tuple.getValue(BASE_MATERIAL.name()))
-        SequencingReadType libLayout = SequencingReadType.getByName(tuple.getValue(SEQUENCING_READ_TYPE.name()))
-        if (!libLayout) {
-            return null
-        }
-        String seqTypeName = getSeqTypeNameFromMetadata(tuple)
-        if (!seqTypeName) {
-            return null
-        }
-
-        return seqTypeService.findByNameOrImportAlias(
-                seqTypeName,
-                [libraryLayout: libLayout, singleCell: isSingleCell],
-        )
     }
 
     static Path getMetaDataFileFullPath(MetaDataFile metaDataFile) {

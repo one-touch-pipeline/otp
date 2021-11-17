@@ -762,17 +762,16 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
 
     private MergingPreventionService createServiceForParseMetaData() {
         return new MergingPreventionService([
-                antibodyTargetService       : new AntibodyTargetService(),
-                libraryPreparationKitService: new LibraryPreparationKitService(),
-                metadataImportService       : new MetadataImportService([
-                        seqTypeService: new SeqTypeService(),
+                validatorHelperService: new ValidatorHelperService([
+                        antibodyTargetService       : new AntibodyTargetService(),
+                        libraryPreparationKitService: new LibraryPreparationKitService(),
+                        sampleIdentifierService     : new SampleIdentifierService(),
+                        seqPlatformService          : new SeqPlatformService([
+                                seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
+                                sequencingKitLabelService   : new SequencingKitLabelService(),
+                        ]),
+                        seqTypeService              : new SeqTypeService(),
                 ]),
-                sampleIdentifierService     : new SampleIdentifierService(),
-                seqPlatformService          : new SeqPlatformService([
-                        seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
-                        sequencingKitLabelService   : new SequencingKitLabelService()
-                ]),
-                seqTypeService              : new SeqTypeService(),
         ])
     }
 

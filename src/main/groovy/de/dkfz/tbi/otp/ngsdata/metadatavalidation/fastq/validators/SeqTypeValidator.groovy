@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
+import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
@@ -37,6 +37,9 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Autowired
     SeqTypeService seqTypeService
+
+    @Autowired
+    ValidatorHelperService validatorHelperService
 
     @Override
     Collection<String> getDescriptions() {
@@ -54,7 +57,7 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String seqType = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
             if (!seqType) {
                 context.addProblem(valueTuple.cells, LogLevel.ERROR, "Sequencing type must not be empty.", "At least one sequencing type is empty.")
             }

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -39,9 +40,11 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
         )
+        TagmentationLibrarySeqTypeValidator validator = new TagmentationLibrarySeqTypeValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
 
         when:
-        new TagmentationLibrarySeqTypeValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -53,9 +56,11 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
                 "${TAGMENTATION_LIBRARY}\n" +
                         ""
         )
+        TagmentationLibrarySeqTypeValidator validator = new TagmentationLibrarySeqTypeValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
 
         when:
-        new TagmentationLibrarySeqTypeValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -69,9 +74,11 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
                 "${TAGMENTATION_LIBRARY}\t${SEQUENCING_TYPE}\n" +
                         "${library}\t${seqTypeName}\n"
         )
+        TagmentationLibrarySeqTypeValidator validator = new TagmentationLibrarySeqTypeValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
 
         when:
-        new TagmentationLibrarySeqTypeValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -85,14 +92,15 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
     @Unroll
     void 'validate, invalid CUSTOMER_LIBRARY SEQUENCING_TYPE combinations (#seqTypeName, #tagmentation, #library), show warning'() {
         given:
-
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${TAGMENTATION_LIBRARY}\t${SEQUENCING_TYPE}\n" +
                         "${library}\t${seqTypeName}\n"
         )
+        TagmentationLibrarySeqTypeValidator validator = new TagmentationLibrarySeqTypeValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
 
         when:
-        new TagmentationLibrarySeqTypeValidator().validate(context)
+        validator.validate(context)
 
         then:
         Collection<Problem> expectedProblems = [
@@ -112,9 +120,11 @@ class TagmentationLibrarySeqTypeValidatorSpec extends Specification {
                 "${SEQUENCING_TYPE}\n" +
                         "seqtype${SeqType.TAGMENTATION_SUFFIX}\n"
         )
+        TagmentationLibrarySeqTypeValidator validator = new TagmentationLibrarySeqTypeValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
 
         when:
-        new TagmentationLibrarySeqTypeValidator().validate(context)
+        validator.validate(context)
 
         then:
         Collection<Problem> expectedProblems = [

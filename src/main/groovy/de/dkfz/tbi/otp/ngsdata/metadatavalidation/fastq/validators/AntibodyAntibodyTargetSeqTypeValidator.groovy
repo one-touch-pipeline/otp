@@ -37,6 +37,9 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
     @Autowired
     SeqTypeService seqTypeService
 
+    @Autowired
+    ValidatorHelperService validatorHelperService
+
     @Override
     Collection<String> getDescriptions() {
         String seqTypeString = seqTypesStringWithAntibody()
@@ -71,7 +74,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
         valueTuples.each { ValueTuple valueTuple ->
             String antibodyTarget = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
             String antibody = valueTuple.getValue(ANTIBODY.name()) ?: ""
-            String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String seqTypeName = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
 
             String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)

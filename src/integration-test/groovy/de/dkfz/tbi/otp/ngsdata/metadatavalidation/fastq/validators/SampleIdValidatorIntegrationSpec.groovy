@@ -26,22 +26,12 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
-import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.parser.SampleIdentifierParser
-import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
@@ -81,9 +71,9 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
             }
         }
 
-        MetadataImportService metadataImportService = new MetadataImportService()
-        metadataImportService.seqTypeService = new SeqTypeService()
-        validator.metadataImportService = metadataImportService
+        ValidatorHelperService validatorHelperService = new ValidatorHelperService()
+        validatorHelperService.seqTypeService = new SeqTypeService()
+        validator.validatorHelperService = validatorHelperService
         validator.sampleIdentifierService = Spy(SampleIdentifierService) {
             _ * getSampleIdentifierParser(_) >> { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                 sampleIdentifierParser

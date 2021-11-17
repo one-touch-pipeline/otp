@@ -48,6 +48,9 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
     @Autowired
     MetadataImportService metadataImportService
 
+    @Autowired
+    ValidatorHelperService validatorHelperService
+
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -71,9 +74,9 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
-        allValueTuples.groupBy { metadataImportService.getSeqTypeFromMetadata(it) }.each { SeqType seqType, List<ValueTuple> valueTuplesSameSeqType ->
+        allValueTuples.groupBy { validatorHelperService.getSeqTypeFromMetadata(it) }.each { SeqType seqType, List<ValueTuple> valueTuplesSameSeqType ->
             if (seqType) {
-                valueTuplesSameSeqType.groupBy { MetadataImportService.getProjectFromMetadata(it) }.each { Project project, List<ValueTuple> valueTuplesSameProject ->
+                valueTuplesSameSeqType.groupBy { validatorHelperService.getProjectFromMetadata(it) }.each { Project project, List<ValueTuple> valueTuplesSameProject ->
                     if (project) {
                         if (seqType in SeqTypeService.roddyAlignableSeqTypes) {
                             Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))

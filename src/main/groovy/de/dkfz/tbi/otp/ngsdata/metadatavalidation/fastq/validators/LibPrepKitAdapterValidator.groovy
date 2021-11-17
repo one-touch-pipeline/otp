@@ -48,6 +48,9 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
     @Autowired
     SeqTypeService seqTypeService
 
+    @Autowired
+    ValidatorHelperService validatorHelperService
+
     @Override
     Collection<String> getDescriptions() {
         return ["If the sample is configured for adapter trimming the library preparation kit must contain adapter information."]
@@ -69,7 +72,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String seqTypeName = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
             String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
             boolean singleCell = SeqTypeService.isSingleCell(baseMaterial)
             if (seqTypeName.isEmpty()) {

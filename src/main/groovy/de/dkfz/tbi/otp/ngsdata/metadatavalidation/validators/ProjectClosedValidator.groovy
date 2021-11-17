@@ -21,12 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
@@ -34,6 +35,9 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 
 @Component
 class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
+
+    @Autowired
+    ValidatorHelperService validatorHelperService
 
     @Override
     Collection<String> getDescriptions() {
@@ -44,7 +48,7 @@ class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> imp
 
     @Override
     List<String> getRequiredColumnTitles(ValidationContext context) {
-        []
+        return []
     }
 
     @Override
@@ -59,7 +63,7 @@ class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> imp
     @Override
     void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { it ->
-            Project project = MetadataImportService.getProjectFromMetadata(it)
+            Project project = validatorHelperService.getProjectFromMetadata(it)
 
             if (project && project.closed) {
                 context.addProblem(it.cells, LogLevel.ERROR, "The project '${project.name}' is closed.", "At least one project is closed.")

@@ -53,10 +53,12 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when project column does not exist, no problem'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -64,6 +66,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when project column exist but is empty or unknown project, no problem'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
                         "\n" +
@@ -71,7 +75,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         )
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -79,6 +83,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when project column exist but project has no internal note, no problem'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         Project project = createProject()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
@@ -86,7 +92,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         )
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -94,6 +100,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when project column exist and project has internal note, add info'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         Project project = createProject(internalNotes: INTERNAL_NOTES)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
@@ -102,7 +110,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         )
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
@@ -113,6 +121,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when project column exists, one project has internal note another one does not, add info for the one that has'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         Project project = createProject(internalNotes: INTERNAL_NOTES)
         Project project2 = createProject()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -122,7 +132,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         )
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
@@ -133,6 +143,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when project column exists, two projects each one with there own note, add infos'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         Project project = createProject(internalNotes: INTERNAL_NOTES)
         Project project2 = createProject(internalNotes: INTERNAL_NOTES)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -146,7 +158,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         ]
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         CollectionUtils.containSame(context.problems,  expectedProblems)
@@ -154,6 +166,8 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     void 'validate metadata, when sample name column exist for project with internal note, adds info'() {
         given:
+        ProjectInternalNoteValidator validator = new ProjectInternalNoteValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
         sampleIdentifier.project.internalNotes = INTERNAL_NOTES
         sampleIdentifier.project.save(flush: true)
@@ -163,7 +177,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         )
 
         when:
-        new ProjectInternalNoteValidator().validate(context)
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)

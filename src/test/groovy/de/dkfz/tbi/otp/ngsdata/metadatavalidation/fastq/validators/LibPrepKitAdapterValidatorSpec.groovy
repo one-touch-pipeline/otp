@@ -63,7 +63,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
 
         LibPrepKitAdapterValidator validator = new LibPrepKitAdapterValidator()
         validator.libraryPreparationKitService = new LibraryPreparationKitService()
-
+        validator.validatorHelperService = new ValidatorHelperService()
         validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
             1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false])  >> SeqTypeService.exomePairedSeqType

@@ -24,25 +24,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
+import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BASE_MATERIAL
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
@@ -52,7 +42,7 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
     SampleIdentifierService sampleIdentifierService
 
     @Autowired
-    MetadataImportService metadataImportService
+    ValidatorHelperService validatorHelperService
 
     @Override
     Collection<String> getDescriptions() {
@@ -86,7 +76,7 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
                 return
             }
 
-            SeqType seqType = metadataImportService.getSeqTypeFromMetadata(valueTuple)
+            SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(valueTuple)
 
             if (!seqType) {
                 return
@@ -129,7 +119,7 @@ class SampleIdentifierValidator extends ValueTuplesValidator<AbstractMetadataVal
             ] as DefaultParsedSampleIdentifier
         }
 
-        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
+        Project project = validatorHelperService.getProjectFromMetadata(valueTuple)
         if (!project) {
             return null
         }

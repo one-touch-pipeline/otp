@@ -43,6 +43,9 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
 
+    @Autowired
+    ValidatorHelperService validatorHelperService
+
     @Override
     Collection<String> getDescriptions() {
         return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the sequencing layout is '${SequencingReadType.PAIRED}', the correct BED file for the used library preparation kit should be configured in OTP."]
@@ -76,7 +79,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
     //LibraryLayout.findByName is not a gorm find, so no findAll available
     @SuppressWarnings("AvoidFindWithoutAll")
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
-        String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+        String seqType = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
 
         boolean singleCell = SeqTypeService.isSingleCell(valueTuple.getValue(BASE_MATERIAL.name()))
 

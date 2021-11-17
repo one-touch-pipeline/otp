@@ -50,6 +50,8 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     void 'validate metadata, when project column exist but project is not closed'() {
         given:
+        ProjectClosedValidator validator = new ProjectClosedValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         Project project = createProject()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
@@ -57,7 +59,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         )
 
         when:
-        new ProjectClosedValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -65,6 +67,8 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     void 'validate metadata, when project column exist but project is closed, add problem'() {
         given:
+        ProjectClosedValidator validator = new ProjectClosedValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         Project project = createProject([closed: true])
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
@@ -72,7 +76,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         )
 
         when:
-        new ProjectClosedValidator().validate(context)
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
@@ -83,6 +87,8 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     void 'validate metadata, when sample name column exist but project is closed, add problem'() {
         given:
+        ProjectClosedValidator validator = new ProjectClosedValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
         sampleIdentifier.sample.project.closed = true
         sampleIdentifier.sample.project.save(flush: true)
@@ -92,7 +98,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         )
 
         when:
-        new ProjectClosedValidator().validate(context)
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
@@ -103,13 +109,15 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     void 'validate metadata, when sample name is unknown and project is not given'() {
         given:
+        ProjectClosedValidator validator = new ProjectClosedValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\n" +
                         "asdf\n"
         )
 
         when:
-        new ProjectClosedValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -117,13 +125,15 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     void 'validate metadata, when sample name is unknown and project does not exist'() {
         given:
+        ProjectClosedValidator validator = new ProjectClosedValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.PROJECT}\n" +
                         "asdf\tasdf\n"
         )
 
         when:
-        new ProjectClosedValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -131,13 +141,15 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     void 'validate metadata, when project column does not exist, then add no problems'() {
         given:
+        ProjectClosedValidator validator = new ProjectClosedValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "someColumn\n" +
                         "someValue\n"
         )
 
         when:
-        new ProjectClosedValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty

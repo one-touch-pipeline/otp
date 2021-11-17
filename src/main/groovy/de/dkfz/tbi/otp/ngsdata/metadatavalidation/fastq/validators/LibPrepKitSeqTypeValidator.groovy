@@ -37,6 +37,9 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
     @Autowired
     SeqTypeService seqTypeService
 
+    @Autowired
+    ValidatorHelperService validatorHelperService
+
     @Override
     Collection<String> getDescriptions() {
         return ["If the sequencing type is ${SeqTypeService.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, " +
@@ -63,7 +66,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         List<SeqType> seqTypes = SeqTypeService.seqTypesRequiredLibPrepKit
         valueTuples.each { ValueTuple valueTuple ->
-            String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String seqTypeName = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
             SequencingReadType libraryLayout = SequencingReadType.getByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
             if (!libraryLayout) {
                 return

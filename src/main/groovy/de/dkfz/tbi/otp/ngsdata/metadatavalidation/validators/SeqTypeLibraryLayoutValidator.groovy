@@ -40,6 +40,9 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
     @Autowired
     SeqTypeService seqTypeService
 
+    @Autowired
+    ValidatorHelperService validatorHelperService
+
     @Override
     Collection<String> getDescriptions() {
         return ['The combination of sequencing type, sequencing read type and single cell is registered in the OTP database.']
@@ -67,7 +70,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             if (context instanceof BamMetadataValidationContext) {
                 seqTypeName = it.getValue(SEQUENCING_TYPE.name())
             } else {
-                seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(it)
+                seqTypeName = validatorHelperService.getSeqTypeNameFromMetadata(it)
             }
 
             String baseMaterial = it.getValue(BASE_MATERIAL.name())

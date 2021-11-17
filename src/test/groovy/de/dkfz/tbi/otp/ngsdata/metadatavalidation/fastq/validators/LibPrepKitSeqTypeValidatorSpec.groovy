@@ -70,6 +70,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.validatorHelperService = new ValidatorHelperService()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
             2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
             1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
@@ -97,6 +98,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.validatorHelperService = new ValidatorHelperService()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
             3 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
             2 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
@@ -139,6 +141,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.validatorHelperService = new ValidatorHelperService()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
             2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
             1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
@@ -185,6 +188,7 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${SequencingReadType.PAIRED}
 
         when:
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.validatorHelperService = new ValidatorHelperService()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
             1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SequencingReadType.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType

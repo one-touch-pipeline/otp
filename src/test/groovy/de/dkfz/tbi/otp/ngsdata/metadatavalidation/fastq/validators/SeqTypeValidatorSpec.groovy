@@ -73,6 +73,7 @@ class SeqTypeValidatorSpec extends Specification implements DataTest {
         validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias('SeqType2') >> seqType2
         }
+        validator.validatorHelperService = new ValidatorHelperService()
         validator.validate(context)
 
         then:
@@ -91,6 +92,7 @@ class SeqTypeValidatorSpec extends Specification implements DataTest {
 
         when:
         SeqTypeValidator validator = new SeqTypeValidator()
+        validator.validatorHelperService = new ValidatorHelperService()
         validator.validate(context)
 
         then:

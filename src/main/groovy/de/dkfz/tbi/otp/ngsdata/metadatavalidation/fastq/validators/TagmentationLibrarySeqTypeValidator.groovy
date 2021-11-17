@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -32,6 +33,9 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class TagmentationLibrarySeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    ValidatorHelperService validatorHelperService
 
     static final String TAGMENTATION_WITHOUT_LIBRARY = "For tagmentation sequencing types there should be a value in the ${TAGMENTATION_LIBRARY} column."
     static final String LIBRARY_WITHOUT_TAGMENTATION = "At least one tagmentation library is given in ${TAGMENTATION_LIBRARY} for a non tagmentation sequencing type"
@@ -61,7 +65,7 @@ class TagmentationLibrarySeqTypeValidator extends ValueTuplesValidator<MetadataV
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String seqType = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
             String library = valueTuple.getValue(TAGMENTATION_LIBRARY.name())
             if (seqType.endsWith(SeqType.TAGMENTATION_SUFFIX)) {
                 if (!library) {
