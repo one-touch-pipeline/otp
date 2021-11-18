@@ -32,7 +32,7 @@
         </nav>
 
         <div class="mt-3">
-            <g:render template="./components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse']]"/>
+            <g:render template="./components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse'], seqTypes: seqTypes]"/>
         </div>
 
         <div class="mt-3">

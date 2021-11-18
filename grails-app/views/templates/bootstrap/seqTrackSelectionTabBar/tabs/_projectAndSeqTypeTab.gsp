@@ -20,26 +20,14 @@
   - SOFTWARE.
   --}%
 
-<div class="card">
-    <div class="card-header">
-        <i class="bi bi-search"></i> <g:message code="triggerAlignment.input.selection"/>
-    </div>
-    <div class="card-body">
-        <div class="alert alert-primary" role="alert">
-            <p class="card-text"><g:message code="triggerAlignment.input.cardTitle"/></p>
-        </div>
+%{--
+  - Tab component for seqTrackSelectionTabBar.
+  -
+  - Required params:
+  - seqTypes, as list of SeqTypes
+  -
+  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/projectAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
+  --}%
+<g:render template="/templates/bootstrap/projectSelection"/>
 
-        <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/seqTrackSelectionTabBar" tabs="$tabs" model="[seqTypes: seqTypes]"/>
-
-        <p class="card-text"></p>
-
-        <ul class="list-group">
-            <li class="list-group-item"><input type="checkbox" aria-label="Checkbox for following text input"> <g:message code="triggerAlignment.input.checkbox.withdrawn"/></li>
-            <li class="list-group-item"><input type="checkbox" aria-label="Checkbox for following text input"> <g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatform"/></li>
-        </ul>
-
-        <p class="card-text"></p>
-
-        <button class="btn btn-primary"><g:message code="triggerAlignment.input.searchButton"/></button>
-    </div>
-</div>
+<g:render template="/templates/bootstrap/seqTypeSelection" model="[seqTypes: seqTypes]"/>

@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.plugin.springsecurity.annotation.Secured
 
+import de.dkfz.tbi.otp.ngsdata.SeqType
+
 @Secured("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
 
@@ -31,6 +33,8 @@ class TriggerAlignmentController {
     ]
 
     def index() {
-        return [:]
+        return [
+                seqTypes: SeqType.findAllByLegacy(false),
+        ]
     }
 }

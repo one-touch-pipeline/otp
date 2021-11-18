@@ -461,7 +461,7 @@ $.otp.getDownloadButtonServerSide = function (downloadLink) {
 $.otp.copyToClipboard = function (text) {
   const body = document.getElementsByTagName('body')[0];
   const $tempInput = document.createElement('INPUT');
-
+  $.otp.toaster.showInfoToast('Info', 'Copied to clipboard.');
   body.appendChild($tempInput);
   $tempInput.setAttribute('value', text);
   $tempInput.select();

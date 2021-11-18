@@ -65,15 +65,23 @@
 
 <div class="tab-content" id="inputTabsContent">
     <g:if test="${tabs.contains('project')}">
-        <div class="tab-pane fade show active" id="project" role="tabpanel" aria-labelledby="project-tab">TODO: otp-1336 input for project & seqType</div>
+        <div class="tab-pane fade show active mt-2" id="project" role="tabpanel" aria-labelledby="project-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/projectAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
+        </div>
     </g:if>
     <g:if test="${tabs.contains('pid')}">
-        <div class="tab-pane fade" id="pid" role="tabpanel" aria-labelledby="pid-tab">TODO: otp-1337 input for pid & seqType</div>
+        <div class="tab-pane fade mt-2" id="pid" role="tabpanel" aria-labelledby="pid-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab"/>
+        </div>
     </g:if>
     <g:if test="${tabs.contains('lane')}">
-        <div class="tab-pane fade" id="lane" role="tabpanel" aria-labelledby="lane-tab">TODO: otp-1338 input for lane id</div>
+        <div class="tab-pane fade mt-2" id="lane" role="tabpanel" aria-labelledby="lane-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/laneIdTab"/>
+        </div>
     </g:if>
     <g:if test="${tabs.contains('ilse')}">
-        <div class="tab-pane fade" id="ilse" role="tabpanel" aria-labelledby="ilse-tab">TODO: otp-1339 input for ilse id</div>
+        <div class="tab-pane fade mt-2" id="ilse" role="tabpanel" aria-labelledby="ilse-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/ilseIdTab"/>
+        </div>
     </g:if>
 </div>

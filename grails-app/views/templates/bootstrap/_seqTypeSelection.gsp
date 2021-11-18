@@ -20,26 +20,21 @@
   - SOFTWARE.
   --}%
 
-<div class="card">
-    <div class="card-header">
-        <i class="bi bi-search"></i> <g:message code="triggerAlignment.input.selection"/>
+%{--
+  - Generic seqType selection.
+  -
+  - Required params:
+  - seqTypes, as list of SeqTypes
+  -
+  - Usage example: <g:render template="/templates/bootstrap/seqTypeSelection" model="[seqTypes: seqTypes]"/>
+  --}%
+<div class="input-group mb-3" style="width: 500px;">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="project"><g:message code="seqTypeSelection.seqType"/></label>
     </div>
-    <div class="card-body">
-        <div class="alert alert-primary" role="alert">
-            <p class="card-text"><g:message code="triggerAlignment.input.cardTitle"/></p>
-        </div>
-
-        <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/seqTrackSelectionTabBar" tabs="$tabs" model="[seqTypes: seqTypes]"/>
-
-        <p class="card-text"></p>
-
-        <ul class="list-group">
-            <li class="list-group-item"><input type="checkbox" aria-label="Checkbox for following text input"> <g:message code="triggerAlignment.input.checkbox.withdrawn"/></li>
-            <li class="list-group-item"><input type="checkbox" aria-label="Checkbox for following text input"> <g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatform"/></li>
-        </ul>
-
-        <p class="card-text"></p>
-
-        <button class="btn btn-primary"><g:message code="triggerAlignment.input.searchButton"/></button>
-    </div>
+    <select id="seqType-selection" class="custom-select use-select-2" multiple="multiple">
+        <g:each in="${seqTypes}" var="seqType">
+            <option value="${seqType.id}">${seqType.displayNameWithLibraryLayout}</option>
+        </g:each>
+    </select>
 </div>

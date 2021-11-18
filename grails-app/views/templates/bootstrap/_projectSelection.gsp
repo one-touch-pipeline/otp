@@ -31,9 +31,7 @@
     <select id="project" class="custom-select use-select-2" onChange='window.location = this.value;'>
         <g:each in="${availableProjects}" var="project">
             <option value="${g.createLink(controller: controllerName, action: actionName, params: [(projectParameter): project.name])}"
-                ${selectedProject == project ? "selected" : ""}>
-                ${project.displayName}
-            </option>
+                ${selectedProject == project ? "selected" : ""}>${project.displayName}</option>
         </g:each>
     </select>
     <div class="input-group-append">
