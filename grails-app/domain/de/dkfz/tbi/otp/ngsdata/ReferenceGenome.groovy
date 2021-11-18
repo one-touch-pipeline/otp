@@ -98,7 +98,6 @@ class ReferenceGenome implements Entity {
 
     String fingerPrintingFileName
 
-
     /*
      * The following two files belong to ENCODE (https://genome.ucsc.edu/ENCODE/)
      * and will therefore be stored under the ENCODE folder in each reference genome
@@ -123,7 +122,6 @@ class ReferenceGenome implements Entity {
     String knownHaplotypesFileX
 
     String knownHaplotypesLegendFileX
-
 
     /**
      * It has to be ensured that there is only one reference genome stored per directory -> unique path
@@ -164,6 +162,6 @@ class ReferenceGenome implements Entity {
 
     @Override
     String toString() {
-        name
+        return name
     }
 }

@@ -94,26 +94,15 @@ class WorkflowDeletionService {
         }
     }
 
-    void deleteActiveProjectWorkflows(Project project) {
-        List<ActiveProjectWorkflow> activeProjectWorkflowList = ActiveProjectWorkflow.findAllByProject(project).sort { -it.id }
-        if (activeProjectWorkflowList) {
-            ReferenceGenomeSelector referenceGenomeSelector = CollectionUtils.exactlyOneElement(
-                    ReferenceGenomeSelector.findAll {
-                        activeProjectWorkflowList.contains(activeProjectWorkflows)
-                    }
-            )
-
-            activeProjectWorkflowList.each {
-                referenceGenomeSelector.activeProjectWorkflows.remove(it)
-                it.delete(flush: true)
-            }
-            deleteReferenceGenomeSelector(referenceGenomeSelector)
-        }
+    void deleteSelectedProjectSeqTypeWorkflowVersions(Project project) {
+        SelectedProjectSeqTypeWorkflowVersion.findAllByProject(project)
+                .sort { -it.id }
+                .each { it.delete(flush: true) }
     }
 
-    void deleteReferenceGenomeSelector(ReferenceGenomeSelector referenceGenomeSelector) {
-        if (referenceGenomeSelector) {
-            referenceGenomeSelector.delete(flush: true)
-        }
+    void deleteReferenceGenomeSelector(Project project) {
+        ReferenceGenomeSelector.findAllByProject(project)
+                .sort { -it.id }
+                .each { it.delete(flush: true) }
     }
 }

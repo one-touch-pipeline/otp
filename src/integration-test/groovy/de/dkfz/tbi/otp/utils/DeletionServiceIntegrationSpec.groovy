@@ -25,9 +25,7 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.Comment
-import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
@@ -105,11 +103,10 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         ])
         createDataFile([seqTrack: seqTrack])
         createDataFile([seqTrack: seqTrack])
-        createReferenceGenomeSelector(activeProjectWorkflows: [
-                createActiveProjectWorkflow(project: project),
-                createActiveProjectWorkflow(project: project),
-                createActiveProjectWorkflow(project: project),
-        ])
+        createReferenceGenomeSelector(project: project)
+        createSelectedProjectSeqTypeWorkflowVersion(project: project)
+        createSelectedProjectSeqTypeWorkflowVersion(project: project)
+        createSelectedProjectSeqTypeWorkflowVersion(project: project)
         createExternalWorkflowConfigSelector(projects: [project])
 
         when:
@@ -118,7 +115,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         then:
         DataFile.count() == 0
         Individual.count() == 0
-        ActiveProjectWorkflow.count == 0
+        SelectedProjectSeqTypeWorkflowVersion.count == 0
         ReferenceGenomeSelector.count == 0
         ExternalWorkflowConfigSelector.count == 0
         Project.count() == 1

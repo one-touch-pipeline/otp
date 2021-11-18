@@ -80,8 +80,9 @@ class DeletionService {
             deleteDataFile(dataFile)
         }
 
-        // delete ActiveProjectWorkflows and ReferenceGenomeSelector
-        workflowDeletionService.deleteActiveProjectWorkflows(project)
+        workflowDeletionService.deleteSelectedProjectSeqTypeWorkflowVersions(project)
+
+        workflowDeletionService.deleteReferenceGenomeSelector(project)
 
         // remove project from ExternalWorkflowConfigSelector or delete selector completely
         deleteProjectsExternalWorkflowConfigSelector(project)

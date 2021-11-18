@@ -117,21 +117,33 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         thrown(IllegalArgumentException)
     }
 
-    void "deleteActiveProjectWorkflows, should delete all activeProjectWorkflows and referenceGenomeSelector to corresponding project"() {
+    void "deleteSelectedProjectSeqTypeWorkflowVersions, should delete all SelectedProjectSeqTypeWorkflowVersions to corresponding project"() {
         given:
         Project project = createProject()
 
-        createReferenceGenomeSelector(activeProjectWorkflows: [
-                createActiveProjectWorkflow(project: project),
-                createActiveProjectWorkflow(project: project),
-                createActiveProjectWorkflow(project: project),
-        ])
+        createSelectedProjectSeqTypeWorkflowVersion(
+                project: project,
+        )
 
         when:
-        workflowDeletionService.deleteActiveProjectWorkflows(project)
+        workflowDeletionService.deleteSelectedProjectSeqTypeWorkflowVersions(project)
 
         then:
-        ActiveProjectWorkflow.count == 0
+        SelectedProjectSeqTypeWorkflowVersion.count == 0
+    }
+
+    void "deleteReferenceGenomeSelector, should delete all ReferenceGenomeSelector to corresponding project"() {
+        given:
+        Project project = createProject()
+
+        createReferenceGenomeSelector(
+                project: project,
+        )
+
+        when:
+        workflowDeletionService.deleteReferenceGenomeSelector(project)
+
+        then:
         ReferenceGenomeSelector.count == 0
     }
 

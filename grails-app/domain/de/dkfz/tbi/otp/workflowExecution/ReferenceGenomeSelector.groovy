@@ -21,25 +21,18 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SampleType
 
 class ReferenceGenomeSelector implements Entity {
 
-    Set<ActiveProjectWorkflow> activeProjectWorkflows
-    SampleType.SpecificReferenceGenome specificReferenceGenome
+    Project project
     ReferenceGenome referenceGenome
+    SeqType seqType
+    SpeciesCommonName speciesCommonName
+    Workflow workflow
 
-    static hasMany = [
-            activeProjectWorkflows: ActiveProjectWorkflow
-    ]
-
-    static Closure constraints = {
-        activeProjectWorkflows validator: {
-            if (it*.project.unique().size() > 1) {
-                return "set can only contain workflows of same project, in this case ${it.first().project}."
-            }
-        }
-    }
 }

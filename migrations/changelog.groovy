@@ -617,4 +617,6 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "otp-1247") {
         sqlFile(path: 'changelogs/2021/otp-1247.sql')
     }
+
+    include file: 'changelogs/2021/otp-1326_adapt_referenceGenomeSelector_and_activeProjectWorkflow.groovy'
 }

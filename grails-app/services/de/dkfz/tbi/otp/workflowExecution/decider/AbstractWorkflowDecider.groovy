@@ -25,7 +25,7 @@ import grails.util.Pair
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.ActiveProjectWorkflow
+import de.dkfz.tbi.otp.workflowExecution.SelectedProjectSeqTypeWorkflowVersion
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
@@ -92,7 +92,7 @@ abstract class AbstractWorkflowDecider implements Decider {
         Collection<WorkflowArtefact> filteredArtefacts = filterForNeededArtefacts(newArtefacts)
         Map<Pair<Project, SeqType>, Set<WorkflowArtefact>> groupedArtefacts = groupArtefacts(filteredArtefacts)
         groupedArtefacts.each { it ->
-            ActiveProjectWorkflow matchingWorkflows = ActiveProjectWorkflow.createCriteria().get {
+            SelectedProjectSeqTypeWorkflowVersion matchingWorkflows = SelectedProjectSeqTypeWorkflowVersion.createCriteria().get {
                 eq('project', it.project)
                 eq('seqType', it.seqType)
                 workflowVersion {

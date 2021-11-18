@@ -22,16 +22,16 @@
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.*
 
 import java.time.ZonedDateTime
 
-trait WorkflowSystemDomainFactory implements DomainFactoryCore {
+trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory {
 
     Workflow createWorkflow(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Workflow, [
@@ -174,8 +174,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
         ], properties, saveAndValidate)
     }
 
-    ActiveProjectWorkflow createActiveProjectWorkflow(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(ActiveProjectWorkflow, [
+    SelectedProjectSeqTypeWorkflowVersion createSelectedProjectSeqTypeWorkflowVersion(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(SelectedProjectSeqTypeWorkflowVersion, [
                 project        : { createProject() },
                 seqType        : { createSeqType() },
                 workflowVersion: { createWorkflowVersion() },
@@ -184,9 +184,11 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore {
 
     ReferenceGenomeSelector createReferenceGenomeSelector(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenomeSelector, [
-                activeProjectWorkflows : { [createActiveProjectWorkflow(),] as Set<ActiveProjectWorkflow> },
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.UNKNOWN,
-                referenceGenome        : { createReferenceGenome() },
+                project          : { createProject() },
+                referenceGenome  : { createReferenceGenome() },
+                seqType          : { createSeqType() },
+                speciesCommonName: { createSpeciesCommonName() },
+                workflow         : { createWorkflow() },
         ], properties, saveAndValidate)
     }
 }

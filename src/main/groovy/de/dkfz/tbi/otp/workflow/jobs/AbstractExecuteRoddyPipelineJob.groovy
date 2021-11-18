@@ -101,8 +101,9 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     private WorkflowVersion getWorkflowVersion(WorkflowStep workflowStep, RoddyResult roddyResult) {
         List<WorkflowVersion> versions = WorkflowVersion.findAllByWorkflow(workflowStep.workflowRun.workflow)
-        CollectionUtils.exactlyOneElement(ActiveProjectWorkflow.findAllByWorkflowVersionInListAndProjectAndSeqTypeAndActiveAndDeprecationDateIsNull(
-                versions, roddyResult.project, roddyResult.seqType, true
+        CollectionUtils.exactlyOneElement(SelectedProjectSeqTypeWorkflowVersion
+                .findAllByWorkflowVersionInListAndProjectAndSeqTypeAndDeprecationDateIsNull(
+                versions, roddyResult.project, roddyResult.seqType
         )).workflowVersion
     }
 

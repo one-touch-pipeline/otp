@@ -52,7 +52,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                ActiveProjectWorkflow,
+                SelectedProjectSeqTypeWorkflowVersion,
                 FastqImportInstance,
                 FileType,
                 LibraryPreparationKit,
@@ -81,7 +81,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
         WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
-        ActiveProjectWorkflow activeWorkflow = createActiveProjectWorkflow(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
+        SelectedProjectSeqTypeWorkflowVersion activeWorkflow = createSelectedProjectSeqTypeWorkflowVersion(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
         List<ClusterJob> clusterJobs = [createClusterJob(), createClusterJob()]
 
@@ -131,7 +131,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
         WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
-        ActiveProjectWorkflow activeWorkflow = createActiveProjectWorkflow(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
+        SelectedProjectSeqTypeWorkflowVersion activeWorkflow = createSelectedProjectSeqTypeWorkflowVersion(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
 
         AbstractExecuteRoddyPipelineJob job = Spy(AbstractExecuteRoddyPipelineJob) {
@@ -180,7 +180,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
         WorkflowVersion workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
-        ActiveProjectWorkflow activeWorkflow = createActiveProjectWorkflow(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
+        SelectedProjectSeqTypeWorkflowVersion activeWorkflow = createSelectedProjectSeqTypeWorkflowVersion(workflowVersion: workflowVersion, project: bamFile.project, seqType: bamFile.seqType)
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
         List<ClusterJob> clusterJobs = [createClusterJob(), createClusterJob()]
 
