@@ -133,6 +133,12 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
                 String furtherFilesSource = epmbf.furtherFiles.collect {
                     new File(sourceBaseDir, it)
                 }.join(' ')
+
+                String furtherFilesMd5sumCheck = furtherFilesSource ? """\
+md5sum `find -L ${furtherFilesSource} -type f` | ${updateBaseDir} > ${targetBaseDir}/md5sum.md5sum
+md5sum -c ${targetBaseDir}/md5sum.md5sum\
+""".stripIndent() : ""
+
                 String furtherFilesTarget = epmbf.furtherFiles.collect {
                     new File(targetBaseDir, it)
                 }.join(' ')
@@ -171,8 +177,7 @@ md5sum -c ${targetBam}.md5sum
 md5sum ${sourceBai} | ${updateBaseDir} > ${targetBai}.md5sum
 md5sum -c ${targetBai}.md5sum
 
-md5sum `find -L ${furtherFilesSource} -type f` | ${updateBaseDir} > ${targetBaseDir}/md5sum.md5sum
-md5sum -c ${targetBaseDir}/md5sum.md5sum
+${furtherFilesMd5sumCheck}
 
 chgrp -hR ${executionHelperService.getGroup(epmbf.project.realm, epmbf.project.projectDirectory)} ${targetBaseDir}
 find ${targetBaseDir} -type d -not -perm 2750 -print -exec chmod 2750 '{}' \\;

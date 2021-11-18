@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.importExternallyMergedBam
 
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -65,7 +67,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             FURTHER_FILE_NAME_SUBSUBDIRECTORY221,
     ].asImmutable()
 
-    protected ExternallyProcessedMergedBamFile createFile(Project project, String nameInfix, boolean useLink = false) {
+    protected ExternallyProcessedMergedBamFile createFile(Project project, String nameInfix, boolean furtherFiles, boolean useLink = false) {
         File baseDir = new File(ftpDir, nameInfix)
         File targetDir = useLink ? new File(baseDir, 'target') : baseDir
 
@@ -74,7 +76,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
         List<String> fileNames = [
                 baiFileName,
-        ] + ALL_FILES
+        ] + (furtherFiles ? ALL_FILES : [])
 
         createFilesWithContent(fileNames.collectEntries {
             [(new File(targetDir, it)): it]
@@ -87,15 +89,17 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         )
 
         if (useLink) {
-            linkFileUtils.createAndValidateLinks([
-                    (bamFileName)                 : bamFileName,
-                    (baiFileName)                 : baiFileName,
+            Map<String, String> map = ([
+                    (bamFileName): bamFileName,
+                    (baiFileName): baiFileName,
+            ] + (furtherFiles ? [
                     (FURTHER_FILE_NAME)           : FURTHER_FILE_NAME,
                     (DIRECTORY1)                  : DIRECTORY1,
                     (FURTHER_FILE_NAME_DIRECTORY2): FURTHER_FILE_NAME_DIRECTORY2,
                     (SUBDIRECTORY21)              : SUBDIRECTORY21,
                     (SUBDIRECTORY22)              : SUBDIRECTORY22,
-            ].collectEntries { key, value ->
+            ] : []))
+            linkFileUtils.createAndValidateLinks(map.collectEntries { key, value ->
                 [(new File(targetDir, key)): new File(baseDir, value)]
             }, realm)
         }
@@ -105,11 +109,11 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                 importedFrom: bamFile.path,
                 fileName: bamFileName,
                 fileSize: bamFile.size(),
-                furtherFiles: [
+                furtherFiles: furtherFiles ? [
                         FURTHER_FILE_NAME,
                         DIRECTORY1,
                         DIRECTORY2,
-                ]
+                ] : [],
         )
         epmbf.individual.project = project
         assert epmbf.individual.save(flush: true)
@@ -119,18 +123,6 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     @Override
     void setup() {
         SessionUtils.withNewSession {
-            Project project = createProject(realm: realm)
-            createDirectories([new File(ftpDir), project.projectDirectory])
-
-            ExternallyProcessedMergedBamFile epmbf01 = createFile(project, '1', false)
-            ExternallyProcessedMergedBamFile epmbf02 = createFile(project, '2', true)
-
-            importProcess = new ImportProcess(
-                    externallyProcessedMergedBamFiles: [epmbf01, epmbf02],
-                    state: ImportProcess.State.NOT_STARTED,
-                    linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
-            ).save(flush: true)
-
             DomainFactory.createProcessingOptionLazy(
                     name: COMMAND_LOAD_MODULE_LOADER,
                     type: null,
@@ -164,8 +156,25 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         }
     }
 
+    void setupFiles(boolean furtherFiles) {
+        SessionUtils.withNewSession {
+            Project project = createProject(realm: realm)
+            createDirectories([new File(ftpDir), project.projectDirectory])
+            ExternallyProcessedMergedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
+            ExternallyProcessedMergedBamFile epmbf02 = createFile(project, '2', furtherFiles, true)
+
+            importProcess = new ImportProcess(
+                    externallyProcessedMergedBamFiles: [epmbf01, epmbf02],
+                    state: ImportProcess.State.NOT_STARTED,
+                    linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
+            ).save(flush: true)
+        }
+    }
+
+    @Unroll
     void "testImportProcess_FilesHaveToBeCopied"() {
         given:
+        setupFiles(furtherFiles)
         SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_KEEP
@@ -176,7 +185,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         execute()
 
         then:
-        checkThatFileCopyingWasSuccessful(importProcess)
+        checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
 
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
         SessionUtils.withNewSession {
@@ -189,7 +198,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                 [
                         it.bamFileName,
                         it.baiFileName,
-                        it.furtherFiles,
+                        furtherFiles ? it.furtherFiles : [],
                 ].flatten().each {
                     Path source = baseDirSource.resolve(it)
                     Path target = baseDirTarget.resolve(it)
@@ -198,10 +207,17 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             }
             return true
         }
+
+        where:
+        furtherFiles | _
+        true         | _
+        false        | _
     }
 
+    @Unroll
     void "testImportProcess_FilesHaveToBeCopiedLinkedAndDeleted"() {
         given:
+        setupFiles(furtherFiles)
         SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_LINK
@@ -212,7 +228,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         execute()
 
         then:
-        checkThatFileCopyingWasSuccessful(importProcess)
+        checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
 
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
 
@@ -225,7 +241,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                 [
                         it.bamFileName,
                         it.baiFileName,
-                        ALL_FILES,
+                        furtherFiles ? ALL_FILES : [],
                 ].flatten().each {
                     Path source = baseDirSource.resolve(it)
                     Path target = baseDirTarget.resolve(it)
@@ -236,10 +252,17 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             }
             return true
         }
+
+        where:
+        furtherFiles | _
+        true         | _
+        false        | _
     }
 
+    @Unroll
     void "testImportProcess_FilesHaveToBeLink"() {
         given:
+        setupFiles(furtherFiles)
         SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.linkOperation = ImportProcess.LinkOperation.LINK_SOURCE
@@ -271,7 +294,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                 [
                         it.bamFileName,
                         it.baiFileName,
-                        it.furtherFiles,
+                        furtherFiles ? it.furtherFiles : [],
                 ].flatten().each {
                     Path source = baseDirSource.resolve(it)
                     Path target = baseDirTarget.resolve(it)
@@ -281,9 +304,14 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             }
             return true
         }
+
+        where:
+        furtherFiles | _
+        true         | _
+        false        | _
     }
 
-    protected void checkThatFileCopyingWasSuccessful(ImportProcess impPro) {
+    protected void checkThatFileCopyingWasSuccessful(ImportProcess impPro, boolean furtherFiles) {
         SessionUtils.withNewSession {
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess = ImportProcess.get(impPro.id)
@@ -298,20 +326,21 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                 [
                         it.bamFileName,
                         it.baiFileName,
-                        ALL_FILES,
+                        furtherFiles ? ALL_FILES : [],
                 ].flatten().each {
                     checkThatFileExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
                 }
 
-                [
-                        DIRECTORY1,
-                        DIRECTORY2,
-                        SUBDIRECTORY21,
-                        SUBDIRECTORY22,
-                ].each {
-                    checkThatDirectoryExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
+                if (furtherFiles) {
+                    [
+                            DIRECTORY1,
+                            DIRECTORY2,
+                            SUBDIRECTORY21,
+                            SUBDIRECTORY22,
+                    ].each {
+                        checkThatDirectoryExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
+                    }
                 }
-
                 assert it.maximumReadLength == 100
             }
         }
