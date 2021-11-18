@@ -61,39 +61,57 @@ function renderStepDataTable(steps) {
 
   steps.forEach((step) => {
     dataTable.row.add([
-      '<input type="checkbox" name="stepId" value="' + step.id + '" class="tableCheckbox">',
-      '<a href="' + $.otp.createLink({
+      `<input type="checkbox" name="stepId" value="${step.id}" class="tableCheckbox">`,
+      `<a href="${$.otp.createLink({
         controller: 'workflowRunList',
         action: 'index',
         parameters: { 'workflow.id': step.workflowId }
-      }) + '">' +
-      step.workflowName + '</a>',
-      '<a href="' + $.otp.createLink({
+      })}">${step.workflowName}</a>`,
+      `<a href="${$.otp.createLink({
         controller: 'workflowRunDetails',
         action: 'index',
         parameters: { id: step.workflowRunId, 'workflow.id': step.workflowId }
-      }) + '" title="' + step.workflowRunName.replaceAll('\n', '<br>') +
-        '" data-toggle="tooltip" data-placement="bottom">' +
-      step.workflowRunShortName + '</a>',
+      })}" 
+          title="${step.workflowRunName.replaceAll('\n', '<br>')}" 
+          data-toggle="tooltip" 
+          data-placement="bottom">
+         ${step.workflowRunShortName}
+       </a>`,
       step.beanName,
       step.id,
       step.lastUpdated,
       step.workflowRunJobCanBeRestarted ? '<i class="bi bi-check"></i>' : '<i class="bi bi-x"></i>',
       /* eslint-disable max-len */
-      '<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">' +
-            '<button class="btn btn-primary" onclick="restartStep(' + step.id + ')"' + (!step.workflowRunJobCanBeRestarted ? 'disabled' : '') +
-            '       data-toggle="tooltip" data-placement="top" title="Restart step #' + step.id + '">' +
-            '   <i class="bi bi-reply"></i></button>' +
-            '<button class="btn btn-primary" onclick="restartWorkflowRun(' + step.id + ')"' +
-            '       data-toggle="tooltip" data-placement="top" title="Restart workflow run #' + step.workflowRunId + '">' +
-            '   <i class="bi bi-reply-all"></i></button>' +
-            '<button class="btn btn-primary" onclick="setWorkflowStepAsFailed(' + step.id + ')"' +
-            '       data-toggle="tooltip" data-placement="top" title="Mark #' + step.id + ' as failed">' +
-            '   <i class="bi bi-x-circle"></i></button>' +
-            '<button class="btn btn-primary" onclick="setWorkflowRunAsFinalFailed(' + step.id + ')"' +
-            '       data-toggle="tooltip" data-placement="top" title="Mark #' + step.workflowRunId + ' as final failed">' +
-            '   <i class="bi bi-file-earmark-x"></i></button>' +
-            '</div>'
+      `<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">
+           <button class="btn btn-primary" 
+                   onclick="restartStep(${step.id})"${(!step.workflowRunJobCanBeRestarted ? 'disabled' : '')}
+                   data-toggle="tooltip" 
+                   data-placement="top" 
+                   title="Restart step #${step.id}">
+               <i class="bi bi-reply"></i>
+           </button>
+           <button class="btn btn-primary" 
+                   onclick="restartWorkflowRun(${step.id})"
+                   data-toggle="tooltip" 
+                   data-placement="top" 
+                   title="Restart workflow run #${step.workflowRunId}">
+               <i class="bi bi-reply-all"></i>
+           </button>
+           <button class="btn btn-primary" 
+                   onclick="setWorkflowStepAsFailed(${step.id})"
+                   data-toggle="tooltip" 
+                   data-placement="top" 
+                   title="Mark #${step.id} as failed">
+               <i class="bi bi-x-circle"></i>
+           </button>
+           <button class="btn btn-primary" 
+                   onclick="setWorkflowRunAsFinalFailed(${step.id})"
+                   data-toggle="tooltip" 
+                   data-placement="top" 
+                   title="Mark #${step.workflowRunId} as final failed">
+               <i class="bi bi-file-earmark-x"></i>
+           </button>
+       </div>`
       /* eslint-enable max-len */
     ]).draw();
 
@@ -123,8 +141,8 @@ function restartStep(stepId) {
     },
     success(result) {
       $.otp.toaster.showSuccessToast(
-        'Step #' + stepId + ' restarted',
-        'Restart of the step #' + stepId + ' was successful.'
+        `Step #${stepId} restarted`,
+        `Restart of the step #${stepId} was successful.`
       );
       syncWorkflowStepData();
     },
@@ -155,8 +173,8 @@ function restartWorkflowRun(stepId) {
     },
     success(result) {
       $.otp.toaster.showSuccessToast(
-        'Workflow run of step #' + stepId + ' restarted',
-        'Restart of the step #' + stepId + ' was successful.'
+        `Workflow run of step #${stepId} restarted`,
+        `Restart of the step #${stepId} was successful.`
       );
       syncWorkflowStepData();
     },
@@ -186,7 +204,7 @@ function setWorkflowStepAsFailed(stepId) {
       workflowStep: stepId
     },
     success(result) {
-      $.otp.toaster.showSuccessToast('Failed set', 'Workflow step #' + stepId + ' has successful been set as failed.');
+      $.otp.toaster.showSuccessToast('Failed set', `Workflow step #${stepId} has successful been set as failed.`);
       syncWorkflowStepData();
     },
     error(error) {
@@ -217,7 +235,7 @@ function setWorkflowRunAsFinalFailed(stepId) {
     success(result) {
       $.otp.toaster.showSuccessToast(
         'Final failed set',
-        'Workflow run of the step #' + stepId + ' has successful been set as final failed.'
+        `Workflow run of the step #${stepId} has successful been set as final failed.`
       );
       syncWorkflowStepData();
     },

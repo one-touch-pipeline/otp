@@ -61,19 +61,19 @@ $.otp.processingPriority = {
     const entityId = data[this.mapFieldIndex.id];
     const entityName = data[this.mapFieldIndex.name];
     $.ajax({
-      url: 'delete/' + entityId,
+      url: `delete/${entityId}`,
       type: 'DELETE',
       success() {
         oTable.row(rowIndex).remove().draw();
         $.otp.toaster.showSuccessToast(
           'Delete Processing Priority',
-          'Processing Priority ' + entityName + ' has been deleted.'
+          `Processing Priority ${entityName} has been deleted.`
         );
       },
       error(xhr) {
         $.otp.toaster.showErrorToast(
           'Failed Deleting Processing Priority',
-          ' Processing Priority ' + entityName + ' cannot be deleted.'
+          `Processing Priority ${entityName} cannot be deleted.`
         );
       }
     }).always(() => {
@@ -99,7 +99,7 @@ $.otp.processingPriority = {
 
     if (namesAvailable.indexOf(sValue.toUpperCase()) > -1) {
       vFeedback.removeClass('d-none');
-      input.setCustomValidity('"' + input.value + '" is not valid.');
+      input.setCustomValidity(`"${input.value}" is not valid.`);
     } else {
       vFeedback.addClass('d-none');
       input.setCustomValidity('');
@@ -126,7 +126,7 @@ $.otp.processingPriority = {
 
     if (namesAvailable.indexOf(sValue) > -1) {
       vFeedback.removeClass('d-none');
-      input.setCustomValidity('"' + input.value + '" is not valid.');
+      input.setCustomValidity(`"${input.value}" is not valid.`);
     } else {
       vFeedback.addClass('d-none');
       input.setCustomValidity('');
@@ -142,7 +142,7 @@ $.otp.processingPriority = {
     const val = parseInt(sValue);
     if (val <= 0) {
       vFeedback.removeClass('d-none');
-      input.setCustomValidity('"' + input.value + '" is not valid.');
+      input.setCustomValidity(`"${input.value}" is not valid.`);
     } else {
       vFeedback.addClass('d-none');
       input.setCustomValidity('');
@@ -164,7 +164,7 @@ $.otp.processingPriority = {
 
     $('#processingPriorityForm').addClass('was-validated');
 
-    const bNotValid = Object.keys(this.mapFieldIndex).some((field) => !($('#pp-' + field)[0].validity.valid));
+    const bNotValid = Object.keys(this.mapFieldIndex).some((field) => !($(`#pp-${field}`)[0].validity.valid));
     $('.modal-footer button#bt-save').prop('disabled', bNotValid);
   },
 
@@ -181,7 +181,7 @@ $.otp.processingPriority = {
       url;
     if (entityId > 0) {
       type = 'PUT';
-      url = 'update/' + entityId;
+      url = `update/${entityId}`;
       $('form input#pp-id').prop('disabled', false);
     } else {
       type = 'POST';
@@ -210,7 +210,7 @@ $.otp.processingPriority = {
           oTable.row.add(oData).draw();
         }
         $.otp.toaster.showSuccessToast('Save Processing Priority',
-          'Processing Priority ' + oData[$.otp.processingPriority.mapFieldIndex.name] + ' has been saved.');
+          `Processing Priority ${oData[$.otp.processingPriority.mapFieldIndex.name]} has been saved.`);
       },
       error(xhr) {
         $.otp.toaster.showErrorToast('Failed Saving Processing Priority',
@@ -282,7 +282,7 @@ $(document).ready(() => {
     // call backend to fetch the referring objects if exist
     $.ajax({
       type: 'get',
-      url: 'refer/' + aData[0],
+      url: `refer/${aData[0]}`,
       success(response) {
         if ($.isEmptyObject(response)) {
           const oDialog = $.otp.processingPriority.openDialog();
@@ -327,7 +327,7 @@ $(document).ready(() => {
 
     // init dialog input fields
     Object.keys($.otp.processingPriority.mapFieldIndex).forEach((field, idx) => {
-      oDialog.find('.modal-body input#pp-' + field).val(aData[idx]);
+      oDialog.find(`.modal-body input#pp-${field}`).val(aData[idx]);
     });
 
     $.otp.processingPriority.toggleSaveButton();
@@ -350,8 +350,8 @@ $(document).ready(() => {
 
     // reset all fields to empty
     Object.keys($.otp.processingPriority.mapFieldIndex).forEach((field, idx) => {
-      oDialog.find('.modal-body input#pp-' + field).val('');
-      oDialog.find('.modal-body input#pp-' + field)[0].setCustomValidity('');
+      oDialog.find(`.modal-body input#pp-${field}`).val('');
+      oDialog.find(`.modal-body input#pp-${field}`)[0].setCustomValidity('');
     });
   });
 });

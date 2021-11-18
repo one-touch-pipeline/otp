@@ -68,9 +68,9 @@ $.otp.selectSamplesTable = {
             for (let i = 0; i < json.aaData.length; i += 1) {
               const entry = json.aaData[i];
               const checked = preSelectedSamples.includes(entry.sampleId + entry.seqType) ? 'checked' : '';
-              json.aaData[i][0] = '<input type="checkbox" name="sampleAndSeqType" value="' +
-                  entry.identifier + '" ' +
-                  checked + '/>';
+              json.aaData[i][0] = `<input type="checkbox" 
+                                          name="sampleAndSeqType" 
+                                          value="${entry.identifier}" ${checked}/>`;
               for (let c = 0; c < header.length; c++) {
                 json.aaData[i][c + 1] = entry[header[c]];
               }
@@ -92,7 +92,7 @@ $.otp.selectSamplesTable = {
     $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
       const select = $('#searchCriteriaTableSeqType').find('select')[0];
       if (select.selectedIndex !== 0) {
-        table.fnFilter('^' + select.value + '$', seqTypeColumnIndex, true);
+        table.fnFilter(`^${select.value}$`, seqTypeColumnIndex, true);
       } else {
         table.fnFilter('', seqTypeColumnIndex);
       }

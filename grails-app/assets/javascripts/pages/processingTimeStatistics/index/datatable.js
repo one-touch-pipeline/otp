@@ -32,7 +32,7 @@ $.otp.processingTimeStatistics = {
 
     const errorContainer = $('.error-container');
     const errorList = $('.error-list');
-    errorList.append('<p>' + msg + '</p>');
+    errorList.append(`<p>${msg}</p>`);
     errorContainer.show();
 
     $('.close-error').on('click', () => {
@@ -45,7 +45,7 @@ $.otp.processingTimeStatistics = {
     'use strict';
 
     const type = $(element).attr('id');
-    const input = prompt('Enter new ' + type, $(element).parent().find('#edit-value')[0].innerHTML);
+    const input = prompt(`Enter new ${type}`, $(element).parent().find('#edit-value')[0].innerHTML);
 
     $.ajax({
       dataType: 'json',
@@ -60,7 +60,7 @@ $.otp.processingTimeStatistics = {
         type
       },
       error() {
-        let errorMsg = "Failed to edit value '" + type + "'.";
+        let errorMsg = `Failed to edit value '${type}'.`;
         if (type == 'ticketCreated' || type == 'SubmissionReceivedNotice') {
           errorMsg += " Check for date format ('yyyy-MM-dd HH:mm').";
         }
@@ -128,7 +128,7 @@ $.otp.processingTimeStatistics = {
               // link OTRS ticket url
               row[0] = $.otp.processingTimeStatistics.createIsFinished(
                 row[27],
-                '<a href="' + row[0] + '">' + row[29] + '</a>'
+                `<a href="${row[0]}">${row[29]}</a>`
               );
 
               row[1] = row[1].join('<br>');
@@ -136,7 +136,7 @@ $.otp.processingTimeStatistics = {
               // shorten project names to max 10 character and add tooltip
               for (let x = 0; x < row[2].length; x += 1) {
                 if (row[2][x].length > 10) {
-                  row[2][x] = '<p title="' + row[2][x] + '">' + row[2][x].substring(0, 10) + '...</p>';
+                  row[2][x] = `<p title="${row[2][x]}">${row[2][x].substring(0, 10)}...</p>`;
                 }
               }
 
@@ -144,23 +144,43 @@ $.otp.processingTimeStatistics = {
               row[2] = row[2].join('<br>');
 
               // display size, list of objects in title
-              row[3] = '<p title="' + row[3].join('\n') + '">' + row[3].length + '</p>';
-              row[4] = '<p title="' + row[4].join('\n') + '">' + row[4].length + '</p>';
-              row[5] = '<p title="' + row[5].join('\n') + '">' + row[5].length + '</p>';
+              row[3] = `<p title="${row[3].join('\n')}">${row[3].length}</p>`;
+              row[4] = `<p title="${row[4].join('\n')}">${row[4].length}</p>`;
+              row[5] = `<p title="${row[5].join('\n')}">${row[5].length}</p>`;
 
               // add edit-button to fields
-              row[6] = '<div class="edit-container" id="' + row[28] + '"><div id="edit-value">' + row[6] +
-                  '</div><button class="edit" id="submissionReceivedNotice"' +
-                  ' onclick="$.otp.processingTimeStatistics.edit(this)">&nbsp;</button></div>';
-              row[8] = '<div class="edit-container" id="' + row[28] + '"><div id="edit-value">' + row[8] +
-                  '</div><button class="edit" id="ticketCreated"' +
-                  ' onclick="$.otp.processingTimeStatistics.edit(this)">&nbsp;</button></div>';
-
+              row[6] = `<div class="edit-container" id="${row[28]}">
+                            <div id="edit-value">
+                                ${row[6]}
+                            </div>
+                            <button class="edit" 
+                                    id="submissionReceivedNotice" 
+                                    onclick="$.otp.processingTimeStatistics.edit(this)">    
+                                &nbsp;
+                            </button>
+                        </div>`;
+              row[8] = `<div class="edit-container" id="${row[28]}">
+                            <div id="edit-value">
+                                ${row[8]}
+                            </div>
+                            <button class="edit" 
+                                    id="ticketCreated" 
+                                    onclick="$.otp.processingTimeStatistics.edit(this)">
+                                &nbsp;
+                            </button>
+                        </div>`;
               row[25] = $.otp.processingTimeStatistics.createIsFinished(row[27], row[25]);
 
-              row[26] = '<div class="edit-container" id="' + row[28] + '"><div id="edit-value">' + row[26] +
-                  '</div><button class="edit" id="comment"' +
-                  ' onclick="$.otp.processingTimeStatistics.edit(this)">&nbsp;</button></div>';
+              row[26] = `<div class="edit-container" id="${row[28]}">
+                             <div id="edit-value">
+                                 ${row[26]}
+                             </div>
+                             <button class="edit" 
+                                     id="comment" 
+                                     onclick="$.otp.processingTimeStatistics.edit(this)">
+                                 &nbsp;
+                             </button>
+                         </div>`;
 
               row.pop(); // finalNotificationSent
               row.pop(); // ticketId
@@ -183,9 +203,8 @@ $.otp.processingTimeStatistics = {
   },
 
   createIsFinished(finished, row) {
-    return '<span class="' +
-        (finished ? 'finalProcessingStatusSent' : 'finalProcessingStatusNotSent') + '">' +
-        row +
-        '</span>';
+    return `<span class="${(finished ? 'finalProcessingStatusSent' : 'finalProcessingStatusNotSent')}">
+                ${row}
+            </span>`;
   }
 };

@@ -32,7 +32,7 @@ $.otp.workflows.processingStep = {
     $.otp.createListView(selector, $.otp.createLink({
       controller: 'processes',
       action: 'processingStepDate',
-      id: $.otp.workflows.processingStep.processingStepId + '/'
+      id: `${$.otp.workflows.processingStep.processingStepId}/`
     }), false, (json) => {
       let i; let
         rowData;
@@ -72,7 +72,7 @@ $.otp.workflows.processingStep = {
     $.otp.createListView(selector, $.otp.createLink({
       controller: 'processes',
       action: 'parameterData',
-      id: $.otp.workflows.processingStep.processingStepId + '/'
+      id: `${$.otp.workflows.processingStep.processingStepId}/`
     }), true, (data) => {
       let i; let j; let rowData; let
         ids;
@@ -86,7 +86,7 @@ $.otp.workflows.processingStep = {
             if (j > 4) {
               rowData[3] += ' style="display: none;"';
             }
-            rowData[3] += '>' + ids[j] + '</li>';
+            rowData[3] += `>${ids[j]}</li>`;
           }
           if (ids.length >= 5) {
             rowData[3] += '<li><a href="#">...</a></li>';

@@ -172,7 +172,7 @@ $.otp.clusterJobGeneralGraph = {
     'use strict';
 
     const json = JSON.parse(data.response);
-    RGraph.reset($('#' + id).get(0));
+    RGraph.reset($(`#${id}`).get(0));
     new RGraph.Pie({
       id,
       data: json.data,
@@ -197,7 +197,7 @@ $.otp.clusterJobGeneralGraph = {
     'use strict';
 
     const json = JSON.parse(data.response);
-    RGraph.reset($('#' + id).get(0));
+    RGraph.reset($(`#${id}`).get(0));
     new RGraph.Line({
       id,
       data: json.data,
@@ -257,16 +257,16 @@ $.otp.clusterJobGeneralProgress = {
     'use strict';
 
     const json = JSON.parse(data.response);
-    $('#' + id).multiprogressbar({
+    $(`#${id}`).multiprogressbar({
       parts: [{
         value: json.data.queue[0],
-        text: json.data.queue[0] + '% (' + json.data.queue[1] + ' hours)',
+        text: `${json.data.queue[0]}% (${json.data.queue[1]} hours)`,
         barClass: 'progressBarQueue',
         textClass: 'progressTextQueue'
       },
       {
         value: json.data.process[0],
-        text: json.data.process[0] + '% (' + json.data.process[1] + ' hours)',
+        text: `${json.data.process[0]}% (${json.data.process[1]} hours)`,
         barClass: 'progressBarProcess',
         textClass: 'progressTextProcess'
       }]

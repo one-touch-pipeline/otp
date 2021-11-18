@@ -35,18 +35,18 @@ $.otp.dataTableFilter = {
       searchCriteriaTable.find('tr').each((index, element) => {
         const selection = $('td.attribute select', element).val();
         if (selection !== 'none') {
-          if ($('td.value span#' + selection, element).hasClass('dateSelection')) {
+          if ($(`td.value span#${selection}`, element).hasClass('dateSelection')) {
             result.push({
               type: selection,
               value: {
-                start: $('td input[name=' + selection + '_start]', element).val(),
-                end: $('td input[name=' + selection + '_end]', element).val()
+                start: $(`td input[name=${selection}_start`, element).val(),
+                end: $(`td input[name=${selection}_end]`, element).val()
               }
             });
           } else {
             result.push({
               type: selection,
-              value: $('td select[name=' + selection + '], td input[name=' + selection + ']', element).val()
+              value: $(`td select[name=${selection}], td input[name=${selection}]`, element).val()
             });
           }
         }
@@ -93,7 +93,7 @@ $.otp.dataTableFilter = {
       $('td.value span.dtf_value_span', tr).hide();
       const attribute = $(event.target).val();
       if (attribute !== 'none') {
-        $("td span[id='dtf_" + attribute + "']", tr).show();
+        $(`td span[id='dtf_${attribute}']`, tr).show();
         $('td.add', tr).show();
         $('td.remove', tr).show();
       } else {

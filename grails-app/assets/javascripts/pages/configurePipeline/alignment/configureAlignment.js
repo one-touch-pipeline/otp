@@ -46,7 +46,7 @@ $(() => {
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+        $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
       }
     });
   };
@@ -74,7 +74,7 @@ $(() => {
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+        $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
       }
     });
   };
@@ -97,23 +97,23 @@ $(() => {
           const search = (index.indexOf('GENOME_STAR_INDEX') !== -1) ? 'GENOME_STAR_INDEX' : index;
           if (value) {
             $.each(value, (i, p) => {
-              const outputValue = index.toLowerCase().replace('genome_', '')
-                .replace('_index', '') + ' - ' + p.indexToolVersion;
+              const outputValue = `${index.toLowerCase().replace('genome_', '')
+                .replace('_index', '')} - ${p.indexToolVersion}`;
               if (outputValue === data.defaultGenomeStarIndex) {
-                $('#toolVersionSelect_' + search).append($('<option></option>')
+                $(`#toolVersionSelect_${search}`).append($('<option></option>')
                   .prop('selected', true).val(p.id).html(outputValue));
               } else {
-                $('#toolVersionSelect_' + search).append($('<option></option>')
+                $(`#toolVersionSelect_${search}`).append($('<option></option>')
                   .val(p.id).html(outputValue));
               }
             });
           } else {
-            $('#toolVersionSelect_' + index).append($('<option></option>'));
+            $(`#toolVersionSelect_${index}`).append($('<option></option>'));
           }
         });
       },
       error(jqXHR, textStatus, errorThrown) {
-        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+        $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
       }
     });
   };

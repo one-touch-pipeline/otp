@@ -31,8 +31,8 @@ $(() => {
     // also copy event handlers on clone
     const sampleBoxes = $('tr.hidden.template').clone(true, true).removeClass('hidden');
     sampleBoxes.insertAfter($('.sampleIdentifier:last'));
-    sampleBoxes.find('select').attr('name', 'samples[' + existingSamples.length + '].sampleType');
-    sampleBoxes.find('input').attr('name', 'samples[' + existingSamples.length + '].sampleIdentifiers');
+    sampleBoxes.find('select').attr('name', `samples[${existingSamples.length}].sampleType`);
+    sampleBoxes.find('input').attr('name', `samples[${existingSamples.length}].sampleIdentifiers`);
     // The templates contains a select-tag that needs to become a select2 searchable dropdown.
     $.otp.applySelect2($('select.use-select-2-after-clone', sampleBoxes));
   });

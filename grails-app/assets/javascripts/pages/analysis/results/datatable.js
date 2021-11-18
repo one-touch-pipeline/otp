@@ -23,7 +23,7 @@
 $.otp.resultsTable = {
 
   registerDataTable(tableElement, source, columnDefs, convertRowData) {
-    const fileName = document.title.replaceAll(' ', '_') + '-' + $('.selected-project-value strong').text();
+    const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
 
     'use strict';
 
@@ -82,11 +82,11 @@ $.otp.resultsTable = {
     'use strict';
 
     return function (data, type, row) {
-      return '<div ' +
-                "class='trim-text-with-ellipsis' " +
-                "style='max-width: " + nCharacters + "em'" +
-                "title='" + data + "'" +
-                '>' + data + '</div>';
+      return `<div class="trim-text-with-ellipsis" \
+                   style="max-width: ${nCharacters}em" \
+                   title="${data}">
+                     ${data}
+              </div>`;
     };
   },
 

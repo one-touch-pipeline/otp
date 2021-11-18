@@ -67,7 +67,7 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
         rowData[6] = rowData[6].state;
       }
       if (rowData[7] != null && rowData[7].length > 0) {
-        rowData[7] = '<div class="commentSet" title="' + rowData[7] + '">&nbsp;</div>';
+        rowData[7] = `<div class="commentSet" title="${rowData[7]}">&nbsp;</div>`;
       } else {
         rowData[7] = '';
       }

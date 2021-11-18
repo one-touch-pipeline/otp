@@ -57,8 +57,8 @@ function postFileAccessChange(context) {
     success(response) {
       if (response.success) {
         $.each(['label', 'editor'], function () {
-          $('.modal-editor-switch-' + this + ' span', container)
-            .removeClass('icon-' + orgVal).addClass('icon-' + invVal);
+          $(`.modal-editor-switch-${this} span`, container)
+            .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
         });
         if (response.tooltip) {
           $('.modal-editor-switch-label', container).attr('data-original-title', response.tooltip);
@@ -70,7 +70,7 @@ function postFileAccessChange(context) {
       }
     },
     error(jqXHR, textStatus, errorThrown) {
-      $.otp.toaster.showErrorToast(textStatus + ' occurred while processing the data.', errorThrown);
+      $.otp.toaster.showErrorToast(`${textStatus} occurred while processing the data.`, errorThrown);
     },
     complete() {
       hideEditorAndShowLabel(context);
@@ -143,7 +143,7 @@ $(() => {
   $('#listEmails').on('click', function () {
     const project = $(this).data('project');
     const emails = $(this).data('emails');
-    prompt('Emails for ' + project, emails);
+    prompt(`Emails for ${project}`, emails);
   });
 
   $('#add-button').on('click', function () {
@@ -196,7 +196,7 @@ function submitChangeProjectAccess(postUrl) {
       }
     },
     error(jqXHR, textStatus, errorThrown) {
-      $.otp.toaster.showErrorToast(textStatus + ' occurred while processing the data.', errorThrown);
+      $.otp.toaster.showErrorToast(`${textStatus} occurred while processing the data.`, errorThrown);
     }
   });
 }

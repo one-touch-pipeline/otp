@@ -45,7 +45,7 @@ function confirmCompleteTransfer(event) {
  */
 function updateFileNameOfFileInput(fileInputFieldId) {
   const inputField = $(fileInputFieldId);
-  const fileName = Array.from(inputField.prop('files')).map((val) => val.name).reduce((acc, val) => acc + ', ' + val);
+  const fileName = Array.from(inputField.prop('files')).map((val) => val.name).reduce((acc, val) => `${acc}, ${val}`);
   inputField.next('.custom-file-label').html(fileName);
 }
 
@@ -57,7 +57,7 @@ function updateFileNameOfFileInput(fileInputFieldId) {
  * @param id to find the correct input field
  */
 function updateFileNameOfFileInputToDefaultPlaceholder(id) {
-  const fileInputField = $('#dtaFileInput-' + id);
+  const fileInputField = $(`#dtaFileInput-${id}`);
   const defaultPlaceholder = 'Choose one or more files';
 
   fileInputField.val('');
@@ -131,13 +131,14 @@ function onUploadFiles(submitBtn, id, action) {
  * @param domPositionId position in the DOM of the file list
  */
 function rerenderDtaFiles(dtaDocuments, domPositionId) {
-  const dtaFilesList = $('#dtaDocuments-' + domPositionId);
+  const dtaFilesList = $(`#dtaDocuments-${domPositionId}`);
 
-  dtaFilesList.html(dtaDocuments.map((document) => "<li><a href='" + $.otp.createLink({
+  dtaFilesList.html(dtaDocuments.map((document) => `<li>
+    <a href="${$.otp.createLink({
     controller: 'dataTransfer',
     action: 'downloadDataTransferAgreementDocument',
     parameters: { 'dataTransferAgreementDocument.id': document.id }
-  }) + "'>" + document.fileName + '</a>' + '</li>').reduce((acc, val) => acc + val));
+  })}">${document.fileName}</a></li>`).reduce((acc, val) => acc + val));
 }
 
 /**
@@ -147,11 +148,11 @@ function rerenderDtaFiles(dtaDocuments, domPositionId) {
  * @param domPositionId position in the DOM of the file list
  */
 function rerenderDataTransferFiles(transferDocuments, domPositionId) {
-  const dtaFilesList = $('#transferDocuments-' + domPositionId);
+  const dtaFilesList = $(`#transferDocuments-${domPositionId}`);
 
-  dtaFilesList.html(transferDocuments.map((document) => "<li><a href='" + $.otp.createLink({
+  dtaFilesList.html(transferDocuments.map((document) => `<li><a href="${$.otp.createLink({
     controller: 'dataTransfer',
     action: 'downloadDataTransferDocument',
     parameters: { 'dataTransferDocument.id': document.id }
-  }) + "'>" + document.fileName + '</a>' + '</li>').reduce((acc, val) => acc + val));
+  })}">${document.fileName}</a></li>`).reduce((acc, val) => acc + val));
 }

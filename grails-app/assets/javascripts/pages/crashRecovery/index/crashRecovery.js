@@ -53,8 +53,9 @@ $.otp.crashRecovery.createListView = function () {
       rowData;
     for (i = 0; i < json.aaData.length; i += 1) {
       rowData = json.aaData[i];
-      rowData[0] = '<input type="checkbox" name="processingStep"' +
-          ' value="' + rowData[0] + '" ' + (rowData[5] ? 'checked' : '') + ' />';
+      rowData[0] = `<input type="checkbox" 
+                           name="processingStep" 
+                           value="${rowData[0]}" ${(rowData[5] ? 'checked' : '')} />`;
       rowData[1] = $.otp.createLinkMarkup({
         controller: 'processes',
         action: 'plan',
@@ -109,7 +110,7 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
               controller: target.controller,
               action: target.action,
               parameters: { ids }
-            }), 'parameters=' + JSON.stringify(parameters), (response) => {
+            }), `parameters=${JSON.stringify(parameters)}`, (response) => {
               $('#crashRecoveryTable').dataTable().fnDraw();
               $.otp.infoMessage(response.success);
             });

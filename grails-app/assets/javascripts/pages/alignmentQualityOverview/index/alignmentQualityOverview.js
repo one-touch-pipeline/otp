@@ -39,7 +39,7 @@ $(() => {
     if (row.withdrawn) {
       const withdrawnRows = [];
       $.each(resultTableRow, function () {
-        withdrawnRows.push("<span class='withdrawn'>" + this + ' </span>');
+        withdrawnRows.push(`<span class='withdrawn'>${this} </span>`);
       });
       resultTableRow = withdrawnRows;
     }
@@ -75,22 +75,22 @@ $(() => {
     const cssClass = [];
 
     if (tableCellData.warnColor) {
-      cssClass.push('text-' + tableCellData.warnColor);
+      cssClass.push(`text-${tableCellData.warnColor}`);
     }
     if (tableCellData.icon) {
-      cssClass.push('icon-' + tableCellData.icon);
+      cssClass.push(`icon-${tableCellData.icon}`);
     }
     if (cssClass.length !== 0) {
-      result = "<span class='" + cssClass + "'>" + result + ' </span>';
+      result = `<span class="${cssClass}">${result} </span>`;
     }
 
     if (tableCellData.tooltip) {
-      result = "<span title='" + tableCellData.tooltip + "'>" + result + '</span>';
+      result = `<span title="${tableCellData.tooltip}">${result}</span>`;
     }
     if (tableCellData.link) {
-      const target = tableCellData.linkTarget ? "target='" + tableCellData.linkTarget + "'" : '';
-      const href = "href='" + tableCellData.link + "'";
-      result = '<a ' + target + ' ' + href + '>' + result + '</a>';
+      const target = tableCellData.linkTarget ? `target="${tableCellData.linkTarget}"` : '';
+      const href = `href="${tableCellData.link}"`;
+      result = `<a ${target} ${href}>${result}</a>`;
     }
     return result;
   };
@@ -206,7 +206,7 @@ $(() => {
      */
   const initDataTable = function () {
     const table = $('#overviewTableProcessedMergedBMF');
-    const fileName = 'Alignment_Quality_Control-' + $('.selected-project-value strong').text();
+    const fileName = `Alignment_Quality_Control-${$('.selected-project-value strong').text()}`;
 
     table.DataTable({
       sDom: '<i> B rt<"clear">',
@@ -295,10 +295,10 @@ $(() => {
      */
   const changeQcStatus = function (dropdownMenu, abstractBamFileId) {
     const oldValue = $(dropdownMenu).find('option[selected]').val();
-    const statusCell = $('#status-cell-' + abstractBamFileId);
+    const statusCell = $(`#status-cell-${abstractBamFileId}`);
     const statusCellOldContent = statusCell.html();
     const rowData = getTableDataRowById(abstractBamFileId);
-    const msgSuffix = '<br><br><b>(' + rowData.pid + ', ' + rowData.sampleType + ')</b>';
+    const msgSuffix = `<br><br><b>(${rowData.pid}, ${rowData.sampleType})</b>`;
     const modalTitle = buildModalTitle(dropdownMenu.value);
 
     updateQcChangeDefaultComment(dropdownMenu.value);
@@ -307,8 +307,9 @@ $(() => {
       if (comment == null) {
         dropdownMenu.value = oldValue;
       } else {
-        statusCell.html("<div class='spinner-border spinner-border-sm' role='status'>" +
-                    "<span class='sr-only'>Loading...</span></div>");
+        statusCell.html(`<div class="spinner-border spinner-border-sm" role="status">
+                             <span class="sr-only">Loading...</span>
+                         </div>`);
 
         $.ajax({
           dataType: 'json',
@@ -327,7 +328,7 @@ $(() => {
             if (error && error.responseJSON && error.responseJSON.message) {
               $.otp.toaster.showErrorToast('Status change failed', error.responseJSON.message + msgSuffix);
             } else {
-              $.otp.toaster.showErrorToast('Status change failed', 'Unknown error.' + msgSuffix);
+              $.otp.toaster.showErrorToast('Status change failed', `Unknown error.${msgSuffix}`);
             }
             dropdownMenu.value = oldValue;
             statusCell.html(statusCellOldContent);
@@ -335,7 +336,7 @@ $(() => {
           success(result) {
             statusCell.html(tableCellFormatter(result));
             $.otp.toaster.showSuccessToast('QC Status change',
-              'Status successfully changed to ' + result.status + '.' + msgSuffix);
+              `Status successfully changed to ${result.status}.${msgSuffix}`);
           }
         });
       }
@@ -380,9 +381,9 @@ $(() => {
     let modalTitle = 'QC status';
 
     if (newQcStatus === 'ACCEPTED') {
-      modalTitle = 'Accept ' + modalTitle;
+      modalTitle = `Accept ${modalTitle}`;
     } else if (newQcStatus === 'REJECTED') {
-      modalTitle = 'Reject ' + modalTitle;
+      modalTitle = `Reject ${modalTitle}`;
     }
 
     return modalTitle;

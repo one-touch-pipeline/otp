@@ -72,20 +72,20 @@ $.otp.toaster = {
     const stateProps = this.getStateProps(state);
     const date = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
 
-    const otpToast = '<div class="toast ' + stateProps.toastClass +
-              '" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">\n' +
-              '<div class="toast-header">\n' +
-              '<span class="otp-toast-icon-wrapper text-' + state + '">' + stateProps.icon + '</span>\n' +
-              '<strong class="mr-auto">' + title + '</strong>\n' +
-              '<small class="text-muted otp-toast-time-txt">' + date + '</small>\n' +
-              '<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">\n' +
-              '<span aria-hidden="true">&times;</span>\n' +
-              '</button>\n' +
-              '</div>\n' +
-              ' <div class="toast-body">\n' +
-              '<div class="alert alert-' + state + '" role="alert">' + message + '</div>' +
-              '</div>\n' +
-              '</div>';
+    const otpToast = `<div class="toast ${stateProps.toastClass}"\
+                           role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+                        <div class="toast-header">
+                          <span class="otp-toast-icon-wrapper text-${state}">${stateProps.icon}</span>
+                          <strong class="mr-auto">${title}</strong>
+                          <small class="text-muted otp-toast-time-txt">${date}</small>
+                          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="toast-body">
+                          <div class="alert alert-${state}" role="alert">${message}</div>
+                        </div>
+                      </div>`;
 
     this.getToastBox().append(otpToast);
 

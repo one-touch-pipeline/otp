@@ -99,7 +99,7 @@ $.otp = {
           if (counter > 0) {
             link += '&';
           }
-          link += parameter + '=' + encodeURIComponent(parameters[parameter]);
+          link += `${parameter}=${encodeURIComponent(parameters[parameter])}`;
           counter += 1;
         }
       }
@@ -127,7 +127,7 @@ $.otp = {
 
     let link; let text; let title; let
       target;
-    link = '<a href="' + $.otp.createLink(options) + '"';
+    link = `<a href="${$.otp.createLink(options)}"`;
     text = '';
     if (options !== undefined && options) {
       if (options.text !== undefined && options.text) {
@@ -141,12 +141,12 @@ $.otp = {
       }
     }
     if (title !== undefined) {
-      link += ' title="' + title + '"';
+      link += ` title="${title}"`;
     }
     if (target !== undefined) {
-      link += ' target="' + target + '"';
+      link += ` target="${target}"`;
     }
-    return link + '>' + text + '</a>';
+    return `${link}>${text}</a>`;
   },
 
   createAssetLink(path) {
@@ -173,7 +173,7 @@ $.otp.message = function (message, warning) {
   $('button', button).on('click', function () {
     $(this).parent().parent().remove();
   });
-  divCode = $('<div class="' + classes + '"><p>' + message + '</p></div>');
+  divCode = $(`<div class="${classes}"><p>${message}</p></div>`);
   button.appendTo(divCode);
   divCode.append($('<div style="clear: both;"></div>'));
   $('#infoBox').append(divCode);
@@ -382,14 +382,14 @@ $.otp.simpleSearch = {
   search(element, table) {
     'use strict';
 
-    $('#' + table).dataTable().fnFilter($(element).val());
+    $(`#${table}`).dataTable().fnFilter($(element).val());
   }
 };
 
 $.otp.highlight = function (path) {
   'use strict';
 
-  const menuElement = $('.menu a[href="' + path + '"]').not('.menuLinkContainer');
+  const menuElement = $(`.menu a[href="${path}"]`).not('.menuLinkContainer');
   const menuElementParent = menuElement.parents('.nav_container');
 
   menuElement.attr('style', 'color: #fafafa;');
@@ -403,7 +403,7 @@ $.otp.resizeBodyInit = function (table, margin) {
   'use strict';
 
   $(window).on('resize', () => {
-    $(table + '_wrapper' + ' .dataTables_scrollBody').height(($('.body').height() - margin));
+    $(`${table}_wrapper .dataTables_scrollBody`).height(($('.body').height() - margin));
   });
 };
 
@@ -420,13 +420,13 @@ $.otp.resizeBodyInit = function (table, margin) {
 $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => { callback(); }) => {
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();
-  const formattedDate = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1) + '-' + date.getUTCDate();
+  const formattedDate = `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1)}-${date.getUTCDate()}`;
 
   return [{
     extend: 'csvHtml5',
     text: 'Download CSV',
     className: 'btn btn-primary',
-    title: (fileName || defaultFileName) + '_' + formattedDate,
+    title: `${(fileName || defaultFileName)}_${formattedDate}`,
     action(e, dt, button, config) {
       beforeDownload(() => {
         $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);

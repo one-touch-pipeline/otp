@@ -30,7 +30,7 @@ $.otp.workflows = {
   statusDivHtml(status) {
     'use strict';
 
-    return '<div class="' + $.otp.workflows.statusToClassName(status) + '"></div>';
+    return `<div class="${$.otp.workflows.statusToClassName(status)}"></div>`;
   },
 
   /**
@@ -76,7 +76,7 @@ $.otp.workflows = {
     'use strict';
 
     if (value) {
-      return '<span title="' + value.full + '">' + value.shortest + '</span>';
+      return `<span title="${value.full}">${value.shortest}</span>`;
     }
     return '-';
   },
@@ -92,26 +92,26 @@ $.otp.workflows = {
     let sec; let min; let hour; let
       day;
     if (msec < 1000) {
-      return msec + ' msec';
+      return `${msec} msec`;
     }
     sec = msec / 1000;
     msec %= 1000;
     if (sec < 60) {
-      return Math.floor(sec) + ' sec ' + msec + ' msec';
+      return `${Math.floor(sec)} sec ${msec} msec`;
     }
     min = sec / 60;
     sec = Math.floor(sec % 60);
     if (min < 60) {
-      return Math.floor(min) + ' min ' + sec + ' sec';
+      return `${Math.floor(min)} min ${sec} sec`;
     }
     hour = min / 60;
     min = Math.floor(min % 60);
     if (hour < 24) {
-      return Math.floor(hour) + ' h ' + min + ' min';
+      return `${Math.floor(hour)} h ${min} min`;
     }
     day = Math.floor(hour / 24);
     hour = Math.floor(hour % 24);
-    return day + ' day(s) ' + hour + ' h';
+    return `${day} day(s) ${hour} h`;
   },
   /**
      * Callback for restart ProcessingStep.
@@ -140,8 +140,11 @@ $.otp.workflows = {
     'use strict';
 
     const imageLink = $.otp.createAssetLink('redo.png');
-    return '<a id="restartProcessingStepLink"' +
-        ' onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');"' +
-        ' href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
+    return `<a id="restartProcessingStepLink" 
+               onclick="$.otp.workflows.restartProcessingStep(${id}, '${dataTable}');"
+               href="#" 
+               title="Restart">
+                <img src="${imageLink}"/>
+            </a>`;
   }
 };

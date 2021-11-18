@@ -169,7 +169,7 @@ $.otp.clusterJobJobTypeSpecific = {
       $.each(json.data, function () {
         const cOption = $('<option>', {
           value: this.id,
-          text: this.name + ' ' + this.libraryLayout
+          text: `${this.name} ${this.libraryLayout}`
         });
         seqTypeSelect.append(cOption);
         if (currentSeqType == this.id) {
@@ -286,7 +286,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
     'use strict';
 
     const json = JSON.parse(data.response);
-    RGraph.reset($('#' + id).get(0));
+    RGraph.reset($(`#${id}`).get(0));
     new RGraph.Pie({
       id,
       data: json.data,
@@ -311,7 +311,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
     'use strict';
 
     const json = JSON.parse(data.response);
-    RGraph.reset($('#' + id).get(0));
+    RGraph.reset($(`#${id}`).get(0));
     new RGraph.Line({
       id,
       data: json.data,
@@ -333,7 +333,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
     'use strict';
 
     const json = JSON.parse(data.response);
-    RGraph.reset($('#' + id).get(0));
+    RGraph.reset($(`#${id}`).get(0));
     new RGraph.Scatter({
       id,
       data: json.data,

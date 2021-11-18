@@ -31,7 +31,7 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
   $.otp.createListView(selector, $.otp.createLink({
     controller: 'processes',
     action: 'processData',
-    id: processId + '/'
+    id: `${processId}/`
   }), false, (json) => {
     json.aaData.forEach((data, index) => {
       const row = [];
@@ -39,7 +39,7 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
         controller: 'processes',
         action: 'processingStep',
         id: data.processingStep.id,
-        text: "<div style='padding: 17px 0px 17px 10px;'>" + data.processingStep.id + '</div>'
+        text: `<div style="padding: 17px 0px 17px 10px;">${data.processingStep.id}</div>`
       });
       row[1] = $.otp.workflows.statusDivHtml(data.lastUpdate.state);
       row[2] = data.processingStep.jobName;
@@ -48,7 +48,7 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
       if (data.processingStep) {
         jobClass = data.processingStep.jobClass;
       }
-      row[3] = '<span title="' + jobClass + '">' + jobClass.split('\.').pop() + '</span><br/>';
+      row[3] = `<span title="${jobClass}">${jobClass.split('.').pop()}</span><br/>`;
 
       row[4] = $.otp.workflows.renderDate(data.times.creation);
       row[5] = $.otp.workflows.renderDate(data.times.lastUpdate);

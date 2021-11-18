@@ -61,7 +61,7 @@ function updateUnixGroup(oldUnixGroup, force = false) {
       unixGroupInputField.attr('data-fixed', result.unixGroup);
       $.otp.toaster.showSuccessToast(
         'Update was successful',
-        'Unix group has successfully been changed to <b>' + result.unixGroup + '</b>.'
+        `Unix group has successfully been changed to <b>${result.unixGroup}</b>.`
       );
     },
     error(error) {

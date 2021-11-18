@@ -49,7 +49,7 @@ $(() => {
       encoding: 'UTF-8',
       success(data) {
         lastSavedComment = commentContent.val();
-        $('#authorSpan').text(data.date + ' ' + data.author);
+        $('#authorSpan').text(`${data.date} ${data.author}`);
       }
     });
   });
