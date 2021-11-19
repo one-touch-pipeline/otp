@@ -59,14 +59,14 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
                         (OtpProperty.PATH_PROJECT_ROOT): "/some/nested/root/path",
                 ])
         ])
-        ProjectCreationCommand cmd = new ProjectCreationCommand (
-                name                          : "project",
-                individualPrefix              : "individualPrefix",
-                unixGroup                     : "unixGroup",
-                directory                     : dirName,
-                projectType                   : Project.ProjectType.SEQUENCING,
-                storageUntil                  : LocalDate.now(),
-                qcThresholdHandling           : QcThresholdHandling.CHECK_AND_NOTIFY,
+        ProjectCreationCommand cmd = new ProjectCreationCommand(
+                name: "project",
+                individualPrefix: "individualPrefix",
+                unixGroup: "unixGroup",
+                directory: dirName,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: LocalDate.now(),
+                qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY,
         )
 
         when:
@@ -121,7 +121,7 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
     void "test getProjectDirectory all fine"() {
         given:
         ProjectService projectService = new ProjectService([
-                configService: new TestConfigService(),
+                configService    : new TestConfigService(),
                 fileSystemService: new TestFileSystemService(),
         ])
 
@@ -138,7 +138,7 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
     void "test getProjectDirectory project directory contains slashes"() {
         given:
         ProjectService projectService = new ProjectService([
-                configService: new TestConfigService(),
+                configService    : new TestConfigService(),
                 fileSystemService: new TestFileSystemService(),
         ])
         Project project = createProject(

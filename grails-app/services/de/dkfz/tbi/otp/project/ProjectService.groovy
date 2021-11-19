@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.OtpFileSystemException
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -49,7 +50,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.nio.file.*
-import java.nio.file.attribute.PosixFileAttributes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -302,29 +302,38 @@ class ProjectService {
     }
 
     private void createProjectDirectoryIfNeeded(Project project) {
+        Realm realm = project.realm
         Path projectDirectory = getProjectDirectory(project)
+
         if (Files.exists(projectDirectory)) {
-            PosixFileAttributes attrs = Files.readAttributes(projectDirectory, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
-            if (attrs.group().toString() == project.unixGroup) {
-                return
-            }
+            //ensure correct permission and group
+            fileService.setGroupViaBash(projectDirectory, realm, project.unixGroup)
+            fileService.setPermissionViaBash(projectDirectory, realm, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+            return
         }
-        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory.toString()), project, "0022")
-        FileService.waitUntilExists(projectDirectory)
+
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory.parent,
+                realm, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, realm, project.unixGroup)
     }
 
     private void createAnalysisDirectoryIfPossible(Project project) {
         assert project.dirAnalysis
-        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
+        Realm realm = project.realm
+        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
         Path analysisDirectory = fs.getPath(project.dirAnalysis)
         if (Files.exists(analysisDirectory)) {
+            //ensure correct permission and group
+            fileService.setGroupViaBash(analysisDirectory, realm, project.unixGroup)
+            fileService.setPermissionViaBash(analysisDirectory, realm, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
             return
         }
 
         try {
-            executeScript(buildCreateProjectDirectory(project.unixGroup, project.dirAnalysis, '2770', '2775'), project, "0002")
-            FileService.waitUntilExists(analysisDirectory)
-        } catch (AssertionError e) {
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory.parent,
+                    realm, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, realm, project.unixGroup)
+        } catch (AssertionError | FileSystemException | OtpFileSystemException e) {
             String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
             mailHelperService.sendEmailToTicketSystem(
                     header,
@@ -933,15 +942,6 @@ ${xmlConfig.replaceAll(/\$/, /\\\$/)}${md5}
 
 chmod 0440 ${configFilePath}
 
-"""
-    }
-
-    private String buildCreateProjectDirectory(String unixGroup, String projectDirectory, String permission = '2750', String initialPermission = '2755') {
-        return """\
-mkdir -p -m ${initialPermission} ${projectDirectory}
-
-chgrp -h ${unixGroup} ${projectDirectory}
-chmod ${permission} ${projectDirectory}
 """
     }
 

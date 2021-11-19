@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
@@ -36,8 +37,7 @@ import de.dkfz.tbi.otp.utils.ThreadUtils
 
 import java.nio.charset.Charset
 import java.nio.file.*
-import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.*
 import java.time.Duration
 import java.util.stream.Stream
 
@@ -70,6 +70,11 @@ class FileService {
      * The default directory permissions (2750) with setgid bit
      */
     static final String DEFAULT_DIRECTORY_PERMISSION_STRING = "2750"
+
+    /**
+     * The directory permissions allowing all to access (2755) with setgid bit
+     */
+    static final String DIRECTORY_WITH_OTHER_PERMISSION_STRING = "2755"
 
     /**
      * The directory permissions only accessible for owner (2700) with setgid bit
@@ -362,8 +367,11 @@ class FileService {
     void setPermission(Path path, Set<PosixFilePermission> permissions) {
         assert path
         assert Files.exists(path)
-
-        Files.setPosixFilePermissions(path, permissions)
+        try {
+            Files.setPosixFilePermissions(path, permissions)
+        } catch (IOException | UnsupportedOperationException | ClassCastException | SecurityException e) {
+            throw new ChangeFilePermissionException("Failed to change permission to ${permissions} for path ${path}", e)
+        }
 
         assert Files.getPosixFilePermissions(path) == permissions
     }
@@ -383,11 +391,17 @@ class FileService {
 
     private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, Realm realm, String groupString, String permissions) {
         if (Files.exists(path)) {
-            assert Files.isDirectory(path): "The path ${path} already exist, but is not a directory"
+            if (!Files.isDirectory(path)) {
+                throw new CreateDirectoryException("The path ${path} already exist, but is not a directory")
+            }
         } else {
             createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, realm, groupString, permissions)
 
-            createDirectoryHandlingParallelCreationOfSameDirectory(path)
+            try {
+                createDirectoryHandlingParallelCreationOfSameDirectory(path)
+            } catch (IOException e) {
+                throw new CreateDirectoryException("Failed to create directory ${path}", e)
+            }
 
             // chgrp needs to be done before chmod, as chgrp resets setgid and setuid
             if (groupString) {
@@ -402,7 +416,11 @@ class FileService {
     }
 
     void setPermissionViaBash(Path path, Realm realm, String permissions) {
-        remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+        try {
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+        } catch (ProcessingException | AssertionError e) {
+            throw new ChangeFilePermissionException("Failed to change permission to ${permissions} for path ${path}", e)
+        }
     }
 
     String getPermissionViaBash(Path path, Realm realm, LinkOption... options) {
@@ -411,7 +429,11 @@ class FileService {
     }
 
     void setGroupViaBash(Path path, Realm realm, String groupString) {
-        remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+        try {
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+        } catch (ProcessingException | AssertionError e) {
+            throw new ChangeFileGroupException("Failed to change group to ${groupString} for path ${path}", e)
+        }
     }
 
     /**

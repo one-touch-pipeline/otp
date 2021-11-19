@@ -24,14 +24,14 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.*
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
@@ -52,7 +52,21 @@ class FileServiceSpec extends Specification implements DataTest {
             PosixFilePermission.GROUP_EXECUTE,
     ].toSet().asImmutable()
 
-    @Shared
+    static private final Set<PosixFilePermission> PERMISSIONS_OWNER = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+    ].toSet().asImmutable()
+
+    static private final Set<PosixFilePermission> PERMISSIONS_OWNER_GROUP = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_WRITE,
+            PosixFilePermission.GROUP_EXECUTE,
+    ].toSet().asImmutable()
+
     FileService fileService = new FileService()
 
     @Rule
@@ -96,6 +110,21 @@ class FileServiceSpec extends Specification implements DataTest {
         permission << PosixFilePermission.values()
     }
 
+    void "setPermission, if permission can't be changed, then throw ChangeFilePermissionException"() {
+        given:
+        mockRemoteShellHelper()
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Set<PosixFilePermission> permissions = ['invalid'] as Set
+
+        when:
+        fileService.setPermission(basePath, permissions)
+
+        then:
+        ChangeFilePermissionException e = thrown()
+        e.message.contains(basePath.toString())
+        e.message.contains('invalid')
+    }
+
     @Unroll
     void "setPermissionViaBash, if permission set to #permissionString, then path has expected permissionPosix"() {
         given:
@@ -114,8 +143,24 @@ class FileServiceSpec extends Specification implements DataTest {
         permissionString || permissionPosix
         '500'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE]
         '550'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE]
-        '700'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE]
-        '2700'           || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE]
+        '700'            || PERMISSIONS_OWNER
+        '2700'           || PERMISSIONS_OWNER
+    }
+
+    void "setPermissionViaBash, if permission can't be changed, then throw ChangeFilePermissionException"() {
+        given:
+        String permissionString = HelperUtils.uniqueString
+        mockRemoteShellHelper()
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Realm realm = new Realm()
+
+        when:
+        fileService.setPermissionViaBash(basePath, realm, permissionString)
+
+        then:
+        ChangeFilePermissionException e = thrown()
+        e.message.contains(basePath.toString())
+        e.message.contains(permissionString)
     }
 
     @Unroll
@@ -138,6 +183,22 @@ class FileServiceSpec extends Specification implements DataTest {
         ]
     }
 
+    void "setGroupViaBash, if group is set to unknown group, then throw ChangeFileGroupException"() {
+        given:
+        mockRemoteShellHelper()
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Realm realm = new Realm()
+        String group = HelperUtils.uniqueString
+
+        when:
+        fileService.setGroupViaBash(basePath, realm, group)
+
+        then:
+        ChangeFileGroupException e = thrown()
+        e.message.contains(basePath.toString())
+        e.message.contains(group)
+    }
+
     private void assertDirectory(Path path) {
         assert Files.exists(path)
         assert Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)
@@ -155,6 +216,73 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !permissions.contains(PosixFilePermission.OTHERS_READ)
         assert !permissions.contains(PosixFilePermission.OTHERS_WRITE)
         assert !permissions.contains(PosixFilePermission.OTHERS_EXECUTE)
+    }
+
+    void "createDirectoryRecursivelyAndSetPermissionsViaBash, if path does not exist, then create it and set group and permission"() {
+        given:
+        mockRemoteShellHelper()
+        TestConfigService configService = new TestConfigService()
+
+        Realm realm = new Realm()
+        String group = firstGroup ? configService.testingGroup : configService.workflowProjectUnixGroup
+
+        Path filePath = temporaryFolder.newFolder().toPath()
+        Path directory1 = filePath.resolve('directory1')
+        Path directory2 = directory1.resolve('directory2')
+        Path directory3 = directory2.resolve('directory3')
+
+        when:
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory3, realm, group, permission)
+
+        then:
+        [
+                directory1,
+                directory2,
+                directory3,
+        ].each {
+            assert Files.exists(it)
+            assert Files.isDirectory(it)
+            assert Files.getPosixFilePermissions(it) == permissionPosix
+            assert Files.getFileAttributeView(it, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group
+        }
+
+        where:
+        firstGroup | permission || permissionPosix
+        true       | '700'      || PERMISSIONS_OWNER
+        true       | '770'      || PERMISSIONS_OWNER_GROUP
+        false      | '700'      || PERMISSIONS_OWNER
+        false      | '770'      || PERMISSIONS_OWNER_GROUP
+    }
+
+    @Unroll
+    void "createDirectoryRecursivelyAndSetPermissionsViaBash, when #name, then throw #exception"() {
+        given:
+        mockRemoteShellHelper()
+        TestConfigService configService = new TestConfigService()
+
+        Realm realm = new Realm()
+        String group = validGroup ? configService.testingGroup : HelperUtils.randomMd5sum
+
+        Path filePath = temporaryFolder.newFolder().toPath()
+        Path directory = filePath.resolve(directoryName)
+
+        CreateFileHelper.createFile(filePath.resolve('file'))
+
+        when:
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory, realm, group, permission)
+
+        then:
+        OtpFileSystemException e = thrown()
+        e.class == exception
+        e.message.contains(filePath.toString())
+
+        where:
+        name                          | directoryName | validGroup | permission               || exception
+        'directory is file'           | 'file'        | true       | '666'                    || CreateDirectoryException
+        'directory based on file'     | 'file/dir'    | true       | '666'                    || CreateDirectoryException
+        'directory has no permission' | 'dir/dir'     | true       | '000'                    || CreateDirectoryException
+        'group change fail'           | 'dir/dir'     | false      | '666'                    || ChangeFileGroupException
+        'permission change fail'      | 'dir/dir'     | true       | HelperUtils.randomMd5sum || ChangeFilePermissionException
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -315,7 +443,7 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
-    void "createFileWithContent, if a parent of path is a file, then throw assertion"() {
+    void "createFileWithContent, if a parent of path is a file, then throw CreateDirectoryException"() {
         given:
         mockRemoteShellHelper()
         Path filePath = temporaryFolder.newFile().toPath()
@@ -327,7 +455,7 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
 
         then:
-        thrown(AssertionError)
+        thrown(CreateDirectoryException)
     }
 
     private void assertFile(Path path) {
@@ -411,7 +539,7 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
-    void "createFileWithContent (byte), if a parent of path is a file, then throw assertion"() {
+    void "createFileWithContent (byte), if a parent of path is a file, then throw CreateDirectoryException"() {
         given:
         mockRemoteShellHelper()
         Path filePath = temporaryFolder.newFile().toPath()
@@ -423,7 +551,7 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
 
         then:
-        thrown(AssertionError)
+        thrown(CreateDirectoryException)
     }
 
     //----------------------------------------------------------------------------------------------------

@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
-import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -111,6 +111,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
             }
         }
+        projectService.fileService = new FileService()
         projectService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             _ * executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
                 return new ProcessOutput(command, '', 0)
@@ -154,30 +155,42 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject valid input"() {
         given:
         setupData()
+
         String unixGroup = configService.testingGroup
+        Path projectPath = configService.rootPath.toPath().resolve(dirName)
+        projectService.fileService = Mock(FileService) {
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
+            0 * _
+        }
+
+        if (dirAnalysis) {
+            dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
+            Path analysisPath = Paths.get(dirAnalysis)
+            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup)
+        }
 
         when:
         Project project
-        if (dirAnalysis) {
-            dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
-        }
+
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name                          : name,
-                dirName                       : dirName,
-                individualPrefix              : 'individualPrefix',
-                dirAnalysis                   : dirAnalysis,
-                relatedProjects               : relatedProjects,
+                name: name,
+                dirName: dirName,
+                individualPrefix: 'individualPrefix',
+                dirAnalysis: dirAnalysis,
+                relatedProjects: relatedProjects,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
-                qcThresholdHandling           : qcThresholdHandling,
-                unixGroup                     : unixGroup,
-                projectGroup                  : projectGroup,
-                nameInMetadataFiles           : nameInMetadataFiles,
-                forceCopyFiles                : forceCopyFiles,
-                description                   : description,
-                processingPriority            : createProcessingPriority(priority: processingPriority),
-                projectType                   : Project.ProjectType.SEQUENCING,
-                storageUntil                  : LocalDate.now(),
-                publiclyAvailable             : false,
+                qcThresholdHandling: qcThresholdHandling,
+                unixGroup: unixGroup,
+                projectGroup: projectGroup,
+                nameInMetadataFiles: nameInMetadataFiles,
+                forceCopyFiles: forceCopyFiles,
+                description: description,
+                processingPriority: createProcessingPriority(priority: processingPriority),
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: LocalDate.now(),
+                publiclyAvailable: false,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -229,19 +242,25 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         null                || "P1"
     }
 
-    void "test createProject if directories are created"() {
+    void "test createProject, when directories does not exist yet, create it"() {
         given:
         setupData()
-        String group = configService.testingGroup
+        String unixGroup = configService.testingGroup
+
+        String dirName = 'projectDir/projectSubDir'
+        Path projectPath = configService.rootPath.toPath().resolve(dirName)
+        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir/analysisSubDir')
+        projectService.fileService = Mock(FileService)
+
+        Project project
 
         when:
-        Project project
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
-                dirName: 'dir',
+                dirName: dirName,
                 individualPrefix: 'individualPrefix',
-                dirAnalysis: "${temporaryFolder.newFolder()}/dirA",
-                unixGroup: group,
+                dirAnalysis: analysisPath.toString(),
+                unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
@@ -257,40 +276,81 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        File projectDirectory = LsdfFilesService.getPath(
-                configService.rootPath.absolutePath,
-                project.dirName,
-        )
-        projectDirectory.exists()
-        PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
-        attrs.group().toString() == group
-        TestCase.assertContainSame(attrs.permissions(),
-                [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE])
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup)
+        0 * projectService.fileService._
 
-        and:
-        File projectDirAnalysis = LsdfFilesService.getPath(
-                project.dirAnalysis,
+        project
+    }
+
+    void "test createProject, when directories already exist, then change permission and group"() {
+        given:
+        setupData()
+        String unixGroup = configService.testingGroup
+
+        String dirName = 'projectDir/subDir'
+        Path projectPath = configService.rootPath.toPath().resolve(dirName)
+        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir/subDir')
+        projectService.fileService = Mock(FileService)
+
+        Files.createDirectories(projectPath)
+        Files.createDirectories(analysisPath)
+
+        Project project
+
+        when:
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
+                name: 'project',
+                dirName: dirName,
+                individualPrefix: 'individualPrefix',
+                dirAnalysis: analysisPath.toString(),
+                unixGroup: unixGroup,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                forceCopyFiles: false,
+                description: '',
+                processingPriority: createProcessingPriority(),
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: LocalDate.now(),
         )
-        projectDirAnalysis.exists()
-        PosixFileAttributes dirAnalysisAttrs = Files.readAttributes(projectDirAnalysis.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
-        dirAnalysisAttrs.group().toString() == group
-        TestCase.assertContainSame(dirAnalysisAttrs.permissions(),
-                [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_WRITE, PosixFilePermission.GROUP_EXECUTE])
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            project = projectService.createProject(projectParams)
+        }
+
+        then:
+        1 * projectService.fileService.setGroupViaBash(projectPath, _, unixGroup)
+        1 * projectService.fileService.setPermissionViaBash(projectPath, _, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+        1 * projectService.fileService.setGroupViaBash(analysisPath, _, unixGroup)
+        1 * projectService.fileService.setPermissionViaBash(analysisPath, _, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+        0 * projectService.fileService._
+
+        project
     }
 
     void "test createProject when dirAnalysis can not be created, sends email"() {
         given:
         setupData()
-        String group = configService.testingGroup
+        String unixGroup = configService.testingGroup
+
+        String exceptionMessage = "message ${nextId}"
+        String dirName = 'projectDir'
+        Path projectPath = configService.rootPath.toPath().resolve(dirName)
+        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir')
+        projectService.fileService = Mock(FileService)
+
+        Project project
 
         when:
-        Project project
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
-                dirName: 'dir',
+                dirName: dirName,
                 individualPrefix: 'individualPrefix',
-                dirAnalysis: "${temporaryFolder.newFolder()}/dirA",
-                unixGroup: group,
+                dirAnalysis: analysisPath.toString(),
+                unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
@@ -304,16 +364,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
                 assert emailSubject == "Could not automatically create analysisDir '${projectParams.dirAnalysis}' for Project '${projectParams.name}'."
-                assert content.contains("mkdir: cannot create directory ‘${projectParams.dirAnalysis}’: Permission denied")
-            }
-        }
-        projectService.remoteShellHelper = Stub(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { Realm realm2, String command ->
-                File script = temporaryFolder.newFile('script.sh')
-                script.text = command
-                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
-            } >> { Realm realm2, String command ->
-                return new ProcessOutput(stderr: "mkdir: cannot create directory ‘${projectParams.dirAnalysis}’: Permission denied".toString(), exitCode: 1)
+                assert content.contains(exceptionMessage)
             }
         }
 
@@ -322,10 +373,15 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        File projectDirAnalysis = LsdfFilesService.getPath(
-                project.dirAnalysis,
-        )
-        !projectDirAnalysis.exists()
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup) >> {
+            throw new OtpFileSystemException(exceptionMessage)
+        }
+        0 * projectService.fileService._
+
+        project
     }
 
     @Unroll
@@ -333,6 +389,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         String group = configService.testingGroup
+
+        projectService.fileService = Mock(FileService) {
+            0 * _
+        }
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
@@ -370,14 +430,22 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test createProject invalid unix group"() {
-        when:
+        given:
         setupData()
+        String unixGroup = configService.testingGroup
+        String exceptionMessage = "message ${nextId}"
+        String dirName = 'projectDir'
+        Path projectPath = configService.rootPath.toPath().resolve(dirName)
+        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir')
+        projectService.fileService = Mock(FileService)
+
+        when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
-                dirName: 'dir',
+                dirName: dirName,
                 individualPrefix: 'individualPrefix',
-                dirAnalysis: "${temporaryFolder.newFolder()}/dirA",
-                unixGroup: 'invalidValue',
+                dirAnalysis: analysisPath.toString(),
+                unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
@@ -393,14 +461,21 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        AssertionError e = thrown()
-        e.message.contains('Expected exit code to be 0, but it is 1')
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING) >> {
+            throw new ChangeFileGroupException(exceptionMessage)
+        }
+        0 * projectService.fileService._
+        then:
+        thrown(ChangeFileGroupException)
     }
 
     void "test createProject with invalid dirAnalysis"() {
         given:
         setupData()
         String group = configService.testingGroup
+        projectService.fileService = Mock(FileService) {
+            0 * _
+        }
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
@@ -427,66 +502,16 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         e.message.contains("dirAnalysis")
     }
 
-    void "test createProject valid input, when directory with wrong unix group already exists"() {
+    void "test createProject, when a project file is given, then create the directory and upload the file"() {
         given:
         setupData()
-        String group = configService.testingGroup
-        File projectDirectory = LsdfFilesService.getPath(
-                configService.rootPath.absolutePath,
-                "/dir",
-        )
+        String unixGroup = configService.testingGroup
 
-        when:
-        new File("${projectDirectory}").mkdirs()
+        String dirName = 'projectDir/projectSubDir'
+        Path projectPath = configService.rootPath.toPath().resolve(dirName)
+        Path analysisPath = temporaryFolder.newFolder().toPath().resolve('analysisDir/analysisSubDir')
+        projectService.fileService = Mock(FileService)
 
-        then:
-        projectDirectory.exists()
-        String mkdirGroup = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group()
-        assert mkdirGroup != group : "Cannot test this if OTP property \"otp.testing.group\" is also the user's primary group." +
-                " Please update your .otp.properties to use a different group that is not your primary group!"
-
-        when:
-        ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                dirName: 'dir',
-                individualPrefix: 'individualPrefix',
-                dirAnalysis: "${temporaryFolder.newFolder()}/dirA",
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: createProcessingPriority(),
-                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
-        )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.createProject(projectParams)
-        }
-
-        then:
-        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() == group
-    }
-
-    void "test createProject valid input, when directory with correct unix group already exists and project file, then do not create the directory and upload file"() {
-        given:
-        setupData()
-        File projectDirectory = LsdfFilesService.getPath(
-                configService.rootPath.absolutePath,
-                "/dir",
-        )
-        String analysisDir = "${temporaryFolder.newFolder()}/dirA"
-        projectService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
-                assert command.contains("mkdir -p -m 2775 ${analysisDir}")
-
-                File script = temporaryFolder.newFile('script.sh')
-                script.text = command
-                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero()
-            }
-        }
         projectService.projectInfoService = Mock(ProjectInfoService) {
             1 * createProjectInfoAndUploadFile(_, _)
         }
@@ -494,19 +519,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         mockMultipartFile.originalFilename = FILE_NAME
 
         when:
-        new File("${projectDirectory}").mkdirs()
-        String group = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group()
-
-        then:
-        projectDirectory.exists()
-
-        when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
-                dirName: 'dir',
+                dirName: dirName,
                 individualPrefix: 'individualPrefix',
-                dirAnalysis: analysisDir,
-                unixGroup: group,
+                dirAnalysis: analysisPath.toString(),
+                unixGroup: unixGroup,
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 forceCopyFiles: false,
@@ -523,7 +541,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() == group
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, _, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, _, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, _, unixGroup)
+        0 * projectService.fileService._
     }
 
     void "test updateNameInMetadata valid input"() {
@@ -1362,12 +1384,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         assert pipeline: "Pipeline could not be found"
 
         DomainFactory.createRoddyWorkflowConfig(
-                project       : baseProject,
-                seqType       : seqType,
-                pipeline      : pipeline,
+                project: baseProject,
+                seqType: seqType,
+                pipeline: pipeline,
                 configFilePath: baseXmlConfigFile,
                 programVersion: "${pluginName}:${programVersion}",
-                configVersion : configVersion,
+                configVersion: configVersion,
         )
 
         DomainFactory.createReferenceGenomeProjectSeqType(
@@ -1786,13 +1808,13 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 messageSourceService: Stub(MessageSourceService) {
                     createMessage("notification.projectCreation.subject", [projectName: project.displayName]) >> "subject"
                     createMessage("notification.projectCreation.message", [
-                            projectName               : project.displayName,
-                            linkProjectConfig         : 'link',
-                            projectFolder             : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
-                            analysisFolder            : project.dirAnalysis,
-                            linkUserManagementConfig  : 'link',
-                            clusterName               : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
-                            teamSignature             : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                            projectName             : project.displayName,
+                            linkProjectConfig       : 'link',
+                            projectFolder           : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
+                            analysisFolder          : project.dirAnalysis,
+                            linkUserManagementConfig: 'link',
+                            clusterName             : processingOptionService.findOptionAsString(OptionName.CLUSTER_NAME),
+                            teamSignature           : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                     ]) >> "body"
                 },
                 mailHelperService: Mock(MailHelperService),
