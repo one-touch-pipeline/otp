@@ -514,6 +514,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     private static TableCellValue generateQcStatusCell(AbstractMergedBamFile abstractMergedBamFile) {
         TableCellValue.Icon icon = [
                 (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) : TableCellValue.Icon.WARNING,
+                (AbstractMergedBamFile.QcTrafficLightStatus.WARNING) : TableCellValue.Icon.WARNING,
                 (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED): TableCellValue.Icon.ERROR,
         ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
         String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
