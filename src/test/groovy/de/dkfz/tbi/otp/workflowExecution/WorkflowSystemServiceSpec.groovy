@@ -28,6 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 
 class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest<WorkflowSystemService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -107,6 +108,9 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
         service.propertiesValidationService = Mock(PropertiesValidationService) {
             _ * validateProcessingOptions() >> []
         }
+        service.workflowBeanNameService = Mock(WorkflowBeanNameService) {
+            _ * findWorkflowBeanNamesNotSet() >> []
+        }
         service.jobService = Mock(JobService)
         service.workflowStepService = Mock(WorkflowStepService)
         WorkflowStep workflowStep = createWorkflowStep()
@@ -142,6 +146,26 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
         service.enabled
     }
 
+    void "check if exception is thrown, when bean name is not set properly"() {
+        given:
+        service.propertiesValidationService = Mock(PropertiesValidationService) {
+            _ * validateProcessingOptions() >> []
+        }
+        service.workflowBeanNameService = Mock(WorkflowBeanNameService) {
+            _ * findWorkflowBeanNamesNotSet() >> [ 'Wfl' ]
+        }
+
+        when:
+        service.startWorkflowSystem()
+
+        then:
+        thrown WorkflowException
+
+        expect:
+        !service.hasRunAfterStart()
+        !service.enabled
+    }
+
     private void createEmptyMockedServices() {
         service.propertiesValidationService = Mock(PropertiesValidationService) {
             _ * validateProcessingOptions() >> []
@@ -151,6 +175,9 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
         }
         service.workflowStepService = Mock(WorkflowStepService) {
             _ * runningWorkflowSteps() >> []
+        }
+        service.workflowBeanNameService = Mock(WorkflowBeanNameService) {
+            _ * findWorkflowBeanNamesNotSet() >> []
         }
     }
 
@@ -166,6 +193,9 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
             _ * runningWorkflowSteps() >> {
                 throw new OtpRuntimeException(FAILED)
             }
+        }
+        service.workflowBeanNameService = Mock(WorkflowBeanNameService) {
+            _ * findWorkflowBeanNamesNotSet() >> []
         }
 
         try {

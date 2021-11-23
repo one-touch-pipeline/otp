@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.WorkflowBeanNameService
 
 @Rollback
 @Integration
@@ -64,6 +65,9 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
         setupData()
         shutdownService.workflowSystemService.propertiesValidationService = Mock(PropertiesValidationService) {
             1 * validateProcessingOptions() >> []
+        }
+        shutdownService.workflowSystemService.workflowBeanNameService = Mock(WorkflowBeanNameService) {
+            1 * findWorkflowBeanNamesNotSet() >> []
         }
         Errors errors
 

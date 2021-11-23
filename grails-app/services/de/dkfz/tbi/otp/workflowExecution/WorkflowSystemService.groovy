@@ -33,6 +33,7 @@ class WorkflowSystemService {
     JobService jobService
     PropertiesValidationService propertiesValidationService
     WorkflowStepService workflowStepService
+    WorkflowBeanNameService workflowBeanNameService
 
     private boolean firstStart = true
 
@@ -47,6 +48,13 @@ class WorkflowSystemService {
         List<OptionProblem> validationResult = propertiesValidationService.validateProcessingOptions()
         if (!validationResult.isEmpty()) {
             throw new WorkflowException(validationResult.join("\n"))
+        }
+
+        List<String> implementedWorkflowsMissingBeanName =
+                workflowBeanNameService.findWorkflowBeanNamesNotSet()
+        if (!implementedWorkflowsMissingBeanName.empty) {
+            throw new WorkflowException(
+                "Following implemented workflows don't have a bean name stored in the database: ${implementedWorkflowsMissingBeanName.join(', ')}")
         }
 
         if (firstStart) {
