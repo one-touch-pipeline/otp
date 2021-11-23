@@ -1540,6 +1540,43 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.getProjectUsersToBeNotified(createProject()) == []
     }
 
+    void "projectsAssociatedToProjectAuthority, returns all projects associated to project Authorities inside a users project"() {
+        given:
+        setupData()
+        User user = createUser()
+        User projectAuthority1 = createUser()
+        User projectAuthority2 = createUser()
+        List<Project> projects = [createProject(), createProject(), createProject()]
+        ProjectRole projectRolePI = ProjectRole.findByName(ProjectRole.Basic.PI.name())
+        projects.each { project -> createUserProjectRole([project: project, user: user]) }
+        createUserProjectRole([
+                project     : projects[0],
+                projectRoles: [projectRolePI],
+                user        : projectAuthority1,
+        ])
+        createUserProjectRole([
+                project     : projects[1],
+                projectRoles: [projectRolePI],
+                user        : projectAuthority1,
+        ])
+        createUserProjectRole([
+                project     : projects[1],
+                projectRoles: [projectRolePI],
+                user        : projectAuthority2,
+        ])
+        createUserProjectRole([
+                project     : projects[2],
+                projectRoles: [projectRolePI],
+                user        : projectAuthority2,
+        ])
+
+        expect:
+        userProjectRoleService.projectsAssociatedToProjectAuthority(user) == [
+                (projectAuthority1): [projects[0], projects[1]],
+                (projectAuthority2): [projects[1], projects[2]]
+        ]
+    }
+
     void "getMails, converts all objects, regardless of notification status"() {
         given:
         setupData()

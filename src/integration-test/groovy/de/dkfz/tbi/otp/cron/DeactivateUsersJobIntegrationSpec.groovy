@@ -29,20 +29,24 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Rollback
 @Integration
-class DeactivateUsersJobIntegrationSpec extends Specification implements DomainFactoryCore {
+class DeactivateUsersJobIntegrationSpec extends Specification implements DomainFactoryCore, UserDomainFactory {
 
     void "getUsersToCheck, only returns users with a username and plannedDeactivationDate before now"() {
         given:
         Date date = new Date(System.currentTimeMillis() + dateOffset * 24 * 60 * 60 * 1000)
-        User user = DomainFactory.createUser(username: username, plannedDeactivationDate: date)
+        User user = createUser(username: username, plannedDeactivationDate: date)
 
         expect:
         TestCase.assertContainSame(found ? [user] : [], DeactivateUsersJob.usersToCheck)
@@ -90,12 +94,44 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         ])
 
         expect:
-        job.notifyAdministration(DomainFactory.createUser(), groups as Set<String>)
+        job.notifyAdministration(createUser(), groups as Set<String>)
 
         where:
         groups     | expectedContent
         ["A", "B"] | "TODO"
         []         | "DONE"
+    }
+
+    void "notifyProjectAuthoritiesOfUsersProjects, send notification mail to all project authorities of a users projects"() {
+        given:
+        DeactivateUsersJob job = new DeactivateUsersJob([
+                processingOptionService: Mock(ProcessingOptionService),
+                mailHelperService      : Mock(MailHelperService),
+                messageSourceService   : Mock(MessageSourceService),
+                userProjectRoleService : Mock(UserProjectRoleService),
+        ])
+        String body = "mail body"
+        String subject = "mail subject"
+        User projectAuthority1 = createUser()
+        User projectAuthority2 = createUser()
+        User user = createUser()
+        List<Project> projects = [createProject(), createProject(), createProject()]
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "30")
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, value: "OTP team")
+
+        when:
+        job.notifyProjectAuthoritiesOfUsersProjects(user)
+
+        then:
+        1 * job.userProjectRoleService.projectsAssociatedToProjectAuthority(_) >> [
+                (projectAuthority1): [projects[0], projects[1]],
+                (projectAuthority2): [projects[1], projects[2]]
+        ]
+        2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.subject" , _) >> subject
+        2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.body", _) >> body
+        1 * job.mailHelperService.sendEmail(subject, body, projectAuthority1.email, [user.email]) >> { }
+        1 * job.mailHelperService.sendEmail(subject, body, projectAuthority2.email, [user.email]) >> { }
+        0 * job.mailHelperService.sendEmail(_)
     }
 
     void "disableUserAndNotify, disables given user and sends notification mail"() {
@@ -105,7 +141,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                ldapService: Mock(LdapService) {
+                ldapService            : Mock(LdapService) {
                     _ * getGroupsOfUser(_) >> { return ["group"] }
                 },
                 userService: new UserService(),
@@ -118,11 +154,11 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
             isUserInLdapAndActivated(_) >> false
         }
 
-        User user = DomainFactory.createUser()
+        User user = createUser()
         List<UserProjectRole> userProjectRoles = [
-                DomainFactory.createUserProjectRole(user: user),
-                DomainFactory.createUserProjectRole(user: user),
-                DomainFactory.createUserProjectRole(user: user, enabled: false, accessToOtp: false, receivesNotifications: false),
+                createUserProjectRole(user: user),
+                createUserProjectRole(user: user),
+                createUserProjectRole(user: user, enabled: false, accessToOtp: false, receivesNotifications: false),
         ]
 
         when:
@@ -159,9 +195,9 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
 
         Closure<User> createUserWithProjectsHelper = { String username, int offset ->
             Date date = new Date(System.currentTimeMillis() + offset * 24 * 60 * 60 * 1000)
-            User user = DomainFactory.createUser(username: username, plannedDeactivationDate: date)
-            DomainFactory.createUserProjectRole(user: user)
-            DomainFactory.createUserProjectRole(user: user, enabled: false)
+            User user = createUser(username: username, plannedDeactivationDate: date)
+            createUserProjectRole(user: user)
+            createUserProjectRole(user: user, enabled: false)
             return user
         }
 

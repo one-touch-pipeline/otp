@@ -28,10 +28,13 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 /**
  * Scheduled job that checks for all users which are scheduled to be deactivated if their time has come.
@@ -55,6 +58,9 @@ class DeactivateUsersJob extends ScheduledJob {
 
     @Autowired
     UserService userService
+
+    @Autowired
+    MessageSourceService messageSourceService
 
     static List<User> getUsersToCheck() {
         return User.createCriteria().list {
@@ -89,6 +95,29 @@ class DeactivateUsersJob extends ScheduledJob {
         mailHelperService.sendEmailToTicketSystem(subject, body)
     }
 
+    void notifyProjectAuthoritiesOfUsersProjects(User deactivatedUser) {
+        userProjectRoleService.projectsAssociatedToProjectAuthority(deactivatedUser).each { User projectAuthority, List<Project> projects ->
+            notifyProjectAuthority(deactivatedUser, projectAuthority, projects)
+        }
+    }
+
+    private void notifyProjectAuthority(User deactivatedUser, User projectAuthority, List<Project> projects) {
+        String recipient = projectAuthority.email
+        List<String> ccs = [deactivatedUser.email]
+        String subject = messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.subject", [
+                deactivatedUser: deactivatedUser.username,
+        ])
+        String body = messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.body", [
+                addressedUser          : "${projectAuthority.realName}",
+                deactivatedUser        : "${deactivatedUser.realName} (${deactivatedUser.username})",
+                deactivationGracePeriod: processingOptionService.findOptionAsString(ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD),
+                supportTeamSalutation  : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                projects               : projects*.name.sort().join('\n\t- '),
+        ])
+        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        log.info("Sent mail to ${recipient} concerning the deactivation of ${deactivatedUser.username}")
+    }
+
     boolean isInGroup(User user, String unixGroup) {
         return unixGroup in ldapService.getGroupsOfUser(user)
     }
@@ -103,6 +132,7 @@ class DeactivateUsersJob extends ScheduledJob {
             }
         }
         userService.setPlannedDeactivationDateOfUser(user, null)
+        notifyProjectAuthoritiesOfUsersProjects(user)
         notifyAdministration(user, affectedUnixGroups)
     }
 

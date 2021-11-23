@@ -32,8 +32,10 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDateTime
 
@@ -69,6 +71,12 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
 
     @Autowired
     UserService userService
+
+    @Autowired
+    MessageSourceService messageSourceService
+
+    @Autowired
+    UserProjectRoleService userProjectRoleService
 
     List<User> getUsersToCheckForDeactivation() {
         List<User> enabledProjectUsers = UserProjectRole.withCriteria {
@@ -109,6 +117,7 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
 
     private void resetPlannedDeactivationDateOfUser(User user) {
         userService.setPlannedDeactivationDateOfUser(user, null)
+        sendReactivationMails(user)
         log.info("Reset deactivation date of ${user}")
     }
 
@@ -147,7 +156,6 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         |OTP on behalf of ${otpServiceSalutation}
         |""".stripMargin()
 
-
         mailHelperService.sendEmail(subject, body, authority.email)
 
         log.info("Sent deactivation mail to ${authority} concerning the following users: ${invalidUsers}")
@@ -173,6 +181,27 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
                 sendDeactivationMailForService(invalidUsers)
             }
         }
+    }
+
+    void sendReactivationMails(User reactivatedUser) {
+        userProjectRoleService.projectsAssociatedToProjectAuthority(reactivatedUser).each { User projectAuthority, List<Project> projects ->
+            sendReactivationMailForAuthority(reactivatedUser, projectAuthority, projects)
+        }
+    }
+
+    private void sendReactivationMailForAuthority(User reactivatedUser, User projectAuthority, List<Project> projects) {
+        String recipient = projectAuthority.email
+        List<String> ccs = [reactivatedUser.email]
+        String subject = messageSourceService.createMessage("scheduledUsersForDeactivationJob.notification.userReactivated.subject", [
+                reactivatedUser: reactivatedUser.username,
+        ])
+        String body = messageSourceService.createMessage("scheduledUsersForDeactivationJob.notification.userReactivated.body", [
+                addressedUser        : "${projectAuthority.realName}",
+                reactivatedUser      : "${reactivatedUser.realName} (${reactivatedUser.username})",
+                supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                projects             : projects*.name.sort().join('\n\t- '),
+        ])
+        mailHelperService.sendEmail(subject, body, recipient, ccs)
     }
 
     ActionPlan buildActionPlan() {

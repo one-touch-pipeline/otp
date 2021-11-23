@@ -33,25 +33,27 @@ import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.*
 
 @Rollback
 @Integration
-class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification implements DomainFactoryCore, UserAndRoles {
+class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification implements DomainFactoryCore, UserAndRoles, UserDomainFactory {
 
     void "getUsersToCheckForDeactivation, returns a unique list of all internal users with an active UserProjectRole"() {
         given:
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob()
 
-        User userA = DomainFactory.createUser()
-        User userB = DomainFactory.createUser()
-        User userC = DomainFactory.createUser()
+        User userA = createUser()
+        User userB = createUser()
+        User userC = createUser()
         [
                 [userA, true],
                 [userA, true],
@@ -59,7 +61,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                 [userB, true],
                 [userC, false],
         ].each { List<?> properties ->
-            DomainFactory.createUserProjectRole(
+            createUserProjectRole(
                     user: properties[0],
                     enabled: properties[1],
             )
@@ -84,7 +86,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
         ])
-        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "${offset}")
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "${offset}")
 
         Date result
 
@@ -99,8 +101,9 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         given:
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob(
                 userService: new UserService(),
+                userProjectRoleService: new UserProjectRoleService(),
         )
-        User user = DomainFactory.createUser(plannedDeactivationDate: date)
+        User user = createUser(plannedDeactivationDate: date)
 
         when:
         job.resetPlannedDeactivationDateOfUser(user)
@@ -116,15 +119,15 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         given:
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob()
 
-        User userA = DomainFactory.createUser(username: "a", realName: "RealNameA")
+        User userA = createUser(username: "a", realName: "RealNameA")
         Set<UserProjectRole> userProjectRolesA = [
-                DomainFactory.createUserProjectRole(user: userA),
-                DomainFactory.createUserProjectRole(user: userA),
+                createUserProjectRole(user: userA),
+                createUserProjectRole(user: userA),
         ] as Set<UserProjectRole>
 
-        User userB = DomainFactory.createUser(username: "b", realName: "RealNameB")
+        User userB = createUser(username: "b", realName: "RealNameB")
         Set<UserProjectRole> userProjectRolesB = [
-                DomainFactory.createUserProjectRole(user: userB),
+                createUserProjectRole(user: userB),
         ] as Set<UserProjectRole>
 
         String result
@@ -141,16 +144,16 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
 
     void "sendDeactivationMails, sends one for each authority user and a single one for the service"() {
         given:
-        User userA = DomainFactory.createUser()
-        User userB = DomainFactory.createUser()
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
+        User userA = createUser()
+        User userB = createUser()
+        UserProjectRole userProjectRole = createUserProjectRole()
 
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: Mock(ProcessingOptionService) {
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                configService: Mock(TestConfigService) {
+                configService          : Mock(TestConfigService) {
                     _ * getClock() >> { return Clock.fixed(Instant.ofEpochSecond(0), ZoneId.systemDefault()) }
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
@@ -169,13 +172,42 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         job.sendDeactivationMails(map)
     }
 
+    void "sendReactivationMails, sends one mail for each authority in the users projects"() {
+        given:
+        ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
+                processingOptionService: Mock(ProcessingOptionService) {
+                    _ * findOptionAsString(_) { return "option" }
+                },
+                mailHelperService      : Mock(MailHelperService),
+                userProjectRoleService : Mock(UserProjectRoleService),
+                messageSourceService   : Mock(MessageSourceService) {
+                    _ * createMessage(_) { return "message" }
+                },
+        ])
+        List<Project> projects = [createProject(), createProject(), createProject()]
+        User user = createUser()
+        User projectAuthorityA = createUser()
+        User projectAuthorityB = createUser()
+
+        when:
+        job.sendReactivationMails(user)
+
+        then:
+        1 * job.userProjectRoleService.projectsAssociatedToProjectAuthority(user) >> [
+                (projectAuthorityA): [projects[0], projects[1], projects[2]],
+                (projectAuthorityB): [projects[1]],
+        ]
+        1 * job.mailHelperService.sendEmail(_, _, projectAuthorityA.email, [user.email]) >> { }
+        1 * job.mailHelperService.sendEmail(_, _, projectAuthorityB.email, [user.email]) >> { }
+    }
+
     void "buildActionPlan, correctly groups users"() {
         given:
         createAllBasicProjectRoles()
         List<User> expiredUsers = []
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: new ProcessingOptionService(),
-                ldapService: Mock(LdapService) {
+                ldapService            : Mock(LdapService) {
                     _ * isUserDeactivated(_) >> { User user ->
                         return user in expiredUsers
                     }
@@ -186,18 +218,18 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         Closure<List<UserProjectRole>> createProjectWithUsersHelper = { List<Map> propertyList ->
             Project project = createProject()
             return propertyList.collect { Map properties ->
-                DomainFactory.createUserProjectRole([project: project] + properties)
+                createUserProjectRole([project: project] + properties)
             }
         }
 
-        User pi1 = DomainFactory.createUser()
-        User pi2 = DomainFactory.createUser()
+        User pi1 = createUser()
+        User pi2 = createUser()
 
-        User expiredUserA = DomainFactory.createUser()
-        User expiredUserB = DomainFactory.createUser()
-        User expiredUserC = DomainFactory.createUser()
-        User expiredAndScheduledUser = DomainFactory.createUser(plannedDeactivationDate: new Date())
-        User notExpiredAndScheduledUser = DomainFactory.createUser(plannedDeactivationDate: new Date())
+        User expiredUserA = createUser()
+        User expiredUserB = createUser()
+        User expiredUserC = createUser()
+        User expiredAndScheduledUser = createUser(plannedDeactivationDate: new Date())
+        User notExpiredAndScheduledUser = createUser(plannedDeactivationDate: new Date())
 
         expiredUsers.addAll([
                 expiredUserA,
@@ -248,32 +280,33 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
     void "executeActionPlan, executes changes as expected"() {
         given:
         createAllBasicProjectRoles()
-        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "10")
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "10")
 
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: new ProcessingOptionService(),
-                configService: Mock(TestConfigService) {
+                configService          : Mock(TestConfigService) {
                     _ * getClock() >> { return Clock.fixed(Instant.ofEpochSecond(0), ZoneId.systemDefault()) }
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
-                mailHelperService: Mock(MailHelperService) {
+                mailHelperService      : Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { }
                     1 * sendEmailToTicketSystem(_, _) >> { }
                 },
-                userService: new UserService(),
-                linkGenerator: Mock(LinkGenerator) {
+                userService            : new UserService(),
+                userProjectRoleService : new UserProjectRoleService(),
+                linkGenerator          : Mock(LinkGenerator) {
                     _ * link(_) >> { return "generated_link" }
                 },
         ])
 
-        User user = DomainFactory.createUser()
+        User user = createUser()
 
         ActionPlan actionPlan = new ActionPlan()
-        actionPlan.usersToSetDate = (0..1).collect { DomainFactory.createUser() }
-        actionPlan.usersToResetDate = (0..1).collect { DomainFactory.createUser(plannedDeactivationDate: new Date()) }
+        actionPlan.usersToSetDate = (0..1).collect { createUser() }
+        actionPlan.usersToResetDate = (0..1).collect { createUser(plannedDeactivationDate: new Date()) }
         actionPlan.notificationMap = [
-                (user): [DomainFactory.createUserProjectRole()] as Set,
-                (null): [DomainFactory.createUserProjectRole()] as Set,
+                (user): [createUserProjectRole()] as Set,
+                (null): [createUserProjectRole()] as Set,
         ]
 
         when:
@@ -290,11 +323,11 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         ActionPlan plan = new ActionPlan()
 
         Project project = createProject()
-        UserProjectRole uprA = DomainFactory.createUserProjectRole(project: project, projectRoles: [pi])
-        UserProjectRole uprB = DomainFactory.createUserProjectRole(project: project, projectRoles: [pi])
-        DomainFactory.createUserProjectRole(project: project, projectRoles: [bioinformatician])
-        DomainFactory.createUserProjectRole(project: project, enabled: false)
-        DomainFactory.createUserProjectRole(project: project, user: DomainFactory.createUser(username: null))
+        UserProjectRole uprA = createUserProjectRole(project: project, projectRoles: [pi])
+        UserProjectRole uprB = createUserProjectRole(project: project, projectRoles: [pi])
+        createUserProjectRole(project: project, projectRoles: [bioinformatician])
+        createUserProjectRole(project: project, enabled: false)
+        createUserProjectRole(project: project, user: createUser(username: null))
 
         expect:
         [uprB]*.user.sort() == plan.getValidAuthorityUsers(uprA).sort()
@@ -306,10 +339,10 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         ActionPlan plan = new ActionPlan()
 
         Project project = createProject()
-        UserProjectRole upr = DomainFactory.createUserProjectRole(project: project, projectRoles: [pi])
-        DomainFactory.createUserProjectRole(project: project, projectRoles: [bioinformatician])
-        DomainFactory.createUserProjectRole(project: project, enabled: false)
-        DomainFactory.createUserProjectRole(project: project, user: DomainFactory.createUser(username: null))
+        UserProjectRole upr = createUserProjectRole(project: project, projectRoles: [pi])
+        createUserProjectRole(project: project, projectRoles: [bioinformatician])
+        createUserProjectRole(project: project, enabled: false)
+        createUserProjectRole(project: project, user: createUser(username: null))
 
         expect:
         [] == plan.getValidAuthorityUsers(upr)

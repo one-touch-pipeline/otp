@@ -96,6 +96,21 @@ class UserProjectRoleService {
         }
     }
 
+    Map<User, List<Project>> projectsAssociatedToProjectAuthority(User user) {
+        List<Project> allProjects = UserProjectRole.findAllByUser(user)*.project.unique()
+        Map<User, List<Project>> projectAuthoritiesWithProjects = [:]
+        allProjects.each { project ->
+            getProjectAuthorities(project).each { projectAuthority ->
+                if (projectAuthoritiesWithProjects.containsKey(projectAuthority)) {
+                    projectAuthoritiesWithProjects[projectAuthority] << project
+                } else {
+                    projectAuthoritiesWithProjects.put(projectAuthority, [project])
+                }
+            }
+        }
+        return projectAuthoritiesWithProjects
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map flags = [:])
             throws AssertionError {
@@ -603,7 +618,7 @@ class UserProjectRoleService {
     }
 
     static List<User> getProjectAuthorities(Project project) {
-        UserProjectRole.createCriteria().list {
+        return UserProjectRole.createCriteria().list {
             eq("project", project)
             eq("enabled", true)
             user {
