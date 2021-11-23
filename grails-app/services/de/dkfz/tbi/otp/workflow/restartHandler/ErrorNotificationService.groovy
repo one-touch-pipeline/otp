@@ -224,7 +224,7 @@ class ErrorNotificationService {
                 message << "Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.eligible)}"
                 message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.started)}"
                 message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.ended)}"
-                message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.standardHours : 'na'}"
+                message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.toHours() : 'na'}"
                 message << "Requested walltime: ${clusterJob.requestedWalltime}"
                 message << "Log file: ${clusterJob.jobLog}"
                 message << "Log page: ${grailsLinkGenerator.link(controller: 'clusterJobDetail', action: 'show', id: clusterJob.id, absolute: 'true')}"
