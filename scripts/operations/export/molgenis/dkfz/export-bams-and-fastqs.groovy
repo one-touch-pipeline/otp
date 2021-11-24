@@ -69,6 +69,9 @@ enum DataFileColumns {
     PID("PID", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.individual.pid
     }),
+    SPECIES("Species list", { DataFile dataFile, Map properties = [:] ->
+        return  dataFile.individual.species ? ([dataFile.individual.species.name] + dataFile.sample.mixedInSpecies).join(', ') : ""
+    }),
     COMMON_NAME("Species Common Name", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.species*.speciesCommonName*.name.join(', ')
     }),
