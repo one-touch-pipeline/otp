@@ -215,16 +215,22 @@ class RoddyConfigService {
     private static final JsonSchema FILENAMES_SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(FILENAMES_SCHEMA)
     private static final ObjectMapper MAPPER = new ObjectMapper()
 
-    static boolean validateRoddyConfig(String value) {
+    static Set<String> validateRoddyConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = SCHEMA_VALIDATOR.validate(node)
-        return errors.empty
+        Set<String> errorsString = errors.collect { error ->
+            return "RODDY." + error.message.drop(2)
+        }
+        return errorsString
     }
 
-    static boolean validateRoddyFilenamesConfig(String value) {
+    static Set<String> validateRoddyFilenamesConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
         Set<ValidationMessage> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)
-        return errors.empty
+        Set<String> errorsString = errors.collect { error ->
+            return "RODDY_FILENAMES." + error.message.drop(2)
+        }
+        return errorsString
     }
 
     String createRoddyXmlConfig(
@@ -267,44 +273,45 @@ class RoddyConfigService {
                 specificConfig.sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
                     cvalue(name: conf.key, value: conf.value)
                 }
-                combinedConfigJson.RODDY.cvalues.fields().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
-                    cvalue(name: conf.key, value: conf.value.value.asText(), type: conf.value.has("type") ? conf.value.type.textValue() : null)
+                combinedConfigJson.get("RODDY").get("cvalues").fields().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { conf ->
+                    cvalue(name: conf.key, value: conf.value.get('value').asText(), type: conf.value.has("type") ? conf.value.get('type').textValue() : null)
                 }
             }
             processingTools {
-                combinedConfigJson.RODDY.resources.fields().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { resource ->
+                combinedConfigJson.get("RODDY").get("resources").fields()
+                        .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key) }.each { resource ->
                     tool(
                             name: resource.key,
-                            value: resource.value.value.textValue(),
-                            basepath: resource.value.basepath.textValue(),
+                            value: resource.value.get("value").textValue(),
+                            basepath: resource.value.get("basepath").textValue(),
                             overrideresourcesets: "true",
                     ) {
                         resourcesets {
                             rset(
                                     size: "l",
                                     queue: queue,
-                                    memory: resource.value.has("memory") ? resource.value.memory.textValue() : null,
-                                    cores: resource.value.has("cores") ? resource.value.cores.intValue() : null,
-                                    nodes: resource.value.has("nodes") ? resource.value.nodes.intValue() : null,
-                                    walltime: resource.value.has("walltime") ? resource.value.walltime.textValue() : null,
+                                    memory: resource.value.has("memory") ? resource.value.get("memory").textValue() : null,
+                                    cores: resource.value.has("cores") ? resource.value.get("cores").intValue() : null,
+                                    nodes: resource.value.has("nodes") ? resource.value.get("nodes").intValue() : null,
+                                    walltime: resource.value.has("walltime") ? resource.value.get("walltime").textValue() : null,
                             )
                         }
                     }
                 }
             }
             filenames(package: "de.dkfz.b080.co.files", filestagesbase: "de.dkfz.b080.co.files.COFileStage") {
-                combinedConfigJson.RODDY_FILENAMES.filenames.elements()
+                combinedConfigJson.get("RODDY_FILENAMES").get("filenames").elements()
                         .sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.findValue("class").textValue(), b.findValue("class").textValue()) }
                         .each { fileName ->
                             filename(
                                     "class": fileName.findValue("class").textValue(),
-                                    derivedFrom: fileName.has("derivedFrom") ? fileName.derivedFrom.textValue() : null,
-                                    fileStage: fileName.has("fileStage") ? fileName.fileStage.textValue() : null,
-                                    onMethod: fileName.has("onMethod") ? fileName.onMethod.textValue() : null,
-                                    onScriptParameter: fileName.has("onScriptParameter") ? fileName.onScriptParameter.textValue() : null,
-                                    onTool: fileName.has("onTool") ? fileName.onTool.textValue() : null,
-                                    pattern: fileName.pattern.textValue(),
-                                    selectiontag: fileName.has("selectiontag") ? fileName.selectiontag.textValue() : null,
+                                    derivedFrom: fileName.has("derivedFrom") ? fileName.get("derivedFrom").textValue() : null,
+                                    fileStage: fileName.has("fileStage") ? fileName.get("fileStage").textValue() : null,
+                                    onMethod: fileName.has("onMethod") ? fileName.get("onMethod").textValue() : null,
+                                    onScriptParameter: fileName.has("onScriptParameter") ? fileName.get("onScriptParameter").textValue() : null,
+                                    onTool: fileName.has("onTool") ? fileName.get("onTool").textValue() : null,
+                                    pattern: fileName.get("pattern").textValue(),
+                                    selectiontag: fileName.has("selectiontag") ? fileName.get("selectiontag").textValue() : null,
                             )
                         }
             }

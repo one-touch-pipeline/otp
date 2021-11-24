@@ -56,9 +56,9 @@ class ExternalWorkflowConfigFragmentSpec extends Specification implements DataTe
         ''                                   || false | "invalid.json"
         '{a:b:c }'                           || false | "invalid.json"
         '{a:b}'                              || false | "wrong.type"
-        '{OTP_CLUSTER: {}}'                  || false | "invalid.configs"
-        '{OTP_CLUSTER: {a:"b"}}'             || false | "invalid.configs"
-        '{OTP_CLUSTER: {CORES: "5", a:"b"}}' || false | "invalid.configs"
+        '{OTP_CLUSTER: {}}'                  || false | "errors.json"
+        '{OTP_CLUSTER: {a:"b"}}'             || false | "errors.json"
+        '{OTP_CLUSTER: {CORES: "5", a:"b"}}' || false | "errors.json"
     }
 
     void "test validation for valid Roddy config values"() {
@@ -123,7 +123,7 @@ class ExternalWorkflowConfigFragmentSpec extends Specification implements DataTe
         ], false)
 
         expect:
-        TestCase.assertAtLeastExpectedValidateError(fragment, "configValues", "invalid.configs", configValues)
+        TestCase.assertAtLeastExpectedValidateError(fragment, "configValues", "errors.json", configValues)
 
         where:
         config << [
@@ -206,7 +206,7 @@ class ExternalWorkflowConfigFragmentSpec extends Specification implements DataTe
         ], false)
 
         expect:
-        TestCase.assertAtLeastExpectedValidateError(fragment, "configValues", "invalid.configs", configValues)
+        TestCase.assertAtLeastExpectedValidateError(fragment, "configValues", "errors.json", configValues)
 
         where:
         config << [

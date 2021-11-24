@@ -104,12 +104,12 @@ class ClusterJobSubmissionOptionsService {
         }
     }
 
-    static boolean validateJsonString(String s) {
+    static String validateJsonString(String s) {
         try {
             convertJsonStringToMap(s)
-            return true
+            return null
         } catch (Exception e) {
-            return false
+            return e.message
         }
     }
 }

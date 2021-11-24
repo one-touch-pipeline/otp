@@ -102,11 +102,11 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
         if (invalidTypes) {
             return ["wrong.type", invalidTypes.join(", "), Type.values()*.name().join(", ")]
         }
-        List<String> invalidConfigs = jsonElement.collect { k, v ->
-            Type t = Type.valueOf(k as String)
-            return (t.validateConfig && !t.validateConfig(v.toString())) ? k as String : ""
+        Set<String> occurredErrors = jsonElement.collectMany { key, value ->
+            Type type = Type.valueOf(key as String)
+            return type.validateConfig(value.toString())
         }.findAll()
-        return invalidConfigs ? ["invalid.configs", invalidConfigs.join(",")] : true
+        return occurredErrors ? ["errors.json", occurredErrors.join(", ")] : true
     }
 
     /**
@@ -116,11 +116,19 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     @TupleConstructor
     enum Type {
         /** used for jobs that are submitted directly to cluster by OTP */
-        OTP_CLUSTER({ String s -> ClusterJobSubmissionOptionsService.validateJsonString(s) }),
-        WORKFLOWS({ true }),
-        RODDY( { String s -> RoddyConfigService.validateRoddyConfig(s) }),
-        RODDY_FILENAMES( { String s -> RoddyConfigService.validateRoddyFilenamesConfig(s) }),
+        OTP_CLUSTER({ String s ->
+            String validation = ClusterJobSubmissionOptionsService.validateJsonString(s)
+            if (validation) {
+                Set<String> validationSet = []
+                validationSet.add(validation)
+                return validationSet
+            }
+            return Collections.<String> emptySet()
+        }),
+        WORKFLOWS({ Collections.<String> emptySet() }),
+        RODDY({ String s -> RoddyConfigService.validateRoddyConfig(s) }),
+        RODDY_FILENAMES({ String s -> RoddyConfigService.validateRoddyFilenamesConfig(s) }),
 
-        final Closure<Boolean> validateConfig
+        final Closure<Set<String>> validateConfig
     }
 }

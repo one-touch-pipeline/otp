@@ -40,7 +40,7 @@ class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test validateOptionString, valid string"() {
         expect:
-        ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
+        !ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
 
         where:
         jsonString                           | _
@@ -52,7 +52,7 @@ class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test validateOptionString, invalid string"() {
         expect:
-        !ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
+        ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
 
         where:
         jsonString                           | _
