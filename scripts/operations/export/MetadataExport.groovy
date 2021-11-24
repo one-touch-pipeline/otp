@@ -462,6 +462,17 @@ class MetaDataExport {
 
         put(SWAPPED, seqTrack.swapped.toString())
 
+        List<String> speciesList = []
+        if (dataFile.individual.species) {
+            speciesList.add(dataFile.individual.species.name)
+        }
+        if (dataFile.sample.mixedInSpecies) {
+            dataFile.sample.mixedInSpecies.each {
+                speciesList.add(it.name)
+            }
+        }
+        put(SPECIES, speciesList ? speciesList.unique().join(' + ') : '')
+
         return properties
     }
 
