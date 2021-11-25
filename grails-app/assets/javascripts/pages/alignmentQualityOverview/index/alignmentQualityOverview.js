@@ -171,8 +171,8 @@ $(() => {
     } else if (seqType === 'CELL_RANGER') {
       columnNames = columnNames.concat([
         { data: 'summary' },
-        { data: 'referenceGenome' },
         { data: 'cellRangerVersion' },
+        { data: 'referenceGenome' },
         { data: 'expectedCells' },
         { data: 'enforcedCells' },
         { data: 'estimatedNumberOfCells' },

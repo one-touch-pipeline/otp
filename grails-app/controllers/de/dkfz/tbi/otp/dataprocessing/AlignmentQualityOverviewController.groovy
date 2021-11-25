@@ -27,6 +27,7 @@ import grails.validation.Validateable
 import org.springframework.http.HttpStatus
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -38,11 +39,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.TimeFormats
 
-import java.nio.file.AccessDeniedException
-import java.nio.file.FileSystem
-import java.nio.file.Files
-import java.nio.file.NoSuchFileException
-import java.nio.file.Path
+import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -132,8 +129,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     private static final List<String> HEADER_CELL_RANGER = HEADER_COMMON + [
             'alignment.quality.cell.ranger.summary',
-            'alignment.quality.cell.ranger.referenceGenome',
             'alignment.quality.cell.ranger.cellRangerVersion',
+            'alignment.quality.cell.ranger.referenceGenome',
             'alignment.quality.cell.ranger.cells.expected',
             'alignment.quality.cell.ranger.cells.enforced',
             'alignment.quality.cell.ranger.estimatedNumberOfCells',
@@ -176,6 +173,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     QcThresholdService qcThresholdService
     QcTrafficLightService qcTrafficLightService
     ProcessingOptionService processingOptionService
+    CellRangerConfigurationService cellRangerConfigurationService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -470,8 +468,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                                             ],
                                     ).toString()
                             ),
-                            referenceGenome  : abstractMergedBamFile.workPackage.referenceGenome.name,
-                            cellRangerVersion: abstractMergedBamFile.workPackage.referenceGenomeIndex.indexToolVersion,
+                            referenceGenome  : abstractMergedBamFile.workPackage.referenceGenomeIndex.toString(),
+                            cellRangerVersion: cellRangerConfigurationService.getWorkflowConfig(project).programVersion,
                     ]
                     qcKeys += [
                             'expectedCells',
