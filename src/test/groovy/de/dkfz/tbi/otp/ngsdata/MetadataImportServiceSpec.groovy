@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -48,6 +49,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonNameService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -67,7 +70,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class MetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest {
+class MetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest, TaxonomyFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -620,6 +623,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         def (String platform1, String platform2) = ["platform1", "platform2"]
         def (String model1, String model2) = ["model1", "model2"]
         def (String kit1, String kit2) = ["kit1", "kit2"]
+        def (String species1, String species2, String species3) = ["human", "mouse", "chicken"]
         def (String target1, String target2) = ["target1", "target2"]
         def (String single, String paired) = [SequencingReadType.SINGLE, SequencingReadType.PAIRED]
         def (String parse, String scParse, String get) = ["parse_me", "sc_parse_me", "in_db"]
@@ -654,6 +658,9 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
             )
         }
         OtrsTicket otrsTicket = createOtrsTicket(automaticNotification: true)
+        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName([name: 'human'])
+        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName([name: 'mouse'])
+        SpeciesCommonName speciesCommonName3 = createSpeciesCommonName([name: 'chicken'])
         SeqType mySeqType = DomainFactory.createWholeGenomeSeqType(SequencingReadType.SINGLE)
         SeqType mySeqTypeTag = createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: SequencingReadType.SINGLE)
         SeqType exomeSingle = DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
@@ -699,6 +706,11 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         }
 
         service.seqTrackService = Mock(SeqTrackService)
+        service.speciesCommonNameService = Mock(SpeciesCommonNameService) {
+            findByNameOrImportAlias(species1) >> speciesCommonName1 //human
+            findByNameOrImportAlias(species2) >> speciesCommonName2 //mouse
+            findByNameOrImportAlias(species3) >> speciesCommonName3 //chicken
+        }
         service.seqPlatformService = Mock(SeqPlatformService) {
             findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             findSeqPlatform(seqPlatform2.name, seqPlatform2.seqPlatformModelLabel.name, null) >> seqPlatform2
@@ -730,29 +742,30 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         DirectoryStructure directoryStructure = new MockDirectoryStructure(file: file)
 
         String metadata = """
-${FASTQ_FILE}                   ${fastq1}     ${fastq2}     ${fastq3}     ${fastq4}     ${fastq5}     ${fastq6}     ${fastq7}     ${fastq8}     ${fastq9}
-${MD5}                          ${md5a}       ${md5b}       ${md5c}       ${md5d}       ${md5e}       ${md5f}       ${md5g}       ${md5h}       ${md5i}
-${RUN_ID}                       ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName2}   ${runName1}
-${CENTER_NAME}                  ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center2}    ${center1}
-${INSTRUMENT_PLATFORM}          ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform2}  ${platform1}
-${INSTRUMENT_MODEL}             ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model2}     ${model1}
-${RUN_DATE}                     ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date2}      ${date1}
-${LANE_NO}                      4             1             1             2             2             2             3             5             1
-${INDEX}                        -             barcode8      barcode8      barcode7      barcode7      barcode6      -             -             -
-${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}     ${SC_EXON}
-${SEQUENCING_READ_TYPE}         ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
-${READ}                         1             1             2             1             2             1             1             1             1
-${SAMPLE_NAME}                  ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
-${BASE_MATERIAL}                -             -             -             -             -             -             -             -             ${scMaterial}
+${FASTQ_FILE}                   ${fastq1}                   ${fastq2}     ${fastq3}     ${fastq4}                   ${fastq5}                   ${fastq6}     ${fastq7}                 ${fastq8}                   ${fastq9}
+${MD5}                          ${md5a}                     ${md5b}       ${md5c}       ${md5d}                     ${md5e}                     ${md5f}       ${md5g}                   ${md5h}                     ${md5i}
+${RUN_ID}                       ${runName1}                 ${runName1}   ${runName1}   ${runName1}                 ${runName1}                 ${runName1}   ${runName1}               ${runName2}                 ${runName1}
+${CENTER_NAME}                  ${center1}                  ${center1}    ${center1}    ${center1}                  ${center1}                  ${center1}    ${center1}                ${center2}                  ${center1}
+${INSTRUMENT_PLATFORM}          ${platform1}                ${platform1}  ${platform1}  ${platform1}                ${platform1}                ${platform1}  ${platform1}              ${platform2}                ${platform1}
+${INSTRUMENT_MODEL}             ${model1}                   ${model1}     ${model1}     ${model1}                   ${model1}                   ${model1}     ${model1}                 ${model2}                   ${model1}
+${RUN_DATE}                     ${date1}                    ${date1}      ${date1}      ${date1}                    ${date1}                    ${date1}      ${date1}                  ${date2}                    ${date1}
+${LANE_NO}                      4                           1             1             2                           2                           2             3                         5                           1
+${INDEX}                        -                           barcode8      barcode8      barcode7                    barcode7                    barcode6      -                         -                           -
+${SEQUENCING_TYPE}              ${WG}                       ${EXON}       ${EXON}       ${CHIP_SEQ}                 ${CHIP_SEQ}                 ${CHIP_SEQ}   ${EXON}                   ${WGBS_T}                   ${SC_EXON}
+${SEQUENCING_READ_TYPE}         ${single}                   ${paired}     ${paired}     ${paired}                   ${paired}                   ${single}     ${single}                 ${single}                   ${single}
+${READ}                         1                           1             2             1                           2                           1             1                         1                           1
+${SAMPLE_NAME}                  ${parse}                    ${get}        ${get}        ${parse}                    ${parse}                    ${get}        ${parse}                  ${parse}                    ${scParse}
+${SPECIES}                      ${species1}+${species2}     ${species2}   ${species2}   ${species1}+${species2}     ${species1}+${species2}     ${species2}   ${species1}+${species2}   ${species1}+${species2}     ${species1}+${species2}
+${BASE_MATERIAL}                -                           -             -             -                           -                           -             -                         -                           ${scMaterial}
 """
         if (includeOptional) {
             metadata += """
-${FRAGMENT_SIZE}                -             -             -             234           234           -             456           -             -
-${FASTQ_GENERATOR}              -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
-${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -             ${kit2}
-${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -             -
-${ANTIBODY}                     -             -             -             antibody1     antibody1     -             -             -             -
-${ILSE_NO}                      -             1234          1234          -             -             2345          -             -             -
+${FRAGMENT_SIZE}                -                           -             -             234                         234                         -             456                       -                           -
+${FASTQ_GENERATOR}              -                           pipeline1     pipeline1     -                           -                           -             pipeline2                 -                           -
+${LIB_PREP_KIT}                 -                           ${kit1}       ${kit1}       ${kit2}                     ${kit2}                     UNKNOWN       UNKNOWN                   -                           ${kit2}
+${ANTIBODY_TARGET}              -                           -             -             target1                     target1                     target2       -                         -                           -
+${ANTIBODY}                     -                           -             -             antibody1                   antibody1                   -             -                         -                           -
+${ILSE_NO}                      -                           1234          1234          -                           -                           2345          -                         -                           -
 """
         }
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -836,6 +849,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                 libraryPreparationKit: null,
         ))
         seqTrack1.ilseId == null
+        seqTrack1.individual.species == speciesCommonName1
+        seqTrack1.sample.mixedInSpecies.size() == 1
+        seqTrack1.sample.mixedInSpecies.first() == speciesCommonName2
         DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
@@ -867,6 +883,8 @@ ${ILSE_NO}                      -             1234          1234          -     
                     libraryPreparationKit: libraryPreparationKit1,
             ))
             assert seqTrack2.ilseId == 1234
+            assert seqTrack2.individual.species == speciesCommonName2
+            assert seqTrack2.sample.mixedInSpecies.size() == 0
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq2,
                     vbpFileName: fastq2,
@@ -900,6 +918,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     antibody: 'antibody1',
             ))
             assert seqTrack3.ilseId == null
+            assert seqTrack3.individual.species == speciesCommonName1
+            assert seqTrack3.sample.mixedInSpecies.size() == 1
+            assert seqTrack3.sample.mixedInSpecies.first() == speciesCommonName2
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq4,
                     vbpFileName: fastq4,
@@ -933,6 +954,8 @@ ${ILSE_NO}                      -             1234          1234          -     
                     antibody: null,
             ))
             assert seqTrack4.ilseId == 2345
+            assert seqTrack4.individual.species == speciesCommonName2
+            assert seqTrack4.sample.mixedInSpecies.size() == 0
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq6,
                     vbpFileName: fastq6,
@@ -955,6 +978,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     libraryPreparationKit: null,
             ))
             assert seqTrack5.ilseId == null
+            assert seqTrack5.individual.species == speciesCommonName1
+            assert seqTrack5.sample.mixedInSpecies.size() == 1
+            assert seqTrack5.sample.mixedInSpecies.first() == speciesCommonName2
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq7,
                     vbpFileName: fastq7,
@@ -977,6 +1003,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     libraryPreparationKit: null,
             ))
             assert seqTrack6.ilseId == null
+            assert seqTrack6.individual.species == speciesCommonName1
+            assert seqTrack6.sample.mixedInSpecies.size() == 1
+            assert seqTrack6.sample.mixedInSpecies.first() == speciesCommonName2
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun2DataFileProperties + [
                     fileName   : fastq8,
                     vbpFileName: fastq8,
@@ -999,6 +1028,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     libraryPreparationKit: libraryPreparationKit2,
             ))
             assert seqTrack7.ilseId == null
+            assert seqTrack7.individual.species == speciesCommonName1
+            assert seqTrack7.sample.mixedInSpecies.size() == 1
+            assert seqTrack7.sample.mixedInSpecies.first() == speciesCommonName2
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq9,
                     vbpFileName: fastq9,
@@ -1044,11 +1076,16 @@ ${ILSE_NO}                      -             1234          1234          -     
         String dateString = TimeFormats.DATE.getFormattedDate(date)
         String fastq1 = "fastq_1.gz"
         String fastq2 = "fastq_2.gz"
+        String species1 = "human"
+        String species2 = "mouse"
+        String species3 = "chicken"
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
 
         DomainFactory.createAllAnalysableSeqTypes()
-
+        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName([name: species1])
+        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName([name: species2])
+        SpeciesCommonName speciesCommonName3 = createSpeciesCommonName([name: species3])
         SeqType seqTypeWithAntibodyTarget = createSeqType([
                 libraryLayout    : SequencingReadType.PAIRED,
                 hasAntibodyTarget: true,
@@ -1091,7 +1128,11 @@ ${ILSE_NO}                      -             1234          1234          -     
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             findByNameOrImportAlias(antibodyTarget.name) >> antibodyTarget
         }
-
+        service.speciesCommonNameService = Mock(SpeciesCommonNameService) {
+            findByNameOrImportAlias(species1) >> speciesCommonName1 //human
+            findByNameOrImportAlias(species2) >> speciesCommonName2 //mouse
+            findByNameOrImportAlias(species3) >> speciesCommonName3 //chicken
+        }
         mockAdditionalServices(service)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
@@ -1118,6 +1159,7 @@ ${SAMPLE_NAME}                  ${sampleIdentifier.name}                    ${sa
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
 ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+${SPECIES}                      ${species1}+${species2}+${species3}         ${species1}+${species2}+${species3}
 """
 
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -1179,6 +1221,8 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         ))
         seqTrack.ilseId == null
         seqTrack.antibodyTarget == antibodyTarget
+        seqTrack.individual.species == speciesCommonName1
+        seqTrack.sample.mixedInSpecies.size() == 2
 
         Map commonRunDataFileProperties = [
                 pathName           : '',
@@ -1219,11 +1263,14 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         String fastq2 = "fastq_r2.gz"
         String fastqIndex1 = "fastq_i1.gz"
         String fastqIndex2 = "fastq_i2.gz"
+        String species1 = "human"
+        String species2 = "mouse"
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
         String md5sumIndex1 = HelperUtils.randomMd5sum
         String md5sumIndex2 = HelperUtils.randomMd5sum
-
+        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName([name: species1])
+        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName([name: species2])
         DomainFactory.createAllAnalysableSeqTypes()
         SeqType seqType = DomainFactory.createSeqTypePaired()
         SeqCenter seqCenter = createSeqCenter()
@@ -1260,7 +1307,10 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
             ]) >> seqType
             0 * _
         }
-
+        service.speciesCommonNameService = Mock(SpeciesCommonNameService) {
+            findByNameOrImportAlias(species1) >> speciesCommonName1 //human
+            findByNameOrImportAlias(species2) >> speciesCommonName2 //mouse
+        }
         mockAdditionalServices(service)
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
@@ -1282,6 +1332,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
                 (SEQUENCING_READ_TYPE): seqType.libraryLayout,
                 (SAMPLE_NAME)         : sampleIdentifier.name,
                 (FASTQ_GENERATOR)     : softwareToolIdentifier.name,
+                (SPECIES)             : species1 + '+' + species2,
         ].asImmutable()
 
         Map fastqData1 = [
@@ -1380,6 +1431,9 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         ))
         seqTrack.ilseId == null
         seqTrack.class == SeqTrack
+        seqTrack.individual.species == speciesCommonName1
+        seqTrack.sample.mixedInSpecies.size() == 1
+        seqTrack.sample.mixedInSpecies.first() == speciesCommonName2
 
         Map commonRunDataFileProperties = [
                 pathName           : '',

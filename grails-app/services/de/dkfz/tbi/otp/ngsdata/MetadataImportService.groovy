@@ -42,6 +42,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonNameService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -107,6 +109,7 @@ class MetadataImportService {
     SeqPlatformService seqPlatformService
     SeqTrackService seqTrackService
     SeqTypeService seqTypeService
+    SpeciesCommonNameService speciesCommonNameService
 
     static final int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -488,6 +491,15 @@ class MetadataImportService {
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
             SequencingReadType libLayout = SequencingReadType.getByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
+            List<String> speciesList = uniqueColumnValue(rows, SPECIES).split('[+]')*.trim()
+            SpeciesCommonName individualSpecies = speciesCommonNameService.findByNameOrImportAlias(speciesList.first())
+            List<SpeciesCommonName> sampleSpecies = []
+            if (speciesList.size() > 1) {
+                speciesList.removeAt(0)
+                speciesList.each { String s ->
+                    sampleSpecies.add(speciesCommonNameService.findByNameOrImportAlias(s))
+                }
+            }
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeRaw,
                     [libraryLayout: libLayout, singleCell: isSingleCell],
@@ -550,6 +562,26 @@ class MetadataImportService {
 
             SeqTrack seqTrack = new SeqTrack(properties)
             seqTrack.save(flush: false)
+
+            if (seqTrack.individual.species) {
+                assert seqTrack.individual.species == individualSpecies: "Individual contains value (${seqTrack.individual.species.name}) " +
+                        "that differs from sheet (${individualSpecies.name})"
+            } else {
+                seqTrack.individual.species = individualSpecies
+                seqTrack.individual.save(flush: false)
+            }
+
+            if (seqTrack.sample.mixedInSpecies) {
+                assert seqTrack.sample.mixedInSpecies.size() == sampleSpecies.size() &&
+                        seqTrack.sample.mixedInSpecies.containsAll(sampleSpecies): "Sample contains value " +
+                        "(${seqTrack.sample.mixedInSpecies*.name}) that differs from sheet (${sampleSpecies*.name})"
+            } else {
+                seqTrack.sample.mixedInSpecies = []
+                sampleSpecies.each { SpeciesCommonName speciesCommonName ->
+                    seqTrack.sample.mixedInSpecies.add(speciesCommonName)
+                    seqTrack.sample.save(flush: false)
+                }
+            }
 
             Long timeStarted = System.currentTimeMillis()
             log.debug("      dataFiles of seqtrack ${seqTrack.laneId} started ${index}/${amountOfRows}")
