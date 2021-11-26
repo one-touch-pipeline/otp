@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.DeletionService
@@ -40,6 +41,7 @@ abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implement
 
     static final String NON_OTP = 'nonOTP'
 
+    AbstractMergedBamFileService abstractMergedBamFileService
     DeletionService deletionService
     FileSystemService fileSystemService
 
@@ -48,9 +50,8 @@ abstract class WithdrawBamFileService<E extends AbstractMergedBamFile> implement
 
     @Override
     List<String> collectPaths(List<E> entities) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         return entities.collectMany {
-            Path path = fileSystem.getPath(it.baseDirectory.absolutePath)
+            Path path = abstractMergedBamFileService.getBaseDirectory(it)
             if (Files.exists(path)) {
                 Stream<Path> stream
                 try {

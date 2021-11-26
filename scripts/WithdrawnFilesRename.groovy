@@ -37,7 +37,7 @@ import java.nio.file.Path
  * in the project folder are renamed by appending "-withdrawn",
  * for analysis instances complete directories are renamed.
  */
-
+AbstractMergedBamFileService abstractMergedBamFileService = ctx.abstractMergedBamFileService
 BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
@@ -48,19 +48,19 @@ FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 Path generated_script_to_run_manually = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("withdraw").resolve("renameWithdrawnFiles.sh")
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_to_run_manually.parent, realm)
-List<File> renameFiles = []
+List<Path> renameFiles = []
 
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
     AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
     if (bamFile && bamFile.withdrawn) {
-        final File file = new File(bamFile.baseDirectory, bamFile.bamFileName)
+        final Path file = abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
         renameFiles.add(file)
 
         List<BamFilePairAnalysis> analysisInstances = findAnalysisInstanceForBamFile(bamFile)
         analysisInstances.each { BamFilePairAnalysis result ->
             assert result.withdrawn
             // rename folder containing results
-            renameFiles.add(fileService.toFile(bamFileAnalysisServiceFactoryService.getService(result).getWorkDirectory(result)))
+            renameFiles.add(bamFileAnalysisServiceFactoryService.getService(result).getWorkDirectory(result))
         }
     }
 }

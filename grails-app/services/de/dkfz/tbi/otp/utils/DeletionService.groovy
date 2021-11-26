@@ -45,6 +45,7 @@ import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
@@ -56,6 +57,7 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class DeletionService {
 
+    AbstractMergedBamFileService abstractMergedBamFileService
     AnalysisDeletionService analysisDeletionService
     CommentService commentService
     ConfigService configService
@@ -256,14 +258,14 @@ class DeletionService {
 
             AbstractBamFile latestBamFile = MergingWorkPackage.findBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)?.bamFileInProjectFolder
             if (latestBamFile) {
-                File mergingDir = latestBamFile.baseDirectory
-                if (mergingDir.exists()) {
+                Path mergingDir = abstractMergedBamFileService.getBaseDirectory(latestBamFile)
+                if (Files.exists(mergingDir)) {
                     List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
                     files.each {
                         externalMergedBamFolders.add(it.nonOtpFolder.absoluteDataManagementPath.path)
                     }
-                    mergingDir.listFiles().each {
-                        dirsToDelete.add(it.path)
+                    Files.list(mergingDir).each {
+                        dirsToDelete.add(it)
                     }
                 }
             }
@@ -372,7 +374,7 @@ class DeletionService {
             mergingWorkPackage.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            dirsToDelete << bamFile.baseDirectory
+            dirsToDelete << new File(abstractMergedBamFileService.getBaseDirectory(bamFile).toString())
             bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already

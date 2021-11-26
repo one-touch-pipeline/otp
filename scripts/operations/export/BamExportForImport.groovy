@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -114,12 +116,12 @@ class BamExportImport {
         Map<String, String> metadata
     }
 
+    AbstractMergedBamFileService abstractMergedBamFileService
     FileService fileService
-
     FileSystemService fileSystemService
+    RoddyBamFileService roddyBamFileService
 
     String inputFieldDelimiter
-
     String outputFieldDelimiter
 
     private SeqType getSeqTypeForIdentifier(String seqTypeIdentifier) {
@@ -176,8 +178,8 @@ class BamExportImport {
     }
 
     private String finalInsertSizeFile(RoddyBamFile bamFile) {
-        Path absoluteInsertSizePath = bamFile.finalInsertSizeFile.toPath()
-        Path bamFileDirectory = bamFile.baseDirectory.toPath()
+        Path absoluteInsertSizePath = roddyBamFileService.getFinalInsertSizeFile(bamFile)
+        Path bamFileDirectory = abstractMergedBamFileService.getBaseDirectory(bamFile)
         Path relativeInsertSizePath = bamFileDirectory.relativize(absoluteInsertSizePath)
         return relativeInsertSizePath.toString()
     }
@@ -269,7 +271,6 @@ class DisplaySamples {
     }
 
     String inputFieldDelimiter
-
     String outputFieldDelimiter
 
     private final Map<SeqType, String> seqTypeMap = [
@@ -359,12 +360,12 @@ class DisplaySamples {
 
 class HandleInputTypes {
 
+    AbstractMergedBamFileService abstractMergedBamFileService
     FileService fileService
-
     FileSystemService fileSystemService
+    RoddyBamFileService roddyBamFileService
 
     String inputFieldDelimiter
-
     String outputFieldDelimiter
 
     private List<String> readInput(String input) {
@@ -390,10 +391,12 @@ class HandleInputTypes {
 
     private void handleExport(List<String> input, String fileName, boolean overwriteExisting) {
         BamExportImport export = new BamExportImport([
-                fileService         : fileService,
-                fileSystemService   : fileSystemService,
-                inputFieldDelimiter : inputFieldDelimiter,
-                outputFieldDelimiter: outputFieldDelimiter,
+                abstractMergedBamFileService: abstractMergedBamFileService,
+                fileService                 : fileService,
+                fileSystemService           : fileSystemService,
+                roddyBamFileService         : roddyBamFileService,
+                inputFieldDelimiter         : inputFieldDelimiter,
+                outputFieldDelimiter        : outputFieldDelimiter,
         ])
         Path file = export.handleInput(input, fileName, overwriteExisting)
         println "Metadata exported to ${file}\n"
@@ -421,10 +424,12 @@ class HandleInputTypes {
 }
 
 HandleInputTypes export = new HandleInputTypes([
-        fileService         : ctx.fileService,
-        fileSystemService   : ctx.fileSystemService,
-        inputFieldDelimiter : inputFieldDelimiter,
-        outputFieldDelimiter: outputFieldDelimiter,
+        abstractMergedBamFileService: ctx.abstractMergedBamFileService,
+        fileService                 : ctx.fileService,
+        fileSystemService           : ctx.fileSystemService,
+        roddyBamFileService         : ctx.roddyBamFileService,
+        inputFieldDelimiter         : inputFieldDelimiter,
+        outputFieldDelimiter        : outputFieldDelimiter,
 ]).handleInput(input, fileName, overwriteExisting)
 
 println ''

@@ -185,7 +185,7 @@ enum BamColumns {
         return bamFile.id
     }),
     ALIGNMENT_DIR("Bam Path", { AbstractMergedBamFile bamFile, Map properties = [:] ->
-        return new File(bamFile.baseDirectory, bamFile.bamFileName)
+        return (properties["abstractMergedBamFileService"] as AbstractMergedBamFileService).getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
     }),
     DATE_CREATED("dateCreated", { AbstractMergedBamFile bamFile, Map properties = [:] ->
         return bamFile.dateCreated
@@ -297,6 +297,7 @@ class MolgenisExporter {
     }
 
     String exportBams(List<AbstractMergedBamFile> bams) {
+        MolgenisBam.properties["abstractMergedBamFileService"] = ctx.abstractMergedBamFileService
         return ([new MolgenisBam().headerAsCsv] + bams.collect { AbstractMergedBamFile bam -> MolgenisBam.export(bam).toCsvLine() }).join("\n")
     }
 

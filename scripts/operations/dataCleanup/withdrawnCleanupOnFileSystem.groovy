@@ -42,7 +42,7 @@ String file = ""
 
 //---------------------------------------
 //work
-
+AbstractMergedBamFileService abstractMergedBamFileService = ctx.abstractMergedBamFileService
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FileService fileService = ctx.fileService
@@ -56,11 +56,11 @@ String chgrp = "chgrp --recursive --verbose ${withdrawnGroup}"
 String bamFiles = AbstractMergedBamFile.findAllByWithdrawn(true).findAll {
     it.isMostRecentBamFile()
 }.collect {
-    it.baseDirectory
+    abstractMergedBamFileService.getBaseDirectory(it)
 }.findAll {
-    it.exists()
+    Files.exists(it)
 }.collectMany {
-    it.listFiles() as List
+    Files.list(it) as List
 }.findAll {
     !it.toString().endsWith('nonOTP')
 }.collect {

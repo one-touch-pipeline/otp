@@ -28,16 +28,12 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.DeletionService
 
-import java.nio.file.FileSystems
+import java.nio.file.Path
 
 abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> extends Specification implements ServiceUnitTest<T>, DataTest {
 
@@ -54,27 +50,28 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
 
     void "collectPaths, when called for bamFiles, then return paths in workDir, except nonOTP paths"() {
         given:
-        new TestConfigService(temporaryFolder.newFolder())
+        Path vbpPath = temporaryFolder.newFolder().toPath()
 
-        service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+        service.abstractMergedBamFileService = new AbstractMergedBamFileService()
+        service.abstractMergedBamFileService.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> vbpPath
         }
 
         List<AbstractMergedBamFile> bamFiles = (1..3).collect {
             createBamFile()
         }
-        List<File> files = bamFiles.collectMany {
-            File baseDirectory = it.baseDirectory
-            CreateFileHelper.createFile(new File(new File(baseDirectory, "nonOTP"), "file"))
+        List<Path> files = bamFiles.collectMany {
+            Path baseDirectory = service.abstractMergedBamFileService.getBaseDirectory(it)
+            CreateFileHelper.createFile(baseDirectory.resolve("nonOTP").resolve("file"))
 
             return [
                     "a", "b", "c",
             ].collect {
-                CreateFileHelper.createFile(new File(baseDirectory, it)).absolutePath
+                CreateFileHelper.createFile(baseDirectory.resolve(it))
             } + [
                     "dir1", "dir2", "dir3",
             ].collect {
-                CreateFileHelper.createFile(new File(new File(baseDirectory, it), "file")).parent
+                CreateFileHelper.createFile(baseDirectory.resolve(it).resolve("file")).parent
             }
         }
 
@@ -82,7 +79,7 @@ abstract class WithdrawBamFileServiceSpec<T extends WithdrawBamFileService> exte
         List<String> result = service.collectPaths(bamFiles)
 
         then:
-        TestCase.assertContainSame(result, files)
+        TestCase.assertContainSame(result, files*.toString())
     }
 
     void "withdrawObjects, when called for bamFiles, then mark each as withdrawn "() {

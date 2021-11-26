@@ -23,17 +23,10 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.data.SampleSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
@@ -42,6 +35,8 @@ import java.nio.file.Path
 @SuppressWarnings("JavaIoPackageAccess")
 @Transactional
 class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwapData> {
+
+    AbstractMergedBamFileService abstractMergedBamFileService
 
     @Override
     protected void logSwapParameters(SampleSwapParameters parameters) {
@@ -128,7 +123,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
                 it.mergingPass.isLatestPass() && it.mergingSet.isLatestSet()
             }
             latestProcessedMergedBamFiles.each { ProcessedMergedBamFile latestProcessedMergedBamFile ->
-                String oldProjectPathToMergedFiles = latestProcessedMergedBamFile.baseDirectory.absolutePath
+                String oldProjectPathToMergedFiles = abstractMergedBamFileService.getBaseDirectory(latestProcessedMergedBamFile)
                 data.moveFilesCommands << "rm -rf ${oldProjectPathToMergedFiles}\n"
             }
         }
