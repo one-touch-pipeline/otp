@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
@@ -41,19 +42,54 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  */
 class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentifier , ProcessParameterObject, RoddyResult {
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#WORK_DIR_PREFIX} instead
+     */
+    @Deprecated
     static final String WORK_DIR_PREFIX = ".merging"
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#QUALITY_CONTROL_DIR} instead
+     */
+    @Deprecated
     static final String QUALITY_CONTROL_DIR = "qualitycontrol"
+    /**
+     * @deprecated use {@link RoddyBamFileService#METHYLATION_DIR} instead
+     */
+    @Deprecated
     static final String METHYLATION_DIR = "methylation"
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#QUALITY_CONTROL_JSON_FILE_NAME} instead
+     */
+    @Deprecated
     static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+    /**
+     * @deprecated use {@link RoddyBamFileService#QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME} instead
+     */
+    @Deprecated
     static final String QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME = "qualitycontrol_targetExtract.json"
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#MERGED_DIR} instead
+     */
+    @Deprecated
     static final String MERGED_DIR = "merged"
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#METADATATABLE_FILE} instead
+     */
+    @Deprecated
     static final String METADATATABLE_FILE = "metadataTable.tsv"
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#INSERT_SIZE_FILE_SUFFIX} instead
+     */
     static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
+    /**
+     * @deprecated use {@link RoddyBamFileService#INSERT_SIZE_FILE_DIRECTORY} instead
+     */
+    @Deprecated
     static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
 
     RoddyBamFile baseBamFile
@@ -219,112 +255,213 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     }
 
     // Example: blood_somePid_merged.mdup.bam.md5
+    @Deprecated
     String getMd5sumFileName() {
         return "${bamFileName}.md5"
     }
 
     // Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkDirectory} instead
+     */
     @Override
+    @Deprecated
     File getWorkDirectory() {
         return new File(baseDirectory, workDirectoryName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalQADirectory} instead
+     */
+    @Deprecated
     File getFinalQADirectory() {
         return new File(baseDirectory, QUALITY_CONTROL_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkQADirectory} instead
+     */
+    @Deprecated
     File getWorkQADirectory() {
         return new File(workDirectory, QUALITY_CONTROL_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMethylationDirectory} instead
+     */
+    @Deprecated
     File getWorkMethylationDirectory() {
         return new File(workDirectory, METHYLATION_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalMethylationDirectory} instead
+     */
+    @Deprecated
     File getFinalMethylationDirectory() {
         return new File(baseDirectory, METHYLATION_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalMergedQADirectory} instead
+     */
+    @Deprecated
     File getFinalMergedQADirectory() {
         return new File(this.finalQADirectory, MERGED_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMergedQADirectory} instead
+     */
+    @Deprecated
     File getWorkMergedQADirectory() {
         return new File(this.workQADirectory, MERGED_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalLibraryQADirectories} instead
+     */
+    @Deprecated
     Map<String, File> getFinalLibraryQADirectories() {
         return getLibraryDirectories(this.finalQADirectory)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkLibraryQADirectories} instead
+     */
+    @Deprecated
     Map<String, File> getWorkLibraryQADirectories() {
         return getLibraryDirectories(this.workQADirectory)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalMergedMethylationDirectory} instead
+     */
+    @Deprecated
     File getFinalMergedMethylationDirectory() {
         return new File(this.finalMethylationDirectory, MERGED_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMergedMethylationDirectory} instead
+     */
+    @Deprecated
     File getWorkMergedMethylationDirectory() {
         return new File(this.workMethylationDirectory, MERGED_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalLibraryMethylationDirectories} instead
+     */
+    @Deprecated
     Map<String, File> getFinalLibraryMethylationDirectories() {
         return getLibraryDirectories(this.finalMethylationDirectory)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkLibraryMethylationDirectories} instead
+     */
+    @Deprecated
     Map<String, File> getWorkLibraryMethylationDirectories() {
         return getLibraryDirectories(this.workMethylationDirectory)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalMergedQAJsonFile} instead
+     */
+    @Deprecated
     File getFinalMergedQAJsonFile() {
         return new File(finalMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMergedQAJsonFile} instead
+     */
+    @Deprecated
     File getWorkMergedQAJsonFile() {
         return new File(workMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMergedQATargetExtractJsonFile} instead
+     */
+    @Deprecated
     File getWorkMergedQATargetExtractJsonFile() {
         return new File(workMergedQADirectory, QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalSingleLaneQADirectories} instead
+     */
+    @Deprecated
     Map<SeqTrack, File> getFinalSingleLaneQADirectories() {
         return getSingleLaneQADirectoriesHelper(this.finalQADirectory)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkSingleLaneQADirectories} instead
+     */
+    @Deprecated
     Map<SeqTrack, File> getWorkSingleLaneQADirectories() {
         return getSingleLaneQADirectoriesHelper(this.workQADirectory)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalSingleLaneQAJsonFiles} instead
+     */
+    @Deprecated
     Map<SeqTrack, File> getFinalSingleLaneQAJsonFiles() {
         return getSingleLaneQAJsonFiles('Final')
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkSingleLaneQAJsonFiles} instead
+     */
+    @Deprecated
     Map<SeqTrack, File> getWorkSingleLaneQAJsonFiles() {
         return getSingleLaneQAJsonFiles('Work')
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getLibraryDirectories} instead
+     */
+    @Deprecated
     private Map<String, File> getLibraryDirectories(File baseDirectory) {
         return seqTracks.collectEntries {
             [(it.libraryDirectoryName): new File(baseDirectory, it.libraryDirectoryName)]
         }
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getSingleLaneQAJsonFiles} instead
+     */
+    @Deprecated
     private Map<SeqTrack, File> getSingleLaneQAJsonFiles(String workOrFinal) {
         return "get${workOrFinal}SingleLaneQADirectories"().collectEntries { SeqTrack seqTrack, File directory ->
             [(seqTrack): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalLibraryQAJsonFiles} instead
+     */
+    @Deprecated
     Map<String, File> getFinalLibraryQAJsonFiles() {
         return getLibraryQAJsonFiles('Final')
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkLibraryQAJsonFiles} instead
+     */
+    @Deprecated
     Map<String, File> getWorkLibraryQAJsonFiles() {
         return getLibraryQAJsonFiles('Work')
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getLibraryQAJsonFiles} instead
+     */
+    @Deprecated
     private Map<String, File> getLibraryQAJsonFiles(String workOrFinal) {
         return "get${workOrFinal}LibraryQADirectories"().collectEntries { String lib, File directory ->
             [(lib): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
@@ -332,6 +469,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     }
 
     // Example: run140801_SN751_0197_AC4HUVACXX_D2059_AGTCAA_L001
+    /**
+     * @deprecated use {@link RoddyBamFileService#getSingleLaneQADirectoriesHelper} instead
+     */
+    @Deprecated
     Map<SeqTrack, File> getSingleLaneQADirectoriesHelper(File baseDirectory) {
         Map<SeqTrack, File> directoriesPerSeqTrack = [:]
         seqTracks.each { SeqTrack seqTrack ->
@@ -341,52 +482,100 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
         return directoriesPerSeqTrack
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalExecutionStoreDirectory} instead
+     */
+    @Deprecated
     File getFinalExecutionStoreDirectory() {
         return new File(baseDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalExecutionDirectories} instead
+     */
+    @Deprecated
     List<File> getFinalExecutionDirectories() {
         this.roddyExecutionDirectoryNames.collect {
             new File(this.finalExecutionStoreDirectory, it)
         }
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalBamFile} instead
+     */
+    @Deprecated
     File getFinalBamFile() {
         return new File(baseDirectory, this.bamFileName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkBamFile} instead
+     */
+    @Deprecated
     File getWorkBamFile() {
         return new File(workDirectory, this.bamFileName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalBaiFile} instead
+     */
+    @Deprecated
     File getFinalBaiFile() {
         return new File(baseDirectory, this.baiFileName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkBaiFile} instead
+     */
+    @Deprecated
     File getWorkBaiFile() {
         return new File(workDirectory, this.baiFileName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalMd5sumFile} instead
+     */
+    @Deprecated
     File getFinalMd5sumFile() {
         return new File(baseDirectory, this.md5sumFileName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMd5sumFile} instead
+     */
+    @Deprecated
     File getWorkMd5sumFile() {
         return new File(workDirectory, this.md5sumFileName)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalMetadataTableFile} instead
+     */
+    @Deprecated
     File getFinalMetadataTableFile() {
         return new File(baseDirectory, METADATATABLE_FILE)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getWorkMetadataTableFile} instead
+     */
+    @Deprecated
     File getWorkMetadataTableFile() {
         return new File(workDirectory, METADATATABLE_FILE)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalInsertSizeDirectory} instead
+     */
+    @Deprecated
     File getFinalInsertSizeDirectory() {
         return new File(finalMergedQADirectory, INSERT_SIZE_FILE_DIRECTORY)
     }
 
+    /**
+     * @deprecated use {@link RoddyBamFileService#getFinalInsertSizeFile} instead
+     */
+    @Deprecated
     @Override
     File getFinalInsertSizeFile() {
         return new File(finalInsertSizeDirectory, "${this.sampleType.dirName}_${this.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
@@ -403,14 +592,18 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
      * </ul>
      *
      * @return true if the old structure is used.
+     * @deprecated use {@link RoddyBamFileService#isOldStructureUsed} instead
      */
+    @Deprecated
     boolean isOldStructureUsed() {
         return !workDirectoryName
     }
 
     /**
      * return for old structure the final bam file and for the new structure the work bam file
+     * @deprecated use {@link RoddyBamFileService#getPathForFurtherProcessingNoCheck} instead
      */
+    @Deprecated
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return isOldStructureUsed() ? finalBamFile : workBamFile

@@ -28,13 +28,70 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-class AbstractMergedBamFileServiceSpec extends Specification implements DataTest {
+import java.nio.file.Paths
+
+class AbstractMergedBamFileServiceSpec extends Specification implements DataTest, IsRoddy {
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                FastqImportInstance,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingWorkPackage,
+                Pipeline,
+                ProcessingPriority,
+                Project,
+                Realm,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Sample,
+                SampleType,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder
+
+    void "test getBaseDirectory"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+
+        AbstractMergedBamFileService service = new AbstractMergedBamFileService()
+        service.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get("/vbp-path")
+        }
+
+        expect:
+        service.getBaseDirectory(bamFile) ==
+                Paths.get("/vbp-path/${bamFile.sample.sampleType.dirName}/${bamFile.seqType.libraryLayoutDirName}/merged-alignment")
+    }
+
+    void "test getBaseDirectory, with antibody target"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        bamFile.seqType.hasAntibodyTarget = true
+        bamFile.mergingWorkPackage.antibodyTarget = createAntibodyTarget(name: "antibody-target-name")
+
+        AbstractMergedBamFileService service = new AbstractMergedBamFileService()
+        service.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> Paths.get("/vbp-path")
+        }
+
+        expect:
+        service.getBaseDirectory(bamFile) ==
+                Paths.get("/vbp-path/${bamFile.sample.sampleType.dirName}-antibody-target-name/${bamFile.seqType.libraryLayoutDirName}/merged-alignment")
+    }
 
     void "getExistingBamFilePath, when all fine, return the file"() {
         given:

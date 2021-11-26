@@ -21,29 +21,59 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+
 import java.nio.file.Paths
 
 class RnaRoddyBamFile extends RoddyBamFile {
 
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#CHIMERIC_BAM_SUFFIX} instead
+     */
+    @Deprecated
     static final String CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#ARRIBA_FOLDER} instead
+     */
+    @Deprecated
     static final String ARRIBA_FOLDER = "fusions_arriba"
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#ARRIBA_PLOT_SUFFIX} instead
+     */
+    @Deprecated
     static final String ARRIBA_PLOT_SUFFIX = ".fusions.pdf"
 
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#getWorkMergedQADirectory} instead
+     */
+    @Deprecated
     @Override
     File getWorkMergedQADirectory() {
         return workQADirectory
     }
 
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#getFinalMergedQADirectory} instead
+     */
+    @Deprecated
     @Override
     File getFinalMergedQADirectory() {
         return finalQADirectory
     }
 
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#getCorrespondingWorkChimericBamFile} instead
+     */
+    @Deprecated
     File getCorrespondingWorkChimericBamFile() {
         return new File(workDirectory, "${sampleType.dirName}_${individual.pid}_${CHIMERIC_BAM_SUFFIX}")
     }
 
+    /**
+     * @deprecated use {@link RnaRoddyBamFileService#getWorkArribaFusionPlotPdf} instead
+     */
+    @Deprecated
     String getWorkArribaFusionPlotPdf() {
         String file = Paths.get(workDirectory as String, ARRIBA_FOLDER,
                 "${sampleType.dirName}_${individual.pid}${ARRIBA_PLOT_SUFFIX}")

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
@@ -33,23 +34,59 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 @SuppressWarnings('JavaIoPackageAccess')
 class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#INPUT_DIRECTORY_NAME} instead
+     */
+    @Deprecated
     static final String INPUT_DIRECTORY_NAME = 'cell-ranger-input'
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#OUTPUT_DIRECTORY_NAME} instead
+     */
+    @Deprecated
     static final String OUTPUT_DIRECTORY_NAME = 'outs'
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAM_FILE_NAME} instead
+     */
+    @Deprecated
     static final String ORIGINAL_BAM_FILE_NAME = 'possorted_genome_bam.bam'
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAI_FILE_NAME} instead
+     */
+    @Deprecated
     static final String ORIGINAL_BAI_FILE_NAME = 'possorted_genome_bam.bam.bai'
 
     //is created manually
+    /**
+     * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAM_MD5SUM_FILE_NAME} instead
+     */
+    @Deprecated
     static final String ORIGINAL_BAM_MD5SUM_FILE_NAME = 'possorted_genome_bam.md5sum'
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#METRICS_SUMMARY_CSV_FILE_NAME} instead
+     */
+    @Deprecated
     static final String METRICS_SUMMARY_CSV_FILE_NAME = "metrics_summary.csv"
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#WEB_SUMMARY_HTML_FILE_NAME} instead
+     */
+    @Deprecated
     static final String WEB_SUMMARY_HTML_FILE_NAME = "web_summary.html"
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#CELL_RANGER_COMMAND_FILE_NAME} instead
+     */
+    @Deprecated
     static final String CELL_RANGER_COMMAND_FILE_NAME = "cell_ranger_command.txt"
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#CREATED_RESULT_FILES} instead
+     */
+    @Deprecated
     static final List<String> CREATED_RESULT_FILES = [
             WEB_SUMMARY_HTML_FILE_NAME,
             METRICS_SUMMARY_CSV_FILE_NAME,
@@ -62,12 +99,20 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
             'cloupe.cloupe',
     ].asImmutable()
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#CREATED_RESULT_DIRS} instead
+     */
+    @Deprecated
     static final List<String> CREATED_RESULT_DIRS = [
             'filtered_feature_bc_matrix',
             'raw_feature_bc_matrix',
             'analysis',
     ].asImmutable()
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#CREATED_RESULT_FILES_AND_DIRS} instead
+     */
+    @Deprecated
     static final List<String> CREATED_RESULT_FILES_AND_DIRS = [
             CREATED_RESULT_FILES,
             CREATED_RESULT_DIRS,
@@ -136,10 +181,18 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         return mergingWorkPackage.config
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getWorkDirectory} instead
+     */
+    @Deprecated
     File getWorkDirectory() {
         return new File(baseDirectory, workDirectoryName)
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#buildWorkDirectoryName} instead
+     */
+    @Deprecated
     static String buildWorkDirectoryName(CellRangerMergingWorkPackage workPackage, int identifier) {
         return [
                 "RG_${workPackage.referenceGenome.name ?: '-'}",
@@ -155,21 +208,35 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         return "${individual.pid}_${sampleType.dirName}"
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getSampleDirectory} instead
+     */
+    @Deprecated
     File getSampleDirectory() {
         return new File(new File(workDirectory, INPUT_DIRECTORY_NAME), singleCellSampleName)
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getOutputDirectory} instead
+     */
+    @Deprecated
     File getOutputDirectory() {
         return new File(workDirectory, singleCellSampleName)
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getResultDirectory} instead
+     */
+    @Deprecated
     File getResultDirectory() {
         return new File(outputDirectory, OUTPUT_DIRECTORY_NAME)
     }
 
     /**
      * Map of names to use for link and name used by CellRanger
+     * @deprecated use {@link SingleCellBamFileService#getFileMappingForLinks} instead
      */
+    @Deprecated
     Map<String, String> getFileMappingForLinks() {
         CREATED_RESULT_FILES_AND_DIRS.collectEntries {
             [(getLinkNameForFile(it)): it]
@@ -178,7 +245,9 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     /**
      * list of linked files
+     * @deprecated use {@link SingleCellBamFileService#getLinkedResultFiles} instead
      */
+    @Deprecated
     List<File> getLinkedResultFiles() {
         File result = workDirectory
         return CREATED_RESULT_FILES_AND_DIRS.collect {
@@ -188,7 +257,9 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     /**
      * return the name to use for the links of the result file, because the bam file should be named differently
+     * @deprecated use {@link SingleCellBamFileService#getLinkNameForFile} instead
      */
+    @Deprecated
     private String getLinkNameForFile(String name) {
         switch (name) {
             case ORIGINAL_BAM_FILE_NAME:
@@ -202,6 +273,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         }
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getFinalInsertSizeFile} instead
+     */
+    @Deprecated
     @Override
     File getFinalInsertSizeFile() {
         throw new MissingPropertyException("Final insert size file is not implemented for single cell BAM files")
@@ -212,15 +287,27 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         throw new MissingPropertyException("Maximal read length is not implemented for single cell BAM files")
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getPathForFurtherProcessingNoCheck} instead
+     */
+    @Deprecated
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return new File(workDirectory, bamFileName)
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getQualityAssessmentCsvFile} instead
+     */
+    @Deprecated
     File getQualityAssessmentCsvFile() {
         return new File(resultDirectory, METRICS_SUMMARY_CSV_FILE_NAME)
     }
 
+    /**
+     * @deprecated use {@link SingleCellBamFileService#getWebSummaryResultFile} instead
+     */
+    @Deprecated
     File getWebSummaryResultFile() {
         return new File(resultDirectory, WEB_SUMMARY_HTML_FILE_NAME)
     }

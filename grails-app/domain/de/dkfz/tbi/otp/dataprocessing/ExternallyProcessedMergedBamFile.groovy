@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedMergedBamFileService
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -89,6 +90,10 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         return ExternalMergingWorkPackage.get(workPackage.id)
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getPathForFurtherProcessingNoCheck}
+     */
+    @Deprecated
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return bamFile
@@ -119,28 +124,52 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         throw new MissingPropertyException('AlignmentConfig is not implemented for externally imported BAM files')
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getBamFile}
+     */
+    @Deprecated
     File getBamFile() {
         return new File(importFolder, bamFileName)
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getBaiFile}
+     */
+    @Deprecated
     File getBaiFile() {
         return new File(importFolder, baiFileName)
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getBamMaxReadLengthFile}
+     */
+    @Deprecated
     File getBamMaxReadLengthFile() {
         return new File(importFolder, "${bamFileName}.maxReadLength")
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getNonOtpFolder}
+     */
+    @Deprecated
     File getNonOtpFolder() {
         String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
         return new OtpPath(project, relative, "nonOTP").absoluteDataManagementPath
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getImportFolder}
+     */
+    @Deprecated
     File getImportFolder() {
         return new File(nonOtpFolder, "analysisImport_${referenceGenome}")
     }
 
+    /**
+     * @deprecated use {@link ExternallyProcessedMergedBamFileService#getFinalInsertSizeFile}
+     */
     @Override
+    @Deprecated
     File getFinalInsertSizeFile() {
         return new File(importFolder, insertSizeFile)
     }

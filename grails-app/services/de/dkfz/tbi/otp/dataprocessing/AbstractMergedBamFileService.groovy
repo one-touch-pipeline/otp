@@ -26,8 +26,20 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.Path
+
 @Transactional
 class AbstractMergedBamFileService {
+
+    IndividualService individualService
+
+    Path getBaseDirectory(AbstractMergedBamFile bamFile) {
+        String antiBodyTarget = bamFile.seqType.hasAntibodyTarget ? "-${((MergingWorkPackage) bamFile.mergingWorkPackage).antibodyTarget.name}" : ''
+        Path viewByPid = individualService.getViewByPidPath(bamFile.individual, bamFile.seqType)
+        return viewByPid.resolve("${bamFile.sample.sampleType.dirName}${antiBodyTarget}")
+                .resolve(bamFile.seqType.libraryLayoutDirName)
+                .resolve('merged-alignment')
+    }
 
     void updateSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,24 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataprocessing.bamfiles
 
-import grails.gorm.transactions.Transactional
+import de.dkfz.tbi.otp.dataprocessing.*
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import java.nio.file.Path
 
-@Transactional
-class MergedAlignmentDataFileService {
-    /**
-     * @deprecated can not handle {@link SeqType} with {@link AntibodyTarget} correctly, use {@link AbstractMergedBamFileService#getBaseDirectory()} instead
-     */
-    @Deprecated
-    static String buildRelativePath(SeqType type, Sample sample) {
-        assert !type.hasAntibodyTarget
-        // this method is also used in the ProcessedMergedBamFileService,
-        // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
-        String sampleType = sample.sampleType.dirName
-        String layout = type.libraryLayoutDirName
-        return "${sample.individual.getViewByPidPath(type).relativePath}/${sampleType}/${layout}/merged-alignment/"
+class ProcessedMergedBamFileService<T extends AbstractMergedBamFile> extends AbstractAbstractMergedBamFileService<ProcessedMergedBamFile> {
+
+    AbstractMergedBamFileService abstractMergedBamFileService
+
+    @Override
+    Path getFinalInsertSizeFile(ProcessedMergedBamFile bamFile) {
+        throw new UnsupportedOperationException("Final insert size file is not implemented for ProcessedMergedBamFile (${bamFile})")
+    }
+
+    @Override
+    protected Path getPathForFurtherProcessingNoCheck(ProcessedMergedBamFile bamFile) {
+        return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
     }
 }

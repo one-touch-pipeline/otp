@@ -129,6 +129,10 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return "${body}.bai"
     }
 
+    /**
+     * @deprecated use {@link de.dkfz.tbi.otp.dataprocessing.bamfiles.ProcessedMergedBamFileService#getPathForFurtherProcessingNoCheck} instead
+     */
+    @Deprecated
     @SuppressWarnings('JavaIoPackageAccess')
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
@@ -144,6 +148,10 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         throw new MissingPropertyException('AlignmentConfig is not implemented for processed merged BAM files')
     }
 
+    /**
+     * @deprecated use {@link de.dkfz.tbi.otp.dataprocessing.bamfiles.ProcessedMergedBamFileService#getFinalInsertSizeFile} instead
+     */
+    @Deprecated
     @Override
     File getFinalInsertSizeFile() {
         throw new UnsupportedOperationException('not available for ProcessedMergedBamFile')

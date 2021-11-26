@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import groovy.transform.TupleConstructor
 import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractMergedBamFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.project.Project
@@ -130,6 +131,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     @Deprecated
     abstract AlignmentConfig getAlignmentConfig()
 
+    /**
+     * @deprecated use {@link AbstractAbstractMergedBamFileService#getFinalInsertSizeFile()} and {@link AbstractMergedBamFileServiceFactoryService#getService()}
+     */
+    @Deprecated
     abstract File getFinalInsertSizeFile()
 
     abstract Integer getMaximalReadLength()
@@ -195,6 +200,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         }
     }
 
+    /**
+     * @deprecated use {@link AbstractMergedBamFileService#getBaseDirectory()}
+     */
+    @Deprecated
     File getBaseDirectory() {
         String antiBodyTarget = seqType.hasAntibodyTarget ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
         OtpPath viewByPid = individual.getViewByPidPath(seqType)
@@ -207,6 +216,11 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         return path.absoluteDataManagementPath
     }
 
+    /**
+     * @deprecated use {@link AbstractAbstractMergedBamFileService#getPathForFurtherProcessing} and
+     * {@link AbstractMergedBamFileServiceFactoryService#getService()}
+     */
+    @Deprecated
     File getPathForFurtherProcessing() {
         if (this.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
             return null
@@ -229,5 +243,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         return project?.realm
     }
 
+    /**
+     * @deprecated use {@link AbstractAbstractMergedBamFileService#getPathForFurtherProcessingNoCheck} and
+     * {@link AbstractMergedBamFileServiceFactoryService#getService()}
+     */
+    @Deprecated
     protected abstract File getPathForFurtherProcessingNoCheck()
 }
