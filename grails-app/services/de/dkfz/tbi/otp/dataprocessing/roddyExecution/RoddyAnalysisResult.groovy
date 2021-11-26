@@ -30,6 +30,7 @@ trait RoddyAnalysisResult extends RoddyResult {
         return config.pipeline
     }
 
+    @Deprecated
     @Override
     File getBaseDirectory() {
         return workDirectory.parentFile

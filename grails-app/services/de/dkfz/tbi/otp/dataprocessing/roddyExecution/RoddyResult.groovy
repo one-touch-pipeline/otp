@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -33,7 +34,16 @@ import de.dkfz.tbi.otp.utils.WaitingFileUtils
 @SuppressWarnings('JavaIoPackageAccess')
 trait RoddyResult {
 
+    /**
+     * @deprecated use {@link RoddyResultServiceTrait#RODDY_EXECUTION_STORE_DIR} instead
+     */
+    @Deprecated
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
+
+    /**
+     * @deprecated use {@link RoddyResultServiceTrait#RODDY_EXECUTION_DIR_PATTERN} instead
+     */
+    @Deprecated
     static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
 
     List<String> roddyExecutionDirectoryNames = []
@@ -50,16 +60,32 @@ trait RoddyResult {
     @Deprecated
     abstract RoddyWorkflowConfig getConfig()
 
+    /**
+     * @deprecated use {@link RoddyResultServiceTrait#getWorkDirectory} instead
+     */
+    @Deprecated
     abstract File getWorkDirectory()
 
+    /**
+     * @deprecated use {@link RoddyResultServiceTrait#getBaseDirectory} instead
+     */
+    @Deprecated
     abstract File getBaseDirectory()
 
     abstract ReferenceGenome getReferenceGenome()
 
+    /**
+     * @deprecated use {@link RoddyResultServiceTrait#getWorkExecutionStoreDirectory} instead
+     */
+    @Deprecated
     File getWorkExecutionStoreDirectory() {
         return new File(workDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
+    /**
+     * @deprecated use {@link RoddyResultServiceTrait#getWorkExecutionDirectories} instead
+     */
+    @Deprecated
     List<File> getWorkExecutionDirectories() {
         roddyExecutionDirectoryNames.collect {
             new File(workExecutionStoreDirectory, it)
@@ -67,11 +93,13 @@ trait RoddyResult {
     }
 
     /**
-     @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
+     * @deprecated use {@link RoddyResultServiceTrait#getLatestWorkExecutionDirectory} instead
+     * @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
      */
     // Example:
     // exec_150625_102449388_SOMEUSER_WGS
     // exec_yyMMdd_HHmmssSSS_user_analysis
+    @Deprecated
     File getLatestWorkExecutionDirectory() {
         assert roddyExecutionDirectoryNames: "No roddyExecutionDirectoryNames have been stored in the database for ${this}."
 

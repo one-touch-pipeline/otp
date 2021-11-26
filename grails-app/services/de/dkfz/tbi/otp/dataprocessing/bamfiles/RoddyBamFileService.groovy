@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import java.nio.file.Path
 
 @Transactional
-class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamFile> {
+class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamFile> implements RoddyResultServiceTrait<RoddyBamFile> {
 
     AbstractMergedBamFileService abstractMergedBamFileService
 
@@ -54,10 +54,12 @@ class RoddyBamFileService extends AbstractAbstractMergedBamFileService<RoddyBamF
     }
 
     // Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
+    @Override
     Path getWorkDirectory(RoddyBamFile bamFile) {
         return abstractMergedBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
     }
 
+    @Override
     Path getBaseDirectory(RoddyBamFile bamFile) {
         return abstractMergedBamFileService.getBaseDirectory(bamFile)
     }
