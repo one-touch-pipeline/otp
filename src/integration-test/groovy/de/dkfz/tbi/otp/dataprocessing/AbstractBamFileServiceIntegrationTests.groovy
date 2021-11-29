@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 @Rollback
@@ -218,54 +217,6 @@ class AbstractBamFileServiceIntegrationTests {
         exomeProcessedBamFile = null
         referenceGenomeProjectSeqTypeForExome = null
     }
-
-    @Test(expected = IllegalArgumentException)
-    void testFindByProcessedMergedBamFileIsNull() {
-        setupData()
-        abstractBamFileService.findByProcessedMergedBamFile(null)
-    }
-
-    @Test
-    void testFindByProcessedMergedBamFile() {
-        setupData()
-        List<AbstractBamFile> abstractBamFilesExp
-        List<AbstractBamFile> abstractBamFilesAct
-
-        assert mergingSet.bamFiles.isEmpty()
-
-        mergingSetAssignment = assignToMergingSet(mergingSet, processedBamFile)
-
-        ProcessedMergedBamFile pmbf_WholeGenome = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
-
-        abstractBamFilesExp = []
-        abstractBamFilesExp.add(processedBamFile)
-        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(pmbf_WholeGenome)
-        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
-
-        ProcessedBamFile processedBamFile2 = createAndSaveProcessedBamFileAndQAObjects(seqTrack, "3")
-        assignToMergingSet(mergingSet, processedBamFile2)
-
-        abstractBamFilesExp.add(processedBamFile2)
-        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(pmbf_WholeGenome)
-        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
-
-        ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile(mergingSet)
-        assignToMergingSet(mergingSet, processedMergedBamFile2)
-
-        abstractBamFilesExp.add(processedMergedBamFile2)
-        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(pmbf_WholeGenome)
-        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
-    }
-
-    @Test
-    void testAssignedToMergingSet() {
-        setupData()
-        assertEquals(processedBamFile.status, AbstractBamFile.State.NEEDS_PROCESSING)
-        abstractBamFileService.assignedToMergingSet(processedBamFile)
-        assertEquals(processedBamFile.status, AbstractBamFile.State.PROCESSED)
-    }
-
-    // Test calculateCoverageWithN() for ProcessedBamFiles
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsNull() {

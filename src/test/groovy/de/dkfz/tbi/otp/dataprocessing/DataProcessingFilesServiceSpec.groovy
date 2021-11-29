@@ -26,10 +26,11 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 
 class DataProcessingFilesServiceSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -47,16 +48,17 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
     void "getOutputDirectory, if input is #outputDirectories, then create correct path"() {
         given:
         DataProcessingFilesService dataProcessingFilesService = new DataProcessingFilesService()
-        ConfigService configService = new TestConfigService()
+        dataProcessingFilesService.fileSystemService = new TestFileSystemService()
+        dataProcessingFilesService.configService = new TestConfigService()
 
         Individual individual = createIndividual()
         Project project = individual.project
 
         String pid = individual.pid
         String projectDir = project.dirName
-        String rootDir = configService.processingRootPath
+        String rootDir = dataProcessingFilesService.configService.processingRootPath
 
-        String expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}/${lastPath}"
+        String expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}${lastPath}"
 
         when:
         String actualPath = dataProcessingFilesService.getOutputDirectory(individual, outputDirectories)
@@ -68,7 +70,7 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
         outputDirectories           | lastPath
         null                        | ''
         OutputDirectories.BASE      | ''
-        OutputDirectories.ALIGNMENT | 'alignment/'
-        OutputDirectories.FASTX_QC  | 'fastx_qc/'
+        OutputDirectories.ALIGNMENT | '/alignment'
+        OutputDirectories.FASTX_QC  | '/fastx_qc'
     }
 }

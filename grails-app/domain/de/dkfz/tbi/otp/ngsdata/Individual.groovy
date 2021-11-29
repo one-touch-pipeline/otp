@@ -124,14 +124,6 @@ class Individual implements CommentableWithProject, Entity {
         return new OtpPath(getViewByPidPathBase(seqType), pid)
     }
 
-    /**
-     * Example: ${project}/results_per_pid/${pid}
-     */
-    @Deprecated
-    OtpPath getResultsPerPidPath() {
-        return new OtpPath(project, project.dirName, 'results_per_pid', pid)
-    }
-
     @Override
     Project getProject() {
         return project

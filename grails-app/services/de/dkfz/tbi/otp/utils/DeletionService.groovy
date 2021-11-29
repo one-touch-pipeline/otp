@@ -249,7 +249,7 @@ class DeletionService {
 
         seqTracks.each { SeqTrack seqTrack ->
             File processingDir = new File(dataProcessingFilesService.getOutputDirectory(
-                    seqTrack.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+                    seqTrack.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
             if (processingDir.exists()) {
                 dirsToDelete.add(processingDir.path)
             }

@@ -21,15 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-
-import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
  * This service implements alignment files organization convention
  */
+@Deprecated // legacy data
 class ProcessedAlignmentFileService {
 
     /**
@@ -39,18 +36,7 @@ class ProcessedAlignmentFileService {
      */
     static transactional = false
 
-    @Autowired
-    ApplicationContext applicationContext
-    DataProcessingFilesService dataProcessingFilesService
-
-    String getDirectory(AlignmentPass alignmentPass) {
-        Individual ind = alignmentPass.seqTrack.sample.individual
-        def dirType = DataProcessingFilesService.OutputDirectories.ALIGNMENT
-        String baseDir = dataProcessingFilesService.getOutputDirectory(ind, dirType)
-        String middleDir = getRunLaneDirectory(alignmentPass.seqTrack)
-        return "${baseDir}/${middleDir}/${alignmentPass.directory}"
-    }
-
+    @Deprecated // legacy data
     String getRunLaneDirectory(SeqTrack seqTrack) {
         String runName = seqTrack.run.name
         String lane = seqTrack.laneId

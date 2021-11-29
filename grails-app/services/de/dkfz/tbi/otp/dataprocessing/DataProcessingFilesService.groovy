@@ -24,37 +24,61 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
+import java.nio.file.Path
+
 @Transactional
+@Deprecated // legacy data
 class DataProcessingFilesService {
 
     ConfigService configService
     LsdfFilesService lsdfFilesService
+    FileSystemService fileSystemService
 
+    @Deprecated // legacy data
     enum OutputDirectories {
+        @Deprecated // legacy data
         BASE,
+
+        @Deprecated // legacy data
         ALIGNMENT,
+
+        @Deprecated // legacy data
         MERGING,
+
+        @Deprecated // legacy data
         COVERAGE,
+
+        @Deprecated // legacy data
         FASTX_QC,
+
+        @Deprecated // legacy data
         FLAGSTATS,
+
+        @Deprecated // legacy data
         INSERTSIZE_DISTRIBUTION,
+
+        @Deprecated // legacy data
         SNPCOMP,
+
+        @Deprecated // legacy data
         STRUCTURAL_VARIATION
     }
 
-    String getOutputDirectory(Individual individual) {
-        return getOutputDirectory(individual, OutputDirectories.BASE)
-    }
-
-    String getOutputDirectory(Individual individual, String dir) {
-        return dir ? getOutputDirectory(individual, dir.toUpperCase() as OutputDirectories) : getOutputDirectory(individual)
-    }
-
-    String getOutputDirectory(Individual individual, OutputDirectories dir) {
-        String postfix = (!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase()}/"
-        return "${individual.resultsPerPidPath.absoluteDataProcessingPath}/${postfix}"
+    @Deprecated // legacy data
+    Path getOutputDirectory(Individual individual, OutputDirectories dir) {
+        Path p = fileSystemService.getRemoteFileSystem(individual.project.realm).getPath(
+                configService.processingRootPath.absolutePath,
+                individual.project.dirName,
+                'results_per_pid',
+                individual.pid,
+        )
+        if (!dir || dir == OutputDirectories.BASE) {
+            return p
+        }
+        return p.resolve(dir.toString().toLowerCase())
     }
 }

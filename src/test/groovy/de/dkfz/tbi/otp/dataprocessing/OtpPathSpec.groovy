@@ -50,35 +50,6 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
         new File('first/second/third/fourth') == path1.relativePath
     }
 
-    void "getAbsoluteDataProcessingPath, when not absolute, then throw exception"() {
-        given:
-        new TestConfigService([
-                (OtpProperty.PATH_PROCESSING_ROOT): 'processing_root'
-        ])
-        OtpPath otpPath = new OtpPath(new Project(), 'child')
-
-        when:
-        otpPath.absoluteDataProcessingPath
-
-        then:
-        RuntimeException e = thrown()
-        e.message == 'processing_root is not absolute.'
-    }
-
-    void "getAbsoluteDataProcessingPath, when absolute, then return absolute file"() {
-        given:
-        new TestConfigService([
-                (OtpProperty.PATH_PROCESSING_ROOT): '/processing_root'
-        ])
-        OtpPath otpPath = new OtpPath(new Project(), 'child')
-
-        when:
-        File path = otpPath.absoluteDataProcessingPath
-
-        then:
-        path == new File('/processing_root/child')
-    }
-
     void "absoluteDataManagementPath, when not absolute, then throw exception"() {
         given:
         new TestConfigService([

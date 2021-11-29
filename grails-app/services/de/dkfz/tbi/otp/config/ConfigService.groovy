@@ -83,6 +83,7 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get(OtpProperty.PATH_SCRIPTS_OUTPUT) ?: "")
     }
 
+    @Deprecated // legacy data
     File getProcessingRootPath() {
         return new File(otpProperties.get(OtpProperty.PATH_PROCESSING_ROOT) ?: "")
     }

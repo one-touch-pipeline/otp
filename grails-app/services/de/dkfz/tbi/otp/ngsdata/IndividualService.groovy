@@ -410,11 +410,4 @@ class IndividualService {
     Path getViewByPidPath(Individual individual, final SeqType seqType) {
         return getViewByPidPathBase(individual, seqType).resolve(individual.pid)
     }
-
-    /**
-     * Example: ${project}/results_per_pid/${pid}
-     */
-    Path getResultsPerPidPath(Individual individual) {
-        return projectService.getProjectDirectory(individual.project).resolve('results_per_pid').resolve(individual.pid)
-    }
 }

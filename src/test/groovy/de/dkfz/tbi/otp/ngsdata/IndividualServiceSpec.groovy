@@ -77,20 +77,4 @@ class IndividualServiceSpec extends Specification implements DataTest, ServiceUn
         then:
         seqDir.resolve(seqType.dirName).resolve('view-by-pid').resolve(individual.pid) == actualPath
     }
-
-    void "test getResultsPerPidPath"() {
-        given:
-        Individual individual = createIndividual()
-
-        Path projectDir = Paths.get("/asdfasdf")
-        service.projectService = Mock(ProjectService) {
-            getProjectDirectory(individual.project) >> projectDir
-        }
-
-        when:
-        Path actualPath = service.getResultsPerPidPath(individual)
-
-        then:
-        projectDir.resolve("results_per_pid").resolve(individual.pid) == actualPath
-    }
 }

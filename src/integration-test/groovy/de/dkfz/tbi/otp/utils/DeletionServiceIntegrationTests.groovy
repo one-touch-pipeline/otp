@@ -464,7 +464,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         dataBaseSetupForMergedBamFiles(bamFile)
         createFastqFiles(bamFile)
 
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
+                bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
         CreateFileHelper.createFile(new File(processingBamFile, "test.bam"))
         CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
@@ -484,7 +485,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         setupData()
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
+                bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
@@ -500,7 +502,8 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         setupData()
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
+                bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 

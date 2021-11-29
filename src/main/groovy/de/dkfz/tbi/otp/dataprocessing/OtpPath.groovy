@@ -35,27 +35,23 @@ class OtpPath {
     final Project project
     final File relativePath
 
+    @Deprecated
     OtpPath(final Project project, final String first, final String... more) {
         this.project = project
         relativePath = LsdfFilesService.getPath(first, more)
         assert !relativePath.absolute
     }
 
+    @Deprecated
     OtpPath(final OtpPath path, final String first, final String... more) {
         project = path.project
         relativePath = new File(path.relativePath, LsdfFilesService.getPath(first, more).path)
     }
 
     /**
-     * Path used in processing directory
-     */
-    File getAbsoluteDataProcessingPath() {
-        return getAbsolutePath(ConfigService.instance.processingRootPath)
-    }
-
-    /**
      * Path used in root
      */
+    @Deprecated
     File getAbsoluteDataManagementPath() {
         return getAbsolutePath(ConfigService.instance.rootPath)
     }
