@@ -35,21 +35,21 @@ class ClusterJobLoggingService {
 
     final static CLUSTER_LOG_BASE_DIR = 'clusterLog'
 
+    ConfigService configService
     FileService fileService
-
     FileSystemService fileSystemService
 
-    static File logDirectory(ProcessingStep processingStep) {
+    File getLogDirectory(ProcessingStep processingStep) {
         assert processingStep: 'No processing step specified.'
 
         Date date = processingStep.firstProcessingStepUpdate.date
         String dateDirectory = TimeFormats.DATE.getFormattedDate(date)
-        return new File("${ConfigService.instance.loggingRootPath}/${CLUSTER_LOG_BASE_DIR}/${dateDirectory}")
+        return new File("${configService.loggingRootPath}/${CLUSTER_LOG_BASE_DIR}/${dateDirectory}")
     }
 
     File createAndGetLogDirectory(Realm realm, ProcessingStep processingStep) {
         assert realm: 'No realm specified.'
-        File logDirectory = logDirectory(processingStep)
+        File logDirectory = getLogDirectory(processingStep)
         if (!logDirectory.exists()) {
             //race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
             FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)

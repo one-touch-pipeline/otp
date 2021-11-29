@@ -78,7 +78,7 @@ class BootStrap {
         }
 
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
-        DicomAuditLogger.logActorStart(EventOutcomeIndicator.SUCCESS, ConfigService.instance.dicomInstanceName)
+        DicomAuditLogger.logActorStart(EventOutcomeIndicator.SUCCESS, configService.dicomInstanceName)
     }
 
     def destroy = {

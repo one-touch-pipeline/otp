@@ -72,7 +72,6 @@ class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, Data
         RnaRoddyBamFile roddyBamFile = createBamFile()
         String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/" +
                 "${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
-        AbstractMergedBamFileService.metaClass.static.destinationDirectory = { AbstractMergedBamFile bamFile -> return testDir }
 
         expect:
         "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${RnaRoddyBamFile.CHIMERIC_BAM_SUFFIX}" == roddyBamFile.correspondingWorkChimericBamFile.path

@@ -23,11 +23,14 @@
 // This script compares the sizes of BAM files on the file system to the file sizes stored in the database.
 // Expect inconsistencies to be reported if you run this script while the transfer workflow is running.
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+
+ConfigService configService = ctx.configService
 
 PrintWriter out = new PrintWriter(new File(
-        ConfigService.instance.scriptOutputPath,
+        configService.scriptOutputPath,
         "consistencyChecking/BamFileSizeConsistency_${ new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") }.tsv"
 ))
 try {
@@ -39,7 +42,7 @@ try {
         out.print("${mergingWorkPackage.id}\t")
         AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
         if (bamFile) {
-            final File file = new File(ctx.abstractMergedBamFileService.destinationDirectory(bamFile), bamFile.bamFileName)
+            final File file = new File(bamFile.baseDirectory, bamFile.bamFileName)
 
             boolean exists = file.exists()
             long length = file.length()

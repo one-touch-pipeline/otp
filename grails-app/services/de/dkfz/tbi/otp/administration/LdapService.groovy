@@ -151,7 +151,7 @@ class LdapService implements InitializingBean {
         return ldapTemplate.search(
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                         .and(LdapKey.MEMBER_OF).is(distinguishedName),
-                new UsernameAttributesMapper())
+                new UsernameAttributesMapper(ldapService: this))
     }
 
     List<String> getGroupsOfUser(User user) {
@@ -220,7 +220,7 @@ class LdapService implements InitializingBean {
                 .and(configService.ldapSearchAttribute).is(user.username)
                 .and(LdapKey.ACCOUNT_EXPIRES).gte('1')
                 .and(LdapKey.ACCOUNT_EXPIRES).lte(ldapTimestamp.toString())
-        return !ldapTemplate.search(query, new UsernameAttributesMapper()).empty
+        return !ldapTemplate.search(query, new UsernameAttributesMapper(ldapService: this)).empty
     }
 
     /**
@@ -315,7 +315,7 @@ class LdapUserDetailsAttributesMapper extends LdapServiceAwareAttributesMapper<L
         String sn = a.get(LdapKey.SURNAME)?.get()
         boolean realNameCreatable = givenName && sn
         return new LdapUserDetails([
-                username         : a.get(ConfigService.instance.ldapSearchAttribute)?.get()?.toString(),
+                username         : a.get(ldapService.configService.ldapSearchAttribute)?.get()?.toString(),
                 realName         : realNameCreatable ? "${givenName} ${sn}" : null,
                 mail             : a.get(LdapKey.MAIL)?.get()?.toString(),
                 department       : a.get(LdapKey.DEPARTMENT)?.get()?.toString(),
@@ -351,10 +351,10 @@ class DistinguishedNameAttributesMapper implements AttributesMapper<String> {
     }
 }
 
-class UsernameAttributesMapper implements AttributesMapper<String> {
+class UsernameAttributesMapper extends LdapServiceAwareAttributesMapper<String> {
     @Override
     String mapFromAttributes(Attributes a) throws NamingException {
-        return a.get(ConfigService.instance.ldapSearchAttribute)?.get()?.toString()
+        return a.get(ldapService.configService.ldapSearchAttribute)?.get()?.toString()
     }
 }
 

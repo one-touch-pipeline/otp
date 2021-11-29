@@ -20,14 +20,15 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
+ConfigService configService = ctx.configService
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
-String roddy_base_path = ConfigService.instance.roddyPath.toString()
+String roddy_base_path = configService.roddyPath.toString()
 
 processingOptionService.createOrUpdate(
         RODDY_PATH,

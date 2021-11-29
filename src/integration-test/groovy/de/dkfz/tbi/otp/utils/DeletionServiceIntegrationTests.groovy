@@ -466,7 +466,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
                 bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File finalBamFile = bamFile.baseDirectory
         CreateFileHelper.createFile(new File(processingBamFile, "test.bam"))
         CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
 
@@ -487,7 +487,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
                 bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File finalBamFile = bamFile.baseDirectory
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
@@ -504,7 +504,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(
                 bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File finalBamFile = bamFile.baseDirectory
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
@@ -520,7 +520,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         dataBaseSetupForMergedBamFiles(bamFile)
         createFastqFiles(bamFile)
 
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File finalBamFile = bamFile.baseDirectory
         CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
 
         return bamFile
@@ -536,7 +536,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         setupData()
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File finalBamFile = bamFile.baseDirectory
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
@@ -551,7 +551,7 @@ class DeletionServiceIntegrationTests implements UserAndRoles {
         setupData()
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File finalBamFile = bamFile.baseDirectory
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)

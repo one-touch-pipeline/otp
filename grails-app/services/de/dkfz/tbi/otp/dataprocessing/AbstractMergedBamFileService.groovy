@@ -26,21 +26,8 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static org.springframework.util.Assert.notNull
-
 @Transactional
 class AbstractMergedBamFileService {
-
-    /**
-     * @deprecated Use bamFile.baseDirectory instead, which can also handle chipseq directories
-     * @param bamFile , the mergedBamFile which has to be copied
-     * @return the final directory of the mergedBamFile after copying
-     */
-    @Deprecated
-    static String destinationDirectory(AbstractMergedBamFile bamFile) {
-        notNull(bamFile, "the input of the method destinationDirectory is null")
-        return bamFile.baseDirectory.absolutePath + '/'
-    }
 
     void updateSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"

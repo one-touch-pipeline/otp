@@ -26,7 +26,6 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -38,8 +37,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 class AbstractMergedBamFileServiceIntegrationSpec extends Specification implements IsRoddy {
 
     AbstractMergedBamFileService abstractMergedBamFileService
-
-    static final String MERGED_BAM_FILES_PATH = "merged-alignment"
 
     static final List<String> PROCESSING_STEPS = [
             "aceseq",
@@ -57,35 +54,6 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
 
         expect:
         analysisPipelines.size() == PROCESSING_STEPS.size()
-    }
-
-    void "destination directory of ProcessedMergedBamFile"() {
-        given:
-        ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
-        String destinationExp = expectedMergedAlignmentPath(mergedBamFile)
-
-        when:
-        String destinationAct = AbstractMergedBamFileService.destinationDirectory(mergedBamFile)
-
-        then:
-        destinationExp == destinationAct
-    }
-
-    void "destination directory of RoddyBamFile"() {
-        given:
-        RoddyBamFile mergedBamFile = DomainFactory.createRoddyBamFile()
-        String destinationExp = expectedMergedAlignmentPath(mergedBamFile)
-
-        when:
-        String destinationAct = AbstractMergedBamFileService.destinationDirectory(mergedBamFile)
-
-        then:
-        destinationExp == destinationAct
-    }
-
-    private String expectedMergedAlignmentPath(AbstractMergedBamFile mergedBamFile) {
-        String pidPath = "${TestConfigService.instance.rootPath}/${mergedBamFile.project.dirName}/sequencing/${mergedBamFile.seqType.dirName}/view-by-pid/${mergedBamFile.individual.pid}"
-        return "${pidPath}/${mergedBamFile.sampleType.dirName}/${mergedBamFile.seqType.libraryLayoutDirName}/${MERGED_BAM_FILES_PATH}/"
     }
 
     void "set SamplePairStatus to need processing while input is null"() {

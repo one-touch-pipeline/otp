@@ -65,6 +65,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         realm = DomainFactory.createRealm()
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()
+        service.configService = configService
         service.fileService = Stub(FileService) {
             createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, Realm _ ->
                 Files.createDirectories(dir)
@@ -76,17 +77,17 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         configService.clean()
     }
 
-    void "test logDirectory, when all fine return correct path"() {
+    void "test getLogDirectory, when all fine return correct path"() {
         when:
-        File logDir = service.logDirectory(processingStepUpdate.processingStep)
+        File logDir = service.getLogDirectory(processingStepUpdate.processingStep)
 
         then:
         logDir.path ==~ /${configService.loggingRootPath.path}\/${ClusterJobLoggingService.CLUSTER_LOG_BASE_DIR}\/\d{4}-\d\d-\d\d/
     }
 
-    void "test logDirectory, when processingStep is null throw exception"() {
+    void "test getLogDirectory, when processingStep is null throw exception"() {
         when:
-        service.logDirectory(null)
+        service.getLogDirectory(null)
 
         then:
         AssertionError e = thrown()
