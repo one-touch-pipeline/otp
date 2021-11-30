@@ -29,7 +29,8 @@ const lintRules = {
       code: 120
     }
   ],
-  'comma-dangle': ['error', 'never']
+  'comma-dangle': ['error', 'never'],
+  'no-plusplus': ['error', { allowForLoopAfterthoughts: true }]
 };
 
 if (process.env.CI) {
@@ -48,7 +49,6 @@ if (process.env.CI) {
     'no-alert': 'off',
     'array-callback-return': 'off',
     radix: 'off',
-    'no-plusplus': 'off',
     'no-new': 'off',
     'vars-on-top': 'off',
     'no-loop-func': 'off',

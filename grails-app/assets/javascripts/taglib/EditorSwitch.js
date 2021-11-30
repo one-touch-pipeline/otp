@@ -731,8 +731,8 @@ $(() => {
   $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let outerContainer; const dataValues = {}; let i = 0; let
-      displayValue = '';
+    let container; let outerContainer; const dataValues = {}; let i = 0;
+    let displayValue = '';
     container = $(this).parent();
     outerContainer = container.parent();
     const multiInputField = $('.multi-input-field', outerContainer);
@@ -745,7 +745,7 @@ $(() => {
       }
       dataValues['value[' + i + ']'] = $(this).val();
       displayValue = displayValue + $(this).val() + ', ';
-      i++;
+      i += 1;
     });
     if (!valid) {
       return;
