@@ -41,7 +41,6 @@ if (process.env.CI) {
     'prefer-template': 'off',
     'no-param-reassign': 'off',
     'no-unused-vars': 'off',
-    eqeqeq: 'off',
     'no-undef': 'off',
     'no-restricted-globals': 'off',
     'default-case': 'off',

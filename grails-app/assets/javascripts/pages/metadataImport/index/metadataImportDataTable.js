@@ -261,16 +261,16 @@ $(($) => {
           const windowOffset = { top: $(window).scrollTop(), bottom: $(window).scrollTop() + $(window).height() };
 
           if ((containerOffset.top > windowOffset.bottom) || (windowOffset.bottom > containerOffset.bottom)) {
-            if ($bar.data('status') == 'on') {
+            if ($bar.data('status') === 'on') {
               $bar.hide().data('status', 'off');
             }
           } else {
-            if ($bar.data('status') == 'off') {
+            if ($bar.data('status') === 'off') {
               $bar.show().data('status', 'on');
             }
             $bar.scrollLeft($container.scrollLeft());
           }
-        } else if ($bar.data('status') == 'on') {
+        } else if ($bar.data('status') === 'on') {
           $bar.hide().data('status', 'off');
         }
       });

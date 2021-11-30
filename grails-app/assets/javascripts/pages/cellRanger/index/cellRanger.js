@@ -24,7 +24,7 @@ $(() => {
   'use strict';
 
   $('input:radio[name=expectedOrEnforcedCells]').on('change', () => {
-    if ($('input:radio[name=expectedOrEnforcedCells]:checked').val() == 'neither') {
+    if ($('input:radio[name=expectedOrEnforcedCells]:checked').val() === 'neither') {
       $('input[name=expectedOrEnforcedCellsValue]').prop('disabled', true);
       $('label[id=expectedOrEnforcedCellsValue]').hide();
     } else {

@@ -146,7 +146,7 @@ $.otp.clusterJobJobTypeSpecific = {
           text: this
         });
         jobClassSelect.append(cOption);
-        if (currentJobClass == this) {
+        if (currentJobClass === this) {
           cOption.attr('selected', 'selected');
         }
       });
@@ -172,7 +172,7 @@ $.otp.clusterJobJobTypeSpecific = {
           text: `${this.name} ${this.libraryLayout}`
         });
         seqTypeSelect.append(cOption);
-        if (currentSeqType == this.id) {
+        if (currentSeqType === this.id) {
           cOption.attr('selected', 'selected');
         }
       });

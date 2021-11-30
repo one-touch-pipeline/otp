@@ -223,7 +223,7 @@ $(() => {
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
       const confirmed = confirm(confirmationText);
-      if (confirmed == false) {
+      if (!confirmed) {
         return;
       }
     }
@@ -340,7 +340,7 @@ $(() => {
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
       const confirmed = confirm(confirmationText);
-      if (confirmed == false) {
+      if (confirmed === false) {
         return;
       }
     }
@@ -635,7 +635,7 @@ $(() => {
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
       const confirmed = confirm(confirmationText);
-      if (confirmed == false) {
+      if (confirmed === false) {
         return;
       }
     }
@@ -659,7 +659,7 @@ $(() => {
           }
           $('input:hidden[name=value]', container).attr('value', invVal);
           const pageReload = $('button[data-pageReload]', container).attr('data-pageReload');
-          if (pageReload && pageReload == 'true') {
+          if (pageReload === 'true') {
             window.setTimeout(() => { location.reload(); }, 100); // reloads page after 0.5 seconds
           }
         } else {

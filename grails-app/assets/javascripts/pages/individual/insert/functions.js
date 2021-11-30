@@ -42,10 +42,10 @@ $(() => {
     const pid = $('#identifier').val();
     const mockPid = $('#alias').val();
     const mockFullName = $('#displayedIdentifier').val();
-    if (lastPid == mockPid) {
+    if (lastPid === mockPid) {
       $('#alias').val(pid);
     }
-    if (lastPid == mockFullName) {
+    if (lastPid === mockFullName) {
       $('#displayedIdentifier').val(pid);
     }
     lastPid = $('#identifier').val();

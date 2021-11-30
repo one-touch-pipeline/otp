@@ -61,7 +61,7 @@ $.otp.processingTimeStatistics = {
       },
       error() {
         let errorMsg = `Failed to edit value '${type}'.`;
-        if (type == 'ticketCreated' || type == 'SubmissionReceivedNotice') {
+        if (type === 'ticketCreated' || type === 'SubmissionReceivedNotice') {
           errorMsg += " Check for date format ('yyyy-MM-dd HH:mm').";
         }
         $.otp.processingTimeStatistics.error(errorMsg);
