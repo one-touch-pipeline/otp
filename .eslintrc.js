@@ -57,7 +57,6 @@ if (process.env.CI) {
     'no-restricted-syntax': 'off',
     'no-useless-concat': 'off',
     'block-scoped-var': 'off',
-    'no-prototype-builtins': 'off',
     'no-useless-call': 'off',
     'no-self-assign': 'off',
     'no-underscore-dangle': 'off',

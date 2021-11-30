@@ -95,7 +95,7 @@ $.otp = {
       link += '?';
       counter = 0;
       for (parameter in parameters) {
-        if (parameters.hasOwnProperty(parameter)) {
+        if ({}.hasOwnProperty.call(parameters, parameter)) {
           if (counter > 0) {
             link += '&';
           }
