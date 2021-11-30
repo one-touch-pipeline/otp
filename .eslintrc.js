@@ -62,8 +62,7 @@ if (process.env.CI) {
     'no-useless-call': 'off',
     'no-self-assign': 'off',
     'no-underscore-dangle': 'off',
-    'no-useless-escape': 'off',
-    'prefer-destructuring': 'off'
+    'no-useless-escape': 'off'
   });
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,6 @@ $.otp.workflows.processingStep = {
       for (i = 0; i < json.aaData.length; i += 1) {
         rowData = json.aaData[i];
         rowData[1] = $.otp.workflows.renderDate(rowData[1]);
-        rowData[2] = rowData[2];
         if (!rowData[3]) {
           rowData[3] = '-';
         } else if (rowData[3].stackTraceIdentifier) {
