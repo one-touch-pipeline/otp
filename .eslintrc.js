@@ -55,7 +55,6 @@ if (process.env.CI) {
     'no-unused-expressions': 'off',
     'guard-for-in': 'off',
     'no-restricted-syntax': 'off',
-    'no-template-curly-in-string': 'off',
     'no-useless-concat': 'off',
     'block-scoped-var': 'off',
     'no-prototype-builtins': 'off',
