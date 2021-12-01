@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,6 @@
  * SOFTWARE.
  */
 
-databaseChangeLog = {
-
-    changeSet(author: "strubelp", id: "Species and strains", runOnChange: "true") {
-        sqlFile(path: 'changelogs/defaultValues/strains.sql')
-        sqlFile(path: 'changelogs/defaultValues/human.sql')
-        sqlFile(path: 'changelogs/defaultValues/mouse.sql')
-        sqlFile(path: 'changelogs/defaultValues/bovine.sql')
-    }
-}
+INSERT INTO species_common_name(id, version, name, date_created, last_updated, legacy)
+VALUES(nextval('hibernate_sequence'), 0, 'Bovine', now(), now(), false)
+ON CONFLICT DO NOTHING;

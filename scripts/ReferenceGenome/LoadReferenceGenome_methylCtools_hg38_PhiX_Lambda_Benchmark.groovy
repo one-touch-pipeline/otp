@@ -25,6 +25,8 @@ import groovy.transform.Field
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
  *  This scripts inserts a new ReferenceGenome object
@@ -35,6 +37,9 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 */
 
 String name = "methylCtools_hg38_PhiX_Lambda_Benchmark"
+Set<SpeciesCommonName> species = [
+        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("human")),
+] as Set
 @Field
 String path = "bwa06_methylCtools_hg38_PhiX_Lambda_Benchmark"
 String fileNamePrefix = "hg_GRCh38_PhiX_Lambda.conv"
@@ -248,5 +253,5 @@ List<FastaEntry> fastaEntries = [
 ]
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, fingerPrintingFileName, statSizeFileNames)

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package ReferenceGenome
+
 
 import groovy.transform.Field
 
@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
@@ -36,6 +37,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 */
 
 String name = "hg_GRCm38"
+Set<SpeciesCommonName> species = [
+        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("mouse")),
+] as Set
 @Field
 String path = "hg_GRCm38"
 String fileNamePrefix = "hg_GRCm38"
@@ -120,7 +124,7 @@ List<FastaEntry> fastaEntries = [
 ToolName tool = CollectionUtils.atMostOneElement(ToolName.findAllByName("CELL_RANGER"))
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, fingerPrintingFileName, statSizeFileNames)
 
 ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))

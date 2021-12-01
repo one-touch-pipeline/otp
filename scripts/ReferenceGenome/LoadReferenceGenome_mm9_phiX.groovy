@@ -1,5 +1,3 @@
-package ReferenceGenome
-
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -27,6 +25,8 @@ import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
  *  This scripts inserts a new ReferenceGenome object
@@ -37,6 +37,9 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 */
 
 String name = "mm9_phiX"
+Set<SpeciesCommonName> species = [
+        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("mouse")),
+] as Set
 @Field
 String path = "bwa07_mm9_PhiX"
 String fileNamePrefix = "mm9_phiX"
@@ -77,5 +80,5 @@ List<FastaEntry> fastaEntries = [
 ]
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, fingerPrintingFileName, statSizeFileNames)

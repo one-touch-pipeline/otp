@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,22 +28,22 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService> {
-
-    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService>, TaxonomyFactory {
 
     ReferenceGenome referenceGenome
     ReferenceGenomeEntry referenceGenomeEntry
@@ -71,7 +71,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
 
     void setupTest() {
         referenceGenomeService = new ReferenceGenomeService()
-        referenceGenomeService.configService = new ConfigService()
+        referenceGenomeService.configService = new TestConfigService()
         referenceGenomeService.processingOptionService = new ProcessingOptionService()
         referenceGenomeService.fileSystemService = new TestFileSystemService()
         referenceGenomeService.fileService = new FileService([
@@ -350,7 +350,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         e.message.contains(referenceGenome.cytosinePositionsIndex)
     }
 
-    void test_loadReferenceGenome() {
+    void "test loadReferenceGenome"() {
         given:
         setupTest()
         String name = "my_reference_gnome"
@@ -361,10 +361,11 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
         String chromosomePrefix = ""
         String chromosomeSuffix = ""
+        Set<SpeciesCommonName> species = [createSpeciesCommonName(), createSpeciesCommonName()] as Set
 
         DomainFactory.createDefaultRealmWithProcessingOption()
 
-        temporaryFolder.newFolder("reference_genomes", path)
+        temporaryFolder.newFolder("reference_genomes", path).toPath()
 
         String fastaName = "chr21"
         String fastaAlias = "21"
@@ -376,17 +377,17 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
                 new FastaEntry(fastaName, fastaAlias, fastaLength, fastaLengthWithoutN, fastaClassification),
         ]
 
-        referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
+        when:
+        referenceGenomeService.loadReferenceGenome(name, species, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
                 fastaEntries, fingerPrintingFileName, [statSizeFileName])
 
-        when:
-        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
-
         then:
+        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
         referenceGenome.path == path
         referenceGenome.fileNamePrefix == fileNamePrefix
         referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
         referenceGenome.fingerPrintingFileName == fingerPrintingFileName
+        referenceGenome.species == species
 
         ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
         entry.referenceGenome == referenceGenome

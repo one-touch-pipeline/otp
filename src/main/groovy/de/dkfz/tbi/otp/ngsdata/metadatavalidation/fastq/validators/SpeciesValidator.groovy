@@ -41,8 +41,10 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Autowired
     ValidatorHelperService validatorHelperService
+
     @Autowired
     SpeciesCommonNameService speciesCommonNameService
+
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
