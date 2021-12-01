@@ -154,8 +154,10 @@ $(() => {
           $('p.edit-switch-label span', outerContainer).text($('textarea', container).val());
           if (data.updateMap) {
             for (const key in data.updateMap) {
-              const el = $('.' + key, outerContainer);
-              el.text(data.updateMap[key]);
+              if ({}.hasOwnProperty.call(data.updateMap, key)) {
+                const el = $('.' + key, outerContainer);
+                el.text(data.updateMap[key]);
+              }
             }
           }
         } else {
@@ -700,20 +702,22 @@ $(() => {
     const template = $('.inputTemplate', outerContainer);
     const dataValues = multiInputField.data('values');
     let first = true;
-    for (const i in dataValues) {
-      const field = $('<div class="field"></div>');
-      const clonedField = template.clone();
-      clonedField.removeClass('inputTemplate');
-      clonedField.val(dataValues[i]);
-      field.append(clonedField);
-      if (first) {
-        field.append(' <button class="add-field">+</button>');
-        first = false;
-      } else {
-        field.append(' <button class="remove-field">-</button>');
+    for (const key in dataValues) {
+      if ({}.hasOwnProperty.call(dataValues, key)) {
+        const field = $('<div class="field"></div>');
+        const clonedField = template.clone();
+        clonedField.removeClass('inputTemplate');
+        clonedField.val(dataValues[key]);
+        field.append(clonedField);
+        if (first) {
+          field.append(' <button class="add-field">+</button>');
+          first = false;
+        } else {
+          field.append(' <button class="remove-field">-</button>');
+        }
+        $.otp.applySelect2($('select.use-select-2', clonedField));
+        multiInputField.append(field);
       }
-      $.otp.applySelect2($('select.use-select-2', clonedField));
-      multiInputField.append(field);
     }
     $('.edit-switch-editor', outerContainer).show();
     $('.edit-switch-label', outerContainer).hide();

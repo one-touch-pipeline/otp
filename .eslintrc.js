@@ -52,7 +52,6 @@ if (process.env.CI) {
     'vars-on-top': 'off',
     'no-loop-func': 'off',
     'no-unused-expressions': 'off',
-    'guard-for-in': 'off',
     'no-restricted-syntax': 'off',
     'no-useless-concat': 'off',
     'block-scoped-var': 'off',
