@@ -49,7 +49,6 @@ if (process.env.CI) {
     radix: 'off',
     'no-new': 'off',
     'vars-on-top': 'off',
-    'no-loop-func': 'off',
     'no-unused-expressions': 'off',
     'no-restricted-syntax': 'off',
     'no-useless-concat': 'off',
