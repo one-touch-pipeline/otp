@@ -23,7 +23,7 @@
 $(() => {
   'use strict';
 
-  const fileName = 'Sample_Overview-' + $('.selected-project-value strong').text();
+  const fileName = `Sample_Overview-${$('.selected-project-value strong').text()}`;
 
   const oTableLaneOverview = $('#laneOverviewId').dataTable({
     sDom: '<i> B rt<"clear">',
@@ -115,7 +115,7 @@ $(() => {
     const select = $('#searchCriteriaTableSampleType').find('select')[0];
     const column = 1;
     if (select.selectedIndex !== 0) {
-      oTableLaneOverview.fnFilter('^' + select.value + '$', column, true);
+      oTableLaneOverview.fnFilter(`^${select.value}$`, column, true);
     } else {
       oTableLaneOverview.fnFilter('', column);
     }

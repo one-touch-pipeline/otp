@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ $.otp.userAdministration.editUser = {
       type: 'GET',
       url: $.otp.createLink({
         controller: 'userAdministration',
-        action: action + 'Role',
+        action: `${action}Role`,
         parameters: {
           user: userId,
           role: roleId
@@ -62,16 +62,16 @@ $.otp.userAdministration.editUser = {
         if (data.success) {
           const tableRow = $(origin).parents('tr');
           const { opposite } = labels[action];
-          $('a', tableRow).text(messages['user.administration.role.' + opposite + '' + type]);
+          $('a', tableRow).text(messages[`user.administration.role.${opposite}${type}`]);
           $('a', tableRow).attr('class', opposite);
           tableRow.detach();
-          tableRow.appendTo($('table tbody', $('#' + labels[action].appendToSection + '' + type)));
+          tableRow.appendTo($('table tbody', $(`#${labels[action].appendToSection}${type}`)));
         } else {
           $.otp.warningMessage(data.error);
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+        $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
       }
     });
   }

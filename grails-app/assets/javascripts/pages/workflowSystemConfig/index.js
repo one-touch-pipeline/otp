@@ -80,11 +80,11 @@ const renderWorkflowOverviewTable = (workflowData) => {
       },
       {
         data: '',
-        render: (column, type, row) => '<button class="btn btn-sm btn-primary" ' +
-          'onclick="openAndRenderEditModal(JSON.parse(\'' +
-          JSON.stringify(row).replace(/'/g, '&apos;').replace(/"/g, '&quot;') +
-          '\'))">' +
-          '<i class="bi bi-pencil"></i></button>'
+        render: (column, type, row) => `<button class="btn btn-sm btn-primary"
+          onclick="openAndRenderEditModal(
+            JSON.parse('${JSON.stringify(row).replace(/'/g, '&apos;').replace(/"/g, '&quot;')}'))">
+            <i class="bi bi-pencil"></i>
+          </button>`
       }
     ]
   });
@@ -179,15 +179,17 @@ const updateWorkflow = (workflow, modal) => {
     })
     .then((response) => {
       const wfTable = $('#workflowOverview');
-      const rowToUpdate = wfTable.dataTable().api().cells(':contains(' + response.name + ')').nodes()[0];
+      const rowToUpdate = wfTable.dataTable().api().cells(`:contains(${response.name})`).nodes()[0];
 
       wfTable.dataTable().fnUpdate(response, rowToUpdate, undefined, false);
 
-      $.otp.toaster.showSuccessToast('Update successful', '<b>' + workflow.name +
-        '</b> Configuration has been updated.');
+      $.otp.toaster.showSuccessToast(
+        'Update successful',
+        `<b>${workflow.name}</b> configuration has been updated.`
+      );
     })
     .catch((error) => {
-      $.otp.toaster.showErrorToast('Error', 'Failed to load workflows. ' + error);
+      $.otp.toaster.showErrorToast('Error', `Failed to load workflows. ${error}`);
     });
 };
 

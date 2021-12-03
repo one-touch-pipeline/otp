@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -89,8 +89,7 @@ $.otp.sequence = {
               } else {
                 fastQC = row.fastqcState;
               }
-              let runLink = row.name ?
-                "<span title='" + row.name + "'>" + row.name + '</span>' : '';
+              let runLink = row.name ? `<span title="${row.name}">${row.name}</span>` : '';
               if (showRunLinks === 'true') {
                 runLink = $.otp.createLinkMarkup({
                   controller: 'run',
@@ -111,30 +110,31 @@ $.otp.sequence = {
                   text: row.projectName,
                   title: row.projectName
                 }),
-                "<div class='trim-text-with-ellipsis-left-based'><bdi>" + $.otp.createLinkMarkup({
+                `<div class="trim-text-with-ellipsis-left-based"><bdi>${$.otp.createLinkMarkup({
                   controller: 'individual',
                   action: 'show',
                   id: row.individualId,
                   title: row.mockPid,
                   text: row.mockPid
-                }) + '</bdi></div>',
+                })}</bdi>
+                 </div>`,
                 row.sampleTypeName,
                 row.seqTypeDisplayName,
                 row.libraryLayout,
                 row.singleCell,
                 row.seqCenterName,
                 row.libraryPreparationKit ?
-                  "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + '</span>' : '',
+                  `<span title="${row.libraryPreparationKit}">${row.libraryPreparationKit}</span>` : '',
                 row.antibodyTarget,
                 runLink,
                 row.laneId ?
-                  "<span title='" + row.laneId + "'>" + row.laneId + '</span>' : '',
+                  `<span title="${row.laneId}">${row.laneId}</span>` : '',
                 row.libraryName,
                 row.singleCellWellLabel,
                 fastQC,
                 row.ilseId,
                 row.problem ?
-                  "<span title='" + row.problemDescription + "'>" + row.problem + '</span>' : '',
+                  `<span title="${row.problemDescription}">${row.problem}</span>` : '',
                 row.fileExists,
                 row.dateCreated
               ];
@@ -143,7 +143,7 @@ $.otp.sequence = {
                 $('#withdrawn_description').show();
                 const withdrawnRow = [];
                 rowData.forEach((rowEntry) => {
-                  rowEntry = rowEntry != null ? "<span class='withdrawn'>" + rowEntry + '</span>' : '';
+                  rowEntry = rowEntry != null ? `<span class='withdrawn'>${rowEntry}</span>` : '';
                   withdrawnRow.push(rowEntry);
                 });
                 rowData = withdrawnRow;

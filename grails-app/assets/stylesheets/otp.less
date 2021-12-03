@@ -82,15 +82,14 @@
     }
 }
 
-body,
-input, select, textarea, option, button {
-    .ACCEPTED {
+body, input, select, textarea, option, button {
+    .ACCEPTED:not([disabled]) {
         color:#006400;
     }
-    .BLOCKED, .WARNING {
+    .BLOCKED:not([disabled]), .WARNING:not([disabled]) {
         color:#e67300;
     }
-    .REJECTED {
+    .REJECTED:not([disabled]) {
         color:red;
     }
 }

@@ -55,10 +55,10 @@ const statusToClassName = function (status) {
 };
 
 const button = function (action, value, title, buttonsDisabled, icon) {
-  return "<button class='btn btn-xs btn-primary' " +
-    "formaction='" + action + "' name='step' value='" + value + "' title='" + title + "' " + buttonsDisabled + '>' +
-    "<i class='bi-" + icon + "'></i>" +
-    '</button>';
+  return `<button class="btn btn-xs btn-primary" formaction="${action}" 
+                  name="step" value="${value}" title="${title}" ${buttonsDisabled}>
+            <i class="bi-${icon}"></i>
+          </button>`;
 };
 
 $(() => {

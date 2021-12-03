@@ -38,7 +38,6 @@ if (process.env.CI) {
     strict: 'off',
     'func-names': 'off',
     'no-use-before-define': 'off',
-    'prefer-template': 'off',
     'no-param-reassign': 'off',
     'no-unused-vars': 'off',
     'no-undef': 'off',

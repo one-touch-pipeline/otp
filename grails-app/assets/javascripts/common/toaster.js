@@ -104,8 +104,8 @@ $.otp.toaster = {
      */
   getToastBox() {
     const toastBoxId = 'otpToastBox';
-    const toastBox = '<div id="' + toastBoxId + '" class="otpToastBox"></div>';
-    const getToastBoxFromDOM = () => $('#' + toastBoxId);
+    const toastBox = `<div id="${toastBoxId}" class="otpToastBox"></div>`;
+    const getToastBoxFromDOM = () => $(`#${toastBoxId}`);
 
     if (getToastBoxFromDOM().length) {
       return getToastBoxFromDOM();

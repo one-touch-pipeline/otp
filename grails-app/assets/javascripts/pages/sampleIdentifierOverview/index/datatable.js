@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ $.otp.sampleIdentifierOverviewTable = {
   registerDataTable(selector, url) {
     'use strict';
 
-    const fileName = 'Sample_Identifier-' + $('.selected-project-value strong').text();
+    const fileName = `Sample_Identifier-${$('.selected-project-value strong').text()}`;
 
     const oTable = $(selector).dataTable({
       sDom: '<i> B rt<"clear">',
@@ -101,7 +101,8 @@ $.otp.sampleIdentifierOverviewTable = {
   },
 
   formatSampleIdentifier(data) {
-    return $.map(data, (it) => '<span class="' + (it.withdrawn ? 'withdrawn' : '') + '" title="' + it.comments + '">' +
-        it.text + '</span>').join(', ');
+    return $.map(data, (it) => `<span class="${(it.withdrawn ? 'withdrawn' : '')}" title="${it.comments}">
+                                  ${it.text}
+                                </span>`).join(', ');
   }
 };

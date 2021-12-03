@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ $(() => {
             return row.comment;
           }
           if (row.comment) {
-            return '<i class="bi-info-circle" title="' + row.comment + '"></i>';
+            return `<i class="bi-info-circle" title="${row.comment}"></i>`;
           }
           return '';
         }
@@ -61,21 +61,20 @@ $(() => {
             return row.shortName;
           }
           if (row.shortName) {
-            return '<a title="' +
-                  row.displayName.replaceAll('\n', '<br>') +
-                  '" data-toggle="tooltip" data-placement="bottom" href="' +
-                  $.otp.createLink(
-                    {
-                      controller: 'workflowRunDetails',
-                      action: 'index',
-                      id: row.id,
-                      parameters: {
-                        'workflow.id': $('#workflow').val(),
-                        state: $('#state').val(),
-                        name: $('#name').val()
-                      }
-                    }
-                  ) + '">' + row.shortName + '</a>';
+            const workflowRunDetailsPageLink = $.otp.createLink({
+              controller: 'workflowRunDetails',
+              action: 'index',
+              id: row.id,
+              parameters: {
+                'workflow.id': $('#workflow').val(),
+                state: $('#state').val(),
+                name: $('#name').val()
+              }
+            });
+            return `<a title="${row.displayName.replaceAll('\n', '<br>')}" 
+                       data-toggle="tooltip" data-placement="bottom" href="${workflowRunDetailsPageLink}">
+                      ${row.shortName}
+                    </a>`;
           }
           return '';
         }
@@ -94,39 +93,46 @@ $(() => {
           const buttonsDisabled = (row.state !== 'FAILED' || row.stepId === null) ? ' disabled ' : '';
           const stepsDisabled = (row.steps.length === 0) ? ' disabled ' : '';
 
-          let result = "<form method='POST' class='single'>" +
-            "          <div class='btn-group float-right'>" +
-            button($.otp.createLink({
-              controller: 'workflowRunList',
-              action: 'setFailedFinal'
-            }),
-            row.stepId, 'Set failed final',
-            buttonsDisabled, 'file-earmark-x') +
-            button($.otp.createLink({
-              controller: 'workflowRunList',
-              action: 'restartStep'
-            }),
-            row.stepId, 'Restart "' + row.step + '" step',
-            buttonsDisabled, 'reply') +
-            "<div class='btn-group' role='group'>" +
-            "<button type='button' class='btn btn-xs btn-primary dropdown-toggle dropdown-toggle-split'" +
-            " data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' title='Restart previous steps'" +
-            buttonsDisabled + stepsDisabled + '>' +
-            "<span class='sr-only'>Toggle Dropdown</span>" +
-            '</button>' +
-            "<div class='dropdown-menu dropdown-menu-right'>";
+          const failedFinalButton = button($.otp.createLink({
+            controller: 'workflowRunList', action: 'setFailedFinal'
+          }),
+          row.stepId, 'Set failed final',
+          buttonsDisabled, 'file-earmark-x');
+          const restartStepButton = button($.otp.createLink({
+            controller: 'workflowRunList', action: 'restartStep'
+          }),
+          row.stepId, `Restart "${row.step}" step`,
+          buttonsDisabled, 'reply');
+          const restartRunButton = button($.otp.createLink({
+            controller: 'workflowRunList', action: 'restartRun'
+          }),
+          row.stepId, 'Restart run',
+          buttonsDisabled, 'reply-all');
+          const workflowRunListPageLink = $.otp.createLink({
+            controller: 'workflowRunList',
+            action: 'restartStep'
+          });
+
+          let result = `<form method="POST" class="single">
+                          <div class="btn-group float-right">
+                            ${failedFinalButton}
+                            ${restartStepButton} 
+                            <div class="btn-group" role="group">
+                              <button class="btn btn-xs btn-primary dropdown-toggle dropdown-toggle-split"
+                                      type="button" data-toggle="dropdown" 
+                                      aria-haspopup="true" aria-expanded="false" 
+                                      title="Restart previous steps" ${buttonsDisabled} ${stepsDisabled}>
+                                <span class="sr-only">Toggle Dropdown</span>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-right">`;
+
           for (let i = 0; i < row.steps.length; i++) {
-            result += "<button class='dropdown-item' formaction='" +
-              $.otp.createLink({ controller: 'workflowRunList', action: 'restartStep' }) +
-              "' name='step' value='" + row.stepIds[i] + "'" + buttonsDisabled + '>Restart "' +
-              row.steps[i] + '" step</button>';
+            result += `<button class="dropdown-item" formaction="${workflowRunListPageLink}" 
+                               name="step" value="${row.stepIds[i]}" ${buttonsDisabled}>
+                         Restart "${row.steps[i]}" step
+                       </button>`;
           }
-          result += '</div>' +
-            '</div>' +
-            button($.otp.createLink({ controller: 'workflowRunList', action: 'restartRun' }),
-              row.stepId, 'Restart run', buttonsDisabled, 'reply-all') +
-            '</div>' +
-            '</form>';
+          result += `</div></div>${restartRunButton}</div></form>`;
           return result;
         },
         orderable: false

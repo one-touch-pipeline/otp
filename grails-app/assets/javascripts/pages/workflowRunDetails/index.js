@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,50 +52,55 @@ $(() => {
     childTable += '<tbody>';
 
     rowData.clusterJobs.map((clusterJob) => {
-      childTable += '<tr>' + '<td><div title="' + clusterJob.state +
-          '" class="small ' + statusToClassName(clusterJob.state) + '"></div></td>' +
-          '<td>' + $.otp.createLinkMarkup({
-        text: 'Cluster job: ' + clusterJob.name,
-        controller: 'clusterJobDetail',
-        action: 'show',
-        id: clusterJob.id,
-        parameters: createLinkParametersForNavigation()
-      }) +
-                    '</td>' +
-                    '<td>' + clusterJob.jobId + '</td>';
-
-      if (clusterJob.hasLog) {
-        childTable += '<td>' + $.otp.createLinkMarkup({
-          text: 'Log',
+      childTable += `<tr>
+                       <td>
+                         <div title="${clusterJob.state}" class="small ${statusToClassName(clusterJob.state)}"></div>
+                       </td>
+                       <td>` +
+        `${$.otp.createLinkMarkup({
+          text: `Cluster job: ${clusterJob.name}`,
           controller: 'clusterJobDetail',
-          action: 'showLog',
+          action: 'show',
           id: clusterJob.id,
           parameters: createLinkParametersForNavigation()
-        }) + '</td>';
+        })}
+                       </td>
+                       <td>${clusterJob.jobId}</td>`;
+
+      if (clusterJob.hasLog) {
+        childTable += '<td>' +
+          `${$.otp.createLinkMarkup({
+            text: 'Log',
+            controller: 'clusterJobDetail',
+            action: 'showLog',
+            id: clusterJob.id,
+            parameters: createLinkParametersForNavigation()
+          })}</td>`;
       } else {
         childTable += '<td></td>';
       }
 
-      childTable +=
-          '<td>' + clusterJob.node + '</td>' +
-          '<td>' + clusterJob.wallTime + '</td>' +
-          '<td>' + clusterJob.exitCode + '</td>' +
-          '</tr>';
+      childTable += `  <td>${clusterJob.node}</td>
+                       <td>${clusterJob.wallTime}</td>
+                       <td>${clusterJob.exitCode}</td>
+                     </tr>`;
     });
 
     if (rowData.state === 'FAILED' && rowData.previousStepId) {
-      childTable += '<tr>' +
-                '<td></td>' +
-                '<td><b>' +
-                '<i class="bi bi-info-circle"></i> This job failed. Maybe the reason is related to the ' +
-                'previous step (' + rowData.previousStepId + ').</b>' +
-                '</td>' +
-                '<td></td>' +
-                '<td></td>' +
-                '<td></td>' +
-                '<td></td>' +
-                '<td></td>' +
-                '</tr>';
+      childTable += `<tr>
+                       <td></td>
+                       <td>
+                         <b><i class="bi bi-info-circle"></i> 
+                           This job failed. Maybe the reason is 
+                           related to the previous step (${rowData.previousStepId}).
+                         </b>
+                       </td>
+                       <td></td>
+                       <td></td>
+                       <td></td>
+                       <td></td>
+                       <td></td>
+                     </tr>`;
     }
 
     childTable += '</tbody>';
@@ -117,41 +122,41 @@ $(() => {
     childTable += '<tbody>';
 
     if (rowData.wes) {
-      childTable += '<tr>' +
-              '<td>WES job</td>' +
-              '<td>' + rowData.wes + '</td>' +
-              '<td></td>' +
-              '</tr>';
+      childTable += `<tr>
+                       <td>WES job</td>
+                       <td>${rowData.wes}</td>
+                       <td></td>
+                     </tr>`;
     }
 
     if (rowData.hasLogs) {
-      childTable += '<tr>' +
-              '<td>Workflow logs</td>' +
-              '<td></td>' +
-              '<td>' + $.otp.createLinkMarkup({
+      const logLink = $.otp.createLinkMarkup({
         text: 'Log',
         controller: 'workflowRunDetails',
         action: 'showLogs',
         id: rowData.id,
         parameters: createLinkParametersForNavigation()
-      }) + '</td>' +
-              '</tr>';
+      });
+      childTable += `<tr>
+                      <td>Workflow logs:</td>
+                      <td></td>
+                      <td>${logLink}</td>
+                    </tr>`;
     }
 
     if (rowData.error) {
+      const errorLink = $.otp.createLinkMarkup({
+        text: 'Error',
+        controller: 'workflowRunDetails',
+        action: 'showError',
+        id: rowData.id,
+        parameters: createLinkParametersForNavigation()
+      });
       childTable += `<tr> 
-              <td>Workflow error: </td> 
-              <td class="break-text-line"> ${rowData.error.message} </td> 
-              <td>
-                  ${$.otp.createLinkMarkup({
-    text: 'Error',
-    controller: 'workflowRunDetails',
-    action: 'showError',
-    id: rowData.id,
-    parameters: createLinkParametersForNavigation()
-  })} 
-              </td>
-              </tr>`;
+                       <td>Workflow error: </td> 
+                       <td class="break-text-line">${rowData.error.message}</td> 
+                       <td>${errorLink}</td>
+                     </tr>`;
     }
     childTable += '</tbody>';
     childTable += '</table></div>';
@@ -173,7 +178,7 @@ $(() => {
       cssClass += statusToClassName(row.state);
     }
 
-    return '<div title="' + row.state + '" class="' + cssClass + ' small"></div>';
+    return `<div title="${row.state}" class="${cssClass} small"></div>`;
   }
 
   let lastStepFailed = false;
@@ -214,20 +219,20 @@ $(() => {
             return null;
           }
 
-          const runState = $('#steps').data('wf-run-state');
+          const runState = $('#steps')
+            .data('wf-run-state');
           const buttonsDisabled = !lastStepFailed ||
-                      runState === 'RESTARTED' ||
-                      runState === 'FAILED_FINAL' ||
-                      row.obsolete ? ' disabled ' : '';
-
-          return "<form method='POST' class='single'>" +
-                        button($.otp.createLink({
-                          controller: 'workflowRunDetails',
-                          action: 'restartStep',
-                          parameters: { redirect: $.otp.uriWithParams }
-                        }),
-                        row.id, 'Restart step', buttonsDisabled, 'reply') +
-                  '</form>';
+          runState === 'RESTARTED' ||
+          runState === 'FAILED_FINAL' ||
+          row.obsolete ? ' disabled ' : '';
+          const restartStepButton = button($.otp.createLink({
+            controller: 'workflowRunDetails',
+            action: 'restartStep',
+            parameters: { redirect: $.otp.uriWithParams }
+          }), row.id, 'Restart step', buttonsDisabled, 'reply');
+          return `<form method="POST" class="single">
+                    ${restartStepButton}
+                 </form>`;
         },
         orderable: false
       }

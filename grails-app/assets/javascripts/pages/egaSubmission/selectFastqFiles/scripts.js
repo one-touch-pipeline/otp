@@ -29,7 +29,7 @@ $.otp.selectFastqFiles = {
       const actor = $(this);
       const checked = actor.prop('checked');
       const group = actor.data('group');
-      const checkboxes = $('input[type="checkbox"][data-group="' + group + '"]');
+      const checkboxes = $(`input[type="checkbox"][data-group="${group}"]`);
       const otherCheckboxes = checkboxes.not(actor);
       otherCheckboxes.prop('checked', checked);
     });

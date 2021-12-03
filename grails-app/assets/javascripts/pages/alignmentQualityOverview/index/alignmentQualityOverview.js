@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,23 +60,27 @@ $(() => {
       return $('<div>').text(tableCellData).html(); // escape HTML
     }
     if (tableCellData.status === 'BLOCKED' || tableCellData.status === 'REJECTED') {
-      /* eslint-disable max-len */
-      return "<span id='status-cell-" + tableCellData.id + "' title='" + tableCellData.tooltip + "'>" +
-        "<select class='qcDropdown " + tableCellData.status + " custom-select custom-select-sm' data-id='" + tableCellData.id + "'>" +
-        "<option value='ACCEPTED' class='ACCEPTED' " + (tableCellData.status === 'ACCEPTED' ? 'selected' : '') + '>&#10003; ACCEPTED</option>' +
-        "<option disabled value='BLOCKED'  class='BLOCKED'" + (tableCellData.status === 'BLOCKED' ? 'selected' : '') + '>&#9888; BLOCKED</option>' +
-        "<option disabled value='REJECTED'  class='REJECTED' " + (tableCellData.status === 'REJECTED' ? 'selected' : '') + '>&#10005; REJECTED</option>' +
-        '</select> ' + $('<div>').text(tableCellData.value).html() + '</span>';
-      /* eslint-enable max-len */
+      return `<span id="status-cell-${tableCellData.id}" title="${tableCellData.tooltip}">
+                <select class="qcDropdown ${tableCellData.status} custom-select custom-select-sm" 
+                        data-id="${tableCellData.id}">
+                  <option class="ACCEPTED" ${(tableCellData.status === 'ACCEPTED' ? 'selected' : '')}
+                          value="ACCEPTED">&#10003; ACCEPTED</option>
+                  <option class="BLOCKED" ${(tableCellData.status === 'BLOCKED' ? 'selected' : '')}
+                          disabled value="BLOCKED">&#9888; BLOCKED</option>
+                  <option class="REJECTED" ${(tableCellData.status === 'REJECTED' ? 'selected' : '')}
+                          disabled value="REJECTED">&#10005; REJECTED</option>
+                </select>
+                ${$('<div>').text(tableCellData.value).html()}
+              </span>`;
     }
     if (tableCellData.status === 'WARNING') {
       return `<span id="status-cell-${tableCellData.id}" title="${tableCellData.tooltip}">
-                  <select class="qcDropdown ${tableCellData.status} custom-select custom-select-sm"
-                          data-id="${tableCellData.id}">
-                       <option value="ACCEPTED" class="ACCEPTED">&#10003; ACCEPTED</option>
-                       <option value="WARNING" class="WARNING" selected>&#9888; WARNING</option>
-                  </select>
-                  ${$('<div>').text(tableCellData.value).html()}
+                <select class="qcDropdown ${tableCellData.status} custom-select custom-select-sm"
+                        data-id="${tableCellData.id}">
+                  <option value="ACCEPTED" class="ACCEPTED">&#10003; ACCEPTED</option>
+                  <option value="WARNING" class="WARNING" selected>&#9888; WARNING</option>
+                </select>
+                ${$('<div>').text(tableCellData.value).html()}
               </span>`;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ $.otp.projectOverviewTable = {
   registerDataTable(selector, url, successUpdate) {
     'use strict';
 
-    const fileName = $(selector).parent().attr('data-csv-title') + '-' + $('.selected-project-value strong').text();
+    const fileName = `${$(selector).parent().attr('data-csv-title')}-${$('.selected-project-value strong').text()}`;
 
     const oTable = $(selector).dataTable({
       sDom: '<i> B rt<"clear">',
@@ -98,7 +98,7 @@ $.otp.projectOverviewTable = {
           $('#patient-count').html('');
           message = '<ul>';
           for (i = 0; i < data.errors.length; i += 1) {
-            message += '<li>' + data.errors[i].message + '</li>';
+            message += `<li>${data.errors[i].message}</li>`;
           }
           message += '</ul>';
           $.otp.warningMessage(message);

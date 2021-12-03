@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ $.otp.userAdministration.enableUser = function (userId, field) {
       action: 'enable',
       parameters: {
         'user.id': userId,
-        flag: $('#' + field).is(':checked')
+        flag: $(`#${field}`).is(':checked')
       }
     }),
     type: 'POST',
@@ -46,7 +46,7 @@ $.otp.userAdministration.enableUser = function (userId, field) {
       }
     },
     error(jqXHR, textStatus, errorThrown) {
-      $.otp.warningMessage(textStatus + ' occurred while processing the data. Reason: ' + errorThrown);
+      $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
     }
   });
 };
@@ -77,7 +77,7 @@ $.otp.userAdministration.loadUserList = function () {
           if (type === 'sort') {
             return source.enabled;
           }
-          const checkboxId = 'user-change-' + source.id;
+          const checkboxId = `user-change-${source.id}`;
           return `<input type="checkbox" id="${checkboxId}"
                     ${source.enabled ? 'checked' : ''}/><input type="button" value="Update"
                     onclick="$.otp.userAdministration.enableUser(${source.id},'${checkboxId}')"/>`;
@@ -92,18 +92,18 @@ $.otp.userAdministration.loadUserList = function () {
           if (source.acceptedPrivacyPolicy) {
             checked = 'checked';
           }
-          return "<input type='checkbox' disabled " + checked + '/>';
+          return `<input type="checkbox" disabled ${checked}/>`;
         }
       },
       {
         mData(source, type, data) {
           let result = '';
           if (source.username) {
-            result = '<form action="' + $.otp.createLink({ controller: 'login', action: 'impersonate' }) +
-                        '" method="POST">' +
-                        '<input type="hidden" name="username" value="' + source.username + '"/>' +
-                        '<button>Switch to ' + source.username + '</button>' +
-                      '</form>';
+            result = `<form action="${$.otp.createLink({ controller: 'login', action: 'impersonate' })}" 
+                            method="POST">
+                        <input type="hidden" name="username" value="${source.username}"/>
+                          <button>Switch to ${source.username}</button>
+                      </form>`;
           }
           return result;
         }

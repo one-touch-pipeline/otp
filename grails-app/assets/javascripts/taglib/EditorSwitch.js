@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ $(() => {
     if ($.otp.toaster) {
       $.otp.toaster.showSuccessToast(title, message);
     } else {
-      $.otp.infoMessage(title + ': ' + message);
+      $.otp.infoMessage(`${title}: ${message}`);
     }
   };
 
@@ -33,7 +33,7 @@ $(() => {
     if ($.otp.toaster) {
       $.otp.toaster.showErrorToast(title, message);
     } else {
-      $.otp.warningMessage(title + '. ' + message);
+      $.otp.warningMessage(`${title}. ${message}`);
     }
   };
 
@@ -127,7 +127,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
         $('input[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
       }
@@ -155,7 +155,7 @@ $(() => {
           if (data.updateMap) {
             for (const key in data.updateMap) {
               if ({}.hasOwnProperty.call(data.updateMap, key)) {
-                const el = $('.' + key, outerContainer);
+                const el = $(`.${key}`, outerContainer);
                 el.text(data.updateMap[key]);
               }
             }
@@ -169,7 +169,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
         $('textarea', container).val($('p.edit-switch-label span', outerContainer).text());
       }
@@ -203,7 +203,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Data could not be stored', jqXHR.responseJSON.message);
         } else {
-          failure('Data could not be stored', 'Reason: ' + errorThrown);
+          failure('Data could not be stored', `Reason: ${errorThrown}`);
         }
       }
     });
@@ -240,7 +240,7 @@ $(() => {
           $(outerContainer).remove();
           const submitContainer = $('div[class=submit-container]', outerOuterContainer);
           const selectRoles = $('select[name=newRoles]', submitContainer);
-          selectRoles.append('<option value=' + data.currentRole + '>' + data.currentRole + '</option>');
+          selectRoles.append(`<option value="${data.currentRole}">${data.currentRole}</option>`);
         } else {
           failure('Data could not be stored', data.error);
           $('p.edit-switch-editor', outerContainer).hide();
@@ -251,7 +251,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
         $('p.edit-switch-editor', outerContainer).hide();
         $('p.edit-switch-label', outerContainer).show();
@@ -323,7 +323,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
@@ -368,7 +368,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
@@ -422,7 +422,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
@@ -454,7 +454,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
@@ -471,7 +471,7 @@ $(() => {
     outerContainer = container.parent();
     value = {};
     $('input:checked', container).each(function (index) {
-      value['value[' + index + ']'] = this.name;
+      value[`value[${index}]`] = this.name;
     });
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
@@ -500,7 +500,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
         resetCheckboxes(container);
       }
@@ -540,7 +540,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
         $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
       }
@@ -575,7 +575,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
         $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
       }
@@ -618,7 +618,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
@@ -653,8 +653,8 @@ $(() => {
         if (data.success) {
           success('Success', 'Data stored successfully');
           $.each(['label', 'editor'], function () {
-            $('p.edit-switch-' + this + ' span', outerContainer)
-              .removeClass('icon-' + orgVal).addClass('icon-' + invVal);
+            $(`p.edit-switch-${this} span`, outerContainer)
+              .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
           });
           if (data.tooltip) {
             $('p.edit-switch-label', outerContainer)[0].title = data.tooltip;
@@ -672,7 +672,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
@@ -747,8 +747,8 @@ $(() => {
         valid = false;
         return;
       }
-      dataValues['value[' + i + ']'] = $(this).val();
-      displayValue = displayValue + $(this).val() + ', ';
+      dataValues[`value[${i}]`] = $(this).val();
+      displayValue += `${$(this).val()}, `;
       i += 1;
     });
     if (!valid) {
@@ -772,7 +772,7 @@ $(() => {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
           failure('Request failed', jqXHR.responseJSON.message);
         } else {
-          failure(textStatus + ' occurred while processing the data', 'Reason: ' + errorThrown);
+          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
         }
       }
     });
