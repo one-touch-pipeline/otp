@@ -38,6 +38,7 @@ import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -79,7 +80,8 @@ import java.util.concurrent.*
  */
 @Slf4j
 @Integration
-abstract class AbstractWorkflowSpec extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, WorkflowSystemDomainFactory, UserDomainFactory {
+abstract class AbstractWorkflowSpec extends Specification implements UserAndRoles, GroovyScriptAwareTestCase,
+        DomainFactoryCore, WorkflowSystemDomainFactory, UserDomainFactory {
 
     /**
      * state considered as running or not started
@@ -221,7 +223,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
                 loadDefaultValuesScripts()
                 createProcessingPriorityObject()
-                createRealmObject()
+                createRealm()
                 initFileSystem()
                 initProcessingOption()
 
@@ -429,20 +431,29 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         DomainFactory.createProcessingOptionLazy(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
     }
 
+    @Override
+    Realm createRealm() {
+        return createRealm([:])
+    }
+
     /**
-     * create a realm for the tests and set it to default
+     * Adapt realm creation to create only one and setup it correctly for the workflow test.
      */
-    private void createRealmObject() {
-        log.debug("creating realm and set it to default")
-        realm = createRealm([
-                name                       : 'WorkflowTest',
-                jobScheduler               : configService.workflowTestScheduler,
-                host                       : configService.workflowTestHost,
-                port                       : 22,
-                timeout                    : 0,
-                defaultJobSubmissionOptions: jobSubmissionOptions,
-        ])
-        DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
+    @Override
+    Realm createRealm(Map realmProperties) {
+        if (!realm) {
+            log.debug("creating realm and set it to default")
+            realm = DomainFactoryCore.super.createRealm([
+                    name                       : 'WorkflowTest',
+                    jobScheduler               : configService.workflowTestScheduler,
+                    host                       : configService.workflowTestHost,
+                    port                       : 22,
+                    timeout                    : 0,
+                    defaultJobSubmissionOptions: jobSubmissionOptions,
+            ])
+            DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
+        }
+        return realm
     }
 
     /**
@@ -618,7 +629,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * Updates some domain to use the correct value for running the tests:
      * - Project:
      *   - unixGroup
-     *   - realm
      *   - processingPriority
      * - WorkflowRun:
      *   - priority
@@ -627,7 +637,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         String unixGroup = configService.workflowProjectUnixGroup
         Project.list().each {
             it.unixGroup = unixGroup
-            it.realm = realm
             it.processingPriority = processingPriority
             it.save(flush: true)
         }

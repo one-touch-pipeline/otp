@@ -38,7 +38,7 @@ import java.time.Duration
 
 abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RunYapsaInstance> {
 
-    LsdfFilesService lsdfFilesService
+    IndividualService individualService
 
     @Override
     void setupData() {
@@ -101,7 +101,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         }
 
         RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(samplePair)
-        Path runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore, configService)
+        Path runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore, individualService)
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         assert sp.save(flush: true)
