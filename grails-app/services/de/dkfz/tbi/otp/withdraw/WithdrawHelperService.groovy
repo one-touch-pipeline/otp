@@ -174,6 +174,15 @@ class WithdrawHelperService {
             if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
                 withdrawStateHolder.pathsToDelete << lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
             }
+
+            MergingWorkPackage.withCriteria {
+                seqTracks {
+                    eq('id', dataFile.seqTrack.id)
+                }
+            }.each { MergingWorkPackage mergingWorkPackage ->
+                mergingWorkPackage.seqTracks.remove(dataFile.seqTrack)
+                mergingWorkPackage.save(flush: true)
+            }
         }
     }
 

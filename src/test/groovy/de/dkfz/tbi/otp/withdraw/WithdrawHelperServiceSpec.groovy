@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.withdraw
 
-import grails.testing.gorm.DataTest
+import grails.test.hibernate.HibernateSpec
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -33,13 +32,14 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-class WithdrawHelperServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class WithdrawHelperServiceSpec extends HibernateSpec implements DomainFactoryCore {
 
     private static final List<String> PATH_LIST1 = ['/tmp'].asImmutable()
     private static final List<String> PATH_LIST2 = ['/tmp2'].asImmutable()
@@ -52,9 +52,10 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
     TemporaryFolder temporaryFolder
 
     @Override
-    Class[] getDomainClassesToMock() {
+    List<Class> getDomainClasses() {
         return [
                 DataFile,
+                MergingWorkPackage,
         ]
     }
 
@@ -414,6 +415,11 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
                         singleCellWellLabel: 'someLabel',
                 ])
         ])
+        MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage([
+                seqTracks: [dataFile.seqTrack] as Set,
+                seqType  : dataFile.seqTrack.seqType,
+        ])
+
         WithdrawHelperService service = new WithdrawHelperService()
 
         service.lsdfFilesService = Mock(LsdfFilesService)
@@ -486,6 +492,8 @@ class WithdrawHelperServiceSpec extends Specification implements DataTest, Domai
             fileWithdrawn == true
             withdrawnComment != withdrawnCommentWithdrawn
         }
+
+        mergingWorkPackage.seqTracks.empty
     }
 
     void "createAndWriteBashScript, if paths given, write expected script"() {
