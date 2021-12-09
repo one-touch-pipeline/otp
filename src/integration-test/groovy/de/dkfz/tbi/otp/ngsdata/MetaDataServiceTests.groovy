@@ -57,7 +57,7 @@ class MetaDataServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testGetMetaDataEntryByIdNoProjectAnonymous() {
+    void testGetMetaDataEntryByIdAsAnonymous() {
         setupData()
         MetaDataEntry entry = mockEntry()
 
@@ -73,62 +73,7 @@ class MetaDataServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testGetMetaDataEntryByIdNoProjectUser() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-
-        doWithAuth(TESTUSER) {
-            TestCase.shouldFail(AccessDeniedException) {
-                metaDataService.getMetaDataEntryById(entry.id)
-            }
-            // accessing a non-existing id should still work
-            assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
-        }
-    }
-
-    @Test
-    void testGetMetaDataEntryByIdNoProjectOperator() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-
-        doWithAuth(OPERATOR) {
-            assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
-            // accessing a non-existing id should still work
-            assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
-        }
-    }
-
-    @Test
-    void testGetMetaDataEntryByIdNoProjectAdmin() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-
-        doWithAuth(ADMIN) {
-            assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
-            // accessing a non-existing id should still work
-            assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
-        }
-    }
-
-    @Test
-    void testGetMetaDataEntryByIdWithProjectNoAclAsAnonymous() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-
-        TestCase.shouldFail(AccessDeniedException) {
-            doWithAnonymousAuth {
-                metaDataService.getMetaDataEntryById(entry.id)
-            }
-        }
-
-        // accessing a non-existing id should still work
-        doWithAnonymousAuth {
-            assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
-        }
-    }
-
-    @Test
-    void testGetMetaDataEntryByIdWithProjectAsUser() {
+    void testGetMetaDataEntryByIdAsUser() {
         setupData()
         MetaDataEntry entry = mockEntry()
 
@@ -159,7 +104,7 @@ class MetaDataServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testGetMetaDataEntryByIdWithProjectAsOperator() {
+    void testGetMetaDataEntryByIdAsOperator() {
         setupData()
         MetaDataEntry entry = mockEntry()
 
@@ -171,7 +116,7 @@ class MetaDataServiceTests implements UserAndRoles {
     }
 
     @Test
-    void testGetMetaDataEntryByIdWithProjectAsAdmin() {
+    void testGetMetaDataEntryByIdAsAdmin() {
         setupData()
         MetaDataEntry entry = mockEntry()
 
