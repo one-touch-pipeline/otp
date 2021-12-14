@@ -23,6 +23,7 @@
 <html>
 <head>
     <title><g:message code="triggerAlignment.title"/></title>
+    <asset:javascript src="pages/triggerAlignment/index/functions.js"/>
 </head>
 
 <body>
@@ -36,7 +37,7 @@
         </div>
 
         <div class="mt-3">
-            <g:render template="./components/checkArea"/>
+            <g:render template="./components/checkArea" model="[seqTracks: seqTracks]"/>
         </div>
 
         <div class="mt-3">

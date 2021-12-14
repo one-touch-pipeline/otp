@@ -19,39 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
 
-import grails.plugin.springsecurity.annotation.Secured
-
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.project.Project
-
-@Secured("hasRole('ROLE_OPERATOR')")
-class TriggerAlignmentController {
-
-    static allowedMethods = [
-            index: "GET",
-    ]
-
-    // TODO: This is only a dummy impl, which will be replaced by otp-1342
-    @SuppressWarnings('AvoidFindWithoutAll')
-    private List<SeqTrack> findSeqTracks() {
-        Project project = Project.findByName("ExampleProject")
-        return SeqTrack.withCriteria {
-            sample {
-                individual {
-                    eq('project', project)
-                }
-            }
-            //    eq('seqType', seqType)
-        }
-    }
-
-    def index() {
-        return [
-                seqTypes: SeqType.findAllByLegacy(false),
-                seqTracks: findSeqTracks(),
-        ]
-    }
-}
+$(document).ready(() => {
+  /*
+   * Initialization of a DataTable for SeqTrack table in TriggerAlignment page
+   */
+  $('#seqTrackTable').DataTable({
+    responsive: true,
+    scrollY: '200px',
+    scrollCollapse: true,
+    paging: false
+  });
+});
