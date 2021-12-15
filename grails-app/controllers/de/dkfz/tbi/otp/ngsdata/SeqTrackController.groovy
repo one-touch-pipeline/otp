@@ -48,13 +48,7 @@ class SeqTrackController {
     }
 
     def seqTrackSet(SeqTrackSelectionCommand cmd) {
-        List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
-            sample {
-                eq("individual", cmd.individual)
-                eq("sampleType", cmd.sampleType)
-            }
-            eq("seqType", cmd.seqType)
-        }
+        List<SeqTrack> seqTracks = seqTrackService.getSeqTrackSet(cmd.individual, cmd.sampleType, cmd.seqType)
 
         return [
                 seqTrackSet: new SeqTrackSet(seqTracks),

@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
@@ -247,6 +248,17 @@ class SeqTrackService {
             seqTrack = SeqTrack.get(identifier as Long)
         }
         return seqTrack
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, 'OTP_READ_ACCESS')")
+    List<SeqTrack> getSeqTrackSet(Individual individual, SampleType sampleType, SeqType seqType) {
+        return SeqTrack.createCriteria().list {
+            sample {
+                eq("individual", individual)
+                eq("sampleType", sampleType)
+            }
+            eq("seqType", seqType)
+        }
     }
 
     /**
