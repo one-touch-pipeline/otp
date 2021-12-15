@@ -100,6 +100,10 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         return processingOptionService.findOptionAsLong(ProcessingOption.OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD)
     }
 
+    String getReasonForDeactivatedUsers() {
+        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TEXT_REASON_DEACTIVATED_USERS)
+    }
+
     String getOtpServiceSalutation() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
     }
@@ -141,19 +145,18 @@ class ScheduleUsersForDeactivationJob extends ScheduledJob {
         String body = """\
         |Dear ${authority?.realName ?: "user"},
         |
-        |There are users with an expired AD account in your OTP projects.
-        |This usually happens for users that no longer have a valid working contract.
-        |If you think this is wrong please check with the respective HR responsible.
-        |
-        |If a user's account stays expired for the next ${deactivationGracePeriod} days, it will be removed automatically.
-        |You will not receive a reminder.
-        |
-        |The expired users are:
+        |There are users with an expired AD account in your OTP project(s):
         |${getMailBodyWithInvalidUsers(invalidUsers)}
         |
+        |${reasonForDeactivatedUsers}
+        |
+        |If a user's account stays expired for the next ${deactivationGracePeriod} days, it will automatically be removed. You will not receive a reminder.
+        |If the user's account is extended or reactivated within these ${deactivationGracePeriod} days, the user will keep access to all projects.
+        |
+        |Please be aware that the user will not get a copy of this mail and can therefore not take action.
         |
         |Best regards,
-        |OTP on behalf of ${otpServiceSalutation}
+        |OTP on behalf of the ${otpServiceSalutation}
         |""".stripMargin()
 
         mailHelperService.sendEmail(subject, body, authority.email)

@@ -392,6 +392,10 @@ class ProcessingOption implements Entity {
                 "The name and optionally email of the helpdesk team, to be used in the middle of sentences",
                 Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+        EMAIL_TEXT_REASON_DEACTIVATED_USERS(
+                "A reason which will be printed in an email to the PI, which informs about deactivated users.",
+                Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT
+        ),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE(
                 "Notes from the sequencing center that is sent with every notification mail",
