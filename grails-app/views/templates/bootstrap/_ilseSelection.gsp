@@ -20,12 +20,10 @@
   - SOFTWARE.
   --}%
 
-%{--
-  - Tab component for seqTrackSelectionTabBar.
-  -
-  - Required params:
-  - None
-  -
-  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/ilseIdTab"/>
-  --}%
-<g:render template="/templates/bootstrap/ilseSelection"/>
+<g:message code="ilseSelection.note"/>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="ilse-selection"><g:message code="ilseSelection.ilse"/></label>
+    </div>
+    <textarea id="ilse-selection" class="form-control"></textarea>
+</div>
