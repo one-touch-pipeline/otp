@@ -57,12 +57,9 @@ class ChromosomeIdentifierSortingService {
         String identifierAsString2 = String.valueOf(identifier2).toUpperCase()
         if (identifierAsInteger1 <= CHROMOSOME_SIZE) {
             return -1
-        } else if (identifierAsString2 == Chromosomes.CHR_X.chr || identifierAsString2 == Chromosomes.CHR_Y.chr ||
-        identifierAsString2 == Chromosomes.CHR_M.chr) {
-            return 1
-        } else {
-            return -1
         }
+        return identifierAsString2 == Chromosomes.CHR_X.chr || identifierAsString2 == Chromosomes.CHR_Y.chr ||
+                identifierAsString2 == Chromosomes.CHR_M.chr ? 1 : -1
     }
 
     private int compareNotIntegerWithInteger(Object identifier1, Object identifier2) {

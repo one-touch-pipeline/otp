@@ -91,13 +91,10 @@ enum TimeFormats {
      * @returns Formatted dates and value to sort by
      */
     static Map<String, Object> asTimestamp(Date date) {
-        if (!date) {
-            return [shortest: "-", full: "-", value: 0]
-        }
-        return [
+        return date ? [
                 shortest: getInShortestTimeFormat(date),
                 full    : TIME_WEEKDAY_DATE.getFormattedDate(date),
                 value   : date.time,
-        ]
+        ] : [shortest: "-", full: "-", value: 0]
     }
 }

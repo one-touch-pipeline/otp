@@ -55,10 +55,7 @@ class DecisionMapping implements Entity {
             if (jobDefinition == mapping.decision.jobDefinition) {
                 return "recursive"
             }
-            if (jobDefinition.plan != mapping.decision.jobDefinition.plan) {
-                return "plan"
-            }
-            return true
+            return (jobDefinition.plan == mapping.decision.jobDefinition.plan) ?: "plan"
         })
     }
 }

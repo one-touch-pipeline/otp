@@ -123,10 +123,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
                     (config.seqType?.isRna() || config.seqType?.isWgbs() || config.seqType?.isChipSeq()) && !adapterTrimmingNeeded) {
                 return "required"
             }
-            if (config.pipeline?.type != Pipeline.Type.ALIGNMENT && adapterTrimmingNeeded) {
-                return "not.allowed"
-            }
-            return true
+            return config.pipeline?.type != Pipeline.Type.ALIGNMENT && adapterTrimmingNeeded ? "not.allowed" : true
         }
         md5sum nullable: true, matches: /^[0-9a-f]{32}$/
     }

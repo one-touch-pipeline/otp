@@ -62,11 +62,7 @@ class ConfigService implements ApplicationContextAware {
         Properties properties = parsePropertiesFile()
         this.otpProperties = properties.collectEntries { key, value ->
             OtpProperty otpProperty = OtpProperty.findByKey(key)
-            if (otpProperty) {
-                return [(otpProperty): value]
-            } else {
-                return [:]
-            }
+            return otpProperty ? [(otpProperty): value] : [:]
         }
     }
 
@@ -172,11 +168,8 @@ class ConfigService implements ApplicationContextAware {
     String getBackdoorUser() {
         if (Environment.isDevelopmentMode()) {
             return otpProperties.get(OtpProperty.DEVEL_BACKDOOR_USER)
-        } else if (Environment.current == Environment.TEST) {
-            return 'otp'
-        } else {
-            return null
         }
+        return Environment.current == Environment.TEST ? 'otp' : null
     }
 
     boolean getLdapEnabled() {

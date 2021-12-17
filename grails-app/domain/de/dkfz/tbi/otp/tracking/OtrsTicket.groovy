@@ -181,11 +181,7 @@ class OtrsTicket implements Commentable, Entity {
     }
 
     static String ticketNumberConstraint(String val) {
-        if (val =~ /^[0-9]+$/) {
-            return null
-        } else {
-            return "does not match the required pattern"
-        }
+        return val =~ /^[0-9]+$/ ? null : "does not match the required pattern"
     }
 
     String getPrefixedTicketNumber() {

@@ -109,11 +109,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
 
     static String pathForMessage(Path path) {
         Path canonicalPath = canonicalPath(path)
-        if (canonicalPath == path) {
-            return "'${path}'"
-        } else {
-            return "'${canonicalPath}' (linked from '${path}')"
-        }
+        return canonicalPath == path ? "'${path}'" : "'${canonicalPath}' (linked from '${path}')"
     }
 
     /**

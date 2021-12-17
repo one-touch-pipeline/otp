@@ -45,10 +45,7 @@ class DecisionProcessingStep extends ProcessingStep {
             if (!val) {
                 return true
             }
-            if (val.jobDefinition != step.jobDefinition) {
-                return "jobDefinition"
-            }
-            return true
+            return (val.jobDefinition == step.jobDefinition) ?: "jobDefinition"
         })
     }
 }

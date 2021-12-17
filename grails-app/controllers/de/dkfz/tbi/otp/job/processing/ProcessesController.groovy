@@ -436,17 +436,12 @@ class ProcessesController {
     private Map<String,String> processParameterData(Process process) {
         ProcessParameter parameter = ProcessParameter.findByProcess(process)
         if (parameter) {
-            if (parameter.className) {
-                return [
-                    controller: GrailsNameUtils.getShortName(parameter.className),
-                    action: "show",
-                    id: parameter.value,
-                    text: parameter.toObject().toString(),
-                ]
-            } else {
-                // not a class, just use the value
-                return [text: parameter.value]
-            }
+            return parameter.className ? [
+                controller: GrailsNameUtils.getShortName(parameter.className),
+                action: "show",
+                id: parameter.value,
+                text: parameter.toObject().toString(),
+            ] : [text: parameter.value] // not a class, just use the value
         }
         return null
     }

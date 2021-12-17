@@ -51,11 +51,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
 
     @Override
     List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
-        if (context instanceof BamMetadataValidationContext) {
-            return []
-        } else {
-            return [BASE_MATERIAL.name()]
-        }
+        return context instanceof BamMetadataValidationContext ? [] : [MetaDataColumn.BASE_MATERIAL.name()]
     }
 
     @Override

@@ -90,10 +90,7 @@ class ProcessingStep implements Serializable, Entity {
     static constraints = {
         jobClass(nullable: true, blank: false)
         process(validator: { Process val, ProcessingStep obj ->
-            if (val?.jobExecutionPlan?.id != obj.jobDefinition?.plan?.id) {
-                return "jobExecutionPlan"
-            }
-            return true
+            return (val?.jobExecutionPlan?.id == obj.jobDefinition?.plan?.id) ?: "jobExecutionPlan"
         })
         previous(nullable: true, validator: { ProcessingStep val, ProcessingStep obj ->
             if (!val) {
@@ -105,10 +102,7 @@ class ProcessingStep implements Serializable, Entity {
             if (val.jobDefinition?.id == obj.jobDefinition?.id) {
                 return "jobDefinition"
             }
-            if (val == obj.next) {
-                return "next"
-            }
-            return true
+            return val == obj.next ? "next" : true
         })
         next(nullable: true, validator: { ProcessingStep val, ProcessingStep obj ->
             if (!val) {
@@ -120,10 +114,7 @@ class ProcessingStep implements Serializable, Entity {
             if (val.jobDefinition?.id == obj.jobDefinition?.id) {
                 return "jobDefinition"
             }
-            if (val == obj.previous) {
-                return "previous"
-            }
-            return true
+            return val == obj.previous ? "previous" : true
         })
         input(nullable: true, validator: { Collection<Parameter> val, ProcessingStep obj ->
             if (!val) {
@@ -147,10 +138,7 @@ class ProcessingStep implements Serializable, Entity {
                     }
                 }
             }
-            if (!errors) {
-                return true
-            }
-            return errors
+            return errors ?: true
         })
         output(nullable: true, validator: { Collection<Parameter> val, ProcessingStep obj ->
             if (!val) {
@@ -174,10 +162,7 @@ class ProcessingStep implements Serializable, Entity {
                     }
                 }
             }
-            if (!errors) {
-                return true
-            }
-            return errors
+            return errors ?: true
         })
     }
 
@@ -229,7 +214,7 @@ class ProcessingStep implements Serializable, Entity {
             default:
                 env = Environment.current.name.toLowerCase()
         }
-        String psId  = this.id
+        String psId = this.id
         String psClass = this.nonQualifiedJobClass
         String psWorkflow = this.process.jobExecutionPlan
         String pid = this.processParameterObject?.individual?.pid

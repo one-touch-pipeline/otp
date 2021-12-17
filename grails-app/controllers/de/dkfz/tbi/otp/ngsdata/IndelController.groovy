@@ -41,15 +41,12 @@ class IndelController extends AbstractAnalysisController {
             render status: 404
             return
         }
-        if (indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
-            return [
-                    id      : cmd.bamFilePairAnalysis.id,
-                    pid     : cmd.bamFilePairAnalysis.individual.pid,
-                    plotType: cmd.plotType,
-                    error   : null,
-            ]
-        }
-        return [
+        return indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
+                id      : cmd.bamFilePairAnalysis.id,
+                pid     : cmd.bamFilePairAnalysis.individual.pid,
+                plotType: cmd.plotType,
+                error   : null,
+        ] : [
                 error: "File not found",
                 pid  : "no File",
         ]
