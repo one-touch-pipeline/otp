@@ -38,7 +38,7 @@ class PropertiesValidationService {
 
         Properties properties = configService.parsePropertiesFile()
 
-        List<OtpProperty> used = OtpProperty.values().findAll { it.usedIn.contains(Environment.current.getName().toUpperCase() as UsedIn) }
+        List<OtpProperty> used = OtpProperty.values().findAll { it.usedIn.contains(Environment.current.name.toUpperCase() as UsedIn) }
         used.each {
             if (!properties[it.key]) {
                 if (it.defaultValue == null) {

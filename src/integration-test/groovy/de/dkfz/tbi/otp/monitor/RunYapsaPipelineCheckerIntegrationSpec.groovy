@@ -33,12 +33,12 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
 
     void "workflowName, should return RunYapsaWorkflow"() {
         expect:
-        'RunYapsaWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
+        'RunYapsaWorkflow' == createVariantCallingPipelineChecker().workflowName
     }
 
     void "processingStateMember, should return runYapsaProcessingStatus"() {
         expect:
-        'runYapsaProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
+        'runYapsaProcessingStatus' == createVariantCallingPipelineChecker().processingStateMember
     }
 
     void "pipelineType, should return Pipeline.Type.MUTATIONAL_SIGNATURE"() {
@@ -46,12 +46,12 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
         createPipeLine()
 
         expect:
-        Pipeline.Type.MUTATIONAL_SIGNATURE == createVariantCallingPipelineChecker().getPipeline().type
+        Pipeline.Type.MUTATIONAL_SIGNATURE == createVariantCallingPipelineChecker().pipeline.type
     }
 
     void "bamFilePairAnalysisClass, should return RunYapsaInstance.class"() {
         expect:
-        RunYapsaInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
+        RunYapsaInstance.class == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

@@ -93,7 +93,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         setupData()
 
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
-        while (roddyBamFile.getContainedSeqTracks().size() < seqTrackNumber) {
+        while (roddyBamFile.containedSeqTracks.size() < seqTrackNumber) {
             SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [
                     libraryName          : LIBRARY_NAME,
                     normalizedLibraryName: NORMALIZED_LIBRARY_NAME,
@@ -134,7 +134,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         ])
 
         roddyBamFile.seqTracks.add(secondSeqTrack)
-        roddyBamFile.numberOfMergedLanes = roddyBamFile.getContainedSeqTracks().size()
+        roddyBamFile.numberOfMergedLanes = roddyBamFile.containedSeqTracks.size()
         assert roddyBamFile.save(flush: true)
 
         createAllQaFilesOnFileSystem(roddyBamFile)

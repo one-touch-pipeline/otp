@@ -63,13 +63,13 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
-        Path file1 = temporaryFolder.getRoot().toPath().resolve("file1")
+        Path file1 = temporaryFolder.root.toPath().resolve("file1")
         Files.createFile(file1)
-        Path file2 = temporaryFolder.getRoot().toPath().resolve("file2")
+        Path file2 = temporaryFolder.root.toPath().resolve("file2")
         Files.createFile(file2)
-        Path dir1 = temporaryFolder.getRoot().toPath().resolve("dir1")
+        Path dir1 = temporaryFolder.root.toPath().resolve("dir1")
         Files.createDirectory(dir1)
-        Path dir2 = temporaryFolder.getRoot().toPath().resolve("dir2")
+        Path dir2 = temporaryFolder.root.toPath().resolve("dir2")
         Files.createDirectory(dir2)
         PanCancerCleanUpJob job = Spy(PanCancerCleanUpJob) {
             getRoddyBamFile(workflowStep) >> bamFile
@@ -87,13 +87,13 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
     void "test getDirectoriesToDelete"() {
         WorkflowStep workflowStep = createWorkflowStep()
         RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
-        Path file1 = temporaryFolder.getRoot().toPath().resolve("file1")
+        Path file1 = temporaryFolder.root.toPath().resolve("file1")
         Files.createFile(file1)
-        Path file2 = temporaryFolder.getRoot().toPath().resolve("file2")
+        Path file2 = temporaryFolder.root.toPath().resolve("file2")
         Files.createFile(file2)
-        Path dir1 = temporaryFolder.getRoot().toPath().resolve("dir1")
+        Path dir1 = temporaryFolder.root.toPath().resolve("dir1")
         Files.createDirectory(dir1)
-        Path dir2 = temporaryFolder.getRoot().toPath().resolve("dir2")
+        Path dir2 = temporaryFolder.root.toPath().resolve("dir2")
         Files.createDirectory(dir2)
         PanCancerCleanUpJob job = Spy(PanCancerCleanUpJob) {
             getRoddyBamFile(workflowStep) >> bamFile

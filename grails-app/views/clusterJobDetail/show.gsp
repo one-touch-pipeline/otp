@@ -148,17 +148,17 @@ on the general cluster job page
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedWallTime"/></td>
-                        <td>${job.getRequestedWalltimeAsISO()}</td>
+                        <td>${job.requestedWalltimeAsISO}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.elapsedWallTime"/></td>
-                        <td>${job.getElapsedWalltimeAsISO()}</td>
+                        <td>${job.elapsedWalltimeAsISO}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.wallTimeDifference"/></td>
-                        <td>${job.getWalltimeDiffAsISO()}</td>
+                        <td>${job.walltimeDiffAsISO}</td>
                     </tr>
                 </table>
             </div>
@@ -195,7 +195,7 @@ on the general cluster job page
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuTime"/></td>
-                        <td>${job.getCpuTimeAsISO()}</td>
+                        <td>${job.cpuTimeAsISO}</td>
                     </tr>
                     <tr>
                         <td></td>

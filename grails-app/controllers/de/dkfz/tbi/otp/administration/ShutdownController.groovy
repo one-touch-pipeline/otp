@@ -59,8 +59,8 @@ class ShutdownController {
                 }
             }
 
-            List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.getRestartableRunningWorkflowSteps()
-            List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.getNonRestartableRunningWorkflowSteps()
+            List<WorkflowStep> restartableRunningWorkflowSteps = shutdownService.restartableRunningWorkflowSteps
+            List<WorkflowStep> notRestartableRunningWorkflowSteps = shutdownService.nonRestartableRunningWorkflowSteps
 
             render(view: "status", model: [
                     shutdown: shutdownInformation,

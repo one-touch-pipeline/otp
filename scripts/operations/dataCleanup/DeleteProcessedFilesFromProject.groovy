@@ -49,14 +49,14 @@ List<SeqTrack> seqTracks = SeqTrack.withCriteria {
         }
     }
     'in'('seqType', [
-            SeqTypeService.getWholeGenomePairedSeqType(),
-            SeqTypeService.getExomePairedSeqType(),
-            SeqTypeService.getWholeGenomeBisulfitePairedSeqType(),
-            SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType(),
-            SeqTypeService.getRnaSingleSeqType(),
-            SeqTypeService.getRnaPairedSeqType(),
-            SeqTypeService.getChipSeqPairedSeqType(),
-            SeqTypeService.get10xSingleCellRnaSeqType(),
+            SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.exomePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+            SeqTypeService.rnaSingleSeqType,
+            SeqTypeService.rnaPairedSeqType,
+            SeqTypeService.chipSeqPairedSeqType,
+            SeqTypeService.'10xSingleCellRnaSeqType',
     ])
 }
 
@@ -88,7 +88,7 @@ FileService fileService = ctx.fileService
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-Path baseOutputDir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
+Path baseOutputDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
 
 DeletionService deletionService = ctx.deletionService
 

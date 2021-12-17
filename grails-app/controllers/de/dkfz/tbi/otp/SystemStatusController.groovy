@@ -43,7 +43,7 @@ class SystemStatusController implements CheckAndCall {
     def index() {
         List<Workflow> workflows = Workflow.findAllByDeprecatedDateIsNull().sort { a, b -> String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString()) }
         return [
-                runs                  : workflowRunOverviewService.getNumberOfRunsPerWorkflowAndState(),
+                runs                  : workflowRunOverviewService.numberOfRunsPerWorkflowAndState,
                 workflowSystem        : workflowSystemService.enabled,
                 workflows             : workflows,
                 numberEnabledWorkflows: workflows.findAll { it.enabled }.size(),

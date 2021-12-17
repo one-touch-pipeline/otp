@@ -83,7 +83,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                             property('displayName', 'seqType')
                             property('name', 'seqTypeName')
                         }
-                        libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
+                        libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                             property('shortDisplayName', 'libPrepKit1')
                         }
                     }
@@ -93,7 +93,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                                 property('name', 'sampleType2')
                             }
                         }
-                        libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
+                        libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                             property('shortDisplayName', 'libPrepKit2')
                         }
                     }

@@ -85,7 +85,7 @@ class PanCancerExecuteJob extends AbstractExecuteRoddyPipelineJob implements Pan
 
         RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
         if (baseBamFile) {
-            conf.put("bam", baseBamFile.getPathForFurtherProcessing().toString())
+            conf.put("bam", baseBamFile.pathForFurtherProcessing.toString())
         }
 
         return conf

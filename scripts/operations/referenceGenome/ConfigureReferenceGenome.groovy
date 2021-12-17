@@ -29,10 +29,10 @@ Project project = Project.findByName('')
 assert project: "no project given"
 
 Collection<SeqType> seqTypes = [
-        //SeqTypeService.getWholeGenomePairedSeqType(),
-        //SeqTypeService.getExomePairedSeqType(),
-        //SeqTypeService.getWholeGenomeBisulfitePairedSeqType(),
-        //SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+        //SeqTypeService.wholeGenomePairedSeqType,
+        //SeqTypeService.exomePairedSeqType,
+        //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+        //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
 ]
 
 Collection<SampleType> sampleTypes = [
@@ -119,8 +119,8 @@ String statSizeFileName = ''
 
 //RNA should not be configured over this script. Use the GUI instead!
 List<SeqType> blackListedSeqTypes = [
-        SeqTypeService.getRnaPairedSeqType(),
-        SeqTypeService.getRnaSingleSeqType(),
+        SeqTypeService.rnaPairedSeqType,
+        SeqTypeService.rnaSingleSeqType,
 ]
 
 assert !(seqTypes.any { it in blackListedSeqTypes }): "Blacklisted seqTypes selected, cant continue!"

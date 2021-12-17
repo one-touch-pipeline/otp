@@ -57,7 +57,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
-            final RoddyResult roddyResult = getRefreshedProcessParameterObject()
+            final RoddyResult roddyResult = refreshedProcessParameterObject
             final Realm realm = roddyResult.project.realm
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
@@ -90,7 +90,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Override
     protected void validate() throws Throwable {
         Realm.withTransaction {
-            final RoddyResult roddyResultObject = getRefreshedProcessParameterObject()
+            final RoddyResult roddyResultObject = refreshedProcessParameterObject
             validate(roddyResultObject)
         }
     }
@@ -100,7 +100,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Override
     protected Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
-        RoddyResult roddyResult = getRefreshedProcessParameterObject()
+        RoddyResult roddyResult = refreshedProcessParameterObject
         assert roddyResult
 
         // Roddy has started at least one cluster job, hence the jobStateLogFile must exist.

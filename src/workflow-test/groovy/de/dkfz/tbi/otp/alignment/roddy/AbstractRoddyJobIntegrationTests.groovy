@@ -49,7 +49,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
             programVersion = config.programVersion
 
             // setting not existing plugin must make roddy exit without sending any cluster jobs
-            config.programVersion = HelperUtils.getUniqueString()
+            config.programVersion = HelperUtils.uniqueString
             config.save(flush: true)
         }
 
@@ -102,7 +102,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         when:
         SessionUtils.withNewSession {
             workPackage.refresh()
-            workPackage.statSizeFileName = getChromosomeStatFileName()
+            workPackage.statSizeFileName = chromosomeStatFileName
             workPackage.save(flush: true)
 
             restartWorkflowFromFailedStep()

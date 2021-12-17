@@ -33,12 +33,12 @@ class SophiaCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
 
     void "workflowName, should return SophiaWorkflow"() {
         expect:
-        'SophiaWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
+        'SophiaWorkflow' == createVariantCallingPipelineChecker().workflowName
     }
 
     void "processingStateMember, should return sophiaProcessingStatus"() {
         expect:
-        'sophiaProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
+        'sophiaProcessingStatus' == createVariantCallingPipelineChecker().processingStateMember
     }
 
     void "pipelineType, should return Pipeline.Type.SOPHIA"() {
@@ -46,12 +46,12 @@ class SophiaCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
         createPipeLine()
 
         expect:
-        Pipeline.Type.SOPHIA == createVariantCallingPipelineChecker().getPipeline().type
+        Pipeline.Type.SOPHIA == createVariantCallingPipelineChecker().pipeline.type
     }
 
     void "bamFilePairAnalysisClass, should return SophiaInstance.class"() {
         expect:
-        SophiaInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
+        SophiaInstance.class == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

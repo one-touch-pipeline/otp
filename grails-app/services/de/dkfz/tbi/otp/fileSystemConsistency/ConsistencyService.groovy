@@ -59,7 +59,7 @@ class ConsistencyService {
             return Status.NO_READ_PERMISSION
         }
         File viewByPidFile = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
-        if (viewByPidFile.getCanonicalPath() != file.getCanonicalPath()) {
+        if (viewByPidFile.canonicalPath != file.canonicalPath) {
             return Status.VIEW_BY_PID_NO_FILE
         }
         if (file.size() != dataFile.fileSize) {

@@ -65,7 +65,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
         }
         cValues.add("fastq_list:${filesToMerge.join(";")}")
         if (baseBamFile) {
-            cValues.add("bam:${baseBamFile.getPathForFurtherProcessing()}")
+            cValues.add("bam:${baseBamFile.pathForFurtherProcessing}")
         }
 
         return cValues

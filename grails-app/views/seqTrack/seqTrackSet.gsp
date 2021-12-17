@@ -104,7 +104,7 @@
                 <g:each var="seqTrack" in="${lanesPerRun[run]}">
                     <g:set var="dataFiles" value="${seqTrack.dataFiles.sort { it.readName }}" />
                     <g:set var="totalFileSize" value="${seqTrack.totalFileSize()}" />
-                    <g:set var="totalNReads" value="${seqTrack.getNReads()}" />
+                    <g:set var="totalNReads" value="${seqTrack.NReads}" />
                     <div class="lane-and-datafile-grid-wrapper color-left-border lane slim">
                         <div class="grid-element lane identifier">
                             <strong><g:message code="seqTrack.seqTrackSet.lanesPerRun.laneId"/>:</strong>
@@ -133,7 +133,7 @@
                             <g:set var="withdrawnComment" value="Withdrawn Comment: ${dataFile.fileWithdrawn ? dataFile.withdrawnComment : ''}"/>
                             <g:set var="withdrawnDate" value="Withdrawn Date: ${dataFile.fileWithdrawn ? dataFile.withdrawnDate : ''}"/>
                             <g:set var="exists" value="${dataFile.fileExists ? '' : 'nonexistent'}"/>
-                            <g:set var="nBasePairs" value="${dataFile.getNBasePairsOrNull()}"/>
+                            <g:set var="nBasePairs" value="${dataFile.NBasePairsOrNull}"/>
                             <g:set var="fileType" value="${dataFile.indexFile ? "index" : "fastq"}"/>
                             <div class="grid-element identifier dataFile color-left-border ${fileType} ${withdrawn} ${exists} trim-text-with-ellipsis"
                                  style="grid-row: ${row};"

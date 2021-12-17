@@ -45,7 +45,7 @@ class QcThresholdController {
     def defaultConfiguration() {
         List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 
-        List<ClassWithThreshold> classesWithProperties = qcThresholdService.getClassesWithProperties()
+        List<ClassWithThreshold> classesWithProperties = qcThresholdService.classesWithProperties
 
         return [
                 classesWithProperties: classesWithProperties,
@@ -100,7 +100,7 @@ class QcThresholdController {
 
     private void checkErrorAndCallMethod(Object cmd, Closure<Errors> method) {
         if (cmd.hasErrors()) {
-            flash.message = new FlashMessage(g.message(code: "qcThreshold.store.fail") as String, cmd.getErrors())
+            flash.message = new FlashMessage(g.message(code: "qcThreshold.store.fail") as String, cmd.errors)
         } else {
             Errors errors = method()
             if (errors) {

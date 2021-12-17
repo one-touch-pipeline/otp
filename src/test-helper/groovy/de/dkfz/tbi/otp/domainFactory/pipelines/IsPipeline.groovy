@@ -47,16 +47,16 @@ trait IsPipeline implements DomainFactoryCore {
     abstract Pipeline findOrCreatePipeline()
 
     ConfigPerProjectAndSeqType createConfig(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(getConfigPerProjectAndSeqTypeClass(), getConfigProperties(properties), properties, saveAndValidate)
+        return createDomainObject(configPerProjectAndSeqTypeClass, getConfigProperties(properties), properties, saveAndValidate)
     }
 
     ConfigPerProjectAndSeqType findOrCreateConfig(Map properties = [:], boolean saveAndValidate = true) {
-        return findOrCreateDomainObject(getConfigPerProjectAndSeqTypeClass(), getConfigProperties(properties), properties, saveAndValidate)
+        return findOrCreateDomainObject(configPerProjectAndSeqTypeClass, getConfigProperties(properties), properties, saveAndValidate)
     }
 
     @Override
     SeqType createSeqType(Map properties = [:], boolean saveAndValidate = true) {
-        findOrCreateDomainObject(SeqType, getSeqTypeProperties(), properties ?: getSeqTypeProperties(), saveAndValidate).refresh()
+        findOrCreateDomainObject(SeqType, seqTypeProperties, properties ?: seqTypeProperties, saveAndValidate).refresh()
     }
 
     Pipeline findOrCreatePipeline(Pipeline.Name name, Pipeline.Type type) {

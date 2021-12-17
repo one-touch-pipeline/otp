@@ -115,17 +115,17 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
         if (parsedSampleIdentifiers) {
             context.addProblem(Collections.emptySet(), LogLevel.INFO, "The following Samples will be created:\n" +
-                    "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
+                    "${SampleIdentifierService.BulkSampleCreationHeader.headers}\n" +
                     "${parsedSampleIdentifiers.sort().join('\n')}")
         }
 
         if (missingIdentifiersWithProject) {
             context.addProblem(Collections.emptySet(), LogLevel.INFO,
                     "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
-                            "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
+                            "${SampleIdentifierService.BulkSampleCreationHeader.headers}\n" +
                             "${missingIdentifiersWithProject.collect { it.substring(0, it.length() - it.reverse().indexOf("\t\t") - 2) }.sort().join('\n')}",
                     "All sample names which are neither registered in OTP nor match a pattern known to OTP:\n" +
-                            "${SampleIdentifierService.BulkSampleCreationHeader.getSummaryHeaders()}\n" +
+                            "${SampleIdentifierService.BulkSampleCreationHeader.summaryHeaders}\n" +
                             "${missingIdentifiersWithProject.sort().join('\n')}")
         }
         if (byProjectName.size() == 1 && context.spreadsheet.getColumn(PROJECT.name()) == null) {

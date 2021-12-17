@@ -39,7 +39,7 @@ class NoAlignmentDecider implements AlignmentDecider {
     @Override
     @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
-        seqTrack.log("Not aligning{0}, because it is configured to use the ${this.getClass().simpleName}.")
+        seqTrack.log("Not aligning{0}, because it is configured to use the ${this.class.simpleName}.")
         return Collections.emptyList()
     }
 }

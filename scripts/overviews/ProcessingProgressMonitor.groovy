@@ -489,7 +489,7 @@ if (allProcessed) {
 }
 
 output << '\n\n'
-println output.getOutput().replace("<br>", " ")
+println output.output.replace("<br>", " ")
 //println outputSeqTrack.join("\n")
 
 println ""

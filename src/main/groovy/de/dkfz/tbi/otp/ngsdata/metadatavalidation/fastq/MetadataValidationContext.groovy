@@ -68,6 +68,6 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     List<String> getSummary() {
-        return getProblems()*.type.flatten().unique()
+        return problems*.type.flatten().unique()
     }
 }

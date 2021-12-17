@@ -249,7 +249,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
-        roddyBamFile.fileSize = roddyBamFile.getWorkBaiFile().size()
+        roddyBamFile.fileSize = roddyBamFile.workBaiFile.size()
         roddyBamFile.save(flush: true)
 
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile

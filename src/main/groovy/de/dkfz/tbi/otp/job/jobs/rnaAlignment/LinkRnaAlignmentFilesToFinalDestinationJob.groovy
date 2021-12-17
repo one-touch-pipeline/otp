@@ -50,7 +50,7 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
 
     @Override
     void execute() throws Exception {
-        final RnaRoddyBamFile roddyBamFile = getProcessParameterObject()
+        final RnaRoddyBamFile roddyBamFile = processParameterObject
 
         Realm realm = roddyBamFile.project.realm
         assert realm : "Realm should not be null"

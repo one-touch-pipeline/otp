@@ -65,7 +65,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
         final String SEQ_TYPE = "${WORKPACKAGE}.seqType"
         final String INDIVIDUAL = "${SAMPLE}.individual"
 
-        double threshold = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, getAnalysisType().toString())
+        double threshold = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, analysisType.toString())
 
         def testIfBamFileFulfillCriteria = { String number ->
             return "AND EXISTS (FROM AbstractMergedBamFile ambf${number} " +
@@ -100,7 +100,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
         String samplePairForProcessing =
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
-                "WHERE " + getProcessingStateCheck() +
+                "WHERE " + processingStateCheck +
 
                 (sp ? "AND sp = :sp " : '') +
                 //check that processing priority of the corresponding project is high enough
@@ -112,7 +112,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 checkConfig() +
 
                 //check that this sample pair is not in process
-                "AND NOT EXISTS (FROM ${getAnalysisClass().name} sci " +
+                "AND NOT EXISTS (FROM ${analysisClass.name} sci " +
                 "   WHERE sci.samplePair = sp " +
                 "   AND sci.processingState IN (:processingStates) " +
                 "   AND sci.withdrawn = false " +
@@ -130,7 +130,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
                 processingStates: PROCESSING_STATES_NOT_PROCESSABLE,
                 minPriority: minPriority,
-                analysis: getAnalysisType(),
+                analysis: analysisType,
                 seqTypes: seqTypes,
                 threshold: threshold,
                 rejecetedQcTrafficLightStatus: [AbstractMergedBamFile.QcTrafficLightStatus.REJECTED, AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED],
@@ -165,11 +165,11 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
     }
 
     final Pipeline getPipeline() {
-        return CollectionUtils.<Pipeline> exactlyOneElement(Pipeline.findAllByName(getPipelineName()))
+        return CollectionUtils.<Pipeline> exactlyOneElement(Pipeline.findAllByName(pipelineName))
     }
 
     final List<SeqType> getSeqTypes() {
-        return getPipelineName().getSeqTypes()
+        return pipelineName.seqTypes
     }
 
     abstract protected String getProcessingStateCheck()
@@ -178,7 +178,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
     abstract Pipeline.Name getPipelineName()
 
     String checkConfig() {
-        return "AND EXISTS (FROM ${getConfigName()} cps " +
+        return "AND EXISTS (FROM ${configName} cps " +
                 "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
                 "   AND cps.pipeline.type = :analysis " +
                 "   AND cps.obsoleteDate is null " +

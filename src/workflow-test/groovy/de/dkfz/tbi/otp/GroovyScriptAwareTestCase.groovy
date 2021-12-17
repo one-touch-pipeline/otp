@@ -42,9 +42,9 @@ trait GroovyScriptAwareTestCase {
     void runScript(File script, Map<String, String> properties = null) {
         assert script.canRead()
         GroovyShell shell = new GroovyShell(
-                grailsApplication.getClassLoader(),
+                grailsApplication.classLoader,
                 new Binding(
-                        ctx: grailsApplication.getMainContext(),
+                        ctx: grailsApplication.mainContext,
                         grailsApplication: grailsApplication
                 )
         )

@@ -81,8 +81,8 @@ BedFile.withTransaction {
         List<ReferenceGenomeEntry> referenceGenomeEntries = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome)
         notEmpty referenceGenomeEntries
         TargetIntervals targetIntervals = TargetIntervalsFactory.create(bedFilePath, referenceGenomeEntries*.name)
-        bedFileDom.targetSize = targetIntervals.getBaseCount()
-        bedFileDom.mergedTargetSize = targetIntervals.getUniqueBaseCount()
+        bedFileDom.targetSize = targetIntervals.baseCount
+        bedFileDom.mergedTargetSize = targetIntervals.uniqueBaseCount
         notNull bedFileDom.validate()
         bedFileDom.save(flush: true)
         println "Added ${bedFileName} to OTP database."

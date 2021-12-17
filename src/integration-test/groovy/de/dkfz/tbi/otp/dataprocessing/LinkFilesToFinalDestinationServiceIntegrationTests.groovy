@@ -77,7 +77,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
         SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
-        roddyBamFile.project.unixGroup = configService.getWorkflowProjectUnixGroup()
+        roddyBamFile.project.unixGroup = configService.workflowProjectUnixGroup
     }
 
     @After
@@ -371,7 +371,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
                 roddyBamFile.finalMd5sumFile,
                 roddyBamFile.finalMergedQADirectory,
                 roddyBamFile.finalMergedQAJsonFile,
-                roddyBamFile.getFinalExecutionDirectories(),
+                roddyBamFile.finalExecutionDirectories,
                 roddyBamFile.finalSingleLaneQADirectories.values(),
                 roddyBamFile.finalSingleLaneQAJsonFiles.values(),
         ].flatten()

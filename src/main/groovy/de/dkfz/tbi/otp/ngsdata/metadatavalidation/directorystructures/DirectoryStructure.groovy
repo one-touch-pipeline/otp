@@ -46,7 +46,7 @@ trait DirectoryStructure {
     Path getDataFilePath(MetadataValidationContext context, Row row) {
         Map<String, String> valuesByColumnTitle = [:]
         Set<Cell> cells = new LinkedHashSet<Cell>()
-        getRequiredColumnTitles().each {
+        requiredColumnTitles.each {
             Cell cell = row.getCellByColumnTitle(it)
             if (cell) {
                 valuesByColumnTitle.put(it, cell.text)
@@ -63,6 +63,6 @@ trait DirectoryStructure {
     }
 
     FileSystem getFileSystem() {
-        return fileSystem ?: FileSystems.getDefault()
+        return fileSystem ?: FileSystems.default
     }
 }

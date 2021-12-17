@@ -47,7 +47,7 @@ abstract class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl impl
         } else {
             fail()
         }
-        if (decision.jobDefinition != getProcessingStep().jobDefinition) {
+        if (decision.jobDefinition != processingStep.jobDefinition) {
             throw new IncorrectProcessingException("Decision does not belong to current JobDefinition")
         }
         this.decision = decision
@@ -57,12 +57,12 @@ abstract class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl impl
      * @return List of available decisions the Job can take ordered by ID.
      */
     protected final List<JobDecision> getAvailableDecisions() {
-        return JobDecision.findAllByJobDefinition(getProcessingStep().jobDefinition).sort { it.id }
+        return JobDecision.findAllByJobDefinition(processingStep.jobDefinition).sort { it.id }
     }
 
     @Override
     final JobDecision getDecision() throws InvalidStateException {
-        if (getState() != AbstractJobImpl.State.FINISHED && endState != ExecutionState.SUCCESS) {
+        if (state != AbstractJobImpl.State.FINISHED && endState != ExecutionState.SUCCESS) {
             throw new InvalidStateException("Decision accessed, but not in succeeded state")
         }
         return decision

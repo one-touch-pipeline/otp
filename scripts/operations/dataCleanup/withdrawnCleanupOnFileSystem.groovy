@@ -136,6 +136,6 @@ String script = [
         dataFilesViewByPid
 ].join('\n')
 
-Path path = fileSystemService.getRemoteFileSystemOnDefaultRealm().getPath(file)
+Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(file)
 
 fileService.createFileWithContentOnDefaultRealm(path, script)

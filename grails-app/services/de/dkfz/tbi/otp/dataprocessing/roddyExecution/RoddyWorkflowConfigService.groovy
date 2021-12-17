@@ -138,7 +138,7 @@ class RoddyWorkflowConfigService {
         assert matcher.matches(): "The file name '${configFile}' does not match the pattern '${pattern}'"
         assert config.programVersion.endsWith(":${matcher.group(1)}")
         def configuration = new XmlParser().parseText(configFile.text)
-        assert configuration.@name == config.getNameUsedInConfig()
+        assert configuration.@name == config.nameUsedInConfig
         if (config.individual) {
             assert config.configFilePath.contains(config.individual.pid)
         }

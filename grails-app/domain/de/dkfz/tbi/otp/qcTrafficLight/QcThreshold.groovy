@@ -144,14 +144,14 @@ class QcThreshold implements Entity {
     }
 
     static void validateClass(String val, Errors errors, String propertyName) {
-        if (!(val in getValidQcClass()*.name)) {
+        if (!(val in validQcClass*.name)) {
             ValidatorUtil.rejectValue(propertyName, QcThreshold.class, val, errors, "invalid")
         }
     }
 
     private static List<Member> getAnnotatedMembers(Class type) {
         List<Member> members = []
-        for (Class c = type; c != null; c = c.getSuperclass()) {
+        for (Class c = type; c != null; c = c.superclass) {
             [c.declaredFields, c.declaredMethods].each {
                 members.addAll(it.findAll { it?.isAnnotationPresent(QcThresholdEvaluated) })
             }
@@ -160,7 +160,7 @@ class QcThreshold implements Entity {
     }
 
     static List<String> getValidQcPropertyForQcClass(String cl) {
-        Class clasz = getValidQcClass().find { it.name == cl }
+        Class clasz = validQcClass.find { it.name == cl }
         if (clasz) {
             List<String> propertiesWithAnnotations = getAnnotatedMembers(clasz)
                     .collect { it.name }
@@ -177,7 +177,7 @@ class QcThreshold implements Entity {
     }
 
     static String convertShortToLongName(String s) {
-        getValidQcClass().find { it.simpleName == s }.name
+        validQcClass.find { it.simpleName == s }.name
     }
 
     static List<Class> getValidQcClass() {

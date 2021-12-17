@@ -86,7 +86,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
     @Override
     File getWorkflowData() {
-        new File(getInputRootDirectory(), 'indel')
+        new File(inputRootDirectory, 'indel')
     }
 
     @Override

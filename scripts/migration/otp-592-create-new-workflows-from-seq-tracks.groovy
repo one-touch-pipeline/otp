@@ -132,7 +132,7 @@ List<Integer> loop = []
     loop += it
 }
 
-int numCores = Runtime.getRuntime().availableProcessors()
+int numCores = Runtime.runtime.availableProcessors()
 println "${numCores} CPU core(s) are available"
 
 //fetch the priority from database

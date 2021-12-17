@@ -93,8 +93,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     void setup() {
         configService = new TestConfigService()
         GroovyMock([global: true], SeqTypeService)
-        SeqTypeService.getRnaSingleSeqType() >> DomainFactory.createRnaSingleSeqType()
-        SeqTypeService.getRnaPairedSeqType() >> DomainFactory.createRnaPairedSeqType()
+        SeqTypeService.rnaSingleSeqType >> DomainFactory.createRnaSingleSeqType()
+        SeqTypeService.rnaPairedSeqType >> DomainFactory.createRnaPairedSeqType()
     }
 
     void cleanup() {
@@ -139,7 +139,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
             getFilePathInViewByPidCount * getFilePathInViewByPid(_) >> 'somePid'
         }
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().getRemoteFileSystemOnDefaultRealm()
+            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
         }
 
         when:
@@ -241,7 +241,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> fileExists
 
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().getRemoteFileSystemOnDefaultRealm()
+            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
         }
 
         String rsyncChmod     = external     ? "Du=rwx,Dg=rx,Fu=rw,Fg=r" : "Du=rwx,Dgo=rx,Fu=rw,Fog=r"
@@ -320,7 +320,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> true
 
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().getRemoteFileSystemOnDefaultRealm()
+            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
         }
 
         when:
@@ -344,7 +344,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Files.exists(_) >> true
 
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().getRemoteFileSystemOnDefaultRealm()
+            getRemoteFileSystemOnDefaultRealm() >> new TestFileSystemService().remoteFileSystemOnDefaultRealm
         }
 
         when:

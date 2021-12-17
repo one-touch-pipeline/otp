@@ -88,7 +88,7 @@ SeqTrack.withTransaction {
 
     submissions.each { submission ->
         SeqTrack.findAllByIlseSubmission(submission).each { s ->
-            s.getDataFiles().each { df ->
+            s.dataFiles.each { df ->
                 File finalPath = new File(lsdfFilesService.getFileFinalPath(df))
                 File initialPath = new File (lsdfFilesService.getFileInitialPath(df))
 

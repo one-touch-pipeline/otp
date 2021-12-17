@@ -62,7 +62,7 @@ DataFile.withTransaction {
   changed md5sum   from: ${fromMd5} to: ${toMd5}
   changed fileSize from: ${fromFileSize} to: ${toFileSize}"""
             println(newComment)
-            String previous = dataFile.getComment()?.comment
+            String previous = dataFile.comment?.comment
             ctx.commentService.createOrUpdateComment(
                     dataFile,
                     previous + (previous? "\n\n" : "") + newComment,

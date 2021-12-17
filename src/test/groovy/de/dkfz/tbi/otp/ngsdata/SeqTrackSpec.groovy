@@ -167,7 +167,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         DataFile.findAllBySeqTrack(seqTrack)[0].delete(flush: true)
 
         when:
-        seqTrack.getReadGroupName()
+        seqTrack.readGroupName
 
         then:
         thrown(AssertionError)
@@ -179,7 +179,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         DomainFactory.createSequenceDataFile([seqTrack: seqTrack])
 
         when:
-        seqTrack.getReadGroupName()
+        seqTrack.readGroupName
 
         then:
         thrown(AssertionError)
@@ -196,7 +196,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         dataFiles[1].vbpFileName = '4_NoIndex_L004_R2_complete_filtered.fastq.gz'
 
         then:
-        "run${seqTrack.run.name}_4_NoIndex_L004" == seqTrack.getReadGroupName()
+        "run${seqTrack.run.name}_4_NoIndex_L004" == seqTrack.readGroupName
     }
 
     void "getReadGroupName, when sequencing read type is single, then return file name consist of: 'run', runname, file name till first dot"() {
@@ -204,7 +204,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [vbpFileName: "fileName.fastq.gz"])
 
         expect:
-        "run${seqTrack.run.name}_${'fileName'}" == seqTrack.getReadGroupName()
+        "run${seqTrack.run.name}_${'fileName'}" == seqTrack.readGroupName
     }
 
     void "test getNReads, returns null"() {
@@ -214,7 +214,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         createDataFile([seqTrack: seqTrack, nReads: input])
 
         expect:
-        seqTrack.getNReads() == null
+        seqTrack.NReads == null
 
         where:
         input | _
@@ -229,7 +229,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         createDataFile([seqTrack: seqTrack, nReads: 25])
 
         expect:
-        seqTrack.getNReads() == 550
+        seqTrack.NReads == 550
     }
 
     void "totalFileSize, returns total fileSize of all DataFiles"() {

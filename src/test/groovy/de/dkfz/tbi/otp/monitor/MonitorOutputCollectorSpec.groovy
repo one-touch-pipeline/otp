@@ -51,7 +51,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         collector << someText
 
         then:
-        someText == collector.getOutput()
+        someText == collector.output
     }
 
     void "leftShift, multiple added value appear in the added order in the output"() {
@@ -71,7 +71,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         collector << someText1 << someText2 << someText3
 
         then:
-        expected == collector.getOutput()
+        expected == collector.output
     }
 
     void "prefix, every line of text is prefixed with the given prefix"() {
@@ -121,7 +121,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         collector.showWorkflow(workflowName, false)
 
         then:
-        expected == collector.getOutput()
+        expected == collector.output
     }
 
     void "showWorkflow with slot information, check that it is added with newlines before"() {
@@ -146,7 +146,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         collector.showWorkflow(plan.name)
 
         then:
-        expected == collector.getOutput()
+        expected == collector.output
     }
 
     @Unroll
@@ -156,7 +156,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showList(listName, list, closure)
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         expected == output
@@ -178,7 +178,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showUniqueList(listName, list, closure)
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         expected == output
@@ -200,7 +200,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showNotTriggered([4, 3, 4, 1], { 2 * it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         expected == output
@@ -213,7 +213,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showShouldStart([4, 3, 4, 1], { 2 * it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         expected == output
@@ -226,7 +226,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showWaiting([4, 3, 4, 1], { 2 * it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         expected == output
@@ -239,7 +239,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showFinished([4, 3, 4, 1], { 2 * it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         expected == output
@@ -260,7 +260,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
         when:
         collector.showRunning(workflowName, [domainObject], { it.id }, { it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         1 * collector.showList(_, _, _)

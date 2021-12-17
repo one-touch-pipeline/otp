@@ -105,8 +105,8 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
     @Test
     void testGetFile() {
         setupData()
-        String otpFile = bamFile.getBamFile().absolutePath
-        String expectedFile = "${configService.getRootPath()}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/paired/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
+        String otpFile = bamFile.bamFile.absolutePath
+        String expectedFile = "${configService.rootPath}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/paired/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
         assert otpFile == expectedFile
     }
 }

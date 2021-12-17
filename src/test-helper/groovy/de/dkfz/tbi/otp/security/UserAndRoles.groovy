@@ -87,9 +87,9 @@ trait UserAndRoles {
     }
 
     static Object doWithAnonymousAuth(final Closure closure) {
-        Authentication previousAuth = SecurityContextHolder.getContext().authentication
+        Authentication previousAuth = SecurityContextHolder.context.authentication
         AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal(username: "Anonymous"), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
-        SecurityContextHolder.getContext().authentication = auth
+        SecurityContextHolder.context.authentication = auth
 
         try {
             return closure.call()
@@ -99,13 +99,13 @@ trait UserAndRoles {
                 SecurityContextHolder.clearContext()
             }
             else {
-                SecurityContextHolder.getContext().authentication = previousAuth
+                SecurityContextHolder.context.authentication = previousAuth
             }
         }
     }
 
     static Object doAsSwitchedToUser(final String username, final Closure closure) {
-        Authentication previousAuth = SecurityContextHolder.getContext().authentication
+        Authentication previousAuth = SecurityContextHolder.context.authentication
         Authentication primaryAuth = previousAuth
         if (primaryAuth == null) {
             primaryAuth = new UsernamePasswordAuthenticationToken(new Principal(username: DomainFactory.createUser().username), null, [])

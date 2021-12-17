@@ -71,7 +71,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
     }
 
     Path getAdapterFileAsPath(LibraryPreparationKit libraryPreparationKit) {
-        FileSystem fs = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fs = fileSystemService.remoteFileSystemOnDefaultRealm
         return fs.getPath(libraryPreparationKit.adapterFile)
     }
 

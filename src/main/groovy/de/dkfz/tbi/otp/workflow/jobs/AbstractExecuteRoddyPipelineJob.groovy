@@ -69,7 +69,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
         String xmlConfig = roddyConfigService.createRoddyXmlConfig(
                 workflowStep.workflowRun.combinedConfig,
-                roddyConfigValueService.getDefaultValues() + getConfigurationValues(workflowStep, workflowStep.workflowRun.combinedConfig),
+                roddyConfigValueService.defaultValues + getConfigurationValues(workflowStep, workflowStep.workflowRun.combinedConfig),
                 roddyWorkflowName,
                 workflowStep.workflowRun.workflowVersion,
                 getAnalysisConfiguration(roddyResult.seqType),

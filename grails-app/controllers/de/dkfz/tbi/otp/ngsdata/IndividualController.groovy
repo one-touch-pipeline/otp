@@ -65,9 +65,9 @@ class IndividualController {
                 individual         : individual,
                 comment            : individual.comment,
                 typeDropDown       : Individual.Type.values(),
-                sampleTypeDropDown : individualService.getSampleTypeNames(),
+                sampleTypeDropDown : individualService.sampleTypeNames,
                 projectBlacklisted : MmmlService.hideSampleIdentifier(individual.project),
-                groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.getSeqTracks()),
+                groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.seqTracks),
                 samplesWrapper     : individual.samples.collect {
                     [
                             sample                 : it,
@@ -83,7 +83,7 @@ class IndividualController {
                 tableHeader    : IndividualColumn.values()*.message,
                 filterTree: [
                         [name : 'projectSelection', msgcode: 'individual.search.project',
-                         type : 'LIST', from: projectService.getAllProjects(),
+                         type : 'LIST', from: projectService.allProjects,
                          value: 'displayName', key: 'id'],
                         [name: 'pidSearch', msgcode: 'individual.search.pid', type: 'TEXT'],
                         [name: 'mockFullNameSearch', msgcode: 'individual.search.mockFullName', type: 'TEXT'],
@@ -119,7 +119,7 @@ class IndividualController {
     @Secured("hasRole('ROLE_OPERATOR')")
     def insert() {
         List<Individual.Type> individualTypes = Individual.Type.values()
-        List<String> sampleTypes = individualService.getSampleTypeNames()
+        List<String> sampleTypes = individualService.sampleTypeNames
         return [
                 individualTypes: individualTypes,
                 sampleTypes    : sampleTypes,

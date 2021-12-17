@@ -299,7 +299,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
         return SamplePair.executeQuery("""
                 select
-                    new ${BlockedSamplePair.class.getName()} (
+                    new ${BlockedSamplePair.class.name} (
                         samplePair,
                         bamFile1,
                         bamFile2,

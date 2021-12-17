@@ -32,7 +32,7 @@ class ProjectGroupService {
     ProjectService projectService
 
     List<ProjectGroup> availableProjectGroups() {
-        List<Project> projects = projectService.getAllProjects()
+        List<Project> projects = projectService.allProjects
         return projects*.projectGroup.unique().findAll { it != null }.sort { it.name }
     }
 

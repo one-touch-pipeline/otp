@@ -59,24 +59,24 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     def libraryPreparationKits() {
-        return [libraryPreparationKits: libraryPreparationKitService.getDisplayableMetadata()]
+        return [libraryPreparationKits: libraryPreparationKitService.displayableMetadata]
     }
 
     def antibodyTargets() {
-        return [antibodyTargets: antibodyTargetService.getDisplayableMetadata()]
+        return [antibodyTargets: antibodyTargetService.displayableMetadata]
     }
 
     def seqCenters() {
-        return [seqCenters: seqCenterService.getDisplayableMetadata()]
+        return [seqCenters: seqCenterService.displayableMetadata]
     }
 
     def seqPlatforms() {
-        return [seqPlatforms: seqPlatformService.getDisplayableMetadata()]
+        return [seqPlatforms: seqPlatformService.displayableMetadata]
     }
 
     def seqTypes() {
         return [
-                seqTypes: seqTypeService.getDisplayableMetadata(),
+                seqTypes: seqTypeService.displayableMetadata,
                 cmd     : flash.cmd as CreateSeqTypeCommand,
         ]
     }
@@ -226,7 +226,7 @@ class MetaDataFieldsController implements CheckAndCall {
             flash.cmd = cmd
             try {
                 assert !cmd.hasErrors()
-                seqTypeService.createMultiple(cmd.seqTypeName, cmd.getLibraryLayouts(), [
+                seqTypeService.createMultiple(cmd.seqTypeName, cmd.libraryLayouts, [
                         dirName          : cmd.dirName,
                         displayName      : cmd.displayName,
                         singleCell       : cmd.singleCell,
@@ -248,7 +248,7 @@ class MetaDataFieldsController implements CheckAndCall {
     JSON createLayout(CreateLayoutCommand cmd) {
         SeqType seqType = seqTypeService.findByNameOrImportAlias(cmd.name, [singleCell: cmd.singleCell])
         checkErrorAndCallMethod(cmd) {
-            seqTypeService.createMultiple(seqType.name, cmd.getLibraryLayouts(), [
+            seqTypeService.createMultiple(seqType.name, cmd.libraryLayouts, [
                     dirName          : seqType.dirName,
                     displayName      : seqType.displayName,
                     singleCell       : cmd.singleCell,
@@ -509,7 +509,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
 
     static constraints = {
         seqTypeName(blank: false, validator: { val, obj ->
-            if (obj.getLibraryLayouts().find {
+            if (obj.libraryLayouts.find {
                 obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
             }) {
                 return 'default.not.unique.message'
@@ -521,7 +521,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
             }
         })
         displayName(blank: false, validator: { val, obj ->
-            if (obj.getLibraryLayouts().find {
+            if (obj.libraryLayouts.find {
                 obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
             }) {
                 return 'default.not.unique.message'

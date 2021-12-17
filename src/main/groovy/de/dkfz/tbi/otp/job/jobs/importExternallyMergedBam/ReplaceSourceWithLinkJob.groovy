@@ -58,7 +58,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     void execute() throws Exception {
-        final ImportProcess importProcess = getProcessParameterObject()
+        final ImportProcess importProcess = processParameterObject
         if (importProcess.linkOperation.replaceSourceWithLink) {
             importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
                 Realm realm = epmbf.project.realm
@@ -69,7 +69,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
 
                 File targetBam = epmbf.bamFile
                 File targetBai = epmbf.baiFile
-                File targetBaseDir = epmbf.getImportFolder()
+                File targetBaseDir = epmbf.importFolder
 
                 Map linkMap = [:]
                 createLinkMap(sourceBam, targetBam, linkMap)

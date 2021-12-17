@@ -143,7 +143,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         assert roddyBamFile.save(flush: true)
 
         expect:
-        expectedNumberOfReads == roddyBamFile.getNumberOfReadsFromFastQc()
+        expectedNumberOfReads == roddyBamFile.numberOfReadsFromFastQc
     }
 
     void "getNumberOfReadsFromFastQc, when a fastqc workflow has not finished, throws exception"() {
@@ -157,7 +157,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         assert roddyBamFile.save(flush: true)
 
         when:
-        roddyBamFile.getNumberOfReadsFromFastQc()
+        roddyBamFile.numberOfReadsFromFastQc
 
         then:
         AssertionError e = thrown()
@@ -175,7 +175,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         assert roddyBamFile.save(flush: true)
 
         when:
-        roddyBamFile.getNumberOfReadsFromFastQc()
+        roddyBamFile.numberOfReadsFromFastQc
 
         then:
         AssertionError e = thrown()
@@ -187,7 +187,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         File expectedPath = new File("${roddyBamFile.baseDirectory}/${roddyBamFile.QUALITY_CONTROL_DIR}/${roddyBamFile.MERGED_DIR}/${roddyBamFile.INSERT_SIZE_FILE_DIRECTORY}")
 
         expect:
-        expectedPath == roddyBamFile.getFinalInsertSizeDirectory()
+        expectedPath == roddyBamFile.finalInsertSizeDirectory
     }
 
     void "test getFinalInsertSizeFile method"() {
@@ -197,7 +197,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
                 "${roddyBamFile.INSERT_SIZE_FILE_SUFFIX}")
 
         expect:
-        expectedPath == roddyBamFile.getFinalInsertSizeFile()
+        expectedPath == roddyBamFile.finalInsertSizeFile
     }
 
     void "test getMaximalReadLength method, when sequenceLength is not set, should fail"() {
@@ -208,7 +208,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         }
 
         when:
-        roddyBamFile.getMaximalReadLength()
+        roddyBamFile.maximalReadLength
 
         then:
         RuntimeException e = thrown()
@@ -223,7 +223,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         }
 
         then:
-        100 == roddyBamFile.getMaximalReadLength()
+        100 == roddyBamFile.maximalReadLength
     }
 
     void "test getMaximalReadLength method, two values available for sequenceLength, should return higher value"() {
@@ -243,7 +243,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         roddyBamFile.seqTracks.add(seqTrack)
 
         then:
-        100 == roddyBamFile.getMaximalReadLength()
+        100 == roddyBamFile.maximalReadLength
     }
 
     void "test qcTrafficLightStatus constraint, should fail since bam file is blocked but no comment is provided"() {
@@ -273,7 +273,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         roddyBamFile.comment = DomainFactory.createComment()
 
         expect:
-        !roddyBamFile.getPathForFurtherProcessing()
+        !roddyBamFile.pathForFurtherProcessing
 
         where:
         status << [AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED, AbstractMergedBamFile.QcTrafficLightStatus.REJECTED]

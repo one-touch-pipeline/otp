@@ -53,7 +53,7 @@ class SeqTrackTests {
         setupData()
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
+        ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
         assert referenceGenomeProjectSeqTypeWithoutSampleType.referenceGenome == referenceGenome
     }
 
@@ -62,7 +62,7 @@ class SeqTrackTests {
         setupData()
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
 
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
+        ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
         assert referenceGenomeProjectSeqTypeWithSampleType.referenceGenome == referenceGenome
     }
 

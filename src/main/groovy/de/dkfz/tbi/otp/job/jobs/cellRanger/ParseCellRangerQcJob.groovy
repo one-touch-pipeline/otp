@@ -48,7 +48,7 @@ class ParseCellRangerQcJob extends AbstractEndStateAwareJobImpl implements AutoR
 
     @Override
     void execute() throws Exception {
-        SingleCellBamFile singleCellBamFile = getProcessParameterObject() as SingleCellBamFile
+        SingleCellBamFile singleCellBamFile = processParameterObject as SingleCellBamFile
 
         SingleCellBamFile.withTransaction {
             CellRangerQualityAssessment qa = cellRangerService.parseCellRangerQaStatistics(singleCellBamFile)

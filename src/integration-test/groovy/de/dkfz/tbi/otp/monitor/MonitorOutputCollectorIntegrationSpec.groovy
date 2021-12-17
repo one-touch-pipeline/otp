@@ -44,7 +44,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         ProcessParameter parameter = DomainFactory.createProcessParameter([
                 value    : seqTrack.id.longValue(),
-                className: SeqTrack.class.getName(),
+                className: SeqTrack.class.name,
         ])
         String workflowName = parameter.process.jobExecutionPlan.name
         MonitorOutputCollector collector = new MonitorOutputCollector()
@@ -52,7 +52,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
 
         when:
         collector.addInfoAboutProcessErrors(workflowName, [seqTrack], { it.id }, { it })
-        String output = collector.getOutput()
+        String output = collector.output
 
         then:
         expected == output
@@ -85,7 +85,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
             }
             DomainFactory.createProcessParameter([
                     value    : seqTrack.id.longValue(),
-                    className: SeqTrack.class.getName(),
+                    className: SeqTrack.class.name,
                     process  : processingStep.process,
             ])
         }
@@ -98,7 +98,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
 
         when:
         collector.addInfoAboutProcessErrors(workflowName, [seqTrack], { it.id }, { it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         !output.empty
@@ -142,11 +142,11 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
 
         when:
         collector.addInfoAboutProcessErrors(workflowRun.workflow.name, [seqTrack1, seqTrack2], { it.id }, { it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         2 * linkGenerator.link(_) >> { return "link" }
-        2 * collector.getGrailsLinkGenerator() >> linkGenerator
+        2 * collector.grailsLinkGenerator >> linkGenerator
 
         and:
         !output.empty
@@ -183,11 +183,11 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
 
         when:
         collector.addInfoAboutProcessErrors(workflowRun.workflow.name, [seqTrack], { it.id }, { it })
-        String output = collector.getOutput().split('\n')*.trim().join('\n')
+        String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
         0 * linkGenerator.link(_) >> { return "link" }
-        0 * collector.getGrailsLinkGenerator() >> linkGenerator
+        0 * collector.grailsLinkGenerator >> linkGenerator
         output.empty
 
         where:

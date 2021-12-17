@@ -112,7 +112,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                 cmd                   : cmd,
                 paths                 : cmd.paths ?: [""],
                 contexts              : metadataValidationContexts,
-                implementedValidations: metadataImportService.getImplementedValidations(),
+                implementedValidations: metadataImportService.implementedValidations,
                 isValidated           : isValidated,
                 problems              : problems,
         ]

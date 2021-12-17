@@ -133,7 +133,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
                         "the same seqTrack is going to be merged for the second time: ${seqTracks.findAll { duplicatedSeqTracksIds.contains(it.id) }}"
             }
 
-            Set<SeqTrack> allContainedSeqTracks = this.getContainedSeqTracks()
+            Set<SeqTrack> allContainedSeqTracks = this.containedSeqTracks
 
             assertAndTrackOnError withdrawn || !allContainedSeqTracks.any { it.withdrawn },
                     "not withdrawn bam file has withdrawn seq tracks"
@@ -335,7 +335,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     Map<SeqTrack, File> getSingleLaneQADirectoriesHelper(File baseDirectory) {
         Map<SeqTrack, File> directoriesPerSeqTrack = [:]
         seqTracks.each { SeqTrack seqTrack ->
-            String readGroupName = seqTrack.getReadGroupName()
+            String readGroupName = seqTrack.readGroupName
             directoriesPerSeqTrack.put(seqTrack, new File(baseDirectory, readGroupName))
         }
         return directoriesPerSeqTrack
@@ -429,7 +429,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
     }
 
     Long getNumberOfReadsFromQa() {
-        AbstractQualityAssessment qa = getOverallQualityAssessment()
+        AbstractQualityAssessment qa = overallQualityAssessment
         return qa.pairedRead1 + qa.pairedRead2
     }
 
@@ -461,6 +461,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements Artefact, HasIdentif
 
     @Override
     Integer getMaximalReadLength() {
-        return getSeqTracks()*.dataFilesWhereIndexFileIsFalse.flatten().max { it.meanSequenceLength }.meanSequenceLength
+        return seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().max { it.meanSequenceLength }.meanSequenceLength
     }
 }

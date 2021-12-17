@@ -68,7 +68,7 @@ class OptionsInterceptor {
 
             // this file is provided by the gradle-git-properties gradle plugin
             String resourceName = "git.properties"
-            ClassLoader loader = Thread.currentThread().getContextClassLoader()
+            ClassLoader loader = Thread.currentThread().contextClassLoader
             Properties props = new Properties()
             InputStream resourceStream
             try  {

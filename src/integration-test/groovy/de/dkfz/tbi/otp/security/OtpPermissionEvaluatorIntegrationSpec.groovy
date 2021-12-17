@@ -67,7 +67,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         when:
         List<Project> resultList = SpringSecurityUtils.doWithAuth(user.username) {
-            projectService.getAllProjects()
+            projectService.allProjects
         }
 
         then:
@@ -87,7 +87,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
         when:
         List<Project> resultList = SpringSecurityUtils.doWithAuth(user.username) {
-            projectService.getAllProjects()
+            projectService.allProjects
         }
 
         then:

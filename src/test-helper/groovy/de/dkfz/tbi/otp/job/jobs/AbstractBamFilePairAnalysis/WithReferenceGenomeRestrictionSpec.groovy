@@ -32,7 +32,7 @@ trait WithReferenceGenomeRestrictionSpec implements StartJobIntegrationSpec {
         SamplePair samplePair = super.setupSamplePair()
 
         DomainFactory.createProcessingOptionLazy([
-                name: getProcessingOptionNameForReferenceGenome(),
+                name: processingOptionNameForReferenceGenome,
                 type: null,
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,

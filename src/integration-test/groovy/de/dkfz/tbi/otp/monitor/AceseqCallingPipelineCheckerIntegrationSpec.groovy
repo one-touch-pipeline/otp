@@ -31,12 +31,12 @@ class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
 
     void "workflowName, should return ACEseqWorkflow"() {
         expect:
-        'ACEseqWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
+        'ACEseqWorkflow' == createVariantCallingPipelineChecker().workflowName
     }
 
     void "processingStateMember, should return aceseqProcessingStatus"() {
         expect:
-        'aceseqProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
+        'aceseqProcessingStatus' == createVariantCallingPipelineChecker().processingStateMember
     }
 
     void "pipelineType, should return Pipeline.Type.ACESEQ"() {
@@ -44,12 +44,12 @@ class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
         createPipeLine()
 
         expect:
-        Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().getPipeline().type
+        Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().pipeline.type
     }
 
     void "bamFilePairAnalysisClass, should return AceseqInstance.class"() {
         expect:
-        AceseqInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
+        AceseqInstance.class == createVariantCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

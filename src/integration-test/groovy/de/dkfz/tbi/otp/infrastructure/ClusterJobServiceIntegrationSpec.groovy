@@ -1625,7 +1625,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         setupData()
 
         expect:
-        null == clusterJobService.getLatestJobDate()
+        null == clusterJobService.latestJobDate
     }
 
     void test_getLatestJobDate_WhenSeveralJobsAreFound_ShouldReturnLatestJobDate() {
@@ -1637,7 +1637,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         createClusterJob([queued: START_DATE_TIME.plusDays(3)])
 
         expect:
-        START_DATE_TIME.plusDays(3) == clusterJobService.getLatestJobDate()
+        START_DATE_TIME.plusDays(3) == clusterJobService.latestJobDate
     }
 
     private static ClusterJob createClusterJob(Map myProps = [:]) {
@@ -1654,7 +1654,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
 
         ClusterJob job = DomainFactory.createClusterJob(realm: realm, userName: "unixUser", processingStep: processingStep, seqType: props.seqType)
 
-        job.clusterJobName = "test_" + processingStep.getNonQualifiedJobClass()
+        job.clusterJobName = "test_" + processingStep.nonQualifiedJobClass
 
         props.remove(['jobClass', 'seqType'])
 

@@ -103,7 +103,7 @@ class WithdrawServiceSpec extends Specification implements DataTest, DomainFacto
         service.withdraw(withdrawParameters)
 
         then:
-        1 * fileSystemService.getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+        1 * fileSystemService.remoteFileSystemOnDefaultRealm >> FileSystems.default
 
         then:
         1 * roddyBamFileWithdrawService.collectObjects(seqTracks) >> roddyBamFiles

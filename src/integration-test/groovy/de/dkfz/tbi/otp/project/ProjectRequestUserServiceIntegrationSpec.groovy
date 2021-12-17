@@ -202,7 +202,7 @@ class ProjectRequestUserServiceIntegrationSpec extends Specification implements 
     void "getProjectRequestUserOfCurrentUser, no ProjectRequestUser for User"() {
         given:
         ProjectRequest request = DomainFactory.createProjectRequest()
-        ProjectRequestUserService service = getServiceWithMockedCurrentUser()
+        ProjectRequestUserService service = serviceWithMockedCurrentUser
 
         when:
         service.getProjectRequestUserOfCurrentUser(request)

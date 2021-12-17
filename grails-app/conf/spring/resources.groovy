@@ -38,11 +38,11 @@ beans = {
     xmlns context:"http://www.springframework.org/schema/context"
     context.'component-scan'('base-package': "de.dkfz.tbi.otp")
 
-    if (Environment.getCurrent() == Environment.TEST) {
+    if (Environment.current == Environment.TEST) {
         // use Class.forName because classes in test-helper are not found in production env
         fileSystemService(Class.forName("de.dkfz.tbi.otp.job.processing.TestFileSystemService"))
     }
-    if (Environment.getCurrent() == Environment.TEST || Environment.getCurrent().getName() == "WORKFLOW_TEST") {
+    if (Environment.current == Environment.TEST || Environment.current.name == "WORKFLOW_TEST") {
         configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
             processingOptionService = ref('processingOptionService')
         }

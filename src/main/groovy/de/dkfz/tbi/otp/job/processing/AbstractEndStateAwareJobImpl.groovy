@@ -53,7 +53,7 @@ abstract class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements E
         if (!endState) {
             throw new InvalidStateException("EndState accessed without end state being set")
         }
-        if (getState() != State.FINISHED) {
+        if (state != State.FINISHED) {
             throw new InvalidStateException("EndState accessed but not in finished state")
         }
         return endState

@@ -233,7 +233,7 @@ class SeqTrackService {
     }
 
     void fillBaseCount(SeqTrack seqTrack) {
-        seqTrack.nBasePairs = seqTrack.dataFilesWhereIndexFileIsFalse.sum { DataFile it -> it.getNBasePairs() } as Long ?: 0
+        seqTrack.nBasePairs = seqTrack.dataFilesWhereIndexFileIsFalse.sum { DataFile it -> it.NBasePairs } as Long ?: 0
         assert seqTrack.save(flush: true)
     }
 

@@ -142,8 +142,8 @@ class CreateRoddyFileHelper {
         RoddyBamFile tumorBam = sophiaInstance.sampleType1BamFile
         RoddyBamFile controlBam = sophiaInstance.sampleType2BamFile
 
-        CreateFileHelper.createFile(tumorBam.getFinalInsertSizeFile())
-        CreateFileHelper.createFile(controlBam.getFinalInsertSizeFile())
+        CreateFileHelper.createFile(tumorBam.finalInsertSizeFile)
+        CreateFileHelper.createFile(controlBam.finalInsertSizeFile)
     }
 
     static void createAceseqResultFiles(AceseqInstance aceseqInstance, IndividualService individualService) {

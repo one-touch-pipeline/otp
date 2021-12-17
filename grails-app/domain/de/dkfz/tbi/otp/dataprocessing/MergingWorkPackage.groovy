@@ -64,7 +64,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         })
 
         needsProcessing(validator: { val, obj ->
-            !val || obj?.pipeline?.name in Pipeline.Name.getAlignmentPipelineNames()
+            !val || obj?.pipeline?.name in Pipeline.Name.alignmentPipelineNames
         })
         pipeline(validator: { pipeline ->
             pipeline.type == Pipeline.Type.ALIGNMENT &&
@@ -137,7 +137,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     @Override
     AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
-        AbstractMergedBamFile bamFile = getProcessableBamFileInProjectFolder()
+        AbstractMergedBamFile bamFile = processableBamFileInProjectFolder
         if (bamFile && bamFile.containedSeqTracks == seqTracks) {
             return bamFile
         } else {

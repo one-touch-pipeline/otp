@@ -89,7 +89,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
             cValues.add("EXOME_CAPTURE_KIT_BEDFILE:${bedFilePath}")
         }
 
-        cValues.addAll(getSampleExtractionVersion2RoddyParameters())
+        cValues.addAll(sampleExtractionVersion2RoddyParameters)
 
         return cValues
     }

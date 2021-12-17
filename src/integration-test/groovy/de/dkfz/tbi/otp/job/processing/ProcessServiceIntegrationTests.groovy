@@ -505,7 +505,7 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
     @Test
     void testProcessUrl_shouldBeFine() {
         setupData()
-        String serverUrl = linkGenerator.getServerBaseURL()
+        String serverUrl = linkGenerator.serverBaseURL
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 

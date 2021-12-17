@@ -230,7 +230,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         )
 
         expect:
-        qcThresholdService.getClassesWithProperties() == [
+        qcThresholdService.classesWithProperties == [
                 new ClassWithThreshold(
                         clasz: CellRangerQualityAssessment,
                         existingThresholds: [threshold],

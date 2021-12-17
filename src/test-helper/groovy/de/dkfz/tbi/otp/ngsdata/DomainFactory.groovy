@@ -287,17 +287,17 @@ class DomainFactory {
 
     @Deprecated
     static Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
-        return proxyCellRanger.getDefaultValuesForAbstractQualityAssessment()
+        return proxyCellRanger.defaultValuesForAbstractQualityAssessment
     }
 
     static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
-        return createDomainObject(OverallQualityAssessmentMerged, getDefaultValuesForAbstractQualityAssessment() + [
+        return createDomainObject(OverallQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
                 qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
         ], properties)
     }
 
     static ChromosomeQualityAssessmentMerged createChromosomeQualityAssessmentMerged(Map properties = [:]) {
-        return createDomainObject(ChromosomeQualityAssessmentMerged, getDefaultValuesForAbstractQualityAssessment() + [
+        return createDomainObject(ChromosomeQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
                 chromosomeName             : "chromosomeName_${counter++}",
                 qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
         ], properties)
@@ -576,14 +576,14 @@ class DomainFactory {
     ]
 
     static ChromosomeQualityAssessment createChromosomeQualityAssessment(Map properties = [:]) {
-        return createDomainObject(ChromosomeQualityAssessment, getDefaultValuesForAbstractQualityAssessment() + qaJarQualityAssessmentProperties + [
+        return createDomainObject(ChromosomeQualityAssessment, defaultValuesForAbstractQualityAssessment + qaJarQualityAssessmentProperties + [
                 chromosomeName       : "chromosomeName_${counter++}",
                 qualityAssessmentPass: { createQualityAssessmentPass() },
         ], properties)
     }
 
     static OverallQualityAssessment createOverallQualityAssessment(Map properties = [:]) {
-        return createDomainObject(OverallQualityAssessment, getDefaultValuesForAbstractQualityAssessment() + qaJarQualityAssessmentProperties + [
+        return createDomainObject(OverallQualityAssessment, defaultValuesForAbstractQualityAssessment + qaJarQualityAssessmentProperties + [
                 qualityAssessmentPass: { createQualityAssessmentPass() },
         ], properties)
     }
@@ -798,7 +798,7 @@ class DomainFactory {
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
     static createRoddyMergedBamQa(Map properties = [:]) {
-        return createDomainObject(RoddyMergedBamQa, getDefaultValuesForAbstractQualityAssessment() + roddyQualityAssessmentProperties, properties)
+        return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties, properties)
     }
 
     /**
@@ -826,13 +826,13 @@ class DomainFactory {
     ]
 
     static RoddyLibraryQa createRoddyLibraryQa(Map properties = [:]) {
-        return createDomainObject(RoddyLibraryQa, getDefaultValuesForAbstractQualityAssessment() + roddyQualityAssessmentProperties + [
+        return createDomainObject(RoddyLibraryQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties + [
                 libraryDirectoryName: "libraryDirectoryName_${counter++}",
         ], properties)
     }
 
     static RoddySingleLaneQa createRoddySingleLaneQa(Map properties = [:]) {
-        return createDomainObject(RoddySingleLaneQa, getDefaultValuesForAbstractQualityAssessment() + roddyQualityAssessmentProperties + [
+        return createDomainObject(RoddySingleLaneQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties + [
                 seqTrack: { createSeqTrack() },
         ], properties)
     }
@@ -992,11 +992,11 @@ class DomainFactory {
                 pipeline: createDefaultOtpPipeline(),
                 referenceGenome: createReferenceGenome(name: 'hs37d5')
         )
-        ProcessedMergedBamFile bamFileTumor = createProcessedMergedBamFile(tumorMwp, getRandomProcessedBamFileProperties() + [coverage: 30.0])
+        ProcessedMergedBamFile bamFileTumor = createProcessedMergedBamFile(tumorMwp, randomProcessedBamFileProperties + [coverage: 30.0])
 
         ProcessedMergedBamFile bamFileControl = createProcessedMergedBamFile(
                 createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
-                getRandomProcessedBamFileProperties() + [coverage: 30.0])
+                randomProcessedBamFileProperties + [coverage: 30.0])
 
         bamFileTumor.mergingWorkPackage.bamFileInProjectFolder = bamFileTumor
         assert bamFileTumor.mergingWorkPackage.save(flush: true)
@@ -1048,7 +1048,7 @@ class DomainFactory {
                 pipeline: tumorMwp.pipeline,
                 referenceGenome: tumorMwp.referenceGenome,
                 sample: createSample(
-                        individual: tumorMwp.getIndividual()
+                        individual: tumorMwp.individual
                 )
         )
 
@@ -1057,7 +1057,7 @@ class DomainFactory {
                 controlMwp,
         ].each {
             ExternallyProcessedMergedBamFile bamFile = createExternallyProcessedMergedBamFile(
-                    getRandomProcessedBamFileProperties() + [
+                    randomProcessedBamFileProperties + [
                             workPackage      : it,
                             coverage         : 30.0,
                             insertSizeFile   : 'insertSize.txt',
@@ -1720,7 +1720,7 @@ class DomainFactory {
                 lastUpdated          : { new Date() },
                 adapterTrimmingNeeded: { seqType.isWgbs() || seqType.isRna() || seqType.isChipSeq() },
                 nameUsedInConfig     : RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, programVersion, configVersion),
-                md5sum               : HelperUtils.getRandomMd5sum(),
+                md5sum               : HelperUtils.randomMd5sum,
         ]
     }
 
@@ -2118,7 +2118,7 @@ class DomainFactory {
     static MetaDataFile createMetaDataFile(Map properties = [:]) {
         return createDomainObject(MetaDataFile, [
                 fileName  : "MetaDataFileName_${counter++}",
-                filePath  : TestCase.getUniqueNonExistentPath().path,
+                filePath  : TestCase.uniqueNonExistentPath.path,
                 fastqImportInstance: { createFastqImportInstance() },
         ], properties)
     }

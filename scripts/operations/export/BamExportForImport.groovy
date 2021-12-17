@@ -227,7 +227,7 @@ class BamExportImport {
     Path convertAndCheckPath(String fileName, boolean overwriteExisting) {
         assert fileName: 'No file name given, but this is required'
 
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         Path path = fileSystem.getPath(fileName)
 
         assert path.absolute: '"The file name is not absolute, but that is required'

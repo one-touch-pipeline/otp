@@ -38,6 +38,6 @@ class ExternalMergingWorkPackage extends AbstractMergingWorkPackage {
 
     @Override
     AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
-        return getProcessableBamFileInProjectFolder()
+        return processableBamFileInProjectFolder
     }
 }

@@ -157,7 +157,7 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         DataFile dataFile = createDataFile(nReads: nReads, sequenceLength: sequenceLength)
 
         when:
-        dataFile.getNBasePairs()
+        dataFile.NBasePairs
 
         then:
         AssertionError e = thrown()
@@ -176,7 +176,7 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         long result
 
         when:
-        result = dataFile.getNBasePairs()
+        result = dataFile.NBasePairs
 
         then:
         result == 10000

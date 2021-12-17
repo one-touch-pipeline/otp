@@ -33,7 +33,7 @@ List<String> errors = []
 Project.withTransaction {
     Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
 
-    [ctx.seqTypeService.getWholeGenomePairedSeqType(), ctx.seqTypeService.getExomePairedSeqType()].each { SeqType seqType ->
+    [ctx.seqTypeService.wholeGenomePairedSeqType, ctx.seqTypeService.exomePairedSeqType].each { SeqType seqType ->
 
         Map<String, List<RoddyWorkflowConfig>> configsByVersion = Project.all.findResults { project ->
             RoddyWorkflowConfig config = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNullAndObsoleteDateIsNull(project, seqType, pipeline))
@@ -50,7 +50,7 @@ Project.withTransaction {
         ].each { k, v ->
             configsByVersion[k].each { RoddyWorkflowConfig config ->
 
-                String md5sum = new File(config.getConfigFilePath()).text.encodeAsMD5() as String
+                String md5sum = new File(config.configFilePath).text.encodeAsMD5() as String
 
                 if (config.md5sum == md5sum) {
                     RoddyConfiguration configuration = new RoddyConfiguration(pluginName: "IndelCallingWorkflow",

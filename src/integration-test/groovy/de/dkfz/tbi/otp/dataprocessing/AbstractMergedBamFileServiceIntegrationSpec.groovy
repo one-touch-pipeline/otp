@@ -84,7 +84,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
     }
 
     private String expectedMergedAlignmentPath(AbstractMergedBamFile mergedBamFile) {
-        String pidPath = "${TestConfigService.getInstance().getRootPath()}/${mergedBamFile.project.dirName}/sequencing/${mergedBamFile.seqType.dirName}/view-by-pid/${mergedBamFile.individual.pid}"
+        String pidPath = "${TestConfigService.instance.rootPath}/${mergedBamFile.project.dirName}/sequencing/${mergedBamFile.seqType.dirName}/view-by-pid/${mergedBamFile.individual.pid}"
         return "${pidPath}/${mergedBamFile.sampleType.dirName}/${mergedBamFile.seqType.libraryLayoutDirName}/${MERGED_BAM_FILES_PATH}/"
     }
 

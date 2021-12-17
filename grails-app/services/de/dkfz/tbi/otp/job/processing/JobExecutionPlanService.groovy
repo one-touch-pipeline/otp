@@ -102,7 +102,6 @@ class JobExecutionPlanService {
 
     @PostFilter("hasRole('ROLE_OPERATOR')")
     List<JobExecutionPlan> getJobExecutionPlansWithPreviousVersions() {
-        List<JobExecutionPlan> jobExecutionPlans = getJobExecutionPlans()
         return JobExecutionPlan.findAllByNameInList(jobExecutionPlans*.name)
     }
 

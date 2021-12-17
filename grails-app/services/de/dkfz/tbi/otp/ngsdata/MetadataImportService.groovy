@@ -139,7 +139,7 @@ class MetadataImportService {
             metadataValidators.each {
                 Long startTime = System.currentTimeMillis()
                 it.validate(context)
-                log.debug("finished ${it.getClass()} took ${System.currentTimeMillis() - startTime}ms validation started : ${hash}")
+                log.debug("finished ${it.class} took ${System.currentTimeMillis() - startTime}ms validation started : ${hash}")
             }
             log.debug("finished all ${metadataValidators.size()} validators for ${context.spreadsheet.dataRows.size()} lines took " +
                     "${System.currentTimeMillis() - startTimeAll}ms validation started : ${hash}")
@@ -170,7 +170,7 @@ class MetadataImportService {
             if (!e.message.startsWith('Copying of metadata file')) {
                 TransactionUtils.withNewTransaction {
                     mailHelperService.sendEmailToTicketSystem("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}\n" +
-                            "${e.getLocalizedMessage()}\n${e.getCause()}")
+                            "${e.localizedMessage}\n${e.cause}")
                 }
             }
             throw new OtpRuntimeException("Error while importing metadata file with paths: ${metadataPaths*.path.join('\n')}", e)
@@ -218,7 +218,7 @@ class MetadataImportService {
                 assert Files.readAllBytes(targetFile) == context.content
             } catch (Throwable t) {
                 mailHelperService.sendEmailToTicketSystem("Error: Copying of metadatafile ${source} failed",
-                        "${t.getLocalizedMessage()}\n${t.getCause()}")
+                        "${t.localizedMessage}\n${t.cause}")
                 throw new RuntimeException("Copying of metadata file ${source} failed", t)
             }
         }
@@ -262,9 +262,9 @@ class MetadataImportService {
             return null
         }
         String ilse = ilseId.padLeft(6, '0')
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.getDefaultRealm())
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
 
-        return fileSystem.getPath("${configService.getSeqCenterInboxPath()}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
+        return fileSystem.getPath("${configService.seqCenterInboxPath}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
     }
 
     protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
@@ -306,7 +306,7 @@ class MetadataImportService {
     }
 
     protected Collection<MetadataValidator> getMetadataValidators() {
-        return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().name }
+        return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.class.name }
     }
 
     protected DirectoryStructure getDirectoryStructure(DirectoryStructureBeanName name) {

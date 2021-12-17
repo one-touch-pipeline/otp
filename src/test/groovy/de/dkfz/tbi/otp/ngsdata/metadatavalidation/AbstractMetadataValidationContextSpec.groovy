@@ -49,7 +49,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file, null)
 
         then:
-        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
+        Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR
         problem.message.contains(problemMessage)
@@ -77,7 +77,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
+        Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.WARNING
         problem.message.contains(problemMessage)
@@ -99,7 +99,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
+        Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR
         problem.message.contains(problemMessage)
@@ -121,7 +121,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        infoMetadata.problems.getProblems().isEmpty()
+        infoMetadata.problems.problems.isEmpty()
         infoMetadata.metadataFileMd5sum == '2628f03624261e75bba6960ff9d15291'
         infoMetadata.spreadsheet.dataRows[0].cells[0].text == 'M\u00e4use'
     }
@@ -148,7 +148,7 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
+        Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR
         problem.message.contains('contains less than two lines')

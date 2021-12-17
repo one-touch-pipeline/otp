@@ -51,7 +51,7 @@ class LinkWgbsAlignmentFilesJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     void execute() throws Exception {
-        final RoddyBamFile roddyBamFile = getProcessParameterObject()
+        final RoddyBamFile roddyBamFile = processParameterObject
 
         Realm realm = roddyBamFile.project.realm
         assert realm : "Realm should not be null"

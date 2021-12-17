@@ -76,7 +76,7 @@ class BamMetadataValidationContextSpec extends Specification {
         context.checkFilesInDirectory(emptyFolder, problems)
 
         then:
-        Problem problem = exactlyOneElement(problems.getProblems())
+        Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.WARNING
         problem.message.contains("is empty.")
     }
@@ -93,7 +93,7 @@ class BamMetadataValidationContextSpec extends Specification {
         context.checkFilesInDirectory(folder, problems)
 
         then:
-        problems.getProblems().empty
+        problems.problems.empty
     }
 
     void "checkFile, when is not readable, add the corresponding problem"() {
@@ -106,7 +106,7 @@ class BamMetadataValidationContextSpec extends Specification {
         context.checkFile(notReadAble, problems)
 
         then:
-        Problem problem = exactlyOneElement(problems.getProblems())
+        Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.ERROR
         problem.message.contains("is not readable.")
     }
@@ -119,7 +119,7 @@ class BamMetadataValidationContextSpec extends Specification {
         context.checkFile(emptyFile, problems)
 
         then:
-        Problem problem = exactlyOneElement(problems.getProblems())
+        Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.WARNING
         problem.message.contains("is empty.")
     }
@@ -135,7 +135,7 @@ class BamMetadataValidationContextSpec extends Specification {
         context.checkFile(bigFile, problems)
 
         then:
-        Problem problem = exactlyOneElement(problems.getProblems())
+        Problem problem = exactlyOneElement(problems.problems)
         problem.level == LogLevel.WARNING
         problem.message.contains("is larger than ${AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
 

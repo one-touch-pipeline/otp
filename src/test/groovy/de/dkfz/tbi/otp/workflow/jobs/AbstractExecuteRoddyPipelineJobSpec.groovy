@@ -105,7 +105,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.execute(workflowStep)
 
         then:
-        1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
+        1 * job.roddyConfigValueService.defaultValues >> { [e: "f"] }
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
@@ -155,7 +155,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.execute(workflowStep)
 
         then:
-        1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
+        1 * job.roddyConfigValueService.defaultValues >> { [e: "f"] }
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
@@ -206,7 +206,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.execute(workflowStep)
 
         then:
-        1 * job.roddyConfigValueService.getDefaultValues() >> { [e: "f"] }
+        1 * job.roddyConfigValueService.defaultValues >> { [e: "f"] }
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }

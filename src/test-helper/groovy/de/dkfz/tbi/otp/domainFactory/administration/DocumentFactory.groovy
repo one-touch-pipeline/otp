@@ -37,7 +37,7 @@ trait DocumentFactory implements DomainFactoryCore {
 
     Document createDocument(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Document, [
-                content     : HelperUtils.getUniqueString().bytes,
+                content     : HelperUtils.uniqueString.bytes,
                 formatType  : Document.FormatType.PDF,
                 documentType: { createDocumentType() },
         ], properties, saveAndValidate)

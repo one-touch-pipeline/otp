@@ -111,7 +111,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
         File sourceBam = new File(bamFile.importedFrom)
         File sourceBai = new File(sourceBam.parentFile, bamFile.baiFileName)
-        File sourceFurtherFile = new File(new File(new File(bamFile.getImportedFrom()).parentFile, bamFile.furtherFiles.first()), 'file.txt')
+        File sourceFurtherFile = new File(new File(new File(bamFile.importedFrom).parentFile, bamFile.furtherFiles.first()), 'file.txt')
         File targetFurtherFile = new File(new File(bamFile.importFolder, bamFile.furtherFiles.first()), 'file.txt')
         [
                 sourceBam,
@@ -197,15 +197,15 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         File link2 = new File(targetDir1, linkFileName2)
         File link1 = new File(mainDirectory, linkFileName1)
 
-        File copiedFile = new File(bamFile.getImportFolder(), realFurtherFileName)
+        File copiedFile = new File(bamFile.importFolder, realFurtherFileName)
 
         [
-                new File(mainDirectory, bamFile.getBamFileName()),
-                new File(mainDirectory, bamFile.getBaiFileName()),
+                new File(mainDirectory, bamFile.bamFileName),
+                new File(mainDirectory, bamFile.baiFileName),
                 real,
 
-                bamFile.getBamFile(),
-                bamFile.getBaiFile(),
+                bamFile.bamFile,
+                bamFile.baiFile,
                 copiedFile,
         ].each {
             CreateFileHelper.createFile(it)
@@ -243,11 +243,11 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
         ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
         [
-                bamFile.getBamFileName(),
-                bamFile.getBaiFileName(),
-                bamFile.getFurtherFiles().first(),
+                bamFile.bamFileName,
+                bamFile.baiFileName,
+                bamFile.furtherFiles.first(),
         ].each {
-            File copied = new File(bamFile.getImportFolder(), it)
+            File copied = new File(bamFile.importFolder, it)
             File link = new File(mainDirectory, it)
             CreateFileHelper.createFile(copied)
             link.delete()

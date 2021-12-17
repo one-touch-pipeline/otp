@@ -138,8 +138,8 @@ Path targetFolder = fileSystem.getPath(targetOutputFolder)
 // where to put output
 Path scriptOutputPath = fileSystem.getPath(scriptOutputFile)
 
-String outputFileName = scriptOutputPath.getFileName()
-String outputDir = scriptOutputPath.getParent().toString()
+String outputFileName = scriptOutputPath.fileName
+String outputDir = scriptOutputPath.parent.toString()
 
 Path outputDirPath = fileService.toPath(new File(outputDir), fileSystem)
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, realm)

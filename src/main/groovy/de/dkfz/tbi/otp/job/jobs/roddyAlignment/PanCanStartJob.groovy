@@ -35,6 +35,6 @@ class PanCanStartJob extends AbstractRoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return [SeqTypeService.getExomePairedSeqType(), SeqTypeService.getWholeGenomePairedSeqType(), SeqTypeService.getChipSeqPairedSeqType()]
+        return [SeqTypeService.exomePairedSeqType, SeqTypeService.wholeGenomePairedSeqType, SeqTypeService.chipSeqPairedSeqType]
     }
 }

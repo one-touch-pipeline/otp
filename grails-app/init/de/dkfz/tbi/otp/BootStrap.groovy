@@ -51,7 +51,7 @@ class BootStrap {
 
         propertiesValidationService.validateStartUpProperties()
 
-        if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.getCurrent())) {
+        if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.current)) {
             seedService.installSeedData()
             UserService.createFirstAdminUserIfNoUserExists()
         }
@@ -78,7 +78,7 @@ class BootStrap {
         }
 
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
-        DicomAuditLogger.logActorStart(EventOutcomeIndicator.SUCCESS, ConfigService.getInstance().getDicomInstanceName())
+        DicomAuditLogger.logActorStart(EventOutcomeIndicator.SUCCESS, ConfigService.instance.dicomInstanceName)
     }
 
     def destroy = {

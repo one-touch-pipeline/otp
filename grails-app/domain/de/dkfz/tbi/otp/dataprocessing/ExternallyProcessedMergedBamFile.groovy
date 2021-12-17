@@ -91,7 +91,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
-        return getBamFile()
+        return bamFile
     }
 
     @Override

@@ -39,13 +39,10 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
         ConfigPerProjectAndSeqType config = getLatestConfig(project, seqType)
         String currentVersion = config?.programVersion
 
-        String defaultVersion = getDefaultVersion()
-        List<String> availableVersions = getAvailableVersions()
-
         return [
                 project: project,
                 seqType: seqType,
-                pipeline: getPipeline(),
+                pipeline: pipeline,
 
                 defaultVersion: defaultVersion,
                 currentVersion: currentVersion,

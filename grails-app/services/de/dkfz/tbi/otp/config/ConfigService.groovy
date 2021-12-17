@@ -166,13 +166,13 @@ class ConfigService implements ApplicationContextAware {
         if (Environment.isDevelopmentMode()) {
             return getBooleanValue(OtpProperty.DEVEL_USE_BACKDOOR, false)
         }
-        return Environment.getCurrent() == Environment.TEST
+        return Environment.current == Environment.TEST
     }
 
     String getBackdoorUser() {
         if (Environment.isDevelopmentMode()) {
             return otpProperties.get(OtpProperty.DEVEL_BACKDOOR_USER)
-        } else if (Environment.getCurrent() == Environment.TEST) {
+        } else if (Environment.current == Environment.TEST) {
             return 'otp'
         } else {
             return null
@@ -207,7 +207,7 @@ class ConfigService implements ApplicationContextAware {
         if (otpProperties.get(OtpProperty.CONFIG_ENVIRONMENT_NAME)) {
             return otpProperties.get(OtpProperty.CONFIG_ENVIRONMENT_NAME)
         } else {
-            return Environment.getCurrent().name
+            return Environment.current.name
         }
     }
 

@@ -66,14 +66,14 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
                 DicomAuditLogger.logUserSwitched(
                         EventIdentification.EventOutcomeIndicator.SUCCESS,
                         DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
-                        event.getTargetUser()?.getUsername()
+                        event.targetUser?.username
                 )
                 break
             case { it instanceof AuthorizationFailureEvent } :
                 DicomAuditLogger.logRestrictedFunctionUsed(
                         EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
                         DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
-                        event.source.hasProperty("request") ? event.source.request.getRequestURI() : "null"
+                        event.source.hasProperty("request") ? event.source.request.requestURI : "null"
                 )
                 break
         }

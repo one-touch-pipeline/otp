@@ -49,7 +49,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
 
     @Override
     void execute() throws Exception {
-        final AceseqInstance aceseqInstance = getProcessParameterObject()
+        final AceseqInstance aceseqInstance = processParameterObject
 
         Path qcFile = aceseqService.getQcJsonFile(aceseqInstance)
         JSONObject qcJson = JSON.parse(qcFile.text)

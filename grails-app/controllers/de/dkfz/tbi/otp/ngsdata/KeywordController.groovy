@@ -54,7 +54,7 @@ class KeywordController implements CheckAndCall {
 
     def createOrAdd(AddKeywordByNameCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.message = new FlashMessage(g.message(code: "keyword.index.failure") as String, cmd.getErrors())
+            flash.message = new FlashMessage(g.message(code: "keyword.index.failure") as String, cmd.errors)
         } else {
             keywordService.createOrAddKeyword(cmd.value, projectSelectionService.requestedProject)
             flash.message = new FlashMessage(g.message(code: "keyword.index.success") as String)
@@ -64,7 +64,7 @@ class KeywordController implements CheckAndCall {
 
     def add(AddKeywordCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordFailure") as String, cmd.getErrors())
+            flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordFailure") as String, cmd.errors)
         } else {
             keywordService.addKeywordToProject(cmd.keyword, projectSelectionService.requestedProject)
             flash.message = new FlashMessage(g.message(code: "keyword.index.addKeywordSuccess") as String)
@@ -74,7 +74,7 @@ class KeywordController implements CheckAndCall {
 
     def remove(KeywordCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordFailure") as String, cmd.getErrors())
+            flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordFailure") as String, cmd.errors)
         } else {
             keywordService.removeKeywordFromProject(cmd.keyword, projectSelectionService.requestedProject)
             flash.message = new FlashMessage(g.message(code: "keyword.index.removeKeywordSuccess") as String)

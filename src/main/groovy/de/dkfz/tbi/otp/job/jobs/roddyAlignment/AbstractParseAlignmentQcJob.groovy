@@ -39,7 +39,7 @@ abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl 
 
     @Override
     void execute() {
-        final RoddyBamFile roddyBamFile = getProcessParameterObject()
+        final RoddyBamFile roddyBamFile = processParameterObject
 
         // the following line is needed to avoid the following error,
         // which appears at least in the workflow test environment:

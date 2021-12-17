@@ -145,7 +145,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     File getWorkflowData() {
-        new File(getInputRootDirectory(), 'aceseq')
+        new File(inputRootDirectory, 'aceseq')
     }
 
     @Override

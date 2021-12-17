@@ -46,7 +46,7 @@ class SecureAllControllerRuleVisitor extends AbstractAstVisitor implements IsAnn
     }
 
     private void checkRule(ClassNode node) {
-        List<AnnotationNode> annotationNodeList = node.getAnnotations()
+        List<AnnotationNode> annotationNodeList = node.annotations
 
         if (!annotationNodeList.any {
             it.classNode.name == "Secured"

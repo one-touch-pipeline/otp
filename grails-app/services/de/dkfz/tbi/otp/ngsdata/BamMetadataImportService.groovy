@@ -61,7 +61,7 @@ class BamMetadataImportService {
     }
 
     protected Collection<BamMetadataValidator> getBamMetadataValidators() {
-        return applicationContext.getBeansOfType(BamMetadataValidator).values().sort { it.getClass().name }
+        return applicationContext.getBeansOfType(BamMetadataValidator).values().sort { it.class.name }
     }
 
     BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles, boolean linkSourceFiles) {

@@ -43,7 +43,7 @@ class ProcessingPriorityController {
         params.max = 1000
         return [
                 processingPriorityList: processingPriorityService.getPriorityList(params),
-                processingPriorityCount: processingPriorityService.getPriorityListCount(),
+                processingPriorityCount: processingPriorityService.priorityListCount,
         ]
     }
 

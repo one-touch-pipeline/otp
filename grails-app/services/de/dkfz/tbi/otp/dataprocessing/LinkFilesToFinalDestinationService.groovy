@@ -144,7 +144,7 @@ class LinkFilesToFinalDestinationService {
 
         if (roddyBamFile.seqType.isWgbs()) {
             linkMapSourceLink.put(roddyBamFile.workMergedMethylationDirectory, roddyBamFile.finalMergedMethylationDirectory)
-            if (roddyBamFile.getContainedSeqTracks()*.getLibraryDirectoryName().unique().size() > 1) {
+            if (roddyBamFile.containedSeqTracks*.libraryDirectoryName.unique().size() > 1) {
                 [
                         roddyBamFile.workLibraryQADirectories.values().asList().sort(),
                         roddyBamFile.finalLibraryQADirectories.values().asList().sort(),
@@ -162,7 +162,7 @@ class LinkFilesToFinalDestinationService {
         }
 
         //collect links for every execution store
-        [roddyBamFile.getWorkExecutionDirectories(), roddyBamFile.getFinalExecutionDirectories()].transpose().each {
+        [roddyBamFile.workExecutionDirectories, roddyBamFile.finalExecutionDirectories].transpose().each {
             linkMapSourceLink.put(it[0], it[1])
         }
 
@@ -183,7 +183,7 @@ class LinkFilesToFinalDestinationService {
     }
 
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
-        File baseDirectory = roddyBamFile.getBaseDirectory()
+        File baseDirectory = roddyBamFile.baseDirectory
         Map<File, File> links = roddyBamFile.workDirectory.listFiles().findAll {
             !it.name.startsWith(".")
         }.collectEntries { File source ->
@@ -272,7 +272,7 @@ class LinkFilesToFinalDestinationService {
         if (workDirs) {
             lsdfFilesService.deleteFilesRecursive(realm, workDirs)
         }
-        String cmd = "find ${roddyBamFile.getBaseDirectory()} -maxdepth 1 -lname '.merging*/*' -delete;"
+        String cmd = "find ${roddyBamFile.baseDirectory} -maxdepth 1 -lname '.merging*/*' -delete;"
         remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
     }
 }

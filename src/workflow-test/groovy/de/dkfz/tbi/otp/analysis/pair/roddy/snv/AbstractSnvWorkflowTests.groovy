@@ -96,7 +96,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
     @Override
     File getWorkflowData() {
-        new File(getInputRootDirectory(), 'snv')
+        new File(inputRootDirectory, 'snv')
     }
 
     @Override

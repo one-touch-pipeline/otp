@@ -48,7 +48,7 @@ class CheckDataFileStatusJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     void execute() throws Exception {
-        ConsistencyCheck consistencyCheck = ConsistencyCheck.get(Long.parseLong(getProcessParameterValue()))
+        ConsistencyCheck consistencyCheck = ConsistencyCheck.get(Long.parseLong(processParameterValue))
         List<DataFile> dataFiles = dataFilesWithConsistentStatus()
         long numberOfInconsistencies = 0
         dataFiles.each { DataFile dataFile ->

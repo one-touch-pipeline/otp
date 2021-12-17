@@ -332,7 +332,7 @@ class RoddyWorkflowConfigUnitTests {
         createXml(roddyWorkflowConfig, 'label')
         RoddyWorkflowConfigService service = createService()
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert configuration.@name == config.getNameUsedInConfig()') {
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert configuration.@name == config.nameUsedInConfig') {
             service.validateConfig(roddyWorkflowConfig)
         }
     }

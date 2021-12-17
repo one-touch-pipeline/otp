@@ -67,7 +67,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> { DataFile file ->
-                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.getRoot()).toPath()
+                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
                 path.text = "non-empty"
                 return path
             }
@@ -168,7 +168,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> { DataFile file ->
-                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.getRoot()).toPath()
+                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
                 path.text = "non-empty"
                 return path
             }
@@ -202,7 +202,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> { DataFile file ->
-                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.getRoot()).toPath()
+                Path path = File.createTempFile("${file.fileName}", null, temporaryFolder.root).toPath()
                 return path
             }
         }

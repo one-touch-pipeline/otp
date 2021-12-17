@@ -190,7 +190,7 @@ abstract class AbstractJobImpl implements Job {
      * belongs to. If there is no such process parameter or object, this method will throw an exception.
      */
     ProcessParameterObject getProcessParameterObject() {
-        ProcessParameterObject object = getProcessParameter().toObject()
+        ProcessParameterObject object = processParameter.toObject()
         if (object == null) {
             throw new RuntimeException("Object referenced by ProcessParameter was not found.")
         }
@@ -198,13 +198,13 @@ abstract class AbstractJobImpl implements Job {
     }
 
     ProcessParameterObject getRefreshedProcessParameterObject() {
-        ProcessParameterObject object = getProcessParameterObject()
+        ProcessParameterObject object = processParameterObject
         object.refresh()
         return object
     }
 
     String getProcessParameterValue() {
-        return getProcessParameter().value
+        return processParameter.value
     }
 
     ProcessParameter getProcessParameter() {

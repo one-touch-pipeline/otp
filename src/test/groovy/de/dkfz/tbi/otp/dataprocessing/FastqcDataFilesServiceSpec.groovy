@@ -208,7 +208,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         given:
         String fastqc = DataProcessingFilesService.OutputDirectories.FASTX_QC.toString().toLowerCase()
 
-        String viewByPidPath = "${configService.getRootPath()}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
+        String viewByPidPath = "${configService.rootPath}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
         Path expectedPath = Paths.get("${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/" +
                 "${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${fastqc}")
 

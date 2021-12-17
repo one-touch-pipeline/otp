@@ -314,7 +314,7 @@ class MolgenisExporter {
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 Realm realm = ctx.configService.defaultRealm
 
-final Path baseDirectory = ctx.fileService.toPath(ctx.configService.getScriptOutputPath(), ctx.fileSystemService.getRemoteFileSystemOnDefaultRealm())
+final Path baseDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.remoteFileSystemOnDefaultRealm)
 final Path outputExportDirectory = baseDirectory.resolve("export").resolve("molgenis").resolve(timestamp)
 
 projects.each { Project project ->
@@ -351,7 +351,7 @@ projects.each { Project project ->
     ].each {
         Path path = outputDirectory.resolve("${it[0]}.csv")
         println "    - ${path}"
-        Files.write(path, it[1].getBytes())
+        Files.write(path, it[1].bytes)
     }
 }
 

@@ -64,7 +64,7 @@ class ErrorLogService {
      * @return Unique hash of caught exception.
      */
     String log(Throwable thrownException) {
-        String exceptionElements = thrownException.getMessage()
+        String exceptionElements = thrownException.message
         thrownException.stackTrace.each {
             exceptionElements += it.toString()
         }
@@ -81,7 +81,7 @@ class ErrorLogService {
     String loggedError(String identifier) {
         File stacktraceFile = getStackTracesFile(identifier)
         if (!stacktraceFile.isFile()) {
-            throw new RuntimeException("${stacktraceFile.getPath()} is not a file ")
+            throw new RuntimeException("${stacktraceFile.path} is not a file ")
         }
         try {
             def records = new XmlSlurper().parse(stacktraceFile)

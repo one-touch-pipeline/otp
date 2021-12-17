@@ -41,9 +41,9 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         File file = CreateFileHelper.createFile(temporaryFolder.newFile())
         AbstractMergedBamFileService service = new AbstractMergedBamFileService()
         AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {
-            1 * getPathForFurtherProcessing() >> file
-            1 * getMd5sum() >> HelperUtils.randomMd5sum
-            2 * getFileSize() >> file.size()
+            1 * getProperty('pathForFurtherProcessing') >> file
+            1 * getProperty('md5sum') >> HelperUtils.randomMd5sum
+            2 * getProperty('fileSize') >> file.size()
             0 * _
         }
 
@@ -60,19 +60,19 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         File file = CreateFileHelper.createFile(temporaryFolder.newFile())
         AbstractMergedBamFileService service = new AbstractMergedBamFileService()
         AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {
-            _ * getPathForFurtherProcessing() >> {
+            _ * getProperty('pathForFurtherProcessing') >> {
                 if (failCase == 'exceptionInFurtherProcessingPath') {
-                    throw new AssertionError('getPathForFurtherProcessing fail')
+                    throw new AssertionError('pathForFurtherProcessing fail')
                 } else if (failCase == 'fileNotExist') {
                     TestCase.uniqueNonExistentPath
                 } else {
                     file
                 }
             }
-            _ * getMd5sum() >> {
+            _ * getProperty('md5sum') >> {
                 failCase == 'invalidMd5sum' ? 'invalid' : HelperUtils.randomMd5sum
             }
-            _ * getFileSize() >> {
+            _ * getProperty('fileSize') >> {
                 failCase == 'fileSizeZero' ? 0 :
                         failCase == 'fileSizeWrong' ? 1234 : file.length()
             }
@@ -88,10 +88,10 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
 
         where:
         failCase                           || exception
-        'exceptionInFurtherProcessingPath' || 'getPathForFurtherProcessing fail'
+        'exceptionInFurtherProcessingPath' || 'pathForFurtherProcessing fail'
         'fileNotExist'                     || 'on local filesystem is not accessible or does not exist. Expression: de.dkfz.tbi.otp.utils.ThreadUtils.waitFor'
-        'invalidMd5sum'                    || 'assert bamFile.getMd5sum()'
-        'fileSizeZero'                     || 'assert bamFile.getFileSize()'
-        'fileSizeWrong'                    || 'assert file.length() == bamFile.getFileSize()'
+        'invalidMd5sum'                    || 'assert bamFile.md5sum'
+        'fileSizeZero'                     || 'assert bamFile.fileSize'
+        'fileSizeWrong'                    || 'assert file.length() == bamFile.fileSize'
     }
 }

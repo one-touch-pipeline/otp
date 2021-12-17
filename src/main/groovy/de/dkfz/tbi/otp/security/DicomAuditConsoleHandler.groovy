@@ -38,7 +38,7 @@ class DicomAuditConsoleHandler {
     // There is sadly no other way to intercept the access to these URLs.
     boolean log() {
         DicomAuditLogger.logEmergencyOverrideStart(EventOutcomeIndicator.SUCCESS,
-            getRealUserName(SecurityContextHolder.getContext().authentication.principal.username))
+            getRealUserName(SecurityContextHolder.context.authentication.principal.username))
         return true
     }
 }

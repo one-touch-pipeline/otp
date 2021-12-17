@@ -72,7 +72,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         findOrCreateProcessingOption(name: ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: "/asdf")
 
         expect:
-        service.getDefaultValues() == ["sharedFilesBaseDirectory": "/asdf"]
+        service.defaultValues == ["sharedFilesBaseDirectory": "/asdf"]
     }
 
     void "test getConfigurationValues, with whole genome seq. type, with fingerprinting"() {

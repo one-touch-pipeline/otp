@@ -50,7 +50,7 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
     @SuppressWarnings('JavaIoPackageAccess')
     @Override
     void execute() throws Exception {
-        final IndelCallingInstance instance = getProcessParameterObject()
+        final IndelCallingInstance instance = processParameterObject
 
         Path indelQcFile = indelCallingService.getIndelQcJsonFile(instance)
         FileService.ensureFileIsReadableAndNotEmpty(indelQcFile)

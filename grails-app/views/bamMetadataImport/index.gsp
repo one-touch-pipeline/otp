@@ -39,14 +39,14 @@
 
 <body>
 <g:if test="${context}">
-    <div id="border" class="borderMetadataImport${LogLevel.normalize(context.getMaximumProblemLevel()).name}">
+    <div id="border" class="borderMetadataImport${LogLevel.normalize(context.maximumProblemLevel).name}">
         <g:if test="${context.problems.isEmpty()}">
             No problems found :)
         </g:if>
         <g:else>
             <ul>
                 <g:each var="problem" in="${context.problems}">
-                    <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-line ">${problem.getLevelAndMessage()}</span>
+                    <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-line ">${problem.levelAndMessage}</span>
                         <g:each var="cell" in="${problem.affectedCells}">
                             <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                         </g:each>
@@ -74,7 +74,7 @@
                             <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
                             <th
                                     class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                    title="${cellProblems*.getLevelAndMessage().join('\n\n')}">
+                                    title="${cellProblems*.levelAndMessage.join('\n\n')}">
                                 <span class="anchor" id="${cell.cellAddress}"></span>
                                 ${cell.text}
                             </th>
@@ -91,7 +91,7 @@
                                 <g:set var="cellProblems" value="${context.getProblems(cell)}"/>
                                 <td
                                         class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                        title="${cellProblems*.getLevelAndMessage().join('\n\n')}">
+                                        title="${cellProblems*.levelAndMessage.join('\n\n')}">
                                     <span class="anchor" id="${cell.cellAddress}"></span>
                                     ${cell.text}
                                 </td>
@@ -168,7 +168,7 @@
         <g:submitButton name="submit" value="Validate"/>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:submitButton name="submit" value="Import"/>
-            <g:if test="${context?.getMaximumProblemLevel() == LogLevel.WARNING}">
+            <g:if test="${context?.maximumProblemLevel == LogLevel.WARNING}">
                 <label>
                     <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
                     <g:message code="bamMetadataImport.ignore.warning"/>

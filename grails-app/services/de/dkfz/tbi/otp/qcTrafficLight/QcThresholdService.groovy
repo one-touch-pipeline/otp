@@ -93,7 +93,7 @@ class QcThresholdService {
             isNull("project")
         }
 
-        List<Class> qcTrafficLightClasses = QcThreshold.getValidQcClass()
+        List<Class> qcTrafficLightClasses = QcThreshold.validQcClass
         List<ClassWithThreshold> classesWithProperties = qcTrafficLightClasses.collect { Class clasz ->
             new ClassWithThreshold(clasz: clasz, availableThresholdProperties: QcThreshold.getValidQcPropertyForQcClass(clasz.name))
         }.sort { it.clasz.simpleName }
@@ -114,7 +114,7 @@ class QcThresholdService {
                 isNull("project")
             }
         }
-        List<Class> qcTrafficLightClasses = QcThreshold.getValidQcClass()
+        List<Class> qcTrafficLightClasses = QcThreshold.validQcClass
         List<ClassWithThresholds> classesWithProperties = qcTrafficLightClasses.collect { Class clasz ->
             new ClassWithThresholds(
                     clasz: clasz,

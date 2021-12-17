@@ -1,4 +1,4 @@
-final Thread thread = Thread.getAllStackTraces().keySet().find {
+final Thread thread = Thread.allStackTraces.keySet().find {
   it.id == 1 && it.name == '...'
 }
 /*

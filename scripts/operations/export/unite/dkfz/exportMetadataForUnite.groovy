@@ -63,7 +63,7 @@ def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
         outString << bam.individual.pid
         outString << bam.sampleType.name
         outString << bam.seqType.nameWithLibraryLayout
-        outString << bam.getPathForFurtherProcessingNoCheck()
+        outString << bam.pathForFurtherProcessingNoCheck
         outString << bam.coverage
         aqa.properties.sort().each {
             outString << it.value
@@ -74,32 +74,32 @@ def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
 
 def wgsAlignmentQualityOverview(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_WGS_alignmentQualityOverview.tsv")
-    alignmentQualityOverview(p, f, ctx.seqTypeService.getWholeGenomePairedSeqType())
+    alignmentQualityOverview(p, f, ctx.seqTypeService.wholeGenomePairedSeqType)
 }
 
 def wesAlignmentQualityOverview(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_WES_alignmentQualityOverview.tsv")
-    alignmentQualityOverview(p, f, ctx.seqTypeService.getExomePairedSeqType())
+    alignmentQualityOverview(p, f, ctx.seqTypeService.exomePairedSeqType)
 }
 
 def wgbsAlignmentQualityOverview(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_WGBS_alignmentQualityOverview.tsv")
-    alignmentQualityOverview(p, f, ctx.seqTypeService.getWholeGenomeBisulfitePairedSeqType())
+    alignmentQualityOverview(p, f, ctx.seqTypeService.wholeGenomeBisulfitePairedSeqType)
 }
 
 def wgbsTagmentationAlignmentQualityOverview(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_WGBS_tagmentation_alignmentQualityOverview.tsv")
-    alignmentQualityOverview(p, f, ctx.seqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType())
+    alignmentQualityOverview(p, f, ctx.seqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType)
 }
 
 def rnaPairedAlignmentQualityOverview(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_RNA_PAIRED_alignmentQualityOverview.tsv")
-    alignmentQualityOverview(p, f, ctx.seqTypeService.getRnaPairedSeqType())
+    alignmentQualityOverview(p, f, ctx.seqTypeService.rnaPairedSeqType)
 }
 
 def rnaSingleAlignmentQualityOverview(Project p, Path file) {
     Path f = file.resolve("${p.name}_RNA_SINGLE_alignmentQualityOverview.tsv")
-    alignmentQualityOverview(p, f, ctx.seqTypeService.getRnaSingleSeqType())
+    alignmentQualityOverview(p, f, ctx.seqTypeService.rnaSingleSeqType)
 }
 
 def cellRangerFinalSelection(Project p, Path folder) {
@@ -206,7 +206,7 @@ FileService fileService = ctx.fileService
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-Path outputFolder = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("export").resolve("UNITE").resolve("output")
+Path outputFolder = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("export").resolve("UNITE").resolve("output")
 Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv", realm)
 
 file << new Date()

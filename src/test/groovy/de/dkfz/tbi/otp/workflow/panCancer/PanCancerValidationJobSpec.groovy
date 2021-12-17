@@ -109,7 +109,7 @@ class PanCancerValidationJobSpec extends Specification implements WorkflowSystem
     }
 
     @Unroll
-    void "test getExpectedXxx(), when called the correct paths (files or directories) should be returned"() {
+    void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
         given:
         final PanCancerValidationJob job = new PanCancerValidationJob()
         final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)

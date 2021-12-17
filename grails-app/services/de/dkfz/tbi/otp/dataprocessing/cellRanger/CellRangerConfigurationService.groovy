@@ -73,7 +73,7 @@ class CellRangerConfigurationService {
     }
 
     List<SeqType> getSeqTypes() {
-        getPipeline().getSeqTypes()
+        pipeline.seqTypes
     }
 
     Pipeline getPipeline() {
@@ -82,7 +82,7 @@ class CellRangerConfigurationService {
 
     MergingCriteria getMergingCriteria(Project project) {
         CollectionUtils.atMostOneElement(
-                MergingCriteria.findAllByProjectAndSeqType(project, getSeqType())
+                MergingCriteria.findAllByProjectAndSeqType(project, seqType)
         )
     }
 
@@ -124,7 +124,7 @@ class CellRangerConfigurationService {
     Map<PlatformGroupAndKit, List<SeqTrack>> getSeqTracksGroupedByPlatformGroupAndKit(Collection<SeqTrack> seqTracks) {
         return seqTracks.groupBy { SeqTrack seqTrack ->
             [
-                    seqPlatformGroup     : seqTrack.getSeqPlatformGroup(),
+                    seqPlatformGroup     : seqTrack.seqPlatformGroup,
                     libraryPreparationKit: seqTrack.libraryPreparationKit,
             ]
         }.collectEntries { Map<String, Entity> key, List<SeqTrack> seqTracksPerPlatformGroupAndKit ->

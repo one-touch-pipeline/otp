@@ -89,7 +89,7 @@ class MolgenisGlobal {
 Realm realm = ctx.configService.defaultRealm
 
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
-final Path outputDirectory = ctx.fileService.toPath(ctx.configService.getScriptOutputPath(), ctx.fileSystemService.getRemoteFileSystemOnDefaultRealm()).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
+final Path outputDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.remoteFileSystemOnDefaultRealm).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
 ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
 ctx.fileService.setPermission(outputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
@@ -103,7 +103,7 @@ println "Writing to: ${outputDirectory}"
     String output = ExportHelper.getFullyExportedEntity(it[0]).join(MolgenisGlobal.SEPARATOR_LINE)
     Path path = outputDirectory.resolve("${it[1]}.csv")
     println "    - ${path}"
-    Files.write(path, output.getBytes())
+    Files.write(path, output.bytes)
 }
 
 ''

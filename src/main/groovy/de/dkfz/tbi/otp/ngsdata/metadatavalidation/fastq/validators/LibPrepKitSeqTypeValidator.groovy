@@ -61,7 +61,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
-        List<SeqType> seqTypes = SeqTypeService.getSeqTypesRequiredLibPrepKit()
+        List<SeqType> seqTypes = SeqTypeService.seqTypesRequiredLibPrepKit
         valueTuples.each { ValueTuple valueTuple ->
             String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
             SequencingReadType libraryLayout = SequencingReadType.findByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))

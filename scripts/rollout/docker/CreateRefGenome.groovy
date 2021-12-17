@@ -59,10 +59,10 @@ folder.eachFileRecurse(groovy.io.FileType.FILES, { file ->
         println("run: ${script.getProperty("path")}")
         run(file)
 
-        File statsPath = new File(refGenomePath.getAbsolutePath() + "/stats")
+        File statsPath = new File(refGenomePath.absolutePath + "/stats")
         statsPath.mkdirs()
         (script.getProperty("statSizeFileNames") as List).each {
-            File statsFile = new File(statsPath.getAbsolutePath() + it)
+            File statsFile = new File(statsPath.absolutePath + it)
             statsFile.createNewFile()
             statsFile.text = "Text content"
         }

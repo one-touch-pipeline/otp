@@ -91,7 +91,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
         )
         assertNotNull(update.save(flush: true))
         TestCase.shouldFail(InvalidStateException) {
-            job.getOutputParameters()
+            job.outputParameters
         }
         scheduler.executeJob(job)
         // now we should have three processingStepUpdates for the processing step
@@ -141,10 +141,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
         )
         assertNotNull(update.save(flush: true))
         TestCase.shouldFail(InvalidStateException) {
-            endStateAwareJob.getOutputParameters()
+            endStateAwareJob.outputParameters
         }
         TestCase.shouldFail(InvalidStateException) {
-            endStateAwareJob.getEndState()
+            endStateAwareJob.endState
         }
         scheduler.restartHandlerService.metaClass.handleRestart = { Job job ->
             assert false: 'Should not reach this point'
@@ -203,10 +203,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
         )
         assertNotNull(update.save(flush: true))
         TestCase.shouldFail(InvalidStateException) {
-            endStateAwareJob.getOutputParameters()
+            endStateAwareJob.outputParameters
         }
         TestCase.shouldFail(InvalidStateException) {
-            endStateAwareJob.getEndState()
+            endStateAwareJob.endState
         }
         scheduler.executeJob(endStateAwareJob)
         assertEquals(ExecutionState.FAILURE, endStateAwareJob.endState)

@@ -56,12 +56,12 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
 
     void "workflowName, should return RnaAlignmentWorkflow"() {
         expect:
-        'RnaAlignmentWorkflow' == createAlignmentChecker().getWorkflowName()
+        'RnaAlignmentWorkflow' == createAlignmentChecker().workflowName
     }
 
     void "pipeLineName, should return RODDY_RNA_ALIGNMENT"() {
         expect:
-        Pipeline.Name.RODDY_RNA_ALIGNMENT == createAlignmentChecker().getPipeLineName()
+        Pipeline.Name.RODDY_RNA_ALIGNMENT == createAlignmentChecker().pipeLineName
     }
 
     void "seqTypes, should return RNA"() {
@@ -69,6 +69,6 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
         List<SeqType> seqTypes = DomainFactory.createRnaAlignableSeqTypes()
 
         expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
+        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 }

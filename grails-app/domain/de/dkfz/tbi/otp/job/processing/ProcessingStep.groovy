@@ -230,9 +230,9 @@ class ProcessingStep implements Serializable, Entity {
                 env = Environment.current.name.toLowerCase()
         }
         String psId  = this.id
-        String psClass = this.getNonQualifiedJobClass()
+        String psClass = this.nonQualifiedJobClass
         String psWorkflow = this.process.jobExecutionPlan
-        String pid = this.getProcessParameterObject()?.individual?.pid
+        String pid = this.processParameterObject?.individual?.pid
         return [
                 'otp',
                 env,
@@ -246,7 +246,7 @@ class ProcessingStep implements Serializable, Entity {
     // suppressing because this entity will be removed within the old workflow system
     @SuppressWarnings("ClassForName")
     boolean belongsToMultiJob() {
-        Class jobClass = Class.forName(jobClass, true, getClass().getClassLoader())
+        Class jobClass = Class.forName(jobClass, true, getClass().classLoader)
         return AbstractMultiJob.isAssignableFrom(jobClass)
     }
 

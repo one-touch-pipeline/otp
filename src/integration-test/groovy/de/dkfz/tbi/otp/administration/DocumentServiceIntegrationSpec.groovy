@@ -154,7 +154,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
         when:
         SpringSecurityUtils.doWithAuth(USER) {
-            service.updateDocument(documentType, HelperUtils.getUniqueString().bytes, Document.FormatType.PDF)
+            service.updateDocument(documentType, HelperUtils.uniqueString.bytes, Document.FormatType.PDF)
         }
 
         then:
@@ -165,7 +165,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         given:
         setupData()
         DocumentType documentType = createDocumentType()
-        byte[] content = HelperUtils.getUniqueString().bytes
+        byte[] content = HelperUtils.uniqueString.bytes
         Document.FormatType type = Document.FormatType.PDF
 
         when:
@@ -187,7 +187,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         createDocument([
                 documentType: documentType,
         ])
-        byte[] content = HelperUtils.getUniqueString().bytes
+        byte[] content = HelperUtils.uniqueString.bytes
         Document.FormatType type = Document.FormatType.CSV
 
         when:

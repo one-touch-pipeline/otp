@@ -74,12 +74,12 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
 
     void "workflowName, should return CellRangerWorkflow"() {
         expect:
-        'CellRangerWorkflow' == createAlignmentChecker().getWorkflowName()
+        'CellRangerWorkflow' == createAlignmentChecker().workflowName
     }
 
     void "pipeLineName, should return CELL_RANGER"() {
         expect:
-        Pipeline.Name.CELL_RANGER == createAlignmentChecker().getPipeLineName()
+        Pipeline.Name.CELL_RANGER == createAlignmentChecker().pipeLineName
     }
 
     void "seqTypes, should return single cell"() {
@@ -87,6 +87,6 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
         List<SeqType> seqTypes = DomainFactory.createCellRangerAlignableSeqTypes()
 
         expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
+        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 }

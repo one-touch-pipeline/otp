@@ -39,14 +39,14 @@
 <body>
 <g:if test="${contexts}">
     <g:each var="context" in="${contexts}">
-        <div id= "border" class="borderMetadataImport${de.dkfz.tbi.util.spreadsheet.validation.LogLevel.normalize(context.getMaximumProblemLevel()).name}">
+        <div id= "border" class="borderMetadataImport${de.dkfz.tbi.util.spreadsheet.validation.LogLevel.normalize(context.maximumProblemLevel).name}">
             <g:if test="${context.problems.isEmpty()}">
                 No problems found :)
             </g:if>
             <g:else>
                 <ul>
                     <g:each var="problem" in="${context.problems}" >
-                        <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-wrap"> ${problem.getLevelAndMessage()}</span>
+                        <li class="${LogLevel.normalize(problem.level).name}"><span style="white-space: pre-wrap"> ${problem.levelAndMessage}</span>
                             <g:each var="cell" in="${problem.affectedCells}" >
                                 <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                             </g:each>
@@ -55,7 +55,7 @@
                 </ul>
                 <h4><g:message code="metadataImport.summary"/></h4>
                 <ul>
-                    <g:each var="problemType" in="${context.getSummary()}" >
+                    <g:each var="problemType" in="${context.summary}" >
                         <li> <span style="white-space: pre">${problemType} </span></li>
                     </g:each>
                 </ul>
@@ -80,7 +80,7 @@
                                 <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
                                 <th
                                         class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                        title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
+                                        title="${cellProblems*.levelAndMessage.join('\n\n')}"
                                 >
                                     <span class="anchor" id="${cell.cellAddress}"></span>
                                     ${cell.text}
@@ -98,7 +98,7 @@
                                     <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
                                     <td
                                             class="${LogLevel.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                            title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
+                                            title="${cellProblems*.levelAndMessage.join('\n\n')}"
                                     >
                                         <span class="anchor" id="${cell.cellAddress}"></span>
                                         ${cell.text}

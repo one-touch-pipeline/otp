@@ -59,7 +59,7 @@ LogThreadLocal.withThreadLog(System.out, {
                         }
                     }
                 }
-                ilseSubmission(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
+                ilseSubmission(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                     'in'('ilseNumber', [
                             -1,
                     ])

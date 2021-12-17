@@ -67,10 +67,10 @@ class UserAdministrationController implements CheckAndCall {
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        dataToRender.iTotalRecords = userService.getUserCount()
+        dataToRender.iTotalRecords = userService.userCount
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List users = userService.getAllUsers()
+        List users = userService.allUsers
 
         users.each { User user ->
             String dateString
@@ -105,9 +105,9 @@ class UserAdministrationController implements CheckAndCall {
         User user = cmd.user
         Map<String, List<Role>> roleLists = [:]
         roleLists['userRole'] = userService.getRolesOfUser(user)
-        roleLists['availableRole'] = userService.getAllRoles() - roleLists['userRole']
+        roleLists['availableRole'] = userService.allRoles - roleLists['userRole']
         roleLists['userGroup'] = userService.getGroupsOfUser(user)
-        roleLists['availableGroup'] = userService.getAllGroups() - roleLists['userGroup']
+        roleLists['availableGroup'] = userService.allGroups - roleLists['userGroup']
 
         return [
                 userProjectRoles       : UserProjectRole.findAllByUser(user).sort { it.project.name },

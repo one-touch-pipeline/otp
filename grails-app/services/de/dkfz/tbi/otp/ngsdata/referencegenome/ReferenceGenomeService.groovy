@@ -230,7 +230,7 @@ class ReferenceGenomeService {
      * The create tsv file is required by qa.jar
      */
     void createReferenceGenomeMetafile(ReferenceGenome referenceGenome) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         Path path = fileSystem.getPath(referenceGenomeMetaInformationPath(referenceGenome).absolutePath)
 
         String content = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome).collect { ReferenceGenomeEntry referenceGenomeEntry ->

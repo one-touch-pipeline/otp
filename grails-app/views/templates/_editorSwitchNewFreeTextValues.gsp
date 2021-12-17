@@ -31,12 +31,12 @@
         </g:each>
         <g:each var="checkBox" in="${checkBoxes}">
             <label>${labels[i++]}:
-                <g:checkBox name="${checkBox.getKey()}" checked="${checkBox.getValue()}" value="true"/>
+                <g:checkBox name="${checkBox.key}" checked="${checkBox.value}" value="true"/>
             </label>
         </g:each>
         <g:each var="dropDown" in="${dropDowns}">
             <label>${labels[i++]}:
-                <g:select id="" name="${dropDown.getKey()}" from="${dropDown.getValue()}" class="use-select-2"/>
+                <g:select id="" name="${dropDown.key}" from="${dropDown.value}" class="use-select-2"/>
             </label>
         </g:each>
         <button class="buttons save"><g:message code="default.button.save.label"/></button>

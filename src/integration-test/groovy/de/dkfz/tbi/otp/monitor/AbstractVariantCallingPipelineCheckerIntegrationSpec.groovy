@@ -133,7 +133,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: pipelineChecker.getPipeline().type.toString(),
+                type: pipelineChecker.pipeline.type.toString(),
                 value: '30.0',
         )
 
@@ -262,13 +262,13 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
 
         SamplePair samplePair = DomainFactory.createSamplePairPanCan([
-                (pipelineChecker.getProcessingStateMember()): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                (pipelineChecker.processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         BamFilePairAnalysis runningAnalysis = createAnalysis([
                 samplePair: samplePair,
         ])
 
-        createExpectedCall(pipelineChecker.getWorkflowName(), output, runningAnalysis)
+        createExpectedCall(pipelineChecker.workflowName, output, runningAnalysis)
 
         when:
         pipelineChecker.displayRunning([runningAnalysis], output)
@@ -291,15 +291,15 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: pipelineChecker.getPipeline().type.toString(),
+                type: pipelineChecker.pipeline.type.toString(),
                 value: '20.0',
         )
 
-        String processingStateMember = pipelineChecker.getProcessingStateMember()
+        String processingStateMember = pipelineChecker.processingStateMember
 
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: pipelineChecker.getPipeline().type.toString(),
+                type: pipelineChecker.pipeline.type.toString(),
                 value: '30.0',
         )
 

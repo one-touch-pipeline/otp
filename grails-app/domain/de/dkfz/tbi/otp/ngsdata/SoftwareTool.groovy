@@ -47,6 +47,6 @@ class SoftwareTool implements Entity {
 
     @Override
     String toString() {
-        return getDisplayName()
+        return displayName
     }
 }

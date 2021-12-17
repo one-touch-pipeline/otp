@@ -313,7 +313,7 @@ List<Object> getProcessableObjects(List<ProcessParameterObject> objs) {
     if (objs.first() instanceof BamFilePairAnalysis) {
         return objs*.samplePair
     } else if (objs.first() instanceof AbstractBamFile) {
-        return objs*.getMergingWorkPackage()
+        return objs*.mergingWorkPackage
     } else {
         throw new UnsupportedOperationException("Could not extract processable object from ${objs.id}")
     }
@@ -350,7 +350,7 @@ int getCountOfSamplePairsByProjectAndSeqType(Project project, SeqType seqType) {
 }
 
 VersionState getUpToDateClass(String version) {
-    for (versionState in VersionState.getInOrderOfImportance()) {
+    for (versionState in VersionState.inOrderOfImportance) {
         if (Globals.versionMapping[versionState]?.contains(version)) {
             return versionState
         }
@@ -360,7 +360,7 @@ VersionState getUpToDateClass(String version) {
 
 ConfigPerProjectAndSeqType saveGetAlignmentConfig(AbstractMergedBamFile bamFile) {
     try {
-        return bamFile.getAlignmentConfig()
+        return bamFile.alignmentConfig
     }  catch (MissingPropertyException e) {
         return null
     }
@@ -445,7 +445,7 @@ tr:hover {
     background-color: #FFFF66
 }"""
 
-combinedOutput << VersionState.getInOrderOfImportance().collect { VersionState versionState ->
+combinedOutput << VersionState.inOrderOfImportance.collect { VersionState versionState ->
     return "span.${versionState.name()} {\n    background-color: ${versionState.color}\n}"
 }.join("\n")
 

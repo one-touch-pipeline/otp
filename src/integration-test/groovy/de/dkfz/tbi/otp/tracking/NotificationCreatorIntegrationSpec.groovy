@@ -60,7 +60,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
     List<ProcessingOption> referenceGenomeProcessingOptions
 
-    final static String EMAIL = HelperUtils.getRandomEmail()
+    final static String EMAIL = HelperUtils.randomEmail
     final static String PREFIX = "TICKET_PREFIX"
     final static String EMAIL_TICKET_SYSTEM = HelperUtils.randomEmail
 

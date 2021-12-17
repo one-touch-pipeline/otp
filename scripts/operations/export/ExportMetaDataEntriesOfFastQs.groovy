@@ -63,7 +63,7 @@ List<DataFile> fastq_to_export = DataFile.createCriteria().listDistinct {
                     }
                 }
             }
-            ilseSubmission(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
+            ilseSubmission(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                 'in'('ilseNumber', [
                         -1
                 ])
@@ -84,7 +84,7 @@ Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 // where to put output
-Path output_dir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("export")
+Path output_dir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("export")
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(output_dir, realm)
 Path output =    output_dir.resolve("${output_name}.csv")
 Path done_flag = output_dir.resolve("${output_name}.done")

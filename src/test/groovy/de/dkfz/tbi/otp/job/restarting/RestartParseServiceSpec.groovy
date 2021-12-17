@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+@SuppressWarnings("UnnecessaryGetter")
 class RestartParseServiceSpec extends Specification implements DataTest {
 
     @Rule

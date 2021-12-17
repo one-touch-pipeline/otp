@@ -48,7 +48,7 @@ class DataFileConsistencyCheckerSpec extends Specification implements DataTest {
         )
 
         then:
-        dataFileConsistencyChecker.getFastqDataFiles().size() == size
+        dataFileConsistencyChecker.fastqDataFiles.size() == size
 
         where:
         type                   | subType    | state                                    | fileWithdrawn || size

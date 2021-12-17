@@ -61,7 +61,7 @@ class RoddyConfigValueService {
             cValues.put("CHROM_SIZES_FILE", "${chromosomeStatSizeFile}")
         }
 
-        cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.getSampleType().dirName}")
+        cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.sampleType.dirName}")
         cValues.put("possibleTumorSampleNamePrefixes", "")
 
         cValues.putAll(getAdapterTrimmingFile(roddyBamFile, combinedConfig))

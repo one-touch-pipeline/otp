@@ -198,7 +198,7 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
     void "ensure only the basic Exome+WholeGenome seqtypes are the 'default' since this assumption is implicit in much old OTP code"() {
         given:
         DomainFactory.createDefaultOtpAlignableSeqTypes()
-        List<SeqType> alignableSeqTypes = SeqTypeService.getDefaultOtpAlignableSeqTypes()
+        List<SeqType> alignableSeqTypes = SeqTypeService.defaultOtpAlignableSeqTypes
 
         expect:
         2 == alignableSeqTypes.size()

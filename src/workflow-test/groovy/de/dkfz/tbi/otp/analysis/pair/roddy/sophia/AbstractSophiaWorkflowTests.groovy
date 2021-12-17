@@ -98,8 +98,8 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         File tumorInsertSizeFile = new File(workflowData, "tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt")
         File controlInsertSizeFile = new File(workflowData, "blood_HCC1187-div128_insertsize_plot.png_qcValues.txt")
 
-        File finalTumorInsertSizeFile = bamFileTumor.getFinalInsertSizeFile()
-        File finalControlInsertSizeFile = bamFileControl.getFinalInsertSizeFile()
+        File finalTumorInsertSizeFile = bamFileTumor.finalInsertSizeFile
+        File finalControlInsertSizeFile = bamFileControl.finalInsertSizeFile
 
         LogThreadLocal.withThreadLog(System.out) {
             linkFileUtils.createAndValidateLinks([
@@ -139,7 +139,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     File getWorkflowData() {
-        new File(getInputRootDirectory(), 'sophia')
+        new File(inputRootDirectory, 'sophia')
     }
 
     @Override

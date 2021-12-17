@@ -210,7 +210,7 @@ class ExampleData {
 
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
             Path fastqcPath = fileSystem.getPath(fastqcDataFilesService.fastqcOutputFile(fastqcProcessedFile.dataFile))
-            Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.getFileName()}.md5sum")
+            Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.fileName}.md5sum")
             [
                     fastqcPath,
                     fastqcMd5Path,

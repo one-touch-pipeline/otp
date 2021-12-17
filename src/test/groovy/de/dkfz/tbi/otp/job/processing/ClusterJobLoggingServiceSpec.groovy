@@ -81,7 +81,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         File logDir = service.logDirectory(processingStepUpdate.processingStep)
 
         then:
-        logDir.path ==~ /${configService.getLoggingRootPath().path}\/${ClusterJobLoggingService.CLUSTER_LOG_BASE_DIR}\/\d{4}-\d\d-\d\d/
+        logDir.path ==~ /${configService.loggingRootPath.path}\/${ClusterJobLoggingService.CLUSTER_LOG_BASE_DIR}\/\d{4}-\d\d-\d\d/
     }
 
     void "test logDirectory, when processingStep is null throw exception"() {

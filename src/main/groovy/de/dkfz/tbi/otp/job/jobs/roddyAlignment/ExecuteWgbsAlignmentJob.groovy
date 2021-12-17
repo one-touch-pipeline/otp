@@ -69,7 +69,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
 
         final Realm realm = roddyBamFile.project.realm
 
-        File metadataFile = roddyBamFile.getWorkMetadataTableFile()
+        File metadataFile = roddyBamFile.workMetadataTableFile
         LsdfFilesService.ensureDirIsReadable(metadataFile.parentFile)
 
         StringBuilder builder = new StringBuilder()
@@ -82,7 +82,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
             assert dataFile.fileSize == file.length()
 
             [dataFile.sampleType.dirName, // it is correct that the header is 'Sample', this is because of the different names for the same things
-             dataFile.seqTrack.getLibraryDirectoryName(),
+             dataFile.seqTrack.libraryDirectoryName,
              dataFile.individual.pid,
              dataFile.seqType.libraryLayoutDirName,
              dataFile.run.dirName,

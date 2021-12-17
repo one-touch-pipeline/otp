@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
+import groovy.transform.TupleConstructor
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
@@ -124,7 +125,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
 
         expect:
-        containSame(service.getImplementedValidations(), ['description1', 'description2', 'description3'])
+        containSame(service.implementedValidations, ['description1', 'description2', 'description3'])
     }
 
     void "validate creates context and calls validators"() {
@@ -466,7 +467,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         def (Date run1Date, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { TimeUtils.toDate(LocalDate.of(it[0], it[1], it[2])) }
         def (String date1, String date2) = [run1Date, run2Date].collect { TimeFormats.DATE.getFormattedDate(it) }
 
-        def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.getRandomMd5sum() }
+        def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.randomMd5sum }
 
         int seqTrackCount = includeOptional ? 7 : 1
         int dataFileCount = includeOptional ? 9 : 1
@@ -565,13 +566,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         mockAdditionalServices(service, seqTrackCount)
 
-        File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
-        DirectoryStructure directoryStructure = [
-                getRequiredColumnTitles: { [FASTQ_FILE.name()] },
-                getDataFilePath        : { MetadataValidationContext context, ValueTuple valueTuple ->
-                    return Paths.get(file.parent, valueTuple.getValue(FASTQ_FILE.name()))
-                },
-        ] as DirectoryStructure
+        File file = new File(new File(TestCase.uniqueNonExistentPath, runName1), 'metadata.tsv')
+        DirectoryStructure directoryStructure = new MockDirectoryStructure(file: file)
 
         String metadata = """
 ${FASTQ_FILE}                   ${fastq1}     ${fastq2}     ${fastq3}     ${fastq4}     ${fastq5}     ${fastq6}     ${fastq7}     ${fastq8}     ${fastq9}
@@ -864,6 +860,21 @@ ${ILSE_NO}                      -             1234          1234          -     
         runExists | includeOptional | align | importMode
         false     | true            | false | FastqImportInstance.ImportMode.AUTOMATIC
         true      | false           | true  | FastqImportInstance.ImportMode.MANUAL
+    }
+
+    @TupleConstructor
+    class MockDirectoryStructure implements DirectoryStructure {
+        File file
+
+        @Override
+        List<String> getRequiredColumnTitles() {
+            return [FASTQ_FILE.name()]
+        }
+
+        @Override
+        Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
+            return Paths.get(file.parent, valueTuple.getValue(FASTQ_FILE.name()))
+        }
     }
 
     void "importMetadataFile imports correctly data withAntibodyTarget"() {

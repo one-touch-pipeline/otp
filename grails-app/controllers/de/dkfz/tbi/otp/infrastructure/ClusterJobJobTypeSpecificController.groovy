@@ -39,7 +39,7 @@ class ClusterJobJobTypeSpecificController {
     ClusterJobService clusterJobService
 
     def index() {
-        LocalDate date = clusterJobService.getLatestJobDate()?.toLocalDate() ?: LocalDate.now()
+        LocalDate date = clusterJobService.latestJobDate?.toLocalDate() ?: LocalDate.now()
         def jobClasses = clusterJobService.findAllJobClassesByDateBetween(date, date)
         return [
                 jobClasses: jobClasses,

@@ -186,7 +186,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         assert project
         assert pipelineName
         LsdfFilesService.getPath(
-                project.getProjectDirectory().path,
+                project.projectDirectory.path,
                 CONFIG_PATH_ELEMENT,
                 pipelineName.name(),
         )

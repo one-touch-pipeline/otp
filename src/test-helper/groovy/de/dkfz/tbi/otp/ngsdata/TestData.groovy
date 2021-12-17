@@ -232,7 +232,7 @@ class TestData {
     DataFile createDataFile(Map properties = [:]) {
         return DomainFactory.createDataFile([
             fileName           : "datafile",
-            initialDirectory   : TestCase.getUniqueNonExistentPath().path,
+            initialDirectory   : TestCase.uniqueNonExistentPath.path,
             fileExists         : true,
             fileSize           : 1,
             fileType           : fileType,

@@ -50,12 +50,12 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
 
     void "workflowName, should return PanCanWorkflow"() {
         expect:
-        'PanCanWorkflow' == createAlignmentChecker().getWorkflowName()
+        'PanCanWorkflow' == createAlignmentChecker().workflowName
     }
 
     void "pipeLineName, should return PANCAN_ALIGNMENT"() {
         expect:
-        Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().getPipeLineName()
+        Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().pipeLineName
     }
 
     void "seqTypes, should return WGS and WES"() {
@@ -67,7 +67,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         ]
 
         expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
+        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 
     void "filter, when seqTracks given, then create output for filtered seqTracks and return the others"() {

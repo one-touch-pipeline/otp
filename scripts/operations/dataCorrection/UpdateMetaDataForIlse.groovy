@@ -76,7 +76,7 @@ boolean testRun = true
 //work
 
 FileSystemService fileSystemService = ctx.fileSystemService
-FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
 Path midTermPath = fileSystem.getPath(midTermDirectory)
 

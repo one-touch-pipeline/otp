@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+@SuppressWarnings("UnnecessaryGetter")
 class RestartActionServiceSpec extends Specification implements DataTest {
 
     @Override

@@ -57,7 +57,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
             cValues.add("${alignmentProperty.name}:${alignmentProperty.value}")
         }
 
-        cValues.add("possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}")
+        cValues.add("possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:")
 
         if (!roddyBamFile.seqType.isRna() && roddyBamFile.config.adapterTrimmingNeeded) {
@@ -124,9 +124,9 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
         final SamReaderFactory factory = SamReaderFactory.makeDefault()
                 .enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
-        List<String> readGroupsInBam = factory.getFileHeader(bamFilePath).getReadGroups().collect { it.id }.sort()
+        List<String> readGroupsInBam = factory.getFileHeader(bamFilePath).readGroups.collect { it.id }.sort()
 
-        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort()
+        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect { it.readGroupName }.sort()
 
         if (readGroupsInBam != expectedReadGroups) {
             throw new RuntimeException("""Read groups in BAM file are not as expected.
@@ -141,7 +141,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
     void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
         if (baseBamFile) {
-            File bamFilePath = baseBamFile.getPathForFurtherProcessing()
+            File bamFilePath = baseBamFile.pathForFurtherProcessing
             assert bamFilePath.exists()
             assert baseBamFile.fileSize == bamFilePath.length()
         }

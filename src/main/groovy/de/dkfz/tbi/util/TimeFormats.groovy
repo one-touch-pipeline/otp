@@ -73,11 +73,11 @@ enum TimeFormats {
      */
     static String getInShortestTimeFormat(Date date) {
         Date now = new Date()
-        boolean same24hours = ((now.getTime() - date.getTime()) <= 86400000) // 86.400.000 = 24h * 60m * 60s * 1000ms
+        boolean same24hours = ((now.time - date.time) <= 86400000) // 86.400.000 = 24h * 60m * 60s * 1000ms
         if (same24hours) {
             return TIME.getFormattedDate(date)
         } else {
-            if (now.getYear() == date.getYear()) {
+            if (now.year == date.year) {
                 TIME_SHORT_DATE.getFormattedDate(date)
             } else {
                 TIME_DATE.getFormattedDate(date)
@@ -97,7 +97,7 @@ enum TimeFormats {
         return [
                 shortest: getInShortestTimeFormat(date),
                 full    : TIME_WEEKDAY_DATE.getFormattedDate(date),
-                value   : date.getTime(),
+                value   : date.time,
         ]
     }
 }

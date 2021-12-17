@@ -484,7 +484,7 @@ class MetaDataExport {
         assert fileName: 'No file name given, but this is required'
         assert !fileName.contains(' '): 'File name contains spaces, which is not allowed'
 
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
         Path outputFile = fileSystem.getPath(fileName)
 
         assert outputFile.absolute: '"The file name is not absolute, but that is required'

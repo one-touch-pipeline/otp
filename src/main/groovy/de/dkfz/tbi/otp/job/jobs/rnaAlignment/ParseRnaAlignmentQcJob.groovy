@@ -44,7 +44,7 @@ class ParseRnaAlignmentQcJob extends AbstractEndStateAwareJobImpl implements Aut
 
     @Override
     void execute() throws Exception {
-        final RnaRoddyBamFile rnaRoddyBamFile = getProcessParameterObject()
+        final RnaRoddyBamFile rnaRoddyBamFile = processParameterObject
 
         RnaRoddyBamFile.withTransaction {
             RnaQualityAssessment rnaQa = abstractQualityAssessmentService.parseRnaRoddyBamFileQaStatistics(rnaRoddyBamFile)

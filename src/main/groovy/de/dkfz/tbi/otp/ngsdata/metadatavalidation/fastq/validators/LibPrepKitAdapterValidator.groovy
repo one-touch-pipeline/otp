@@ -94,7 +94,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             }
             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
 
-            if (seqType in SeqTypeService.getRoddyAlignableSeqTypes() &&
+            if (seqType in SeqTypeService.roddyAlignableSeqTypes &&
                     project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT &&
                     config?.adapterTrimmingNeeded) {
                 if (!seqType.isRna() && !kit.adapterFile) {

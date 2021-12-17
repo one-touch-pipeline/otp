@@ -64,7 +64,7 @@ class DataFileConsistencyChecker {
                 (0..countDataFiles() / MAX_RESULTS).each {
                     SessionUtils.withNewSession {
                         DataFile.withTransaction {
-                            getFastqDataFiles().each {
+                            fastqDataFiles.each {
                                 String path = lsdfFilesService.getFileFinalPath(it)
                                 if (path) {
                                     File file = new File(path)
@@ -81,11 +81,11 @@ class DataFileConsistencyChecker {
                     }
                 }
             } catch (RuntimeException e) {
-                log.error("error ${e.getLocalizedMessage()}", e)
+                log.error("error ${e.localizedMessage}", e)
                 SessionUtils.withNewSession {
                     mailHelperService.sendEmailToTicketSystem(
                             "Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
-                            "${e.getLocalizedMessage()}\n${e.getCause()}")
+                            "${e.localizedMessage}\n${e.cause}")
                 }
             }
             log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: " +

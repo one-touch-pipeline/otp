@@ -47,7 +47,7 @@ class JobStatusLoggingService {
     final static STATUS_LOGGING_BASE_DIR = 'log/status'
 
     private String shellSnippetForClusterJobId(Realm realm) {
-        return "\$(echo \${${clusterJobManagerFactoryService.getJobManager(realm).getJobIdVariable()}} | cut -d. -f1)"
+        return "\$(echo \${${clusterJobManagerFactoryService.getJobManager(realm).jobIdVariable}} | cut -d. -f1)"
     }
 
     /**
@@ -58,7 +58,7 @@ class JobStatusLoggingService {
      */
     String logFileBaseDir(ProcessingStep processingStep) {
         notNull processingStep, 'No processing step specified.'
-        return "${configService.getLoggingRootPath()}/${STATUS_LOGGING_BASE_DIR}"
+        return "${configService.loggingRootPath}/${STATUS_LOGGING_BASE_DIR}"
     }
 
     /**
@@ -104,7 +104,7 @@ class JobStatusLoggingService {
         notNull processingStep, 'No processing step specified.'
         String message = [
                 processingStep.jobDefinition.plan.name,
-                processingStep.getNonQualifiedJobClass(),
+                processingStep.nonQualifiedJobClass,
                 processingStep.id,
                 clusterJobId ?: shellSnippetForClusterJobId(realm),
         ].join(',')

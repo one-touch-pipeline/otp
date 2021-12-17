@@ -31,12 +31,12 @@ ctx.schedulerService.queue.each {
 }
 println ""
 println "RUNNING JOBS"
-ctx.schedulerService.getRunning().each {
+ctx.schedulerService.running.each {
     println "${it}\t(ProcessingStep ID ${it.processingStep.id}, ${it.processingStep.process.jobExecutionPlan.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(it.processingStep.process))?.toObject()}"
 }
 println ""
 println "THREADS"
-Thread.getAllStackTraces().each {
+Thread.allStackTraces.each {
     println "${it.key} (ID ${it.key.id})"
     it.value.each {
         println "  ${it}"

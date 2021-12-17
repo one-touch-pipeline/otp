@@ -64,12 +64,12 @@ class CustomRequestDataValueProcessor implements RequestDataValueProcessor {
             request.removeAttribute(this.DISABLE_CSRF_TOKEN_ATTR);
             return Collections.emptyMap();
         } else {
-            CsrfToken token = (CsrfToken)request.getAttribute(CsrfToken.class.getName());
+            CsrfToken token = (CsrfToken)request.getAttribute(CsrfToken.class.name);
             if (token == null) {
                 return Collections.emptyMap();
             } else {
                 Map<String, String> hiddenFields = new HashMap(1);
-                hiddenFields.put(token.getParameterName(), token.getToken());
+                hiddenFields.put(token.parameterName, token.token);
                 return hiddenFields;
             }
         }

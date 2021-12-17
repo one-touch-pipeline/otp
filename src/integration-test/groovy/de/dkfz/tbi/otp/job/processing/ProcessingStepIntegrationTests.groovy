@@ -37,7 +37,7 @@ class ProcessingStepIntegrationTests {
     void testBelongsToMultiJob_WhenJobIsMultiJob_ShouldReturnTrue() {
         // AbstractOtpJob as dummy for Multijob
         Class testMultiJob = AbstractOtpJob
-        ProcessingStep p = DomainFactory.createProcessingStep(jobClass: testMultiJob.getName())
+        ProcessingStep p = DomainFactory.createProcessingStep(jobClass: testMultiJob.name)
         assert p.belongsToMultiJob()
     }
 
@@ -71,7 +71,7 @@ class ProcessingStepIntegrationTests {
         )
         String expected = "otp_test_testWorkFlow_${step.id}_foo"
 
-        assert expected == step.getClusterJobName()
+        assert expected == step.clusterJobName
     }
 
     @Test
@@ -97,10 +97,10 @@ class ProcessingStepIntegrationTests {
         DomainFactory.createProcessParameter([
                 process: process,
                 value: seqTrack.id.toString(),
-                className: seqTrack.getClass().getName(),
+                className: seqTrack.class.name,
         ])
         String expected = "otp_test_pid_testWorkFlow_${step.id}_foo"
 
-        assert expected == step.getClusterJobName()
+        assert expected == step.clusterJobName
     }
 }

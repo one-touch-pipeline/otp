@@ -31,12 +31,12 @@ class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingP
 
     void "workflowName, should return IndelWorkflow"() {
         expect:
-        'IndelWorkflow' == new IndelCallingPipelineChecker().getWorkflowName()
+        'IndelWorkflow' == new IndelCallingPipelineChecker().workflowName
     }
 
     void "processingStateMember, should return indelProcessingStatus"() {
         expect:
-        'indelProcessingStatus' == new IndelCallingPipelineChecker().getProcessingStateMember()
+        'indelProcessingStatus' == new IndelCallingPipelineChecker().processingStateMember
     }
 
     void "pipelineType, should return Pipeline.Type.INDEL"() {
@@ -44,12 +44,12 @@ class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingP
         createPipeLine()
 
         expect:
-        Pipeline.Type.INDEL == new IndelCallingPipelineChecker().getPipeline().type
+        Pipeline.Type.INDEL == new IndelCallingPipelineChecker().pipeline.type
     }
 
     void "bamFilePairAnalysisClass, should return IndelCallingInstance.class"() {
         expect:
-        IndelCallingInstance.class == new IndelCallingPipelineChecker().getBamFilePairAnalysisClass()
+        IndelCallingInstance.class == new IndelCallingPipelineChecker().bamFilePairAnalysisClass
     }
 
     @Override

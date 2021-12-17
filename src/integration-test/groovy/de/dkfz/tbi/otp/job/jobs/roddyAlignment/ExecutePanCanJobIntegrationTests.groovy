@@ -103,7 +103,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
-        roddyBamFile.fileSize = roddyBamFile.getFinalBamFile().size()
+        roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
         assert roddyBamFile.save(flush: true)
 
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
@@ -197,7 +197,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = HelperUtils.randomMd5sum
-        roddyBamFile.fileSize = roddyBamFile.getWorkBaiFile().size()
+        roddyBamFile.fileSize = roddyBamFile.workBaiFile.size()
         assert roddyBamFile.save(flush: true)
 
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
@@ -307,7 +307,7 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         DomainFactory.changeSeqType(roddyBamFile, exomeSeqType)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        assert CreateFileHelper.createFile(roddyBamFile.getWorkMergedQATargetExtractJsonFile())
+        assert CreateFileHelper.createFile(roddyBamFile.workMergedQATargetExtractJsonFile)
 
         executePanCanJob.workflowSpecificValidation(roddyBamFile)
     }

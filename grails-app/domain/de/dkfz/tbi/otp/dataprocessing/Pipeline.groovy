@@ -163,6 +163,6 @@ class Pipeline implements Entity {
 
     @Deprecated
     final List<SeqType> getSeqTypes() {
-        return name.getSeqTypes()
+        return name.seqTypes
     }
 }

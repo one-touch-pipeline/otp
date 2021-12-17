@@ -92,9 +92,9 @@ faq:${faq}
         ]
 
         String expected = [
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project2",
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project3",
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project5",
+                "${linkGenerator.serverBaseURL}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project2",
+                "${linkGenerator.serverBaseURL}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project3",
+                "${linkGenerator.serverBaseURL}/${CONTROLLER}/${ACTION}?${ProjectSelectionService.PROJECT_SELECTION_PARAMETER}=project5",
         ].join('\n')
 
         expect:
@@ -335,7 +335,7 @@ faq:
                 (LinkGenerator.ATTRIBUTE_ID)         : 12345,
         ]
 
-        String baseUrl = createNotificationTextService.linkGenerator.getServerBaseURL()
+        String baseUrl = createNotificationTextService.linkGenerator.serverBaseURL
         String expected = "${baseUrl}/${linkProperties.values().join('/')}"
 
         linkProperties.put(LinkGenerator.ATTRIBUTE_ABSOLUTE, true)

@@ -37,14 +37,14 @@ current qcTrafficLight status.
 
 String projectName = ""
 List<SeqType> seqTypes = [
-        //SeqTypeService.getWholeGenomePairedSeqType(),
-        //SeqTypeService.getExomePairedSeqType(),
-        //SeqTypeService.getWholeGenomeBisulfitePairedSeqType(),
-        //SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType(),
-        //SeqTypeService.getRnaSingleSeqType(),
-        //SeqTypeService.getRnaPairedSeqType(),
-        //SeqTypeService.getChipSeqPairedSeqType(),
-        //SeqTypeService.get10xSingleCellRnaSeqType(),
+        //SeqTypeService.wholeGenomePairedSeqType,
+        //SeqTypeService.exomePairedSeqType,
+        //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+        //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+        //SeqTypeService.rnaSingleSeqType,
+        //SeqTypeService.rnaPairedSeqType,
+        //SeqTypeService.chipSeqPairedSeqType,
+        //SeqTypeService.'10xSingleCellRnaSeqType',
 ]
 
 // QC_PASSED, ACCEPTED, BLOCKED, REJECTED, AUTO_ACCEPTED, UNCHECKED

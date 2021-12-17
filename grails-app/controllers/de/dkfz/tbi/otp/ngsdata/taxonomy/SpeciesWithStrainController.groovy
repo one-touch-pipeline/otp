@@ -60,7 +60,7 @@ class SpeciesWithStrainController implements CheckAndCall {
     }
 
     def index() {
-        List<Species> species = speciesWithStrainService.getAllSpecies()
+        List<Species> species = speciesWithStrainService.allSpecies
         return [
                 helperParams               : redirectParams.params,
 

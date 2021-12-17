@@ -94,7 +94,7 @@ Path targetPathForLinkedBam(Path bamPath) {
     if (!Files.isSymbolicLink(bamPath)) {
         throw new NotLinkException("${bamPath} should be link! Didn't you import all merged BAMs?")
     }
-    return bamPath.toRealPath().getParent()
+    return bamPath.toRealPath().parent
 }
 
 String matchSampleTypeInMergedBam(Path bamFile) {

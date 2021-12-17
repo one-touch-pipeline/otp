@@ -93,6 +93,6 @@ class Process implements CommentableWithProject, Serializable, Entity {
 
     @Override
     Project getProject() {
-        return getProcessParameterObject()?.project
+        return processParameterObject?.project
     }
 }

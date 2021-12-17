@@ -71,8 +71,8 @@
             <tr>
                 <td><g:message code="seqTrack.show.details.nReads"/></td>
                 <td>
-                    <g:if test="${seqTrack.getNReads()}">
-                        ${seqTrack.getNReads()}
+                    <g:if test="${seqTrack.NReads}">
+                        ${seqTrack.NReads}
                     </g:if>
                 </td>
             </tr>
@@ -98,7 +98,7 @@
             </tr>
             <tr>
                 <td><g:message code="seqTrack.show.pipelineVersion"/></td>
-                <td>${seqTrack.pipelineVersion.getDisplayName()}</td>
+                <td>${seqTrack.pipelineVersion.displayName}</td>
             </tr>
         </table>
         <g:if test="${jobExecutionPlans}">

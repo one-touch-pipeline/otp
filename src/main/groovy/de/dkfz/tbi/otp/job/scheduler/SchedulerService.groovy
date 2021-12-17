@@ -278,10 +278,10 @@ class SchedulerService {
         if (!schedulerActive) {
             throw new RuntimeException("Scheduler is disabled")
         }
-        JobExecutionPlan plan = JobExecutionPlan.get(startJob.getJobExecutionPlan().id)
+        JobExecutionPlan plan = JobExecutionPlan.get(startJob.jobExecutionPlan.id)
         Process process = new Process(started: new Date(),
                 jobExecutionPlan: plan,
-                startJobClass: startJob.class.getName(),
+                startJobClass: startJob.class.name,
         )
         if (!process.save(flush: true)) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
@@ -407,7 +407,7 @@ class SchedulerService {
             }
         }
         Parameter failedOutputParameter
-        job.getOutputParameters().each { Parameter param ->
+        job.outputParameters.each { Parameter param ->
             if (param.type.parameterUsage != ParameterUsage.OUTPUT) {
                 failedOutputParameter = param
                 return // continue
@@ -446,7 +446,7 @@ class SchedulerService {
         if (job instanceof EndStateAwareJob) {
             try {
                 EndStateAwareJob endStateAwareJob = job as EndStateAwareJob
-                final ExecutionState endState = endStateAwareJob.getEndState()
+                final ExecutionState endState = endStateAwareJob.endState
                 if (endState == ExecutionState.FAILURE) {
                     jobMailService.sendErrorNotification(job, "Something went wrong in endStateAwareJob")
                 }
@@ -468,7 +468,7 @@ class SchedulerService {
                             "will NOT be created."
                 }
                 if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
-                    ((DecisionProcessingStep) step).decision = (job as DecisionJob).getDecision()
+                    ((DecisionProcessingStep) step).decision = (job as DecisionJob).decision
                 }
                 if (!step.save(flush: true)) {
                     log.error("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
@@ -749,7 +749,7 @@ class SchedulerService {
     private Job createJob(ProcessingStep step) {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean) as Job
         job.processingStep = step
-        step.jobClass = job.class.getName()
+        step.jobClass = job.class.name
         step.save(flush: true)
         return job
     }

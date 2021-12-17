@@ -48,7 +48,7 @@ class ProcessedAlignmentFileService {
         def dirType = DataProcessingFilesService.OutputDirectories.ALIGNMENT
         String baseDir = dataProcessingFilesService.getOutputDirectory(ind, dirType)
         String middleDir = getRunLaneDirectory(alignmentPass.seqTrack)
-        return "${baseDir}/${middleDir}/${alignmentPass.getDirectory()}"
+        return "${baseDir}/${middleDir}/${alignmentPass.directory}"
     }
 
     String getRunLaneDirectory(SeqTrack seqTrack) {

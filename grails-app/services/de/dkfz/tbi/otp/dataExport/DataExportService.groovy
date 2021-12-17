@@ -85,7 +85,7 @@ class DataExportService {
             consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
         }
 
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
         dataExportInput.seqTrackList.each { SeqTrack seqTrack ->
             String seqTrackPid = seqTrack.individual.pid
@@ -128,10 +128,10 @@ class DataExportService {
             consoleBuilder.append("Found BAM files ${dataExportInput.bamFileList.size()}\n")
         }
 
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
         dataExportInput.bamFileList.each { AbstractMergedBamFile bamFile ->
-            Path basePath = Paths.get(bamFile.getBaseDirectory().getAbsolutePath())
+            Path basePath = Paths.get(bamFile.baseDirectory.absolutePath)
             Path sourceBam = bamFile instanceof ExternallyProcessedMergedBamFile ?
                     fileSystem.getPath(bamFile.bamFile.toString()) :
                     fileSystem.getPath(basePath.toString(), bamFile.bamFileName)
@@ -140,7 +140,7 @@ class DataExportService {
             Path targetBamFolder = dataExportInput.targetFolder.
                     resolve(bamFile.individual.mockPid).
                     resolve(bamFile.seqType.dirName).
-                    resolve(bamFile.sampleType.getDirName() + (bamFile.workPackage.seqType.hasAntibodyTarget ?
+                    resolve(bamFile.sampleType.dirName + (bamFile.workPackage.seqType.hasAntibodyTarget ?
                             "-${bamFile.workPackage.antibodyTarget.name}" : ""))
 
             if (dataExportInput.checkFileStatus) {
@@ -180,7 +180,7 @@ class DataExportService {
             } else {
                 if (dataExportInput.checkFileStatus) {
                     consoleBuilder.append("WARNING: BAM File ${sourceBam} for ${bamFile.individual.pid} ")
-                    consoleBuilder.append("${bamFile.sampleType.getDirName()} ${bamFile.seqType.dirName} doesn't exist\n")
+                    consoleBuilder.append("${bamFile.sampleType.dirName} ${bamFile.seqType.dirName} doesn't exist\n")
                 }
             }
         }

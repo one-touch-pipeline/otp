@@ -53,7 +53,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
     @Override
     void execute() throws Exception {
         RoddyBamFile.withTransaction {
-            final RoddyBamFile roddyBamFile = getProcessParameterObject()
+            final RoddyBamFile roddyBamFile = processParameterObject
 
             Realm realm = roddyBamFile.project.realm
             assert realm: "Realm should not be null"

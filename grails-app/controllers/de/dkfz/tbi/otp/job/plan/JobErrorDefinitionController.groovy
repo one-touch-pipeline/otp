@@ -33,7 +33,7 @@ class JobErrorDefinitionController implements CheckAndCall {
     JobErrorDefinitionService jobErrorDefinitionService
 
     def index() {
-        Map jobErrorDefinitions = jobErrorDefinitionService.getAllJobErrorDefinition()
+        Map jobErrorDefinitions = jobErrorDefinitionService.allJobErrorDefinition
         List<JobDefinition> jobDefinitions = jobErrorDefinitionService.getJobDefinition(jobErrorDefinitions)
         JobDefinition jobDefinition = JobDefinition.findByName(params.job) ?: null
         [
@@ -44,7 +44,7 @@ class JobErrorDefinitionController implements CheckAndCall {
                 jobDefinition     : jobDefinition?.name,
                 typeDropDown      : JobErrorDefinition.Type,
                 actionDropDown    : JobErrorDefinition.Action,
-                allJobDefinition  : getAllJobDefinitions(),
+                allJobDefinition  : allJobDefinitions,
         ]
     }
 
@@ -77,7 +77,7 @@ class JobErrorDefinitionController implements CheckAndCall {
         List jobNames = []
 
         allJobDefinition.each {
-            if (!it.plan.obsoleted && it.getClass() != StartJobDefinition) {
+            if (!it.plan.obsoleted && it.class != StartJobDefinition) {
                 jobNames.add("${it.name} - ${it.plan.name}")
             }
         }

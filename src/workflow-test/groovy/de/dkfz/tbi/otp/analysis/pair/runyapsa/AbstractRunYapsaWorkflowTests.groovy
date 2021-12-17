@@ -124,7 +124,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     @Override
     File getWorkflowData() {
-        new File(getInputRootDirectory(), 'runYapsa')
+        new File(inputRootDirectory, 'runYapsa')
     }
 
     @Override

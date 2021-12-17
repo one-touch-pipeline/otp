@@ -45,7 +45,7 @@ FileService fileService = ctx.fileService
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-Path baseOutputDir = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
+Path baseOutputDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
 
 FastqImportInstance.withTransaction {
     FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)

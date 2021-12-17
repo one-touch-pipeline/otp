@@ -264,7 +264,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         assert lines.get(0).trim() == executeWgbsAlignmentJob.HEADER.trim()
 
         DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).each {
-            String oneLine = "${it.sampleType.dirName}\t${it.seqTrack.getLibraryDirectoryName()}\t${it.individual.pid}\t${it.seqType.libraryLayoutDirName}\t${it.run.dirName}\t${it.mateNumber}\t${lsdfFilesService.getFileViewByPidPath(it)}"
+            String oneLine = "${it.sampleType.dirName}\t${it.seqTrack.libraryDirectoryName}\t${it.individual.pid}\t${it.seqType.libraryLayoutDirName}\t${it.run.dirName}\t${it.mateNumber}\t${lsdfFilesService.getFileViewByPidPath(it)}"
 
             assert lines.contains(oneLine)
         }
@@ -275,7 +275,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
         setupData(executeWgbsAlignmentJob)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        File methylationMergedDir = new File(roddyBamFile.getWorkMethylationDirectory(), "merged")
+        File methylationMergedDir = new File(roddyBamFile.workMethylationDirectory, "merged")
         methylationMergedDir.deleteDir()
 
         assert TestCase.shouldFail(AssertionError) {
@@ -293,7 +293,7 @@ class ExecuteWgbsAlignmentJobIntegrationTests {
         roddyBamFile.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        File methylationLibraryDir = new File(roddyBamFile.getWorkMethylationDirectory(), "libNA")
+        File methylationLibraryDir = new File(roddyBamFile.workMethylationDirectory, "libNA")
         methylationLibraryDir.deleteDir()
 
         assert TestCase.shouldFail(AssertionError) {

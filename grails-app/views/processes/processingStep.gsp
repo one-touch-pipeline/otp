@@ -136,7 +136,7 @@
                     <td>
                         <span class="clusterJobExitStatus ${clusterJob.exitStatus}">${"${clusterJob.exitStatus}: ${clusterJob.exitCode}"}</span>
                     </td>
-                    <td>${clusterJob.getElapsedWalltimeAsHhMmSs()}</td>
+                    <td>${clusterJob.elapsedWalltimeAsHhMmSs}</td>
                     <td>${clusterJob.node ?: "-"}</td>
                     <td></td>
                 </tr>

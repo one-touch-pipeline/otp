@@ -93,7 +93,7 @@ class ProcessService {
     }
 
     private File getLogForProcessingStep(ProcessingStep step) {
-        return new File(new File(configService.getJobLogDirectory(), "${step.process.id}"), "${step.id}.log")
+        return new File(new File(configService.jobLogDirectory, "${step.process.id}"), "${step.id}.log")
     }
 
     /**
@@ -117,7 +117,7 @@ class ProcessService {
         if (!file.exists() || !file.isFile()) {
             return ""
         }
-        return file.getText()
+        return file.text
     }
 
     /**

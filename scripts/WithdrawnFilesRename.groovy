@@ -46,7 +46,7 @@ FileService fileService = ctx.fileService
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
-Path generated_script_to_run_manually = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("withdraw").resolve("renameWithdrawnFiles.sh")
+Path generated_script_to_run_manually = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("withdraw").resolve("renameWithdrawnFiles.sh")
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_to_run_manually.parent, realm)
 List<File> renameFiles = []
 

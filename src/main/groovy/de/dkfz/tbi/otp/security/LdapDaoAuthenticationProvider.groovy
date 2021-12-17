@@ -59,7 +59,7 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
         // is locked/disabled/expired by somebody else than the account owner
         Authentication ldapAuth = ldapAuthProvider.authenticate(authentication)
 
-        UserDetails user = userDetailsService.loadUserByUsername(authentication.getName())
+        UserDetails user = userDetailsService.loadUserByUsername(authentication.name)
         if (user == null) {
             throw new InternalAuthenticationServiceException("UserDetailsService returned null, which is an interface contract violation")
         }

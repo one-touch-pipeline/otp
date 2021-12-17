@@ -96,7 +96,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         service.linkResultFiles(singleCellBamFile)
 
         then:
-        singleCellBamFile.getLinkedResultFiles().each {
+        singleCellBamFile.linkedResultFiles.each {
             Path path = it.toPath()
             assert Files.exists(path, LinkOption.NOFOLLOW_LINKS)
             assert Files.isSymbolicLink(path)

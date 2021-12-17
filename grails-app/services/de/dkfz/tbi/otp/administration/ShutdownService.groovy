@@ -67,7 +67,7 @@ class ShutdownService implements DisposableBean {
 
     @Override
     void destroy() {
-        ShutdownInformation info = getCurrentPlannedShutdown()
+        ShutdownInformation info = currentPlannedShutdown
         if (info) {
             ShutdownInformation.withTransaction {
                 info.succeeded = new Date()
@@ -80,7 +80,7 @@ class ShutdownService implements DisposableBean {
         } else {
             log.warn("OTP is shutting down without a planned shutdown")
             DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS,
-                    configService.getDicomInstanceName())
+                    configService.dicomInstanceName)
         }
         shutdownSuccessful = true
     }
@@ -146,7 +146,7 @@ class ShutdownService implements DisposableBean {
         lock.lock()
         try {
             ShutdownInformation.withTransaction {
-                ShutdownInformation info = getCurrentPlannedShutdown()
+                ShutdownInformation info = currentPlannedShutdown
                 if (!info) {
                     throw new OtpException('Canceling Shutdown failed since there is no shutdown in progress')
                 }

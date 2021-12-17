@@ -48,12 +48,12 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
 
     void "workflowName, should return WgbsAlignmentWorkflow"() {
         expect:
-        'WgbsAlignmentWorkflow' == createAlignmentChecker().getWorkflowName()
+        'WgbsAlignmentWorkflow' == createAlignmentChecker().workflowName
     }
 
     void "pipeLineName, should return PANCAN_ALIGNMENT"() {
         expect:
-        Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().getPipeLineName()
+        Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().pipeLineName
     }
 
     void "seqTypes, should return WGBS and WGBS_TAG"() {
@@ -64,6 +64,6 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
         ]
 
         expect:
-        TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
+        TestCase.assertContainSame(seqTypes, createAlignmentChecker().seqTypes)
     }
 }

@@ -140,7 +140,7 @@ class ProcessedMergedBamFileIntegrationTests {
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
         assert bamFile.mergingWorkPackage.save(flush: true)
 
-        assert expected == bamFile.getPathForFurtherProcessing()
+        assert expected == bamFile.pathForFurtherProcessing
     }
 
     @Test
@@ -148,7 +148,7 @@ class ProcessedMergedBamFileIntegrationTests {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
 
         TestCase.shouldFailWithMessage(IllegalStateException, /^This BAM file is not in the project folder(?s).*$/) {
-            bamFile.getPathForFurtherProcessing()
+            bamFile.pathForFurtherProcessing
         }
     }
 

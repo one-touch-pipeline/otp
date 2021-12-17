@@ -56,7 +56,7 @@ class ReferenceGenomeServiceTests {
                 pipeline: DomainFactory.createPanCanPipeline(),
         ])
 
-        File referenceGenomeDirectory = new File(configService.getProcessingRootPath(), 'reference_genomes')
+        File referenceGenomeDirectory = new File(configService.processingRootPath, 'reference_genomes')
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         directory = new File(
                 new File(referenceGenomeDirectory,

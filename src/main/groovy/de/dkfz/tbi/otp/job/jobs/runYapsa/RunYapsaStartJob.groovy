@@ -47,7 +47,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
 
-        notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.RUN_YAPSA)
+        notificationCreator.setStartedForSeqTracks(bamFilePairAnalysis.containedSeqTracks, OtrsTicket.ProcessingStep.RUN_YAPSA)
         bamFilePairAnalysis.samplePair.runYapsaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         bamFilePairAnalysis.samplePair.save(flush: true)
     }
@@ -61,13 +61,13 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     String getInstanceName(ConfigPerProjectAndSeqType config) {
         assert RunYapsaConfig.isAssignableFrom(Hibernate.getClass(config)):
                 "RunYapsa startjob should only ever be started with a YAPSA config, not something else; got ${ config.class }"
-        return "runYapsa_${ config.programVersion.replace("/", "-") }_${ getFormattedDate() }"
+        return "runYapsa_${ config.programVersion.replace("/", "-") }_${ formattedDate }"
     }
 
     @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     @Override
     ConfigPerProjectAndSeqType getConfig(SamplePair samplePair) {
-        Pipeline pipeline = getBamFileAnalysisService().getPipeline()
+        Pipeline pipeline = bamFileAnalysisService.pipeline
         RunYapsaConfig config = CollectionUtils.<RunYapsaConfig> atMostOneElement(
                 RunYapsaConfig.findAllByProjectAndPipelineAndSeqTypeAndObsoleteDate(samplePair.project, pipeline, samplePair.seqType, null)
         )

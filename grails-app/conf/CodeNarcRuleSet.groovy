@@ -1163,7 +1163,7 @@ All the Rules that will be used for OTP
     }
     //UnnecessaryGString //We would prefer a rule to only use GStrings
     UnnecessaryGetter {
-        priority = LOW
+        priority = CRITICAL
         checkIsMethods = false
     }
     UnnecessaryIfStatement {

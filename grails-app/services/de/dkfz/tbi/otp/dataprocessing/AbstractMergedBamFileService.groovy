@@ -76,11 +76,11 @@ class AbstractMergedBamFileService {
     }
 
     File getExistingBamFilePath(final AbstractMergedBamFile bamFile) {
-        final File file = bamFile.getPathForFurtherProcessing()
-        assert bamFile.getMd5sum() ==~ /^[0-9a-f]{32}$/
-        assert bamFile.getFileSize() > 0L
+        final File file = bamFile.pathForFurtherProcessing
+        assert bamFile.md5sum ==~ /^[0-9a-f]{32}$/
+        assert bamFile.fileSize > 0L
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
-        assert file.length() == bamFile.getFileSize()
+        assert file.length() == bamFile.fileSize
         return file
     }
 

@@ -93,8 +93,8 @@ class ProcessesController {
     def listData(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        List<JobExecutionPlan> plans = jobExecutionPlanService.getJobExecutionPlans()
-        List<JobExecutionPlan> plansWithPrevious = jobExecutionPlanService.getJobExecutionPlansWithPreviousVersions()
+        List<JobExecutionPlan> plans = jobExecutionPlanService.jobExecutionPlans
+        List<JobExecutionPlan> plansWithPrevious = jobExecutionPlanService.jobExecutionPlansWithPreviousVersions
         dataToRender.iTotalRecords = plans.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
@@ -261,7 +261,7 @@ class ProcessesController {
     // suppressing because this controller will be removed within the old workflow system
     @SuppressWarnings("ClassForName")
     boolean showRestartButton(Process process) {
-        return (RestartableStartJob.isAssignableFrom(Class.forName(process.getStartJobClass())) &&
+        return (RestartableStartJob.isAssignableFrom(Class.forName(process.startJobClass)) &&
                 !Process.findByRestarted(process))
     }
 
@@ -399,10 +399,10 @@ class ProcessesController {
         List<Parameter> parameters = []
         if (input) {
             parameters = step.input.toList().sort { it.id }
-            jobName = step.previous?.getClusterJobName()
+            jobName = step.previous?.clusterJobName
         } else {
             parameters = step.output.toList().sort { it.id }
-            jobName = step.getClusterJobName()
+            jobName = step.clusterJobName
         }
         if (!cmd.sortOrder) {
             parameters = parameters.reverse()

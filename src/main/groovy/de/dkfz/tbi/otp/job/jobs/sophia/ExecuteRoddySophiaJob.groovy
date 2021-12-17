@@ -63,8 +63,8 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(diseaseInsertSizeFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(controlInsertSizeFile)
 
-        Integer tumorDefaultReadLength = bamFileDisease.getMaximalReadLength()
-        Integer controlDefaultReadLength = bamFileControl.getMaximalReadLength()
+        Integer tumorDefaultReadLength = bamFileDisease.maximalReadLength
+        Integer controlDefaultReadLength = bamFileControl.maximalReadLength
 
         assert tumorDefaultReadLength && controlDefaultReadLength: "neither tumorDefaultReadLength nor controlDefaultReadLength may be null"
 
@@ -76,15 +76,15 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
             throw new RuntimeException("Unsupported BAM-File type for '${bamFileDisease.class}' or '${bamFileControl.class}' ")
         }
 
-        SophiaWorkflowQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.getOverallQualityAssessment() as SophiaWorkflowQualityAssessment
-        SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.getOverallQualityAssessment() as SophiaWorkflowQualityAssessment
+        SophiaWorkflowQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.overallQualityAssessment as SophiaWorkflowQualityAssessment
+        SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.overallQualityAssessment as SophiaWorkflowQualityAssessment
 
         cValues.add("controlMedianIsize:${bamFileControlQualityAssessment.insertSizeMedian}")
         cValues.add("tumorMedianIsize:${bamFileDiseaseQualityAssessment.insertSizeMedian}")
         cValues.add("controlStdIsizePercentage:${bamFileControlQualityAssessment.insertSizeCV}")
         cValues.add("tumorStdIsizePercentage:${bamFileDiseaseQualityAssessment.insertSizeCV}")
-        cValues.add("controlProperPairPercentage:${bamFileControlQualityAssessment.getPercentProperlyPaired()}")
-        cValues.add("tumorProperPairPercentage:${bamFileDiseaseQualityAssessment.getPercentProperlyPaired()}")
+        cValues.add("controlProperPairPercentage:${bamFileControlQualityAssessment.percentProperlyPaired}")
+        cValues.add("tumorProperPairPercentage:${bamFileDiseaseQualityAssessment.percentProperlyPaired}")
 
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")
@@ -94,7 +94,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         cValues.add("controlDefaultReadLength:${controlDefaultReadLength}")
         cValues.add("tumorDefaultReadLength:${tumorDefaultReadLength}")
 
-        cValues.addAll(getSampleExtractionVersion2RoddyParameters())
+        cValues.addAll(sampleExtractionVersion2RoddyParameters)
 
         return cValues
     }

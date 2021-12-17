@@ -63,7 +63,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
 
         if (!canPipelineAlign(seqTrack)) {
-            logNotAligning(seqTrack, "${this.getClass().simpleName} says it cannot do so")
+            logNotAligning(seqTrack, "${this.class.simpleName} says it cannot do so")
             return Collections.emptyList()
         }
 
@@ -186,7 +186,7 @@ be merged because of incompatible sequencing platforms or used chemistry.
             |${propertyOverview.join("\n\n")}
             |
             |Please be aware that OTP can currently only handle one bam file, therefore your current samples will not be aligned.
-            |Please contact ${mailHelperService.getTicketSystemEmailAddress()} if you wish the samples \
+            |Please contact ${mailHelperService.ticketSystemEmailAddress} if you wish the samples \
 nevertheless to be merged or if you want to withdraw the old samples (would result in deletion of the old bam files), to align \
 the current ones.""".stripMargin()
     }

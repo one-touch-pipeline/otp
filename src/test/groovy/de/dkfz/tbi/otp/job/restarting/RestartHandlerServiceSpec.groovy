@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+@SuppressWarnings("UnnecessaryGetter")
 class RestartHandlerServiceSpec extends Specification implements DataTest {
 
     @Override

@@ -51,7 +51,7 @@ class ParseSophiaQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
 
     @Override
     void execute() throws Exception {
-        final SophiaInstance sophiaInstance = getProcessParameterObject()
+        final SophiaInstance sophiaInstance = processParameterObject
         Path qcFile = sophiaService.getQcJsonFile(sophiaInstance)
         JSONObject qcJson = JSON.parse(qcFile.text)
         SophiaInstance.withTransaction {

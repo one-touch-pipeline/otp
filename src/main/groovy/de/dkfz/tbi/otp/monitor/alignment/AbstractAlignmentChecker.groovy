@@ -60,9 +60,9 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         }
         seqTracks.unique()
 
-        output.showWorkflow(getWorkflowName())
+        output.showWorkflow(workflowName)
 
-        List<SeqType> supportedSeqTypes = getSeqTypes()
+        List<SeqType> supportedSeqTypes = seqTypes
 
         Map seqTrackMap = seqTracks.groupBy {
             supportedSeqTypes.contains(it.seqType)
@@ -123,7 +123,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
             Map<AbstractMergedBamFile.FileOperationStatus, Collection<AbstractMergedBamFile>> bamFileByFileOperationStatus =
                     notWithdrawnBamFiles.groupBy { it.fileOperationStatus }
 
-            String workflowName = getWorkflowName()
             output.showRunningWithHeader(
                     HEADER_RUNNING_DECLARED, workflowName, bamFileByFileOperationStatus[AbstractMergedBamFile.FileOperationStatus.DECLARED]
             )
@@ -166,7 +165,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                         )
                 """.toString(), [
                 seqTracks   : seqTracks,
-                pipeLineName: getPipeLineName(),
+                pipeLineName: pipeLineName,
         ])
     }
 
@@ -190,7 +189,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                         and mergingWorkPackage.pipeline.name = :pipeLineName
                 """.toString(), [
                 seqTracks                                    : seqTracks,
-                pipeLineName                                 : getPipeLineName(),
+                pipeLineName                                 : pipeLineName,
         ])
 
         List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {
@@ -238,7 +237,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                         )
                 """.toString(), [
                 mergingWorkPackage: mergingWorkPackages,
-                pipeLineName      : getPipeLineName(),
+                pipeLineName      : pipeLineName,
         ])
     }
 

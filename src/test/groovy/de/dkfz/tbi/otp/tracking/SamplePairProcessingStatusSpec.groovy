@@ -37,7 +37,7 @@ class SamplePairProcessingStatusSpec extends Specification {
         ProcessingStatus.WorkflowProcessingStatus result = NotificationCreator.combineStatuses(inputStatuses, Closure.IDENTITY)
 
         expect:
-        result == status.getVariantCallingProcessingStatus()
+        result == status.variantCallingProcessingStatus
 
         where:
         //generates a Permutation List for indel, snv, aceseq and runYapsa.

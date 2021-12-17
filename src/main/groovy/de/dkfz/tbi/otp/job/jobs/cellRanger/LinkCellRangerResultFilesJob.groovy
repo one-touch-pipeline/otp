@@ -41,7 +41,7 @@ class LinkCellRangerResultFilesJob extends AbstractEndStateAwareJobImpl implemen
 
     @Override
     void execute() throws Exception {
-        final SingleCellBamFile singleCellBamFile = getProcessParameterObject()
+        final SingleCellBamFile singleCellBamFile = processParameterObject
 
         SingleCellBamFile.withTransaction {
             cellRangerService.finishCellRangerWorkflow(singleCellBamFile)

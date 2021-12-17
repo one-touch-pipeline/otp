@@ -338,7 +338,7 @@ task codenarcAll(type: CodeNarc) {
     }
     sourceSets.each { SourceSet s ->
         if (s.name != "script") {
-            source(s.allGroovy.getSrcDirs())
+            source(s.allGroovy.srcDirs)
         }
     }
 

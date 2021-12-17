@@ -79,7 +79,7 @@ class QcTrafficLightService {
         assert qcTrafficLightStatus: "the qcTrafficLightStatus must not be null"
         assert comment: "the comment must not be null"
 
-        AbstractMergedBamFile.QcTrafficLightStatus prevQcTrafficLightStatus = bamFile.getQcTrafficLightStatus()
+        AbstractMergedBamFile.QcTrafficLightStatus prevQcTrafficLightStatus = bamFile.qcTrafficLightStatus
 
         commentService.saveComment(bamFile, comment)
         setQcTrafficLightStatus(bamFile, qcTrafficLightStatus)

@@ -723,7 +723,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     protected void ensureThatFilePermissionsAreCorrect() {
         log.debug("Checking file permissions")
-        Files.walk(configService.getRootPath().toPath()).each { Path path ->
+        Files.walk(configService.rootPath.toPath()).each { Path path ->
             if (Files.isDirectory(path)) {
                 assert fileService.getPermissionViaBash(path, realm, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
             }

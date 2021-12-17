@@ -118,9 +118,9 @@ class ProjectOverviewService {
     }
 
     List centerNameRunIdLastMonth(Project project) {
-        Calendar cal = Calendar.getInstance()
+        Calendar cal = Calendar.instance
         cal.add(Calendar.MONTH, -6)
-        Date date = cal.getTime()
+        Date date = cal.time
         List seq = Sequence.withCriteria {
             eq("projectId", project?.id)
             gt("dateExecuted", date)

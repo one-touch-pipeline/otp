@@ -43,8 +43,8 @@ class SeqTrackServiceTests {
     SeqType alignableSeqType
 
     void setupData() {
-        dataPath = TestCase.getUniqueNonExistentPath()
-        mdPath = TestCase.getUniqueNonExistentPath()
+        dataPath = TestCase.uniqueNonExistentPath
+        mdPath = TestCase.uniqueNonExistentPath
         testData = new TestData()
         alignableSeqType = DomainFactory.createDefaultOtpAlignableSeqTypes().first()
     }

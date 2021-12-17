@@ -107,7 +107,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         assert step.processParameterObject
 
         AbstractJobImpl job = Mock(AbstractJobImpl) {
-            _ * getProcessingStep() >> step
+            _ * getProperty('processingStep') >> step
             0 * _
         }
 

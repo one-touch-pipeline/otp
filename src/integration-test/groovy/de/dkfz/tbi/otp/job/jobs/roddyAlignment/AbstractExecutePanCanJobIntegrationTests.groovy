@@ -94,7 +94,7 @@ class AbstractExecutePanCanJobIntegrationTests implements DomainFactoryCore, Dom
         abstractExecutePanCanJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
         abstractExecutePanCanJob.processingOptionService = new ProcessingOptionService()
 
-        File processingRootPath = configService.getProcessingRootPath()
+        File processingRootPath = configService.processingRootPath
 
         DomainFactory.createRoddyProcessingOptions(tmpDir.newFolder())
 

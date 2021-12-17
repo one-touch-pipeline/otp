@@ -60,7 +60,7 @@ abstract class AbstractRoddyAlignmentChecker extends AbstractAlignmentChecker {
                         )
                 """.toString(), [
                 mergingWorkPackage: mergingWorkPackages,
-                pipeLineName      : getPipeLineName(),
+                pipeLineName      : pipeLineName,
         ])
     }
 

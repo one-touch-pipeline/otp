@@ -45,7 +45,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
         }
 
         if (!latestValidBamFile ||
-                !latestValidBamFile.getContainedSeqTracks().contains(seqTrack) ||
+                !latestValidBamFile.containedSeqTracks.contains(seqTrack) ||
                 latestValidBamFile.withdrawn) {
             setNeedsProcessing()
         } else {
@@ -76,7 +76,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     @Override
     @Deprecated
     boolean canPipelineAlign(SeqTrack seqTrack) {
-        boolean canAlign = SeqTypeService.getRoddyAlignableSeqTypes().contains(seqTrack.seqType)
+        boolean canAlign = SeqTypeService.roddyAlignableSeqTypes.contains(seqTrack.seqType)
         if (canAlign && (RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, getPipeline(seqTrack)) == null)) {
             SeqTrackService.logToSeqTrack(seqTrack, "RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${getPipeline(seqTrack).name}.")
             return false

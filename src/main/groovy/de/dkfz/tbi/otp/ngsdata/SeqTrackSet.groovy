@@ -49,14 +49,14 @@ class SeqTrackSet {
         this.seqPlatforms = this.seqTracks*.seqPlatform.unique()
         this.seqCenters = this.seqTracks*.seqCenter.unique()
         this.numberOfLanes = this.seqTracks.size()
-        this.numberOfBases = getTotalNumberOfBasesOrNull()
+        this.numberOfBases = totalNumberOfBasesOrNull
     }
 
     @SuppressWarnings('ReturnNullFromCatchBlock') //if the number can not be calculated, null should be return
     private Long getTotalNumberOfBasesOrNull() {
         try {
             return dataFiles.findAll { !it.indexFile }.sum { DataFile dataFile ->
-                dataFile.getNBasePairs()
+                dataFile.NBasePairs
             } as Long
         } catch (AssertionError e) {
             return null

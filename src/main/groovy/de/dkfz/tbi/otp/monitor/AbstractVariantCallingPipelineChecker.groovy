@@ -50,9 +50,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         }
         List<SamplePair> samplePairs = samplePairsInput
 
-        output.showWorkflow(getWorkflowName())
+        output.showWorkflow(workflowName)
 
-        List<SeqType> supportedSeqTypes = getSeqTypes()
+        List<SeqType> supportedSeqTypes = seqTypes
 
         Map samplePairSupportedSeqType = samplePairs.groupBy {
             supportedSeqTypes.contains(it.seqType)
@@ -74,7 +74,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         List<SamplePair> samplePairsWithConfig = samplePairsWithSupportedSeqTypes - noConfig
 
         Map processingStateMap = samplePairsWithConfig.groupBy {
-            it[getProcessingStateMember()]
+            it[processingStateMember]
         }
 
         output.showList(HEADER_DISABLED_SAMPLE_PAIR, processingStateMap[SamplePair.ProcessingStatus.DISABLED])
@@ -82,7 +82,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         List needsProcessing = processingStateMap[SamplePair.ProcessingStatus.NEEDS_PROCESSING]
         if (needsProcessing) {
             List<BamFilePairAnalysis> alreadyRunning = analysisAlreadyRunningForSamplePairAndPipeline(needsProcessing)
-            output.showRunningWithHeader(HEADER_OLD_INSTANCE_RUNNING, getWorkflowName(), alreadyRunning)
+            output.showRunningWithHeader(HEADER_OLD_INSTANCE_RUNNING, workflowName, alreadyRunning)
 
             List<SamplePair> waiting = needsProcessing - alreadyRunning*.samplePair
 
@@ -147,7 +147,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         )
                 """, [
                 samplePairs : samplePairs,
-                pipelineType: getPipeline().type,
+                pipelineType: pipeline.type,
         ])
     }
 
@@ -159,7 +159,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                     select
                         analysis
                     from
-                        ${getBamFilePairAnalysisClass().simpleName} analysis
+                        ${bamFilePairAnalysisClass.simpleName} analysis
                     where
                         analysis.samplePair in (:samplePairs)
                         and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
@@ -167,7 +167,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         and analysis.config.pipeline.type = :pipelineType
                 """.toString(), [
                 samplePairs : samplePairs,
-                pipelineType: getPipeline().type,
+                pipelineType: pipeline.type,
         ])
     }
 
@@ -196,7 +196,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         return SamplePair.executeQuery("""
                 select
-                    new ${ToLittleCoverageSamplePair.class.getName()} (
+                    new ${ToLittleCoverageSamplePair.class.name} (
                         samplePair,
                         bamFile1.coverage,
                         bamFile2.coverage,
@@ -234,14 +234,14 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                             select
                                 analysis
                             from
-                                ${getBamFilePairAnalysisClass().simpleName} analysis
+                                ${bamFilePairAnalysisClass.simpleName} analysis
                             where
                                 analysis.samplePair = samplePair
                                 and analysis.config.pipeline.type = :pipelineType
                         )
                 """.toString(), [
                 samplePairs : samplePairs,
-                pipelineType: getPipeline().type,
+                pipelineType: pipeline.type,
         ])
     }
 
@@ -253,13 +253,13 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                     select
                         analysis
                     from
-                        ${getBamFilePairAnalysisClass().simpleName} analysis
+                        ${bamFilePairAnalysisClass.simpleName} analysis
                     where
                         analysis.id in (
                             select
                                 max(analysis.id)
                             from
-                                ${getBamFilePairAnalysisClass().simpleName} analysis
+                                ${bamFilePairAnalysisClass.simpleName} analysis
                             where
                                 analysis.samplePair in (:samplePairs)
                                 and analysis.config.pipeline.type = :pipelineType
@@ -269,7 +269,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         and analysis.config.pipeline.type = :pipelineType
                 """.toString(), [
                 samplePairs : samplePairs,
-                pipelineType: getPipeline().type,
+                pipelineType: pipeline.type,
         ])
     }
 
@@ -280,13 +280,13 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     abstract Pipeline getPipeline()
 
     List<SeqType> getSeqTypes() {
-        return pipeline.getSeqTypes()
+        return pipeline.seqTypes
     }
 
     abstract Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass()
 
     void displayRunning(List<BamFilePairAnalysis> bamFilePairAnalysis, MonitorOutputCollector output) {
-        output.showRunning(getWorkflowName(), bamFilePairAnalysis)
+        output.showRunning(workflowName, bamFilePairAnalysis)
     }
 
     private Closure displayWaitingWithInfos = { SamplePair samplePair ->
@@ -299,7 +299,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             if (bamFile == null) {
                 ret << "${key} ${PROBLEMS_NO_BAM_FILE}"
             } else if (!(bamFile instanceof ExternallyProcessedMergedBamFile)) {
-                Set<SeqTrack> containedSeqTracks = bamFile.getContainedSeqTracks()
+                Set<SeqTrack> containedSeqTracks = bamFile.containedSeqTracks
                 Set<SeqTrack> availableSeqTracks = bamFile.workPackage.seqTracks
                 if (!CollectionUtils.containSame(containedSeqTracks*.id, availableSeqTracks*.id)) {
                     Set<SeqTrack> missingSeqTracks = availableSeqTracks.findAll {

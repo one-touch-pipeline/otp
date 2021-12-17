@@ -225,7 +225,7 @@ class DataFile implements CommentableWithProject, Entity {
         if (nReads == null || sequenceLength == null) {
             return null
         }
-        return getNBasePairs()
+        return NBasePairs
     }
 
     int getMeanSequenceLength() {

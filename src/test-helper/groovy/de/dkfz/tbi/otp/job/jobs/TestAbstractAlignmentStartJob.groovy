@@ -45,7 +45,7 @@ class TestAbstractAlignmentStartJob extends AbstractAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return [SeqTypeService.getWholeGenomePairedSeqType()]
+        return [SeqTypeService.wholeGenomePairedSeqType]
     }
 
     @Override

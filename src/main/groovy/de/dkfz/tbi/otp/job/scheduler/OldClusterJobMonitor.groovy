@@ -88,7 +88,7 @@ ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\
                 jobEndState = monitoringJob.endState
                 jobHasFinished = true
             } catch (final InvalidStateException e) {
-                // MonitoringJob.getEndState() is specified to throw an InvalidStateException if the
+                // MonitoringJob.endState is specified to throw an InvalidStateException if the
                 // job has not finished yet.
                 jobHasFinished = false
             }

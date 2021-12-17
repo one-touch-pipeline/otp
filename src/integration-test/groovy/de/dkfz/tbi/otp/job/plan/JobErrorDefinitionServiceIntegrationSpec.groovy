@@ -39,7 +39,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        Map jobErrorDefinitions = service.getAllJobErrorDefinition()
+        Map jobErrorDefinitions = service.allJobErrorDefinition
 
         then:
         jobErrorDefinitions.size() == 1
@@ -62,7 +62,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        Map jobErrorDefinitions = service.getAllJobErrorDefinition()
+        Map jobErrorDefinitions = service.allJobErrorDefinition
 
         then:
         jobErrorDefinitions.size() == 3
@@ -77,7 +77,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.getAllJobErrorDefinition())
+        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.allJobErrorDefinition)
 
         then:
         jobDefinitions.size() == 1
@@ -90,7 +90,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         JobErrorDefinitionService service = new JobErrorDefinitionService()
 
         when:
-        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.getAllJobErrorDefinition())
+        List<JobDefinition> jobDefinitions = service.getJobDefinition(service.allJobErrorDefinition)
 
         then:
         jobDefinitions.size() == 3
@@ -105,7 +105,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addErrorExpressionFirstLevel(type, action, errorExpression)
 
         then:
-        service.getAllJobErrorDefinition().get(JobErrorDefinition.findByErrorExpression(errorExpression)) == errorExpression
+        service.allJobErrorDefinition.get(JobErrorDefinition.findByErrorExpression(errorExpression)) == errorExpression
 
         where:
         type                            | action        | errorExpression
@@ -127,7 +127,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addErrorExpression(type, action, errorExpression, jobErrorDefinition)
 
         then:
-        service.getAllJobErrorDefinition().get(jobErrorDefinition).get(JobErrorDefinition.findByErrorExpression(errorExpression)) == errorExpression
+        service.allJobErrorDefinition.get(jobErrorDefinition).get(JobErrorDefinition.findByErrorExpression(errorExpression)) == errorExpression
 
         where:
         type          | action        | errorExpression
@@ -147,7 +147,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.updateErrorExpression(jobErrorDefinition, errorExpression)
 
         then:
-        jobErrorDefinition.getErrorExpression() == errorExpression
+        jobErrorDefinition.errorExpression == errorExpression
     }
 
     @Unroll
@@ -160,7 +160,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.updateErrorExpression(jobErrorDefinition, errorExpression)
 
         then:
-        jobErrorDefinition.getErrorExpression() == errorExpression
+        jobErrorDefinition.errorExpression == errorExpression
 
         where:
         errorExpression         | _
@@ -180,7 +180,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addNewJob(jobErrorDefinition, jobDefinition)
 
         then:
-        jobErrorDefinition.getJobDefinitions().contains(jobDefinition)
+        jobErrorDefinition.jobDefinitions.contains(jobDefinition)
     }
 
     @SuppressWarnings('SpaceInsideParentheses') //auto-format and codenarc clash
@@ -195,7 +195,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         service.addNewJob(jobErrorDefinition, jobDefinition)
 
         then:
-        jobErrorDefinition.getJobDefinitions().contains(jobDefinition)
+        jobErrorDefinition.jobDefinitions.contains(jobDefinition)
 
         where:
         jobDefinitionClosure                                        | _

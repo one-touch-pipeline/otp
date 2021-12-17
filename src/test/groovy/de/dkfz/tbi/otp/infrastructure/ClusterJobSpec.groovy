@@ -25,8 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-
-import static de.dkfz.tbi.otp.utils.HelperUtils.getUniqueString
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class ClusterJobSpec extends Specification implements DataTest {
 
@@ -43,7 +42,7 @@ class ClusterJobSpec extends Specification implements DataTest {
         ClusterJobIdentifier identifier = new ClusterJobIdentifier(clusterJob)
         DomainFactory.createClusterJob(
                 realm: identifier.realm,
-                clusterJobId: getUniqueString(),
+                clusterJobId: HelperUtils.uniqueString,
         )
         DomainFactory.createClusterJob(
                 realm: DomainFactory.createRealm(),

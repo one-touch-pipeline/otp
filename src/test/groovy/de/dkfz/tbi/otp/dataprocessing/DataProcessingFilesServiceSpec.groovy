@@ -54,7 +54,7 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
 
         String pid = individual.pid
         String projectDir = project.dirName
-        String rootDir = configService.getProcessingRootPath()
+        String rootDir = configService.processingRootPath
 
         String expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}/${lastPath}"
 

@@ -107,7 +107,7 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${SequencingReadType.PAI
         new SampleLibraryValidator().validate(context)
 
         expect:
-        context.getSummary() == [
+        context.summary == [
                 "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.",
         ]
     }
@@ -124,6 +124,6 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${SequencingReadType.PAI
         new SampleLibraryValidator().validate(context)
 
         expect:
-        [] == context.getSummary()
+        [] == context.summary
     }
 }

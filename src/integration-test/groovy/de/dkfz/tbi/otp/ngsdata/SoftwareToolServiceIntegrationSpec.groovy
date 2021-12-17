@@ -93,7 +93,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = softwareToolService.getIdentifiersPerSoftwareTool()
+            result = softwareToolService.identifiersPerSoftwareTool
         }
 
         then:
@@ -123,7 +123,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = softwareToolService.getSoftwareToolsPerProgramName()
+            result = softwareToolService.softwareToolsPerProgramName
         }
 
         then:

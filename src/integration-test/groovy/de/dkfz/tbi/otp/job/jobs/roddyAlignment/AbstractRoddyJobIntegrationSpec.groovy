@@ -276,7 +276,7 @@ newLine"""
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", configService.getSshUser(), processingStep)
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", configService.sshUser, processingStep)
         assert clusterJob
 
         final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)

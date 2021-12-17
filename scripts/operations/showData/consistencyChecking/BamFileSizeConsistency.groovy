@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 
 PrintWriter out = new PrintWriter(new File(
-        ConfigService.getInstance().getScriptOutputPath(),
+        ConfigService.instance.scriptOutputPath,
         "consistencyChecking/BamFileSizeConsistency_${ new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") }.tsv"
 ))
 try {

@@ -51,10 +51,10 @@ class AbstractMaybeSubmitWaitValidateJobIntegrationTests extends TestCase {
         setupData()
         Realm realm = DomainFactory.createRealm()
 
-        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", configService.getSshUser(), processingStep)
+        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", configService.sshUser, processingStep)
         ClusterJobIdentifier identifier1 = new ClusterJobIdentifier(clusterJob1)
 
-        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", configService.getSshUser(), processingStep)
+        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", configService.sshUser, processingStep)
         ClusterJobIdentifier identifier2 = new ClusterJobIdentifier(clusterJob2)
 
         Map failedClusterJobs = [(identifier2): "Failed2.", (identifier1): "Failed1."]

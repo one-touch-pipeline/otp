@@ -52,7 +52,7 @@ class SequenceController {
             showRunLinks: userService.hasCurrentUserAdministrativeRoles(),
             filterTree : [
                     [name : 'projectSelection', msgcode: 'sequence.search.project',
-                     type : 'LIST', from: projectService.getAllProjects(),
+                     type : 'LIST', from: projectService.allProjects,
                      value: 'displayName', key: 'id'],
                     [name: 'individualSearch', msgcode: 'sequence.search.individual',
                      type: 'TEXT'],
@@ -101,7 +101,7 @@ class SequenceController {
         // because of that, we just copy all properties into a map
         sequences.each { Sequence seq ->
             Map data = [:]
-            seq.getProperties().each {
+            seq.properties.each {
                 data.put(it.key, it.value)
             }
             // format date
@@ -115,7 +115,7 @@ class SequenceController {
                 [!it.indexFile, it.mateNumber]
             }.collect {
                 [
-                        readName: it.getReadName(),
+                        readName: it.readName,
                         fastqId : it.id,
                 ]
             }

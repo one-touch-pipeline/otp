@@ -27,7 +27,7 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
-String roddy_base_path = ConfigService.getInstance().getRoddyPath().toString()
+String roddy_base_path = ConfigService.instance.roddyPath.toString()
 
 processingOptionService.createOrUpdate(
         RODDY_PATH,

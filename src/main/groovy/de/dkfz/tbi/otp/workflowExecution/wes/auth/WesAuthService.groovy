@@ -73,9 +73,9 @@ class WesAuthService {
      */
     private ClientCredentialsResourceDetails oAuthConfigDetails() {
         ClientCredentialsResourceDetails authConfig = new ClientCredentialsResourceDetails()
-        authConfig.accessTokenUri = configService.getWesAuthBaseUrl()
-        authConfig.clientId = configService.getWesAuthClientId()
-        authConfig.clientSecret = configService.getWesAuthClientSecret()
+        authConfig.accessTokenUri = configService.wesAuthBaseUrl
+        authConfig.clientId = configService.wesAuthClientId
+        authConfig.clientSecret = configService.wesAuthClientSecret
         return authConfig
     }
 }

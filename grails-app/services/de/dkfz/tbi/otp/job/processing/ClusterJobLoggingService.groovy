@@ -44,7 +44,7 @@ class ClusterJobLoggingService {
 
         Date date = processingStep.firstProcessingStepUpdate.date
         String dateDirectory = TimeFormats.DATE.getFormattedDate(date)
-        return new File("${ConfigService.getInstance().getLoggingRootPath()}/${CLUSTER_LOG_BASE_DIR}/${dateDirectory}")
+        return new File("${ConfigService.instance.loggingRootPath}/${CLUSTER_LOG_BASE_DIR}/${dateDirectory}")
     }
 
     File createAndGetLogDirectory(Realm realm, ProcessingStep processingStep) {

@@ -138,8 +138,8 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
         RnaQualityAssessment rnaQa = RnaQualityAssessment.findByQualityAssessmentMergedPass(qaPass)
         assert rnaQa
 
-        JSON.parse(bamFile.getFinalMergedQAJsonFile().text)
-        assert bamFile.getFinalMergedQAJsonFile().text.trim() != ""
+        JSON.parse(bamFile.finalMergedQAJsonFile.text)
+        assert bamFile.finalMergedQAJsonFile.text.trim() != ""
 
         assert bamFile.coverage == null
 

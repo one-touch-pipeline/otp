@@ -61,7 +61,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
     @Override
     protected NextAction maybeSubmit() throws Throwable {
-        final SingleCellBamFile singleCellBamFile = getProcessParameterObject()
+        final SingleCellBamFile singleCellBamFile = processParameterObject
         final Realm realm = singleCellBamFile.project.realm
 
         prepareInputStructure(singleCellBamFile)
@@ -87,7 +87,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
     @Override
     protected void validate() throws Throwable {
-        final SingleCellBamFile singleCellBamFile = getProcessParameterObject()
+        final SingleCellBamFile singleCellBamFile = processParameterObject
 
         cellRangerService.validateFilesExistsInResultDirectory(singleCellBamFile)
     }

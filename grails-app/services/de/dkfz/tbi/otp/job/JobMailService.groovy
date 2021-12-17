@@ -58,7 +58,7 @@ class JobMailService {
         assert job: 'job may not be null'
         assert errorMessage: 'message may not be null'
 
-        ProcessingStep step = ProcessingStep.getInstance(job.getProcessingStep().id)
+        ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
 
         ProcessParameterObject object = step.processParameterObject
         if (!object) {

@@ -102,7 +102,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
 
         String execDirName = "exec_890420_133730004_user_analysis"
-        File roddyExecDir = new File(roddyBamFile.getWorkExecutionStoreDirectory(), execDirName)
+        File roddyExecDir = new File(roddyBamFile.workExecutionStoreDirectory, execDirName)
         assert roddyExecDir.mkdirs()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(execDirName)
@@ -121,7 +121,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tmpDir.newFolder().absolutePath)
 
         String execDirName = "exec_890420_133730004_user_analysis"
-        File roddyExecDir = new File(roddyBamFile.getWorkExecutionStoreDirectory(), execDirName)
+        File roddyExecDir = new File(roddyBamFile.workExecutionStoreDirectory, execDirName)
         assert roddyExecDir.mkdirs()
 
         CreateJobStateLogFileHelper.createJobStateLogFile(roddyExecDir, [
@@ -152,7 +152,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
         // jobStateLogFile for the first roddy call
         String execDirName1 = "exec_140625_102449388_SOMEUSER_WGS"
-        File firstRoddyExecDir = new File(roddyBamFile.getWorkExecutionStoreDirectory(), execDirName1)
+        File firstRoddyExecDir = new File(roddyBamFile.workExecutionStoreDirectory, execDirName1)
         assert firstRoddyExecDir.mkdirs()
         CreateJobStateLogFileHelper.createJobStateLogFile(firstRoddyExecDir, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierA.clusterJobId, statusCode: STATUS_CODE_STARTED]),
@@ -161,7 +161,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
         // create jobStateLogFile for the second roddy call
         String execDirName2 = "exec_150625_102449388_SOMEUSER_WGS"
-        File secondRoddyExecDir = new File(roddyBamFile.getWorkExecutionStoreDirectory(), execDirName2)
+        File secondRoddyExecDir = new File(roddyBamFile.workExecutionStoreDirectory, execDirName2)
         assert secondRoddyExecDir.mkdirs()
         CreateJobStateLogFileHelper.createJobStateLogFile(secondRoddyExecDir, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierA.clusterJobId, statusCode: STATUS_CODE_STARTED]),
@@ -175,7 +175,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         roddyBamFile.roddyExecutionDirectoryNames.add(execDirName2)
         roddyBamFile.save(flush: true)
 
-        assert new File(roddyBamFile.getWorkExecutionStoreDirectory(), "exec_890420_133730004_user_analysis").mkdirs()
+        assert new File(roddyBamFile.workExecutionStoreDirectory, "exec_890420_133730004_user_analysis").mkdirs()
 
         expect:
         [

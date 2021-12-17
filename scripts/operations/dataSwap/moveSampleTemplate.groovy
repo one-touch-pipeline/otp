@@ -60,7 +60,7 @@ FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
-final Path scriptOutputDirectory = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve('sample_swap')
+final Path scriptOutputDirectory = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, realm)
 fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 

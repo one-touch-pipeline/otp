@@ -53,7 +53,7 @@ body: ${e.responseBodyAsString}
     }
 }
 
-work('serviceinfo') { apiInstance.getServiceInfo() }
+work('serviceinfo') { apiInstance.serviceInfo }
 work('list') { apiInstance.listRuns(10, null) }
 work('run state') { apiInstance.getRunStatus('1') }
 work('run log') { apiInstance.getRunLog('1') }

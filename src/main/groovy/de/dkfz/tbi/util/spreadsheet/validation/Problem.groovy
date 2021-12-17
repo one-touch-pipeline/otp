@@ -43,11 +43,11 @@ class Problem {
     }
 
     String getLevelAndMessage() {
-        return level.getName() + ": " + message
+        return level.name + ": " + message
     }
 
     String getLogLikeString() {
-        return "[${level.getName()}]: ${messageWithIndentedMultiline}"
+        return "[${level.name}]: ${messageWithIndentedMultiline}"
     }
 
     String getMessageWithIndentedMultiline(String indent = "    ") {

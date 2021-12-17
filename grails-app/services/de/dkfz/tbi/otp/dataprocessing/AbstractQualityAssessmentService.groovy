@@ -90,7 +90,7 @@ class AbstractQualityAssessmentService {
     }
 
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.getWorkSingleLaneQAJsonFiles()
+        Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.workSingleLaneQAJsonFiles
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
             chromosomeInformation.each { chromosome, chromosomeValues ->
@@ -104,7 +104,7 @@ class AbstractQualityAssessmentService {
     }
 
     RoddyMergedBamQa parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
-        File qaFile = roddyBamFile.getWorkMergedQAJsonFile()
+        File qaFile = roddyBamFile.workMergedQAJsonFile
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
 
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
@@ -127,7 +127,7 @@ class AbstractQualityAssessmentService {
     }
 
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
-        File qaFile = rnaRoddyBamFile.getWorkMergedQAJsonFile()
+        File qaFile = rnaRoddyBamFile.workMergedQAJsonFile
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
         RnaQualityAssessment rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
         rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
@@ -137,7 +137,7 @@ class AbstractQualityAssessmentService {
     }
 
     void parseRoddyLibraryQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<String, File> qaFilesPerLibrary = roddyBamFile.getWorkLibraryQAJsonFiles()
+        Map<String, File> qaFilesPerLibrary = roddyBamFile.workLibraryQAJsonFiles
 
         qaFilesPerLibrary.each { lib, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)

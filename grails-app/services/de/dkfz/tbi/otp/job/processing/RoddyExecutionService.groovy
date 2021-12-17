@@ -119,11 +119,11 @@ class RoddyExecutionService {
                 ClusterJob clusterJob
                 if (processingStep) {
                     clusterJob = clusterJobService.createClusterJob(
-                            roddyResult.project.realm, jobId, configService.getSshUser(), processingStep, roddyResult.getSeqType(), jobName, jobClass
+                            roddyResult.project.realm, jobId, configService.sshUser, processingStep, roddyResult.seqType, jobName, jobClass
                     )
                 } else {
                     clusterJob = clusterJobService.createClusterJob(
-                            roddyResult.project.realm, jobId, configService.getSshUser(), workflowStep, jobName, jobClass
+                            roddyResult.project.realm, jobId, configService.sshUser, workflowStep, jobName, jobClass
                     )
                 }
                 submittedClusterJobs.add(clusterJob)

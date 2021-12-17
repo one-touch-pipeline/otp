@@ -65,7 +65,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends Specification {
         LogThreadLocal.withThreadLog(System.out) {
             process = roddyAlignmentStartJob.restart(failedProcess)
         }
-        RoddyBamFile restartedInstance = (RoddyBamFile) process.getProcessParameterObject()
+        RoddyBamFile restartedInstance = (RoddyBamFile) process.processParameterObject
 
         then:
         RoddyBamFile.list().size() == 2
