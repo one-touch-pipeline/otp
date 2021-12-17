@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * The seqtracks can be selected about ilse, project or pid and filtered by seqType
  */
 
-
 //---------------------------
 //input
 
@@ -79,12 +78,10 @@ Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
     ])
 }
 
-
 //---------------------------
 //ensure keeping of import of disabled code
 
 SeqTypeService seqTypeService
-
 
 //-----------------------------
 assert libPrepKit : 'No lib prep kit is provided'
@@ -96,7 +93,6 @@ LibraryPreparationKit libraryPreparationKit = CollectionUtils.exactlyOneElement(
 MetaDataKey key = CollectionUtils.exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.LIB_PREP_KIT.name()))
 
 CommentService commentService = ctx.commentService
-
 
 SeqTrack.withTransaction {
     seqTrackList.each { SeqTrack seqTrack ->

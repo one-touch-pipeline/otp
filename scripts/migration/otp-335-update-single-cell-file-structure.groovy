@@ -24,7 +24,6 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
-
 List<DataFile> datafiles = DataFile.createCriteria().list {
     seqTrack {
         isNotNull('singleCellWellLabel')

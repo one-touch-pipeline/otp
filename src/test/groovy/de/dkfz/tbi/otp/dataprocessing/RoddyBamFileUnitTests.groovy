@@ -374,7 +374,6 @@ class RoddyBamFileUnitTests {
         ])
     }
 
-
     @Test
     void testIsOldStructureUsed_useOldStructure_shouldReturnTrue() {
         roddyBamFile.workDirectoryName = null

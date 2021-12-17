@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.utils
 
-
 import org.junit.*
 import org.slf4j.*
 import org.slf4j.helpers.*

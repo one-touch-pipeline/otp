@@ -77,7 +77,6 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         true                 | true                     | true                      || false
     }
 
-
     @Unroll
     void "validate, when directory structure is DataFilesWithAbsolutePath, then run name does not need to be in path"() {
         given:

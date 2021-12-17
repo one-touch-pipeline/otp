@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.project.Project
  * 3. All effected pids. That can be used as input for RetriggerAnalysisForPids
  */
 
-
 //--------------------------
 //input
 
@@ -52,7 +51,6 @@ String projectName = ''
  * - ACEseqWorkflow:1.2.8-4
  */
 String plugInAndVersion = ''
-
 
 //-------------------------
 //work
@@ -80,7 +78,6 @@ List<BamFilePairAnalysis> bamFilePairAnalysisList = BamFilePairAnalysis.withCrit
     }
 }
 
-
 println "found analysis: ${bamFilePairAnalysisList.size()}"
 println([
         'pid',
@@ -100,7 +97,6 @@ println bamFilePairAnalysisList.collect {
             it.instanceName,
     ].join(',')
 }.sort().join('\n')
-
 
 Map<SamplePair, List<BamFilePairAnalysis>> bamFilePairAnalysisFiltered = bamFilePairAnalysisList.collectEntries { analysis ->
     [(analysis.samplePair): analysis.class.withCriteria {
@@ -134,7 +130,6 @@ println bamFilePairAnalysisFiltered.collect { SamplePair samplePair, List<BamFil
             analysis*.instanceName.unique().sort().join(';'),
     ].join(',')
 }.sort().join('\n')
-
 
 List<String> pids = bamFilePairAnalysisList.collect {
     it.samplePair.individual.pid

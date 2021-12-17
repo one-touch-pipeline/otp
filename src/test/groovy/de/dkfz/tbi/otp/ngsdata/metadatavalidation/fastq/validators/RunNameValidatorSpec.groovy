@@ -50,7 +50,6 @@ class RunNameValidatorSpec extends Specification {
         context.problems.empty
     }
 
-
     void 'validate invalid run name, adds problems'() {
         String ARBITRARY_RUN_NAME = "120111_SN509_/something/0137_BD0CWYACXX"
 

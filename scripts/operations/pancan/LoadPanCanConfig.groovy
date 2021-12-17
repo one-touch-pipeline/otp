@@ -37,11 +37,9 @@ String projectName = ''
 // If the PID is set, alignment will automatically triggered for that PID.
 String individualPid = ''
 
-
 //The roddy plugin version. It needs to be a valid value for Roddy.
 //For example: AlignmentAndQCWorkflows:1.1.39
 String programVersionToUse = ''
-
 
 //The config version used. Has to be match the expression: '^v\d+_\d+$'
 //The first version of a file has 'v1_0
@@ -67,7 +65,6 @@ String libraryLayout = SequencingReadType.PAIRED
  * for example: $OtpProperty#PATH_PROJECT_ROOT/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.1.39_v1_0.xml
  */
 String configFilePath = ''
-
 
 boolean adapterTrimmingNeeded = false
 

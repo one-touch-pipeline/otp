@@ -103,7 +103,6 @@ class SeqTrackServiceTests {
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
     }
 
-
     private static SeqTrack setupSeqTrackProjectAndDataFile() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 seqType: DomainFactory.createDefaultOtpAlignableSeqTypes().first(),

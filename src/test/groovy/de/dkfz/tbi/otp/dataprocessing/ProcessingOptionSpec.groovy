@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -74,7 +73,6 @@ class ProcessingOptionSpec extends Specification implements DataTest {
         ProcessingOption.OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED | 'f'
         ProcessingOption.OptionName.MAXIMUM_SFTP_CONNECTIONS          | 'text'
     }
-
 
     @Unroll
     void "validate #optionName with invalid value #value and obsolete date, should be valid"() {

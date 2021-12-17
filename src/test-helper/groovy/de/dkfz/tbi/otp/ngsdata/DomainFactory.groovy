@@ -634,7 +634,6 @@ class DomainFactory {
         return mergingWorkPackage ?: createMergingWorkPackage(mwpProperties)
     }
 
-
     static ReferenceGenome createReferenceGenomeLazy() {
         return ReferenceGenome.find { true } ?: createReferenceGenome()
     }
@@ -918,7 +917,6 @@ class DomainFactory {
         return createSamplePair(properties)
     }
 
-
     static SamplePair createSamplePair(AbstractMergingWorkPackage mergingWorkPackage1, Map properties = [:]) {
         return createSamplePair(
                 mergingWorkPackage1,
@@ -1100,7 +1098,6 @@ class DomainFactory {
         ], properties)
     }
 
-
     /**
      * create necessary initialising for the analysis pipelines for the sample Pair.
      *
@@ -1166,7 +1163,6 @@ class DomainFactory {
                 pipeline      : { createOtpSnvPipelineLazy() },
         ], properties)
     }
-
 
     private
     static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
@@ -1288,7 +1284,6 @@ class DomainFactory {
         return createDomainObject(RoddySnvCallingInstance, map, properties)
     }
 
-
     static IndelCallingInstance createIndelCallingInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
         return createDomainObject(IndelCallingInstance, [
                 processingState   : AnalysisProcessingStates.FINISHED,
@@ -1313,7 +1308,6 @@ class DomainFactory {
         ]
         return createDomainObject(IndelCallingInstance, map, properties)
     }
-
 
     static SophiaInstance createSophiaInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
@@ -1832,7 +1826,6 @@ class DomainFactory {
         return proxyCore.createSequenceDataFile(properties)
     }
 
-
     static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
         return createDomainObject(RoddySnvCallingInstance, [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
@@ -2044,7 +2037,6 @@ class DomainFactory {
                 createCellRangerAlignableSeqTypes(),
         ].flatten().unique()
     }
-
 
     static List<SeqType> createSnvSeqTypes() {
         [
@@ -2470,7 +2462,6 @@ class DomainFactory {
             createDomainObject(AclSid, [sid: Role.ROLE_ADMIN], properties)
         }], [:])
     }
-
 
     @Deprecated
     static MergingCriteria createMergingCriteria(Map properties = [:]) {

@@ -202,7 +202,6 @@ new WorkflowRun(
         workflow: rnaAlignmentWorkflow,
 ).save(flush: true)
 
-
 /**
  * Create workflow steps.
  */

@@ -91,7 +91,6 @@ class TypeValidatorsSpec extends Specification implements DataTest {
         TypeValidators.POSITIVE_NUMBER               | '1.0'                             | emptyInit                   || false
         TypeValidators.POSITIVE_NUMBER               | '1e3'                             | emptyInit                   || false
 
-
         TypeValidators.FLOAT                         | '0'                               | emptyInit                   || true
         TypeValidators.FLOAT                         | '1'                               | emptyInit                   || true
         TypeValidators.FLOAT                         | '2'                               | emptyInit                   || true
@@ -180,7 +179,6 @@ class TypeValidatorsSpec extends Specification implements DataTest {
         TypeValidators.PLUGIN                        | '1.2.3-d'                         | emptyInit                   || false
         TypeValidators.PLUGIN                        | ''                                | emptyInit                   || false
         TypeValidators.PLUGIN                        | null                              | emptyInit                   || false
-
 
         TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | ''                                | emptyInit                   || true
         TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION | '{CORES: \'3\'}'                  | emptyInit                   || true
@@ -297,7 +295,6 @@ class TypeValidatorsSpec extends Specification implements DataTest {
             ])
         }
     }
-
 
     private static Closure initJobExecutionPlans = { ->
         [

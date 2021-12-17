@@ -25,7 +25,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
-
 /**
  * Creates an overview of used seqPlatform and libraryPreparationKit and nreads per sample for the given Projects and SeqTypes.
  * The sample is defined by project name, pid, sample type, and seqType.
@@ -42,8 +41,6 @@ List<SeqType> seqTypes = [
         SeqTypeService.wholeGenomeBisulfitePairedSeqType,
         SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
 ]
-
-
 
 println SeqTrack.createCriteria().list {
     sample {

@@ -36,7 +36,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification implements DomainFactoryCore {
 
-
     @Unroll
     void 'validate, when  #name, then validation do not return problems'() {
         given:
@@ -69,7 +68,6 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         'seq type require antibody target and only antibody target is given'         | true              | 'some text'       | ''
         'seq type require antibody target and antibody target and antibody is given' | true              | 'antibody target' | 'antibody'
     }
-
 
     @Unroll
     void 'validate, when  #name, then validation return extpected problems'() {
@@ -109,7 +107,6 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         'seq type do not support target and only antibody is given'                | false             | ''                | 'antibody' || LogLevel.WARNING | "Antibody target ('') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."                | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
     }
 
-
     void 'validate, when no ANTIBODY_TARGET and ANTIBODY column exist and seqType do not require antibody Target, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -124,11 +121,9 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
                 }
         ]).validate(context)
 
-
         then:
         context.problems.empty
     }
-
 
     void 'validate, when no ANTIBODY column exists and seqType require AntibodyTarget and AntibodyTarget is given, succeeds'() {
         given:
@@ -143,7 +138,6 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
                     1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true)
                 }
         ]).validate(context)
-
 
         then:
         assertContainSame(context.problems, [])

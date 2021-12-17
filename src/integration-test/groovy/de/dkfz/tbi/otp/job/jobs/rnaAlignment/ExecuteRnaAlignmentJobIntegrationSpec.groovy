@@ -64,7 +64,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         configService.clean()
     }
 
-
     void "test prepareAndReturnWorkflowSpecificCValues no adapter sequence available"() {
         given:
         setupData()
@@ -115,7 +114,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         cleanup:
         executeRnaAlignmentJob.fileSystemService = null
     }
-
 
     private RnaRoddyBamFile setUpForPrepareAndReturnWorkflowSpecificCValues() {
         ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()

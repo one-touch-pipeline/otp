@@ -66,7 +66,6 @@ class CellRangerService {
         final String columnName
     }
 
-
     FileSystemService fileSystemService
 
     FileService fileService
@@ -84,7 +83,6 @@ class CellRangerService {
     Md5SumService md5SumService
 
     CellRangerWorkflowService cellRangerWorkflowService
-
 
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
         Realm realm = singleCellBamFile.realm
@@ -185,7 +183,6 @@ class CellRangerService {
         qa.save(flush: true)
         return qa
     }
-
 
     void finishCellRangerWorkflow(SingleCellBamFile singleCellBamFile) {
         cellRangerWorkflowService.cleanupOutputDirectory(singleCellBamFile)

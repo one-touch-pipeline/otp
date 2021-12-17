@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -78,7 +77,6 @@ class IlseSubmissionSpec extends Specification implements DataTest {
         TestCase.assertValidateError(ilseSubmission, 'ilseNumber', 'max.exceeded', 1111111111)
     }
 
-
     void "test unique constraints of ilseNumber invalid"() {
         given:
         IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission()
@@ -89,7 +87,6 @@ class IlseSubmissionSpec extends Specification implements DataTest {
         then:
         TestCase.assertValidateError(ilseSubmission2, 'ilseNumber', 'unique', ilseSubmission.ilseNumber)
     }
-
 
     @Unroll
     void "test constraints comment invalid"() {

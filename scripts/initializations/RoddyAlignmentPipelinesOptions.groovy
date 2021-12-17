@@ -26,13 +26,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 ProcessingOptionService processingOptionService = ctx.getBean("processingOptionService")
 
-
-
 List<SeqType> wgbs = [
         SeqTypeService.wholeGenomeBisulfitePairedSeqType,
         SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
 ]
-
 
 //WES
 processingOptionService.createOrUpdate(
@@ -59,7 +56,6 @@ processingOptionService.createOrUpdate(
         SeqTypeService.exomePairedSeqType.roddyName,
 )
 
-
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL,
         "sambamba",
@@ -71,7 +67,6 @@ processingOptionService.createOrUpdate(
         "picard,biobambam,sambamba",
         SeqTypeService.exomePairedSeqType.roddyName,
 )
-
 
 //WGS
 processingOptionService.createOrUpdate(
@@ -109,7 +104,6 @@ processingOptionService.createOrUpdate(
         "picard,biobambam,sambamba",
         SeqTypeService.wholeGenomePairedSeqType.roddyName,
 )
-
 
 //WGBS && WGBS_TAG
 
@@ -151,8 +145,6 @@ wgbs.each { SeqType seqType ->
     )
 }
 
-
-
 //RNA
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
@@ -183,7 +175,6 @@ processingOptionService.createOrUpdate(
         "star_200 - 2.5.2b",
 )
 
-
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
         '0.7.8, 0.7.15',
@@ -200,7 +191,6 @@ processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT,
         '0.6.5',
 )
-
 
 //ChipSeq
 processingOptionService.createOrUpdate(

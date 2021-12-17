@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Also the author for new comments needs to be provided by the ldap name.
  */
 
-
 //------------------------------
 //input
 

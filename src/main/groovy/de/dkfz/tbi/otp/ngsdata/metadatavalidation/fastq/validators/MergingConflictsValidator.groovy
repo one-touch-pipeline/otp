@@ -101,7 +101,6 @@ class MergingConflictsValidator extends MergingPreventionValidator {
         return parsedSampleIdentifier.pid
     }
 
-
     String getSampleType(ValueTuple valueTuple) {
         String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleName))

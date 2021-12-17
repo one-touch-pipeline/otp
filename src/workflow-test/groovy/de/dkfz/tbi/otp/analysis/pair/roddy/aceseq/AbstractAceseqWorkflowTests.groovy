@@ -113,7 +113,6 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         return referenceGenome
     }
 
-
     void createSophiaInput() {
         File sourceSophiaInputFile = new File(workflowData, "svs_stds_filtered_somatic_minEventScore3.tsv")
 
@@ -127,7 +126,6 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 (sourceSophiaInputFile): sophiaInputFile,
         ], realm)
     }
-
 
     @Override
     List<String> getWorkflowScripts() {

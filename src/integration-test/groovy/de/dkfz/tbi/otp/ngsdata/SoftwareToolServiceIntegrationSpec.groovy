@@ -139,7 +139,6 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         String newVersion = "1.1"
         SoftwareTool softwareTool = createSoftwareTool()
 
-
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             softwareToolService.updateSoftwareTool(softwareTool.id, newVersion)

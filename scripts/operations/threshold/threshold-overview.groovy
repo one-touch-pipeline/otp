@@ -36,12 +36,10 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 String projectName = ""
 
-
 //------------------------------------------------
 //working
 
 Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "Could not find project $projectName")
-
 
 SampleTypeService sampleTypeService = ctx.sampleTypeService
 
@@ -54,7 +52,6 @@ List<SampleType> sampleTypesWithCategory = sampleTypePerProjects*.sampleType
 List<ProcessingThresholds> processingThresholds = ProcessingThresholds.findAllByProject(project)
 List<SampleType> sampleTypesWithWesThreshold = processingThresholds.findAll { it.seqType == wes }*.sampleType
 List<SampleType> sampleTypesWithWgsThreshold = processingThresholds.findAll { it.seqType == wgs }*.sampleType
-
 
 println '\n\ncategories: '
 println sampleTypePerProjects.collect {

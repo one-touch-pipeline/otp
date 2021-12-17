@@ -95,7 +95,6 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         List<File> instancesDirectories = []
         List<File> samplePairsDirectories
 
-
         when:
         BamFilePairAnalysis.findAll().each {
             instancesDirectories.add(analysisDeletionService.deleteInstance(it))

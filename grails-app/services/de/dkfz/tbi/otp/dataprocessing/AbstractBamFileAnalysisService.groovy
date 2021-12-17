@@ -108,10 +108,8 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 'AND sp.mergingWorkPackage1.seqType in (:seqTypes) ' +
                 checkReferenceGenome() +
 
-
                 //check that the config file is available with at least one script with same version
                 checkConfig() +
-
 
                 //check that this sample pair is not in process
                 "AND NOT EXISTS (FROM ${getAnalysisClass().name} sci " +

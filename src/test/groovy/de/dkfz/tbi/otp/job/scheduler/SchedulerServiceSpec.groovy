@@ -50,7 +50,6 @@ class SchedulerServiceSpec extends Specification {
         LogThreadLocal.removeThreadLog()
     }
 
-
     void testStartingJobExecutionOnCurrentThread_null() {
         given:
         initialize()
@@ -63,7 +62,6 @@ class SchedulerServiceSpec extends Specification {
         service.jobExecutedByCurrentThread == null
         LogThreadLocal.threadLog == null
     }
-
 
     void testStartingJobExecutionOnCurrentThread_twice() {
         given:
@@ -85,7 +83,6 @@ class SchedulerServiceSpec extends Specification {
         LogThreadLocal.threadLog == testJob1.log
     }
 
-
     void testStartingJobExecutionOnCurrentThread_twiceOther() {
         given:
         initialize()
@@ -105,7 +102,6 @@ class SchedulerServiceSpec extends Specification {
         service.jobExecutedByCurrentThread == testJob1
         LogThreadLocal.threadLog == testJob1.log
     }
-
 
     void testStartingJobExecutionOnCurrentThread_threadLogSet() {
         given:
@@ -127,7 +123,6 @@ class SchedulerServiceSpec extends Specification {
         LogThreadLocal.threadLog == testJob1.log
     }
 
-
     void testFinishedJobExecutionOnCurrentThread_null() {
         given:
         initialize()
@@ -141,7 +136,6 @@ class SchedulerServiceSpec extends Specification {
         LogThreadLocal.threadLog == null
     }
 
-
     void testFinishedJobExecutionOnCurrentThread_notStarted() {
         given:
         initialize()
@@ -154,7 +148,6 @@ class SchedulerServiceSpec extends Specification {
         service.jobExecutedByCurrentThread == null
         LogThreadLocal.threadLog == null
     }
-
 
     void testFinishedJobExecutionOnCurrentThread_differentJob() {
         given:
@@ -175,7 +168,6 @@ class SchedulerServiceSpec extends Specification {
         service.jobExecutedByCurrentThread == testJob1
         LogThreadLocal.threadLog == testJob1.log
     }
-
 
     void testFinishedJobExecutionOnCurrentThread_differentLog() {
         given:
@@ -205,7 +197,6 @@ class SchedulerServiceSpec extends Specification {
         LogThreadLocal.threadLog == log
     }
 
-
     void testFinishedJobExecutionOnCurrentThread_twice() {
         given:
         initialize()
@@ -232,7 +223,6 @@ class SchedulerServiceSpec extends Specification {
         service.jobExecutedByCurrentThread == null
         LogThreadLocal.threadLog == null
     }
-
 
     void testStartingAndFinishedJobExecutionOnCurrentThread_success() {
         given:

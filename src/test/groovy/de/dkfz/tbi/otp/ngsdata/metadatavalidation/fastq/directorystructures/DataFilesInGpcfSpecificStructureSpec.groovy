@@ -53,7 +53,6 @@ class DataFilesInGpcfSpecificStructureSpec extends Specification {
         )
         Set<Cell> invalidCells = context.spreadsheet.dataRows.get(0).cells as Set
 
-
         when:
         Path dataFilePath = directoryStructure.getDataFilePath(context, new ValueTuple(
                 [(FASTQ_FILE.name()): fileName, (RUN_ID.name()): "run_name"], invalidCells)

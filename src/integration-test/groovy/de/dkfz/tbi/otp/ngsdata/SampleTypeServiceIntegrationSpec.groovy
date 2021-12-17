@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.project.Project
 @Integration
 class SampleTypeServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
-
     void "findUsedSampleTypesForProject, if project is empty, return nothing"() {
         given:
         SampleTypeService service = new SampleTypeService()
@@ -107,7 +106,6 @@ class SampleTypeServiceIntegrationSpec extends Specification implements DomainFa
         then:
         ret == [externalMergingWorkPackage.sampleType]
     }
-
 
     void "findUsedSampleTypesForProject, if sampleType is used in SeqTrack and AbstractMergingWorkPackage with an analysable SeqTypes, return the sampleType only once"() {
         given:

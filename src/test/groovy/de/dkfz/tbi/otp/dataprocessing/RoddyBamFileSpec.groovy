@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
@@ -101,7 +100,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         "Final"     | "abc"       | "abc"          | "libabc"      || 'qualitycontrol/libabc/qualitycontrol.json'
     }
 
-
     @Unroll
     void "test getFinalLibraryQAJsonFiles MultipleSeqTrack libraryName is #libraryName"() {
         given:
@@ -129,7 +127,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         "Final"     | "library1"  | "1"            | "lib1"        || 2
     }
 
-
     void "getNumberOfReadsFromFastQc, when all fine, returns sum of all number of readsnumber of reads of all DataFiles of all SeqTracks of the RoddyBamFile"() {
         given:
         long numberOfReads1 = DomainFactory.counter++
@@ -145,11 +142,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         ]
         assert roddyBamFile.save(flush: true)
 
-
         expect:
         expectedNumberOfReads == roddyBamFile.getNumberOfReadsFromFastQc()
     }
-
 
     void "getNumberOfReadsFromFastQc, when a fastqc workflow has not finished, throws exception"() {
         given:
@@ -169,7 +164,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         e.message.contains('Not all Fastqc workflows of all seqtracks are finished')
     }
 
-
     void "getNumberOfReadsFromFastQc, when number of reads of a SeqTrack is null, throws exception"() {
         given:
         roddyBamFile.numberOfMergedLanes = 3
@@ -187,7 +181,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         AssertionError e = thrown()
         e.message.contains('At least one seqTrack has no value for number of reads')
     }
-
 
     void "test getFinalInsertSizeDirectory method"() {
         given:
@@ -249,7 +242,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
         roddyBamFile.seqTracks.add(seqTrack)
 
-
         then:
         100 == roddyBamFile.getMaximalReadLength()
     }
@@ -265,7 +257,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         ValidationException e = thrown()
         e.message.contains("comment.missing")
     }
-
 
     void "test qcTrafficLightStatus constraint, is valid since bam file is blocked and comment is provided"() {
         given:

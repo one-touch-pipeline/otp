@@ -24,13 +24,11 @@
  * Lists the cluster jobs which are currently being monitored by the {@link OldClusterJobMonitor}.
  */
 
-
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.OldClusterJobMonitor
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-
 
 ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).groupBy {
     it.processingStep

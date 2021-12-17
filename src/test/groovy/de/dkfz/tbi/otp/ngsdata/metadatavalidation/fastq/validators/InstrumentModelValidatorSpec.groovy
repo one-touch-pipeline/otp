@@ -52,7 +52,6 @@ class InstrumentModelValidatorSpec extends Specification {
         problem.message.contains("Required column 'INSTRUMENT_MODEL' is missing.")
     }
 
-
     void 'validate adds expected error when INSTRUMENT_MODEL is empty'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\

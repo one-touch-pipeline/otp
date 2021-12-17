@@ -187,13 +187,11 @@ List<BamFilePairAnalysis> getBamFilePairAnalysesOfProject(Project project) {
     }
 }
 
-
 // Get all pipelines (minus the ignored ones) in a sorted order (ALIGNMENT + rest alphabetically)
 List<Pipeline> usedPipelines = ignoredPipelines ? Pipeline.findAllByNameNotInList(ignoredPipelines) : Pipeline.list()
 Map<Pipeline.Type, List<Pipeline>> pipelinesPerType = usedPipelines.groupBy { it.type }
 List<Pipeline.Type> typesInOrder = ([Pipeline.Type.ALIGNMENT] + Pipeline.Type.values()).flatten().unique()
 List<Pipeline> selectedAndSortedPipelines = typesInOrder.collect { pipelinesPerType[(it)].sort { it.name } }.flatten()
-
 
 Map<Project, Map<Pipeline, Map<SeqType, Map<String, List>>>> table = [:]
 
@@ -247,7 +245,6 @@ List<String> allUnmappedVersions = allVersions.findAll { String version ->
 
 Globals.versionMapping[VersionState.UNKNOWN].addAll(allUnmappedVersions)
 
-
 List<String> output = []
 
 /*
@@ -274,7 +271,6 @@ pipelineHeader << "</tr>"
 seqTypeHeader << "</tr>"
 
 String header = ["<thead>", pipelineHeader.join("\n"), seqTypeHeader.join("\n"), "</thead>"].join("\n")
-
 
 output << "<tbody>"
 table.keySet().each { Project project ->
@@ -312,7 +308,6 @@ table.keySet().each { Project project ->
     output << "</tr>"
 }
 output << "</tbody>"
-
 
 List<Object> getProcessableObjects(List<ProcessParameterObject> objs) {
     if (objs.first() instanceof BamFilePairAnalysis) {
@@ -432,7 +427,6 @@ void setValueOfMap(Map map, Project project, Pipeline pipeline, SeqType seqType,
     }
     map[(project)][(pipeline)][(seqType)][(version)] = value
 }
-
 
 // Build the HTML report
 List<String> combinedOutput = []

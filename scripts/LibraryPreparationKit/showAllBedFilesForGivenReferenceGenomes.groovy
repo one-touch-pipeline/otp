@@ -49,7 +49,6 @@ List<String> refGenomeNames = [
 
 assert refGenomeNames: 'At least one reference genome must be specified'
 
-
 List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
     ReferenceGenome referenceGenome = ReferenceGenome.findByName(it)
     assert referenceGenome: "The ReferenceGenome '${it}' could not be found in OTP"
@@ -69,5 +68,3 @@ BedFile.withTransaction {
         }
     }
 }
-
-

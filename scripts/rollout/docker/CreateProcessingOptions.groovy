@@ -22,7 +22,6 @@
 
 package rollout.docker
 
-
 import de.dkfz.tbi.otp.dataprocessing.*
 
 /**
@@ -40,6 +39,5 @@ Map<ProcessingOption.OptionName, String> processingOptions = [
         (ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME) : 'MINIMAL',
         (ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME) : '/otp/reference_genomes',
 ]
-
 
 rollout.createProcessingOptions(ctx, processingOptions)

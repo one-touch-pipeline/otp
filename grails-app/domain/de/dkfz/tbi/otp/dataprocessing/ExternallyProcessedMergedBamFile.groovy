@@ -58,7 +58,6 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     Set<String> furtherFiles = [] as Set<String>
 
-
     static hasMany = [
             furtherFiles: String,
     ]
@@ -150,7 +149,6 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     Integer getMaximalReadLength() {
         return maximumReadLength
     }
-
 
     static constraints = {
         importedFrom nullable: true, blank: false, shared: "absolutePath"

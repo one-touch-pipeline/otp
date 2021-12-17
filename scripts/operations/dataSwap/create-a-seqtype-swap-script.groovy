@@ -20,14 +20,12 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.dataswap.DataSwapService
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Generation script for LaneSwaps
  */
-
 
 //Input area
 //------------------------------
@@ -81,7 +79,6 @@ def adaptValues = { SeqTrack oldSeqTrack ->
             newLibraryLayout : oldSeqTrack.seqType.libraryLayout,
     ]
 }
-
 
 //script area
 //------------------------------

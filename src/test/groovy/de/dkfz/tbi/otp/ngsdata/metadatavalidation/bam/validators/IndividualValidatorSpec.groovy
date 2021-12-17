@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 

@@ -107,7 +107,6 @@ class OtrsTicket implements Commentable, Entity {
 
     String seqCenterComment
 
-
     static constraints = {
         ticketNumber(nullable: false, unique: true, validator: { val, obj ->
             return ticketNumberConstraint(val) ?: true

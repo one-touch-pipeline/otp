@@ -42,15 +42,12 @@ The following code allows to show the processing state for
 *** the bam files has reached the min coverage for the analysis
 *** depending analysis is finished
 
-
 Entries are trimmed (spaces before after are removed)
 Names prefixed with # are ignored (handled as comment)
 Empty lines are ignored
 
-
 The script has four input areas, one for run names, one for patient names, one for ilse ids, and one for project names.
  */
-
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -65,7 +62,6 @@ String runString = """
 #run 2
 
 """
-
 
 //pid of patients
 String individualString ="""
@@ -86,7 +82,6 @@ String projectString ="""
 #project 2
 
 """
-
 
 //if enabled, shows all lanes in progressing.
 //see file header comment for details
@@ -128,9 +123,7 @@ List blackList_SeqTrackForFastQc = ([
 
 long firstSeqTrackIdToCheckForFastQcWorkflow = 20077258 // Heidelberg 1.1.2015
 
-
 String INDENT = MonitorOutputCollector.INDENT
-
 
 List<String> outputSeqTrack = []
 
@@ -185,7 +178,6 @@ Closure handleStateMap = { Map map, String workflow, Closure objectToCheck = {it
     return ret
 }
 
-
 Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     boolean allFinished = true
 
@@ -195,7 +187,6 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
         output << "No not withdrawn seq tracks left, stop"
         return
     }
-
 
     //data installation workflow
     Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> dataInstallationState =
@@ -251,7 +242,6 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     }.sort { it }.each { output << it }
 }
 
-
 //======================================================
 
 nameStringToList(runString).each { String runName ->
@@ -271,7 +261,6 @@ nameStringToList(runString).each { String runName ->
     showSeqTracks(seqTracks)
 }
 
-
 nameStringToList(individualString).each { String individualName ->
     output << "\n\n\n==============================\nindividual name = ${individualName}\n==============================\n"
 
@@ -290,7 +279,6 @@ nameStringToList(individualString).each { String individualName ->
     }
     showSeqTracks(seqTracks)
 }
-
 
 nameStringToList(ilseIdString).each { String ilseId ->
     output << "\n\n\n==============================\nilseId = ${ilseId}\n==============================\n"
@@ -328,7 +316,6 @@ nameStringToList(projectString).each { String projectName ->
     }
     showSeqTracks(seqTracks)
 }
-
 
 if (allProcessed) {
     output << "\n\n\n==============================\nseqtracks in processing (as defined in header comment)\n==============================\n"
@@ -479,8 +466,6 @@ if (allProcessed) {
     }.each { BamFilePairAnalysis bamFilePairAnalysis ->
         seqTracks.addAll(bamFilePairAnalysis.containedSeqTracks)
     }
-
-
 
     MergingWorkPackage.executeQuery("""
         select

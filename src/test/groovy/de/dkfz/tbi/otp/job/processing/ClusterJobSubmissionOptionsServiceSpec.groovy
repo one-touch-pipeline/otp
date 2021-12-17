@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.job.processing
 
 import spock.lang.Specification
 
-
 class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test jsonStringToMap"() {

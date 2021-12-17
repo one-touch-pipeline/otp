@@ -97,7 +97,6 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         return ""
     }
 
-
     @Override
     protected void validate(RoddySnvCallingInstance roddySnvCallingInstance) throws Throwable {
         assert roddySnvCallingInstance : "The input roddyResult must not be null"

@@ -74,7 +74,6 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         TestCase.removeMetaClass(SessionUtils)
     }
 
-
     void "testEndOfProcess"() {
         given:
         setupData()

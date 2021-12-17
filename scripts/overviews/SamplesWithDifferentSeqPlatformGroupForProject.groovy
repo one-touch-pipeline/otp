@@ -42,11 +42,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * - ... further seq platform groups
  */
 
-
 //---------------------------
 //input area
 String projectName = ''
-
 
 //---------------------------
 //work area

@@ -27,7 +27,6 @@ List sampleTypeNames = """
 #SampleType1
 #SampleType2
 
-
 """.split("\n").findAll {
     it && !it.startsWith('#')
 }

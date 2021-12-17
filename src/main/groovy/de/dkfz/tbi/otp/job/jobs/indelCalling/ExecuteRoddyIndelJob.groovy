@@ -49,7 +49,6 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
     @Autowired
     IndividualService individualService
 
-
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(IndelCallingInstance indelCallingInstance) {
         assert indelCallingInstance
@@ -99,7 +98,6 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
     protected String prepareAndReturnWorkflowSpecificParameter(IndelCallingInstance indelCallingInstance) {
         return ""
     }
-
 
     @Override
     protected void validate(IndelCallingInstance indelCallingInstance) throws Throwable {

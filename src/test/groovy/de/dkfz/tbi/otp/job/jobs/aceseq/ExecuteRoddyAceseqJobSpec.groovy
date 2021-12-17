@@ -118,7 +118,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         e.message.contains('assert aceseqInstance')
     }
 
-
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
@@ -167,7 +166,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         String bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing.path
         String bamFileControlPath = bamFileControl.pathForFurtherProcessing.path
 
-
         List<String> expectedList = [
                 "bamfile_list:${bamFileControlPath};${bamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
@@ -198,7 +196,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         FileService.ensureFileIsReadableAndNotEmpty(job.sophiaService.getFinalAceseqInputFile(sophiaInstance))
     }
 
-
     @Unroll
     void "prepareAndReturnWorkflowSpecificParameter, return always empty String"() {
         expect:
@@ -210,7 +207,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                 new AceseqInstance(),
         ]
     }
-
 
     void "validate, when all fine, set processing state to finished"() {
         given:
@@ -235,7 +231,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         aceseqInstance.processingState == AnalysisProcessingStates.FINISHED
     }
 
-
     void "validate, when aceseqInstance is null, throw assert"() {
         when:
         new ExecuteRoddyAceseqJob().validate(null)
@@ -244,7 +239,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         AssertionError e = thrown()
         e.message.contains('The input aceseqInstance must not be null. Expression')
     }
-
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
@@ -270,7 +264,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         e.message.contains(md5sum)
         aceseqInstance.processingState != AnalysisProcessingStates.FINISHED
     }
-
 
     //false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')

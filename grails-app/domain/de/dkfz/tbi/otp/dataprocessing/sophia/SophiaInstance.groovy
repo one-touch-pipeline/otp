@@ -42,7 +42,6 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
         return new OtpPath(samplePair.sophiaSamplePairPath, instanceName)
     }
 
-
     @Override
     String toString() {
         return "SI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"

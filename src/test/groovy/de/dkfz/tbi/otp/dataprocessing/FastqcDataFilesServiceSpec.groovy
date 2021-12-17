@@ -153,7 +153,6 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.456.sam"         || "123.456"
         "123.456.bam"         || "123.456"
 
-
         //dot in name, two extension, second is gz
         "123.456.gz.gz"       || "123.456.gz"
         "123.456.bz2.gz"      || "123.456"

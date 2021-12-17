@@ -72,7 +72,6 @@ grails {
     }
 }
 
-
 grails.converters.encoding = "UTF-8"
 // enable Sitemesh preprocessing of GSP pages
 grails.views.gsp.sitemesh.preprocess = true
@@ -95,13 +94,11 @@ grails.controllers.upload.maxRequestSize = 10*1024*1024
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
-
 // Added by the Spring Security Core plugin:
 grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugin.springsecurity.userLookup.usernameIgnoreCase = true
-
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         // restricted access to special pages
@@ -172,7 +169,6 @@ environments {
         grails.plugin.databasemigration.updateOnStart = false
     }
 }
-
 
 // WARNING: This setting (same as this entire application.groovy) has no effect on unit tests. See:
 // * OTP-1126

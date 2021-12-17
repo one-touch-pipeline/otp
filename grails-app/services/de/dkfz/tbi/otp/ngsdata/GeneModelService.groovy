@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -47,7 +46,6 @@ class GeneModelService {
     File getGcFile(GeneModel geneModel) {
         new File(getBasePath(geneModel), geneModel.gcFileName)
     }
-
 
     private File getBasePath(GeneModel geneModel) {
         assert geneModel : "geneModel is null"

@@ -88,7 +88,6 @@ class IndelQualityControl implements Entity {
 
     double percentDelsSize11plus
 
-
     static constraints = {
         file shared: "absolutePath"
         indelCallingInstance unique: true

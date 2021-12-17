@@ -25,7 +25,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Files
 
-
 /*
 input area
  */

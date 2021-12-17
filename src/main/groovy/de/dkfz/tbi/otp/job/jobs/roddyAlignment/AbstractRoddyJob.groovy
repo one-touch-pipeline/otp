@@ -85,9 +85,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         }
     }
 
-
     protected abstract String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable
-
 
     @Override
     protected void validate() throws Throwable {

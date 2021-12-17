@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-
 // input area
 /*
 Please provide the Ticket number and the project you want to inform.

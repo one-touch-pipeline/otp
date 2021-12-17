@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
@@ -74,7 +73,6 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest {
         ] + processedMergedBamFileMap)
         return processedBamFile
     }
-
 
     void testHasBeenQualityAssessedAndMerged() {
         given:

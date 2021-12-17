@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
-
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder

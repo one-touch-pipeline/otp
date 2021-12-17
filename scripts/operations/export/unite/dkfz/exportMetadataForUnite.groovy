@@ -34,7 +34,6 @@ import java.nio.file.Path
  * SOFTWARE.
  */
 
-
 /*
 Input Area
 */
@@ -42,11 +41,9 @@ def projectNames = [
 
 ]
 
-
 /*
 Script area
  */
-
 
 def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
     def header = []
@@ -105,7 +102,6 @@ def rnaSingleAlignmentQualityOverview(Project p, Path file) {
     alignmentQualityOverview(p, f, ctx.seqTypeService.getRnaSingleSeqType())
 }
 
-
 def cellRangerFinalSelection(Project p, Path folder) {
 
     Path f = folder.resolve("${p.name}_cellRangerFinalSelection.tsv")
@@ -140,7 +136,6 @@ def cellRangerFinalSelection(Project p, Path folder) {
     }
 }
 
-
 def snvResults(Project p, Path folder) {
 
     Path f = folder.resolve("${p.name}_snvResults.tsv")
@@ -150,7 +145,6 @@ def snvResults(Project p, Path folder) {
         f << "${p.name}\t${snvResult.individualPid}\t${snvResult.sampleTypes}\t${snvResult.seqType}\t${snvResult.libPrepKits}\t${snvResult.version}\t${snvResult.dateCreated}\t${snvResult.processingState}\n"
     }
 }
-
 
 def indelResults(Project p, Path folder) {
 
@@ -169,7 +163,6 @@ def indelResults(Project p, Path folder) {
     }
 }
 
-
 def aceseqResults(Project p, Path folder) {
 
     Path f = folder.resolve("${p.name}_aceseqResults.tsv")
@@ -180,8 +173,6 @@ def aceseqResults(Project p, Path folder) {
                 "${aceseqResult.gender}\t${aceseqResult.version}\t${aceseqResult.dateCreated}\t${aceseqResult.processingState}\n"
     }
 }
-
-
 
 def sophiaResults(Project p, Path folder) {
 
@@ -196,8 +187,6 @@ def sophiaResults(Project p, Path folder) {
                 "${sophiaResult.dateCreated}\t${sophiaResult.processingState}\n"
     }
 }
-
-
 
 def runYapsaResults(Project p, Path folder) {
 
@@ -216,7 +205,6 @@ FileService fileService = ctx.fileService
 
 Realm realm = configService.defaultRealm
 FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-
 
 Path outputFolder = fileService.toPath(configService.getScriptOutputPath(), fileSystem).resolve("export").resolve("UNITE").resolve("output")
 Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv", realm)
@@ -280,7 +268,6 @@ projectNames.each { projectName ->
     file << "wgbsTagmentationAlignmentQualityOverview started\n"
     wgbsTagmentationAlignmentQualityOverview(project, outputFolderPerProject)
     file << "wgbsTagmentationAlignmentQualityOverview done\n"
-
 
 }
 

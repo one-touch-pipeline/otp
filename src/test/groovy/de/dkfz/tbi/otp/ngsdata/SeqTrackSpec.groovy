@@ -82,7 +82,6 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         then:
         TestCase.assertValidateError(seqTrack, 'libraryPreparationKit', 'validator.invalid', seqTrack.libraryPreparationKit)
 
-
         where:
         hasLibPrepKit | libraryPreparationKitClosure      | kitInfoReliability
         ''            | { createLibraryPreparationKit() } | InformationReliability.UNKNOWN_UNVERIFIED

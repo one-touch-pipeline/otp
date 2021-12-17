@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -246,7 +245,6 @@ List<FastaEntry> fastaEntries = [
         new FastaEntry("chrUn_GL000218v1", "Un_GL000218v1", 161147, 161147, Classification.CONTIG),
         new FastaEntry("chrEBV", "EBV", 171823, 171823, Classification.UNDEFINED),
 ]
-
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,

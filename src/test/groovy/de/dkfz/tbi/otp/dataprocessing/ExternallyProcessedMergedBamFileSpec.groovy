@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -53,7 +52,6 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
                 ]),
         ]
     }
-
 
     void "all constraint fine, create object"() {
         given:

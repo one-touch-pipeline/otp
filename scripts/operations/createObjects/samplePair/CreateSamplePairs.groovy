@@ -47,7 +47,6 @@ import de.dkfz.tbi.otp.utils.*
 //PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
 String input = """
 
-
 """
 
 //----------------------------------------
@@ -71,7 +70,6 @@ List<List<MergingWorkPackage>> samplePairs = input.split('\n').findAll().collect
     AbstractMergingWorkPackage mergingWorkPackage2 = CollectionUtils.exactlyOneElement(AbstractMergingWorkPackage.findAllBySampleAndSeqType(sample2, seqType))
     return [mergingWorkPackage1, mergingWorkPackage2]
 }
-
 
 Individual.withTransaction {
     samplePairs.each {

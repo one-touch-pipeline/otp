@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 @Integration
 class AllAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
 
-
     void "handle, if SeqTracks given, then return finished RoddyBamFile, call Roddy alignments workflows with correct seqTracks and output SeqTypes not supported by any workflow"() {
         given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)

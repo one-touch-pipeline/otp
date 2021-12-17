@@ -115,7 +115,6 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         TestCase.assertValidateError(workPackage2, 'sample', 'unique', workPackage.sample)
     }
 
-
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns bamFile'() {
         given:
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)

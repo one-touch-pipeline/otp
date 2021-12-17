@@ -44,7 +44,6 @@ String header = (['project'] + analysableSeqTypes.collectMany {
     ]
 }).join(', ')
 
-
 String output = Project.list().sort {
     it.name
 }.collect { Project project ->

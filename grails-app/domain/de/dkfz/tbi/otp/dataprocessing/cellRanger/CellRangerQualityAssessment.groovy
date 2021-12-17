@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentWithMergedPass
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile

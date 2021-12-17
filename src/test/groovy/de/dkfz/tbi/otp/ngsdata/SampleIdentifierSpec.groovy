@@ -37,11 +37,9 @@ class SampleIdentifierSpec extends Specification implements DataTest {
         ]
     }
 
-
     private static final String CORRECT_NAME = 'name'
 
     private SampleIdentifier sampleIdentifier
-
 
     void setup() {
         sampleIdentifier = new SampleIdentifier(
@@ -50,7 +48,6 @@ class SampleIdentifierSpec extends Specification implements DataTest {
         )
         assert sampleIdentifier.validate()
     }
-
 
     void "test validate, when name is null, should fail"() {
         given:

@@ -26,13 +26,11 @@ It is used by the codenarc-check.sh script, but can also be used manually by exe
 
     groovy scripts/codenarc-diff.groovy first-report.txt second-report.txt
 
-
 """
 
 assert args.size() == 2 : description
 File fileM = new File(args[0])
 File fileNew = new File(args[1])
-
 
 String FILE = "File: "
 String VIOLATION = "    Violation: "

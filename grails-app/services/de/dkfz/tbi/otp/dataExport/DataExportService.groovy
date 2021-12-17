@@ -57,7 +57,6 @@ class DataExportService {
         exportFilesWrapper(dataExportInput, exportAnalysisFilesClosure)
     }
 
-
     private Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder,
                                                 rsyncChmod, copyConnection, copyTargetBase ->
         String umask = dataExportInput.external ? "027" : "022"

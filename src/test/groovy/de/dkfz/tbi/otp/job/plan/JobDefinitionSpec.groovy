@@ -74,7 +74,6 @@ class JobDefinitionSpec extends Specification implements DataTest {
         then:
         !jobDefinition.errors.hasErrors()
 
-
         when:
         JobDefinition next = new JobDefinition([
                 plan: jobExecutionPlan,

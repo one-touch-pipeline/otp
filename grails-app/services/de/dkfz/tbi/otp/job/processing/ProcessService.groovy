@@ -130,7 +130,6 @@ class ProcessService {
         schedulerService.restartProcessingStep(step)
     }
 
-
     /**
      * Retrieves all ProcessingStepUpdates for the given ProcessingStep.
      * @param step The ProcessingStep whose Updates should be retrieved

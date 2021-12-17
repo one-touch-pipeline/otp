@@ -62,7 +62,6 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
         DomainFactory.createAllAlignableSeqTypes()
     }
 
-
     void 'validate, when sequencing type is exome, RNA, WGBS, WGBSTag or ChipSeq and LibPrepKit is valid'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(

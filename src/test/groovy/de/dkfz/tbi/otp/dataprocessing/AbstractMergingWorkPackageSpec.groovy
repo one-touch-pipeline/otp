@@ -60,7 +60,6 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
     TestAbstractMergingWorkPackage testAMWP2
     TestAbstractMergedBamFile testAMBF
 
-
     @Artefact(DomainClassArtefactHandler.TYPE)
     class TestAbstractMergingWorkPackage extends AbstractMergingWorkPackage implements DomainClass, GormEntity<TestAbstractMergingWorkPackage>, Validateable {
 
@@ -166,8 +165,6 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
         then:
         noExceptionThrown()
     }
-
-
 
     void "constraint for antibodyTarget, when seqType is not chip seq and antibodyTarget is not set, then validate should not create errors"() {
         when:

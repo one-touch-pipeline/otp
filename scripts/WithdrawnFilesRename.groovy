@@ -65,7 +65,6 @@ MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
     }
 }
 
-
 generated_script_to_run_manually.withPrintWriter { writer ->
     writer.write("#!/bin/bash\n")
 
@@ -73,7 +72,6 @@ generated_script_to_run_manually.withPrintWriter { writer ->
         writer.write("mv ${it} ${it}-withdrawn\n")
     }
 }
-
 
 List<BamFilePairAnalysis> findAnalysisInstanceForBamFile(AbstractMergedBamFile bamFile) {
     return BamFilePairAnalysis.createCriteria().list {

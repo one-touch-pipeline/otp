@@ -81,8 +81,6 @@ if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key
     grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
 }
 
-
-
 String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
 String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
 String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)

@@ -41,7 +41,6 @@ class RestartParseService {
 
     SchedulerService schedulerService
 
-
     JobErrorDefinition.Action handleTypeMessage(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         job.log.debug("Checking error message.")
         ProcessingError error = job.processingStep.latestProcessingStepUpdate.error

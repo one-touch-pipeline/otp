@@ -219,7 +219,6 @@ class LinkFilesToFinalDestinationService {
         lsdfFilesService.deleteFilesRecursive(realm, getFilesToCleanup(roddyBamFile, realm).collect { fileService.toFile(it) })
     }
 
-
     List<Path> getOldResultsToCleanup(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert realm: "Input realm must not be null"

@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 @Rollback
 class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
 
-
     void "workflowName, should return ACEseqWorkflow"() {
         expect:
         'ACEseqWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()

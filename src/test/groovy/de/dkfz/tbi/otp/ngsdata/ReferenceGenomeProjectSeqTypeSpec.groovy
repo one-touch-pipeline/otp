@@ -61,7 +61,6 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         ]
     }
 
-
     void "test validate, when statSizeFileName is correct"() {
         given:
         ReferenceGenomeProjectSeqType rpst = DomainFactory.createReferenceGenomeProjectSeqType(
@@ -125,7 +124,6 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         where:
         l << "\"',:;%\$§&<>|^§!?=äöüÄÖÜß´`".toCharArray()
     }
-
 
     @Unroll
     void "test getConfiguredReferenceGenomeProjectSeqType with #projectName #seqTypeName #sampleTypeName"() {
@@ -259,7 +257,6 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         AssertionError e = thrown()
         e.message.contains('sampleType')
     }
-
 
     void "test getConfiguredReferenceGenomeProjectSeqType should fail for sampleType.specificReferenceGenome is unknown"() {
         given:

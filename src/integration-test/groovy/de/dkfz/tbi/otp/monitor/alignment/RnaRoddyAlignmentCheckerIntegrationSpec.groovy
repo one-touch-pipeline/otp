@@ -54,7 +54,6 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
         ] + properties)
     }
 
-
     void "workflowName, should return RnaAlignmentWorkflow"() {
         expect:
         'RnaAlignmentWorkflow' == createAlignmentChecker().getWorkflowName()

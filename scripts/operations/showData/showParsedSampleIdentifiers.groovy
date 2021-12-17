@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.parser.pedion.PedionParser
 //----------------------------------------
 //input area
 
-
 //sample name
 //lines are trimmed, lines starting with # are ignored
 String input = """
@@ -79,7 +78,6 @@ static String getSanitizedSampleTypeDbName(String sampleTypeName) {
     }
     return sanitizedSampleTypeDbName
 }
-
 
 try {
     SampleType.withTransaction {

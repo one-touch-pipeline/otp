@@ -39,7 +39,6 @@ class WgbsAlignmentStartJobIntegrationTests {
     @Autowired
     WgbsAlignmentStartJob wgbsAlignmentStartJob
 
-
     @Test
     void "test findUsableBaseBamFile when bamFileInProjectFolder is usable should return null"() {
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([

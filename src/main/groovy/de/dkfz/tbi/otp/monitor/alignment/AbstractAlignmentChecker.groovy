@@ -53,7 +53,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
     static final String HEADER_RUNNING_IN_PROGRESS =
             'running (in_progress)'
 
-
     @Override
     List handle(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
         if (!seqTracks) {
@@ -82,7 +81,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
             output.showUniqueList(HEADER_NO_CONFIG, noConfig, { "${it.project}  ${it.seqType}" })
 
             List<SeqTrack> seqTracksWithConfig = alignableSeqTracks - noConfig
-
 
             List<SeqTrack> seqTracksWithReferenceGenome = filterWithoutReferenceGenome(seqTracksWithConfig, output)
 
@@ -143,7 +141,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         return []
     }
 
-
     List<SeqTrack> getSeqTracksWithoutCorrespondingAlignmentConfig(List<SeqTrack> seqTracks) {
         if (!seqTracks) {
             return []
@@ -172,7 +169,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                 pipeLineName: getPipeLineName(),
         ])
     }
-
 
     Map mergingWorkPackageForSeqTracks(List<SeqTrack> seqTracks) {
         if (!seqTracks) {
@@ -211,7 +207,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         ]
     }
 
-
     List<AbstractMergedBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
         if (!mergingWorkPackages) {
             return []
@@ -246,7 +241,6 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                 pipeLineName      : getPipeLineName(),
         ])
     }
-
 
     abstract String getWorkflowName()
 

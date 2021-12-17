@@ -64,7 +64,6 @@ class CoverageValidatorSpec extends Specification {
                         "The coverage '${COVERAGE_NO_DOUBLE}' should be a double number.", "At least one coverage is not a double number."),
         ]
 
-
         when:
         new CoverageValidator().validate(context)
 

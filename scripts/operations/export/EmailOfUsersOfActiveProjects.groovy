@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User

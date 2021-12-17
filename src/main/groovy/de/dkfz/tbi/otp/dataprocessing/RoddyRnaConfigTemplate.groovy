@@ -26,7 +26,6 @@ import de.dkfz.tbi.otp.project.RoddyConfiguration
 
 class RoddyRnaConfigTemplate {
 
-
     static String createConfig(RoddyConfiguration rnaAlignmentConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType="project"

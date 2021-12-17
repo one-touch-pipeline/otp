@@ -48,7 +48,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
     static final private String INIT_MODULES = "${LOAD_MODULE}\n${ACTIVATE_JAVA}\n${ACTIVATE_GROOVY}\n"
 
-
     ExecuteRoddyCommandService executeRoddyCommandService
 
     RemoteShellHelper remoteShellHelper
@@ -56,7 +55,6 @@ class ExecuteRoddyCommandServiceIntegrationTests {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
-
 
     static final String CONFIG_NAME = "WORKFLOW_VERSION"
     static final String ANALYSIS_ID = "WHOLE_GENOME"

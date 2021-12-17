@@ -58,7 +58,6 @@ class Sequence implements Serializable {
     long projectId
     long realmId
 
-
     /** fields from {@link SeqTrack} */
     String laneId
     String libraryName

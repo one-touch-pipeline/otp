@@ -715,7 +715,6 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         return update
     }
 
-
     @Test
     void "test processCount"() {
         setup:
@@ -821,7 +820,6 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         return step
     }
 
-
     @Test
     void "test lastProcessDate, finds date of newest update with the given state"() {
         setup:
@@ -838,7 +836,6 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         then:
         assert result == [panCanInstallation: date]
     }
-
 
     private static Date createLastDateStructure(String planName, ExecutionState state) {
         JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(name: planName)

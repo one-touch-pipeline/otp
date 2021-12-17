@@ -152,7 +152,6 @@ class ProcessedMergedBamFileIntegrationTests {
         }
     }
 
-
     private static OverallQualityAssessmentMerged createOverallQualityAssessment(ProcessedMergedBamFile processedMergedBamFile, Long identifier) {
         assert processedMergedBamFile: 'processedMergedBamFile must not be null'
 

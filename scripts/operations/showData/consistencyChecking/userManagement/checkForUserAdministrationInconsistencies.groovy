@@ -63,7 +63,6 @@ List output = []
 LdapService ldapService = ctx.getBean('ldapService')
 UserProjectRoleService uprs = ctx.getBean('userProjectRoleService')
 
-
 // this cache maps username to LdapUserDetails in an effort to reduce the number of duplicate ldap requests
 Map<String, LdapUserDetails> cache = [:]
 
@@ -120,7 +119,6 @@ Project.findAll().each { Project project ->
     }
 }
 
-
 // Check 2
 User.findAll().each { User user ->
     UserProjectRole[] allUserProjectRolesOfUser = UserProjectRole.findAllByUser(user)
@@ -133,7 +131,6 @@ User.findAll().each { User user ->
         }
     }
 }
-
 
 // Check 3
 String format = "%-10s | %-6s | %-6s | %-7s | %-7s | %-10s | %s (%s)"

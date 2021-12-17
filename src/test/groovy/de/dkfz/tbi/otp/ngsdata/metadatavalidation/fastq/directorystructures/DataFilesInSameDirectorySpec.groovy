@@ -51,7 +51,6 @@ class DataFilesInSameDirectorySpec extends Specification {
         Set<Cell> validCells = [context.spreadsheet.dataRows.get(0).cells.get(0)] as Set
         Set<Cell> invalidCells = [context.spreadsheet.dataRows.get(1).cells.get(0)] as Set
 
-
         when:
         Path dataFilePath1 = directoryStructure.getDataFilePath(context, new ValueTuple(
                 [(MetaDataColumn.FASTQ_FILE.name()): 'foo.fastq'], validCells))

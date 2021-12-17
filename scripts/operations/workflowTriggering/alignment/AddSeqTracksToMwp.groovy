@@ -34,7 +34,6 @@ String sampleTypeName = ""
 List<SeqTrack> seqTracksToInclude = SeqTrack.getAll([])
 MergingWorkPackage mwpToAddTo = null //MergingWorkPackage.get()
 
-
 // Work
 Sample sample = Sample.createCriteria().get {
     individual {

@@ -40,7 +40,6 @@ class TagmentationLibraryProjectValidator extends ValueTuplesValidator<MetadataV
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
-
     @Override
     Collection<String> getDescriptions() {
         return ['The tagmentation library names which match the same normalized tagmentation library should be' +

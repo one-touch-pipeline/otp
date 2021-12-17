@@ -143,7 +143,6 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         OTHER_NAME | SHORT_DISPLAY_NAME       | ADAPTER_FILE | ADAPTER_SEQUENCE
     }
 
-
     void "test addAdapterFileToLibraryPreparationKit succeeds"() {
         given:
         LibraryPreparationKit kit = service.create(NAME,

@@ -69,7 +69,6 @@ boolean assertProjectEmpty = true
  */
 boolean deleteAnalysisDirectory = true
 
-
 //script area
 //-----------------------------
 

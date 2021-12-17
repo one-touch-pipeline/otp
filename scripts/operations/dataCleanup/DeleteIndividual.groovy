@@ -42,7 +42,6 @@ import java.nio.file.Path
  * request in OTP, it will continue to run until it succeeds or an error is thrown.
  */
 
-
 // input area
 //----------------------
 
@@ -54,16 +53,13 @@ String pids = """
 #pid
 #pid2
 
-
 """
-
 
 /**
  * Flag to indicate, if it should be checked for files only linked and for external bam files.
  * If checked and some found, an exception is thrown
  */
 boolean check = true
-
 
 //script area
 //-----------------------------

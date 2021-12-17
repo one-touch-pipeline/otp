@@ -146,7 +146,6 @@ class ReferenceGenomeService {
         return checkFileExistence(file, checkExistence)
     }
 
-
     private File checkFileExistence(File file, boolean checkExistence) {
         if (!checkExistence || file.canRead()) {
             return file

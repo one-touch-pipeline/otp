@@ -598,7 +598,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ConsecutiveBlankLines {
-        priority = LOW
+        priority = CRITICAL
     }
     FileEndsWithoutNewline {
         priority = CRITICAL

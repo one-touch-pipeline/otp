@@ -29,14 +29,12 @@ import de.dkfz.tbi.otp.ngsdata.*
  * Script show for one individual, sampleType and seqType, which thresholds are failing
  */
 
-
 String pid = ""
 String sampleTypeName = ""
 String seqTypeName = ""
 String libraryLayout = SequencingReadType.PAIRED
 
 //-----------------
-
 
 def bamFile = CollectionUtils.exactlyOneElement(AbstractMergedBamFile.createCriteria().list {
     workPackage {
@@ -67,7 +65,6 @@ def qa = CollectionUtils.exactlyOneElement(RoddyQualityAssessment.createCriteria
     (it instanceof RoddyMergedBamQa) || it.roddyBamFile.seqType.isRna()
 })
 println qa
-
 
 println "\n\nfailed thresholds"
 QcThreshold.getValidQcPropertyForQcClass(qa.class.name).findAll { String property ->

@@ -55,7 +55,6 @@ class RoddyWorkflowConfigUnitTests {
         configDir = TestCase.createEmptyTestDirectory()
     }
 
-
     @After
     void tearDown() {
         TestCase.cleanTestDirectory()
@@ -348,7 +347,6 @@ class RoddyWorkflowConfigUnitTests {
 
         service.validateConfig(roddyWorkflowConfig)
     }
-
 
     @Test
     void testValidateConfig_withIndividual_PidNotInPath_shouldBeInvalid() {

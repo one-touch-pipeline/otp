@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.project.Project
  * This script has no input
  */
 
-
 //work area
 //-----------------------------------------
 println "Project\tType\tFileName\tComment"

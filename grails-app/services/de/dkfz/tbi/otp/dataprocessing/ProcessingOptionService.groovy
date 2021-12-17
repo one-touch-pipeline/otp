@@ -97,7 +97,6 @@ class ProcessingOptionService {
         findOptionAsString(name, type)?.split(',')*.trim()
     }
 
-
     @Deprecated
     static String findOptionSafe(OptionName name, String type, Project project) {
         ProcessingOption option = findOption(name, type, project)

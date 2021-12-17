@@ -57,7 +57,6 @@ class Md5SumServiceSpec extends Specification implements DataTest {
         md5sum = HelperUtils.randomMd5sum
     }
 
-
     void "extractMd5Sum, if md5sum file is null, then throw an assertion"() {
         when:
         new Md5SumService().extractMd5Sum(null)

@@ -48,7 +48,6 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
     @Autowired
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
-
     @Override
     void execute() throws Exception {
         final RnaRoddyBamFile roddyBamFile = getProcessParameterObject()

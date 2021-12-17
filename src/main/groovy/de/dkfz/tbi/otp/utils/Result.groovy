@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.utils
 
 import groovy.transform.ToString
 
-
 @ToString
 class Result<T, U> {
     private T result

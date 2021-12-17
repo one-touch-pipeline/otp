@@ -81,7 +81,6 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         checkInstance()
     }
 
-
     @Override
     ReferenceGenome createReferenceGenome() {
         return createAndSetup_Bwa06_1K_ReferenceGenome()

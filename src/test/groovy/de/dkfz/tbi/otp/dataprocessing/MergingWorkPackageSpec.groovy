@@ -48,7 +48,6 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
         ]
     }
 
-
     void "validate&save, when all fine, then object is saved"() {
         given:
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
@@ -126,7 +125,6 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
                 true,
         ]
     }
-
 
     @Unroll
     void "satisfiesCriteriaSeqTrack, when ignoreLibraryPreparationKit is set, then ignore libPrepKit return true  (#seqTrackHasLibPrepKit, #workPackageHasLibPrepKit)"() {

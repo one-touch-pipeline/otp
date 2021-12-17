@@ -43,7 +43,6 @@ class CrashRecoveryControllerUnitTests {
     static final String PARAMETERS_FOR_TO_MUCH_PARTS = '{"more!then!two!parts":"some value 1"}'
     static final String PARAMETERS_FOR_FIRST_PART_IS_NOT_A_LONG = '{"noLong!key1":"some value 1"}'
 
-
     static final String SUCCESS_MESSAGE = '{"success":true,"error":null}'
 
     static final String ERROR_MESSAGE_FOR_MISSING_IDS = '{"success":false,"error":"No ids given. Expression: params.ids"}'
@@ -60,7 +59,6 @@ class CrashRecoveryControllerUnitTests {
 
     static final String ERROR_MESSAGE_EXCEPTION_THROWN = '{"success":false,"error":"' + EXCEPTION_MESSAGE + '"}'
 
-
     @Before
     void setUp() {
         params.ids = IDS_SINGLE
@@ -74,7 +72,6 @@ class CrashRecoveryControllerUnitTests {
                 markJobsAsFinished : { List<Long> ids, Map parameters -> },
         ] as CrashRecoveryService
     }
-
 
     @Test
     void test_markFailed_ShouldReturnOk_singleId() {
@@ -132,7 +129,6 @@ class CrashRecoveryControllerUnitTests {
         assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
 
-
     @Test
     void test_restart_ShouldReturnOk_singleId() {
         controller.restart()
@@ -188,7 +184,6 @@ class CrashRecoveryControllerUnitTests {
         controller.restart()
         assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
-
 
     @Test
     void test_markFinished_ShouldReturnOk_singleId_NoParameters() {
@@ -295,7 +290,6 @@ class CrashRecoveryControllerUnitTests {
         assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
     }
 
-
     @Test
     void test_markSucceeded_ShouldReturnOk_singleId_NoParameters() {
         controller.markSucceeded()
@@ -401,7 +395,6 @@ class CrashRecoveryControllerUnitTests {
         assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
     }
 
-
     @Test
     void test_startScheduler_ShouldReturnOk() {
         final String SUCCESS_MESSAGE = '{"success":true}'
@@ -427,7 +420,6 @@ class CrashRecoveryControllerUnitTests {
         controller.startScheduler()
         assert ERROR_MESSAGE == response.text
     }
-
 
     @Test
     void test_parametersOfJob_ShouldReturnModel() {

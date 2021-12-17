@@ -42,14 +42,11 @@ String sampleTypesDiseaseInput = """
 #sampletype1
 #sampletype2
 
-
 """
-
 
 String sampleTypesControlInput = """
 #sampletype2
 #sampletype3
-
 
 """
 
@@ -87,7 +84,6 @@ SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
 SeqType wes = SeqTypeService.exomePairedSeqType
 SeqType wgs = SeqTypeService.wholeGenomePairedSeqType
 
-
 SampleType.withNewTransaction {
     sampleTypesDisease.each {
         sampleTypePerProjectService.createOrUpdate(project, it, SampleTypePerProject.Category.DISEASE)
@@ -110,7 +106,6 @@ SampleType.withNewTransaction {
 
     samplePairDeciderService.findOrCreateSamplePairsForProject(project)
     println "create sample pairs "
-
 
     assert false: "DEBUG: transaction intentionally failed to rollback changes"
 }

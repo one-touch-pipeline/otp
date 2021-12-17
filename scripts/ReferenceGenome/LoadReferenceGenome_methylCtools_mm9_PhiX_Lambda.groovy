@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -34,7 +33,6 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
  *  A python helper script 'scripts/ReferenceGenome/getReferenceGenomeInfo.py' which extracts
  *  information from the fasta file was used to generate the fastaEntries content.
 */
-
 
 String name = "methylCtools_mm9_PhiX_Lambda"
 @Field

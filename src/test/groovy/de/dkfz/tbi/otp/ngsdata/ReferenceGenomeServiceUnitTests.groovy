@@ -83,7 +83,6 @@ class ReferenceGenomeServiceUnitTests {
         directory = temporaryFolder.newFolder("reference_genomes", "referenceGenome")
         DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent)
 
-
         file = new File(directory, "prefixName.fa")
         assert file.createNewFile()
         file << "test"

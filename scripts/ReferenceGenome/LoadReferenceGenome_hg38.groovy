@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -245,7 +244,6 @@ List<FastaEntry> fastaEntries = [
         new FastaEntry("KI270392.1", "KI270392.1", 971, 971, Classification.CONTIG),
         new FastaEntry("KI270394.1", "KI270394.1", 970, 970, Classification.CONTIG),
 ]
-
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,

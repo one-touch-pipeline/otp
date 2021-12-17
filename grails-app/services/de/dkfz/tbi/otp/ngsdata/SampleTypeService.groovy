@@ -65,7 +65,6 @@ class SampleTypeService {
         return sampleTypes.unique().sort { it.name }
     }
 
-
     List<SeqTrack> getSeqTracksWithoutSampleCategory(List<SeqTrack> seqTracks) {
         List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
         return seqTracks.findAll {

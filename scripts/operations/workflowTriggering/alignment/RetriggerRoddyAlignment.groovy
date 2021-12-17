@@ -25,7 +25,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-
 LogThreadLocal.withThreadLog(System.out, { SeqTrack.withTransaction {
     Collection<RoddyBamFile> roddyBamFiles = RoddyBamFile.withCriteria {
         'in'('id', [

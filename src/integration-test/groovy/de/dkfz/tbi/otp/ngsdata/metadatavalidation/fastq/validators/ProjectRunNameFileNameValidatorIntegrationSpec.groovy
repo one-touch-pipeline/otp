@@ -51,7 +51,6 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
             "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
                     "${DATAFILE}\t${RUN_ID}\t${PROJECT}\n"
 
-
     void setupData() {
         Run run = DomainFactory.createRun(["name": RUN_ID])
         Project project = DomainFactory.createProject(["name": PROJECT])

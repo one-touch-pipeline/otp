@@ -32,7 +32,6 @@ processingOptionService.createOrUpdate(
         'hg19, hs37d5, 1KGRef_PhiX'
 )
 
-
 processingOptionService.createOrUpdate(
         PIPELINE_RUNYAPSA_DEFAULT_VERSION,
         'yapsa-devel/b765fa8',

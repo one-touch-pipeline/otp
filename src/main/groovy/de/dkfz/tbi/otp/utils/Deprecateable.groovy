@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.utils
 
-
 import java.time.LocalDate
 
 trait Deprecateable<D extends Deprecateable<D>> {

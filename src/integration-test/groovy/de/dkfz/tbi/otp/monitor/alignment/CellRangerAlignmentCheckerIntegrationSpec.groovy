@@ -72,7 +72,6 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
         }
     }
 
-
     void "workflowName, should return CellRangerWorkflow"() {
         expect:
         'CellRangerWorkflow' == createAlignmentChecker().getWorkflowName()

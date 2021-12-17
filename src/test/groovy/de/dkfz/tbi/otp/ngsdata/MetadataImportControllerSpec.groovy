@@ -127,8 +127,6 @@ class MetadataImportControllerSpec extends Specification implements ControllerUn
             ))
         }
 
-
-
         String expected = """\
                           Automatic import succeeded :-)
 

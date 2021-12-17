@@ -68,7 +68,6 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
         }
     }
 
-
     @Override
     List<String> getWorkflowScripts() {
         return [
@@ -84,7 +83,6 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
                 indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
         ].flatten()
     }
-
 
     @Override
     File getWorkflowData() {

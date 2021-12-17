@@ -146,7 +146,6 @@ class AbstractBamFileServiceIntegrationTests {
             lengthRefChromosomesWithoutN: ARBITRARY_UNUSED_VALUE,
         ])
 
-
         referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType([
             project        : project,
             seqType        : wholeGenomeSeqType,
@@ -208,7 +207,6 @@ class AbstractBamFileServiceIntegrationTests {
 
         exomeMergingSet = createMergingSetAndDependentObjects(exomeSeqTrack)
     }
-
 
     @After
     void tearDown() {
@@ -377,7 +375,6 @@ class AbstractBamFileServiceIntegrationTests {
         assert !processedMergedBamFile.isQualityAssessed()
         assert abstractBamFileService.calculateCoverageWithN(processedMergedBamFile) == null
     }
-
 
     ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet) {
         MergingPass mergingPass1 = new MergingPass(

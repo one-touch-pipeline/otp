@@ -127,7 +127,6 @@ class OtrsTicketService {
         assert otrsTicket.save(flush: true)
     }
 
-
     Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
         if (!seqTracks) {
             return [] as Set

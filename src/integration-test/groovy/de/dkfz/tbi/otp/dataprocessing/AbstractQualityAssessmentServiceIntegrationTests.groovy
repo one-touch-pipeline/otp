@@ -209,7 +209,6 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         })
     }
 
-
     static void createReferenceGenomeEntries(ReferenceGenome referenceGenome) {
         ['7', '8'].each {
             DomainFactory.createReferenceGenomeEntry(

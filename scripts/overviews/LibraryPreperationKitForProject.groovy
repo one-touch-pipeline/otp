@@ -58,5 +58,3 @@ println seqTracks.findAll {
 }.collect {
     "${it.individual.pid} ${it.sampleType.name} ${it.run.name} ${it.laneId}"
 }.unique().sort().join('\n')
-
-

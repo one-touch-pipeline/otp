@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.config
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -48,13 +47,11 @@ class PropertiesValidationServiceSpec extends Specification implements DataTest 
 
     PropertiesValidationService propertiesValidationService
 
-
     def setup() {
         propertiesValidationService = new PropertiesValidationService()
         propertiesValidationService.processingOptionService = new ProcessingOptionService()
         DomainFactory.createSeqType(roddyName: SEQ_TYPE_RODDY_NAME)
     }
-
 
     @Unroll
     void "test validateProcessingOptionName"() {

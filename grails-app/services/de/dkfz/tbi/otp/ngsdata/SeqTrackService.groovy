@@ -65,7 +65,6 @@ class SeqTrackService {
     @Autowired
     DataSource dataSource
 
-
     @Autowired
     ApplicationContext applicationContext
 

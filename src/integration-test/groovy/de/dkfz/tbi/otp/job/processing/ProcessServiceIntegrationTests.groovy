@@ -57,7 +57,6 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         createUserAndRoles()
     }
 
-
     /**
      * Tests that getProcess returns null in case of non existing Process
      */
@@ -513,7 +512,6 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         String url = processService.processUrl(process)
         assert "${serverUrl}/processes/process/${process.id}" == url
     }
-
 
     private JobExecutionPlan mockPlan(String name = "test") {
         JobExecutionPlan plan = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)

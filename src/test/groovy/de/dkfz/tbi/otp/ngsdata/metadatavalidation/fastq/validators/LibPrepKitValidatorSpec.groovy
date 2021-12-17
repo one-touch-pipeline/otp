@@ -57,7 +57,6 @@ class LibPrepKitValidatorSpec extends Specification implements DataTest {
         DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit', importAlias: ["lib_prep_kit_import_alias"])
     }
 
-
     void 'validate, when metadata file contains valid LibPrepKit'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -70,7 +69,6 @@ class LibPrepKitValidatorSpec extends Specification implements DataTest {
         then:
         context.problems.empty
     }
-
 
     void 'validate, when metadata file contains invalid LibPrepKit, adds error'() {
         given:

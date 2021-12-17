@@ -38,7 +38,6 @@ List<String> blacklistedUsernames = [
 
 ]
 
-
 String getListInfo(String text, List list) {
     return "${text}\n${list}\n${list.size()} entries\n"
 }

@@ -25,7 +25,6 @@ import groovy.text.SimpleTemplateEngine
 import java.time.*
 import java.time.format.DateTimeFormatter
 
-
 // read CSV file
 List<List<String>> c = new File("review/final.csv").readLines()*.split(";")
 
@@ -52,7 +51,6 @@ Closure<String> get = { String[] line, int index ->
 
 Map<String, List<String[]>> th = data.groupBy { get(it, themeIdx) }.sort { it.value.size() }
 
-
 // get sprint name, start and end dates
 Object json = new JsonSlurper().parse(new URL("https://one-touch-pipeline.myjetbrains.com/youtrack/api/agiles/106-4?fields=currentSprint(name,start,finish)"))
 
@@ -65,7 +63,6 @@ LocalDate finishDateNext = startDateNext.plusDays(21)
 
 String duration = "${startDate} – ${finishDate}"
 String durationNext = "${startDateNext} – ${finishDateNext}"
-
 
 // get releases
 StringBuilder stdOut = new StringBuilder()
@@ -84,7 +81,6 @@ String releases = stdOut.readLines().collectEntries {
 }.collect {
     it.value
 }.join(", ")
-
 
 // create overview
 String overview = """
@@ -130,7 +126,6 @@ overview += """
 </table>
 """
 
-
 // create details
 List<String> details = []
 int i = 0
@@ -157,7 +152,6 @@ th.each { theme ->
     }
 }
 details << "\n*) Issue finished in last sprint after sprint review"
-
 
 // add data to template
 new File("review/presentation.html").text = new SimpleTemplateEngine()

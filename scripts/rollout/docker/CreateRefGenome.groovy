@@ -25,12 +25,10 @@ package rollout.docker
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
-
 /**
  * Calls each Script from ../ReferenceGenome with few exceptions to
  * create ReferenceGenomes for Docker setup.
  */
-
 
 GroovyShell shell = new GroovyShell()
 ProcessingOptionService processingOptionService = ctx.processingOptionService

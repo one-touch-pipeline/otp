@@ -104,7 +104,6 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         return ""
     }
 
-
     @Override
     protected void validate(SophiaInstance sophiaInstance) throws Throwable {
         assert sophiaInstance : "The input sophiaInstance must not be null"

@@ -50,7 +50,6 @@ class SystemStatusController implements CheckAndCall {
         ]
     }
 
-
     def startWorkflowSystem() {
         checkErrorAndCallMethodWithFlashMessage(null, 'systemStatus.workflowSystem.started') {
             workflowSystemService.startWorkflowSystem()

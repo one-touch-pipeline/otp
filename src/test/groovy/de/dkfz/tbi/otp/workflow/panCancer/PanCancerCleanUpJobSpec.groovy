@@ -42,7 +42,6 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
     @Rule
     public TemporaryFolder temporaryFolder
 
-
     @Override
     Class[] getDomainClassesToMock() {
         return [

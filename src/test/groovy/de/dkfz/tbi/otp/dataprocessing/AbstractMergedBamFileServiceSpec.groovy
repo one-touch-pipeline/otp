@@ -36,7 +36,6 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
     @Rule
     TemporaryFolder temporaryFolder
 
-
     void "getExistingBamFilePath, when all fine, return the file"() {
         given:
         File file = CreateFileHelper.createFile(temporaryFolder.newFile())
@@ -54,7 +53,6 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         then:
         file == existingFile
     }
-
 
     @Unroll
     void "getExistingBamFilePath, when fail for #failCase, throw an exception"() {

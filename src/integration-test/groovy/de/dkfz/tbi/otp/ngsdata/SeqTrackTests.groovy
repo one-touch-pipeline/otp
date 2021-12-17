@@ -48,7 +48,6 @@ class SeqTrackTests {
         ).save(flush: true)
     }
 
-
     @Test
     void testGetConfiguredReferenceGenome_ProjectDefault() {
         setupData()

@@ -644,7 +644,6 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         }
     }
 
-
     @Test
     void testExecute_FailLinkNewResults_ShouldFail() {
         setupData()
@@ -695,7 +694,6 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
     }
-
 
     private void finishOperationStateOfRoddyBamFile(RoddyBamFile roddyBamFile) {
         roddyBamFile.md5sum = HelperUtils.randomMd5sum

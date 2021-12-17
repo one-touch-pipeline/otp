@@ -105,7 +105,6 @@ class ProcessingStatus {
         }
     }
 
-
     Map<OtrsTicket.ProcessingStep, WorkflowProcessingStatus> getWorkflowProcessingStatusPerProcessingStep() {
         return [
                 (OtrsTicket.ProcessingStep.INSTALLATION): installationProcessingStatus,

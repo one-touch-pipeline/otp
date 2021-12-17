@@ -75,7 +75,6 @@ class IndelSampleSwapDetection implements Entity {
 
     Integer germlineSmallVarsInBothRare
 
-
     static constraints  = {
         indelCallingInstance unique: true
         germlineSmallVarsInBothRare nullable: true

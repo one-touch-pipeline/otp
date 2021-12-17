@@ -70,7 +70,6 @@ class UserAdministrationController implements CheckAndCall {
         dataToRender.iTotalRecords = userService.getUserCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-
         List users = userService.getAllUsers()
 
         users.each { User user ->

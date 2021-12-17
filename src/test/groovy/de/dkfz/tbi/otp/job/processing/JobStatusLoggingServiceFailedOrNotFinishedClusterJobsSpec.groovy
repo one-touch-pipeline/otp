@@ -42,7 +42,6 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
         ]
     }
 
-
     TestConfigService configService
 
     final static Long ARBITRARY_ID = 23
@@ -74,7 +73,6 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
     ClusterJobIdentifier failedJobOnRealmWithSameLogDirAs1
     Collection<String> jobIdsOnRealmWithSameLogDirAs1
     Collection<ClusterJobIdentifier> allUnsuccessfulJobs
-
 
     void setup() {
         tempDirectory = TestCase.createEmptyTestDirectory()

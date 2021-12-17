@@ -161,7 +161,6 @@ class RoddyAlignmentDeciderIntegrationTests {
         assert workPackage.needsProcessing
     }
 
-
     @Test
     void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueFileOperationStatusInProgress_shouldSetNeedsProcessing() {
         MergingWorkPackage workPackage = createAndRunPrepare(false, true, FileOperationStatus.INPROGRESS, false)
@@ -219,7 +218,6 @@ class RoddyAlignmentDeciderIntegrationTests {
         assert workPackage.needsProcessing
     }
 
-
     void prepareGetLatestExistingValidBamFile_latestShouldBeFound(boolean withdrawn, boolean md5sumNotNull) {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
                 withdrawn: false,
@@ -254,7 +252,6 @@ class RoddyAlignmentDeciderIntegrationTests {
         prepareGetLatestExistingValidBamFile_latestShouldBeFound(false, false)
         prepareGetLatestExistingValidBamFile_latestShouldBeFound(false, true)
     }
-
 
     void prepareGetLatestExistingValidBamFile_secondShouldBeFound(boolean withdrawn, boolean md5sumNotNull) {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
@@ -294,7 +291,6 @@ class RoddyAlignmentDeciderIntegrationTests {
         prepareGetLatestExistingValidBamFile_secondShouldBeFound(false, true)
     }
 
-
     @Test
     void prepareGetLatestExistingValidBamFile_nothingShouldBeFound() {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
@@ -329,13 +325,11 @@ class RoddyAlignmentDeciderIntegrationTests {
         assert bamFileResult == null
     }
 
-
     @Test
     void testPrepareForAlignment_forceAlignment_shouldNotSetNeedsProcessing() {
         MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.DECLARED, true)
         assert !workPackage.needsProcessing
     }
-
 
     @Test
     void test_ensureConfigurationIsComplete_whenConfigurationIsComplete_shouldReturnNormally() {

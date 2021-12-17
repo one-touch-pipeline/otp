@@ -56,7 +56,6 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
         checkInstance()
     }
 
-
     @Override
     ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createRoddySnvPipelineLazy()

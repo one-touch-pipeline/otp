@@ -96,5 +96,3 @@ try {
 } finally {
     println outputStringBuilder
 }
-
-

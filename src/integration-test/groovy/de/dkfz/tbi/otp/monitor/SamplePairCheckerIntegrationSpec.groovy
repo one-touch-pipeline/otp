@@ -55,7 +55,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         ] + properties)
     }
 
-
     void "bamFilesWithoutCategory, when some bam files has a category and some not, return only bam files without category"() {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
@@ -148,7 +147,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
 
         DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
         DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
-
 
         List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
 

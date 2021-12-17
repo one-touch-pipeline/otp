@@ -32,9 +32,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
  * (You can use either the normal metadata tsv file used for import, or create a new file with just these two columns)
  */
 
-
 File input = new File("/absolute/path/to/file.tsv")
-
 
 /////////////////////////////////////////////////////
 

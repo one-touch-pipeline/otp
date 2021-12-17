@@ -76,7 +76,6 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
             return
         }
 
-
         Integer result = DataFile.createCriteria().count {
             eq("fileName", fileName)
             seqTrack {

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.indel
 
-
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div32
 import de.dkfz.tbi.otp.ngsdata.*
 

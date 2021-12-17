@@ -65,7 +65,6 @@ class QualityControlFileValidatorSpec extends Specification {
         {{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157, 12:34
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
-
         BamMetadataValidationContext context = contextForTestValidateContextWithErrors(bamFile, dir, notReadAble, qualityControl, qualityControlInvalid, qualityControlInvalidJson)
 
         Collection<Problem> expectedProblems = expectedProblemsForTestValidateContextWithErrors(context, dir, notReadAble, qualityControlInvalid, qualityControlInvalidJson)

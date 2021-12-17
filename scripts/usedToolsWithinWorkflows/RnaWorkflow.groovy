@@ -36,7 +36,6 @@ Please provide the PIDs in a comma separated list, e.g. ["pid1", "pid2", ...]
 def projectName = ""
 def pids = []
 
-
 /*
 Input checks
  */

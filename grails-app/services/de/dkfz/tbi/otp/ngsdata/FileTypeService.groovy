@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.gorm.transactions.Transactional
 
 @Transactional

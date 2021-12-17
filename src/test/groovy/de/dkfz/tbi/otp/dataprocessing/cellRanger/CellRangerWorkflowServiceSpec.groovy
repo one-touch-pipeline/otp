@@ -77,7 +77,6 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
     @Rule
     TemporaryFolder temporaryFolder
 
-
     void "linkResultFiles, if all target files exist, then create link for each"() {
         given:
         new TestConfigService(temporaryFolder.newFolder())
@@ -105,7 +104,6 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
             assert !link.isAbsolute()
         }
     }
-
 
     @Unroll
     void "linkResultFiles, if file/directory '#missingFile' does not exist, then throw an assert"() {

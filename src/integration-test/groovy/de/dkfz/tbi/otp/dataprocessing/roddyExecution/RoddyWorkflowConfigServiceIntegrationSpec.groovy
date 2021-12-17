@@ -57,7 +57,6 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyBamFile.withdrawn == true
     }
 
-
     void "test method loadPanCanConfigAndTriggerAlignment no individual should throw exception"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -69,7 +68,6 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains("The individual is not allowed to be null")
     }
-
 
     void "test method loadPanCanConfigAndTriggerAlignment importProjectConfigFile throws exception"() {
         given:
@@ -91,7 +89,6 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyBamFile.withdrawn == false
     }
 
-
     void "test method loadPanCanConfigAndTriggerAlignment no merging work package found"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -109,7 +106,6 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyBamFile.mergingWorkPackage.needsProcessing == false
         roddyBamFile.withdrawn == false
     }
-
 
     static final String TEST_RODDY_SEQ_TYPE_RODDY_NAME = 'roddyName'
     static final String TEST_RODDY_PLUGIN_VERSION_PLUGIN_PART = 'plugin'
@@ -270,7 +266,6 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.list())
         roddyWorkflowConfig.individual == individual
     }
-
 
     void "test importProjectConfigFile when previous RoddyWorkflowConfig exists"() {
         given:

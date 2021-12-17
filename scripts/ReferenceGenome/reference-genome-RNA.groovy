@@ -115,7 +115,6 @@ ReferenceGenome.withTransaction {
             path: "STAR_2.5.2b_1KGRef_PhiX_Gencode19_50bp"
     ))
 
-
     //#################################################################################
     //###############  xenograft reference genome  mm10 + PhiX         ################
     //#################################################################################
@@ -150,7 +149,6 @@ ReferenceGenome.withTransaction {
             indexToolVersion: "2.5.2b",
             path: "STAR_2.5.2b_GRCm38mm10_gencodevM12_PhiX_200bp"
     ))
-
 
     //#################################################################################
     //###############  xenograft reference genome hs37d5 + PhiX + mm10 ################

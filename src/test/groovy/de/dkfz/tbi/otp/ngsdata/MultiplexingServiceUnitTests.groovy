@@ -68,8 +68,6 @@ class MultiplexingServiceUnitTests {
         testInvalidBarcodePatternGATC("acacac")
     }
 
-
-
     @Test
     void testBarcodePatternThreeDigitsFastqValid() {
         testBarcodePatternThreeDigitsFastq("000", "_0_000")
@@ -102,8 +100,6 @@ class MultiplexingServiceUnitTests {
     void testBarcodePatternThreeDigitsFastqInvalidMissingUnderscore() {
         testBarcodePatternThreeDigitsFastq(null, "4_030")
     }
-
-
 
     @Test
     void testBarcodePatternThreeDigitsBamValid() {
@@ -138,15 +134,11 @@ class MultiplexingServiceUnitTests {
         testBarcodePatternThreeDigitsBam(null, "4_030")
     }
 
-
-
     @Test
     void testBarcodeNoCode() {
         String someFile = "example_something.bam"
         assert null == MultiplexingService.barcode(someFile)
     }
-
-
 
     private void testValidBarcodePatternGATC(String barcode) {
         testBarcodePatternGATC(barcode, barcode)

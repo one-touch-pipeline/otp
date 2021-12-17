@@ -71,8 +71,3 @@ WorkflowVersion.withTransaction {
                     SeqTypeService.sophiaPipelineSeqTypes.first().roddyName)
     ).save(flush: true)
 }
-
-
-
-
-

@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 @Integration
 class AbstractMergingWorkPackageServiceSpec extends Specification {
 
-
     /**
      * this test, tests the opposite of  "findMergingWorkPackage, with chipSeq, find the correct one"()
      * therefore only Pipelines that can align ChipSeq were chosen

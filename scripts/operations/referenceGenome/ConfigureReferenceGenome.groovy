@@ -20,12 +20,10 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import de.dkfz.tbi.otp.ngsdata.*
-
 
 Project project = Project.findByName('')
 assert project: "no project given"
@@ -118,7 +116,6 @@ String refGenName = ''
  * The list could be create with the script "statSizeFileList"
  */
 String statSizeFileName = ''
-
 
 //RNA should not be configured over this script. Use the GUI instead!
 List<SeqType> blackListedSeqTypes = [

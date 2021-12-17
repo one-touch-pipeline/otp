@@ -85,7 +85,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     @Rule
     public TemporaryFolder temporaryFolder
 
-
     void "prepareAndReturnWorkflowSpecificCValues, when roddyIndelCallingInstance is null, throw assert"() {
         when:
         new ExecuteRoddyIndelJob().prepareAndReturnWorkflowSpecificCValues(null)
@@ -94,7 +93,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         AssertionError e = thrown()
         e.message.contains('assert indelCallingInstance')
     }
-
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WGS, return correct value list"() {
         given:
@@ -177,7 +175,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         cleanup:
         configService.clean()
     }
-
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WES, return correct value list"() {
         given:
@@ -285,7 +282,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         expectedList == returnedList
     }
 
-
     @Unroll
     void "prepareAndReturnWorkflowSpecificParameter, return always empty String"() {
         expect:
@@ -297,7 +293,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 new IndelCallingInstance(),
         ]
     }
-
 
     void "validate, when all fine, set processing state to finished"() {
         given:
@@ -326,7 +321,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         job.validate(indelCallingInstance)
     }
 
-
     void "validate, when indelCallingInstance is null, throw assert"() {
         when:
         new ExecuteRoddyIndelJob().validate(null)
@@ -335,7 +329,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         AssertionError e = thrown()
         e.message.contains('The input indelCallingInstance must not be null. Expression')
     }
-
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
@@ -366,7 +359,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         e.message.contains(md5sum)
         indelCallingInstance.processingState != AnalysisProcessingStates.FINISHED
     }
-
 
     @Unroll
     void "validate, when file not exists, throw assert"() {

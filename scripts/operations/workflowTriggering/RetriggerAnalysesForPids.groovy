@@ -34,7 +34,6 @@ String pids = """
 #PID1
 #PID2
 
-
 """
 
 //************ Select witch analyses type should be triggered ************//
@@ -54,8 +53,6 @@ List<SeqType> seqTypes = [
 
 //************ Trigger analyses for disabled sample pairs. otherwise they will be ignored. ************//
 boolean runDisabledPairs = false
-
-
 
 //WORK
 def samplePairs = SamplePair.withCriteria {
@@ -77,7 +74,6 @@ analyses.each { println " - ${it}" }
 println "\nAffected SamplePairs: (${samplePairs.size()})"
 samplePairs.each { println " - ${it}" }
 println("\n")
-
 
 // CONFIGURATION
 // this maps the different names and objects each analysis needs to its name
@@ -103,7 +99,6 @@ Map<String, Map<String, Object>> analysesObjectMapping = [
                 instanceClass:        RunYapsaInstance,
         ],
 ]
-
 
 // PROCESSING
 LogThreadLocal.withThreadLog(System.out, {

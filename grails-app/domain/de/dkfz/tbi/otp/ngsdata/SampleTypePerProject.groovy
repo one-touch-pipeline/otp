@@ -83,7 +83,6 @@ class SampleTypePerProject implements Entity {
      */
     Category category
 
-
     static constraints = {
         sampleType unique: 'project'
     }

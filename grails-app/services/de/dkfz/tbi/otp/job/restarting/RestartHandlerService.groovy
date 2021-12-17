@@ -36,7 +36,6 @@ class RestartHandlerService {
 
     RestartActionService restartActionService
 
-
     void handleRestart(Job job) {
         ProcessingStep step = job.processingStep
 

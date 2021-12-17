@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
@@ -50,7 +49,6 @@ class GeneModelServiceSpec extends Specification implements DataTest, ServiceUni
         geneModel = DomainFactory.createGeneModel(path: "geneModel", referenceGenome: referenceGenome)
         DomainFactory.createProcessingOptionBasePathReferenceGenome("/referenceGenomes")
     }
-
 
     void "test getFile"() {
         expect:

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.monitor
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -55,7 +54,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         someText == collector.getOutput()
     }
 
-
     void "leftShift, multiple added value appear in the added order in the output"() {
         given:
         String someText1 = TestCase.createUniqueString()
@@ -76,7 +74,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         expected == collector.getOutput()
     }
 
-
     void "prefix, every line of text is prefixed with the given prefix"() {
         given:
         String someText1 = TestCase.createUniqueString()
@@ -94,7 +91,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         then:
         expectedText == receivedText
     }
-
 
     @Unroll
     void "objectsToStrings, given list is converted to strings and sorted"() {
@@ -114,7 +110,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         ['abcdef']     | { String it -> it.substring(2, 4) } || ['cd']
         ['ace', 'bcd'] | { String it -> it.substring(1, 2) } || ['c', 'c']
     }
-
 
     void "showWorkflow without slot information, check that it is added with newlines before"() {
         given:
@@ -176,7 +171,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         'liste'     | ['ace', 'bcd']  | { String it -> it.substring(1, 2) } || 'liste (2):\nc\nc\n'
     }
 
-
     @Unroll
     void "showUniqueList, add list name and values of list as expected (#listName)"() {
         given:
@@ -199,7 +193,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         'liste'     | ['ace', 'bcd']  | { String it -> it.substring(1, 2) } || 'liste (1):\nc  (count: 2)\n'
     }
 
-
     void "showNotTriggered, create list with expected entries"() {
         given:
         MonitorOutputCollector collector = new MonitorOutputCollector()
@@ -212,7 +205,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         then:
         expected == output
     }
-
 
     void "showShouldStart, create list with expected entries"() {
         given:
@@ -227,7 +219,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         expected == output
     }
 
-
     void "showWaiting, create list with expected entries"() {
         given:
         MonitorOutputCollector collector = new MonitorOutputCollector()
@@ -240,7 +231,6 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         then:
         expected == output
     }
-
 
     @Unroll
     void "showFinished, create list with expected entries (#showFinished)"() {

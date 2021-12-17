@@ -81,7 +81,6 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         return cValues
     }
 
-
     @Override
     protected void validate(RoddyBamFile roddyBamFile) throws Throwable {
         assert roddyBamFile: "Input roddyBamFile must not be null"
@@ -139,7 +138,6 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
             )
         }
     }
-
 
     void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
         if (baseBamFile) {

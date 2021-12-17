@@ -51,7 +51,6 @@ class BarcodeValidatorSpec extends Specification {
         context.problems.empty
     }
 
-
     void 'validate, when barcode use valid chars but does not pass the regular expression, adds warnings'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -88,7 +87,6 @@ class BarcodeValidatorSpec extends Specification {
         where:
         barcode << ['%', '$', '^', '_']
     }
-
 
     void 'validate, when no INDEX column exists in metadata file, adds warnings'() {
         given:

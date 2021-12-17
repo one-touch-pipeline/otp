@@ -56,7 +56,6 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     FileService fileService
 
-
     @Override
     void execute() throws Exception {
         final ImportProcess importProcess = getProcessParameterObject()
@@ -75,7 +74,6 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
                 Map linkMap = [:]
                 createLinkMap(sourceBam, targetBam, linkMap)
                 createLinkMap(sourceBai, targetBai, linkMap)
-
 
                 epmbf.furtherFiles.each { String relativePath ->
                     File sourceFurtherFile = new File(sourceBaseDir, relativePath)

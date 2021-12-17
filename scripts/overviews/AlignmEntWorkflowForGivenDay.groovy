@@ -29,7 +29,6 @@ int year = 2018
 int month =12
 int day = 17
 
-
 //---------------------------
 //work area
 
@@ -84,6 +83,5 @@ output << bamFile.collect {
             it.workDirectory,
     ].join('|')
 }.join('\n')
-
 
 println output.join('\n')

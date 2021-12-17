@@ -48,5 +48,4 @@ Map<String, Object> projectCreationParameter = [
         processingPriority: [ctx.processingPriorityService.defaultPriority()]
 ]
 
-
 rollout.createProjects(ctx, projectCreationParameter)

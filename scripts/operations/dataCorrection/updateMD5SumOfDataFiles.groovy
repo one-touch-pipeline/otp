@@ -37,7 +37,6 @@ String executingUser = ""
 List<String> runNames = [""]
 Map<String, String> dataFileMap = [:]
 
-
 assert executingUser: "Your username is used to set a comment that informs of the changes to the DataFile"
 assert runNames: "Define the Runs"
 runNames.each {

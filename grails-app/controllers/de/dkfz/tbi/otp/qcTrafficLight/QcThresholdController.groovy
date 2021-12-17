@@ -42,7 +42,6 @@ class QcThresholdController {
             delete: "POST",
     ]
 
-
     def defaultConfiguration() {
         List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 

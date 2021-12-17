@@ -190,7 +190,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         assert expectedCommand == actualCommand
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_WithBaseBamFile_AllFine() {
         setupData()
@@ -223,14 +222,12 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         assert expectedCommand == actualCommand
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MustAlwaysReturnAnEmptyString() {
         setupData()
         assert "" == executePanCanJob.prepareAndReturnWorkflowSpecificParameter(null)
         assert "" == executePanCanJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)
     }
-
 
     @Test
     void testGetFilesToMerge_BamFileIsNull_ShouldFail() {
@@ -239,7 +236,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
             executePanCanJob.getFilesToMerge(null)
         }.contains("roddyBamFile must not be null")
     }
-
 
     @Test
     void testGetFilesToMerge_WrongCountOfDataFileForSeqTrack_ShouldFail() {
@@ -251,7 +247,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
             executePanCanJob.getFilesToMerge(roddyBamFile)
         }.contains("seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()")
     }
-
 
     //false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
@@ -268,7 +263,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         }.contains(file1.path)
     }
 
-
     @Test
     void testGetFilesToMerge_DataFileHasWrongFileSizeInDatabase_ShouldFail() {
         setupData()
@@ -282,7 +276,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         }.contains("1234")
     }
 
-
     @Test
     void testGetFilesToMerge_AllFine() {
         setupData()
@@ -293,7 +286,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         assert expectedDataFileList == actualDataFileList
     }
-
 
     @Test
     void testWorkflowSpecificValidation_workMergedQATargetExtractJsonFileDoesNotExist_ShouldFail() {
@@ -308,7 +300,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         }.contains(roddyBamFile.workMergedQATargetExtractJsonFile.path)
     }
 
-
     @Test
     void testWorkflowSpecificValidation_AllFine() {
         setupData()
@@ -320,7 +311,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
 
         executePanCanJob.workflowSpecificValidation(roddyBamFile)
     }
-
 
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_AllFine() {
@@ -342,7 +332,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
             executePanCanJob.workflowSpecificValidation(roddyBamFile)
         }.contains(roddyBamFile.correspondingWorkChimericBamFile.path)
     }
-
 
     private void prepareDataFilesOnFileSystem(RoddyBamFile bamFile) {
         assert 1 == bamFile.seqTracks.size()

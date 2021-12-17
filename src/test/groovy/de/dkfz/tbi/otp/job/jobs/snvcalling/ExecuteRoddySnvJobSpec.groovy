@@ -181,7 +181,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ]
     }
 
-
     void "validate, when all fine, set processing state to finished"() {
         given:
         String path = temporaryFolder.newFolder().path

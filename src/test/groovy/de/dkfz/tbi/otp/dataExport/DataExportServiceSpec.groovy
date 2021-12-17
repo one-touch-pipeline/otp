@@ -184,7 +184,6 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 break
         }
 
-
         where:
         checkFileStatus | getFileList | getFileFinalPathCount | getFilePathInViewByPidCount || cases
         false           | true        | 2                     | 2                           || 1

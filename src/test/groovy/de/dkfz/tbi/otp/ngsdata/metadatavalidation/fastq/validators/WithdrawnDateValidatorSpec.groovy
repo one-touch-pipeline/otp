@@ -54,7 +54,6 @@ class WithdrawnDateValidatorSpec extends Specification {
         TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
-
     void 'validate, when metadata does not contain a column WITHDRAWN_DATE, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()

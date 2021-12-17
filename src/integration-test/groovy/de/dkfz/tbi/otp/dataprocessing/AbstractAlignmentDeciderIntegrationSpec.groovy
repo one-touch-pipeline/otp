@@ -366,7 +366,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         e.message.contains("The input seqTrack of method hasLibraryPreparationKitAndBedFile is null")
     }
 
-
     void "test isLibraryPreparationKitOrBedFileMissing, with normal seqTrack"() {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrack()

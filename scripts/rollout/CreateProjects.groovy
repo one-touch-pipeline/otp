@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.project.Project
 
-
 /**
  * @see Project
  * @see ProjectCreationCommand
@@ -146,7 +145,6 @@ static boolean validateProjectParams(Map<String, Object> projectCreationParamete
  * @return a String indicating a successfully creation or an validation error.
  */
 static String createProjects(AnnotationConfigEmbeddedWebApplicationContext ctx, Map<String, Object> projectCreationParameter) {
-
 
     int amount
     boolean sendNotifications

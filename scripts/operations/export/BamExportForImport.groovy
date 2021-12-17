@@ -72,7 +72,6 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
  * The flag 'overwriteExisting' indicates, that an existing file should be replaced.
  */
 
-
 //=============================================
 // input area
 
@@ -97,10 +96,8 @@ String fileName = ''
  */
 boolean overwriteExisting = false
 
-
 //=============================================
 // work area
-
 
 String outputFieldDelimiter = '\t'
 

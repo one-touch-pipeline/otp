@@ -27,7 +27,6 @@ import de.dkfz.tbi.TestCase
 
 class LocalShellHelperUnitTests {
 
-
     static final String STDOUT_TEXT = "Stdout\nText"
     static final String STDERR_TEXT = "Stderr\nText"
     static final String COMMAND = "echo '${STDOUT_TEXT}'\n>&2 echo '${STDERR_TEXT}'"

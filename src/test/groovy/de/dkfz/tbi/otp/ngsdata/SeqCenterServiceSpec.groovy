@@ -35,7 +35,6 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
         ]
     }
 
-
     SeqCenterService seqCenterService
 
     final static String SEQ_CENTER = "SeqCenter"
@@ -46,11 +45,9 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
 
     final static String DIFFERENT_SEQ_CENTER_DIR = "DifferentSeqCenterDir"
 
-
     void setup() throws Exception {
         seqCenterService = new SeqCenterService()
     }
-
 
     void "test createSeqCenter"() {
         expect:

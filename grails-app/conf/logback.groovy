@@ -48,7 +48,6 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
-
 def targetDir = BuildSettings.TARGET_DIR
 if (Environment.isDevelopmentMode() && targetDir != null) {
     appender("FULL_STACKTRACE", FileAppender) {
@@ -163,7 +162,6 @@ String jobLogConfig = """\
 </configuration>
 """
 configurator.doConfigure(new ByteArrayInputStream(jobLogConfig.getBytes(StandardCharsets.UTF_8)))
-
 
 logger("de.dkfz.tbi.otp.infrastructure.FileService.WAITING", DEBUG, ['WAIT_TO_FILE_SYSTEM'], false)
 logger("de.dkfz.tbi.otp", DEBUG, appenderToUse, false)

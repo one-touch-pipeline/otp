@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm

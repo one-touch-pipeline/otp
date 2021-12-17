@@ -47,7 +47,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     static final String HEADER_BLOCKED_SAMPLE_PAIRS =
             'The following samplePairs are waiting'
 
-
     static final String BLOCKED_BAM_IS_WITHDRAWN = "bam file is withdrawn"
     static final String BLOCKED_BAM_IS_IN_PROCESSING = "bam file is in processing"
     static final String BLOCKED_TO_FEW_LANES = "bam file has too few lanes"
@@ -114,13 +113,11 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE, diseaseBamFileMissed[true])
         output.showList(HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE, diseaseBamFileMissed[false])
 
-
         List<BlockedSamplePair> waitingSamplePairs = blockedSamplePairs(allSamplePairs)
         output.showList(HEADER_BLOCKED_SAMPLE_PAIRS, waitingSamplePairs)
 
         return allSamplePairs - samplePairWithoutBamFile - waitingSamplePairs.collect { it.samplePair }
     }
-
 
     List<AbstractMergedBamFile> bamFilesWithoutCategory(List<AbstractMergedBamFile> bamFiles) {
         if (!bamFiles) {
@@ -265,7 +262,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                 samplePair: allSamplePairs,
         ])
     }
-
 
     List<BlockedSamplePair> blockedSamplePairs(List<SamplePair> allSamplePairs) {
         if (!allSamplePairs) {

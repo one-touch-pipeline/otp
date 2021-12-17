@@ -63,8 +63,6 @@ class StringUtilsUnitTests {
         assert commonPrefixLength('abc', 'ab') == 2
     }
 
-
-
     @Test
     void testLongestCommonPrefix_FirstStringIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {

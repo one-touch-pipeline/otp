@@ -115,7 +115,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         ]
     }
 
-
     void "test the constraints when instanceName is blank, should not be valid"() {
         given:
         MockBamFilePairAnalysis bamFilePairAnalysis = createMockBamFilePairAnalysis()
@@ -126,7 +125,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         then:
         !bamFilePairAnalysis.validate()
     }
-
 
     void "test the constraints when instanceName is not unique, should not be valid"() {
         given:
@@ -152,13 +150,11 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(bamFile1.mergingWorkPackage)
 
-
         expect:
         DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFile2,
         )
-
 
         where:
         classBamFile1                    | classBamFile2
@@ -205,7 +201,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 assert false
         }
     }
-
 
     static MockBamFilePairAnalysis createMockBamFilePairAnalysis() {
         Pipeline alignmentPipeline = DomainFactory.createPanCanPipeline()

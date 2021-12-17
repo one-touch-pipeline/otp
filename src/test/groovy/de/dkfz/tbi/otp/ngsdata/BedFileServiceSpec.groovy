@@ -41,13 +41,11 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
         ]
     }
 
-
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     BedFile bedFile
     File referenceGenomesBaseDirectory
-
 
     void setup() {
         bedFile = DomainFactory.createBedFile([fileName: 'bedFileName'])
@@ -60,7 +58,6 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
         service.referenceGenomeService = new ReferenceGenomeService()
         service.referenceGenomeService.processingOptionService = new ProcessingOptionService()
     }
-
 
     void "test filePath, when bedFile is null, should fail"() {
         when:

@@ -24,7 +24,6 @@
  * Change the SeqPlatform of a Run and its SeqTracks.
  */
 
-
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.*
 

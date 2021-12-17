@@ -37,7 +37,6 @@ class PrivacyPolicyController {
     UserService userService
     ProcessingOptionService processingOptionService
 
-
     def index() {
         String contactDataDataPrivacyOfficer = processingOptionService.findOptionAsString(OptionName.GUI_CONTACT_DATA_POSTAL_ADDRESS_DATA_PROTECTION_OFFICER)
 

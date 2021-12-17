@@ -44,7 +44,6 @@ class AbstractBamFileSpec extends Specification implements DataTest {
         ]
     }
 
-
     void testSave() {
         given:
         AbstractBamFile bamFile = new MockAbstractBamFile()
@@ -53,7 +52,6 @@ class AbstractBamFileSpec extends Specification implements DataTest {
         bamFile.validate()
         bamFile.save(flush: true)
     }
-
 
     void testSaveCoverageNotNull() {
         given:
@@ -64,7 +62,6 @@ class AbstractBamFileSpec extends Specification implements DataTest {
         bamFile.validate()
         bamFile.save(flush: true)
     }
-
 
     void testWithdraw_ChangeStatusFromNeedsProcessingToDeclared() {
         given:
@@ -84,7 +81,6 @@ class AbstractBamFileSpec extends Specification implements DataTest {
         bamFile.status == AbstractBamFile.State.DECLARED
     }
 }
-
 
 @Artefact(DomainClassArtefactHandler.TYPE)
 class MockAbstractBamFile extends AbstractBamFile implements DomainClass, GormEntity<MockAbstractBamFile>, Validateable {

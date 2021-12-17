@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -11871,7 +11870,6 @@ List<FastaEntry> fastaEntries = [
 ].collect {
     it()
 }.flatten()
-
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,

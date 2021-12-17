@@ -111,7 +111,6 @@ class JobStatusLoggingService {
         return "${message}" as String
     }
 
-
     /**
      * Checks if cluster jobs have finished successfully.
      *
@@ -135,7 +134,6 @@ class JobStatusLoggingService {
         assert clusterJobMap.values().flatten().size() == clusterJobs.size()
         return failedOrNotFinishedClusterJobs(processingStep, clusterJobMap)
     }
-
 
     /**
      * Checks if cluster jobs have finished successfully.

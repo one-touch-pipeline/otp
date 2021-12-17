@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
-
 import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification

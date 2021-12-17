@@ -79,7 +79,6 @@ class ConfigService implements ApplicationContextAware {
         return exactlyOneElement(Realm.findAllByName(processingOptionService.findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE)))
     }
 
-
     File getRootPath() {
         return new File(otpProperties.get(OtpProperty.PATH_PROJECT_ROOT) ?: "")
     }
@@ -95,7 +94,6 @@ class ConfigService implements ApplicationContextAware {
     File getToolsPath() {
         return new File(otpProperties.get(OtpProperty.PATH_TOOLS) ?: "")
     }
-
 
     File getLoggingRootPath() {
         return new File(otpProperties.get(OtpProperty.PATH_CLUSTER_LOGS_OTP) ?: "")
@@ -134,7 +132,6 @@ class ConfigService implements ApplicationContextAware {
     File getSshKeyFile() {
         return new File(otpProperties.get(OtpProperty.SSH_KEY_FILE) ?: OtpProperty.SSH_KEY_FILE.defaultValue)
     }
-
 
     boolean otpSendsMails() {
         return getBooleanValue(OtpProperty.CONFIG_EMAIL_ENABLED, false)

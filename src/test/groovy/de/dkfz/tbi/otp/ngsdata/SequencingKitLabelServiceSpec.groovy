@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 
 class SequencingKitLabelServiceSpec extends MetadataFieldsServiceSpec<SequencingKitLabel> implements DataTest {

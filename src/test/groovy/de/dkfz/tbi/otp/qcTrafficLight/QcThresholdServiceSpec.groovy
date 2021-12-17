@@ -103,7 +103,6 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
             "withMateMappedToDifferentChrMaq",
     ]
 
-
     def setup() {
         qcThresholdService = new QcThresholdService()
 
@@ -317,7 +316,6 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 ),
         ]
     }
-
 
     void "test createThreshold"() {
         given:

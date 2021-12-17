@@ -38,7 +38,6 @@ class QcThresholdService {
         new ThresholdColorizer(project, seqType, qcClass)
     }
 
-
     static class ThresholdColorizer<T extends QcTrafficLightValue> {
         private Map<String, QcThreshold> thresholdList
         private Class<QcTrafficLightValue> qcClass

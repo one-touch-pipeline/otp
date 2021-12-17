@@ -71,7 +71,6 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
         return cValues
     }
 
-
     @Override
     protected String prepareAndReturnWorkflowSpecificParameter(RoddyBamFile roddyBamFile) {
         return ""
@@ -109,7 +108,6 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
         return vbpDataFiles
     }
-
 
     @Override
     protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {

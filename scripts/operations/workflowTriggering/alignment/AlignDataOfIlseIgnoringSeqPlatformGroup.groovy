@@ -40,7 +40,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  */
 Integer ilseNumber = 0
 
-
 //-------------------------------
 //work area
 

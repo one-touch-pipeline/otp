@@ -38,7 +38,6 @@ If a project already has a prefix you need to set this value to true to overwrit
  */
 boolean overwrite = false
 
-
 //-----------------------------
 // work
 assert projectName : "No project name given"

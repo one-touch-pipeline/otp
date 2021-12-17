@@ -140,7 +140,6 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         return 'hg_GRCh38.fa.chrLenOnlyACGT.tab'
     }
 
-
     @Override
     protected String getReferenceGenomeSpecificPath() {
         'bwa_hg38'

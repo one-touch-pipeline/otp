@@ -122,7 +122,6 @@ class QcThreshold implements Entity {
         }
     }
 
-
     @TupleConstructor
     static enum ThresholdStrategy {
         ABSOLUTE_LIMITS("absolute limits"),
@@ -138,7 +137,6 @@ class QcThreshold implements Entity {
         ERROR,
     }
 
-
     static void validateProperty(String val, String cls, Errors errors, String propertyName) {
         if (!(val in getValidQcPropertyForQcClass(cls))) {
             ValidatorUtil.rejectValue(propertyName, QcThreshold.class, val, errors, "invalid")
@@ -150,7 +148,6 @@ class QcThreshold implements Entity {
             ValidatorUtil.rejectValue(propertyName, QcThreshold.class, val, errors, "invalid")
         }
     }
-
 
     private static List<Member> getAnnotatedMembers(Class type) {
         List<Member> members = []
@@ -187,7 +184,6 @@ class QcThreshold implements Entity {
         GrailsClass[] classes = Holders.grailsApplication.getArtefacts('Domain')
         classes*.clazz.findAll { QcTrafficLightValue.class.isAssignableFrom(it) }
     }
-
 
     ThresholdLevel qcPassed(QcTrafficLightValue qc, Double externalValue = 0) {
         switch (this.compare) {

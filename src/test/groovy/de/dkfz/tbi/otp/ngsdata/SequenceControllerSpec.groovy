@@ -45,7 +45,6 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
         ]
     }
 
-
     def "test exportAll to ensure that both header and content have the correct number of columns"() {
         given:
         Sequence sequence = DomainFactory.createSequence()

@@ -129,7 +129,6 @@ abstract class AbstractQualityAssessment implements Entity {
     @QcThresholdEvaluated
     Double insertSizeSD
 
-
     @QcThresholdEvaluated
     Double getPercentDuplicates() {
         calculatePercentage(duplicates , totalReadCounter)

@@ -50,7 +50,6 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         service.seqTypeService = new SeqTypeService()
     }
 
-
     void 'validate, when column SEQUENCING_TYPE missing, then add expected problem'() {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(

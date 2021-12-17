@@ -92,7 +92,6 @@ class LsdfFilesService {
         return fileSystem.getPath(getFileInitialPath(dataFile))
     }
 
-
     /**
      * Important function.
      * This function knows all naming conventions and data organization

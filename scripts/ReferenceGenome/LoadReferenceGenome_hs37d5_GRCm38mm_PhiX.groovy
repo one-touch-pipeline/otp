@@ -21,7 +21,6 @@ package ReferenceGenome
  * SOFTWARE.
  */
 
-
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry

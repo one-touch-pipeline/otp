@@ -52,7 +52,6 @@ class RestartActionService {
 
     ProcessService processService
 
-
     void handleAction(JobErrorDefinition.Action action, Job job) {
         if (!action) {
             job.log.debug("Stopping, because action is null.")

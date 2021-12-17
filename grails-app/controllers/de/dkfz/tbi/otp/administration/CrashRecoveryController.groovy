@@ -42,7 +42,6 @@ class CrashRecoveryController {
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
 
-
     def index() {
         boolean crashRecovery = crashRecoveryService.crashRecovery
         boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()

@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification

@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.utils.*
  *   - creation of swap script
  */
 
-
 /*********************************************************************************
  * Input area
  *
@@ -169,7 +168,6 @@ if (samplesAndTypesScriptOutput.containsChanges) {
     return
 }
 createSwapScript(swapLabel).printToStdout()
-
 
 /*********************************************************************************
  * Utility Functions and Classes

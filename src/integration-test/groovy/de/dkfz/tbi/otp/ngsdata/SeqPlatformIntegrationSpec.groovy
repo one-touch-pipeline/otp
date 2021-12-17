@@ -57,7 +57,6 @@ class SeqPlatformIntegrationSpec extends Specification {
         sp4 = new SeqPlatform(name: "sp4")
         sp4.save(flush: true)
 
-
         mergingCriteriaUseProject = DomainFactory.createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
         )
@@ -92,7 +91,6 @@ class SeqPlatformIntegrationSpec extends Specification {
         sp4.addToSeqPlatformGroups(spgUseDefault1)
         sp4.save(flush: true)
     }
-
 
     void "test add a SP which belongs already to a default SPG to another default SPG, fails"() {
         given:
@@ -197,7 +195,6 @@ class SeqPlatformIntegrationSpec extends Specification {
         then:
         thrown(ValidationException)
     }
-
 
     void "test get correct SPGs for SP and project and seqType"() {
         given:

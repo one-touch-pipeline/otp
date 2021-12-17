@@ -46,7 +46,6 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
         return DomainFactory.createRoddyRnaPipeline()
     }
 
-
     void "workflowName, should return WgbsAlignmentWorkflow"() {
         expect:
         'WgbsAlignmentWorkflow' == createAlignmentChecker().getWorkflowName()

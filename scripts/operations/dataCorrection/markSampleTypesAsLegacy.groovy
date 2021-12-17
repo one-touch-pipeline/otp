@@ -27,14 +27,12 @@ List sampleTypeNames = """
 #SampleType1
 #SampleType2
 
-
 """.split("\n")*.trim().findAll {
     it && !it.startsWith('#')
 }
 
 //************ legacy or not legacy ************//
 boolean legacy = true
-
 
 /* work area */
 SampleType.withTransaction {

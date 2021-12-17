@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.dataswap.DataSwapService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -43,13 +42,11 @@ import de.dkfz.tbi.otp.utils.*
  * Limitation: If you want to merge one patient into another, they may not have the same SampleTypes (not implemented yet)
  */
 
-
 /*********************************************************************************
  * Input area
  *
  * This block should be all that needs to be changed to generate the swap.
  ********************************************************************************/
-
 
 swapLabel = 'OTRS-________________-something-descriptive'
 
@@ -59,7 +56,6 @@ def swapMap = """
 #oldPid oldSampleType newPid newSampleType
 #oldPid oldSampleType newPid newSampleType
 #oldPid sampleType newPid sampleType
-
 
 """.split("\n")*.trim().findAll {
     it && !it.startsWith('#')
@@ -244,7 +240,6 @@ Closure<String> createScript = { String swapLabel ->
 
 println createScript(swapLabel)
 
-
 /****************************************************************
  * refactoring milestone:
  * END chaotic closures mixed with in-line script
@@ -347,7 +342,6 @@ private int moveOneSample(Project newProject,
 
     return counter
 }
-
 
 private int renamePatient(String newIndividualName, Individual oldIndividual,
                           Project newProject,
@@ -466,7 +460,6 @@ class Snippets {
                ).save(flush: true, failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
                """.stripIndent()
     }
-
 
     static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newDataFileNameClosure,
                            Project newProject,

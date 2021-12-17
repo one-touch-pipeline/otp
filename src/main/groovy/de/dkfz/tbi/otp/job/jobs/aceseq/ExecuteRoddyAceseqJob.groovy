@@ -120,7 +120,6 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         return ""
     }
 
-
     @Override
     protected void validate(AceseqInstance aceseqInstance) throws Throwable {
         assert aceseqInstance : "The input aceseqInstance must not be null"
@@ -131,7 +130,6 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
                 aceseqInstance.workExecutionStoreDirectory,
         ]
         directories.addAll(aceseqInstance.workExecutionDirectories)
-
 
         directories.each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)

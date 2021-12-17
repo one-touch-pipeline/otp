@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-
 class SeqTrackServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
@@ -50,7 +49,6 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
     }
 
     SeqTrackService seqTrackService
-
 
     void setup() throws Exception {
         seqTrackService = new SeqTrackService()
@@ -299,7 +297,6 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         DomainFactory.createDataFile(seqTrack: seqTrack, run: run, fastqImportInstance: fastqImportInstance, initialDirectory: path ?: "/link_this")
         return seqTrack
     }
-
 
     void "test doesImportDirAllowLinking, seqTrack is null, should fail"() {
         when:

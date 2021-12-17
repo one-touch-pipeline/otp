@@ -50,7 +50,6 @@ class RestartCheckerServiceSpec extends Specification implements DataTest {
         !restartCheckerService.canJobBeRestarted(Mock(Job))
     }
 
-
     void "canWorkflowBeRestarted, when start job bean is of type RestartableStartJob, returns true"() {
         given:
         String planName = HelperUtils.uniqueString
@@ -96,7 +95,6 @@ class RestartCheckerServiceSpec extends Specification implements DataTest {
         expect:
         !restartCheckerService.canWorkflowBeRestarted(step)
     }
-
 
     void "isJobAlreadyRestarted, when job has already been restarted, returns true"() {
         given:

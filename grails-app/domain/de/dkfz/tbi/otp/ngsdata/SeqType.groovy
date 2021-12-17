@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import de.dkfz.tbi.otp.project.ProjectFieldReferenceAble
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MetadataField

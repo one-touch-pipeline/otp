@@ -57,7 +57,6 @@ class ProcessingStepIntegrationTests {
         assert step == ProcessingStep.findTopMostProcessingStep(step)
     }
 
-
     @Test
     void testClusterJobName() {
         JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan(

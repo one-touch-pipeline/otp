@@ -87,7 +87,6 @@ class OtpTagLib {
         out << editorSwitchRender(roles, template, attrs)
     }
 
-
     /**
      * Renders the enable/disable auto-refresh buttons.
      * Depending on the current state in the session either enable or disable is pre-selected.
@@ -254,7 +253,6 @@ class OtpTagLib {
         out << g.submitButton(class: "save", style: "display: none;", name: "Save")
         out << '<button class="cancel" style="display: none;">Cancel</button>'
     }
-
 
     def tableCell = { attrs ->
         TableCellValue cell = attrs.cell

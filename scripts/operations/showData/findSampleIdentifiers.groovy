@@ -34,13 +34,11 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
  * Empty lines and comments (starting with '#') are skipped.
  */
 
-
 //-------------------------------
 //work area
 String input = """
 #sample id 1
 #sample id 2
-
 
 """
 

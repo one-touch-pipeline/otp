@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.tracking
 
-
 import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification

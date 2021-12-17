@@ -34,11 +34,9 @@ List projectNames = """
 #projectName1
 #projectName2
 
-
 """.split("\n")*.trim().findAll {
     it && !it.startsWith('#')
 }
-
 
 User.withTransaction {
     User user = User.findByUsername(username)

@@ -112,12 +112,10 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 
-
     @Override
     void checkForFailedClusterJobs() {
         assert ClusterJob.all.every { it.jobLog != null }
     }
-
 
     @Override
     SeqType findSeqType() {

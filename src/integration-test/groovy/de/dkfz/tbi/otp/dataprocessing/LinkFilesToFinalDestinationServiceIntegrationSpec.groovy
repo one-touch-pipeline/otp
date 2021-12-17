@@ -140,9 +140,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         !roddyBamFile.finalMd5sumFile.exists()
     }
 
-
-
-
     private void assertBamFileIsFine() {
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
         assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
@@ -150,7 +147,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert roddyBamFile.fileExists
         assert roddyBamFile.dateFromFileSystem instanceof Date
     }
-
 
     void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #QC_PASSED"() {
         given:

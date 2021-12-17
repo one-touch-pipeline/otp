@@ -52,7 +52,6 @@ class SeqPlatformServiceTests {
         checkedLogger = null
     }
 
-
     private static List createDataFor_findForNameAndModelAndSequencingKit() {
         final String OTHER_PLATFORM_NAME = 'Some other platform name'
         SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel()
@@ -86,7 +85,6 @@ class SeqPlatformServiceTests {
                 sequencingKitLabel,
         ]
     }
-
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndModelAndKitGiven() {

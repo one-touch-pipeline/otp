@@ -41,7 +41,6 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
     ChecksumFileService checksumFileService
     Path file
 
-
     void "md5FileName, when call then return md5 file name"() {
         given:
         ChecksumFileService checksumFileService = new ChecksumFileService()

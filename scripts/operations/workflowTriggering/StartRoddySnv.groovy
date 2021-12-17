@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.*
 //the sample pair has to be created already by OTP, the SAMPLETYPE1 has to be a disease sample type, the SAMPLETYPE2 is usually control
 List<SamplePair> samplePairs = """
 
-
 """.split('\n').findAll().collect {
     println "check: '${it}'"
     String[] split = it.split(' ')
@@ -49,9 +48,7 @@ List<SamplePair> samplePairs = """
     return samplePair
 }
 
-
 RoddySnvCallingStartJob roddySnvCallingStartJob = ctx.roddySnvStartJob
-
 
 SamplePair.withTransaction {
     samplePairs.each { SamplePair samplePair ->

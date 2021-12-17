@@ -115,6 +115,3 @@ class CreateSoftwareToolCommand implements Validateable {
     String programName
     String programVersion
 }
-
-
-

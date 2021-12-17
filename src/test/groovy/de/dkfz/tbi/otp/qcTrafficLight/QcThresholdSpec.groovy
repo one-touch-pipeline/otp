@@ -222,7 +222,6 @@ class QcThresholdSpec extends Specification implements DataTest {
                 qcClass: CellRangerQualityAssessment.name,
         )
 
-
         expect:
         threshold.qcPassed(qc) == warning
 
@@ -241,7 +240,6 @@ class QcThresholdSpec extends Specification implements DataTest {
         CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
                 estimatedNumberOfCells: 50,
         ], false)
-
 
         QcThreshold threshold = DomainFactory.createQcThreshold(
                 qcProperty1: "estimatedNumberOfCells",
@@ -272,7 +270,6 @@ class QcThresholdSpec extends Specification implements DataTest {
         CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
                 estimatedNumberOfCells: 50,
         ], false)
-
 
         QcThreshold threshold = DomainFactory.createQcThreshold(
                 qcProperty1: "estimatedNumberOfCells",

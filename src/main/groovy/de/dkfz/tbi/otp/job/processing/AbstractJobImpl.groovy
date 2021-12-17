@@ -80,7 +80,6 @@ abstract class AbstractJobImpl implements Job {
      */
     private State state = State.CREATED
 
-
     /**
      * Adds an output parameter to the list of output parameters provided
      * by the Job implementation.

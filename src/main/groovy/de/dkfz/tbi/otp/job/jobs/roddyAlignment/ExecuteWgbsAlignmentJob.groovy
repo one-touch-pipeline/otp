@@ -38,16 +38,13 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 @Slf4j
 class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoRestartableJob {
 
-
     @Autowired
     RemoteShellHelper remoteShellHelper
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
 
-
     static final String HEADER = "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"
-
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
@@ -65,7 +62,6 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
 
         return cValues
     }
-
 
     @Override
     protected String prepareAndReturnWorkflowSpecificParameter(RoddyBamFile roddyBamFile) {
@@ -110,14 +106,12 @@ EOD
 chmod 0444 ${metadataFile.path}
 """
 
-
         ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
         assert output.exitCode == 0
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(metadataFile)
 
         return "--usemetadatatable=${metadataFile.path}"
     }
-
 
     @Override
     protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {

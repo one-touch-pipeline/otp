@@ -39,7 +39,6 @@ class AggregateSequences implements Serializable {
     long projectId
     long realmId
 
-
     /** aggregated fields from {@link SeqTrack} */
     long laneCount
 

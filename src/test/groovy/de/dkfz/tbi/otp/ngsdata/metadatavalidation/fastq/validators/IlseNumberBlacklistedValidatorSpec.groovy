@@ -96,7 +96,6 @@ ${ilse}
 """)
         IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission([ilseNumber: ilse, warning: true, comment: DomainFactory.createComment()])
 
-
         when:
         new IlseNumberBlacklistedValidator().validate(context)
         Collection<Problem> expectedProblems = [

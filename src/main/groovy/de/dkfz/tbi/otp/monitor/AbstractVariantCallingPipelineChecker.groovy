@@ -32,14 +32,12 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<SamplePair> {
 
-
     static final String HEADER_NO_CONFIG = 'For the following project seqtype combination no config is defined'
     static final String HEADER_DISABLED_SAMPLE_PAIR = 'The following samplePairs are disabled for processing'
     static final String HEADER_TOO_LITTLE_COVERAGE_FOR_ANALYSIS = 'The following samplePairs have not enough coverage to run this analysis'
     static final String HEADER_OLD_INSTANCE_RUNNING = 'old instance running'
     static final String HEADER_WITHDRAWN_ANALYSIS_RUNNING = 'The following Analysis are withdrawn and running'
     static final String HEADER_WITHDRAWN_ANALYSIS_FINISHED = 'The following Analysis are withdrawn and finished'
-
 
     static final String PROBLEMS_NO_BAM_FILE = "bam file does not exist"
     static final String PROBLEMS_MISSING_SEQ_TRACKS = "bam file misses the following seqtracks"
@@ -275,7 +273,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         ])
     }
 
-
     abstract String getWorkflowName()
 
     abstract String getProcessingStateMember()
@@ -322,7 +319,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         }
         return "${samplePair} ${ret ? " (${ret.join(', ')})" : ''}"
     }
-
 
     @TupleConstructor
     @EqualsAndHashCode

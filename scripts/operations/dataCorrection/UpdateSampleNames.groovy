@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 /**
  * A script to update the sampleNames in the SeqTracks.
  * That is sometimes requested after a data swap.
@@ -58,7 +57,6 @@ List<String> oldSampleNameNotFound = []
 List<String> oldSampleNameMultipleFound = []
 List<String> newSampleNameFound = []
 List<String> changes = []
-
 
 List<Map> workList = mapping.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')
@@ -101,7 +99,6 @@ if (newSampleNameFound) {
 }
 
 println "\n\nThe following changes will be done:\n${changes.join('\n')}"
-
 
 if (preView) {
     println "\n\nStop, since preview mode is active. Nothing has changed. Change flag preView to false to do the changes"

@@ -30,7 +30,6 @@ class GeneModel implements Entity {
     static final String GENE_MODELS_DEXSEQ = "GENE_MODELS_DEXSEQ"
     static final String GENE_MODELS_GC = "GENE_MODELS_GC"
 
-
     ReferenceGenome referenceGenome
 
     // suppressing because changing this would involve refactoring the code as well as the database columns

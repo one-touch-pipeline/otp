@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-
 import grails.testing.gorm.DataTest
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
@@ -95,7 +94,6 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
         context.spreadsheet.header.cells[2].text == SEQUENCING_READ_TYPE.name()
     }
 
-
     void 'test getSummary when problems occurred'()  {
         given:
         DomainFactory.createAllAlignableSeqTypes()
@@ -113,7 +111,6 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${SequencingReadType.PAI
                 "For samples which contain 'lib', there should be a value in the TAGMENTATION_LIBRARY column.",
         ]
     }
-
 
     void 'test getSummary when no problem occurred'() {
         given:

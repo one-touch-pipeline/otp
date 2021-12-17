@@ -37,7 +37,6 @@ enum SampleIdentifierParserBeanName {
     PEDION('pedionParser', 'PeDiOn'),
     COVID19('covid19SampleIdentifierParser', 'Covid-19'),
 
-
     final String beanName
     final String displayName
 }

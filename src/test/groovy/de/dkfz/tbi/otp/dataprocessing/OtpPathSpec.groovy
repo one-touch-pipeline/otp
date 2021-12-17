@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.project.Project
 
 class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 
-
     void "relativePath"() {
         given:
         Project project = new Project()

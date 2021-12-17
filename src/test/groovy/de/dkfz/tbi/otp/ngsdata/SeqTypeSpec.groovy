@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
@@ -81,7 +80,6 @@ class SeqTypeSpec extends Specification implements DataTest, DomainFactoryCore {
         then:
         seqType == SeqTypeService.wholeGenomePairedSeqType
     }
-
 
     void "test get Exome Paired SeqType, no SeqType in DB, should fail"() {
         when:

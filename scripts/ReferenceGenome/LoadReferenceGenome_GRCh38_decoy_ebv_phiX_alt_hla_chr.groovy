@@ -3524,7 +3524,6 @@ List<FastaEntry> fastaEntries = [
     it()
 }.flatten()
 
-
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, fingerPrintingFileName, statSizeFileNames)

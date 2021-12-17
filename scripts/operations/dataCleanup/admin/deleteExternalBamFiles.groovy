@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -58,7 +57,6 @@ List<String> pidsToDelete = [
  */
 boolean tryRun = true
 
-
 //--------------------------------
 //work
 
@@ -75,7 +73,6 @@ def bamFiles = ExternallyProcessedMergedBamFile.createCriteria().listDistinct {
 List<String> dirsToDelete = []
 
 AnalysisDeletionService analysisDeletionService = ctx.analysisDeletionService
-
 
 ExternallyProcessedMergedBamFile.withTransaction {
     bamFiles.each { ExternallyProcessedMergedBamFile epmbf ->

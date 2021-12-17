@@ -53,10 +53,8 @@ class AbstractBamFileService {
                 // quality assessed.
                 "AND bf3.qualityAssessmentStatus = :qaStatus)) "
 
-
     static final String QUALITY_ASSESSED_AND_MERGED_QUERY_WITHOUT_QA_CHECK =
             QUALITY_ASSESSED_AND_MERGED_QUERY_PART + ")) "
-
 
     /**
      * @param bamFile, which was assigned to a {@link MergingSet}

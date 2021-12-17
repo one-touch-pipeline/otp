@@ -48,7 +48,6 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         ]
     }
 
-
     TestConfigService configService
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
@@ -80,8 +79,6 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
     void cleanup() {
         configService.clean()
     }
-
-
 
     void "test logFileBaseDir, when processing step is null"() {
         when:

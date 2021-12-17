@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import de.dkfz.tbi.otp.project.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -34,9 +33,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * Prints out an overview of all domain instances connected to the Project
  */
 
-
 String projectName = ""
-
 
 List<String> output = []
 Project project = exactlyOneElement(Project.findAllByName(projectName))

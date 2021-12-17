@@ -36,7 +36,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class MateNumberLibraryLayoutValidatorSpec extends Specification {
 
-
     @Unroll
     void 'validate, when column(s) is/are missing, adds error(s)'() {
         given:

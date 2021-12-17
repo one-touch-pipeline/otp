@@ -137,7 +137,6 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     abstract Map getQcData(T analysis)
 
-
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
     List<Path> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
         if (!callingInstance) {

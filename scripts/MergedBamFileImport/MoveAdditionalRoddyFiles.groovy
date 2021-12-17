@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException
 import java.nio.file.*
 import java.util.regex.*
@@ -172,7 +171,6 @@ void assertThatSampleTypesAreUnique (List<ArrayList> sampleTypesAndBamFiles) {
     assert sampleTypesAndBamFiles.countBy { it[0] }.every { type, count -> count == 1 }
 }
 
-
 void moveAdditionalRoddyFilesInDirectory(Path sourceDir) {
     println("\n\n# sourcedir=" + sourceDir)
     List<Path> bamFiles = getMergedBams(sourceDir)
@@ -202,8 +200,6 @@ void moveAdditionalRoddyFilesInDirectory(Path sourceDir) {
 /*
 Path directoryWithPidSubdirectories = Paths.get("/path/to/example/project")
 Pattern pidSelectorPattern = ~/.*PID_PREFIX\d+.*//*
-
-
 
 List<Path> matchPidDirectoriesToImport(Path from, Pattern pidPattern) {
     Files.list(from).toArray().findAll { it =~ pidPattern }.asList().sort()

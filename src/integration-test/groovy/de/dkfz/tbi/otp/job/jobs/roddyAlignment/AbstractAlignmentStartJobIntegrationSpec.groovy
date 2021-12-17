@@ -48,7 +48,6 @@ class AbstractAlignmentStartJobIntegrationSpec extends Specification {
         failedInstance.mergingWorkPackage.bamFileInProjectFolder = failedInstance
         failedInstance.mergingWorkPackage.save(flush: true)
 
-
         AbstractAlignmentStartJob roddyAlignmentStartJob = new PanCanStartJob()
         roddyAlignmentStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameterSecond ->

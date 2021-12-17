@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-
 //----------------------------------------
 //input area
 
@@ -65,7 +64,6 @@ println mergingWorkPackages*.toString().sort().join('\n')
 //----------------------------------------
 //work area
 SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
-
 
 SeqTrack.withTransaction {
     println "\n\n        finds or creates following sample pairs:"

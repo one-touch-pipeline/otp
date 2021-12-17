@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 

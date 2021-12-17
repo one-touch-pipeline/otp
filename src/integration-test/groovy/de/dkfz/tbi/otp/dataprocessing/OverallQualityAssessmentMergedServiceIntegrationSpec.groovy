@@ -86,8 +86,6 @@ class OverallQualityAssessmentMergedServiceIntegrationSpec extends Specification
         chromosomeLengthForReferenceGenomes == result
     }
 
-
-
     private OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(ReferenceGenome referenceGenome) {
         DomainFactory.createOverallQualityAssessmentMerged([
                 qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass([

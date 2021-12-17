@@ -52,7 +52,6 @@ class FastqcDataFilesService {
     static final String FASTQC_FILE_SUFFIX = "_fastqc"
     static final String FASTQC_ZIP_SUFFIX = ".zip"
 
-
     Path fastqcOutputDirectory(SeqTrack seqTrack) {
         DataProcessingFilesService.OutputDirectories type = DataProcessingFilesService.OutputDirectories.FASTX_QC
 

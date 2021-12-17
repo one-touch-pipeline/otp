@@ -47,7 +47,6 @@ class AceseqController extends AbstractAnalysisController {
         render dataToRender as JSON
     }
 
-
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             render status: 404

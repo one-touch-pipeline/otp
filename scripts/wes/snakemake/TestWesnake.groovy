@@ -72,6 +72,3 @@ work('post') {
 
     apiInstance.runWorkflow(workflowParams, workflowType, workflowTypeVersion, tags, workflowEngineParameters, workflowUrl, workflowAttachment)
 }
-
-
-

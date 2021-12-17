@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
-
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.utils.Entity
 

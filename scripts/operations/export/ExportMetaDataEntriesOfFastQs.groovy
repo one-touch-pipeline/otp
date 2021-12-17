@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -39,7 +38,6 @@ import java.nio.file.Path
  * They are NOT updated when sampleswaps or data corrections are done.
  * Thus, you are likely to get outdated data with this export script.
  */
-
 
 ////////////////////////////////////////////////////////////
 // CONFIG
@@ -104,7 +102,6 @@ List<MetaDataEntry> metaDataEntries = MetaDataEntry.createCriteria().list {
     order('dataFile') // Caveat: ordering clause is vitally important for output-logic below to be correct
 }
 
-
 // output our data ============================================================
 // Note: the OTP Console will probably time out with a proxy/gateway error while doing this, but the script remains
 // running. Look for the ".done" file to see when we are truly finished.
@@ -141,8 +138,6 @@ output.withPrintWriter { w ->
     writeln(line_buffer, previous_fastq, w, wanted_columns)
 } // END printwriter
 
-
-
 private void writeln(Map<String, String> line_buffer, DataFile the_file, PrintWriter w, List<MetaDataColumn> wanted_columns) {
     line = []
 
@@ -168,6 +163,5 @@ println(done_message)
 done_flag.withPrintWriter { Writer w ->
     w.write(done_message)
 }
-
 
 null // suppress (potentially huge) console result output.

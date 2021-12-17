@@ -73,7 +73,6 @@ List<Closure> grouping = [
         //{ it[4] },// seq type
 ]
 
-
 //---------------------
 //work
 
@@ -100,10 +99,8 @@ List<List> result = [
     ])
 }
 
-
 Map groupData = result.groupBy(grouping)
 println printGrouping(groupData)
-
 
 //---------------------
 //functions

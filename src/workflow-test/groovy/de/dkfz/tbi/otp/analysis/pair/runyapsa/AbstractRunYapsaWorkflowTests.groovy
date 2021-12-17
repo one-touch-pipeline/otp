@@ -87,7 +87,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         return referenceGenome
     }
 
-
     void createRunYapsaInput() {
         int minConfidenceScore = 8
         File sourceSnvCallingInputFile
@@ -111,7 +110,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         ], realm)
     }
 
-
     @Override
     List<String> getWorkflowScripts() {
         return [
@@ -123,7 +121,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     List<Path> filesToCheck(RunYapsaInstance runYapsaInstance) {
         return []
     }
-
 
     @Override
     File getWorkflowData() {

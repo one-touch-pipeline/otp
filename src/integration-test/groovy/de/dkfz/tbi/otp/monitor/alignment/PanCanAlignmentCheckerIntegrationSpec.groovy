@@ -48,7 +48,6 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         return DomainFactory.createRoddyRnaPipeline()
     }
 
-
     void "workflowName, should return PanCanWorkflow"() {
         expect:
         'PanCanWorkflow' == createAlignmentChecker().getWorkflowName()
@@ -70,7 +69,6 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         expect:
         TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
     }
-
 
     void "filter, when seqTracks given, then create output for filtered seqTracks and return the others"() {
         given:
@@ -109,7 +107,6 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         then:
         expectedSeqTracks == result
     }
-
 
     private SeqTrack createExomeSeqTrack(boolean createLibraryPreperationKit, boolean createBedFile) {
         SeqTrack exomeSeqTrack = DomainFactory.createExomeSeqTrack([

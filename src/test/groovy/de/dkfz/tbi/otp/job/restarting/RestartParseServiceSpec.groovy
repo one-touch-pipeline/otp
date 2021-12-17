@@ -41,7 +41,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
     @Rule
     TemporaryFolder temporaryFolder
 
-
     @Unroll
     void "extractMatchingAction, when text is '#text', matches (#match) JobErrorDefinition with errorExpression '#errorExpression'"() {
         given:
@@ -73,7 +72,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         'test\tbla\ttest' | /test(.|\s)*test/ || true
     }
 
-
     @Unroll
     void "extractMatchingAction returns #expectedAction for actions #actions"() {
         given:
@@ -104,7 +102,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         [JobErrorDefinition.Action.RESTART_JOB, JobErrorDefinition.Action.RESTART_WF] || JobErrorDefinition.Action.STOP
     }
 
-
     @Unroll
     void "test handleTypeMessage (#text)"() {
         given:
@@ -129,7 +126,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         'abc'  || null
         'Test' || JobErrorDefinition.Action.RESTART_WF
     }
-
 
     @Unroll
     void "test handleTypeStackTrace (#text)"() {
@@ -191,7 +187,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         null == service.handleTypeStackTrace(job, jobErrorDefinitions)
     }
 
-
     @Unroll
     void "test handleTypeClusterLogs '#name' "() {
         given:
@@ -249,7 +244,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         'two files, only one exist and match'        | ['Test1', null]                                 || JobErrorDefinition.Action.RESTART_WF
         'many files, some exist, matching one cases' | [null, 'abc', null, 'Test1', null, 'abc', null] || JobErrorDefinition.Action.RESTART_WF
     }
-
 
     @Unroll
     void "detectAndHandleType calls correct method for #type"() {
@@ -402,7 +396,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         'm1'      | 'unknown'  | 'c1'      || null
         'unknown' | 's1'       | 'c1'      || null
     }
-
 
     private List<JobErrorDefinition> createJobErrorDefinitions() {
         return [
