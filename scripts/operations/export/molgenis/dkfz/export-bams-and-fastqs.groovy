@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.TimeFormats
@@ -69,17 +70,23 @@ enum DataFileColumns {
     PID("PID", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sample.individual.pid
     }),
-    SPECIES("Species list", { DataFile dataFile, Map properties = [:] ->
-        return  dataFile.individual.species ? ([dataFile.individual.species.name] + dataFile.sample.mixedInSpecies).join(', ') : ""
-    }),
     COMMON_NAME("Species Common Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.species*.speciesCommonName*.name.join(', ')
+        return dataFile.individual.species ? dataFile.individual.species.species.speciesCommonName.name : ""
     }),
     SCIENTIFIC_NAME("Species Scientific Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.species*.scientificName.join(', ')
+        return dataFile.individual.species ? dataFile.individual.species.species.scientificName : ""
     }),
     STRAIN_NAME("Species Strain Name", { DataFile dataFile, Map properties = [:] ->
-        return dataFile.seqTrack.sample.individual.project.speciesWithStrains*.strain*.name.join(', ')
+        return dataFile.individual.species ? dataFile.individual.species.strain.name : ""
+    }),
+    MIXED_IN_COMMON_NAME("Mixed-in Species Common Name", { DataFile dataFile, Map properties = [:] ->
+        return (dataFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.species*.speciesCommonName*.name.join(',')
+    }),
+    MIXED_IN_SCIENTIFIC_NAME("Mixed-in Species Scientific Name", { DataFile dataFile, Map properties = [:] ->
+        return (dataFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.species*.scientificName.join(',')
+    }),
+    MIXED_IN_STRAIN_NAME("Mixed-in Species Strain Name", { DataFile dataFile, Map properties = [:] ->
+        return (dataFile.sample.mixedInSpecies ?: [] as List<SpeciesWithStrain>)*.strain*.name.join(',')
     }),
     SAMPLE_IDENTIFIER("Sample Identifier", { DataFile dataFile, Map properties = [:] ->
         return dataFile.seqTrack.sampleIdentifier

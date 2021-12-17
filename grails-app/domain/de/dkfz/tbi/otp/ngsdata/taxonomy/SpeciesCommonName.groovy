@@ -24,11 +24,10 @@ package de.dkfz.tbi.otp.ngsdata.taxonomy
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.MetadataField
 
-class SpeciesCommonName implements Entity, MetadataField {
+class SpeciesCommonName implements Entity {
 
-    static hasMany = [importAlias: String]
+    String name
 
     static constraints = {
         name(unique: true, nullable: false, blank: false, validator: { String val, SpeciesCommonName obj ->

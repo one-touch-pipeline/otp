@@ -21,18 +21,17 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 class ReferenceGenomeSelector implements Entity {
 
     Project project
     ReferenceGenome referenceGenome
     SeqType seqType
-    SpeciesCommonName speciesCommonName
+    SpeciesWithStrain species
     Workflow workflow
-
 }

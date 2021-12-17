@@ -23,7 +23,7 @@
 <div class="edit-switch edit-switch-date">
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
-        <input type="date" name="date" value="${value}"/>
+        <input type="date" name="date" value="${value}" autocomplete="off"/>
         <button class="save"><g:message code="default.button.update.label"/></button>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>

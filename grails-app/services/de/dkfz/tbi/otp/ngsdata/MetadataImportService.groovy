@@ -42,8 +42,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonNameService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -108,7 +108,7 @@ class MetadataImportService {
     SeqPlatformService seqPlatformService
     SeqTrackService seqTrackService
     SeqTypeService seqTypeService
-    SpeciesCommonNameService speciesCommonNameService
+    SpeciesWithStrainService speciesWithStrainService
 
     static final int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -491,12 +491,12 @@ class MetadataImportService {
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
             SequencingReadType libLayout = SequencingReadType.getByName(uniqueColumnValue(rows, SEQUENCING_READ_TYPE))
             List<String> speciesList = uniqueColumnValue(rows, SPECIES).split('[+]')*.trim()
-            SpeciesCommonName individualSpecies = speciesCommonNameService.findByNameOrImportAlias(speciesList.first())
-            List<SpeciesCommonName> sampleSpecies = []
+            SpeciesWithStrain individualSpecies = speciesWithStrainService.getByAlias(speciesList.first())
+            List<SpeciesWithStrain> sampleSpecies = []
             if (speciesList.size() > 1) {
                 speciesList.removeAt(0)
                 speciesList.each { String s ->
-                    sampleSpecies.add(speciesCommonNameService.findByNameOrImportAlias(s))
+                    sampleSpecies.add(speciesWithStrainService.getByAlias(s))
                 }
             }
 
@@ -563,8 +563,8 @@ class MetadataImportService {
             seqTrack.save(flush: false)
 
             if (seqTrack.individual.species) {
-                assert seqTrack.individual.species == individualSpecies: "Individual contains value (${seqTrack.individual.species.name}) " +
-                        "that differs from sheet (${individualSpecies.name})"
+                assert seqTrack.individual.species == individualSpecies: "Individual contains value (${seqTrack.individual.species}) " +
+                        "that differs from sheet (${individualSpecies})"
             } else {
                 seqTrack.individual.species = individualSpecies
                 seqTrack.individual.save(flush: false)
@@ -573,11 +573,11 @@ class MetadataImportService {
             if (seqTrack.sample.mixedInSpecies) {
                 assert seqTrack.sample.mixedInSpecies.size() == sampleSpecies.size() &&
                         seqTrack.sample.mixedInSpecies.containsAll(sampleSpecies): "Sample contains value " +
-                        "(${seqTrack.sample.mixedInSpecies*.name}) that differs from sheet (${sampleSpecies*.name})"
+                        "(${seqTrack.sample.mixedInSpecies}) that differs from sheet (${sampleSpecies})"
             } else {
                 seqTrack.sample.mixedInSpecies = []
-                sampleSpecies.each { SpeciesCommonName speciesCommonName ->
-                    seqTrack.sample.mixedInSpecies.add(speciesCommonName)
+                sampleSpecies.each { SpeciesWithStrain species ->
+                    seqTrack.sample.mixedInSpecies.add(species)
                     seqTrack.sample.save(flush: false)
                 }
             }

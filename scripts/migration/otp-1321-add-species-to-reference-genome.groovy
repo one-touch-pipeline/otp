@@ -23,49 +23,49 @@
 package migration
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 String referenceGenomeSpecies = """\
-1KGRef_PhiX | Human
-GRCh38_decoy_ebv_phiX_alt_hla_chr | Mouse
-GRCm38mm10 | Mouse
-GRCm38mm10_PhiX | Mouse
-GRCm38mm10_PhiX_hD3A | Mouse
-hg19 | Human
-hg38 | Human
-hg38_CGA_000001405.15-no_alt_analysis_set | Human
-hg38_PhiX | Human
-hg_GRCh38 | Human
-hg_GRCh38-2020-A | Human
-hg_GRCh38-2020-A_premrna | Human
-hg_GRCm38 | Mouse
-hg_GRCm38-2020-A | Mouse
-hs37d5 | Human
-hs37d5+mouse | Human + Mouse
-hs37d5_Bovine_Phix | Human + Bovine
-hs37d5_GRCm38mm | Human + Mouse
-hs37d5_GRCm38mm_PhiX | Human + Mouse
-methylCtools_GRCm38mm10_PhiX_Lambda | Mouse
-methylCtools_GRCm38mm10_PhiX_Lambda_hD3A | Mouse
-methylCtools_hg38_PhiX_Lambda | Human
-methylCtools_hg38_PhiX_Lambda_Benchmark | Human
-methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda | Human + Mouse
-methylCtools_hs37d5_PhiX_Lambda | Human
-methylCtools_mm10_UCSC_PhiX_Lambda | Mouse
-methylCtools_mm9_PhiX_Lambda | Mouse
-mm9_phiX | Mouse
-hg19_pathogens | Human
-methylCtools_hg38p13_lambda_phix_herpes | Human
-refdata-gex-GRCh38 | Human
+1KGRef_PhiX | Homo sapiens
+GRCh38_decoy_ebv_phiX_alt_hla_chr | Mus musculus
+GRCm38mm10 | Mus musculus
+GRCm38mm10_PhiX | Mus musculus
+GRCm38mm10_PhiX_hD3A | Mus musculus
+hg19 | Homo sapiens
+hg38 | Homo sapiens
+hg38_CGA_000001405.15-no_alt_analysis_set | Homo sapiens
+hg38_PhiX | Homo sapiens
+hg_GRCh38 | Homo sapiens
+hg_GRCh38-2020-A | Homo sapiens
+hg_GRCh38-2020-A_premrna | Homo sapiens
+hg_GRCm38 | Mus musculus
+hg_GRCm38-2020-A | Mus musculus
+hs37d5 | Homo sapiens
+hs37d5+mouse | Homo sapiens + Mus musculus
+hs37d5_Bovine_Phix | Homo sapiens + Bos taurus
+hs37d5_GRCm38mm | Homo sapiens + Mus musculus
+hs37d5_GRCm38mm_PhiX | Homo sapiens + Mus musculus
+methylCtools_GRCm38mm10_PhiX_Lambda | Mus musculus
+methylCtools_GRCm38mm10_PhiX_Lambda_hD3A | Mus musculus
+methylCtools_hg38_PhiX_Lambda | Homo sapiens
+methylCtools_hg38_PhiX_Lambda_Benchmark | Homo sapiens
+methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda | Homo sapiens + Mus musculus
+methylCtools_hs37d5_PhiX_Lambda | Homo sapiens
+methylCtools_mm10_UCSC_PhiX_Lambda | Mus musculus
+methylCtools_mm9_PhiX_Lambda | Mus musculus
+mm9_phiX | Mus musculus
+hg19_pathogens | Homo sapiens
+methylCtools_hg38p13_lambda_phix_herpes | Homo sapiens
+refdata-gex-GRCh38 | Homo sapiens
 """
 
 List<List<String>> rgs = referenceGenomeSpecies.split("\n").collect { it.split("\\|")*.trim() }
 rgs.each {
     ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(it[0].trim()))
     if (referenceGenome) {
-        List<SpeciesCommonName> species = it[1].split(" \\+ ").collect { speciesName ->
-            CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName(speciesName.trim()))
+        Set<SpeciesWithStrain> species = it[1].split(" \\+ ").collect { String speciesName ->
+            CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == speciesName && strain.name == "No strain available" }.list())
         }
         referenceGenome.species = species as Set
         referenceGenome.save(flush: true)

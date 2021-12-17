@@ -23,7 +23,7 @@
 <div class="edit-switch edit-switch-integer">
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
-        <input type="number" name="value" class="edit-switch-input" value="${value}"/>
+        <input type="number" name="value" class="edit-switch-input" value="${value}" autocomplete="off"/>
         <button class="buttons save"><g:message code="default.button.update.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
     </p>

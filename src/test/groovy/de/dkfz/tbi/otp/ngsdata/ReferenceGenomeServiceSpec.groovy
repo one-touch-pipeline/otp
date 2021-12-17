@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -361,7 +361,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
         String chromosomePrefix = ""
         String chromosomeSuffix = ""
-        Set<SpeciesCommonName> species = [createSpeciesCommonName(), createSpeciesCommonName()] as Set
+        Set<SpeciesWithStrain> species = [createSpeciesWithStrain(), createSpeciesWithStrain()] as Set
 
         DomainFactory.createDefaultRealmWithProcessingOption()
 

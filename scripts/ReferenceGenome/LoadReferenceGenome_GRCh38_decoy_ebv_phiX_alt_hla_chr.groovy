@@ -27,7 +27,7 @@ import groovy.transform.Field
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
@@ -39,8 +39,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 */
 
 String name = "GRCh38_decoy_ebv_phiX_alt_hla_chr"
-Set<SpeciesCommonName> species = [
-        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("mouse")),
+Set<SpeciesWithStrain> species = [
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "No strain available" }.list()),
 ] as Set
 @Field
 String path = "GRCh38_decoy_ebv_phiX_alt_hla_chr"

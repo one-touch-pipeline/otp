@@ -49,8 +49,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonNameService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -623,7 +622,7 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         def (String platform1, String platform2) = ["platform1", "platform2"]
         def (String model1, String model2) = ["model1", "model2"]
         def (String kit1, String kit2) = ["kit1", "kit2"]
-        def (String species1, String species2, String species3) = ["human", "mouse", "chicken"]
+        def (String human, String mouse, String chicken) = ["human", "mouse", "chicken"]
         def (String target1, String target2) = ["target1", "target2"]
         def (String single, String paired) = [SequencingReadType.SINGLE, SequencingReadType.PAIRED]
         def (String parse, String scParse, String get) = ["parse_me", "sc_parse_me", "in_db"]
@@ -658,9 +657,9 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
             )
         }
         OtrsTicket otrsTicket = createOtrsTicket(automaticNotification: true)
-        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName([name: 'human'])
-        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName([name: 'mouse'])
-        SpeciesCommonName speciesCommonName3 = createSpeciesCommonName([name: 'chicken'])
+        SpeciesWithStrain humanSpecies = createSpeciesWithStrain(importAlias: ['human'] as Set)
+        SpeciesWithStrain mouseSpecies = createSpeciesWithStrain(importAlias: ['mouse'] as Set)
+        SpeciesWithStrain chickenSpecies = createSpeciesWithStrain(importAlias: ['chicken'] as Set)
         SeqType mySeqType = DomainFactory.createWholeGenomeSeqType(SequencingReadType.SINGLE)
         SeqType mySeqTypeTag = createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: SequencingReadType.SINGLE)
         SeqType exomeSingle = DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
@@ -706,10 +705,10 @@ ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${so
         }
 
         service.seqTrackService = Mock(SeqTrackService)
-        service.speciesCommonNameService = Mock(SpeciesCommonNameService) {
-            findByNameOrImportAlias(species1) >> speciesCommonName1 //human
-            findByNameOrImportAlias(species2) >> speciesCommonName2 //mouse
-            findByNameOrImportAlias(species3) >> speciesCommonName3 //chicken
+        service.speciesWithStrainService = Mock(SpeciesWithStrainService) {
+            getByAlias(human) >> humanSpecies
+            getByAlias(mouse) >> mouseSpecies
+            getByAlias(chicken) >> chickenSpecies
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
             findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
@@ -755,7 +754,7 @@ ${SEQUENCING_TYPE}              ${WG}                       ${EXON}       ${EXON
 ${SEQUENCING_READ_TYPE}         ${single}                   ${paired}     ${paired}     ${paired}                   ${paired}                   ${single}     ${single}                 ${single}                   ${single}
 ${READ}                         1                           1             2             1                           2                           1             1                         1                           1
 ${SAMPLE_NAME}                  ${parse}                    ${get}        ${get}        ${parse}                    ${parse}                    ${get}        ${parse}                  ${parse}                    ${scParse}
-${SPECIES}                      ${species1}+${species2}     ${species2}   ${species2}   ${species1}+${species2}     ${species1}+${species2}     ${species2}   ${species1}+${species2}   ${species1}+${species2}     ${species1}+${species2}
+${SPECIES}                      ${human}+${mouse}           ${mouse}      ${mouse}      ${human}+${mouse}           ${human}+${mouse}           ${mouse}      ${human}+${mouse}         ${human}+${mouse}           ${human}+${mouse}
 ${BASE_MATERIAL}                -                           -             -             -                           -                           -             -                         -                           ${scMaterial}
 """
         if (includeOptional) {
@@ -849,9 +848,9 @@ ${ILSE_NO}                      -                           1234          1234  
                 libraryPreparationKit: null,
         ))
         seqTrack1.ilseId == null
-        seqTrack1.individual.species == speciesCommonName1
+        seqTrack1.individual.species == humanSpecies
         seqTrack1.sample.mixedInSpecies.size() == 1
-        seqTrack1.sample.mixedInSpecies.first() == speciesCommonName2
+        seqTrack1.sample.mixedInSpecies.first() == mouseSpecies
         DataFile dataFile1 = CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                 fileName   : fastq1,
                 vbpFileName: fastq1,
@@ -883,7 +882,7 @@ ${ILSE_NO}                      -                           1234          1234  
                     libraryPreparationKit: libraryPreparationKit1,
             ))
             assert seqTrack2.ilseId == 1234
-            assert seqTrack2.individual.species == speciesCommonName2
+            assert seqTrack2.individual.species == mouseSpecies
             assert seqTrack2.sample.mixedInSpecies.size() == 0
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq2,
@@ -918,9 +917,9 @@ ${ILSE_NO}                      -                           1234          1234  
                     antibody: 'antibody1',
             ))
             assert seqTrack3.ilseId == null
-            assert seqTrack3.individual.species == speciesCommonName1
+            assert seqTrack3.individual.species == humanSpecies
             assert seqTrack3.sample.mixedInSpecies.size() == 1
-            assert seqTrack3.sample.mixedInSpecies.first() == speciesCommonName2
+            assert seqTrack3.sample.mixedInSpecies.first() == mouseSpecies
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq4,
                     vbpFileName: fastq4,
@@ -954,7 +953,7 @@ ${ILSE_NO}                      -                           1234          1234  
                     antibody: null,
             ))
             assert seqTrack4.ilseId == 2345
-            assert seqTrack4.individual.species == speciesCommonName2
+            assert seqTrack4.individual.species == mouseSpecies
             assert seqTrack4.sample.mixedInSpecies.size() == 0
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq6,
@@ -978,9 +977,9 @@ ${ILSE_NO}                      -                           1234          1234  
                     libraryPreparationKit: null,
             ))
             assert seqTrack5.ilseId == null
-            assert seqTrack5.individual.species == speciesCommonName1
+            assert seqTrack5.individual.species == humanSpecies
             assert seqTrack5.sample.mixedInSpecies.size() == 1
-            assert seqTrack5.sample.mixedInSpecies.first() == speciesCommonName2
+            assert seqTrack5.sample.mixedInSpecies.first() == mouseSpecies
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq7,
                     vbpFileName: fastq7,
@@ -1003,9 +1002,9 @@ ${ILSE_NO}                      -                           1234          1234  
                     libraryPreparationKit: null,
             ))
             assert seqTrack6.ilseId == null
-            assert seqTrack6.individual.species == speciesCommonName1
+            assert seqTrack6.individual.species == humanSpecies
             assert seqTrack6.sample.mixedInSpecies.size() == 1
-            assert seqTrack6.sample.mixedInSpecies.first() == speciesCommonName2
+            assert seqTrack6.sample.mixedInSpecies.first() == mouseSpecies
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun2DataFileProperties + [
                     fileName   : fastq8,
                     vbpFileName: fastq8,
@@ -1028,9 +1027,9 @@ ${ILSE_NO}                      -                           1234          1234  
                     libraryPreparationKit: libraryPreparationKit2,
             ))
             assert seqTrack7.ilseId == null
-            assert seqTrack7.individual.species == speciesCommonName1
+            assert seqTrack7.individual.species == humanSpecies
             assert seqTrack7.sample.mixedInSpecies.size() == 1
-            assert seqTrack7.sample.mixedInSpecies.first() == speciesCommonName2
+            assert seqTrack7.sample.mixedInSpecies.first() == mouseSpecies
             assert CollectionUtils.atMostOneElement(DataFile.findAllWhere(commonRun1DataFileProperties + [
                     fileName   : fastq9,
                     vbpFileName: fastq9,
@@ -1076,16 +1075,16 @@ ${ILSE_NO}                      -                           1234          1234  
         String dateString = TimeFormats.DATE.getFormattedDate(date)
         String fastq1 = "fastq_1.gz"
         String fastq2 = "fastq_2.gz"
-        String species1 = "human"
-        String species2 = "mouse"
-        String species3 = "chicken"
+        String human = "human"
+        String mouse = "mouse"
+        String chicken = "chicken"
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
 
         DomainFactory.createAllAnalysableSeqTypes()
-        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName([name: species1])
-        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName([name: species2])
-        SpeciesCommonName speciesCommonName3 = createSpeciesCommonName([name: species3])
+        SpeciesWithStrain humanSpecies = createSpeciesWithStrain(importAlias: [human] as Set)
+        SpeciesWithStrain mouseSpecies = createSpeciesWithStrain(importAlias: [mouse] as Set)
+        SpeciesWithStrain chickenSpecies = createSpeciesWithStrain(importAlias: [chicken] as Set)
         SeqType seqTypeWithAntibodyTarget = createSeqType([
                 libraryLayout    : SequencingReadType.PAIRED,
                 hasAntibodyTarget: true,
@@ -1128,10 +1127,10 @@ ${ILSE_NO}                      -                           1234          1234  
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             findByNameOrImportAlias(antibodyTarget.name) >> antibodyTarget
         }
-        service.speciesCommonNameService = Mock(SpeciesCommonNameService) {
-            findByNameOrImportAlias(species1) >> speciesCommonName1 //human
-            findByNameOrImportAlias(species2) >> speciesCommonName2 //mouse
-            findByNameOrImportAlias(species3) >> speciesCommonName3 //chicken
+        service.speciesWithStrainService = Mock(SpeciesWithStrainService) {
+            getByAlias(human) >> humanSpecies
+            getByAlias(mouse) >> mouseSpecies
+            getByAlias(chicken) >> chickenSpecies
         }
         mockAdditionalServices(service)
 
@@ -1159,7 +1158,7 @@ ${SAMPLE_NAME}                  ${sampleIdentifier.name}                    ${sa
 ${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
 ${ANTIBODY}                     -                                           -
 ${FASTQ_GENERATOR}              ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
-${SPECIES}                      ${species1}+${species2}+${species3}         ${species1}+${species2}+${species3}
+${SPECIES}                      ${human}+${mouse}+${chicken}                ${human}+${mouse}+${chicken}
 """
 
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -1221,7 +1220,7 @@ ${SPECIES}                      ${species1}+${species2}+${species3}         ${sp
         ))
         seqTrack.ilseId == null
         seqTrack.antibodyTarget == antibodyTarget
-        seqTrack.individual.species == speciesCommonName1
+        seqTrack.individual.species == humanSpecies
         seqTrack.sample.mixedInSpecies.size() == 2
 
         Map commonRunDataFileProperties = [
@@ -1263,14 +1262,14 @@ ${SPECIES}                      ${species1}+${species2}+${species3}         ${sp
         String fastq2 = "fastq_r2.gz"
         String fastqIndex1 = "fastq_i1.gz"
         String fastqIndex2 = "fastq_i2.gz"
-        String species1 = "human"
-        String species2 = "mouse"
+        String human = "human"
+        String mouse = "mouse"
         String md5sum1 = HelperUtils.randomMd5sum
         String md5sum2 = HelperUtils.randomMd5sum
         String md5sumIndex1 = HelperUtils.randomMd5sum
         String md5sumIndex2 = HelperUtils.randomMd5sum
-        SpeciesCommonName speciesCommonName1 = createSpeciesCommonName([name: species1])
-        SpeciesCommonName speciesCommonName2 = createSpeciesCommonName([name: species2])
+        SpeciesWithStrain humanSpecies = createSpeciesWithStrain(importAlias: [human] as Set)
+        SpeciesWithStrain mouseSpecies = createSpeciesWithStrain(importAlias: [mouse] as Set)
         DomainFactory.createAllAnalysableSeqTypes()
         SeqType seqType = DomainFactory.createSeqTypePaired()
         SeqCenter seqCenter = createSeqCenter()
@@ -1307,9 +1306,9 @@ ${SPECIES}                      ${species1}+${species2}+${species3}         ${sp
             ]) >> seqType
             0 * _
         }
-        service.speciesCommonNameService = Mock(SpeciesCommonNameService) {
-            findByNameOrImportAlias(species1) >> speciesCommonName1 //human
-            findByNameOrImportAlias(species2) >> speciesCommonName2 //mouse
+        service.speciesWithStrainService = Mock(SpeciesWithStrainService) {
+            getByAlias(human) >> humanSpecies
+            getByAlias(mouse) >> mouseSpecies
         }
         mockAdditionalServices(service)
 
@@ -1332,7 +1331,7 @@ ${SPECIES}                      ${species1}+${species2}+${species3}         ${sp
                 (SEQUENCING_READ_TYPE): seqType.libraryLayout,
                 (SAMPLE_NAME)         : sampleIdentifier.name,
                 (FASTQ_GENERATOR)     : softwareToolIdentifier.name,
-                (SPECIES)             : species1 + '+' + species2,
+                (SPECIES)             : human + '+' + mouse,
         ].asImmutable()
 
         Map fastqData1 = [
@@ -1431,9 +1430,9 @@ ${SPECIES}                      ${species1}+${species2}+${species3}         ${sp
         ))
         seqTrack.ilseId == null
         seqTrack.class == SeqTrack
-        seqTrack.individual.species == speciesCommonName1
+        seqTrack.individual.species == humanSpecies
         seqTrack.sample.mixedInSpecies.size() == 1
-        seqTrack.sample.mixedInSpecies.first() == speciesCommonName2
+        seqTrack.sample.mixedInSpecies.first() == mouseSpecies
 
         Map commonRunDataFileProperties = [
                 pathName           : '',

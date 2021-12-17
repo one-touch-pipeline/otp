@@ -20,28 +20,6 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-
-/*
- *  This scripts inserts a new ReferenceGenome object
- *  as well as StatSizeFileName and ReferenceGenomeEntry objects obtained from the fasta file
- *  which lies in ${OtpProperty#PATH_PROCESSING_ROOT}/reference_genomes/${path}/
- *  A python helper script 'scripts/ReferenceGenome/getReferenceGenomeInfo.py' which extracts
- *  information from the fasta file was used to generate the fastaEntries content.
-*/
-
-String name = "methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda"
-String path = "bwa06_methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda"
-String fileNamePrefix = "hs37d5_GRCm38mm10_PhiX.conv"
-String cytosinePositionsIndex = "hs37d5_GRCm38mm10_PhiX.CGCH.pos.gz"
-String chromosomePrefix = ""
-String chromosomeSuffix = ""
-String fingerPrintingFileName = null
-List<String> statSizeFileNames = [
-        "hs37d5_GRCm38mm10_PhiX.chrLenOnlyACGT.tab",
-]
-
 List<FastaEntry> fastaEntries = [
         new FastaEntry("1_W", "1_W", 249250621, 225280621, Classification.UNDEFINED),
         new FastaEntry("1_C", "1_C", 249250621, 225280621, Classification.UNDEFINED),
@@ -350,7 +328,3 @@ List<FastaEntry> fastaEntries = [
         new FastaEntry("chrMmuJH584299.1_W", "chrMmuJH584299.1_W", 953012, 953012, Classification.UNDEFINED),
         new FastaEntry("chrMmuJH584299.1_C", "chrMmuJH584299.1_C", 953012, 953012, Classification.UNDEFINED),
 ]
-
-ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, fingerPrintingFileName, statSizeFileNames)

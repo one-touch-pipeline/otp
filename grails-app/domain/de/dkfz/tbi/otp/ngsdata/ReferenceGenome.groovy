@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
@@ -37,7 +37,7 @@ class ReferenceGenome implements Entity {
      */
     String name
 
-    Set<SpeciesCommonName> species
+    Set<SpeciesWithStrain> species
 
     /**
      * Reference genome specific directory

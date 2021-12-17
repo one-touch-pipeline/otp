@@ -23,19 +23,19 @@
 <div class="edit-switch edit-switch-new-free-text-values" style="display:inline-block">
     <span class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
-        <g:set var="i" value="${0}"/>
+        <g:set var="editSwitchI" value="${0}"/>
         <g:each var="field" in="${textFields}">
-            <label>${labels[i++]}:
-                <input type="text" name="${field}"/>
+            <label>${labels[editSwitchI++]}:
+                <input type="text" name="${field}" autocomplete="off"/>
             </label>
         </g:each>
         <g:each var="checkBox" in="${checkBoxes}">
-            <label>${labels[i++]}:
+            <label>${labels[editSwitchI++]}:
                 <g:checkBox name="${checkBox.key}" checked="${checkBox.value}" value="true"/>
             </label>
         </g:each>
         <g:each var="dropDown" in="${dropDowns}">
-            <label>${labels[i++]}:
+            <label>${labels[editSwitchI++]}:
                 <g:select id="" name="${dropDown.key}" from="${dropDown.value}" class="use-select-2"/>
             </label>
         </g:each>

@@ -89,12 +89,39 @@
                 </g:if>
                 <div class="scrollable listing-content">
                     <ul>
-                        <g:each var="species" in="${speciesWithStrainsBySpecies.keySet()}">
+                        <g:set var="i" value="${0}"/>
+                        <g:each var="species" in="${speciesWithStrainsBySpecies.keySet().sort()}">
                             <li>
                                 ${species}
                                 <ul>
-                                    <g:each var="speciesWithStrain" in="${speciesWithStrainsBySpecies[species]}">
-                                        <li>${speciesWithStrain.strain}</li>
+                                    <g:each var="speciesWithStrain" in="${speciesWithStrainsBySpecies[species].sort()}">
+                                        <li>
+                                            <div class="speciesCommonName-container">
+                                                <span class="name-box">
+                                                    ${speciesWithStrain}
+                                                    ${g.message(code: 'speciesWithStrain.label.importAlias')}: ${speciesWithStrain.importAlias.join(", ")}
+                                                </span>
+                                                <span class="alias-box" title="${g.message(code: 'speciesWithStrain.tooltip.importAlias')}">
+                                                    <otp:editorSwitchNewValues
+                                                            roles="ROLE_OPERATOR"
+                                                            labels="${["Import Alias"]}"
+                                                            textFields="${["importAlias"]}"
+                                                            link="${g.createLink(
+                                                                    controller: 'speciesWithStrain',
+                                                                    action: 'createImportAlias',
+                                                                    id: speciesWithStrain.id
+                                                            )}"/>
+                                                </span>
+                                                <span title="${g.message(code: 'speciesWithStrain.tooltip.legacy')}">
+                                                    <g:render template="/templates/slider" model="[
+                                                            targetAction: 'changeLegacyState',
+                                                            objectName  : 'species',
+                                                            object      : speciesWithStrain,
+                                                            i           : i++,
+                                                    ]"/>
+                                                </span>
+                                            </div>
+                                        </li>
                                     </g:each>
                                 </ul>
                             </li>
@@ -145,33 +172,9 @@
                 </g:if>
                 <div class="scrollable">
                     <ul>
-                        <g:each status="i" var="speciesCommonName" in="${speciesCommonNames}">
+                        <g:each var="speciesCommonName" in="${speciesCommonNames}">
                             <li>
-                                <div class="speciesCommonName-container">
-                                    <span class="name-box">
-                                        ${speciesCommonName.name},
-                                        Alias: ${speciesCommonName.importAlias.join(",")}
-                                    </span>
-                                    <span class="alias-box" title="${g.message(code:'speciesWithStrain.tooltip.importAlias')}">
-                                        <otp:editorSwitchNewValues
-                                                roles="ROLE_OPERATOR"
-                                                labels="${["Import Alias"]}"
-                                                textFields="${["importAlias"]}"
-                                                link="${g.createLink(
-                                                        controller: 'speciesWithStrain',
-                                                        action: 'createSpeciesCommonImportAlias',
-                                                        id: speciesCommonName.id
-                                                )}"/>
-                                    </span>
-                                    <span title="${g.message(code:'speciesWithStrain.tooltip.legacy')}">
-                                        <g:render template="/templates/slider" model="[
-                                                targetAction: 'changeSpeciesCommonNameLegacyState',
-                                                objectName  : 'speciesCommonName',
-                                                object      : speciesCommonName,
-                                                i           : i,
-                                        ]"/>
-                                    </span>
-                                </div>
+                                ${speciesCommonName.name}
                                 <ul>
                                     <g:each var="species" in="${speciesBySpeciesCommonName[speciesCommonName]}">
                                         <li>${species.scientificName}</li>

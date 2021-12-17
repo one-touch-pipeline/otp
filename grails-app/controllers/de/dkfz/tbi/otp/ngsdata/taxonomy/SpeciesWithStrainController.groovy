@@ -34,16 +34,15 @@ class SpeciesWithStrainController implements CheckAndCall {
 
     SpeciesWithStrainService speciesWithStrainService
     SpeciesService speciesService
-    SpeciesCommonNameService speciesCommonNameService
     StrainService strainService
 
     static allowedMethods = [
-            index                             : "GET",
-            createSpeciesWithStrain           : "POST",
-            createSpecies                     : "POST",
-            createStrain                      : "POST",
-            changeSpeciesCommonNameLegacyState: "POST",
-            createSpeciesCommonImportAlias    : "POST",
+            index                  : "GET",
+            createSpeciesWithStrain: "POST",
+            createSpecies          : "POST",
+            createStrain           : "POST",
+            changeLegacyState      : "POST",
+            createImportAlias      : "POST",
     ]
 
     private Map getRedirectParams() {
@@ -53,9 +52,9 @@ class SpeciesWithStrainController implements CheckAndCall {
         ]
     }
 
-    JSON createSpeciesCommonImportAlias(CreateSpeciesCommonNameImportAliasCommand cmd) {
+    JSON createImportAlias(CreateSpeciesImportAliasCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            speciesCommonNameService.addNewAlias(cmd.id, cmd.importAlias)
+            speciesWithStrainService.addNewAlias(cmd.id, cmd.importAlias)
         }
     }
 
@@ -76,9 +75,9 @@ class SpeciesWithStrainController implements CheckAndCall {
         ]
     }
 
-    def changeSpeciesCommonNameLegacyState(SpeciesCommonNameCommand cmd) {
+    def changeLegacyState(SpeciesLegacyCommand cmd) {
         checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
-            speciesCommonNameService.changeLegacyState(cmd.speciesCommonName, cmd.legacy)
+            speciesWithStrainService.changeLegacyState(cmd.species, cmd.legacy)
         }
         redirect action: 'index'
     }
@@ -138,11 +137,11 @@ class LegacyCommand implements Validateable {
     boolean legacy
 }
 
-class SpeciesCommonNameCommand extends LegacyCommand {
-    SpeciesCommonName speciesCommonName
+class SpeciesLegacyCommand extends LegacyCommand {
+    SpeciesWithStrain species
 }
 
-class CreateSpeciesCommonNameImportAliasCommand {
+class CreateSpeciesImportAliasCommand {
     Long id
     String importAlias
 

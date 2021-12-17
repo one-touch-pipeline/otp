@@ -24,7 +24,7 @@
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
         <label>${label}</label>
-        <input type="text" name="value"/>
+        <input type="text" name="value" autocomplete="off"/>
         <button class="buttons save"><g:message code="default.button.save.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
     </p>

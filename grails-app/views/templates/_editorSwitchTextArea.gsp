@@ -27,7 +27,7 @@
         <button class="buttons save"><g:message code="default.button.update.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
         <br>
-        <textarea name="value" class="edit-switch-input" rows="${rows ?: 5}" cols="${cols ?: 150}">${value}</textarea>
+        <textarea name="value" class="edit-switch-input" rows="${rows ?: 5}" cols="${cols ?: 150}" autocomplete="off">${value}</textarea>
     </p>
     <p class="edit-switch-label">
         <span class="wordBreak keep-whitespace">${value}</span>

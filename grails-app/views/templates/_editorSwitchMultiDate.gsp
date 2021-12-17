@@ -21,6 +21,6 @@
   --}%
 
 <div class="multi-edit-switch edit-switch-multi-input edit-switch-multi-date">
-    <input class="inputTemplate" type="date" name="value" value=""/>
+    <input class="inputTemplate" type="date" name="value" value="" autocomplete="off"/>
     <g:render template="/templates/editorSwitchMultiCommon" model="${model}"/>
 </div>

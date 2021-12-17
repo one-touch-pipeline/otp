@@ -49,7 +49,6 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         controller.speciesWithStrainService = new SpeciesWithStrainService()
         controller.speciesService = new SpeciesService()
         controller.speciesService.speciesCommonNameService = new SpeciesCommonNameService()
-        controller.speciesCommonNameService = new SpeciesCommonNameService()
         controller.strainService = new StrainService()
     }
 

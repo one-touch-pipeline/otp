@@ -26,6 +26,8 @@ import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 @Transactional
 class SpeciesWithStrainService {
 
@@ -50,5 +52,33 @@ class SpeciesWithStrainService {
             return e.errors
         }
         return null
+    }
+
+    SpeciesWithStrain getByAlias(String importAlias) {
+        return CollectionUtils.atMostOneElement(SpeciesWithStrain.list().findAll {
+            it.importAlias*.toLowerCase()?.contains(importAlias.toLowerCase())
+        })
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void changeLegacyState(SpeciesWithStrain domainObject, boolean legacy) {
+        domainObject.legacy = legacy
+        assert domainObject.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addNewAlias(Long id, String importAlias) {
+        assert id: "the input ID must not be null"
+        assert importAlias: "the input importAlias must not be null"
+
+        SpeciesWithStrain instance = SpeciesWithStrain.get(id)
+        assert instance: "could not get an instance of type SpeciesWithStrain with ID ${id}"
+
+        SpeciesWithStrain duplicateImportAlias = getByAlias(importAlias)
+        assert !duplicateImportAlias: "importAlias ${importAlias} already exists for ${duplicateImportAlias}"
+
+        assert !instance.importAlias.contains(importAlias): "the importAlias was already created"
+        instance.importAlias.add(importAlias)
+        assert instance.save(flush: true)
     }
 }

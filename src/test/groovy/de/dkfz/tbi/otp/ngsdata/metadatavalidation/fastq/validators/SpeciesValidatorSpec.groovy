@@ -31,8 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonNameService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
@@ -45,20 +44,24 @@ class SpeciesValidatorSpec extends Specification implements DataTest, DomainFact
         return [
                 ProcessingOption,
                 SampleIdentifier,
-                SpeciesCommonName,
+                SpeciesWithStrain,
         ]
     }
 
     void "test validate"() {
         given:
         SpeciesValidator validator = new SpeciesValidator()
-        validator.speciesCommonNameService = new SpeciesCommonNameService()
+        validator.speciesWithStrainService = new SpeciesWithStrainService()
         validator.sampleIdentifierService = new SampleIdentifierService()
         validator.validatorHelperService = new ValidatorHelperService()
 
-        SpeciesCommonName human = createSpeciesCommonName(name: "human")
-        SpeciesCommonName mouse = createSpeciesCommonName(name: "mouse")
-        SpeciesCommonName dolphin = createSpeciesCommonName(name: "dolphin")
+        Strain strain = createStrain(name: "No strain available")
+        SpeciesWithStrain human = createSpeciesWithStrain(importAlias: ["human"] as Set,
+                species: createSpecies(scientificName: "Homo sapiens", speciesCommonName: createSpeciesCommonName(name: "Human")), strain: strain)
+        SpeciesWithStrain mouse = createSpeciesWithStrain(importAlias: ["mouse"] as Set,
+                species: createSpecies(scientificName: "Mus musculus", speciesCommonName: createSpeciesCommonName(name: "Mouse")), strain: strain)
+        SpeciesWithStrain dolphin = createSpeciesWithStrain(importAlias: ["dolphin"] as Set,
+                species: createSpecies(scientificName: "Delphinus delphis", speciesCommonName: createSpeciesCommonName(name: "Dolphin")), strain: strain)
 
         // correct metadata
         createSampleIdentifier(name: "sample", sample: createSample(individual: createIndividual(species: human), mixedInSpecies: []))
@@ -120,26 +123,26 @@ unknownSampleName\tMOUSE\t
                         "Each value of the + separated list in field 'SPECIES' has to be known to OTP."),
 
                 new Problem(context.spreadsheet.dataRows[10, 11].collectMany { it.cells } as Set, LogLevel.ERROR,
-                        "PID '1' has distinct species 'human', 'mouse'.",
+                        "PID '1' has distinct species 'Human (Homo sapiens) [No strain available]', 'Mouse (Mus musculus) [No strain available]'.",
                         "All entries of a PID must have the same main species."),
                 new Problem(context.spreadsheet.dataRows[12].cells as Set, LogLevel.ERROR,
-                        "Species 'human' for PID '2' doesn't match with existing PID with species 'dolphin'.",
+                        "Species 'Human (Homo sapiens) [No strain available]' for PID '2' doesn't match with existing PID with species 'Dolphin (Delphinus delphis) [No strain available]'.",
                         "If the PID already exists, the main species has to match."),
                 new Problem(context.spreadsheet.dataRows[13].cells as Set, LogLevel.ERROR,
-                        "Species 'human' for PID '3' doesn't match with existing PID with species 'null'.",
+                        "Species 'Human (Homo sapiens) [No strain available]' for PID '3' doesn't match with existing PID with species 'null'.",
                         "If the PID already exists, the main species has to match."),
 
                 new Problem(context.spreadsheet.dataRows[14, 15].collectMany { it.cells } as Set, LogLevel.ERROR,
-                        "Sample '4 a' has distinct mixed-in species 'mouse', 'dolphin'.",
+                        "Sample '4 a' has distinct mixed-in species 'Mouse (Mus musculus) [No strain available]', 'Dolphin (Delphinus delphis) [No strain available]'.",
                         "All entries of a sample must have the same mixed-in species."),
                 new Problem(context.spreadsheet.dataRows[16].cells as Set, LogLevel.ERROR,
-                        "No mixed-in species for sample '5 b' doesn't match with existing sample with mixed-in species 'mouse'.",
+                        "No mixed-in species for sample '5 b' doesn't match with existing sample with mixed-in species 'Mouse (Mus musculus) [No strain available]'.",
                         "If the sample already exists, the mixed-in species have to match."),
                 new Problem(context.spreadsheet.dataRows[17].cells as Set, LogLevel.ERROR,
-                        "Mixed-in species 'mouse' for sample '6 c' doesn't match with existing sample without mixed-in species.",
+                        "Mixed-in species 'Mouse (Mus musculus) [No strain available]' for sample '6 c' doesn't match with existing sample without mixed-in species.",
                         "If the sample already exists, the mixed-in species have to match."),
                 new Problem(context.spreadsheet.dataRows[18].cells as Set, LogLevel.ERROR,
-                        "Mixed-in species 'dolphin,mouse' for sample '7 d' doesn't match with existing sample with mixed-in species 'human,mouse'.",
+                        "Mixed-in species 'Dolphin (Delphinus delphis) [No strain available],Mouse (Mus musculus) [No strain available]' for sample '7 d' doesn't match with existing sample with mixed-in species 'Human (Homo sapiens) [No strain available],Mouse (Mus musculus) [No strain available]'.",
                         "If the sample already exists, the mixed-in species have to match."),
         ]
         TestCase.assertContainSame(context.problems, expectedProblems)

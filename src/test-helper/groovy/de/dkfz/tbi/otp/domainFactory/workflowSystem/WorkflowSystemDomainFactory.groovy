@@ -189,7 +189,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 project          : { createProject() },
                 referenceGenome  : { createReferenceGenome() },
                 seqType          : { createSeqType() },
-                speciesCommonName: { createSpeciesCommonName() },
+                species          : { createSpeciesWithStrain() },
                 workflow         : { createWorkflow() },
         ], properties, saveAndValidate)
     }

@@ -21,15 +21,29 @@
  */
 package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
 
-class SpeciesWithStrain implements Entity {
+class SpeciesWithStrain implements Entity, Legacy {
     Species species
     Strain strain
+
+    Set<String> importAlias
+    static hasMany = [importAlias: String]
 
     static constraints = {
         species(nullable: false)
         strain(nullable: false, unique: ['species'])
+        importAlias validator: { val, obj ->
+            if (val.any { it.contains("+") }) {
+                return "plus"
+            }
+            if (CollectionUtils.atMostOneElement(SpeciesWithStrain.list().findAll { SpeciesWithStrain existingSpecies ->
+                existingSpecies.id != obj.id &&
+                val*.toLowerCase().any { String importAlias -> importAlias in existingSpecies.importAlias*.toLowerCase() }
+            })) {
+                return "duplicate"
+            }
+        }
     }
 
     String getDisplayString() {

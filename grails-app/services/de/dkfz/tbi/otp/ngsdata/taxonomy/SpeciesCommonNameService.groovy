@@ -26,11 +26,10 @@ import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.ngsdata.MetadataFieldsService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
-class SpeciesCommonNameService extends MetadataFieldsService<SpeciesCommonName> {
+class SpeciesCommonNameService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SpeciesCommonName findOrSaveSpeciesCommonName(String name) {
@@ -51,10 +50,5 @@ class SpeciesCommonNameService extends MetadataFieldsService<SpeciesCommonName> 
     SpeciesCommonName createAndGetSpeciesCommonName(String name) throws ValidationException {
         SpeciesCommonName speciesCommonName = new SpeciesCommonName(name: name)
         return speciesCommonName.save(flush: true)
-    }
-
-    @Override
-    protected Class getClazz() {
-        return SpeciesCommonName
     }
 }

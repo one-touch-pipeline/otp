@@ -22,10 +22,10 @@
 
 import groovy.transform.Field
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
@@ -37,8 +37,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 */
 
 String name = "hg19"
-Set<SpeciesCommonName> species = [
-        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("human")),
+Set<SpeciesWithStrain> species = [
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
 ] as Set
 @Field
 String path = "bwa06_hg19_chr"

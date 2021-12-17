@@ -19,14 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-INSERT INTO species_common_name(id, version, name, date_created, last_updated)
-VALUES(nextval('hibernate_sequence'), 0, 'Mouse', now(), now())
-ON CONFLICT DO NOTHING;
 
-INSERT INTO species(id, version, scientific_name, date_created, last_updated, species_common_name_id)
-VALUES(nextval('hibernate_sequence'), 0, 'Mus musculus', now(), now(),(SELECT id FROM species_common_name WHERE name = 'Mouse'))
-ON CONFLICT DO NOTHING;
-
-INSERT INTO species_with_strain(id, version, species_id, strain_id, date_created, last_updated, legacy)
-VALUES(nextval('hibernate_sequence'), 0,(SELECT id FROM species WHERE scientific_name = 'Mus musculus'),(SELECT id FROM strain WHERE name = 'No strain available'), now(), now(), false)
-ON CONFLICT DO NOTHING;
+ALTER TABLE species_with_strain ADD COLUMN legacy boolean;
+UPDATE species_with_strain SET legacy = FALSE WHERE legacy IS NOT FALSE;
+ALTER TABLE species_with_strain ALTER COLUMN legacy SET NOT NULL;

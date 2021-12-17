@@ -32,8 +32,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.StatSizeFileName
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
@@ -169,7 +168,7 @@ class ReferenceGenomeService {
      * @param cytosinePositionsIndex only for methylCtools processed reference genomes
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void loadReferenceGenome(String name, Set<SpeciesCommonName> species, String path, String fileNamePrefix, String cytosinePositionsIndex,
+    void loadReferenceGenome(String name, Set<SpeciesWithStrain> species, String path, String fileNamePrefix, String cytosinePositionsIndex,
                              String chromosomePrefix, String chromosomeSuffix,
                              List<FastaEntry> fastaEntries, String fingerPrintingFileName, List<String> statSizeFileNames) {
         // get list of all standard chromosomes (1...22, X, Y)

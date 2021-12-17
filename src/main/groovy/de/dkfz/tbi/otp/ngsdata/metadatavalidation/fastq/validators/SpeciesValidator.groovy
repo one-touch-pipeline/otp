@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonNameService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -43,7 +43,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
     ValidatorHelperService validatorHelperService
 
     @Autowired
-    SpeciesCommonNameService speciesCommonNameService
+    SpeciesWithStrainService speciesWithStrainService
 
     @Autowired
     SampleIdentifierService sampleIdentifierService
@@ -84,7 +84,7 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
             String speciesValue = valueTuple.getValue(SPECIES.name()).trim()
             if (speciesValue) {
                 List<Boolean> speciesAreKnown =  speciesValue.split(/\+/).collect {
-                    if (!speciesCommonNameService.findByNameOrImportAlias(it.trim())) {
+                    if (!speciesWithStrainService.getByAlias(it.trim())) {
                         if (unknownCells.containsKey(it)) {
                             unknownCells[it].addAll(valueTuple.cells)
                         } else {
@@ -111,8 +111,8 @@ class SpeciesValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
         List<Value> values = valueTuplesValidSpecies.collect {
             List<String> speciesNames = it.getValue(SPECIES.name()).trim().split(/\+/) as List
-            SpeciesCommonName species = speciesCommonNameService.findByNameOrImportAlias(speciesNames.remove(0).trim())
-            Set<SpeciesCommonName> mixedInSpecies = speciesNames.collect { speciesCommonNameService.findByNameOrImportAlias(it.trim()) } as Set
+            SpeciesWithStrain species = speciesWithStrainService.getByAlias(speciesNames.remove(0).trim())
+            Set<SpeciesWithStrain> mixedInSpecies = speciesNames.collect { speciesWithStrainService.getByAlias(it.trim()) } as Set
 
             String sampleType = validatorHelperService.getSampleType(it)
             String pid = validatorHelperService.getPid(it)
@@ -188,7 +188,7 @@ class Value {
     Sample sample
     String pid
     Individual individual
-    SpeciesCommonName species
-    Set<SpeciesCommonName> mixedInSpecies
+    SpeciesWithStrain species
+    Set<SpeciesWithStrain> mixedInSpecies
     ValueTuple valueTuple
 }

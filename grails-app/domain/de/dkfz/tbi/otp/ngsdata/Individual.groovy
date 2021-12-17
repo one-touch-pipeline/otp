@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -66,7 +66,7 @@ class Individual implements CommentableWithProject, Entity {
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
 
-    SpeciesCommonName species
+    SpeciesWithStrain species
 
     /** This attribute is used externally. Please discuss a change in the team */
     Project project

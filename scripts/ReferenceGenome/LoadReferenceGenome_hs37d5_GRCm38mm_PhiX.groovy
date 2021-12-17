@@ -22,10 +22,10 @@
 
 import groovy.transform.Field
 
-import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /*
@@ -37,9 +37,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 */
 
 String name = "hs37d5_GRCm38mm_PhiX"
-Set<SpeciesCommonName> species = [
-        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("human")),
-        CollectionUtils.exactlyOneElement(SpeciesCommonName.findAllByName("mouse")),
+Set<SpeciesWithStrain> species = [
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Homo sapiens" && strain.name == "No strain available" }.list()),
+        CollectionUtils.exactlyOneElement(SpeciesWithStrain.where { species.scientificName == "Mus musculus" && strain.name == "No strain available" }.list()),
 ] as Set
 @Field
 String path = "bwa06_hs37d5_GRCm38mm_PhiX"
