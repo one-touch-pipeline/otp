@@ -20,13 +20,17 @@
  * SOFTWARE.
  */
 
-endpoints {
-    enabled = false
+spring {
     jmx {
-        enabled = true
+        uniqueNames = true
     }
 }
-endpoints.enabled = false
+management {
+    endpoints {
+        enabledByDefault = false
+    }
+}
+
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -170,39 +174,6 @@ environments {
     test {
         grails.plugin.databasemigration.updateOnStart = false
     }
-}
-
-// WARNING: This setting (same as this entire application.groovy) has no effect on unit tests. See:
-// * OTP-1126
-// * http://grails.1312388.n4.nabble.com/unit-testing-grails-gorm-failOnError-true-td4231435.html
-// * http://grails.1312388.n4.nabble.com/Unit-testing-with-failOnError-true-td2718543.html
-grails.gorm.failOnError=true
-
-// Shared constraints
-grails.gorm.default.constraints = {
-    greaterThanZero validator: { val, obj ->
-        if (val <= 0) {
-            return "validator.greater.than.zero"
-        }
-    }
-    pathComponent validator: { val, obj ->
-        if (val && !de.dkfz.tbi.otp.utils.validation.OtpPathValidator.isValidPathComponent(val)) {
-            return "validator.path.component"
-        }
-    }
-    relativePath validator: { val, obj ->
-        if (val && !de.dkfz.tbi.otp.utils.validation.OtpPathValidator.isValidRelativePath(val)) {
-            return "validator.relative.path"
-        }
-    }
-    absolutePath validator: { val, obj ->
-        if (val && !de.dkfz.tbi.otp.utils.validation.OtpPathValidator.isValidAbsolutePath(val)) {
-            return "validator.absolute.path"
-        }
-    }
-}
-grails.gorm.default.mapping = {
-    id generator:'sequence'
 }
 
 // Restore old data-binding behaviour (before 2.3)
