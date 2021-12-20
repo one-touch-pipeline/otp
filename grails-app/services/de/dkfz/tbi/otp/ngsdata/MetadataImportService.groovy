@@ -122,16 +122,17 @@ class MetadataImportService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     // TODO: OTP-1908: Relax this restriction
-    MetadataValidationContext validateWithAuth(File metadataFile, DirectoryStructureBeanName directoryStructure) {
+    MetadataValidationContext validateWithAuth(File metadataFile, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
         FileSystem fs = fileSystemService.filesystemForFastqImport
-        return validate(fs.getPath(metadataFile.path), directoryStructure)
+        return validate(fs.getPath(metadataFile.path), directoryStructure, ignoreAlreadyKnownMd5sum)
     }
 
-    MetadataValidationContext validate(Path metadataFile, DirectoryStructureBeanName directoryStructure) {
+    MetadataValidationContext validate(Path metadataFile, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
         MetadataValidationContext context = MetadataValidationContext.createFromFile(
                 metadataFile,
                 getDirectoryStructure(directoryStructure),
                 directoryStructure.displayName,
+                ignoreAlreadyKnownMd5sum
         )
         if (context.spreadsheet) {
             Long hash = System.currentTimeMillis()
@@ -153,11 +154,12 @@ class MetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, DirectoryStructureBeanName directoryStructure, boolean align,
                                                             boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
-                                                            boolean automaticNotification) {
+                                                            boolean automaticNotification,
+                                                            boolean ignoreAlreadyKnownMd5sum = false) {
         try {
             Long startTime = System.currentTimeMillis()
             Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
-                return [(validate(pathWithMd5sum.path, directoryStructure)): pathWithMd5sum.md5sum]
+                return [(validate(pathWithMd5sum.path, directoryStructure, ignoreAlreadyKnownMd5sum)): pathWithMd5sum.md5sum]
             }
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
                 return importHelperMethod(context, align, FastqImportInstance.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
@@ -167,7 +169,7 @@ class MetadataImportService {
             log.debug("finished validate and import took ${System.currentTimeMillis() - startTime}ms for ${lines}")
             return results
         } catch (Exception e) {
-            if (!e.message.startsWith('Copying of metadata file')) {
+            if (e.message && !e.message.startsWith('Copying of metadata file')) {
                 TransactionUtils.withNewTransaction {
                     mailHelperService.sendEmailToTicketSystem("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}\n" +
                             "${e.localizedMessage}\n${e.cause}")
@@ -248,9 +250,9 @@ class MetadataImportService {
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
             return results
-        } else {
-            throw new MultiImportFailedException(failedValidations, metadataFiles)
         }
+
+        throw new MultiImportFailedException(failedValidations, metadataFiles)
     }
 
     /**

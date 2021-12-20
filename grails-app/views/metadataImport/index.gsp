@@ -164,6 +164,14 @@
                 <td><label><g:message code="runSubmit.align"/></label></td>
                 <td><g:checkBox name="align" checked="${cmd.align}" value="true"/></td>
             </tr>
+            <g:if test="${cmd.paths}">
+                <tr>
+                    <td><label><g:message code="metadataImport.ignoreMd5sumError.label"/></label></td>
+                    <td>
+                        <g:checkBox name="ignoreMd5sumError" checked="${cmd.ignoreMd5sumError}" value="true"/>
+                    </td>
+                </tr>
+            </g:if>
         </table>
         <g:submitButton name="submit" value="Validate"/>
         <g:each var="context" in="${contexts}">

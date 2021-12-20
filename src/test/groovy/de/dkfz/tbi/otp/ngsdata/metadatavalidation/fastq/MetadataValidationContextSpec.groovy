@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 import grails.testing.gorm.DataTest
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Shared
-import spock.lang.Specification
+import spock.lang.*
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
@@ -37,13 +37,14 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-class MetadataValidationContextSpec extends Specification implements DataTest {
+class MetadataValidationContextSpec extends Specification implements DomainFactoryCore, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqType,
                 Realm,
+                DataFile,
         ]
     }
 
@@ -53,29 +54,44 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
     @ClassRule
     TemporaryFolder temporaryFolder
 
-    void 'createFromFile, when file contains undetermined entries, ignores them'() {
+    @Unroll
+    void 'createFromFile, when file contains undetermined entries, or with ignoreMd5sum flag, ignores them'() {
         given:
+        final String md5sum = '123456789012345678901234567890ab'
+        createDataFile(
+                fileName: 'fastq',
+                md5sum: md5sum,
+        )
         Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
-        file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_NAME} ${INDEX}\n" +
-                "0 Undetermined_1.fastq.gz x x\n" +
-                "1 Undetermined_1.fastq.gz x Undetermined\n" +
-                "2 Undetermined_1.fastq.gz Undetermined_1 x\n" +
-                "3 Undetermined_1.fastq.gz Undetermined_1 Undetermined\n" +
-                "4 x x x\n" +
-                "5 x x Undetermined\n" +
-                "6 x Undetermined_1 x\n" +
-                "7 x Undetermined_1 Undetermined\n" +
+        file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_NAME} ${INDEX} ${MD5}\n" +
+                "0 Undetermined_1.fastq.gz x x x\n" +
+                "1 Undetermined_1.fastq.gz x Undetermined x\n" +
+                "2 Undetermined_1.fastq.gz Undetermined_1 x x\n" +
+                "3 Undetermined_1.fastq.gz Undetermined_1 Undetermined x\n" +
+                "4 x x x x\n" +
+                "5 x x Undetermined x\n" +
+                "6 x Undetermined_1 x x\n" +
+                "7 x Undetermined_1 Undetermined x\n" +
+                "8 fastq x x ${md5sum}\n" +
                 "").replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure, "")
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure, "", ignoreMd5sum)
 
         then:
-        context.spreadsheet.dataRows.size() == 4
+        context.spreadsheet.dataRows.size() == numRows
         context.spreadsheet.dataRows[0].cells[0].text == '4'
         context.spreadsheet.dataRows[1].cells[0].text == '5'
         context.spreadsheet.dataRows[2].cells[0].text == '6'
         context.spreadsheet.dataRows[3].cells[0].text == '7'
+        if (!ignoreMd5sum) {
+            assert (context.spreadsheet.dataRows[4].cells[0].text == '8')
+        }
+
+        where:
+        ignoreMd5sum     || numRows
+        true             || 4
+        false            || 5
     }
 
     void 'createFromFile, when file header contains alias, replace it'() {

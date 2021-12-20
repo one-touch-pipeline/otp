@@ -116,10 +116,6 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
      * Replacement for {@link File#getCanonicalPath()}, which does not work when the target does not exist
      */
     static Path canonicalPath(Path path) {
-        if (Files.isSymbolicLink(path)) {
-            return canonicalPath(Files.readSymbolicLink(path))
-        } else {
-            return path
-        }
+        return Files.isSymbolicLink(path) ? canonicalPath(Files.readSymbolicLink(path)) : path
     }
 }

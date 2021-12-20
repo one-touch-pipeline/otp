@@ -21,8 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -32,6 +31,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problems
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.MD5
 
 class MetadataValidationContext extends AbstractMetadataValidationContext {
 
@@ -56,11 +56,14 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
         this.usedSampleIdentifiers = [] as Set
     }
 
-    static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription) {
+    static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription,
+        boolean ignoreAlreadyKnownMd5sum = false) {
         Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
             MetaDataColumn.getColumnForName(s)?.name() ?: s
         }, { Row row ->
-            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined')
+            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
+                    // Add additional filter to skip rows containing known md5sum in database
+                    (!ignoreAlreadyKnownMd5sum || DataFile.findAllByMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
         })
 
         return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,

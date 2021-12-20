@@ -38,9 +38,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.errors.ForbiddenErrorPlainResponseException
-import de.dkfz.tbi.otp.errors.InternalServerErrorPlainResponseException
-import de.dkfz.tbi.otp.errors.PlainResponseExceptionHandler
+import de.dkfz.tbi.otp.errors.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -98,7 +96,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             metadataValidationContexts = flash.mvc
         } else if (cmd.paths) {
             cmd.paths.each { path ->
-                MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directoryStructure)
+                MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directoryStructure, cmd.ignoreMd5sumError)
                 metadataValidationContexts.add(mvc)
                 if (mvc.maximumProblemLevel.intValue() > problems) {
                     problems = mvc.maximumProblemLevel.intValue()
@@ -108,13 +106,14 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         }
 
         return [
-                directoryStructures   : DirectoryStructureBeanName.values(),
-                cmd                   : cmd,
-                paths                 : cmd.paths ?: [""],
-                contexts              : metadataValidationContexts,
-                implementedValidations: metadataImportService.implementedValidations,
-                isValidated           : isValidated,
-                problems              : problems,
+                directoryStructures    : DirectoryStructureBeanName.values(),
+                cmd                    : cmd,
+                paths                  : cmd.paths ?: [""],
+                contexts               : metadataValidationContexts,
+                implementedValidations : metadataImportService.getImplementedValidations(),
+                isValidated            : isValidated,
+                problems               : problems,
+                ignoreMd5sumError      : cmd.ignoreMd5sumError,
         ]
     }
 
@@ -132,7 +131,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                 }
                 List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(
                         pathWithMd5sums, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
-                        cmd.seqCenterComment, cmd.automaticNotification
+                        cmd.seqCenterComment, cmd.automaticNotification, cmd.ignoreMd5sumError
                 )
                 metadataValidationContexts = validateAndImportResults*.context
                 boolean allValid = validateAndImportResults.every {
@@ -163,6 +162,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                     seqCenterComment     : cmd.seqCenterComment,
                     align                : cmd.align,
                     automaticNotification: cmd.automaticNotification,
+                    ignoreMd5sumError    : cmd.ignoreMd5sumError
             ])
         }
     }
@@ -461,6 +461,8 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     boolean align = true
     boolean automaticNotification = true
     boolean ignoreWarnings
+
+    boolean ignoreMd5sumError = false
 
     static constraints = {
         paths(nullable: true)
