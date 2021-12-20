@@ -25,7 +25,6 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 import groovy.transform.ToString
-import org.grails.datastore.gorm.GormEntity
 
 import de.dkfz.tbi.otp.CheckAndCall
 
@@ -33,7 +32,7 @@ import de.dkfz.tbi.otp.CheckAndCall
  * A generic base class for update properties of a domain class using {@link UpdateDomainPropertyService}.
  * @param <T> The domain class to support updates
  */
-abstract class AbstractGeneralDomainPropertyUpdateController<T extends GormEntity<T>> implements CheckAndCall {
+abstract class AbstractGeneralDomainPropertyUpdateController<T extends Entity> implements CheckAndCall {
 
     UpdateDomainPropertyService updateDomainPropertyService
 

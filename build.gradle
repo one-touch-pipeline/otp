@@ -215,11 +215,13 @@ dependencies {
     swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.3' // swagger 2.x codegen
     implementation 'io.swagger:swagger-annotations:1.6.0'
 
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'       // TODO: check if it could be removed
+
     integrationTestCompile sourceSets.testHelper.output
     integrationTestRuntime sourceSets.testHelper.output
 
-    compile 'org.codehaus.groovy:groovy-all:2.5.14'
-    codenarc 'org.codehaus.groovy:groovy-all:2.5.14' // both groovy versions must be the same; required bc we add runtimeClasspath to codenarcClasspath
+//    compile 'org.codehaus.groovy:groovy-all:2.5.15'
+//    codenarc 'org.codehaus.groovy:groovy-all:2.5.15' // both groovy versions must be the same; required bc we add runtimeClasspath to codenarcClasspath
 
     // JDBC
     runtime "org.postgresql:postgresql:42.1.4"

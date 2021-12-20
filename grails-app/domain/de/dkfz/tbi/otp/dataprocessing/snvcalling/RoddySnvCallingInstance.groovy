@@ -24,10 +24,11 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
-class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements RoddyAnalysisResult {
+class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements RoddyAnalysisResult, RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,

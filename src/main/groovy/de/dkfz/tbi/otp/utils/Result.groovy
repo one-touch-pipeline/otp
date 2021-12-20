@@ -30,13 +30,13 @@ class Result<T, U> {
 
     private Result() { }
 
-    static Result<T, U> success(T value) {
+    static <T, U> Result<T, U> success(T value) {
         Result<T, U> r = new Result<T, U>()
         r.result = value
         return r
     }
 
-    static Result<T, U> ofNullable(T value, U error) {
+    static <T, U> Result<T, U> ofNullable(T value, U error) {
         Result<T, U> r = new Result<T, U>()
         if (value == null) {
             r.error = error
@@ -46,7 +46,7 @@ class Result<T, U> {
         return r
     }
 
-    static Result<T, U> failure(U error) {
+    static <T, U> Result<T, U> failure(U error) {
         Result<T, U> r = new Result<T, U>()
         r.error = error
         return r

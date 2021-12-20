@@ -83,7 +83,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
         addErrorForMissingRequiredColumn(context, columnTitle)
     }
 
-    static final void addErrorForMissingRequiredColumn(C context, String columnTitle) {
+    static final void addErrorForMissingRequiredColumn(ValidationContext context, String columnTitle) {
         context.addProblem(Collections.emptySet(), LogLevel.ERROR, "Required column '${columnTitle}' is missing.")
     }
 
@@ -97,7 +97,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
         addWarningForMissingOptionalColumn(context, columnTitle)
     }
 
-    static final void addWarningForMissingOptionalColumn(C context, String columnTitle, String additionalWarningMessage = '') {
+    static final void addWarningForMissingOptionalColumn(ValidationContext context, String columnTitle, String additionalWarningMessage = '') {
         context.addProblem(Collections.emptySet(), LogLevel.WARNING, "Optional column '${columnTitle}' is missing. ${additionalWarningMessage}".trim())
     }
 }

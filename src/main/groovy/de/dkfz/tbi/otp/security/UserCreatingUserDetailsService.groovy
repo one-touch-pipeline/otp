@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.security
 
 import grails.core.GrailsApplication
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails

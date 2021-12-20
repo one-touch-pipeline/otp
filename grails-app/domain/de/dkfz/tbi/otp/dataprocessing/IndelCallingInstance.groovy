@@ -22,10 +22,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
-class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisResult {
+class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisResult, RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
