@@ -71,7 +71,7 @@
     </g:if>
     <g:if test="${tabs.contains('pid')}">
         <div class="tab-pane fade mt-2" id="pid" role="tabpanel" aria-labelledby="pid-tab">
-            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab"/>
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
         </div>
     </g:if>
     <g:if test="${tabs.contains('lane')}">

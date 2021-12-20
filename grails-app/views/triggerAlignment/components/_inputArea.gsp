@@ -34,8 +34,8 @@
         <p class="card-text"></p>
 
         <ul class="list-group">
-            <li class="list-group-item"><input type="checkbox" aria-label="Checkbox for following text input"> <g:message code="triggerAlignment.input.checkbox.withdrawn"/></li>
-            <li class="list-group-item"><input type="checkbox" aria-label="Checkbox for following text input"> <g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatform"/></li>
+            <li class="list-group-item"><input type="checkbox" id="withdrawn"> <label for="withdrawn"><g:message code="triggerAlignment.input.checkbox.withdrawn"/></label></li>
+            <li class="list-group-item"><input type="checkbox" id="ignoreSeqPlatform"> <label for="ignoreSeqPlatform"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatform"/></label></li>
         </ul>
 
         <p class="card-text"></p>

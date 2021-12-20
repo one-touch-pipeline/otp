@@ -20,14 +20,10 @@
   - SOFTWARE.
   --}%
 
-%{--
-  - Tab component for seqTrackSelectionTabBar.
-  -
-  - Required params:
-  - seqTypes, as list of SeqTypes
-  -
-  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
-  --}%
-<g:render template="/templates/bootstrap/pidSelection"/>
-
-<g:render template="/templates/bootstrap/seqTypeSelection" model="[seqTypes: seqTypes]"/>
+<g:message code="pidSelection.note"/>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="pid-selection"><g:message code="pidSelection.pid"/></label>
+    </div>
+    <textarea id="pid-selection" class="form-control"></textarea>
+</div>
