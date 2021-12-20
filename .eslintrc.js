@@ -50,7 +50,6 @@ if (process.env.CI) {
     'no-new': 'off',
     'no-unused-expressions': 'off',
     'no-restricted-syntax': 'off',
-    'no-useless-concat': 'off',
     'block-scoped-var': 'off',
     'no-useless-call': 'off',
     'no-underscore-dangle': 'off',
