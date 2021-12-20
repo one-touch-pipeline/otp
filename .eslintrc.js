@@ -30,7 +30,8 @@ const lintRules = {
     }
   ],
   'comma-dangle': ['error', 'never'],
-  'no-plusplus': ['error', { allowForLoopAfterthoughts: true }]
+  'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
+  'no-undef': 'off'
 };
 
 if (process.env.CI) {
@@ -40,7 +41,6 @@ if (process.env.CI) {
     'no-use-before-define': 'off',
     'no-param-reassign': 'off',
     'no-unused-vars': 'off',
-    'no-undef': 'off',
     'no-restricted-globals': 'off',
     'default-case': 'off',
     'prefer-const': 'off',
