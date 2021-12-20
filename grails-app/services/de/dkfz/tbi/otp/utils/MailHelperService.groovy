@@ -21,24 +21,22 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.plugins.mail.MailService
-import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.security.*
 
 @Transactional
 class MailHelperService {
 
-    @Autowired
-    GrailsApplication grailsApplication
-
     MailService mailService
     ConfigService configService
     ProcessingOptionService processingOptionService
+    SecurityService securityService
+    RolesService rolesService
 
     void sendEmail(String emailSubject, String content, String recipient, List<String> ccs = []) {
         sendEmail(emailSubject, content, Arrays.asList(recipient), ccs)
@@ -103,6 +101,19 @@ class MailHelperService {
                 body content
             }
         }
+    }
+
+    /**
+     * Returns the EMAIL_SENDER_SALUTATION if the current user is an operator or admin. Otherwise it returns the name of the current user.
+     */
+    String getSenderName() {
+        User currentUser = securityService.currentUserAsUser
+
+        if (rolesService.isAdministrativeUser(currentUser)) {
+            return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+        }
+
+        return currentUser.realName
     }
 
     String getTicketSystemEmailAddress() {

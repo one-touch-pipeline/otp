@@ -241,7 +241,7 @@ class EgaSubmissionFileService {
 
         String subject = "New ${submission}"
         String content = messageSourceService.createMessage('egaSubmission.template.base', [
-                user         : user.realName,
+                user         : mailHelperService.senderName,
                 project      : submission.project.name,
                 submission   : submission.id,
                 numberOfFiles: submission.dataFilesToSubmit.size() + submission.bamFilesToSubmit.size(),

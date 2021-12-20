@@ -168,7 +168,6 @@ class UserProjectRoleService {
     }
 
     private void notifyUsersAboutFileAccessChange(UserProjectRole userProjectRole) {
-        User requester = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
         Project project = userProjectRole.project
         User user = userProjectRole.user
 
@@ -180,7 +179,7 @@ class UserProjectRoleService {
         String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
         String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", [
                 username             : user.realName,
-                requester            : requester.realName,
+                requester            : mailHelperService.senderName,
                 projectName          : project.name,
                 dirAnalysis          : project.dirAnalysis ?: "-",
                 clusterName          : clusterName,
@@ -269,7 +268,7 @@ class UserProjectRoleService {
                     userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
                     projectRole   : projectRoleNames.join(", "),
                     projectName   : projectName,
-                    executingUser : executingUser.realName ?: executingUser.username,
+                    executingUser : mailHelperService.senderName,
             ])
         }
 

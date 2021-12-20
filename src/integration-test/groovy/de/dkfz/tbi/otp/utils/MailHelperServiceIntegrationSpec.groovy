@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugins.mail.MailService
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
@@ -31,24 +32,32 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.security.RolesService
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.security.User
 
 @Rollback
 @Integration
-class MailHelperServiceIntegrationSpec extends Specification implements DomainFactoryCore {
+class MailHelperServiceIntegrationSpec extends Specification implements DomainFactoryCore, UserDomainFactory, UserAndRoles {
 
     static final String SUBJECT = 'subject'
     static final String BODY = 'body'
     static final String RECIPIENT = HelperUtils.randomEmail
     static final String TICKET_EMAIL = HelperUtils.randomEmail
+    static final String SENDER_SALUTATION = "OTP team"
 
     MailHelperService mailHelperService
     TestConfigService configService
 
     void setupData() {
         findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM, value: TICKET_EMAIL)
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, value: SENDER_SALUTATION)
 
         mailHelperService = new MailHelperService()
         mailHelperService.processingOptionService = new ProcessingOptionService()
+        mailHelperService.rolesService = new RolesService()
         mailHelperService.configService = configService
         mailHelperService.mailService = Mock(MailService)
     }
@@ -102,5 +111,35 @@ class MailHelperServiceIntegrationSpec extends Specification implements DomainFa
         receiverList     | testSubject
         []               | "is empty list"
         ["a@b.c", "abc"] | "contains non-email strings"
+    }
+
+    void "getSenderName, should return correct sender salutation"() {
+        given:
+        setupData()
+        createUserAndRoles()
+
+        mailHelperService.securityService = Mock(SecurityService) {
+            1 * getCurrentUserAsUser() >> {
+                User user = getUser(user)
+                user.realName = TESTUSER
+                return user
+            }
+        }
+
+        when:
+        String sender = ""
+
+        SpringSecurityUtils.doWithAuth(user) {
+            sender = mailHelperService.senderName
+        }
+
+        then:
+        sender == resultName
+
+        where:
+        user      || resultName
+        OPERATOR  || SENDER_SALUTATION
+        ADMIN     || SENDER_SALUTATION
+        TESTUSER  || TESTUSER
     }
 }

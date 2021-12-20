@@ -61,6 +61,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     private static final String EMAIL_INTERN = 'intern@de.de'
     private static final String EMAIL_EXTERN = 'extern@de.de'
     private static final String EMAIL_TICKET_SYSTEM = HelperUtils.randomEmail
+    private static final String EMAIL_SENDER_NAME = "Tina Test"
 
     @Autowired
     GrailsApplication grailsApplication
@@ -97,6 +98,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
             getTicketSystemEmailAddress() >> EMAIL_TICKET_SYSTEM
+            getSenderName() >> EMAIL_SENDER_NAME
         }
 
         findOrCreateProcessingOption(
@@ -746,7 +748,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole executingUPR = createUserProjectRole(properties)
 
         String expectedSubject = "newProjectMember\n${newUPR.project.name}"
-        String expectedContent = "newProjectMember\n${executingUPR.user.realName}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}"
+        String expectedContent = "newProjectMember\n${EMAIL_SENDER_NAME}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}"
         if (authoritative && projectRole == submitter) {
             String nameAndSalutation = EMAIL_SENDER_SALUTATION
             expectedContent = "administrativeUserAddedSubmitter\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}\n${nameAndSalutation}\n${nameAndSalutation}"
@@ -776,8 +778,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(OPERATOR))
-
         Project project = createProject(dirAnalysis: "/dev/null")
         UserProjectRole userProjectRole = createUserProjectRole(
                 project: project,
@@ -792,7 +792,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         String expectedBody = """\
             fileAccessChange
             ${userProjectRole.user.realName}
-            ${executingUser.realName}
+            ${EMAIL_SENDER_NAME}
             ${projectName}
             ${project.dirAnalysis}
             ${CLUSTER_NAME}
@@ -800,7 +800,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
             ${EMAIL_SENDER_SALUTATION}""".stripIndent()
 
         when:
-        SpringSecurityUtils.doWithAuth(executingUser.username) {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             userProjectRoleService.notifyUsersAboutFileAccessChange(userProjectRole)
         }
 
