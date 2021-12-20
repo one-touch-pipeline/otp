@@ -54,7 +54,6 @@ if (process.env.CI) {
     'no-useless-concat': 'off',
     'block-scoped-var': 'off',
     'no-useless-call': 'off',
-    'no-self-assign': 'off',
     'no-underscore-dangle': 'off',
     'no-useless-escape': 'off'
   });
