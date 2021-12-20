@@ -87,9 +87,9 @@ $(() => {
   });
 
   $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
-    const ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns'));
-    const workflowSize = parseInt($('#laneOverviewId').data('workflow-size'));
-    const seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size'));
+    const ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns'), 10);
+    const workflowSize = parseInt($('#laneOverviewId').data('workflow-size'), 10);
+    const seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size'), 10);
     const step = workflowSize + 1;
     const tableSize = seqTypeSize * step + ignoredColumns;
     const result = [];

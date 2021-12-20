@@ -139,7 +139,7 @@ $.otp.processingPriority = {
     const sValue = $('#pp-allowedParallelWorkflowRuns').val();
     const vFeedback = $('#vf-allowedParallelWorkflowRuns');
 
-    const val = parseInt(sValue);
+    const val = parseInt(sValue, 10);
     if (val <= 0) {
       vFeedback.removeClass('d-none');
       input.setCustomValidity(`"${input.value}" is not valid.`);
@@ -203,7 +203,7 @@ $.otp.processingPriority = {
         oData.push($.otp.processingPriority.ppActionColumn);
 
         if (entityId > 0) {
-          oData[1] = parseInt(version) + 1;
+          oData[1] = parseInt(version, 10) + 1;
           oTable.row(rowIndex).data(oData).draw();
         } else {
           oData[1] = 0;

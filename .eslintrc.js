@@ -45,7 +45,6 @@ if (process.env.CI) {
     'default-case': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',
-    radix: 'off',
     'no-new': 'off',
     'no-unused-expressions': 'off',
     'no-restricted-syntax': 'off',
