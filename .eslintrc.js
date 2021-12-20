@@ -48,7 +48,6 @@ if (process.env.CI) {
     'array-callback-return': 'off',
     radix: 'off',
     'no-new': 'off',
-    'vars-on-top': 'off',
     'no-unused-expressions': 'off',
     'no-restricted-syntax': 'off',
     'no-useless-concat': 'off',
