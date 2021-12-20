@@ -100,11 +100,9 @@ $(() => {
   $('div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let outerContainer; let
-      inputField;
-    container = $(this).parent();
-    outerContainer = container.parent();
-    inputField = $('input[name=value]', container);
+    const container = $(this).parent();
+    const outerContainer = container.parent();
+    const inputField = $('input[name=value]', container);
     if (!inputField[0].validity.valid) {
       window.alert('The input is not valid. Please provide a valid input value.');
       return;
@@ -139,10 +137,8 @@ $(() => {
   $('div.edit-switch-text-area p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
@@ -181,10 +177,8 @@ $(() => {
   $('div.edit-switch-url p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
@@ -216,11 +210,9 @@ $(() => {
   function deleteRole(that) {
     'use strict';
 
-    let container; let outerContainer; let
-      outerOuterContainer;
-    container = that.parent();
-    outerContainer = container.parent();
-    outerOuterContainer = outerContainer.parent();
+    const container = that.parent();
+    const outerContainer = container.parent();
+    const outerOuterContainer = outerContainer.parent();
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
@@ -262,10 +254,8 @@ $(() => {
   $('div.submit-container button.addRole').on('click', function () {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
 
     const selectedNewRoles = [];
     const selectNewRoles = $('select[name=newRoles]', container).children();
@@ -334,10 +324,8 @@ $(() => {
   function saveRole(that) {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = that.parent();
-    outerContainer = container.parent();
+    const container = that.parent();
+    const outerContainer = container.parent();
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
@@ -386,10 +374,8 @@ $(() => {
   function saveMultiDropDownOptions(that) {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = that.parent();
-    outerContainer = container.parent();
+    const container = that.parent();
+    const outerContainer = container.parent();
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
@@ -433,10 +419,8 @@ $(() => {
   $('div.edit-switch-date p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
@@ -465,11 +449,9 @@ $(() => {
   $('div.edit-switch-checkboxes p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let outerContainer; let
-      value;
-    container = $(this).parent();
-    outerContainer = container.parent();
-    value = {};
+    const container = $(this).parent();
+    const outerContainer = container.parent();
+    const value = {};
     $('input:checked', container).each(function (index) {
       value[`value[${index}]`] = this.name;
     });
@@ -518,10 +500,8 @@ $(() => {
   $('div.edit-switch-new-value p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
@@ -553,10 +533,8 @@ $(() => {
   $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let
-      outerContainer;
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
@@ -588,10 +566,9 @@ $(() => {
   $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let outerContainer; const
-      data = {};
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const data = {};
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     $('input:text', container).each(function () {
       data[this.name] = $(this).val();
     });
@@ -629,12 +606,10 @@ $(() => {
   $('div.edit-switch-toggle p.edit-switch-editor button.toggle').on('click', function () {
     'use strict';
 
-    let container; let outerContainer; let orgVal; let
-      invVal;
-    container = $(this).parent();
-    outerContainer = container.parent();
-
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
+
     if (confirmationText) {
       const confirmed = confirm(confirmationText);
       if (confirmed === false) {
@@ -642,8 +617,8 @@ $(() => {
       }
     }
 
-    orgVal = $('input:hidden[name=value]', container).val();
-    invVal = (orgVal === 'true' ? 'false' : 'true');
+    const orgVal = $('input:hidden[name=value]', container).val();
+    const invVal = (orgVal === 'true' ? 'false' : 'true');
     $.ajax({
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
@@ -735,10 +710,11 @@ $(() => {
   $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', function () {
     'use strict';
 
-    let container; let outerContainer; const dataValues = {}; let i = 0;
+    const dataValues = {};
+    let i = 0;
     let displayValue = '';
-    container = $(this).parent();
-    outerContainer = container.parent();
+    const container = $(this).parent();
+    const outerContainer = container.parent();
     const multiInputField = $('.multi-input-field', outerContainer);
     let valid = true;
     $('input', multiInputField).each(function () {

@@ -103,15 +103,12 @@ $.otp.dataTableFilter = {
       updateSearchCriteria();
     };
     const searchCriteriaAddRow = function (event) {
-      let tr; let
-        cloned;
-
-      tr = $(event.target).parents('.dtf_row');
+      const tr = $(event.target).parents('.dtf_row');
       $('td.add', tr).hide();
 
       // select2 doesn't take well to cloning, do the required voodoo dance.
       $('select.select2-hidden-accessible', tr).select2('destroy');
-      cloned = tr.clone();
+      const cloned = tr.clone();
       $.otp.applySelect2($('select.use-select-2', tr));
 
       $('td.value span.dtf_value_span', cloned).hide();

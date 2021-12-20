@@ -163,17 +163,15 @@ $.otp.message = function (message, warning) {
   if (!message) {
     return;
   }
-  let classes; let button; let
-    divCode;
-  classes = 'message';
+  let classes = 'message';
   if (warning) {
     classes += ' errors';
   }
-  button = $('<div class="close-info-box"><button></button></div>');
+  const button = $('<div class="close-info-box"><button></button></div>');
   $('button', button).on('click', function () {
     $(this).parent().parent().remove();
   });
-  divCode = $(`<div class="${classes}"><p>${message}</p></div>`);
+  const divCode = $(`<div class="${classes}"><p>${message}</p></div>`);
   button.appendTo(divCode);
   divCode.append($('<div style="clear: both;"></div>'));
   $('#infoBox').append(divCode);

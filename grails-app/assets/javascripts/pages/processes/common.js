@@ -89,8 +89,7 @@ $.otp.workflows = {
   formatTimespan(msec) {
     'use strict';
 
-    let sec; let min; let hour; let
-      day;
+    let sec; let min; let hour;
     if (msec < 1000) {
       return `${msec} msec`;
     }
@@ -109,7 +108,7 @@ $.otp.workflows = {
     if (hour < 24) {
       return `${Math.floor(hour)} h ${min} min`;
     }
-    day = Math.floor(hour / 24);
+    const day = Math.floor(hour / 24);
     hour = Math.floor(hour % 24);
     return `${day} day(s) ${hour} h`;
   },

@@ -43,7 +43,6 @@ if (process.env.CI) {
     'no-unused-vars': 'off',
     'no-restricted-globals': 'off',
     'default-case': 'off',
-    'prefer-const': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',
     radix: 'off',

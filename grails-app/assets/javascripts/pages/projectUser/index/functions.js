@@ -167,9 +167,7 @@ $(() => {
   $('div.submit-container button.changeProjectAccess').on('click', function () {
     'use strict';
 
-    let container;
-    container = $(this).parent();
-
+    const container = $(this).parent();
     const postUrl = $('input:hidden[name=changeProjectAccessButton]', container).val();
     const modalText = $('button[data-confirmation]', container).attr('data-confirmation');
 

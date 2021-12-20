@@ -156,8 +156,7 @@ $.otp.sequence = {
         });
       },
       fnRowCallback(nRow) {
-        let fastqc;
-        fastqc = $('td:eq(13)', nRow);
+        const fastqc = $('td:eq(13)', nRow);
         if ($('a', fastqc).length > 0) {
           fastqc.addClass('true');
         } else {
