@@ -241,7 +241,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     JavadocMissingParamDescription {
-        priority = LOW
+        priority = CRITICAL
     }
     JavadocMissingThrowsDescription {
         priority = DEFAULT

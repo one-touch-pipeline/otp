@@ -400,7 +400,6 @@ class SeqTrackService {
 
     /**
      * In case there are ExternallyProcessedMergedBamFile attached to the lanes to swap, the script shall stop
-     * @param seqTracks
      */
     void throwExceptionInCaseOfExternalMergedBamFileIsAttached(List<SeqTrack> seqTracks) {
         List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = returnExternallyProcessedMergedBamFiles(seqTracks)

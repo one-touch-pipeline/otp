@@ -101,7 +101,6 @@ class AlignmentInfoService {
 
     /**
      * get the output check it and returns result if successful
-     * @param workflowConfig
      *
      * @deprecated method is part of the old workflow system
      */
@@ -130,7 +129,8 @@ class AlignmentInfoService {
      * Generate a new RoddyAlignmentInfo by calling necessary Methods
      * for res, bwa and merge
      * @param config Configuration values map
-     * @param seqType
+     * @param seqType Sequencing type the RoddyAlignmentInfo should be generated for
+     * @param programVersion Version of the Roddy workflow plugin
      * @return new Alignment info
      */
     private RoddyAlignmentInfo generateRoddyAlignmentInfo(Map<String, String> config, SeqType seqType, String programVersion) {
@@ -151,7 +151,7 @@ class AlignmentInfoService {
      * Generates Merge Map that holds Command and Options
      * for the required MergeTool
      * @param config Configuration values map
-     * @param seqType
+     * @param seqType Sequencing type for which the merging information should be returned
      * @return Map that holds command and options for the Merging
      */
     private Map createMergeCommandOptionsMap(Map<String, String> config, SeqType seqType) {

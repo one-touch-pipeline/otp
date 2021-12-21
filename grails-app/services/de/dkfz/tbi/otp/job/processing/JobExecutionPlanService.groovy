@@ -289,7 +289,6 @@ class JobExecutionPlanService {
 
     /**
      * Retrieves all JobDefinitions for the given JobExecutionPlan
-     * @param plan
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<JobDefinition> jobDefinitions(JobExecutionPlan plan) {

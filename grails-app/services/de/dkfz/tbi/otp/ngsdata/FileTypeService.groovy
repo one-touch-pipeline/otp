@@ -48,8 +48,6 @@ class FileTypeService {
      *
      * to make a difference between 'stats' from sequence and alignment
      *
-     * @param filename
-     * @param type
      * @return FileType
      */
     static FileType getFileType(String filename, FileType.Type type) {

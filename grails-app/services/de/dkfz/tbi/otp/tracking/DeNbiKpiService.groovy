@@ -255,7 +255,6 @@ class DeNbiKpiService {
     /**
      * Count the number of users in the given projects. Only enabled users are counted.
      *
-     * @param projectNames
      * @return number of users
      */
     int countUsersInProjects(List<String> projectNames) {

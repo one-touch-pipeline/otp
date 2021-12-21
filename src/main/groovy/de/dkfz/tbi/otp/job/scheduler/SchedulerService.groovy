@@ -745,7 +745,6 @@ class SchedulerService {
 
     /**
      * Creates a Job for one ProcessingStep.
-     * @param step
      */
     private Job createJob(ProcessingStep step) {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean) as Job

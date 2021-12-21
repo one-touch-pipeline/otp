@@ -97,7 +97,6 @@ class LsdfFilesService {
      * Important function.
      * This function knows all naming conventions and data organization
      *
-     * @param dataFile
      * @return String with path or null if path can not be established
      */
     Path getFileFinalPathAsPath(DataFile dataFile) {

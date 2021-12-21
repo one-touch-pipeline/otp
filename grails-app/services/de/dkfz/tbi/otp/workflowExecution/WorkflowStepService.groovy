@@ -35,7 +35,6 @@ class WorkflowStepService {
      * Case 2: job D is the restarted from job B
      * --> return Job A
      *
-     * @param workflowStep
      * @return the previous running {@link WorkflowStep}, ignoring restarted ones.
      */
     WorkflowStep getPreviousRunningWorkflowStep(WorkflowStep workflowStep) {

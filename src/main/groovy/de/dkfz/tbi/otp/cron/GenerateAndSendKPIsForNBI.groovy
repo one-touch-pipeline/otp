@@ -93,8 +93,6 @@ class GenerateAndSendKPIsForNBI extends ScheduledJob {
     /**
      * Generate a list of all de.NBI workflow KPIs in a given date range.
      *
-     * @param fromDate
-     * @param toDate
      * @return List of de.NBI KPIs
      */
     private List<DeNbiKpi> generateKpiList(LocalDate fromDate, LocalDate toDate) {

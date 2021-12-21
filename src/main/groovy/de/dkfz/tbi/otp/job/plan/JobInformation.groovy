@@ -50,7 +50,6 @@ class JobInformation implements Serializable {
 
     /**
      * Creates a JobInformation from the given JobDefinition.
-     * @param job
      */
     static JobInformation fromJob(JobDefinition job) {
         JobInformation ret = new JobInformation()

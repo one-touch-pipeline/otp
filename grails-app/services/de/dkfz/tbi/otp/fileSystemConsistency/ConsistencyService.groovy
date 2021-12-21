@@ -38,7 +38,6 @@ class ConsistencyService {
     /**
      * Retrieves the consistency status of the DataFile
      *
-     * @param dataFile
      * @return Consistency status of the DataFile
      */
     Status checkStatus(DataFile dataFile) {

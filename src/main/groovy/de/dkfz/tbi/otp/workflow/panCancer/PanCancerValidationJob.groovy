@@ -40,7 +40,6 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
     /**
      * Returns the expected files for validation
      *
-     * @param workflowStep
      * @return the following paths
      * <ul>
      *     <li>workBamFile
@@ -72,7 +71,6 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
     /**
      * Returns the expected directories for validation
      *
-     * @param workflowStep
      * @return the following paths
      * <ul>
      *     <li>workDirectory
@@ -94,7 +92,6 @@ class PanCancerValidationJob extends AbstractRoddyClusterValidationJob implement
      * Returns errors if expected read groups are different from the read groups created
      * Empty list means no further validation error
      *
-     * @param workflowStep
      * @return currently only one error in the list if any exists
      */
     @Override

@@ -178,7 +178,6 @@ class ProcessService {
 
     /**
      * Overloaded method for convenience.
-     * @param step
      * @see #getState(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -202,7 +201,6 @@ class ProcessService {
 
     /**
      * Overloaded method for convenience.
-     * @param step
      * @see #getError(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -216,7 +214,6 @@ class ProcessService {
 
     /**
      * Retrieves the last update date for the Process.
-     * @param process
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getLastUpdate(Process process) {
@@ -225,7 +222,6 @@ class ProcessService {
 
     /**
      * Overloaded method for convenience
-     * @param step
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getLastUpdate(ProcessingStep step) {
@@ -244,7 +240,6 @@ class ProcessService {
 
     /**
      * Retrieves the first update date for the ProcessingStep
-     * @param step
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getFirstUpdate(ProcessingStep step) {
@@ -361,7 +356,6 @@ class ProcessService {
 
     /**
      * Helper function to retrieve the last ProcessingSTepUpdate for given Process.
-     * @param process
      */
     private ProcessingStepUpdate lastUpdate(Process process) {
         return ProcessingStepUpdate.withCriteria {

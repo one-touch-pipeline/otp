@@ -90,7 +90,6 @@ class WorkflowSystemConfigController implements CheckAndCall {
     /**
      * Converter especially to get the correct time format in output data sets.
      *
-     * @param wf
      * @return map of workflow data
      */
     private static Map buildWorkflowOutputObject(Workflow wf) {

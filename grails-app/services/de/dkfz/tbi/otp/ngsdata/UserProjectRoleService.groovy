@@ -314,7 +314,6 @@ class UserProjectRoleService {
     /**
      * Checks if all UserProjectRole match the applied predicate closure.
      *
-     * @param userProjectRole
      * @param consistencyCheck Closure to be called on each UserProjectRole
      */
     boolean checkRelatedUserProjectRolesFor(UserProjectRole userProjectRole, Closure consistencyCheck) {
