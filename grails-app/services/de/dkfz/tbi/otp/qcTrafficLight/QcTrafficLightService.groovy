@@ -88,7 +88,7 @@ class QcTrafficLightService {
         if ((bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED ||
              bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.WARNING) &&
                 prevQcTrafficLightStatus != AbstractMergedBamFile.QcTrafficLightStatus.WARNING) {
-                otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
+            otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
                 otrsTicketService.resetAnalysisNotification(it)
             }
             Closure<Void> qcHandler = qcHandlerMap[bamFile.seqType]

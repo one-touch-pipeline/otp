@@ -200,7 +200,7 @@ class LdapService implements InitializingBean {
                     .and(configService.ldapSearchAttribute).is(user.username)
             return !ldapTemplate.search(query, new IsUserDeactivatedMapper(ldapService: this)).empty
         } catch (NameNotFoundException ignored) {
-           return false
+            return false
         }
     }
 

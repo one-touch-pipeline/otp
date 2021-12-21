@@ -233,6 +233,7 @@ class RoddyConfigService {
         return errorsString
     }
 
+    @SuppressWarnings("Indentation")
     String createRoddyXmlConfig(
             String combinedConfig,
             Map<String, String> specificConfig,

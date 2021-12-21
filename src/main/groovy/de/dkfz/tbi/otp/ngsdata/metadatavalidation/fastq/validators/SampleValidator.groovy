@@ -65,6 +65,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
+    @SuppressWarnings("Indentation")
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         Collection<String> missingIdentifiersWithProject = []
         Collection<String> parsedSampleIdentifiers = []

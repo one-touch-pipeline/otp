@@ -601,7 +601,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     Indentation {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     LineLength {
         priority = DEFAULT

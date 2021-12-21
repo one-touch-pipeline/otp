@@ -114,6 +114,7 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
      * Optionally the content can be validated by setting validateConfig, if no validation is required set it to null
      */
     @TupleConstructor
+    @SuppressWarnings("Indentation")
     enum Type {
         /** used for jobs that are submitted directly to cluster by OTP */
         OTP_CLUSTER({ String s ->

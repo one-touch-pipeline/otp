@@ -58,6 +58,7 @@ class AlignmentInfoService {
         return null
     }
 
+    @SuppressWarnings("Indentation")
     Map<SeqType, AlignmentInfo> getAlignmentInformationForProject(Project project) {
         assert project: "No project provided"
 
