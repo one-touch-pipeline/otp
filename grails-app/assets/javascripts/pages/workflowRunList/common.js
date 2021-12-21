@@ -50,8 +50,9 @@ const statusToClassName = (status) => {
       return 'dot orange';
     case 'KILLED':
       return 'dot black';
+    default:
+      return '';
   }
-  return '';
 };
 
 // eslint-disable-next-line no-unused-vars

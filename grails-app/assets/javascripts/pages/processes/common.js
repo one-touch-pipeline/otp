@@ -63,8 +63,9 @@ $.otp.workflows = {
         return 'dot red';
       case 'RESTARTED':
         return 'dot purple';
+      default:
+        return '';
     }
-    return '';
   },
   /**
      * Helper method to render a date in a common way.

@@ -41,7 +41,6 @@ if (process.env.CI) {
     'no-use-before-define': 'off',
     'no-param-reassign': 'off',
     'no-restricted-globals': 'off',
-    'default-case': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',
     'no-restricted-syntax': 'off',
