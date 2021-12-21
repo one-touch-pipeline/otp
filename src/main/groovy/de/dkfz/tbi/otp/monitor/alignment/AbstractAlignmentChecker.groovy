@@ -55,11 +55,11 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
 
     @Override
-    List handle(List<SeqTrack> seqTracksInput, MonitorOutputCollector output) {
-        if (!seqTracksInput) {
+    List handle(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
+        if (!seqTracks) {
             return []
         }
-        List<SeqTrack> seqTracks = seqTracksInput.unique()
+        seqTracks.unique()
 
         output.showWorkflow(getWorkflowName())
 

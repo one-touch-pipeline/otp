@@ -732,7 +732,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     AssignCollectionUnique {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     ClosureAsLastMethodParameter {
         priority = MIDDLE
