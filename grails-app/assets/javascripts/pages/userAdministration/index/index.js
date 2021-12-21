@@ -57,7 +57,7 @@ $.otp.userAdministration.loadUserList = () => {
   $('#userTable').dataTable({
     aoColumns: [
       {
-        mData(source, type, data) {
+        mData(source) {
           return $.otp.createLinkMarkup({
             controller: 'userAdministration',
             action: 'show',
@@ -73,7 +73,7 @@ $.otp.userAdministration.loadUserList = () => {
       { mData: 'email' },
       { mData: 'deactivationDate' },
       {
-        mData(source, type, data) {
+        mData(source, type) {
           if (type === 'sort') {
             return source.enabled;
           }
@@ -84,7 +84,7 @@ $.otp.userAdministration.loadUserList = () => {
         }
       },
       {
-        mData(source, type, data) {
+        mData(source, type) {
           if (type === 'sort') {
             return source.acceptedPrivacyPolicy;
           }
@@ -96,7 +96,7 @@ $.otp.userAdministration.loadUserList = () => {
         }
       },
       {
-        mData(source, type, data) {
+        mData(source) {
           let result = '';
           if (source.username) {
             result = `<form action="${$.otp.createLink({ controller: 'login', action: 'impersonate' })}" 

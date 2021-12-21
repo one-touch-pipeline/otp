@@ -40,7 +40,6 @@ if (process.env.CI) {
     strict: 'off',
     'no-use-before-define': 'off',
     'no-param-reassign': 'off',
-    'no-unused-vars': 'off',
     'no-restricted-globals': 'off',
     'default-case': 'off',
     'no-alert': 'off',

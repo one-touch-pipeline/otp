@@ -66,7 +66,7 @@ $.otp.projectConfig = {
   referenceGenome() {
     'use strict';
 
-    const oTable = $.otp.projectConfig.registerDataTable(
+    $.otp.projectConfig.registerDataTable(
       '#listReferenceGenome',
       $.otp.createLink({
         controller: 'alignmentConfigurationOverview',

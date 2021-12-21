@@ -24,7 +24,7 @@ $(() => {
   const table = runsTable.DataTable({
     columns: [
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return null;
           }
@@ -35,7 +35,7 @@ $(() => {
         orderable: false
       },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return row.state;
           }
@@ -44,7 +44,7 @@ $(() => {
         }
       },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return row.comment;
           }
@@ -56,7 +56,7 @@ $(() => {
       },
       { data: 'workflow', orderable: false },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return row.shortName;
           }
@@ -85,7 +85,7 @@ $(() => {
       { data: 'duration', orderable: false },
       { data: 'id' },
       {
-        data(row, type, set, meta) {
+        data(row, type) {
           if (type === 'sort') {
             return null;
           }

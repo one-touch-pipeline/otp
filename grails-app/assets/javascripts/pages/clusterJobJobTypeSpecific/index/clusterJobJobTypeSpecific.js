@@ -360,7 +360,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
             id: jobId
           });
         },
-        eventsMousemove(e, shape) {
+        eventsMousemove() {
           return true;
         }
       }

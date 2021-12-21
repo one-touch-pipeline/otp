@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+// eslint-disable-next-line no-unused-vars
 function confirmDataTransferDeletion() {
   if (!window.confirm(`Are you sure that you want to permanently
    delete this document and any transfers based on it?`)) {
@@ -31,6 +32,7 @@ function confirmDataTransferDeletion() {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function confirmCompleteTransfer(event) {
   if (!window.confirm(`Are you sure that this transfer is completed?
    (receipt acknowledged? files deleted? disks wiped? etc..)`)) {
@@ -43,6 +45,7 @@ function confirmCompleteTransfer(event) {
  *
  * @param fileInputFieldId
  */
+// eslint-disable-next-line no-unused-vars
 function updateFileNameOfFileInput(fileInputFieldId) {
   const inputField = $(fileInputFieldId);
   const fileName = Array.from(inputField.prop('files')).map((val) => val.name).reduce((acc, val) => `${acc}, ${val}`);
@@ -72,6 +75,7 @@ function updateFileNameOfFileInputToDefaultPlaceholder(id) {
  * @param id to find the correct position of the file list to add the new file names
  * @param action for the ajax query target
  */
+// eslint-disable-next-line no-unused-vars
 function onUploadFiles(submitBtn, id, action) {
   const uploadForm = submitBtn.closest('form');
   const data = new FormData(uploadForm);

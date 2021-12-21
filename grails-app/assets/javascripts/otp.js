@@ -441,7 +441,7 @@ $.otp.getDownloadButtonServerSide = (downloadLink) => [{
   extend: 'csv',
   text: 'Download CSV',
   titleAttr: 'Attention: Download can take a while',
-  action(e, dt, node, config) {
+  action() {
     const iframe = document.createElement('iframe');
     iframe.style.height = '0px';
     iframe.style.width = '0px';

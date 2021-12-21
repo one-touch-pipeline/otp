@@ -456,7 +456,7 @@ $(() => {
   const getTableDataRowById = (id) => {
     const dataTable = $('#overviewTableProcessedMergedBMF').DataTable();
 
-    return dataTable.rows((idx, data, node) => data.rowId === id.toString()).data()[0];
+    return dataTable.rows((idx, data) => data.rowId === id.toString()).data()[0];
   };
 
   /**

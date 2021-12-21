@@ -23,7 +23,7 @@
 $(() => {
   'use strict';
 
-  $('.sample-identifier-edit-form').on('reset', (e) => {
+  $('.sample-identifier-edit-form').on('reset', () => {
     $.otp.multiInputField.cancel($(this).find($('.multi-input-field')));
   });
 });

@@ -21,7 +21,7 @@
  */
 
 $(() => {
-  $('button.workflow').on('click', (e) => {
+  $('button.workflow').on('click', () => {
     $('.workflow').toggle();
   });
 });
