@@ -28,6 +28,11 @@ import java.time.*
 
 class TimeUtilsSpec extends Specification {
 
+    void "getFormattedDuration, when input duration is missing, return empty String"() {
+        expect:
+        TimeUtils.getFormattedDuration(null) == ""
+    }
+
     void "getFormattedDurationWithDays, when d1 is missing, return empty String"() {
         expect:
         TimeUtils.getFormattedDurationWithDays(null, new Date()) == ""
@@ -64,27 +69,6 @@ class TimeUtilsSpec extends Specification {
         0         | 0          | 17           || "0d 00h 17m"
         0         | 0          | 0            || "0d 00h 00m"
         0         | 0          | -17          || "-0d 00h 17m"
-    }
-
-    @Unroll
-    void "getFormattedDuration, when called, then return formatted string '#expected'"() {
-        given:
-        LocalDateTime start = LocalDateTime.now()
-        LocalDateTime end = start.plusHours(hourOffset).plusMinutes(minuteOffset).plusSeconds(secondOffset)
-
-        when:
-        String duration = TimeUtils.getFormattedDuration(start, end)
-
-        then:
-        duration == expected
-
-        where:
-        hourOffset | minuteOffset | secondOffset || expected
-        0          | 0            | 0            || "00:00:00"
-        12         | 0            | 0            || "12:00:00"
-        0          | 12           | 0            || "00:12:00"
-        0          | 0            | 12           || "00:00:12"
-        12         | 34           | 56           || "12:34:56"
     }
 
     @Unroll

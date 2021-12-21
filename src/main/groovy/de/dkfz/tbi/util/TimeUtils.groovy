@@ -33,6 +33,10 @@ class TimeUtils {
      * @return String with format "hh:mm:ss"
      */
     static String getFormattedDuration(Duration duration) {
+        if (!duration) {
+            return ""
+        }
+
         long millis = duration.toMillis()
         String negative = duration.isNegative() ? '-' : ''
         long absMillis = Math.abs(millis)
@@ -53,21 +57,6 @@ class TimeUtils {
      * @return String with format "hh:mm:ss"
      */
     static String getFormattedDurationForZonedDateTime(ZonedDateTime start, ZonedDateTime end) {
-        if (!start || !end) {
-            return null
-        }
-
-        return getFormattedDuration(Duration.between(start, end))
-    }
-
-    /**
-     * Convert a Duration into a String with the format "hh:mm:ss".
-     *
-     * @param start of the duration
-     * @param end of the duration
-     * @return String with format "hh:mm:ss"
-     */
-    static String getFormattedDuration(LocalDateTime start, LocalDateTime end) {
         if (!start || !end) {
             return null
         }
