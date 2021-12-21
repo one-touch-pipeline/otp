@@ -46,7 +46,6 @@ if (process.env.CI) {
     'no-alert': 'off',
     'array-callback-return': 'off',
     'no-new': 'off',
-    'no-unused-expressions': 'off',
     'no-restricted-syntax': 'off',
     'block-scoped-var': 'off',
     'no-useless-call': 'off',
