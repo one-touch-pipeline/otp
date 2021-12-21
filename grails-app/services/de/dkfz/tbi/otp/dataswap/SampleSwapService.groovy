@@ -107,13 +107,13 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
                         DataProcessingFilesService.OutputDirectories.ALIGNMENT)
                 String middleDirAlignment = processedAlignmentFileService.getRunLaneDirectory(alignmentPass.seqTrack)
                 String oldPathToAlignedFiles = "${baseDirAlignment}/${middleDirAlignment}"
-                data.moveFilesCommands << "#rm -rf ${oldPathToAlignedFiles}\n"
+                data.moveFilesCommands << "rm -rf ${oldPathToAlignedFiles}\n"
             }
 
             String baseDirMerging = dataProcessingFilesService.getOutputDirectory(data.individualSwap.old,
                     DataProcessingFilesService.OutputDirectories.MERGING)
             String oldProcessingPathToMergedFiles = "${baseDirMerging}/${data.sampleTypeSwap.old.name}"
-            data.moveFilesCommands << "#rm -rf ${oldProcessingPathToMergedFiles}\n"
+            data.moveFilesCommands << "rm -rf ${oldProcessingPathToMergedFiles}\n"
 
             List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.createCriteria().list {
                 mergingPass {
@@ -129,7 +129,7 @@ class SampleSwapService extends DataSwapService<SampleSwapParameters, SampleSwap
             }
             latestProcessedMergedBamFiles.each { ProcessedMergedBamFile latestProcessedMergedBamFile ->
                 String oldProjectPathToMergedFiles = latestProcessedMergedBamFile.baseDirectory.absolutePath
-                data.moveFilesCommands << "#rm -rf ${oldProjectPathToMergedFiles}\n"
+                data.moveFilesCommands << "rm -rf ${oldProjectPathToMergedFiles}\n"
             }
         }
 

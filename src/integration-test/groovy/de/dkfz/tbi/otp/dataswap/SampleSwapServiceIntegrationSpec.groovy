@@ -125,7 +125,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         copyScript.exists()
         String copyScriptContent = copyScript.text
         copyScriptContent.startsWith(DataSwapService.BASH_HEADER)
-        copyScriptContent.contains("#rm -rf ${destinationDirectory}")
+        copyScriptContent.contains("rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")

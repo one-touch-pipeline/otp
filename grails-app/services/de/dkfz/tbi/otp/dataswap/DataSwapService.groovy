@@ -197,7 +197,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
                 if (Files.isSameFile(oldPath, newPath)) {
                     bashCommand = "# the old and the new data file ('${oldPath}') are the same, no move needed.\n"
                 } else {
-                    bashCommand = "# new file already exists: '${newPath}'; delete old file\n# rm -f '${oldPath}'\n"
+                    bashCommand = "# new file already exists: '${newPath}'; delete old file\n rm -f '${oldPath}'\n"
                 }
             } else {
                 bashCommand = """
@@ -355,7 +355,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
     void createRemoveAnalysisAndAlignmentsCommands(DataSwapData data) {
         data.moveFilesCommands << "\n\n################ delete bam and analysis files ################\n"
         data.dirsToDelete.flatten()*.path.each {
-            data.moveFilesCommands << "#rm -rf ${it}\n"
+            data.moveFilesCommands << "rm -rf ${it}\n"
         }
     }
 
@@ -523,7 +523,7 @@ abstract class DataSwapService<P extends DataSwapParameters, D extends DataSwapD
 
         if (Files.exists(newDirectPath)) {
             if (!filesAlreadyMoved && (oldDirectFilePath != newDirectPath)) {
-                bashMoveDirectFile = "# rm -f '${oldDirectFileName}'"
+                bashMoveDirectFile = "rm -f '${oldDirectFileName}'"
             } else {
                 bashMoveDirectFile = "# ${newDirectPath} is already at the correct position"
             }

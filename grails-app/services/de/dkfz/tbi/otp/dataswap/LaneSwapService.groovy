@@ -186,7 +186,7 @@ class LaneSwapService extends DataSwapService<LaneSwapParameters, LaneSwapData> 
         if (SeqTrack.findAllBySampleAndSeqType(data.sampleSwap.old, data.seqTypeSwap.old).empty) {
             data.moveFilesCommands << "\n #There are no seqTracks belonging to the sample ${data.sampleSwap.old} -> delete it on the filesystem\n\n"
             String basePath = projectService.getSequencingDirectory(data.projectSwap.old)
-            data.moveFilesCommands << "#rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
+            data.moveFilesCommands << "rm -rf '${basePath}/${data.seqTypeSwap.old.dirName}/" +
                     "view-by-pid/${data.individualSwap.old.pid}/${data.sampleTypeSwap.old.dirName}/" +
                     "${data.seqTypeSwap.old.libraryLayoutDirName}'\n"
         }

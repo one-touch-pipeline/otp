@@ -474,7 +474,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
         final Path oldPath = temporaryFolder.newFile().toPath()
         final Path newPath = temporaryFolder.newFile().toPath()
 
-        final String fileExistsComment = "# new file already exists: '${newPath}'; delete old file\n# rm -f '${oldPath}'\n"
+        final String fileExistsComment = "# new file already exists: '${newPath}'; delete old file\n rm -f '${oldPath}'\n"
 
         when:
         String bashCommand = service.generateMaybeMoveBashCommand(oldPath, newPath, null)
@@ -942,7 +942,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         String bashScriptToMoveFiles = ""
         dataFileList.each {
-            final String bashMoveDirectFile = "# rm -f '${dataFilePaths[it].oldPath}'"
+            final String bashMoveDirectFile = "rm -f '${dataFilePaths[it].oldPath}'"
             final String bashMoveVbpFile = """\
                                  |rm -f '${dataFilePaths[it].oldVbpPath}';
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
@@ -1040,7 +1040,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, RoddyPancan
 
         String bashScriptToMoveFiles = ""
         dataFileList.each {
-            final String bashMoveDirectFile = "# rm -f '${dataFilePaths[it].oldPath}'"
+            final String bashMoveDirectFile = "rm -f '${dataFilePaths[it].oldPath}'"
             final String bashMoveVbpFile = """\
                                  |rm -f '${dataFilePaths[it].oldVbpPath}';
                                  |mkdir -p -m 2750 '${dataFilePaths[it].newVbpPath.parent}';
