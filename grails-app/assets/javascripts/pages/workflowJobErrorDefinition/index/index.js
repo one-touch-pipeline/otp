@@ -22,7 +22,7 @@
 
 // no namespace, since method name is given as string and execute using
 // window[$method]
-workflowJobErrorDefinitionActionChangeSuccessHandler = function (container, additionalData) {
+workflowJobErrorDefinitionActionChangeSuccessHandler = (container, additionalData) => {
   'use strict';
 
   const row = container.parent().parent().parent();
@@ -42,7 +42,7 @@ workflowJobErrorDefinitionActionChangeSuccessHandler = function (container, addi
 
 $(() => {
   const rows = $('.errorDefinitions tr');
-  rows.each(function () {
+  rows.each(() => {
     const row = $(this);
     const action = $('.restartAction select', row);
     const val = action.val();

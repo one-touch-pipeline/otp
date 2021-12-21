@@ -29,7 +29,7 @@ $(() => {
 
   const columnsToShow = [];
   let i = fixedColumnsLeft;
-  tableElement.find('thead tr:first th[colspan]').each(function () {
+  tableElement.find('thead tr:first th[colspan]').each(() => {
     columnsToShow.push(i);
     i = i + +$(this).attr('colspan') + 1;
   });

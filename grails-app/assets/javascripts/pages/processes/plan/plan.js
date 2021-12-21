@@ -26,7 +26,7 @@
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
  * @param state Whether to limit to specific processes (failed, running) or include all processes
  */
-$.otp.workflows.registerProcesses = function (selector, planId, state) {
+$.otp.workflows.registerProcesses = (selector, planId, state) => {
   'use strict';
 
   $.otp.createListView(selector, $.otp.createLink({

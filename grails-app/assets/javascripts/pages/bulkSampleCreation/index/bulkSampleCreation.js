@@ -25,7 +25,7 @@ $.otp.bulkSampleCreation = {
   toggleEnable(source, target, invert) {
     'use strict';
 
-    $(`#${source}`).on('change', function () {
+    $(`#${source}`).on('change', () => {
       $(`#${target}`).attr('disabled', invert ? this.checked : !this.checked);
     });
   }

@@ -81,7 +81,7 @@ $.otp.resultsTable = {
   getEllipsisRenderer(nCharacters) {
     'use strict';
 
-    return function (data, type, row) {
+    return function ellipsisRenderer(data, type, row) {
       return `<div class="trim-text-with-ellipsis" \
                    style="max-width: ${nCharacters}em" \
                    title="${data}">

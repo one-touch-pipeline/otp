@@ -29,7 +29,7 @@ $(() => {
      * @param columnNames name of the columns in the correct order
      * @returns {Array}
      */
-  const tableRowsFormatter = function (row, columnNames) {
+  const tableRowsFormatter = (row, columnNames) => {
     let resultTableRow = [];
 
     columnNames.forEach((name) => {
@@ -38,7 +38,7 @@ $(() => {
 
     if (row.withdrawn) {
       const withdrawnRows = [];
-      $.each(resultTableRow, function () {
+      $.each(resultTableRow, () => {
         withdrawnRows.push(`<span class='withdrawn'>${this} </span>`);
       });
       resultTableRow = withdrawnRows;
@@ -52,7 +52,7 @@ $(() => {
      * @param tableCellData
      * @returns {string|*|Window.jQuery}
      */
-  const tableCellFormatter = function (tableCellData) {
+  const tableCellFormatter = (tableCellData) => {
     if (!tableCellData) {
       return '';
     }
@@ -112,7 +112,7 @@ $(() => {
      * Get the list of the column names for the generic DataTable header depending on the selected seqType.
      *
      */
-  const getDataTableColumns = function () {
+  const getDataTableColumns = () => {
     const seqType = $('#seqType').data('columns');
 
     let columnNames = [
@@ -217,7 +217,7 @@ $(() => {
   /**
      * Initialize the DataTable with it's default settings.
      */
-  const initDataTable = function () {
+  const initDataTable = () => {
     const table = $('#overviewTableProcessedMergedBMF');
     const fileName = `Alignment_Quality_Control-${$('.selected-project-value strong').text()}`;
 
@@ -246,7 +246,7 @@ $(() => {
      *
      * @param callback, fired when the sync and rendering is finished
      */
-  const syncAndRenderDataTable = function (callback = () => {}) {
+  const syncAndRenderDataTable = (callback = () => {}) => {
     const seqType = $('#seqType');
 
     if (seqType.val()) {
@@ -292,11 +292,11 @@ $(() => {
     }
   };
 
-  const disableLoadingSpinner = function () {
+  const disableLoadingSpinner = () => {
     $('#alignmentQualityOverviewSpinner').hide();
   };
 
-  const enableLoadingSpinner = function () {
+  const enableLoadingSpinner = () => {
     $('#alignmentQualityOverviewSpinner').show();
   };
 
@@ -306,7 +306,7 @@ $(() => {
      * @param dropdownMenu, with the selectable status options
      * @param abstractBamFileId
      */
-  const changeQcStatus = function (dropdownMenu, abstractBamFileId) {
+  const changeQcStatus = (dropdownMenu, abstractBamFileId) => {
     const oldValue = $(dropdownMenu).find('option[selected]').val();
     const statusCell = $(`#status-cell-${abstractBamFileId}`);
     const statusCellOldContent = statusCell.html();
@@ -369,7 +369,7 @@ $(() => {
      * @param row, data of the row
      * @returns {number|*}
      */
-  const renderQcStatusColumn = function (data, type, row) {
+  const renderQcStatusColumn = (data, type, row) => {
     let position = 3;
 
     if (row.qcStatusOnly) {
@@ -390,7 +390,7 @@ $(() => {
      * @param newQcStatus which is ACCEPTED or REJECTED
      * @returns {string} new modal title
      */
-  const buildModalTitle = function (newQcStatus) {
+  const buildModalTitle = (newQcStatus) => {
     let modalTitle = 'QC status';
 
     if (newQcStatus === 'ACCEPTED') {
@@ -409,7 +409,7 @@ $(() => {
      *
      * @param newQcStatus which is ACCEPTED or REJECTED
      */
-  const updateQcChangeDefaultComment = function (newQcStatus) {
+  const updateQcChangeDefaultComment = (newQcStatus) => {
     const modalInput = $('#modalInput');
 
     if (modalInput.attr('data-mode') !== newQcStatus) {
@@ -425,7 +425,7 @@ $(() => {
      * @param confirmCallback, performed when confirm button was pressed
      * @param closeCallback, performed when a close button was pressed
      */
-  const openConfirmationModal = function (title, confirmCallback, closeCallback) {
+  const openConfirmationModal = (title, confirmCallback, closeCallback) => {
     const modal = $('#confirmModal');
     const confirmButton = modal.find('#confirmModal');
     const closeButtons = modal.find('.closeModal');
@@ -453,7 +453,7 @@ $(() => {
      * @param id of the requested row
      * @returns {*} json object of the row data
      */
-  const getTableDataRowById = function (id) {
+  const getTableDataRowById = (id) => {
     const dataTable = $('#overviewTableProcessedMergedBMF').DataTable();
 
     return dataTable.rows((idx, data, node) => data.rowId === id.toString()).data()[0];

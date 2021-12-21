@@ -64,7 +64,7 @@ $(() => {
           const selectorHtml = (response.selectors);
           relatedSelectors.html(selectorHtml);
 
-          $('.expandable-button').on('click', function () {
+          $('.expandable-button').on('click', () => {
             $(this).siblings('.expandable-container').toggleClass('collapsed');
             $(this).siblings('.expandable-container').toggleClass('expanded');
           });

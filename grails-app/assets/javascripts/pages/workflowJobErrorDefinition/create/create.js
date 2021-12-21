@@ -21,7 +21,7 @@
  */
 
 $(() => {
-  const update = function () {
+  const update = () => {
     const val = $('#restartAction').val();
     if (val === 'RESTART_JOB') {
       $('#beanToRestart').parent().show();

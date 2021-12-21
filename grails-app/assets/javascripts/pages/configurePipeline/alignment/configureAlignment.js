@@ -23,7 +23,7 @@
 $(() => {
   'use strict';
 
-  const setStatSizeFileNames = function () {
+  const setStatSizeFileNames = () => {
     $.ajax({
       type: 'GET',
       url: $.otp.createLink({
@@ -51,7 +51,7 @@ $(() => {
     });
   };
 
-  const setGeneModels = function () {
+  const setGeneModels = () => {
     $.ajax({
       type: 'GET',
       url: $.otp.createLink({
@@ -79,7 +79,7 @@ $(() => {
     });
   };
 
-  const setToolVersion = function () {
+  const setToolVersion = () => {
     $.ajax({
       type: 'GET',
       url: $.otp.createLink({

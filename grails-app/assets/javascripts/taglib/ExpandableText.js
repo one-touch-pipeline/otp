@@ -21,12 +21,12 @@
  */
 
 $(() => {
-  $('.expandable-more').on('click', function (e) {
+  $('.expandable-more').on('click', (e) => {
     e.preventDefault();
     $(this).parent().css('display', 'none');
     $(this).parent().siblings('.expandable-full').css('display', '');
   });
-  $('.expandable-less').on('click', function (e) {
+  $('.expandable-less').on('click', (e) => {
     e.preventDefault();
     $(this).parent().css('display', 'none');
     $(this).parent().siblings('.expandable-shortened').css('display', '');

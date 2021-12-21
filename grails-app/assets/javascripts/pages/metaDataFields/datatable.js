@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-$.otp.exportableMetaDataFieldsTable = function () {
+$.otp.exportableMetaDataFieldsTable = () => {
   'use strict';
 
   return $('#metadatafields-datatable').dataTable({

@@ -24,10 +24,10 @@ $(() => {
   'use strict';
 
   // configure merging criteria
-  $('#useSeqPlatformGroup').on('change', function () {
+  $('#useSeqPlatformGroup').on('change', () => {
     this.form.submit();
   });
-  $('#libPrepKit').on('change', function () {
+  $('#libPrepKit').on('change', () => {
     this.form.submit();
   });
 
@@ -35,7 +35,7 @@ $(() => {
   const copyFromProjectSelector = $('#selectedProjectToCopyFrom');
   const copyFromSeqTypeSelector = $('#selectedSeqTypeToCopyFrom');
 
-  copyFromProjectSelector.on('change', function () {
+  copyFromProjectSelector.on('change', () => {
     if (this.value === 'null') {
       // Switch to system default seq. platforms
       this.form.submit();
@@ -52,7 +52,7 @@ $(() => {
     }
   });
 
-  copyFromSeqTypeSelector.on('change', function () {
+  copyFromSeqTypeSelector.on('change', () => {
     if (copyFromProjectSelector.prop('value') !== 'null' && copyFromSeqTypeSelector.prop('value') !== 'null') {
       // Search for the seq. platforms of the other projects
       this.form.submit();

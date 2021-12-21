@@ -25,7 +25,7 @@ $(() => {
     $(e.target).find('input:submit').addClass('submitting');
   });
 
-  const removeSubmitted = function (target) {
+  const removeSubmitted = (target) => {
     $(target).find('input:submit').removeClass('submitting');
   };
   removeSubmitted(document);

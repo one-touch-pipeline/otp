@@ -21,7 +21,7 @@
  */
 
 $.otp.userAdministration = {};
-$.otp.userAdministration.enableUser = function (userId, field) {
+$.otp.userAdministration.enableUser = (userId, field) => {
   'use strict';
 
   $.ajax({
@@ -51,7 +51,7 @@ $.otp.userAdministration.enableUser = function (userId, field) {
   });
 };
 
-$.otp.userAdministration.loadUserList = function () {
+$.otp.userAdministration.loadUserList = () => {
   'use strict';
 
   $('#userTable').dataTable({

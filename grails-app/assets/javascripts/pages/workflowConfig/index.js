@@ -23,7 +23,7 @@
 //= require ../shared/workflowConfigBase
 
 $(() => {
-  const update = function (e) {
+  const update = (e) => {
     $(e.target).parents('form').submit();
   };
   const form = $('form.selector');
@@ -39,7 +39,7 @@ $(() => {
 
   // disable buttons if default values are selected
   const editForm = $('form.editor');
-  const disableButtons = function () {
+  const disableButtons = () => {
     const disable = ($('select.type', editForm).val() === 'DEFAULT_VALUES');
     $('input[type=submit]', editForm).prop('disabled', disable);
     if (disable) {

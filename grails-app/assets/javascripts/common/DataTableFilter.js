@@ -30,7 +30,7 @@ $.otp.dataTableFilter = {
   register(searchCriteriaTable, onUpdateFunction) {
     'use strict';
 
-    const searchCriteria = function () {
+    const searchCriteria = () => {
       const result = [];
       searchCriteriaTable.find('tr').each((index, element) => {
         const selection = $('td.attribute select', element).val();
@@ -54,13 +54,13 @@ $.otp.dataTableFilter = {
       return result;
     };
 
-    const updateSearchCriteria = function () {
+    const updateSearchCriteria = () => {
       if (onUpdateFunction !== undefined) {
         onUpdateFunction(searchCriteria);
       }
     };
 
-    const removeRowOrHideInputs = function (tr) {
+    const removeRowOrHideInputs = (tr) => {
       // if there's more than one filter row, remove it, otherwise reset it
       if (tr.siblings('tr').size() > 0) {
         // remove row and determine whether to show an add button
@@ -88,7 +88,7 @@ $.otp.dataTableFilter = {
       }
     };
 
-    const searchCriteriaChangeHandler = function (event) {
+    const searchCriteriaChangeHandler = (event) => {
       const tr = $(event.target).parents('.dtf_row');
       $('td.value span.dtf_value_span', tr).hide();
       const attribute = $(event.target).val();
@@ -102,7 +102,7 @@ $.otp.dataTableFilter = {
       }
       updateSearchCriteria();
     };
-    const searchCriteriaAddRow = function (event) {
+    const searchCriteriaAddRow = (event) => {
       const tr = $(event.target).parents('.dtf_row');
       $('td.add', tr).hide();
 
@@ -132,7 +132,7 @@ $.otp.dataTableFilter = {
       $.otp.applySelect2($('select.use-select-2', cloned));
     };
 
-    const searchCriteriaRemoveRow = function (event) {
+    const searchCriteriaRemoveRow = (event) => {
       const tr = $(event.target).parents('.dtf_row');
       $('td.value span.dtf_value_span', tr).hide();
       removeRowOrHideInputs(tr);

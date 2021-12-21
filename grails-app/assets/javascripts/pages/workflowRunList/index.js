@@ -166,7 +166,7 @@ $(() => {
     $('[title]').tooltip({ html: true });
   });
 
-  const setCount = function (values) {
+  const setCount = (values) => {
     $('#allRuns').text(values[0]);
     $('#runningRuns').text(values[1]);
     $('#failedRuns').text(values[2]);
@@ -204,7 +204,7 @@ $(() => {
     addSelection(e.target);
   });
 
-  const addSelection = function (form) {
+  const addSelection = (form) => {
     addHiddenField(form, 'redirect',
       $.otp.createLink({
         controller: 'workflowRunList',
@@ -216,7 +216,7 @@ $(() => {
       }).slice($.otp.contextPath.length));
   };
 
-  const addHiddenField = function (form, name, value) {
+  const addHiddenField = (form, name, value) => {
     $('<input>', { type: 'hidden', name, value }).appendTo(form);
   };
 });

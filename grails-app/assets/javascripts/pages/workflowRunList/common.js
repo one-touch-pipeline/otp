@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-const statusToClassName = function (status) {
+const statusToClassName = (status) => {
   'use strict';
 
   switch (status) {
@@ -54,7 +54,7 @@ const statusToClassName = function (status) {
   return '';
 };
 
-const button = function (action, value, title, buttonsDisabled, icon) {
+const button = function button(action, value, title, buttonsDisabled, icon) {
   return `<button class="btn btn-xs btn-primary" formaction="${action}" 
                   name="step" value="${value}" title="${title}" ${buttonsDisabled}>
             <i class="bi-${icon}"></i>

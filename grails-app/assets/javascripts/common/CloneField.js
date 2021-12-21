@@ -33,9 +33,9 @@ $(() => {
 
     // replace the template-index with the current index to fulfill the array like indexing
     // prop[0], prop[1], ...
-    clone.find('input, select, label').each(function () {
+    clone.find('input, select, label').each(() => {
       const component = this;
-      $.each(['name', 'id', 'for', 'data-select2-id'], function () {
+      $.each(['name', 'id', 'for', 'data-select2-id'], () => {
         const attribute = this;
         $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
       });
@@ -52,7 +52,7 @@ $(() => {
     return false;
   });
 
-  $('.clone-remove').on('click', function (e) {
+  $('.clone-remove').on('click', (e) => {
     e.preventDefault();
     $(this).closest('.clone-remove-target').remove();
   });

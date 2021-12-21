@@ -31,13 +31,13 @@ const lintRules = {
   ],
   'comma-dangle': ['error', 'never'],
   'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
-  'no-undef': 'off'
+  'no-undef': 'off',
+  'func-names': 'error'
 };
 
 if (process.env.CI) {
   Object.assign(lintRules, {
     strict: 'off',
-    'func-names': 'off',
     'no-use-before-define': 'off',
     'no-param-reassign': 'off',
     'no-unused-vars': 'off',

@@ -24,7 +24,7 @@ $(() => {
   const selectorTypeSelector = $('#relatedSelectorType');
   selectorTypeSelector.on('change', (e) => {
     const types = $(e.target).val();
-    $('#relatedSelectors').children('div').each(function () {
+    $('#relatedSelectors').children('div').each(() => {
       if (types !== null && types.indexOf($(this).data('type')) === -1) {
         $(this).hide();
       } else {

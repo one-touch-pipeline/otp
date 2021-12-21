@@ -91,7 +91,7 @@ $.otp.toaster = {
 
     const toast = $('.toast');
 
-    toast.on('hidden.bs.toast', function () {
+    toast.on('hidden.bs.toast', () => {
       $(this).remove();
     });
     toast.toast('show');

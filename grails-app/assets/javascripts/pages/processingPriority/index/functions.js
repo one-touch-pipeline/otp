@@ -275,7 +275,7 @@ $(document).ready(() => {
      * it launches the modal dialog window for confirmation before deletion
      * it checks if the priority has been used somewhere, if yes, stop the deletion
      */
-  $('#processingPriority').on('click', 'tbody tr td button#delete-row', function () {
+  $('#processingPriority').on('click', 'tbody tr td button#delete-row', () => {
     const rowIndex = processingPriorityTable.row($(this).parents('tr')).index();
     const aData = processingPriorityTable.row(rowIndex).data();
 
@@ -314,7 +314,7 @@ $(document).ready(() => {
      * it launches the modal dialog window for editing the attributes of selected priority
      * data is transferred from selected row to the dialog
      */
-  $('#processingPriority').on('click', 'tbody td button#edit-row', function (event) {
+  $('#processingPriority').on('click', 'tbody td button#edit-row', (event) => {
     const aData = processingPriorityTable.row($(this).parents('tr')).data();
 
     const oDialog = $.otp.processingPriority.openDialog();

@@ -21,7 +21,7 @@
  */
 
 $.otp.crashRecovery = {};
-$.otp.crashRecovery.processingStepIds = function () {
+$.otp.crashRecovery.processingStepIds = () => {
   'use strict';
 
   const ids = [];
@@ -42,7 +42,7 @@ $.otp.crashRecovery.processingStepIds = function () {
   return ids;
 };
 
-$.otp.crashRecovery.createListView = function () {
+$.otp.crashRecovery.createListView = () => {
   'use strict';
 
   $.otp.createListView('#crashRecoveryTable', $.otp.createLink({
@@ -83,7 +83,7 @@ $.otp.crashRecovery.createListView = function () {
   { bSort: false });
 };
 
-$.otp.crashRecovery.showParametersDialog = function (ids, target) {
+$.otp.crashRecovery.showParametersDialog = (ids, target) => {
   'use strict';
 
   $.get($.otp.createLink({
@@ -100,7 +100,7 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
           text: 'OK',
           click() {
             const parameters = [];
-            $('ul li input', $(this)).each(function () {
+            $('ul li input', $(this)).each(() => {
               parameters[parameters.length] = {
                 key: $(this).attr('name'),
                 value: $(this).val()
@@ -128,13 +128,13 @@ $.otp.crashRecovery.showParametersDialog = function (ids, target) {
   });
 };
 
-$.otp.crashRecovery.showFailedJobDialog = function (ids, target) {
+$.otp.crashRecovery.showFailedJobDialog = (ids, target) => {
   'use strict';
 
   $('#dialog-error-message-job').dialog({
     modal: true,
     buttons: {
-      'Mark Job as Failed': function () {
+      'Mark Job as Failed': () => {
         let message = $('input', $(this)).val();
         if (!message || message === '') {
           message = null;
@@ -157,7 +157,7 @@ $.otp.crashRecovery.showFailedJobDialog = function (ids, target) {
   });
 };
 
-$.otp.crashRecovery.finishedButton = function () {
+$.otp.crashRecovery.finishedButton = () => {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
@@ -170,7 +170,7 @@ $.otp.crashRecovery.finishedButton = function () {
   });
 };
 
-$.otp.crashRecovery.succeededButton = function () {
+$.otp.crashRecovery.succeededButton = () => {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
@@ -183,7 +183,7 @@ $.otp.crashRecovery.succeededButton = function () {
   });
 };
 
-$.otp.crashRecovery.failedButton = function () {
+$.otp.crashRecovery.failedButton = () => {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
@@ -196,7 +196,7 @@ $.otp.crashRecovery.failedButton = function () {
   });
 };
 
-$.otp.crashRecovery.restartButton = function () {
+$.otp.crashRecovery.restartButton = () => {
   'use strict';
 
   const ids = $.otp.crashRecovery.processingStepIds();
@@ -209,7 +209,7 @@ $.otp.crashRecovery.restartButton = function () {
   });
 };
 
-$.otp.crashRecovery.startSchedulerButton = function () {
+$.otp.crashRecovery.startSchedulerButton = () => {
   'use strict';
 
   $.getJSON($.otp.createLink({
@@ -225,7 +225,7 @@ $.otp.crashRecovery.startSchedulerButton = function () {
   });
 };
 
-$.otp.crashRecovery.setupView = function () {
+$.otp.crashRecovery.setupView = () => {
   'use strict';
 
   $.otp.crashRecovery.createListView();
