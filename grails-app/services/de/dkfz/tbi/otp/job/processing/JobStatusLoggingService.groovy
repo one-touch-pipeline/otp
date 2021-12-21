@@ -159,12 +159,11 @@ class JobStatusLoggingService {
             notNull clusterJobs
             clusterJobs.each {
                 final File logFile = new File(constructLogFileLocation(realm, processingStep, it.clusterJobId))
-                final String logFileText
+                String logFileText = ''
                 try {
                     logFileText = logFile.text
                 } catch (final FileNotFoundException e) {
                     threadLog?.debug "Cluster job status log file ${logFile} not found."
-                    logFileText = ''
                 }
                 notNull it
                 final String expectedLogMessage = constructMessage(realm, processingStep, it.clusterJobId)

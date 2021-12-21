@@ -227,7 +227,7 @@ class EgaSubmissionService {
     List deleteSampleSubmissionObjects(EgaSubmission submission) {
         List samplesWithSeqType = []
         submission.samplesToSubmit*.seqType.unique()*.refresh()
-        submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
+        submission.samplesToSubmit.each { SampleSubmissionObject it ->
             submission.samplesToSubmit.remove(it)
             samplesWithSeqType.add("${it.sample.id}-${it.seqType.id}")
             it.delete(flush: false)

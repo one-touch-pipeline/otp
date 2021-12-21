@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileStatic
 
+import de.dkfz.tbi.util.TimeFormats
+
 import java.nio.file.Path
 
 /**
@@ -44,6 +46,6 @@ class ClusterLogQueryResultFileService extends AbstractLogDirectoryService {
 
     Path logFileWithCreatingDirectory() {
         Date date = configService.currentDate
-        return createAndGetLogDirectory(date).resolve(date.format("HH-mm-ss\'.txt\'"))
+        return createAndGetLogDirectory(date).resolve("${TimeFormats.TIME_DASHED.getFormattedDate(date)}\'.txt\'")
     }
 }

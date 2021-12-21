@@ -27,6 +27,7 @@ import groovy.transform.CompileStatic
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
 
@@ -44,7 +45,7 @@ abstract class AbstractLogDirectoryService {
         assert date
 
         Path baseLogDirectory = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(configService.loggingRootPath.absolutePath)
-        String dateDirectory = date.format('yyyy/MM/dd')
+        String dateDirectory = TimeFormats.DATE_DIRECTORY.getFormattedDate(date)
 
         Path logPath = baseLogDirectory.resolve(logType).resolve(dateDirectory)
         if (!Files.exists(logPath)) {

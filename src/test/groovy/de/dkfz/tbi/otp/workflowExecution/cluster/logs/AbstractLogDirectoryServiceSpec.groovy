@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystems
 import java.nio.file.Path
@@ -91,6 +92,6 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
     }
 
     protected Path expectedPath(Date date, String directory) {
-        return configService.loggingRootPath.toPath().resolve(directory).resolve(date.format('yyyy/MM/dd'))
+        return configService.loggingRootPath.toPath().resolve(directory).resolve(TimeFormats.DATE_DIRECTORY.getFormattedDate(date))
     }
 }

@@ -25,7 +25,7 @@ import groovy.transform.EqualsAndHashCode
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-@EqualsAndHashCode(includes = ["clusterJobId", "realmId"])
+@EqualsAndHashCode(includes = ["clusterJobId", "realm"])
 class ClusterJobIdentifier {
 
     final Realm realm

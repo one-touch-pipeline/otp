@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 
 import grails.testing.services.ServiceUnitTest
 
+import de.dkfz.tbi.util.TimeFormats
+
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -68,6 +70,6 @@ class ClusterLogQueryResultFileServiceSpec extends AbstractLogDirectoryServiceSp
 
     private Path expectedFile() {
         Date date = service.configService.currentDate
-        return expectedPath().resolve(date.format("HH-mm-ss'.txt'"))
+        return expectedPath().resolve("${TimeFormats.TIME_DASHED.getFormattedDate(date)}\'.txt\'")
     }
 }
