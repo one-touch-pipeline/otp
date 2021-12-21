@@ -64,7 +64,7 @@ $.otp.resultsTable = {
         });
       },
       fnInitComplete() {
-        new $.fn.dataTable.FixedColumns(this, {
+        $.fn.dataTable.FixedColumns(this, {
           leftColumns: 2
         });
       }

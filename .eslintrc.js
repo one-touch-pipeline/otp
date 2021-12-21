@@ -44,7 +44,6 @@ if (process.env.CI) {
     'default-case': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',
-    'no-new': 'off',
     'no-restricted-syntax': 'off',
     'block-scoped-var': 'off',
     'no-useless-call': 'off',
