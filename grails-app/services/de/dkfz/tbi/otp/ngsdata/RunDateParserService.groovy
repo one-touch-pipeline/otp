@@ -45,7 +45,7 @@ class RunDateParserService {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.ENGLISH)
             date = simpleDateFormat.parse(text)
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // no exception
         }
         return date

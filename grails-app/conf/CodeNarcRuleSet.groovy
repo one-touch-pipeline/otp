@@ -112,7 +112,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     EmptyCatchBlock {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     EmptyClass {
         priority = DEFAULT

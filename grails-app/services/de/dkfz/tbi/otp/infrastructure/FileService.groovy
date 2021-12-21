@@ -190,12 +190,11 @@ class FileService {
         return toPath(toFile(path), fileSystem)
     }
 
-    @SuppressWarnings('EmptyCatchBlock')
     static boolean isFileReadableAndNotEmpty(final Path file) {
         assert file.absolute
         try {
             waitUntilExists(file)
-        } catch (AssertionError e) {
+        } catch (AssertionError ignored) {
         }
         return Files.exists(file) && Files.isRegularFile(file) && Files.isReadable(file) && Files.size(file) > 0L
     }

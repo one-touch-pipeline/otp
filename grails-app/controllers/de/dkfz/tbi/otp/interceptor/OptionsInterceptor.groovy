@@ -50,16 +50,20 @@ class OptionsInterceptor {
             model.piwikEnabled = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.GUI_TRACKING_ENABLED)
             model.showPartners = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.GUI_SHOW_PARTNERS)
 
-            InstanceLogo logo = InstanceLogo.NONE
+            InstanceLogo logo
             try {
                 logo = InstanceLogo.valueOf(processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_LOGO))
-            } catch (IllegalArgumentException e) { }
+            } catch (IllegalArgumentException ignored) {
+                logo = InstanceLogo.NONE
+            }
             model.logo = logo.fileName
 
             String faqLink
             try {
                 faqLink = processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)
-            } catch (IllegalArgumentException e) { }
+            } catch (IllegalArgumentException ignored) {
+                faqLink = ""
+            }
             model.faqLink = faqLink
 
             // this file is provided by the gradle-git-properties gradle plugin
