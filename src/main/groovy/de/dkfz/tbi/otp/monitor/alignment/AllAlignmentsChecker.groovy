@@ -51,9 +51,9 @@ class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
 
         Map<AbstractAlignmentChecker, List<SeqTrack>> seqTracksPerChecker = checkers.collectEntries { AbstractAlignmentChecker checker ->
             [
-                    (checker): checker.seqTypes.collect { SeqType seqType ->
-                        seqTracksBySeqType.remove(seqType)
-                    }.flatten().unique().findAll()
+                    (checker): checker.seqTypes.collectMany { SeqType seqType ->
+                        seqTracksBySeqType.remove(seqType) ?: []
+                    }.unique().findAll()
             ]
         }
 
@@ -63,8 +63,8 @@ class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
             "${seqTrack.seqType.displayNameWithLibraryLayout}"
         }
 
-        return seqTracksPerChecker.collect { AbstractAlignmentChecker checker, List<SeqTrack> seqTrackList ->
-            checker.handle(seqTrackList, output)
-        }.flatten().findAll()
+        return seqTracksPerChecker.collectMany { AbstractAlignmentChecker checker, List<SeqTrack> seqTrackList ->
+            checker.handle(seqTrackList, output) ?: []
+        }.findAll()
     }
 }

@@ -214,8 +214,8 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         setupData()
         List<AbstractMergedBamFile> expected = []
 
-        List<MergingWorkPackage> mergingWorkPackages = AbstractMergedBamFile.FileOperationStatus.values().collect { AbstractMergedBamFile.FileOperationStatus state ->
-            [true, false].collect { boolean withDrawnBamFile ->
+        List<MergingWorkPackage> mergingWorkPackages = AbstractMergedBamFile.FileOperationStatus.values().collectMany { AbstractMergedBamFile.FileOperationStatus state ->
+            [true, false].collectMany { boolean withDrawnBamFile ->
                 createBamFiles([
                         fileOperationStatus: state,
                         withdrawn          : withDrawnBamFile,
@@ -227,7 +227,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
                     bamFile.mergingWorkPackage
                 }
             }
-        }.flatten()
+        }
 
         when:
         List<AbstractMergedBamFile> returnValue = checker.getBamFileForMergingWorkPackage(mergingWorkPackages, showFinished, showWithdrawn)

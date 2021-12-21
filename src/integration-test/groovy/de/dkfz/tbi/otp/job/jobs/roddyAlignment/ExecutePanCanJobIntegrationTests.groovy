@@ -362,10 +362,10 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
     }
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
-        return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->
+        return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
                 lsdfFilesService.getFileViewByPidPath(dataFile) as File
             }
-        }.flatten().join(';')
+        }.join(';')
     }
 }

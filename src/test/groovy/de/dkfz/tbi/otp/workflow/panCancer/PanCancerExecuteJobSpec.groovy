@@ -284,10 +284,10 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
     }
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
-        return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->
+        return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
                 job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString()
             }
-        }.flatten().join(';')
+        }.join(';')
     }
 }

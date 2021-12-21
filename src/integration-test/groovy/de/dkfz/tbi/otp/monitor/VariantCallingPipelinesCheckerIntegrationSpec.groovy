@@ -129,9 +129,9 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
         List<AbstractMergedBamFile> bamFiles = (
         analysesOfAllAnalysisFinishedSamplePair +
                 analysesOfSingleAnalysisFinishedSamplePairs
-        ).collect {
+        ).collectMany {
             [it.sampleType1BamFile, it.sampleType2BamFile]
-        }.flatten()
+        }
 
         bamFiles.collect {
             [

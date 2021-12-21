@@ -165,9 +165,9 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification implemen
                 createRoddyBamFileHelper(false, true),
                 createRoddyBamFileHelper(true, false),
                 createRoddyBamFileHelper(true, true),
-        ].collect {
+        ].collectMany {
             it.containedSeqTracks
-        }.flatten()
+        }
 
         when:
         List<AbstractMergedBamFile> bams = abstractMergedBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracks)

@@ -822,7 +822,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     UseCollectMany {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     UseCollectNested {
         priority = DEFAULT

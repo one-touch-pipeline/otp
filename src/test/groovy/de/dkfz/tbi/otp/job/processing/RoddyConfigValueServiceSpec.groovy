@@ -189,10 +189,10 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     }
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse) {
-        return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->
+        return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
                 service.lsdfFilesService.getFileViewByPidPathAsPath(dataFile).toString()
             }
-        }.flatten().join(';')
+        }.join(';')
     }
 }
