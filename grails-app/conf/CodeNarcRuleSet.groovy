@@ -109,7 +109,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     DuplicateSetValue {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     EmptyCatchBlock {
         priority = MIDDLE
@@ -252,7 +252,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     DoubleCheckedLocking {
-        priority = HIGH
+        priority = CRITICAL
     }
     InconsistentPropertyLocking {
         priority = DEFAULT
@@ -279,7 +279,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     SynchronizedMethod {
-        priority = HIGH
+        priority = CRITICAL
     }
     SynchronizedOnBoxedPrimitive {
         priority = DEFAULT
@@ -380,7 +380,7 @@ All the Rules that will be used for OTP
         priority = MIDDLE
     }*/
     NoTabCharacter {
-        priority = HIGH
+        priority = CRITICAL
     }
     ParameterReassignment {
         priority = CRITICAL
@@ -407,7 +407,7 @@ All the Rules that will be used for OTP
     }
     AbstractClassWithoutAbstractMethod {
         applyToFileNames = SERVICE
-        priority = MIDDLE
+        priority = CRITICAL
     }
     AssignmentToStaticFieldFromInstanceMethod {
         priority = MIDDLE
@@ -420,7 +420,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     CloseWithoutCloseable {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     CompareToWithoutComparable {
         priority = DEFAULT
@@ -492,14 +492,14 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     JUnitAssertEqualsConstantActualValue {
-        priority = HIGH
+        priority = CRITICAL
     }
     MissingOverrideAnnotation {
         priority = CRITICAL
         doNotApplyToFileNames = INTEGRATION_SPEC
     }
     UnsafeImplementationAsMap {
-        priority = HIGH
+        priority = CRITICAL
     }
 
     // rulesets/exceptions.xml
@@ -546,7 +546,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     SwallowThreadDeath {
-        priority = DEFAULT
+        priority = CRITICAL
     }
     ThrowError {
         priority = CRITICAL
@@ -756,7 +756,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ExplicitCallToEqualsMethod {
-        priority = HIGH
+        priority = CRITICAL
     }
     ExplicitCallToGetAtMethod {
         priority = CRITICAL
@@ -836,7 +836,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ImportFromSunPackages {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     MisorderedStaticImports {
         priority = CRITICAL
@@ -844,7 +844,7 @@ All the Rules that will be used for OTP
     }
     //NoWildcardImports //does not fit with OTP-Convention of using WildcardImports for 3+ imports
     UnnecessaryGroovyImport {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     //UnusedImport //replaced by UnusedImportWithoutAutowiredRule
 
@@ -882,7 +882,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     JUnitLostTest {
-        priority = MIDDLE
+        priority = CRITICAL
         doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     //JUnitPublicField
@@ -894,7 +894,7 @@ All the Rules that will be used for OTP
      */
     //JUnitPublicProperty
     JUnitSetUpCallsSuper {
-        priority = HIGH
+        priority = CRITICAL
         doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
     //JUnitStyleAssertions //will be fixed by converting to spock
@@ -954,7 +954,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     SystemOutPrint {
-        priority = HIGH
+        priority = CRITICAL
     }
 
     // rulesets/naming.xml
@@ -1018,7 +1018,7 @@ All the Rules that will be used for OTP
         priority = MIDDLE
     }
     NonFinalPublicField {
-        priority = MIDDLE
+        priority = CRITICAL
         doNotApplyToFileNames = TEST
     }
     NonFinalSubclassOfSensitiveInterface {
@@ -1061,7 +1061,7 @@ All the Rules that will be used for OTP
         doNotApplyToFileNames = TEST
     }
     CrapMetric {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     CyclomaticComplexity {
         priority = HIGH
