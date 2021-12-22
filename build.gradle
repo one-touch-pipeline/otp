@@ -207,8 +207,15 @@ task workflowTest(type: Test) {
     systemProperty "grails.env", "WORKFLOW_TEST" // change to TEST??
 }
 
-configurations.all {
-    exclude group: 'org.webjars', module: 'popper.js'    // exclude popper.js, since the correct version is already imported within bootstrap.bundle
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+
+    all {
+        exclude group: 'org.webjars', module: 'popper.js'    // exclude popper.js, since the correct version is already imported within bootstrap.bundle
+    }
 }
 
 dependencies {
@@ -287,6 +294,7 @@ dependencies {
     compile "org.grails:grails-core"
     compile "org.springframework.boot:spring-boot-starter-actuator"
     compile "org.springframework.boot:spring-boot-starter-tomcat"
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     compile "org.grails:grails-web-boot"
     compile "org.grails:grails-logging"
     compile "org.grails:grails-plugin-rest"

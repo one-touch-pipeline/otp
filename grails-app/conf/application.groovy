@@ -24,6 +24,11 @@ spring {
     jmx {
         uniqueNames = true
     }
+    devtools {
+        restart {
+            exclude = ['grails-app/views/**', 'grails-app/i18n/**', 'grails-app/conf/**']
+        }
+    }
 }
 management {
     endpoints {
