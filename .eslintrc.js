@@ -39,7 +39,6 @@ if (process.env.CI) {
   Object.assign(lintRules, {
     strict: 'off',
     'no-use-before-define': 'off',
-    'no-param-reassign': 'off',
     'no-restricted-globals': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',

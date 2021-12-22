@@ -54,11 +54,12 @@ $.otp.resultsTable = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
+            const result = json;
             let i;
             for (i = 0; i < json.aaData.length; i += 1) {
-              json.aaData[i] = convertRowData(json.aaData[i]);
+              result.aaData[i] = convertRowData(json.aaData[i]);
             }
-            fnCallback(json);
+            fnCallback(result);
             oTable.fnSettings().oFeatures.bServerSide = false;
           }
         });

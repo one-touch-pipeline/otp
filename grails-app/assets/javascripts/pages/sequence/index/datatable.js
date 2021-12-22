@@ -70,6 +70,7 @@ $.otp.sequence = {
             fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
           },
           success(json) {
+            const result = json;
             $('#withdrawn_description').hide();
             let i; let j; let rowData; let row; let
               fastQC;
@@ -143,15 +144,14 @@ $.otp.sequence = {
                 $('#withdrawn_description').show();
                 const withdrawnRow = [];
                 rowData.forEach((rowEntry) => {
-                  rowEntry = rowEntry != null ? `<span class='withdrawn'>${rowEntry}</span>` : '';
-                  withdrawnRow.push(rowEntry);
+                  withdrawnRow.push(rowEntry != null ? `<span class='withdrawn'>${rowEntry}</span>` : '');
                 });
                 rowData = withdrawnRow;
               }
 
-              json.aaData[i] = rowData;
+              result.aaData[i] = rowData;
             }
-            fnCallback(json);
+            fnCallback(result);
           }
         });
       },
