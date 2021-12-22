@@ -40,8 +40,7 @@ if (process.env.CI) {
     strict: 'off',
     'no-use-before-define': 'off',
     'no-restricted-globals': 'off',
-    'no-alert': 'off',
-    'no-restricted-syntax': 'off'
+    'no-alert': 'off'
   });
 }
 
