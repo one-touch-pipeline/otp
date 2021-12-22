@@ -190,7 +190,7 @@ function submitChangeProjectAccess(postUrl) {
     type: 'POST',
     success(data) {
       if (data.success) {
-        location.reload();
+        window.location.reload();
       } else {
         $.otp.toaster.showErrorToast('Saving failed.', data.error);
       }

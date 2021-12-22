@@ -21,7 +21,7 @@
  */
 
 // eslint-disable-next-line no-unused-vars
-function confirmDataTransferDeletion() {
+function confirmDataTransferDeletion(event) {
   if (!window.confirm(`Are you sure that you want to permanently
    delete this document and any transfers based on it?`)) {
     event.preventDefault();

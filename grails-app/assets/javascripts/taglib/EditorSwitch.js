@@ -214,7 +214,7 @@ $(() => {
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (!confirmed) {
         return;
       }
@@ -266,7 +266,7 @@ $(() => {
     if (selectedNewRoles.length !== 0) {
       const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
       if (confirmationText) {
-        const confirmed = confirm(confirmationText);
+        const confirmed = window.confirm(confirmationText);
         if (confirmed === false) {
           return;
         }
@@ -327,7 +327,7 @@ $(() => {
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (confirmed === false) {
         return;
       }
@@ -377,7 +377,7 @@ $(() => {
 
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (!confirmed) {
         return;
       }
@@ -525,7 +525,7 @@ $(() => {
     });
     $('p.edit-switch-editor', outerContainer).hide();
     $('p.edit-switch-label', outerContainer).show();
-    window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
+    window.setTimeout(() => { window.location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
   $('div.edit-switch-new-free-text-value p.edit-switch-editor button.save').on('click', () => {
@@ -558,7 +558,7 @@ $(() => {
     });
     $('p.edit-switch-editor', outerContainer).hide();
     $('p.edit-switch-label', outerContainer).show();
-    window.setTimeout(() => { location.reload(); }, 300); // reloads page after 0.3 seconds
+    window.setTimeout(() => { window.location.reload(); }, 300); // reloads page after 0.3 seconds
   });
 
   $('div.edit-switch-new-free-text-values span.edit-switch-editor button.save').on('click', () => {
@@ -584,7 +584,7 @@ $(() => {
       success(response) {
         if (response.success) {
           success('Success', 'Data stored successfully');
-          window.setTimeout(() => { location.reload(); }, 300);
+          window.setTimeout(() => { window.location.reload(); }, 300);
         } else {
           failure('Data could not be stored', response.error);
         }
@@ -609,7 +609,7 @@ $(() => {
     const confirmationText = $('button[data-confirmation]', container).attr('data-confirmation');
 
     if (confirmationText) {
-      const confirmed = confirm(confirmationText);
+      const confirmed = window.confirm(confirmationText);
       if (confirmed === false) {
         return;
       }
@@ -635,7 +635,7 @@ $(() => {
           $('input:hidden[name=value]', container).attr('value', invVal);
           const pageReload = $('button[data-pageReload]', container).attr('data-pageReload');
           if (pageReload === 'true') {
-            window.setTimeout(() => { location.reload(); }, 100); // reloads page after 0.5 seconds
+            window.setTimeout(() => { window.location.reload(); }, 100); // reloads page after 0.5 seconds
           }
         } else {
           failure('Data could not be stored', data.error);
