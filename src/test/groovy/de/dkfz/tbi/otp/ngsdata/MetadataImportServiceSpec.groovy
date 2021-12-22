@@ -103,6 +103,11 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     }
 
     final static String TICKET_NUMBER = "2000010112345678"
+    final static String WGBS_T = SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName
+    final static String WG = SeqTypeNames.WHOLE_GENOME.seqTypeName
+    final static String EXON = SeqTypeNames.EXOME.seqTypeName
+    final static String CHIP_SEQ = SeqTypeNames.CHIP_SEQ.seqTypeName
+    final static String SC_EXON = "SC_" + SeqTypeNames.EXOME.seqTypeName
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -443,12 +448,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, FastqImportInstance.ImportMode importMode) {
         given:
         DomainFactory.createAllAnalysableSeqTypes()
-
-        final String WGBS_T = SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName
-        final String WG = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        final String EXON = SeqTypeNames.EXOME.seqTypeName
-        final String CHIP_SEQ = SeqTypeNames.CHIP_SEQ.seqTypeName
-        final String SC_EXON = "SC_" + SeqTypeNames.EXOME.seqTypeName
 
         def (fastq1, fastq2, fastq3, fastq4, fastq5, fastq6, fastq7, fastq8, fastq9) =
             ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b", "fastq_sc"]

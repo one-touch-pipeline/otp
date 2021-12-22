@@ -75,11 +75,11 @@ class SampleIdentifierSpec extends Specification implements DataTest {
 
     void "test validate, when name is too short, should fail"() {
         given:
-        final String name = '12'
-        sampleIdentifier.name = name
+        final String shortName = '12'
+        sampleIdentifier.name = shortName
 
         expect:
-        TestCase.assertValidateError(sampleIdentifier, 'name', 'minSize.notmet', name)
+        TestCase.assertValidateError(sampleIdentifier, 'name', 'minSize.notmet', shortName)
     }
 
     void "test validate, when name is not unique, should fail"() {

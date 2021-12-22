@@ -503,15 +503,15 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         given:
         setupData()
         final SeqType seqType = availableSeqTypes.first()
-        final Project selectedProjectToCopyForm = createProject()
-        final SeqType selectedSeqTypeToCopyFrom = availableSeqTypes.last()
+        final Project selectedProjectToCopy = createProject()
+        final SeqType selectedSeqTypeToCopy = availableSeqTypes.last()
 
         when:
         request.contentType = FORM_CONTENT_TYPE
         request.method = 'POST'
         params['seqType.id'] = seqType.id
-        params['selectedProjectToCopyForm.id'] = selectedProjectToCopyForm.id
-        params['selectedSeqTypeToCopyFrom.id'] = selectedSeqTypeToCopyFrom.id
+        params['selectedProjectToCopyForm.id'] = selectedProjectToCopy.id
+        params['selectedSeqTypeToCopyFrom.id'] = selectedSeqTypeToCopy.id
         controller.searchForSeqPlatformGroups()
 
         then:
