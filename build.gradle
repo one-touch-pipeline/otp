@@ -303,10 +303,6 @@ dependencies {
     testCompile "org.grails:grails-gorm-testing-support"
     testHelperCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-web-testing-support"
-    testCompile "org.grails.plugins:geb:1.1.2"
-    testRuntime "org.seleniumhq.selenium:selenium-chrome-driver:2.47.1"
-    testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
-    testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 
     testCompile "org.grails:grails-test-mixins:3.3.0"
 
@@ -342,10 +338,6 @@ grails {
 
 tasks.withType(Test) {
     maxParallelForks = System.getenv('MAX_PARALLEL_FORKS')?.isInteger() ? System.getenv('MAX_PARALLEL_FORKS') as int : 1
-    systemProperty "geb.env", System.getProperty('geb.env')
-    systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
-    systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
-    systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
     testLogging {
         exceptionFormat = 'full'
         afterSuite { desc, result ->
