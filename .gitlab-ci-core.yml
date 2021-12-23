@@ -30,7 +30,7 @@ image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
 ## having multiple commands in one variable does not work
 ## putting the expire time to a variable does not work
 variables:
-  GRADLE_OPTS: '-Xms1g -Dorg.gradle.daemon=false'
+  GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=false'
   GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
