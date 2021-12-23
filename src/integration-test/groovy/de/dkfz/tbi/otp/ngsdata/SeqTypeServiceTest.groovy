@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 

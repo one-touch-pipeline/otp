@@ -21,16 +21,17 @@
  */
 package de.dkfz.tbi.otp.project.projectRequest
 
+import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.project.ProjectRequestUser
-import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration

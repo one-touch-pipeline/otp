@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.cron
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 

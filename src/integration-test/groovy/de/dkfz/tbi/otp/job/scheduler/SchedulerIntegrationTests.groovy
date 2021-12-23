@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import grails.core.GrailsApplication
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired

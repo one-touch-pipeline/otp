@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.context.NoSuchMessageException
 import spock.lang.Specification

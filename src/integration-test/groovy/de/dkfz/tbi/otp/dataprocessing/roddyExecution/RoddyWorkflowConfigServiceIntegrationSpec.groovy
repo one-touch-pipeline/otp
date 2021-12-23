@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.codehaus.groovy.control.io.NullWriter
 import spock.lang.Specification
 

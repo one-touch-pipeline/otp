@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 

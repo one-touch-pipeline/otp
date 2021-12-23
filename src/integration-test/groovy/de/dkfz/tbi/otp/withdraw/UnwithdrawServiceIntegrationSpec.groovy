@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.withdraw
 
+import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification

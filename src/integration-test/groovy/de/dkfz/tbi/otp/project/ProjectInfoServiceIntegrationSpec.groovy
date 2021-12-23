@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile

@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.util.Pair
 import spock.lang.Specification
 

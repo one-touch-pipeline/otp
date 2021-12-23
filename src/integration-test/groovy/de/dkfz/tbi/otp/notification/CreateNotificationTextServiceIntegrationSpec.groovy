@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.notification
 
 import grails.core.GrailsApplication
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.web.mapping.LinkGenerator
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired

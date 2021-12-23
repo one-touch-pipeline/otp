@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.util.Holders
 import org.junit.After
 import spock.lang.Specification

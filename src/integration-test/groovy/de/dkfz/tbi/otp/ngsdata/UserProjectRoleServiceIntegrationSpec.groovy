@@ -25,7 +25,7 @@ import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.junit.Rule

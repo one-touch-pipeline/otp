@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase

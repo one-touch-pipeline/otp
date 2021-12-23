@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory

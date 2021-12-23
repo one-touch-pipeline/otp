@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 

@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.validation.ValidationException
 import spock.lang.Specification
 

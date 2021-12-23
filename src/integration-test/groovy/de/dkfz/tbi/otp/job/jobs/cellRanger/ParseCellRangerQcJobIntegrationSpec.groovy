@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification

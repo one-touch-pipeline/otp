@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.web.mapping.LinkGenerator
 import org.apache.commons.io.FileUtils
 import org.junit.Test

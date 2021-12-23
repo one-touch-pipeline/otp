@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugins.mail.MailService
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 

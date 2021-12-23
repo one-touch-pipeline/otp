@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.monitor
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.codehaus.groovy.runtime.MethodClosure
 import spock.lang.Specification
 

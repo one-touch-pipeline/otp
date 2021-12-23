@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 

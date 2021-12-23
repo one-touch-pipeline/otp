@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.monitor
 
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory

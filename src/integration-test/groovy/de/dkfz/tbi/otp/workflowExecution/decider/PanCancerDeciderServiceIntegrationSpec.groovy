@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
+import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
 import grails.util.Pair
 import spock.lang.Specification
 

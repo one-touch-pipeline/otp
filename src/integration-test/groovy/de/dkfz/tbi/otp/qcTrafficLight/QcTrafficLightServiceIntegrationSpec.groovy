@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 

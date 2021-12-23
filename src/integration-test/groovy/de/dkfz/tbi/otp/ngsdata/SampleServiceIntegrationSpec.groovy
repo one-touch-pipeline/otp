@@ -26,7 +26,7 @@ import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 

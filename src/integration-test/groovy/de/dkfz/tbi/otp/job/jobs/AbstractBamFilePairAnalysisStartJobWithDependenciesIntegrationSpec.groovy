@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs
 
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair

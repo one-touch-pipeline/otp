@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.project
 
-import grails.gorm.transactions.Rollback
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import grails.validation.ValidationException
 import grails.web.mapping.LinkGenerator
 import org.grails.datastore.gorm.events.AutoTimestampEventListener

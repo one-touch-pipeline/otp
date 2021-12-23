@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import spock.lang.Specification
 

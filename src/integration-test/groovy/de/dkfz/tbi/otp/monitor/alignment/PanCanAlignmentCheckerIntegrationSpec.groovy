@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
-import grails.transaction.Rollback
+import grails.gorm.transactions.Rollback
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
