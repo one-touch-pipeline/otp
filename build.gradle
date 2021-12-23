@@ -222,7 +222,7 @@ dependencies {
     swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.3' // swagger 2.x codegen
     implementation 'io.swagger:swagger-annotations:1.6.0'
 
-    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'       // TODO: check if it could be removed
+    compile group: 'commons-io', name: 'commons-io', version: '2.11.0'
 
     integrationTestCompile sourceSets.testHelper.output
     integrationTestRuntime sourceSets.testHelper.output
