@@ -57,6 +57,7 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
      * - pair is not already in processing
      * - config file is available
      */
+    @SuppressWarnings('SpaceInsideParentheses')
     SamplePair samplePairForProcessing(int minPriority, SamplePair sp = null) {
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"

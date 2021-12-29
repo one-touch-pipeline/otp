@@ -185,7 +185,7 @@ class SchedulerService {
                 processesToResume.each {
                     Job job = createJob(it)
                     running.add(job)
-                    executeInNewThread (job) {
+                    executeInNewThread(job) {
                         grailsApplication.mainContext.scheduler.executeJob(job)
                     }
                 }

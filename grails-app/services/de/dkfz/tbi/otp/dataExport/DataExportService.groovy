@@ -42,7 +42,7 @@ class DataExportService {
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
 
     DataExportOutput exportHeaderInfo(DataExportInput dataExportInput) {
-        exportFilesWrapper(dataExportInput, exportHeaderInfoClosure, )
+        exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
     }
 
     DataExportOutput exportDataFiles(DataExportInput dataExportInput) {

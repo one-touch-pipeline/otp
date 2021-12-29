@@ -30,8 +30,10 @@ class DataTableCommand implements Validateable {
 
     int iDisplayStart = 0
     int iDisplayLength = 10
+
     @SuppressWarnings("PropertyName")
     int iSortCol_0 = 0
+
     @SuppressWarnings("PropertyName")
     String sSortDir_0 = "asc"
     String sEcho

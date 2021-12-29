@@ -42,8 +42,10 @@ class AggregateSequences implements Serializable {
 
     /** aggregated fields from {@link SeqTrack} */
     long laneCount
+
     @SuppressWarnings("PropertyName")
     Long sum_N_BasePairs
+
     @SuppressWarnings("PropertyName")
     Long sum_N_BasePairsGb
 

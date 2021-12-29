@@ -221,7 +221,7 @@ dependencies {
     compile "com.bertramlabs.plugins:asset-pipeline-grails:2.14.8"
     compile "com.bertramlabs.plugins:less-asset-pipeline:2.15.1"
 
-    compile 'org.codenarc:CodeNarc:2.0.0'
+    compile 'org.codenarc:CodeNarc:2.2.0'
 
     // Grails Defaults
     compile "org.springframework.boot:spring-boot-starter-logging"
@@ -318,10 +318,10 @@ assets {
 }
 
 codenarc {
-    toolVersion = '2.0.0'
+    toolVersion = '2.2.0'
     configFile file('grails-app/conf/CodeNarcRuleSet.groovy')
     maxPriority1Violations = 0
-    maxPriority2Violations = 895
+    maxPriority2Violations = 901
     maxPriority3Violations = 3406
 }
 

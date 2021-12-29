@@ -48,7 +48,7 @@ class RunNameInMetadataPathValidator implements MetadataValidator {
         if (runNames.size() == 1 &&
                 !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
                 !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
+                !context.metadataFile.toString().contains(runNames.first())) {
             context.addProblem(runCells as Set, LogLevel.WARNING,
                     "The path of the metadata file should contain the run name.")
         }

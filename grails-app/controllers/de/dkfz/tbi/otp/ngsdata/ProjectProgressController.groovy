@@ -34,6 +34,7 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
 
     @BindingFormat('yyyy-MM-dd')
     Date startDate = new Date()
+
     @BindingFormat('yyyy-MM-dd')
     Date endDate = new Date()
 

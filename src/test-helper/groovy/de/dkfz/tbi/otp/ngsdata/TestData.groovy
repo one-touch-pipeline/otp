@@ -38,42 +38,61 @@ class TestData {
 
     @Deprecated
     String referenceGenomePath
+
     @Deprecated
     File directory
+
     @Deprecated
     File file
+
     @Deprecated
     Realm realm
+
     @Deprecated
     Project project
+
     @Deprecated
     Individual individual
+
     @Deprecated
     SampleType sampleType
+
     @Deprecated
     Sample sample
+
     @Deprecated
     SeqType seqType
+
     @Deprecated
     SeqType exomeSeqType
+
     @Deprecated
     SeqCenter seqCenter
+
     @Deprecated
     SeqPlatform seqPlatform
+
     @Deprecated
     Run run
+
     @Deprecated
     FastqImportInstance fastqImportInstance
+
     @Deprecated
     SoftwareTool softwareTool
+
     @Deprecated
     SeqTrack seqTrack
+
     @Deprecated
     FileType fileType
+
     @Deprecated
     DataFile dataFile
+
     @Deprecated
     ReferenceGenome referenceGenome
+
     @Deprecated
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
 

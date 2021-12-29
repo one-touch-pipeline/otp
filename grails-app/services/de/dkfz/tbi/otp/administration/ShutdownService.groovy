@@ -188,7 +188,7 @@ class ShutdownService implements DisposableBean {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<WorkflowStep> getRestartableRunningWorkflowSteps() {
-        return workflowStepService.runningWorkflowSteps().findAll( {
+        return workflowStepService.runningWorkflowSteps().findAll({
             it.workflowRun.jobCanBeRestarted
         })
     }
@@ -199,7 +199,7 @@ class ShutdownService implements DisposableBean {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<WorkflowStep> getNonRestartableRunningWorkflowSteps() {
-        return workflowStepService.runningWorkflowSteps().findAll( {
+        return workflowStepService.runningWorkflowSteps().findAll({
             !it.workflowRun.jobCanBeRestarted
         })
     }

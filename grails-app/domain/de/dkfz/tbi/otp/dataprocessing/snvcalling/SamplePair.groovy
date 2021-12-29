@@ -218,7 +218,7 @@ class SamplePair implements Entity {
 
     private BamFilePairAnalysis findLatestInstance(Class instanceClass) {
         BamFilePairAnalysis criteria = instanceClass.createCriteria().get {
-            eq ('samplePair', this)
+            eq('samplePair', this)
             order('id', 'desc')
             maxResults(1)
         }

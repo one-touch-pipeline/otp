@@ -54,6 +54,7 @@ class WithdrawHelperService {
     FileSystemService fileSystemService
     LsdfFilesService lsdfFilesService
     ProcessingOptionService processingOptionService
+
     @Autowired
     List<WithdrawBamFileService<?>> withdrawBamFileServices
     WithdrawAnalysisService withdrawAnalysisService

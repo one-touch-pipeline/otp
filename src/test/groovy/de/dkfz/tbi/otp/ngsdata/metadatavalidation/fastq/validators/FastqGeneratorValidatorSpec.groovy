@@ -58,7 +58,7 @@ class FastqGeneratorValidatorSpec extends Specification implements DataTest {
 
         DomainFactory.createSoftwareToolIdentifier(
                 name: FASTQ_GENERATOR,
-                softwareTool: DomainFactory.createSoftwareTool( type: SoftwareTool.Type.BASECALLING )
+                softwareTool: DomainFactory.createSoftwareTool(type: SoftwareTool.Type.BASECALLING)
         )
 
         when:

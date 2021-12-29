@@ -183,6 +183,7 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         jobErrorDefinition.getJobDefinitions().contains(jobDefinition)
     }
 
+    @SuppressWarnings('SpaceInsideParentheses') //auto-format and codenarc clash
     @Unroll
     void "addNewJob with multiple JobErrorDefinitions"() {
         given:

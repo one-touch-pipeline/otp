@@ -44,10 +44,13 @@ class RoddyExecutionService {
 
     @Autowired
     ClusterJobService clusterJobService
+
     @Autowired
     ConfigService configService
+
     @Autowired
     ProcessingOptionService processingOptionService
+
     @Autowired
     RemoteShellHelper remoteShellHelper
 

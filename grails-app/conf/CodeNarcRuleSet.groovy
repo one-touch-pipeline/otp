@@ -187,6 +187,9 @@ All the Rules that will be used for OTP
     ThrowExceptionFromFinallyBlock {
         priority = DEFAULT
     }
+    ParameterAssignmentInFilterClosure {
+        priority = DEFAULT
+    }
 
     // rulesets/braces.xml
     ElseBlockBraces {
@@ -622,6 +625,9 @@ All the Rules that will be used for OTP
     MissingBlankLineAfterPackage {
         priority = CRITICAL
     }
+    MissingBlankLineBeforeAnnotatedField {
+        priority = DEFAULT
+    }
     SpaceAfterCatch {
         priority = CRITICAL
     }
@@ -667,6 +673,18 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     TrailingWhitespace {
+        priority = DEFAULT
+    }
+    SpaceAfterMethodCallName {
+        priority = DEFAULT
+    }
+    SpaceInsideParentheses {
+        priority = DEFAULT
+    }
+    SpaceAfterNotOperator {
+        priority = DEFAULT
+    }
+    SpaceAfterMethodDeclarationName {
         priority = DEFAULT
     }
 

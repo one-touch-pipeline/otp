@@ -370,7 +370,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                             link: null,
                             tooltip: kit*.name.join(", ") ?: ""
                     ),
-                    dbVersion         : new TableCellValue (
+                    dbVersion         : new TableCellValue(
                             value: abstractMergedBamFile.version
                     ),
             ]

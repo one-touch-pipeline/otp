@@ -237,7 +237,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     void "test execute when everything files already linked, do not delete copied files"() {
         given:
         createHelperObjects()
-        linkingJob.linkFileUtils = Mock (LinkFileUtils) {
+        linkingJob.linkFileUtils = Mock(LinkFileUtils) {
             0 * _
         }
 

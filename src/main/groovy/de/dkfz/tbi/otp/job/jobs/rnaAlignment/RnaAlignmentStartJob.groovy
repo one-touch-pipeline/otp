@@ -55,7 +55,7 @@ class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
             ConfigPerProjectAndSeqType config,
             AbstractMergedBamFile baseBamFile = null
     ) {
-        new RnaRoddyBamFile (
+        new RnaRoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",

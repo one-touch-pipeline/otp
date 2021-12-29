@@ -37,14 +37,19 @@ class FastqcDecider implements Decider {
 
     @Autowired
     ConfigFragmentService configFragmentService
+
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
+
     @Autowired
     ProcessingPriorityService processingPriorityService
+
     @Autowired
     WorkflowArtefactService workflowArtefactService
+
     @Autowired
     WorkflowRunService workflowRunService
+
     @Autowired
     SeqTrackService seqTrackService
 

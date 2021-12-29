@@ -45,6 +45,7 @@ import java.time.LocalDate
 class ProjectRequestService {
 
     AuditLogService auditLogService
+
     @Autowired
     LinkGenerator linkGenerator
     LdapService ldapService

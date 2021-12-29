@@ -85,10 +85,12 @@ class MetadataImportService {
 
     @Autowired
     ApplicationContext applicationContext
+
     @Autowired
     RemoteShellHelper remoteShellHelper
     AntibodyTargetService antibodyTargetService
     DataInstallationInitializationService dataInstallationInitializationService
+
     @Autowired
     AllDecider allDecider
     ConfigService configService

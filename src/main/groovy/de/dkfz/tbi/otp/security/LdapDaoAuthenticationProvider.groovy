@@ -43,6 +43,7 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
     LdapAuthenticationProvider ldapAuthProvider
+
     @Autowired
     UserDetailsService userDetailsService
 

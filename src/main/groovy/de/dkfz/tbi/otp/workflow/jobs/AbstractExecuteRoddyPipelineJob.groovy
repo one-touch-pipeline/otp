@@ -41,16 +41,22 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     @Autowired
     ClusterJobHandlingService clusterJobHandlingService
+
     @Autowired
     IndividualService individualService
+
     @Autowired
     RoddyCommandService roddyCommandService
+
     @Autowired
     RoddyConfigService roddyConfigService
+
     @Autowired
     RoddyConfigValueService roddyConfigValueService
+
     @Autowired
     RoddyExecutionService roddyExecutionService
+
     @Autowired
     WorkflowRunService workflowRunService
 

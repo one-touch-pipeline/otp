@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 class WithdrawService {
 
     FileSystemService fileSystemService
+
     @Autowired
     List<WithdrawBamFileService<?>> withdrawBamFileServices
     WithdrawAnalysisService withdrawAnalysisService

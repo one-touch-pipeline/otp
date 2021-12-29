@@ -57,8 +57,10 @@ class ReferenceGenomeProjectSeqType implements Entity {
 
     @Deprecated
     Project project
+
     @Deprecated
     SeqType seqType
+
     @Deprecated
     SampleType sampleType
 

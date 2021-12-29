@@ -40,8 +40,10 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
+
     @Autowired
     SampleIdentifierService sampleIdentifierService
+
     @Autowired
     SeqTypeService seqTypeService
 

@@ -179,11 +179,13 @@ class ProcessingOption implements Entity {
                 "Available versions for merging and duplication marking with sambamba, used when configuring the pipeline",
                 Necessity.OPTIONAL, "0.5.9, 0.6.5", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @Deprecated
         PIPELINE_RODDY_ALIGNMENT_BWA_PATHS(
                 "Path to bwa_mem",
                 Necessity.OPTIONAL, "", TypeValidators.ABSOLUTE_PATH
         ),
+
         @Deprecated
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS(
                 "Path to sambamba",
@@ -205,6 +207,7 @@ class ProcessingOption implements Entity {
                 "BWA command for pairing and sorting",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @Deprecated
         COMMAND_CONVEY_BWA(
                 "BWA convey command for alignment",
@@ -252,11 +255,13 @@ class ProcessingOption implements Entity {
                 "command to enable the module containing R (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @Deprecated
         COMMAND_R(
                 "command for R",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @Deprecated
         COMMAND_RUN_YAPSA(
                 "command for runYAPSA",
@@ -274,11 +279,13 @@ class ProcessingOption implements Entity {
                 "Path to the roddy.sh on the current cluster",
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
         ),
+
         @Deprecated
         RODDY_VERSION(
                 "Roddy version which is used currently to process Roddy-Pipelines",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @Deprecated // base configs are not used anymore by the new WF system
         RODDY_BASE_CONFIGS_PATH(
                 "Path to the baseConfig-files which are needed to execute Roddy",
@@ -411,12 +418,14 @@ class ProcessingOption implements Entity {
                 "Comma separated list of path prefixes which are ignored in the import source notification",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_ADD_USER_SNIPPET(
                 "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
                         " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template.",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+
         @SuppressWarnings('GStringExpressionWithinString')
         AD_GROUP_REMOVE_USER_SNIPPET(
                 "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
@@ -430,6 +439,7 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.CLUSTER_JOB_SUBMISSION_OPTION,
                 TypeValidators.JOB_NAME_SEQ_TYPE,
         ),
+
         @Deprecated
         CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE(
                 "name of the queue used by fast track projects",
@@ -623,6 +633,7 @@ class ProcessingOption implements Entity {
 
     OptionName name
     String type
+
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
     Project project

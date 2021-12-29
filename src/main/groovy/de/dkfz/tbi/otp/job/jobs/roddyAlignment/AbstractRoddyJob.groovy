@@ -44,10 +44,13 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
 
     @Autowired
     ConfigService configService
+
     @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
+
     @Autowired
     FileSystemService fileSystemService
+
     @Autowired
     RoddyExecutionService roddyExecutionService
 
@@ -67,7 +70,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                 roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyResult, output.stderr, fs)
                 submittedClusterJobs.each {
                     clusterJobSchedulerService.retrieveAndSaveJobInformationAfterJobStarted(it)
-                    threadLog?.info("Log file: ${it.jobLog}" )
+                    threadLog?.info("Log file: ${it.jobLog}")
                 }
                 return NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {

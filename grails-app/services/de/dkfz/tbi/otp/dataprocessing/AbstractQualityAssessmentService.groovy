@@ -120,7 +120,7 @@ class AbstractQualityAssessmentService {
     }
 
 
-    private Map handleNaValue(Map map ) {
+    private Map handleNaValue(Map map) {
         if (map.containsKey('percentageMatesOnDifferentChr') && map.percentageMatesOnDifferentChr == 'NA') {
             map.percentageMatesOnDifferentChr = null
         }

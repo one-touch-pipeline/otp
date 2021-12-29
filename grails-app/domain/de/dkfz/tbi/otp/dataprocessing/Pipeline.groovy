@@ -52,10 +52,13 @@ class Pipeline implements Entity {
 
         @Deprecated
         final Type type
+
         @Deprecated
         final boolean usesRoddy
+
         @Deprecated
         final String displayName
+
         @Deprecated
         final Closure<List<SeqType>> seqTypes
 
@@ -102,6 +105,7 @@ class Pipeline implements Entity {
             }
         }
     }
+
     @Deprecated
     Name name
 
@@ -109,14 +113,19 @@ class Pipeline implements Entity {
     static enum Type {
         @Deprecated
         ACESEQ,
+
         @Deprecated
         ALIGNMENT,
+
         @Deprecated
         INDEL,
+
         @Deprecated
         MUTATIONAL_SIGNATURE,
+
         @Deprecated
         SNV,
+
         @Deprecated
         SOPHIA,
 
@@ -127,6 +136,7 @@ class Pipeline implements Entity {
             }
         }
     }
+
     @Deprecated
     Type type
 

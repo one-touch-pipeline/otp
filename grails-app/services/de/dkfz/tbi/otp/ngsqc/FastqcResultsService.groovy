@@ -60,8 +60,8 @@ class FastqcResultsService {
         return FastqcProcessedFile.createCriteria().list {
             dataFile {
                 seqTrack {
-                    'in'('id', sequences*.seqTrackId )
-                    eq ('fastqcState', SeqTrack.DataProcessingState.FINISHED)
+                    'in'('id', sequences*.seqTrackId)
+                    eq('fastqcState', SeqTrack.DataProcessingState.FINISHED)
                 }
             }
         }*.dataFile

@@ -42,12 +42,16 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
 
     @Shared
     SnvCallingService snvCallingService
+
     @Shared
     IndelCallingService indelCallingService
+
     @Shared
     AceseqService aceseqService
+
     @Shared
     SophiaService sophiaService
+
     @Shared
     RunYapsaService runYapsaService
 

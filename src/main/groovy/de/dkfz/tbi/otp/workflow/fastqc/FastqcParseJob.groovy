@@ -42,8 +42,10 @@ class FastqcParseJob extends AbstractJob implements FastqcShared {
 
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
+
     @Autowired
     FastqcUploadService fastqcUploadService
+
     @Autowired
     SeqTrackService seqTrackService
 

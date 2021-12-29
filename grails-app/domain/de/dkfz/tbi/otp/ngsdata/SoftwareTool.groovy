@@ -27,6 +27,7 @@ class SoftwareTool implements Entity {
 
     enum Type {
         BASECALLING,
+
         @Deprecated
         ALIGNMENT,
     }

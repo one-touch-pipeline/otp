@@ -300,6 +300,7 @@ class ProjectRequestCreationCommand {
     String save
     String name
     String description
+
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['keywords']
         List<String> ids = id instanceof String[] ? id : [id]
@@ -311,6 +312,7 @@ class ProjectRequestCreationCommand {
     LocalDate storageUntil
     String relatedProjects
     TumorEntity tumorEntity
+
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['speciesWithStrains'].id
         List<Long> ids = id instanceof String[] ? id : [id]
@@ -321,6 +323,7 @@ class ProjectRequestCreationCommand {
     Project.ProjectType projectType
     String sequencingCenter
     Integer approxNoOfSamples
+
     @BindUsing({ ProjectRequestCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['seqTypes']?.id
         List<Long> ids = id instanceof String[] ? id : [id]

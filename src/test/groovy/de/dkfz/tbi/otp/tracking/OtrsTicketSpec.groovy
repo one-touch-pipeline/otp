@@ -44,7 +44,7 @@ class OtrsTicketSpec extends Specification implements DataTest {
         ]
     }
 
-    def 'test creation, correct String' () {
+    def 'test creation, correct String'() {
         given:
         OtrsTicket otrsTicket
 
@@ -55,7 +55,7 @@ class OtrsTicketSpec extends Specification implements DataTest {
         otrsTicket.ticketNumber == '2000010112345678'
     }
 
-    def 'test creation, incorrect String' () {
+    def 'test creation, incorrect String'() {
         when:
         DomainFactory.createOtrsTicket([ticketNumber: '20000101a2345678'])
 
@@ -64,7 +64,7 @@ class OtrsTicketSpec extends Specification implements DataTest {
         ex.message.contains("does not match the required pattern")
     }
 
-    def 'test creation, duplicate String' () {
+    def 'test creation, duplicate String'() {
         when:
         DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
         DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])

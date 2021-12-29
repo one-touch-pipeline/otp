@@ -31,13 +31,16 @@ import groovy.transform.TupleConstructor
 enum AlignmentDeciderBeanName {
     @Deprecated
     NO_ALIGNMENT('noAlignmentDecider', 'No Alignment'),
+
     @Deprecated
     OTP_ALIGNMENT('defaultOtpAlignmentDecider', 'OTP Alignment'),
+
     @Deprecated
     PAN_CAN_ALIGNMENT('panCanAlignmentDecider', 'PanCan Alignment'),
 
     @Deprecated
     final String beanName
+
     @Deprecated
     final String displayName
 

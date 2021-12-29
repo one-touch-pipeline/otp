@@ -41,14 +41,19 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
 
     @Autowired
     AntibodyTargetService antibodyTargetService
+
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
+
     @Autowired
     MetadataImportService metadataImportService
+
     @Autowired
     SampleIdentifierService sampleIdentifierService
+
     @Autowired
     SeqPlatformService seqPlatformService
+
     @Autowired
     SeqTypeService seqTypeService
 

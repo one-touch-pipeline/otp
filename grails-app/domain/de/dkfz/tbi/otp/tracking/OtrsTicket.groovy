@@ -63,7 +63,7 @@ class OtrsTicket implements Commentable, Entity {
          */
         @Override
         String toString() {
-            return name().toLowerCase(Locale.ENGLISH).replaceAll( "(_)([a-z0-9])", { it -> it[2].toUpperCase() } )
+            return name().toLowerCase(Locale.ENGLISH).replaceAll("(_)([a-z0-9])", { it -> it[2].toUpperCase() })
         }
     }
 
@@ -170,7 +170,7 @@ class OtrsTicket implements Commentable, Entity {
     List<FastqImportInstance> getFastqImportInstances() {
         //Doesn't work as a single Query, probably a Unit test problem
         return FastqImportInstance.withCriteria {
-            eq ('otrsTicket', this)
+            eq('otrsTicket', this)
         }
     }
 

@@ -87,13 +87,13 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
                 'FROM MergingWorkPackage mwp ' +
                         'WHERE needsProcessing = true ' +
                         'AND seqType IN (:seqTypes)' +
-                        'AND NOT EXISTS ( ' +
-                        'FROM AbstractMergedBamFile ' +
+                        'AND NOT EXISTS (' +
+                        ' FROM AbstractMergedBamFile ' +
                         'WHERE workPackage = mwp ' +
                         'AND fileOperationStatus <> :processed ' +
                         'AND withdrawn = false ' +
-                        ') ' +
-                        'AND mwp.seqTracks is not empty ' +
+                        ')' +
+                        ' AND mwp.seqTracks is not empty ' +
                         'AND sample.individual.project.processingPriority.priority >= :minPriority ' +
                         'ORDER BY sample.individual.project.processingPriority.priority DESC, mwp.id ASC',
                 [

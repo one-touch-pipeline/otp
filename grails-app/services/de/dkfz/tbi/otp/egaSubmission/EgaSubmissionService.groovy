@@ -418,14 +418,14 @@ class EgaSubmissionService {
         String seqPlatformName
         LibraryPreparationKit libraryPreparationKit
 
-        ExperimentalDataRow (DataFileSubmissionObject dataFileSubmissionObject) {
+        ExperimentalDataRow(DataFileSubmissionObject dataFileSubmissionObject) {
             seqType = dataFileSubmissionObject.dataFile.seqType
             seqPlatformModelLabel = dataFileSubmissionObject.dataFile.run.seqPlatform.seqPlatformModelLabel
             seqPlatformName = dataFileSubmissionObject.dataFile.run.seqPlatform.name
             libraryPreparationKit = dataFileSubmissionObject.dataFile.seqTrack.libraryPreparationKit
         }
 
-        ExperimentalDataRow (SeqTrack seqTrack) {
+        ExperimentalDataRow(SeqTrack seqTrack) {
             seqType = seqTrack.seqType
             seqPlatformModelLabel = seqTrack.seqPlatform.seqPlatformModelLabel
             seqPlatformName = seqTrack.seqPlatform.name

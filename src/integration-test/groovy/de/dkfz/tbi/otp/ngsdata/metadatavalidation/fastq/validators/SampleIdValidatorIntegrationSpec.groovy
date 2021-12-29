@@ -153,7 +153,7 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         problem.message.contains("Sample Name '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 
-    void 'validate, fails when parsed sampleIdentifier is already registered' () {
+    void 'validate, fails when parsed sampleIdentifier is already registered'() {
         given:
         Project project = createProject(
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP,

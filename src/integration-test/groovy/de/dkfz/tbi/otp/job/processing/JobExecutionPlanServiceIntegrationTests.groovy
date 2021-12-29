@@ -823,7 +823,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
 
 
     @Test
-    void "test lastProcessDate, finds date of newest update with the given state" () {
+    void "test lastProcessDate, finds date of newest update with the given state"() {
         setup:
         setupData()
         // create a JEP with processes, processing states and updates

@@ -41,8 +41,10 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
 
     @Autowired
     ConfigService configService
+
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
+
     @Autowired
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 

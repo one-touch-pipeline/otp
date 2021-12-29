@@ -241,6 +241,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     String nameInMetadataFiles
     String unixGroup
     String projectGroup
+
     @BindUsing({ ProjectCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['usersToCopyFromBaseProject']?.id
         List<Long> ids = (id instanceof String[] ? id : [id]) as List<Long>
@@ -250,6 +251,7 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName
     QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
+
     @BindUsing({ ProjectCreationCommand obj, SimpleMapDataBindingSource source ->
         Object id = source['speciesWithStrains'].id
         List<Long> ids = id instanceof String[] ? id : [id]
