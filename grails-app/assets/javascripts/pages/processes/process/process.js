@@ -62,8 +62,7 @@ $.otp.workflows.registerProcessingStep = (selector, processId) => {
       row[7] = data.lastUpdate.state;
 
       row[8] = '';
-
-      data.actions.forEach((action) => {
+      for (const action of data.actions) {
         switch (action) {
           case 'restart':
             row[8] += $.otp.workflows.createRestartProcessingStepLink(data.processingStep.id, selector);
@@ -72,8 +71,7 @@ $.otp.workflows.registerProcessingStep = (selector, processId) => {
             // nothing
             break;
         }
-      });
-
+      }
       result.aaData[index] = row;
     });
   }, [

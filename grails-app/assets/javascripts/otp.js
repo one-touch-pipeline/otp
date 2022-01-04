@@ -79,9 +79,8 @@ $.otp = {
   createLink(options) {
     'use strict';
 
-    let link;
-    let counter;
-
+    let link; let parameter; let
+      counter;
     link = $.otp.contextPath;
     if (options === undefined || !options) {
       return link;
@@ -99,14 +98,15 @@ $.otp = {
     if (parameters !== undefined && parameters && Object.keys(parameters).length > 0) {
       link += '?';
       counter = 0;
-
-      parameters.forEach((parameter) => {
-        if (counter > 0) {
-          link += '&';
+      for (parameter in parameters) {
+        if ({}.hasOwnProperty.call(parameters, parameter)) {
+          if (counter > 0) {
+            link += '&';
+          }
+          link += `${parameter}=${encodeURIComponent(parameters[parameter])}`;
+          counter += 1;
         }
-        link += `${parameter}=${encodeURIComponent(parameters[parameter])}`;
-        counter += 1;
-      });
+      }
     }
     return link;
   },
