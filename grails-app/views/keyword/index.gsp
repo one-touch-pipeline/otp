@@ -38,7 +38,7 @@
             <h1><g:message code="keyword.index.header" args="[selectedProject.name]"/></h1>
         </div>
         <div class="item">
-            <g:form controller="projectConfig" view="index">
+            <g:form controller="projectConfig" view="index" method="GET">
                 <g:submitButton name="back" value="Back to Overview"/>
             </g:form>
         </div>
