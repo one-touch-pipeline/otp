@@ -354,7 +354,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         eventsClick(e, shape) {
           const index = shape[4];
           const jobId = shape.object.data[0][index][3];
-          window.location.href = $.otp.createLink({
+          location.href = $.otp.createLink({
             controller: 'clusterJobDetail',
             action: 'show',
             id: jobId

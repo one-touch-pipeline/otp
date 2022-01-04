@@ -426,7 +426,7 @@ $.otp.graph.project = {
         xmax: 13,
         eventsClick(e, shape) {
           const idx = shape[5];
-          window.location.href = $.otp.createLink({
+          location.href = $.otp.createLink({
             controller: 'individual',
             action: 'show',
             parameters: {

@@ -23,7 +23,7 @@
 $(() => {
   const sendButton = $('#send-button');
 
-  sendButton.on('click', () => window.confirm('Really send the notification?'));
+  sendButton.on('click', () => confirm('Really send the notification?'));
 
   $('div#notification-selection-container').find('input[type=checkbox]').on('click', () => {
     sendButton.prop('disabled', true);
