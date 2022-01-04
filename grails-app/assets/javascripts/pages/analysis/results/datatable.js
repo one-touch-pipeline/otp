@@ -23,9 +23,10 @@
 $.otp.resultsTable = {
 
   registerDataTable(tableElement, source, columnDefs, convertRowData) {
+    const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
+
     'use strict';
 
-    const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
     const oTable = tableElement.dataTable({
       sDom: '<i> B rt<"clear">',
       buttons: $.otp.getDownloadButton('', fileName),
