@@ -43,7 +43,8 @@ if (process.env.CI) {
     'no-restricted-globals': 'off',
     'no-alert': 'off',
     'array-callback-return': 'off',
-    'no-restricted-syntax': 'off'
+    'no-restricted-syntax': 'off',
+    'no-useless-escape': 'off'
   });
 }
 
