@@ -95,8 +95,9 @@ $.otp.workflows = {
       return `${msec} msec`;
     }
     sec = msec / 1000;
+    msec %= 1000;
     if (sec < 60) {
-      return `${Math.floor(sec)} sec ${msec % 1000} msec`;
+      return `${Math.floor(sec)} sec ${msec} msec`;
     }
     min = sec / 60;
     sec = Math.floor(sec % 60);

@@ -65,18 +65,17 @@ $.otp.selectSamplesTable = {
             fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
           },
           success(json) {
-            const result = json;
             for (let i = 0; i < json.aaData.length; i += 1) {
               const entry = json.aaData[i];
               const checked = preSelectedSamples.includes(entry.sampleId + entry.seqType) ? 'checked' : '';
-              result.aaData[i][0] = `<input type="checkbox" 
+              json.aaData[i][0] = `<input type="checkbox" 
                                           name="sampleAndSeqType" 
                                           value="${entry.identifier}" ${checked}/>`;
               for (let c = 0; c < header.length; c++) {
-                result.aaData[i][c + 1] = entry[header[c]];
+                json.aaData[i][c + 1] = entry[header[c]];
               }
             }
-            fnCallback(result);
+            fnCallback(json);
           }
         });
       }

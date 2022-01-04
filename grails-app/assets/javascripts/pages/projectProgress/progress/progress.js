@@ -69,8 +69,8 @@ $(() => {
           oTableProgress.fnSettings().oFeatures.bServerSide = false;
         },
         success(json) {
-          const result = json;
-          let i; let j; let rowData; let row;
+          let i; let j; let rowData; let
+            row;
           for (i = 0; i < json.aaData.length; i += 1) {
             row = json.aaData[i];
             const samples = [];
@@ -93,9 +93,9 @@ $(() => {
               row[2],
               samples.join(', ')
             ];
-            result.aaData[i] = rowData;
+            json.aaData[i] = rowData;
           }
-          fnCallback(result);
+          fnCallback(json);
         }
       });
     }

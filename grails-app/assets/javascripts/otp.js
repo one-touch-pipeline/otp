@@ -37,26 +37,22 @@ $.otp = {
   addLinkComponent(link, component) {
     'use strict';
 
-    let newLink = link;
-    let componentString = component;
-
     if (component === undefined || !component) {
-      return newLink;
+      return link;
     }
-    if (typeof newLink !== 'string') {
-      newLink = link.toString();
+    if (typeof link !== 'string') {
+      link = link.toString();
     }
-
     if (typeof component !== 'string') {
-      componentString = component.toString();
+      component = component.toString();
     }
-    if (newLink.charAt(newLink.length - 1) !== '/' && componentString.charAt(0) !== '/') {
-      newLink += '/';
-    } else if (newLink.charAt(newLink.length - 1) === '/' && componentString.charAt(0) === '/') {
-      componentString = componentString.substring(1);
+    if (link.charAt(link.length - 1) !== '/' && component.charAt(0) !== '/') {
+      link += '/';
+    } else if (link.charAt(link.length - 1) === '/' && component.charAt(0) === '/') {
+      component = component.substring(1);
     }
-    newLink += componentString;
-    return newLink;
+    link += component;
+    return link;
   },
   /**
      * Creates an URL from the passed in options in the same way as the Grails

@@ -307,19 +307,18 @@ $(() => {
      * @param abstractBamFileId
      */
   const changeQcStatus = (dropdownMenu, abstractBamFileId) => {
-    const currentDropdownMenu = dropdownMenu;
-    const oldValue = $(currentDropdownMenu).find('option[selected]').val();
+    const oldValue = $(dropdownMenu).find('option[selected]').val();
     const statusCell = $(`#status-cell-${abstractBamFileId}`);
     const statusCellOldContent = statusCell.html();
     const rowData = getTableDataRowById(abstractBamFileId);
     const msgSuffix = `<br><br><b>(${rowData.pid}, ${rowData.sampleType})</b>`;
-    const modalTitle = buildModalTitle(currentDropdownMenu.value);
+    const modalTitle = buildModalTitle(dropdownMenu.value);
 
-    updateQcChangeDefaultComment(currentDropdownMenu.value);
+    updateQcChangeDefaultComment(dropdownMenu.value);
 
     openConfirmationModal(modalTitle, (comment) => {
       if (comment == null) {
-        currentDropdownMenu.value = oldValue;
+        dropdownMenu.value = oldValue;
       } else {
         statusCell.html(`<div class="spinner-border spinner-border-sm" role="status">
                              <span class="sr-only">Loading...</span>
@@ -344,7 +343,7 @@ $(() => {
             } else {
               $.otp.toaster.showErrorToast('Status change failed', `Unknown error.${msgSuffix}`);
             }
-            currentDropdownMenu.value = oldValue;
+            dropdownMenu.value = oldValue;
             statusCell.html(statusCellOldContent);
           },
           success(result) {
@@ -355,7 +354,7 @@ $(() => {
         });
       }
     }, () => {
-      currentDropdownMenu.value = oldValue;
+      dropdownMenu.value = oldValue;
       statusCell.html(statusCellOldContent);
     });
   };

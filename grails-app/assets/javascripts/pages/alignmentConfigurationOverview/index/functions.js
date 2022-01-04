@@ -53,8 +53,8 @@ $.otp.projectConfig = {
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
-            const result = successUpdate(json);
-            fnCallback(result);
+            json = successUpdate(json);
+            fnCallback(json);
             oTable.fnSettings().oFeatures.bServerSide = false;
           }
         });
