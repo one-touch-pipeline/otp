@@ -95,7 +95,6 @@ const renderWorkflowOverviewTable = (workflowData) => {
  *
  * @param workflow to show and edit
  */
-// eslint-disable-next-line no-unused-vars
 const openAndRenderEditModal = (workflow) => {
   const modal = $('#editWorkflowModal');
   const confirmButton = modal.find('#confirmModal');

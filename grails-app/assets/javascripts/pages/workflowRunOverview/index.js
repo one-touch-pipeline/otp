@@ -49,7 +49,7 @@ $(() => {
     bSort: false
   });
 
-  buttonElements.on('click', () => {
+  buttonElements.on('click', (e) => {
     buttonElements.toggle();
     for (let j = fixedColumnsLeft; j < numberOfColumns - fixedColumnsRight; j++) {
       dataTable.fnSetColumnVis(j, !dataTable.fnSettings().aoColumns[j].bVisible);

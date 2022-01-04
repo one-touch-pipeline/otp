@@ -65,7 +65,7 @@ $.otp.individual = {
             fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
           },
           success(json) {
-            let i; let rowData; let
+            let i; let j; let rowData; let
               row;
             for (i = 0; i < json.aaData.length; i += 1) {
               row = json.aaData[i];

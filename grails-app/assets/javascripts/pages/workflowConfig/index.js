@@ -48,7 +48,7 @@ $(() => {
       $('.disabledMessage', editForm).hide();
     }
   };
-  editForm.on('change', 'select.type', () => {
+  editForm.on('change', 'select.type', (e) => {
     disableButtons();
   });
   disableButtons();

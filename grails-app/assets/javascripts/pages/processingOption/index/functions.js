@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-// eslint-disable-next-line no-unused-vars
 function onObsolete(rowIndex, name, type, specificProject) {
   const inputField = $(`#value-${rowIndex}`);
   const optionNumber = parseInt(rowIndex, 10) + 1;
@@ -60,14 +59,12 @@ function onObsolete(rowIndex, name, type, specificProject) {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
 function onEdit(rowIndex) {
   $(`#button-save-${rowIndex}`).show();
   $(`#button-edit-${rowIndex}`).hide();
   $(`#value-${rowIndex}`).prop('disabled', false);
 }
 
-// eslint-disable-next-line no-unused-vars
 function onSave(rowIndex, name, oldValue, type, specificProject) {
   const optionNumber = parseInt(rowIndex, 10) + 1;
   const inputField = $(`#value-${rowIndex}`);

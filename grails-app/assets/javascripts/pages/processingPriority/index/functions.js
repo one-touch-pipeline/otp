@@ -70,7 +70,7 @@ $.otp.processingPriority = {
           `Processing Priority ${entityName} has been deleted.`
         );
       },
-      error() {
+      error(xhr) {
         $.otp.toaster.showErrorToast(
           'Failed Deleting Processing Priority',
           `Processing Priority ${entityName} cannot be deleted.`
@@ -151,7 +151,7 @@ $.otp.processingPriority = {
     this.toggleSaveButton();
   },
 
-  validateString() {
+  validateString(input) {
     // nothing to do for custom validation
     this.toggleSaveButton();
   },
@@ -212,7 +212,7 @@ $.otp.processingPriority = {
         $.otp.toaster.showSuccessToast('Save Processing Priority',
           `Processing Priority ${oData[$.otp.processingPriority.mapFieldIndex.name]} has been saved.`);
       },
-      error() {
+      error(xhr) {
         $.otp.toaster.showErrorToast('Failed Saving Processing Priority',
           'Make sure that both name and priority are globally unique.');
       }
@@ -302,7 +302,7 @@ $(document).ready(() => {
           );
         }
       },
-      error() {
+      error(xhr) {
         $.otp.toaster.showErrorToast('Check Processing Priority References',
           'Check OTP server logs for detailed information');
       }
@@ -314,7 +314,7 @@ $(document).ready(() => {
      * it launches the modal dialog window for editing the attributes of selected priority
      * data is transferred from selected row to the dialog
      */
-  $('#processingPriority').on('click', 'tbody td button#edit-row', () => {
+  $('#processingPriority').on('click', 'tbody td button#edit-row', (event) => {
     const aData = processingPriorityTable.row($(this).parents('tr')).data();
 
     const oDialog = $.otp.processingPriority.openDialog();
@@ -349,7 +349,7 @@ $(document).ready(() => {
     oDialog.find('.modal-body input#pp-row').val(-1);
 
     // reset all fields to empty
-    Object.keys($.otp.processingPriority.mapFieldIndex).forEach((field) => {
+    Object.keys($.otp.processingPriority.mapFieldIndex).forEach((field, idx) => {
       oDialog.find(`.modal-body input#pp-${field}`).val('');
       oDialog.find(`.modal-body input#pp-${field}`)[0].setCustomValidity('');
     });

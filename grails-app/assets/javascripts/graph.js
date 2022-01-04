@@ -33,21 +33,21 @@ $.otp.graph.overview = {
       action: 'projectCountPerDate',
       parameters: { projectGroupName: projectGroup }
     }), () => {
-      $.otp.graph.overview.projectCountPerDate(this);
+      $.otp.graph.overview.projectCountPerDate(this, projectGroup);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
       action: 'laneCountPerDate',
       parameters: { projectGroupName: projectGroup }
     }), () => {
-      $.otp.graph.overview.laneCountPerDate(this);
+      $.otp.graph.overview.laneCountPerDate(this, projectGroup);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
       action: 'gigaBasesPerDay',
       parameters: { projectGroupName: projectGroup }
     }), () => {
-      $.otp.graph.overview.gigaBasesPerDay(this);
+      $.otp.graph.overview.gigaBasesPerDay(this, projectGroup);
     });
     RGraph.AJAX($.otp.createLink({
       controller: 'statistic',
@@ -66,7 +66,7 @@ $.otp.graph.overview = {
     }), $.otp.graph.overview.projectCountPerSequenceType);
   },
 
-  projectCountPerDate(data) {
+  projectCountPerDate(data, project) {
     'use strict';
 
     const json = JSON.parse(data.responseText);
@@ -104,7 +104,7 @@ $.otp.graph.overview = {
     }).draw();
   },
 
-  laneCountPerDate(data) {
+  laneCountPerDate(data, project) {
     'use strict';
 
     const json = JSON.parse(data.responseText);
@@ -137,7 +137,7 @@ $.otp.graph.overview = {
     }).draw();
   },
 
-  gigaBasesPerDay(data) {
+  gigaBasesPerDay(data, project) {
     'use strict';
 
     const json = JSON.parse(data.responseText);
@@ -290,6 +290,7 @@ $.otp.graph.project = {
   init() {
     'use strict';
 
+    const project = $('#project').find('option:selected').text();
     RGraph.AJAX(
       $.otp.createLink({
         controller: 'statistic',
@@ -434,7 +435,7 @@ $.otp.graph.project = {
             }
           });
         },
-        eventsMousemove() {
+        eventsMousemove(e, shape) {
           return true;
         }
       }

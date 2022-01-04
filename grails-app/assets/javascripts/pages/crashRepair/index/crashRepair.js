@@ -45,7 +45,7 @@ function syncWorkflowStepData() {
         renderStepDataTable(result);
       }
     },
-    error() {
+    error(error) {
       $.otp.toaster.showErrorToast(
         'Data Loading',
         'An error occurred while trying to load the jobs data. Please try again.'
@@ -139,7 +139,7 @@ function restartStep(stepId) {
     data: {
       workflowStep: stepId
     },
-    success() {
+    success(result) {
       $.otp.toaster.showSuccessToast(
         `Step #${stepId} restarted`,
         `Restart of the step #${stepId} was successful.`
@@ -171,7 +171,7 @@ function restartWorkflowRun(stepId) {
     data: {
       workflowStep: stepId
     },
-    success() {
+    success(result) {
       $.otp.toaster.showSuccessToast(
         `Workflow run of step #${stepId} restarted`,
         `Restart of the step #${stepId} was successful.`
@@ -203,7 +203,7 @@ function setWorkflowStepAsFailed(stepId) {
     data: {
       workflowStep: stepId
     },
-    success() {
+    success(result) {
       $.otp.toaster.showSuccessToast('Failed set', `Workflow step #${stepId} has successful been set as failed.`);
       syncWorkflowStepData();
     },
@@ -232,7 +232,7 @@ function setWorkflowRunAsFinalFailed(stepId) {
     data: {
       workflowStep: stepId
     },
-    success() {
+    success(result) {
       $.otp.toaster.showSuccessToast(
         'Final failed set',
         `Workflow run of the step #${stepId} has successful been set as final failed.`
@@ -249,7 +249,6 @@ function setWorkflowRunAsFinalFailed(stepId) {
   });
 }
 
-/* eslint-disable no-unused-vars */
 function startWorkflowSystem() {
   $.ajax({
     url: $.otp.createLink({
@@ -258,7 +257,7 @@ function startWorkflowSystem() {
     }),
     dataType: 'json',
     type: 'POST',
-    success() {
+    success(result) {
       $.otp.toaster.showSuccessToast('Workflow System', 'Workflow system has been started.');
       window.setTimeout(() => {
         window.location.reload(true);
@@ -305,7 +304,6 @@ function markSelectedRunsAsFinalFailed() {
     });
   });
 }
-/* eslint-enable no-unused-vars */
 
 function getSelectedSteps(callback) {
   const selectedSteps = $('.tableCheckbox:checked');
