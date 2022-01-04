@@ -309,7 +309,13 @@ function markSelectedRunsAsFinalFailed() {
 
 function getSelectedSteps(callback) {
   const selectedSteps = $('.tableCheckbox:checked');
-  const selectedStepIds = selectedSteps.map((step) => selectedSteps[step].value);
+
+  const selectedStepIds = [];
+
+  selectedSteps.map((step) => {
+    selectedStepIds.push(selectedSteps[step].value);
+  });
+
   callback(selectedStepIds);
 }
 

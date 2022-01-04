@@ -51,7 +51,7 @@ $(() => {
 
     childTable += '<tbody>';
 
-    rowData.clusterJobs.each((clusterJob) => {
+    rowData.clusterJobs.map((clusterJob) => {
       childTable += `<tr>
                        <td>
                          <div title="${clusterJob.state}" class="small ${statusToClassName(clusterJob.state)}"></div>

@@ -41,6 +41,7 @@ if (process.env.CI) {
     'no-use-before-define': 'off',
     'no-restricted-globals': 'off',
     'no-alert': 'off',
+    'array-callback-return': 'off',
     'no-restricted-syntax': 'off'
   });
 }
